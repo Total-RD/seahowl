@@ -42,6 +42,149 @@ using namespace chrono::postprocess;
 
 using std::filesystem::path;
 
+//#include <format> // c++20
+
+#ifdef HAVE_VTK
+#include <vtkSmartPointer.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkXMLUnstructuredGridWriter.h>
+#include <vtkPoints.h>
+#include <vtkPointData.h>
+#include <vtkDoubleArray.h>
+
+struct VTKOutput {
+    
+    vtkSmartPointer<vtkUnstructuredGrid> mesh;
+
+
+    //vtkSmartPointer<vtkUnstructuredGrid> mesh_blade1;
+    //vtkSmartPointer<vtkUnstructuredGrid> mesh_blade2;
+    //vtkSmartPointer<vtkUnstructuredGrid> mesh_blade3;
+    
+    vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer;
+
+    double time;
+    double dt;
+    std::string base = "";
+
+    VTKOutput() { 
+        mesh = vtkSmartPointer<vtkUnstructuredGrid>::New();
+
+
+
+        writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+    }
+    void init(seahowl::elasto::ElastoFEAComponent& component, const char* base_name) {
+
+        base = base_name;
+
+        //const auto& tower = ssystem.turbine.rotor.blades[0]->elasto.get()->get_nodes_positions();
+        //ssystem.turbine.tower.elasto;
+        //const auto& blade1 = ssystem.turbine.rotor.blades[0]->elasto.get();
+        //const auto& blade2 = ssystem.turbine.rotor.blades[0]->elasto.get();
+        //const auto& blade3 = ssystem.turbine.rotor.blades[0]->elasto.get();
+
+        auto& coords = component.get_nodes_positions();
+         //tower.get_nodes_positions();
+        //
+
+        auto points = vtkSmartPointer<vtkPoints>::New();
+        points->SetDataTypeToDouble();
+        const vtkIdType nPoints = coords.size();
+        points->SetNumberOfPoints(nPoints);
+        double* pDst = static_cast<double*>(points->GetVoidPointer(0));
+        memcpy(pDst, &coords[0], sizeof(double) * nPoints * 3);
+        mesh->SetPoints(points);
+
+        const vtkIdType nCells = nPoints - 1;
+        vtkIdType ptIds[2] = {0, 1};
+
+        for (vtkIdType iCell = 0; iCell < nCells; ++iCell) {
+            ptIds[0] = iCell;
+            ptIds[1] = iCell + 1;
+            mesh->InsertNextCell(VTK_LINE, 2, ptIds);
+        }
+
+        // Displacement
+        {
+            auto displacement = vtkSmartPointer<vtkDoubleArray>::New();
+            displacement->SetName("Displacement");
+            displacement->SetNumberOfComponents(3);
+            displacement->SetNumberOfTuples(nPoints);
+            displacement->Fill(0.0);
+
+            mesh->GetPointData()->AddArray(displacement);
+        }
+
+
+        // AeroDynamic Loadings
+        {
+            auto forces = vtkSmartPointer<vtkDoubleArray>::New();
+            forces->SetName("Forces");
+            forces->SetNumberOfComponents(3);
+            forces->SetNumberOfTuples(nPoints);
+            forces->Fill(0.0);
+
+            mesh->GetPointData()->AddArray(forces);
+        }
+        //
+
+
+
+
+    }
+
+    void write(seahowl::elasto::ElastoFEAComponent& component, double time, int time_step) {
+        std::cout << "WRITE " << time_step << std::endl;
+        
+        //seahowl::elasto::ElastoFEAComponent&
+
+       // auto& tower = ssystem.turbine.tower.elasto;
+        auto& coords = component.get_nodes_positions();
+        auto& loads = component.get_nodes_loads();
+ 
+        auto* initial_coords = static_cast<double*>(mesh->GetPoints()->GetVoidPointer(0));
+
+        {
+            auto displacement = mesh->GetPointData()->GetArray("Displacement");
+
+            double* pDst = static_cast<double*>(displacement->GetVoidPointer(0));
+            memcpy(pDst, &coords[0], sizeof(double) * coords.size() * 3);
+
+            for (auto idx = 0; idx < 3 * coords.size(); ++idx) {
+                pDst[idx] -= initial_coords[idx];
+            }
+
+
+        }
+
+        {
+            auto forces = mesh->GetPointData()->GetArray("Forces");
+
+            double* pDst = static_cast<double*>(forces->GetVoidPointer(0));
+            memcpy(pDst, &loads[0], sizeof(double) * loads.size() * 3);
+        }
+
+        char fname[2048];
+        std::sprintf(fname, "%s_%03d.vtu", base.c_str(), time_step);
+        writer->SetFileName(fname);
+        writer->SetInputData(mesh);
+        writer->Write();
+
+
+
+    }
+
+
+};
+
+
+
+
+#endif
+
+
+
 /*! \mainpage SEAHOWL
  *
  * \section intro_sec Introduction
@@ -258,6 +401,16 @@ int main(int argc, char* argv[]) {
     // controller.init(time, dt, omega, turbine.rotor.elasto.pitch_collective, turbine.rotor.blades.size());
 #endif
 
+#ifdef HAVE_VTK
+    VTKOutput post_blade1;
+    post_blade1.init(*seahowl_system.turbine.rotor.blades[0]->elasto.get(), "c:\\tmp\\blade1");
+    VTKOutput post_blade2;
+    post_blade2.init(*seahowl_system.turbine.rotor.blades[1]->elasto.get(), "c:\\tmp\\blade2");
+    VTKOutput post_blade3;
+    post_blade3.init(*seahowl_system.turbine.rotor.blades[2]->elasto.get(), "c:\\tmp\\blade3");
+#endif
+
+
     double torque_aero = 0.0;
     double average_torque_aero = 0.0;
     double torque_elec = 0.0;
@@ -268,6 +421,14 @@ int main(int argc, char* argv[]) {
         // compute forces
 
         seahowl_system.prestep(time, dt);
+#ifdef HAVE_VTK
+        if (step % 10 == 0) {
+            post_blade1.write(*seahowl_system.turbine.rotor.blades[0]->elasto.get(), time, step);        
+            post_blade2.write(*seahowl_system.turbine.rotor.blades[1]->elasto.get(), time, step);     
+            post_blade3.write(*seahowl_system.turbine.rotor.blades[2]->elasto.get(), time, step);     
+        }
+
+#endif
 
         // step
         if (visualization_on) {
