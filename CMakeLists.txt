@@ -135,6 +135,7 @@ set(SEAHOWL_SOURCES
     src/elasto/reference_point_elasto.cpp
     src/elasto/rotor_elasto.cpp
     src/elasto/tower_elasto.cpp
+    src/elasto/mooring_elasto.cpp
 
     src/core/reference_point.cpp
     src/core/rotor.cpp
@@ -185,6 +186,7 @@ set(SEAHOWL_HEADERS
     include/seahowl/elasto/rotor_elasto.h
     include/seahowl/elasto/tower_elasto.h
     include/seahowl/elasto/utils_elasto.h
+    include/seahowl/elasto/mooring_elasto.h
 
     include/seahowl/io/read_json.h
     include/seahowl/io/write_csv.h
