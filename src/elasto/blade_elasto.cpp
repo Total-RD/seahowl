@@ -18,15 +18,6 @@ using namespace seahowl::elasto;
 
 BladeElasto::BladeElasto() {}
 
-void BladeElasto::assemble(chrono::ChSystemSMC& system, std::shared_ptr<chrono::fea::ChMesh> mesh) {
-    for (auto node : nodes) {
-        mesh->AddNode(node);
-    }
-    for (auto element : elements) {
-        mesh->AddElement(element);
-    }
-}
-
 void BladeElasto::build() {
     // check that enough reference points were defined to create elements (at least 2)
     if (reference_points.size() <= 2) {
@@ -234,7 +225,8 @@ void BladeElasto::set_damping_coefficients(double axial, double edge, double fla
     }
 
     for (auto element : elements) {
-        auto section = element->GetTaperedSection();
+        auto section =
+            std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(element)->GetTaperedSection();
         section->GetSectionA()->SetBeamRaleyghDamping(damping_coefficients);
         section->GetSectionB()->SetBeamRaleyghDamping(damping_coefficients);
     }
@@ -243,8 +235,8 @@ void BladeElasto::set_damping_coefficients(double axial, double edge, double fla
 void BladeElasto::evaluate_position_rotation(chrono::ChVector<double>& position,
                                              chrono::ChQuaternion<double>& rotation,
                                              int element_index,
-                                             double eta) {
-    auto& element = elements[element_index];
+                                             double eta) const {
+    auto& element = std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(elements[element_index]);
 
     // // unfortunately line below does not always work (returns nans sometimes when fpm_mode is true)
     element->EvaluateSectionFrame(eta, position, rotation);
@@ -253,38 +245,6 @@ void BladeElasto::evaluate_position_rotation(chrono::ChVector<double>& position,
     auto w2 = std::abs(eta + 1.0) * 0.5;
     position = w1 * element->GetNodeA()->GetPos() + w2 * element->GetNodeB()->GetPos();
     rotation = (element->GetNodeA()->GetRot());
-}
-
-void BladeElasto::reset_loads() {
-    for (auto node : nodes) {
-        node->SetForce({0.0, 0.0, 0.0});
-        node->SetTorque({0.0, 0.0, 0.0});
-    }
-}
-
-void BladeElasto::accumulate_element_load(chrono::ChVector<double> load, int element_index, double eta) {
-    if (element_index >= elements.size() || element_index < 0) {
-        throw std::runtime_error("Element index " + std::to_string(element_index) + " does not exist (max " +
-                                 std::to_string(elements.size()) + ").");
-    }
-    auto& element = elements[element_index];
-    chrono::ChVector<double> position{0.0, 0.0, 0.0};
-    chrono::ChQuaternion<double> rotation{0.0, 0.0, 0.0, 0.0};
-    element->EvaluateSectionFrame(eta, position, rotation);
-
-    // load on first node
-    double weight0 = 0.5 * abs(eta - 1);
-    auto load0 = load * weight0;
-    auto node0 = element->GetNodeA();
-    node0->SetForce(node0->GetForce() + load0);
-    node0->SetTorque(node0->GetTorque() + (position - node0->GetPos()) % load0);
-
-    // load on second node
-    double weight1 = 0.5 * abs(eta - 1);
-    auto load1 = load * weight1;
-    auto node1 = element->GetNodeB();
-    node1->SetForce(node1->GetForce() + load1);
-    node1->SetTorque(node1->GetTorque() + (position - node1->GetPos()) % load1);
 }
 
 void BladeElasto::apply_pitch_increment(double pitch_increment) {
