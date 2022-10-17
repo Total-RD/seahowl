@@ -80,9 +80,12 @@ void seahowl::core::Blade::update_positions_aero() {
                                            aero->elements[ii].properties.rotation, elasto_element_index, eta);
 
         // update velocity of aero elements
-        aero->elements[ii].properties.velocity =
-            0.5 * (std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(elasto->elements[elasto_element_index]->GetNodeN(0))->GetPos_dt() +
-                   std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(elasto->elements[elasto_element_index]->GetNodeN(1))->GetPos_dt());
+        aero->elements[ii].properties.velocity = 0.5 * (std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(
+                                                            elasto->elements[elasto_element_index]->GetNodeN(0))
+                                                            ->GetPos_dt() +
+                                                        std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(
+                                                            elasto->elements[elasto_element_index]->GetNodeN(1))
+                                                            ->GetPos_dt());
 
         // update pitch of aero elements
         aero->elements[ii].pitch = elasto->pitch;

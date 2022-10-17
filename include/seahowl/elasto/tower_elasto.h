@@ -17,11 +17,10 @@ namespace elasto {
 
 Implemented as Finite Element Beams
 */
-class TowerElasto : public ElastoFEAComponent {
+class TowerElasto : public ComponentElastoFEA {
   public:
     std::vector<TowerReferencePointElasto> reference_points;
     std::vector<TowerReferencePointElasto> discretized_points;
-    std::vector<double> discretization_fractions;
     double height;
     double base_height;
 
@@ -29,10 +28,9 @@ class TowerElasto : public ElastoFEAComponent {
     ~TowerElasto();
 
     void build();
-    void build_nodes();
     void build_elements_tapered_timoshenko();
 
-    virtual void set_damping_coefficients(double axial, double edge, double flap, double torsion) override;
+    virtual void set_damping_coefficients(double axial, double edge, double flap, double torsion);
 };
 
 }  // namespace elasto

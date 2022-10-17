@@ -33,7 +33,24 @@ void BladeElasto::build() {
 
     // build
     discretized_points = seahowl::core::get_discretized_points(discretization_fractions, reference_points);
-    build_nodes();
+    ///@todo find better way to build ReferencePointElasto from BladeReferencePointElasto
+    std::vector<ReferencePointElasto> discretized_points0;
+    for (int ii = 0; ii < discretized_points.size(); ii++) {
+        auto discretized_point0 = ReferencePointElasto();
+        discretized_point0.coordinates = discretized_points[ii].coordinates;
+        discretized_point0.fraction = discretized_points[ii].fraction;
+        discretized_points0.push_back(discretized_point0);
+    }
+    build_nodes(discretized_points0);
+    // apply structural twist
+    for (int ii = 0; ii < nodes.size(); ii++) {
+        auto& node = nodes[ii];
+        auto& point = discretized_points[ii];
+        auto axis = node->TransformDirectionLocalToParent(chrono::ChVector<double>(1.0, 0.0, 0.0));
+        chrono::ChMatrix33<> twist_matrix(Q_from_AngAxis(-point.structural_twist, axis));
+        nodes[ii]->Frame().SetRot(twist_matrix * chrono::ChMatrix33(nodes[ii]->Frame().coord.rot));
+    }
+
     if (fpm_mode) {
         build_elements_tapered_timoshenko_fpm();
     } else {
@@ -41,39 +58,6 @@ void BladeElasto::build() {
     }
     // commented out since loads are applied to nodes;
     // build_loads(system);
-};
-
-void BladeElasto::build_nodes() {
-    nodes.clear();
-    const auto nnodes = discretized_points.size();
-    for (size_t ii = 0; ii < nnodes; ii++) {
-        auto& discretized_point = discretized_points[ii];
-        auto& node_pos = discretized_point.coordinates;
-
-        // get node coordinate system
-        chrono::ChVector<> node_axis;
-        chrono::ChMatrix33<> node_rotation;
-        if (ii == 0) {
-            node_axis = (discretized_points[ii + 1].coordinates - node_pos).GetNormalized();
-            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
-        } else if (ii == nnodes - 1) {
-            node_axis = (node_pos - discretized_points[ii - 1].coordinates).GetNormalized();
-            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
-        } else {
-            node_axis =
-                (discretized_points[ii + 1].coordinates - discretized_points[ii - 1].coordinates).GetNormalized();
-            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
-        }
-        // apply structural twist
-        chrono::ChMatrix33<> twist_matrix(Q_from_AngAxis(-discretized_point.structural_twist, node_axis));
-        node_rotation = twist_matrix * node_rotation;
-        auto node_frame = chrono::ChFrame<>(node_pos, node_rotation);
-
-        // make node
-        auto node = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(node_frame);
-        // add node to blade nodes vector
-        nodes.push_back(node);
-    };
 };
 
 void BladeElasto::build_elements_tapered_timoshenko() {
@@ -224,7 +208,7 @@ void BladeElasto::set_damping_coefficients(double axial, double edge, double fla
         point.damping_coefficients = damping_coefficients;
     }
 
-    for (auto element : elements) {
+    for (auto& element : elements) {
         auto section =
             std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(element)->GetTaperedSection();
         section->GetSectionA()->SetBeamRaleyghDamping(damping_coefficients);
@@ -240,11 +224,10 @@ void BladeElasto::evaluate_position_rotation(chrono::ChVector<double>& position,
 
     // // unfortunately line below does not always work (returns nans sometimes when fpm_mode is true)
     element->EvaluateSectionFrame(eta, position, rotation);
-
     auto w1 = std::abs(eta - 1.0) * 0.5;
     auto w2 = std::abs(eta + 1.0) * 0.5;
     position = w1 * element->GetNodeA()->GetPos() + w2 * element->GetNodeB()->GetPos();
-    rotation = (element->GetNodeA()->GetRot());
+    rotation = element->GetNodeA()->GetRot();
 }
 
 void BladeElasto::apply_pitch_increment(double pitch_increment) {

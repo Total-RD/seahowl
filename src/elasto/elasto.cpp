@@ -8,7 +8,38 @@
 
 using namespace seahowl::elasto;
 
-void ElastoFEAComponent::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) const {
+void ComponentElastoFEA::build_nodes(std::vector<ReferencePointElasto>& discretized_points) {
+    nodes.clear();
+    const auto nnodes = discretized_points.size();
+
+    for (size_t ii = 0; ii < nnodes; ii++) {
+        auto& discretized_point = discretized_points[ii];
+        auto& node_pos = discretized_point.coordinates;
+
+        // get node coordinate system
+        chrono::ChVector<> node_axis;
+        chrono::ChMatrix33<> node_rotation;
+        if (ii == 0) {
+            node_axis = (discretized_points[ii + 1].coordinates - node_pos).GetNormalized();
+            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
+        } else if (ii == nnodes - 1) {
+            node_axis = (node_pos - discretized_points[ii - 1].coordinates).GetNormalized();
+            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
+        } else {
+            node_axis =
+                (discretized_points[ii + 1].coordinates - discretized_points[ii - 1].coordinates).GetNormalized();
+            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
+        }
+        auto node_frame = chrono::ChFrame<>(node_pos, node_rotation);
+
+        // make node
+        auto node = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(node_frame);
+        // add node to blade nodes vector
+        nodes.push_back(node);
+    };
+};
+
+void ComponentElastoFEA::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) const {
     for (auto node : nodes) {
         mesh->AddNode(node);
     }
@@ -17,7 +48,7 @@ void ElastoFEAComponent::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) con
     }
 }
 
-void ElastoFEAComponent::rotate(double angle, chrono::ChVector<double> axis) const {
+void ComponentElastoFEA::rotate(double angle, chrono::ChVector<double> axis) const {
     auto rotation = Q_from_AngAxis(angle, axis);
     for (auto& node : nodes) {
         auto new_position = rotation.Rotate(node->GetPos());
@@ -27,25 +58,25 @@ void ElastoFEAComponent::rotate(double angle, chrono::ChVector<double> axis) con
     }
 }
 
-void ElastoFEAComponent::translate(chrono::ChVector<double> translation_vector) const {
+void ComponentElastoFEA::translate(chrono::ChVector<double> translation_vector) const {
     for (auto& node : nodes) {
         node->SetPos(node->GetPos() + translation_vector);
     }
 }
-double ElastoFEAComponent::get_mass() const {
+double ComponentElastoFEA::get_mass() const {
     return std::accumulate(
         cbegin(elements), cend(elements), 0.0,
         [](double total, decltype(elements)::value_type pElem) { return total += pElem->GetMass(); });
 }
 
-void ElastoFEAComponent::reset_loads() {
+void ComponentElastoFEA::reset_loads() {
     for (auto& node : nodes) {
         node->SetForce({0.0, 0.0, 0.0});
         node->SetTorque({0.0, 0.0, 0.0});
     }
 }
 
-void ElastoFEAComponent::evaluate_position_rotation(chrono::ChVector<double>& position,
+void ComponentElastoFEA::evaluate_position_rotation(chrono::ChVector<double>& position,
                                                     chrono::ChQuaternion<double>& rotation,
                                                     int element_index,
                                                     double eta) const {
@@ -54,7 +85,7 @@ void ElastoFEAComponent::evaluate_position_rotation(chrono::ChVector<double>& po
     element->EvaluateSectionFrame(eta, position, rotation);
 }
 
-void ElastoFEAComponent::accumulate_element_load(chrono::ChVector<double> load, int element_index, double eta) {
+void ComponentElastoFEA::accumulate_element_load(chrono::ChVector<double> load, int element_index, double eta) {
     if (element_index >= elements.size() || element_index < 0) {
         throw std::runtime_error("Element index " + std::to_string(element_index) + " does not exist (max " +
                                  std::to_string(elements.size()) + ").");
@@ -80,7 +111,7 @@ void ElastoFEAComponent::accumulate_element_load(chrono::ChVector<double> load, 
     node1->SetTorque(node1->GetTorque() + (position - node1->GetPos()) % load1);
 }
 
-std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_positions() const {
+std::vector<chrono::ChVector<double>> ComponentElastoFEA::get_nodes_positions() const {
     std::vector<chrono::ChVector<double>> positions;
     for (auto& node : nodes) {
         positions.push_back(node->GetPos());
@@ -88,7 +119,7 @@ std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_positions() 
     return positions;
 }
 
-std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_velocities() const {
+std::vector<chrono::ChVector<double>> ComponentElastoFEA::get_nodes_velocities() const {
     std::vector<chrono::ChVector<double>> velocities;
     for (auto& node : nodes) {
         velocities.push_back(node->GetPos_dt());
@@ -96,7 +127,7 @@ std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_velocities()
     return velocities;
 }
 
-std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_accelerations() const {
+std::vector<chrono::ChVector<double>> ComponentElastoFEA::get_nodes_accelerations() const {
     std::vector<chrono::ChVector<double>> accelerations;
     for (auto& node : nodes) {
         accelerations.push_back(node->GetPos_dtdt());
@@ -104,7 +135,7 @@ std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_acceleration
     return accelerations;
 }
 
-std::vector<chrono::ChQuaternion<double>> ElastoFEAComponent::get_nodes_rotations() const {
+std::vector<chrono::ChQuaternion<double>> ComponentElastoFEA::get_nodes_rotations() const {
     std::vector<chrono::ChQuaternion<double>> rotations;
     for (auto& node : nodes) {
         rotations.push_back(node->GetRot());
@@ -112,7 +143,7 @@ std::vector<chrono::ChQuaternion<double>> ElastoFEAComponent::get_nodes_rotation
     return rotations;
 }
 
-std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_directions() const {
+std::vector<chrono::ChVector<double>> ComponentElastoFEA::get_nodes_directions() const {
     std::vector<chrono::ChVector<double>> directions;
     for (auto& node : nodes) {
         directions.push_back(node->GetRot().GetVector());
@@ -120,7 +151,7 @@ std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_directions()
     return directions;
 }
 
-std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_rotational_velocities() const {
+std::vector<chrono::ChVector<double>> ComponentElastoFEA::get_nodes_rotational_velocities() const {
     std::vector<chrono::ChVector<double>> rotational_velocities;
     for (auto& node : nodes) {
         rotational_velocities.push_back(node->GetWvel_loc());
@@ -128,7 +159,7 @@ std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_rotational_v
     return rotational_velocities;
 }
 
-std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_rotational_accelerations() const {
+std::vector<chrono::ChVector<double>> ComponentElastoFEA::get_nodes_rotational_accelerations() const {
     std::vector<chrono::ChVector<double>> rotational_accelerations;
     for (auto& node : nodes) {
         rotational_accelerations.push_back(node->GetWacc_loc());
@@ -136,7 +167,7 @@ std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_rotational_a
     return rotational_accelerations;
 }
 
-std::vector<chrono::ChVector<double>> ElastoFEAComponent::get_nodes_loads() const {
+std::vector<chrono::ChVector<double>> ComponentElastoFEA::get_nodes_loads() const {
     std::vector<chrono::ChVector<double>> loads;
     for (auto& node : nodes) {
         loads.push_back(node->GetForce());

@@ -7,14 +7,23 @@
 namespace seahowl {
 namespace elasto {
 
-/**@brief Elastodynamic model DOF reference point */
-struct BladeReferencePointElasto {
+struct ReferencePointElasto {
     chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};  ///< Coordinates of reference point
-    chrono::ChVector2<double> offset_elastic{0.0, 0.0};   ///< Offset of center of elasticity
-    chrono::ChVector2<double> offset_gravity{0.0, 0.0};   ///< Offset of center of gravity
+    double fraction = 0.0;                                ///< Fraction (normalized abscissa along component)
+
+    ReferencePointElasto();
+    ~ReferencePointElasto();
+
+    ReferencePointElasto operator*(const double factor) const;
+    ReferencePointElasto operator+(const ReferencePointElasto& other) const;
+};
+
+/**@brief Elastodynamic model DOF reference point */
+struct BladeReferencePointElasto : ReferencePointElasto {
+    chrono::ChVector2<double> offset_elastic{0.0, 0.0};     ///< Offset of center of elasticity
+    chrono::ChVector2<double> offset_gravity{0.0, 0.0};     ///< Offset of center of gravity
     chrono::ChMatrixNM<double, 6, 6> stiffness_matrix;      ///< Stiffness matrix
     chrono::ChMatrixNM<double, 6, 6> mass_matrix;           ///< Mass matrix
-    double fraction = 0.0;                                  ///< Fraction (normalized abscissa along blade)
     double structural_twist = 0.0;                          ///< Twist angle (radians)
     chrono::fea::DampingCoefficients damping_coefficients;  ///< Damping coefficients
 
@@ -27,9 +36,7 @@ struct BladeReferencePointElasto {
 };
 
 /**@brief Tower (DOF) reference point */
-struct TowerReferencePointElasto {
-    chrono::ChVector<double> coordinates;                   ///< Coordinates of reference point
-    double fraction = 0.0;                                  ///< Fraction (normalized abscissa along tower)
+struct TowerReferencePointElasto : ReferencePointElasto {
     double density = 0.0;                                   ///< Density
     double stiffness_axial = 0.0;                           ///< Axial stiffness
     double stiffness_foreaft = 0.0;                         ///< Fore-aft stiffness

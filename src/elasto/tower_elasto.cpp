@@ -29,40 +29,18 @@ void TowerElasto::build() {
 
     // build
     discretized_points = seahowl::core::get_discretized_points(discretization_fractions, reference_points);
-    build_nodes();
+    ///@todo find better way to build ReferencePointElasto from TowerReferencePointElasto
+    std::vector<ReferencePointElasto> discretized_points0;
+    for (int ii = 0; ii < discretized_points.size(); ii++) {
+        auto discretized_point0 = ReferencePointElasto();
+        discretized_point0.coordinates = discretized_points[ii].coordinates;
+        discretized_point0.fraction = discretized_points[ii].fraction;
+        discretized_points0.push_back(discretized_point0);
+    }
+    build_nodes(discretized_points0);
+
     build_elements_tapered_timoshenko();
 };
-
-void TowerElasto::build_nodes() {
-    nodes.clear();
-
-    const auto nnodes = discretized_points.size();
-    for (auto ii = 0; ii < nnodes; ii++) {
-        auto discretized_point = discretized_points[ii];
-        auto node_pos = discretized_point.coordinates;
-
-        // get node coordinate system
-        chrono::ChVector<> node_axis;
-        chrono::ChMatrix33<> node_rotation;
-        if (ii == 0) {
-            node_axis = (discretized_points[ii + 1].coordinates - node_pos).GetNormalized();
-            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
-        } else if (ii == nnodes - 1) {
-            node_axis = (node_pos - discretized_points[ii - 1].coordinates).GetNormalized();
-            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
-        } else {
-            node_axis =
-                (discretized_points[ii + 1].coordinates - discretized_points[ii - 1].coordinates).GetNormalized();
-            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
-        }
-        auto node_frame = chrono::ChFrame<>(node_pos, node_rotation);
-
-        // make node
-        auto node = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(node_frame);
-        // add node to tower nodes vector
-        nodes.push_back(node);
-    };
-}
 
 void TowerElasto::build_elements_tapered_timoshenko() {
     elements.clear();

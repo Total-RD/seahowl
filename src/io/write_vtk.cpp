@@ -9,7 +9,7 @@
 
 #include <chrono/core/ChVector.h>
 
-OutputMeshVTK::OutputMeshVTK(seahowl::elasto::ElastoFEAComponent& component) : component(component) {
+OutputMeshVTK::OutputMeshVTK(seahowl::elasto::ComponentElastoFEA& component) : component(component) {
     mesh = vtkSmartPointer<vtkUnstructuredGrid>::New();
     writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 }

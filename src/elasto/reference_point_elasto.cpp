@@ -99,3 +99,22 @@ TowerReferencePointElasto TowerReferencePointElasto::operator+(const TowerRefere
     new_point.damping_coefficients.alpha += other.damping_coefficients.alpha;
     return new_point;
 };
+
+
+ReferencePointElasto::ReferencePointElasto() {}
+
+ReferencePointElasto::~ReferencePointElasto() {}
+
+ReferencePointElasto ReferencePointElasto::operator*(const double factor) const {
+    ReferencePointElasto new_point = *this;
+    new_point.coordinates *= factor;
+    new_point.fraction *= factor;
+    return new_point;
+};
+
+ReferencePointElasto ReferencePointElasto::operator+(const ReferencePointElasto& other) const {
+    ReferencePointElasto new_point = *this;
+    new_point.coordinates += other.coordinates;
+    new_point.fraction += other.fraction;
+    return new_point;
+};

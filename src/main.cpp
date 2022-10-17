@@ -106,8 +106,8 @@ int main(int argc, char* argv[]) {
     system.SetNumThreads(ChOMP::GetNumProcs(), 0, 1);
     // wind
     auto wind_model = seahowl::aero::WindRamp();
-    wind_model.wind_velocity_start = ChVector<double>(3.0, 0.0, 0.0);
-    wind_model.wind_velocity_stop = ChVector<double>(30.0, 0.0, 0.0);
+    wind_model.wind_velocity_start = ChVector<double>(12.0, 0.0, 0.0);
+    wind_model.wind_velocity_stop = ChVector<double>(12.0, 0.0, 0.0);
     wind_model.direction_gravity = system.Get_G_acc().GetNormalized();
     wind_model.reference_height = 0.0;
     wind_model.time_start = 500.0;
@@ -116,7 +116,6 @@ int main(int argc, char* argv[]) {
     wind_model.reference_height = 150.0;
     // turbine
     double initial_pitch = 0.0 * CH_C_PI / 8.0;
-
 
     switch (solver_type) {
         case ChSolver::Type::SPARSE_QR: {
@@ -172,6 +171,7 @@ int main(int argc, char* argv[]) {
         blade->elasto->discretization_fractions.clear();
         blade->aero->discretization_fractions.clear();
     }
+    std::cout << "hello" << std::endl;
     // build turbine (Chrono)
     turbine.build();
     turbine.assemble(system, blades_mesh);
@@ -181,15 +181,27 @@ int main(int argc, char* argv[]) {
     for (auto& bladei : turbine.blades) {
         auto blade = bladei->elasto;
         for (auto& elm : blade->elements) {
-            elm->GetTaperedSection()->GetSectionA()->SetDrawThickness(2.0, 0.5);
-            elm->GetTaperedSection()->GetSectionB()->SetDrawThickness(2.0, 0.5);
+            std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(elm)
+                ->GetTaperedSection()
+                ->GetSectionA()
+                ->SetDrawThickness(2.0, 0.5);
+            std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(elm)
+                ->GetTaperedSection()
+                ->GetSectionB()
+                ->SetDrawThickness(2.0, 0.5);
         }
     }
     // increase elements for visualization
     auto& tower = turbine.tower;
     for (auto& elm : tower.elasto.elements) {
-        elm->GetTaperedSection()->GetSectionA()->SetDrawThickness(6.0, 6.0);
-        elm->GetTaperedSection()->GetSectionB()->SetDrawThickness(6.0, 6.0);
+        std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(elm)
+            ->GetTaperedSection()
+            ->GetSectionA()
+            ->SetDrawThickness(6.0, 6.0);
+        std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(elm)
+            ->GetTaperedSection()
+            ->GetSectionB()
+            ->SetDrawThickness(6.0, 6.0);
     }
 
     turbine.translate(ChVector<double>(0.0, 0.0, 0.0));
@@ -265,7 +277,7 @@ int main(int argc, char* argv[]) {
     // statics
     if (statics_prestep) {
         system.DoStaticLinear();
-        system.DoStaticNonlinear(1000, true);
+        system.DoStaticNonlinear(10, true);
     }
 
     turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
@@ -298,7 +310,7 @@ int main(int argc, char* argv[]) {
         // prestep
         // compute forces
 
-        if (step % 100 == 0) {
+        if (step % 20 == 0) {
             GetLog() << "time " << time << " step: " << step << " rpm: " << turbine.rotor.elasto.get_rpm() << "\n";
             write_turbine_info_to_csv("output.csv", seahowl_system, time);
         }
@@ -307,7 +319,7 @@ int main(int argc, char* argv[]) {
 #ifdef HAVE_VTK
         if (step % 10 == 0) {
             for (auto const& vtk_output : vtk_outputs) {
-                //vtk_output.write(time, step);
+                // vtk_output.write(time, step);
             }
         }
 
