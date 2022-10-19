@@ -11,6 +11,21 @@ Tower::Tower() {
 
 Tower::~Tower() {}
 
+void Tower::init(double time, double dt) {
+    prestep(time, dt);
+    poststep(time, dt);
+}
+
+void Tower::prestep(double time, double dt) {
+    // update loads on elasto part
+    update_loads_elasto();
+}
+
+void Tower::poststep(double time, double dt) {
+    // update position of aero points
+    update_positions_aero();
+}
+
 void Tower::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) {
     elasto.assemble(mesh);
 }
@@ -19,9 +34,9 @@ void Tower::build() {
     // push reference points
     elasto.reference_points.clear();
     aero.reference_points.clear();
-    for (auto& pt : reference_points) {
-        elasto.reference_points.push_back(TowerReferencePointElasto(pt));
-        aero.reference_points.push_back(TowerReferencePointAero(pt));
+    for (auto& point : reference_points) {
+        elasto.reference_points.push_back(TowerReferencePointElasto(point));
+        aero.reference_points.push_back(TowerReferencePointAero(point));
     }
     // build
     elasto.build();
@@ -30,15 +45,15 @@ void Tower::build() {
     // mappings
     compute_mapping_aero2elasto();
     compute_mapping_elasto2aero();
-};
+}
 
 void Tower::set_discretization_elasto(std::vector<double> fractions) {
     elasto.discretization_fractions = fractions;
-};
+}
 
 void Tower::set_discretization_aero(std::vector<double> fractions) {
     aero.discretization_fractions = fractions;
-};
+}
 
 void Tower::compute_mapping_aero2elasto() {
     // get aero element position (center) from which loads will be applied
@@ -51,16 +66,6 @@ void Tower::compute_mapping_aero2elasto() {
 
 void Tower::compute_mapping_elasto2aero() {
     mapping_elasto2aero = get_indice_and_positions(elasto.discretization_fractions, aero.discretization_fractions);
-}
-
-void Tower::prestep(double time, double dt) {
-    // update loads on elasto part
-    update_loads_elasto();
-};
-
-void Tower::poststep(double time, double dt) {
-    // update position of aero points
-    update_positions_aero();
 }
 
 void Tower::update_positions_aero() {
