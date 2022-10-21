@@ -115,12 +115,6 @@ if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "ONLY 64 BITS SUPPORTED")
 endif()
 
-if(SEAHOWL_ENABLE_VTK)
-    find_package(VTK 9 REQUIRED)
-    add_compile_definitions(SEAHOWL_HAVE_VTK=1)
-    add_definitions("-DHAVE_VTK=1")
-endif(SEAHOWL_ENABLE_VTK)
-
 # --------------------------------------------------------------
 # Tweaks to disable some warnings with MSVC
 # --------------------------------------------------------------
