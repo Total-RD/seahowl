@@ -67,6 +67,20 @@ if(SEAHOWL_FETCH_DEPENDENCIES)
 endif(SEAHOWL_FETCH_DEPENDENCIES)
 find_package(nlohmann_json REQUIRED)
 
+# python
+if(SEAHOWL_ENABLE_PYTHON)
+    if(SEAHOWL_FETCH_DEPENDENCIES)
+        FetchContent_Declare(
+            pybind11
+            GIT_REPOSITORY https://github.com/pybind/pybind11
+            GIT_TAG        v2.10.0
+            GIT_PROGRESS TRUE
+            OVERRIDE_FIND_PACKAGE
+        )
+    endif(SEAHOWL_FETCH_DEPENDENCIES)
+    find_package(pybind11 CONFIG REQUIRED)
+endif(SEAHOWL_ENABLE_PYTHON)
+
 # tests
 if(SEAHOWL_ENABLE_TESTS)
     if(SEAHOWL_FETCH_DEPENDENCIES)
@@ -252,6 +266,13 @@ endif(SEAHOWL_ENABLE_ROSCO)
 if(SEAHOWL_ENABLE_VTK)
     target_link_libraries(seahowl_core PRIVATE VTK::CommonDataModel VTK::IOXML)
 endif(SEAHOWL_ENABLE_VTK)
+
+if (SEAHOWL_ENABLE_PYTHON)
+    set(SEAHOWL_PYTHON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/python)
+    pybind11_add_module(pyseahowl ${SEAHOWL_PYTHON_SOURCE_DIR}/pybindings.cpp)
+    target_link_libraries(pyseahowl PUBLIC seahowl_core)
+endif (SEAHOWL_ENABLE_PYTHON)
+
 
 # =============
 # DRIVER
