@@ -2,7 +2,7 @@
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-find_package(GTest CONFIG REQUIRED)
+find_package(googletest CONFIG REQUIRED)
 
 add_executable(test_01 unit_tests/test_components.cpp )
 
@@ -26,7 +26,7 @@ target_compile_features(
 
 # target_link_libraries(test_01 seahowl_core ${CHRONO_LIBRARIES} -lgtest)
 
-target_link_libraries(test_01 seahowl_core ${CHRONO_LIBRARIES} GTest::gtest GTest::gtest_main GTest::gmock_main GTest::gmock Threads::Threads)
+target_link_libraries(test_01 seahowl_core ${CHRONO_LIBRARIES} gtest_main)
 
 target_include_directories(test_01
 	PRIVATE

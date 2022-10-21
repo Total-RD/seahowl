@@ -67,6 +67,43 @@ if(SEAHOWL_FETCH_DEPENDENCIES)
 endif(SEAHOWL_FETCH_DEPENDENCIES)
 find_package(nlohmann_json REQUIRED)
 
+# tests
+if(SEAHOWL_ENABLE_TESTS)
+    if(SEAHOWL_FETCH_DEPENDENCIES)
+        FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest
+            GIT_TAG        release-1.12.1
+            GIT_PROGRESS TRUE
+            OVERRIDE_FIND_PACKAGE)
+    endif(SEAHOWL_FETCH_DEPENDENCIES)
+    find_package(googletest CONFIG REQUIRED)
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+endif(SEAHOWL_ENABLE_TESTS)
+
+#VTK
+if(SEAHOWL_ENABLE_VTK)
+    if(SEAHOWL_FETCH_DEPENDENCIES)
+        FetchContent_Declare(
+            VTK
+            GIT_REPOSITORY https://gitlab.kitware.com/vtk/vtk.git
+            GIT_TAG        v9.2.0
+            GIT_PROGRESS TRUE
+            OVERRIDE_FIND_PACKAGE)
+    endif(SEAHOWL_FETCH_DEPENDENCIES)
+    find_package(VTK 9
+        COMPONENTS
+        CommonDataModel
+        IOXML
+        FiltersGeneral
+        FiltersModeling
+        FiltersSources
+        FiltersExtraction)
+    add_compile_definitions(SEAHOWL_HAVE_VTK=1)
+    add_definitions("-DHAVE_VTK=1")
+endif(SEAHOWL_ENABLE_VTK)
+
 # ROSCO controller
 if(SEAHOWL_ENABLE_ROSCO)
     find_package(ROSCO REQUIRED)
@@ -77,10 +114,6 @@ endif(SEAHOWL_ENABLE_ROSCO)
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "ONLY 64 BITS SUPPORTED")
 endif()
-
-if(SEAHOWL_ENABLE_TESTS)
-    find_package(GTest CONFIG REQUIRED)
-endif(SEAHOWL_ENABLE_TESTS)
 
 if(SEAHOWL_ENABLE_VTK)
     find_package(VTK 9 REQUIRED)
