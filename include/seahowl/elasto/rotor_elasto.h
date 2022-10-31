@@ -5,22 +5,17 @@
 #include <vector>
 #include <memory>
 
+#include <chrono/physics/ChBody.h>
+#include <chrono/physics/ChSystemSMC.h>
+#include <chrono/physics/ChLinkMate.h>
+#include <chrono/physics/ChLinkRevolute.h>
+
 namespace seahowl {
 namespace elasto {
 class BladeElasto;
 class TowerElasto;  ///@todo move out of rotor
 }  // namespace elasto
 }  // namespace seahowl
-
-#include <chrono/core/ChVector.h>
-
-namespace chrono {
-class ChBody;
-class ChLinkMateFix;
-class ChLinkRevolute;
-class ChSystemSMC;
-
-}  // namespace chrono
 
 namespace seahowl {
 namespace elasto {
@@ -56,7 +51,7 @@ struct ShaftProperties {
 
 Implemented as collection of rigid bodies + blades
 */
-class RotorElasto : public ComponentElasto {
+class RotorElasto : public ElastoComponent {
   public:
     std::vector<double> blade_precones;  ///< Blade precones (radians)
     double pitch_collective;             ///< Collective pitch (for all blades)

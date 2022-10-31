@@ -3,12 +3,7 @@
 #include <seahowl/elasto/elasto.h>
 
 #include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
-
-namespace chrono {
-namespace fea {
-class ChMesh;
-}
-}  // namespace chrono
+#include <chrono/fea/ChMesh.h>
 
 namespace seahowl {
 namespace elasto {

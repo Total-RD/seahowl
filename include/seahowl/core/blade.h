@@ -3,25 +3,10 @@
 #include <memory>
 #include <vector>
 
-namespace seahowl {
-namespace core {}
-namespace elasto {
-class BladeElasto;
-}
-namespace aero {
-class BladeAero;
-}
-}  // namespace seahowl
-
 #include <seahowl/core/reference_point.h>
 #include <seahowl/core/utils.h>
-
-namespace chrono {
-class ChSystemSMC;
-namespace fea {
-class ChMesh;
-}
-}  // namespace chrono
+#include <seahowl/elasto/blade_elasto.h>
+#include <seahowl/aero/blade_aero.h>
 
 namespace seahowl {
 namespace core {
@@ -30,7 +15,7 @@ namespace core {
 
 Pattern "mediator" for elasto and aero
 */
-class Blade {
+class Blade : public ComponentDynamic {
   public:
     std::shared_ptr<seahowl::elasto::BladeElasto> elasto;  ///< Elastodynamic element mesh
     std::shared_ptr<seahowl::aero::BladeAero> aero;        ///< Aerodynamic element mesh
@@ -42,14 +27,15 @@ class Blade {
     Blade();
     ~Blade();
 
+    void init(double time, double dt) override;
+    void prestep(double time, double dt) override;
+    void poststep(double time, double dt) override;
     void assemble(chrono::ChSystemSMC& system, std::shared_ptr<chrono::fea::ChMesh> mesh);
     void build();
     void set_discretization_elasto(std::vector<double> fractions);
     void set_discretization_aero(std::vector<double> fractions);
     void compute_mapping_aero2elasto();
     void compute_mapping_elasto2aero();
-    void prestep(double time, double dt);
-    void poststep(double time, double dt);
 
     /**@brief Compute aerodynamic loadings */
     void update_positions_aero();

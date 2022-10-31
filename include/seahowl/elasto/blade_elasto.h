@@ -4,16 +4,11 @@
 #include <seahowl/elasto/utils_elasto.h>  // WeightedElasto
 
 #include <chrono/physics/ChLoad.h>
-#include <chrono/physics/ChLoaderU.h>
-
-namespace chrono {
-class ChSystemSMC;
-namespace fea {
-class ChMesh;
-class ChNodeFEAxyzrot;
-class ChElementBeamTaperedTimoshenko;
-}  // namespace fea
-}  // namespace chrono
+#include <chrono/physics/ChBody.h>
+#include <chrono/physics/ChSystemSMC.h>
+#include <chrono/fea/ChMesh.h>
+#include <chrono/fea/ChNodeFEAxyzrot.h>
+#include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
 
 namespace seahowl {
 namespace elasto {

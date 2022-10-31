@@ -9,10 +9,19 @@
 namespace seahowl {
 namespace core {
 
+
+class ComponentDynamic {
+  public:
+    virtual void init(double time, double dt) = 0;
+    virtual void prestep(double time, double dt) = 0;
+    virtual void poststep(double time, double dt) = 0;
+};
+
+
 /**@brief Parametric discretization point */
 struct DiscretizationPoint {
-    int index;
-    double eta;
+    int index = 0;
+    double eta = 0;
 };
 
 std::vector<DiscretizationPoint> get_indice_and_positions(const std::vector<double>& discretization_fractions,
