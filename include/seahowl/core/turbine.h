@@ -21,7 +21,7 @@ namespace core {
 
 @todo Turbine is par Turbine class part TurbineElasto class (translate , rotate, ...)
 */
-class Turbine {
+class Turbine : public ComponentDynamic {
   public:
     std::vector<std::shared_ptr<Blade>> blades;              ///< Blades => To be moved in Rotor
     Rotor rotor;                                             ///< Rotor.  @todo Should be Hub + Blades
@@ -35,11 +35,11 @@ class Turbine {
     Turbine();
     ~Turbine();
 
+    void init(double time, double dt) override;
+    void prestep(double time, double dt) override;
+    void poststep(double time, double dt) override;
     void assemble(chrono::ChSystemSMC& system, std::shared_ptr<chrono::fea::ChMesh> mesh);
     void build();
-    void init(double time, double dt);
-    void prestep(double time, double dt);
-    void poststep(double time, double dt);
     void translate(chrono::ChVector<double> translation_vector);
     void rotate(double angle, chrono::ChVector<double> axis);
     void compute_wind_loads(seahowl::aero::WindModel& wind_model, double time);

@@ -11,7 +11,7 @@ namespace core {
 
 @todo Rotor should be composed of blades  + hub
 */
-class Rotor {
+class Rotor : public ComponentDynamic {
   public:
     seahowl::elasto::RotorElasto elasto;                        ///< Elastodynamic model
     seahowl::aero::RotorAero aero;                              ///< Aerodynamic model
@@ -20,11 +20,12 @@ class Rotor {
     Rotor();
     ~Rotor();
 
+    void init(double time, double dt) override;
+    void prestep(double time, double dt) override;
+    void poststep(double time, double dt) override;
     void update_positions_aero();
     void assemble(chrono::ChSystemSMC& system);
     void build(std::vector<std::shared_ptr<seahowl::core::Blade>> blades);
-    void prestep(double time, double dt);
-    void poststep(double time, double dt);
 };
 
 }  // namespace core
