@@ -4,7 +4,8 @@
 #include <seahowl/core/utils.h>
 
 #include <chrono/fea/ChElementBeamEuler.h>
-
+#include <chrono/fea/ChContactSurfaceNodeCloud.h>
+#include <chrono/physics/ChMaterialSurfaceSMC.h>
 
 using namespace seahowl::elasto;
 
@@ -40,12 +41,10 @@ void MooringElasto::build_elements_euler() {
     section->SetDensity(density);
     // axial
     double area = chrono::CH_C_PI * pow(diameter, 2) / 4.0;
+    section->SetArea(area);
     section->SetYoungModulus(stiffness_axial / area);
-    section->SetGshearModulus(1e-6);
-    // make it a circular section
+    section->SetGshearModulus(0.0);
     section->SetAsCircularSection(diameter);
-    // damping
-    // section->SetBeamRaleyghDamping(discretized_point.damping_coefficients);
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
@@ -59,4 +58,24 @@ void MooringElasto::build_elements_euler() {
         // set rest length
         element->SetRestLength(length * abs(discretization_fractions[ii] - discretization_fractions[ii - 1]));
     }
+}
+
+void MooringElasto::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) {
+    // call parent class assemble
+    ComponentElastoFEA::assemble(mesh);
+
+    // make contact material
+    contact_material = chrono_types::make_shared<chrono::ChMaterialSurfaceSMC>();
+    double area = chrono::CH_C_PI * pow(diameter, 2) / 4.0;
+    contact_material->SetYoungModulus(stiffness_axial / area);
+    contact_material->SetFriction(0.3f);
+    contact_material->SetRestitution(0.2f);
+    contact_material->SetAdhesion(0);
+
+    // assemble contact node cloud
+    contact_cloud = chrono_types::make_shared<chrono::fea::ChContactSurfaceNodeCloud>(contact_material, mesh.get());
+    for (auto& node : nodes) {
+        contact_cloud->AddNode(node, diameter);
+    }
+    mesh->AddContactSurface(contact_cloud);
 }
