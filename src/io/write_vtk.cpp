@@ -66,7 +66,7 @@ void OutputMeshVTK::write(double time, int time_step) const {
     // positions
     auto points = mesh->GetPoints();
     double* pDst0 = static_cast<double*>(points->GetVoidPointer(0));
-    auto& values0 = component.get_nodes_positions();
+    auto values0 = component.get_nodes_positions();
     memcpy(pDst0, &values0[0], sizeof(double) * values0.size() * 3);
     mesh->SetPoints(points);
 
@@ -99,7 +99,7 @@ void OutputMeshVTK::write(double time, int time_step) const {
     // quaternions
     auto arr = mesh->GetPointData()->GetArray("Rotation");
     double* pDst = static_cast<double*>(arr->GetVoidPointer(0));
-    auto& values = component.get_nodes_rotations();
+    auto values = component.get_nodes_rotations();
     memcpy(pDst, &values[0], sizeof(double) * values.size() * 4);
 
     char fname[2048];

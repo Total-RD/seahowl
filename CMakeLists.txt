@@ -126,17 +126,8 @@ endif()
 # ================
 add_library( seahowl_core )
 
-
-
-set(SEAHOWL_SOURCES 
-
-    src/elasto/elasto.cpp
-    src/elasto/blade_elasto.cpp
-    src/elasto/reference_point_elasto.cpp
-    src/elasto/rotor_elasto.cpp
-    src/elasto/tower_elasto.cpp
-    src/elasto/mooring_elasto.cpp
-
+# core
+set(SEAHOWL_CORE_SOURCES
     src/core/reference_point.cpp
     src/core/rotor.cpp
     src/core/blade.cpp
@@ -144,23 +135,8 @@ set(SEAHOWL_SOURCES
     src/core/turbine.cpp
     src/core/utils.cpp 
     src/core/system.cpp
-
-    src/aero/airfoil.cpp
-    src/aero/bemt.cpp
-    src/aero/reference_point_aero.cpp
-    src/aero/blade_aero.cpp
-    src/aero/rotor_aero.cpp
-    src/aero/tower_aero.cpp
-    src/aero/wind_models.cpp
-
-    src/servo/controller.cpp
-
-    src/io/read_json.cpp
-    src/io/write_csv.cpp
-)
-
-set(SEAHOWL_HEADERS
-
+    )
+set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/reference_point.h
     include/seahowl/core/blade.h
     include/seahowl/core/rotor.h
@@ -168,8 +144,44 @@ set(SEAHOWL_HEADERS
     include/seahowl/core/turbine.h
     include/seahowl/core/utils.h
     include/seahowl/core/system.h
+    )
+source_group(core FILES
+    ${SEAHOWL_CORE_SOURCES}
+    ${SEAHOWL_CORE_HEADERS})
 
+# elasto
+set(SEAHOWL_ELASTO_SOURCES
+    src/elasto/elasto.cpp
+    src/elasto/blade_elasto.cpp
+    src/elasto/reference_point_elasto.cpp
+    src/elasto/rotor_elasto.cpp
+    src/elasto/tower_elasto.cpp
+    src/elasto/mooring_elasto.cpp
+    )
+set(SEAHOWL_ELASTO_HEADERS
+    include/seahowl/elasto/blade_elasto.h
+    include/seahowl/elasto/elasto.h
+    include/seahowl/elasto/reference_point_elasto.h
+    include/seahowl/elasto/rotor_elasto.h
+    include/seahowl/elasto/tower_elasto.h
+    include/seahowl/elasto/mooring_elasto.h
+    include/seahowl/elasto/utils_elasto.h
+    )
+source_group(elasto FILES
+    ${SEAHOWL_ELASTO_SOURCES}
+    ${SEAHOWL_ELASTO_HEADERS})
 
+# aero
+set(SEAHOWL_AERO_SOURCES
+    src/aero/airfoil.cpp
+    src/aero/bemt.cpp
+    src/aero/reference_point_aero.cpp
+    src/aero/blade_aero.cpp
+    src/aero/rotor_aero.cpp
+    src/aero/tower_aero.cpp
+    src/aero/wind_models.cpp
+    )
+set(SEAHOWL_AERO_HEADERS
     include/seahowl/aero/airfoil.h
     include/seahowl/aero/bemt.h
     include/seahowl/aero/blade_aero.h
@@ -177,44 +189,67 @@ set(SEAHOWL_HEADERS
     include/seahowl/aero/rotor_aero.h
     include/seahowl/aero/tower_aero.h
     include/seahowl/aero/wind_models.h
-
-    include/seahowl/servo/controller.h
-
-    include/seahowl/elasto/blade_elasto.h
-    include/seahowl/elasto/elasto.h
-    include/seahowl/elasto/reference_point_elasto.h
-    include/seahowl/elasto/rotor_elasto.h
-    include/seahowl/elasto/tower_elasto.h
-    include/seahowl/elasto/utils_elasto.h
-    include/seahowl/elasto/mooring_elasto.h
-
-    include/seahowl/io/read_json.h
-    include/seahowl/io/write_csv.h
-
-)
-
-if (SEAHOWL_ENABLE_ROSCO)
-    list(APPEND SEAHOWL_HEADERS 
-        include/seahowl/servo/controller_discon.h
     )
-    list(APPEND SEAHOWL_SOURCES 
+source_group(aero FILES
+    ${SEAHOWL_AERO_SOURCES}
+    ${SEAHOWL_AERO_HEADERS})
+
+# servo
+set(SEAHOWL_SERVO_SOURCES
+    src/servo/controller.cpp
+    )
+set(SEAHOWL_SERVO_HEADERS
+    include/seahowl/servo/controller.h
+    )
+if(SEAHOWL_ENABLE_ROSCO)
+    list(APPEND SEAHOWL_SERVO_SOURCES
         src/servo/controller_discon.cpp
     )
-endif (SEAHOWL_ENABLE_ROSCO)
-
-if (SEAHOWL_ENABLE_VTK)
-    list(APPEND SEAHOWL_HEADERS
-        include/seahowl/io/write_vtk.h
+    list(APPEND SEAHOWL_SERVO_HEADERS
+        include/seahowl/servo/controller_discon.h
     )
-    list(APPEND SEAHOWL_SOURCES
+endif(SEAHOWL_ENABLE_ROSCO)
+source_group(servo FILES
+    ${SEAHOWL_SERVO_SOURCES}
+    ${SEAHOWL_SERVO_HEADERS})
+
+# io
+set(SEAHOWL_IO_SOURCES
+    src/io/read_json.cpp
+    src/io/write_csv.cpp
+    )
+set(SEAHOWL_IO_HEADERS
+    include/seahowl/io/read_json.h
+    include/seahowl/io/write_csv.h
+    )
+if(SEAHOWL_ENABLE_VTK)
+    list(APPEND SEAHOWL_IO_SOURCES
         src/io/write_vtk.cpp
     )
-endif (SEAHOWL_ENABLE_VTK)
+    list(APPEND SEAHOWL_IO_HEADERS
+        include/seahowl/io/write_vtk.h
+    )
+endif(SEAHOWL_ENABLE_VTK)
+source_group(io FILES
+    ${SEAHOWL_IO_SOURCES}
+    ${SEAHOWL_IO_HEADERS})
 
+# seahowl lib
+set(SEAHOWL_FILES
+    ${SEAHOWL_CORE_SOURCES}
+    ${SEAHOWL_CORE_HEADERS}
+    ${SEAHOWL_ELASTO_SOURCES}
+    ${SEAHOWL_ELASTO_HEADERS}
+    ${SEAHOWL_AERO_SOURCES}
+    ${SEAHOWL_AERO_HEADERS}
+    ${SEAHOWL_SERVO_SOURCES}
+    ${SEAHOWL_SERVO_HEADERS}
+    ${SEAHOWL_IO_SOURCES}
+    ${SEAHOWL_IO_HEADERS}
+    )
 target_sources(seahowl_core 
     PRIVATE 
-    ${SEAHOWL_SOURCES}
-    ${SEAHOWL_HEADERS}
+    ${SEAHOWL_FILES}
 )
 
 target_include_directories(seahowl_core

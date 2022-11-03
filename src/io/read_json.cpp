@@ -182,7 +182,7 @@ std::vector<seahowl::core::TowerReferencePoint> get_tower_reference_points_from_
         auto reference_point = seahowl::core::TowerReferencePoint();
         point.at("fraction").get_to(reference_point.fraction);
         reference_point.coordinates =
-            chrono::ChVector<double>(0.0, 0.0, (height - base_height) * reference_point.fraction);
+            chrono::ChVector<double>(0.0, 0.0, (height - base_height) * reference_point.fraction + base_height);
         point.at("stiffness_sideside").get_to(reference_point.stiffness_sideside);
         point.at("stiffness_foreaft").get_to(reference_point.stiffness_foreaft);
         point.at("density").get_to(reference_point.density);
