@@ -1,6 +1,6 @@
 #include <seahowl/io/write_vtk.h>
 
-#include <vtkSmartPointer.h>
+
 #include <vtkUnstructuredGrid.h>
 #include <vtkXMLUnstructuredGridWriter.h>
 #include <vtkPoints.h>
@@ -10,11 +10,17 @@
 #include <chrono/core/ChVector.h>
 
 OutputMeshVTK::OutputMeshVTK(seahowl::elasto::ComponentElastoFEA& component) : component(component) {
-    mesh = vtkSmartPointer<vtkUnstructuredGrid>::New();
-    writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+    mesh = vtkUnstructuredGrid::New();
+    writer = vtkXMLUnstructuredGridWriter::New();
 }
 
-OutputMeshVTK::~OutputMeshVTK() {}
+OutputMeshVTK::~OutputMeshVTK() {
+    if (mesh != nullptr)
+        mesh->Delete();
+    if (writer != nullptr) {
+        writer->Delete();
+    }
+}
 
 void OutputMeshVTK::init(const char* base_name) {
     base = base_name;
@@ -38,17 +44,15 @@ void OutputMeshVTK::init(const char* base_name) {
         mesh->InsertNextCell(VTK_LINE, 2, ptIds);
     }
 
-    arrays_map.insert({"Displacement", vtkSmartPointer<vtkDoubleArray>::New()});
-    arrays_map.insert({"Forces", vtkSmartPointer<vtkDoubleArray>::New()});
-    arrays_map.insert({"Velocity", vtkSmartPointer<vtkDoubleArray>::New()});
-    arrays_map.insert({"Acceleration", vtkSmartPointer<vtkDoubleArray>::New()});
-    arrays_map.insert({"Direction", vtkSmartPointer<vtkDoubleArray>::New()});
-    arrays_map.insert({"Rotation", vtkSmartPointer<vtkDoubleArray>::New()});
+    std::vector<std::string> myKeys = {"Displacement", "Forces", "Velocity", "Acceleration", "Direction", "Rotation"};
+
     // initialize arrays properties
-    for (auto const& keyval : arrays_map) {
-        auto& key = keyval.first;
-        auto& val = keyval.second;
+    for (auto const& key : myKeys) {
+
+        auto val = vtkSmartPointer<vtkDoubleArray>::New();
+
         val->SetName(key.c_str());
+
         if (key == "Rotation") {
             val->SetNumberOfComponents(4);
         } else {
@@ -79,18 +83,18 @@ void OutputMeshVTK::write(double time, int time_step) const {
 
     auto* initial_coords = static_cast<double*>(mesh->GetPoints()->GetVoidPointer(0));
 
-    for (auto const& keyval : arrays_map) {
+    for (auto const& keyval : arrays_values) {
         auto& key = keyval.first;
         auto& val = keyval.second;
         auto arr = mesh->GetPointData()->GetArray(key.c_str());
 
-        double* pDst = static_cast<double*>(val->GetVoidPointer(0));
-        auto& values = arrays_values[key];
-        memcpy(pDst, &values[0], sizeof(double) * values.size() * 3);
+        double* pDst = static_cast<double*>(arr->GetVoidPointer(0));
+
+        memcpy(pDst, &val[0], sizeof(double) * val.size() * 3);
 
         // remove initial coords for displacement
         if (key == "Displacement") {
-            for (auto idx = 0; idx < 3 * values.size(); ++idx) {
+            for (auto idx = 0; idx < 3 * val.size(); ++idx) {
                 pDst[idx] -= initial_coords[idx];
             }
         }

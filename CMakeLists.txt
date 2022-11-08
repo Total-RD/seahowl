@@ -297,7 +297,7 @@ endif (SEAHOWL_ENABLE_ROSCO)
 
 if(SEAHOWL_ENABLE_VTK) 
     target_link_libraries(seahowl_core
-        PUBLIC
+        PRIVATE
         VTK::CommonDataModel
         VTK::IOXML
     )

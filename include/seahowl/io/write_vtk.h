@@ -1,17 +1,16 @@
 #include <seahowl/elasto/elasto.h>
 
-#include <vtkSmartPointer.h>
-#include <vtkUnstructuredGrid.h>
-#include <vtkXMLUnstructuredGridWriter.h>
-#include <vtkPoints.h>
-#include <vtkPointData.h>
-#include <vtkDoubleArray.h>
 
 
+// Forward declaration
+class vtkUnstructuredGrid;
+class vtkXMLUnstructuredGridWriter;
+
+/**@brief Output with VTK format */
 struct OutputMeshVTK {
-    vtkSmartPointer<vtkUnstructuredGrid> mesh;
-    vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer;
-    std::map<std::string, vtkSmartPointer<vtkDoubleArray>> arrays_map;
+    vtkUnstructuredGrid* mesh;
+    vtkXMLUnstructuredGridWriter* writer;
+
     seahowl::elasto::ComponentElastoFEA& component;
 
     double time;
