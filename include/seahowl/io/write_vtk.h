@@ -4,20 +4,21 @@
 
 // Forward declaration
 class vtkUnstructuredGrid;
-class vtkXMLUnstructuredGridWriter;
 
 /**@brief Output with VTK format */
 struct OutputMeshVTK {
     vtkUnstructuredGrid* mesh;
-    vtkXMLUnstructuredGridWriter* writer;
 
     seahowl::elasto::ComponentElastoFEA& component;
 
-    double time;
-    double dt;
+    double time = 0.0;
+    double dt = 0.0;
     std::string base = "";
 
     OutputMeshVTK(seahowl::elasto::ComponentElastoFEA& component);
+    OutputMeshVTK(const OutputMeshVTK&);
+    OutputMeshVTK& operator=(const OutputMeshVTK&) = delete;
+
     ~OutputMeshVTK();
 
     void init(const char* base_name);

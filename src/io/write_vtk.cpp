@@ -1,6 +1,6 @@
 #include <seahowl/io/write_vtk.h>
 
-
+#include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkXMLUnstructuredGridWriter.h>
 #include <vtkPoints.h>
@@ -11,15 +11,16 @@
 
 OutputMeshVTK::OutputMeshVTK(seahowl::elasto::ComponentElastoFEA& component) : component(component) {
     mesh = vtkUnstructuredGrid::New();
-    writer = vtkXMLUnstructuredGridWriter::New();
+}
+
+OutputMeshVTK::OutputMeshVTK(const OutputMeshVTK& rhs) : component(rhs.component) {
+    mesh = vtkUnstructuredGrid::New();
+    mesh->ShallowCopy(rhs.mesh);
 }
 
 OutputMeshVTK::~OutputMeshVTK() {
     if (mesh != nullptr)
         mesh->Delete();
-    if (writer != nullptr) {
-        writer->Delete();
-    }
 }
 
 void OutputMeshVTK::init(const char* base_name) {
@@ -106,9 +107,12 @@ void OutputMeshVTK::write(double time, int time_step) const {
     auto values = component.get_nodes_rotations();
     memcpy(pDst, &values[0], sizeof(double) * values.size() * 4);
 
-    char fname[2048];
-    std::sprintf(fname, "%s_%03d.vtu", base.c_str(), time_step);
-    writer->SetFileName(fname);
-    writer->SetInputData(mesh);
-    writer->Write();
+    {
+        char fname[2048];
+        std::sprintf(fname, "%s_%03d.vtu", base.c_str(), time_step);
+        auto writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+        writer->SetFileName(fname);
+        writer->SetInputData(mesh);
+        writer->Write();
+    }
 }

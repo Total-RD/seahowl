@@ -292,9 +292,8 @@ int main(int argc, char* argv[]) {
     remove_all("./vtk");
     create_directory("./vtk");
     for (int ii = 0; ii < seahowl_system.turbine.rotor.blades.size(); ii++) {
-        auto post_blade = OutputMeshVTK(*seahowl_system.turbine.rotor.blades[ii]->elasto.get());
+        auto& post_blade = vtk_outputs.emplace_back(*seahowl_system.turbine.rotor.blades[ii]->elasto.get());
         post_blade.init(("./vtk/blade" + std::to_string(ii + 1)).c_str());
-        vtk_outputs.push_back(post_blade);
     }
     auto post_tower = OutputMeshVTK(seahowl_system.turbine.tower.elasto);
     post_tower.init("./vtk/tower");
