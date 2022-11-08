@@ -20,6 +20,7 @@
 using namespace chrono;
 
 #include <filesystem>  // C++17
+#include <cstdlib>
 
 using std::filesystem::path;
 using std::filesystem::absolute;
@@ -27,12 +28,21 @@ using std::filesystem::absolute;
 static path DATADIR{};
 
 int main(int argc, char** argv) {
-    if (argc < 2) {
-        std::cerr << "Usage: seahol_driver.exe <datadir>" << std::endl;
-        return 1;
+    const char* env_p = std::getenv("SEAHOWL_DATADIR");
+
+    if (env_p == nullptr) {
+        if (argc < 2) {
+            std::cerr << "Usage: test_01.exe [<datadir>] or set SEAHOWL_DATADIR environement variable" << std::endl;
+            return 1;
+        } else {
+            DATADIR = absolute(path(argv[1]));
+        }
+    } else {
+        DATADIR = absolute(path(env_p));
     }
 
-    DATADIR = absolute(path(argv[1]));
+
+    
 
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
@@ -51,6 +61,7 @@ TEST(test_blade, mass_deflection) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
     // blade
+    std::cout << "file: " << (DATADIR / "IEA15MW_blade.json").generic_string() << std::endl;
     auto blade_core = get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string());
     std::vector<double> fractions;
     fractions.clear();
