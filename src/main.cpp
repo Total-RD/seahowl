@@ -294,10 +294,9 @@ int main(int argc, char* argv[]) {
     for (int ii = 0; ii < seahowl_system.turbine.rotor.blades.size(); ii++) {
         auto& post_blade = vtk_outputs.emplace_back(*seahowl_system.turbine.rotor.blades[ii]->elasto.get());
         post_blade.init(("./vtk/blade" + std::to_string(ii + 1)).c_str());
-    }
-    auto post_tower = OutputMeshVTK(seahowl_system.turbine.tower.elasto);
+    }   
+    auto& post_tower = vtk_outputs.emplace_back(seahowl_system.turbine.tower.elasto);
     post_tower.init("./vtk/tower");
-    vtk_outputs.push_back(post_tower);
 #endif
 
     double torque_aero = 0.0;

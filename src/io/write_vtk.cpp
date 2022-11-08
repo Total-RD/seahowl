@@ -17,6 +17,11 @@ OutputMeshVTK::OutputMeshVTK(const OutputMeshVTK& rhs) : component(rhs.component
     mesh = vtkUnstructuredGrid::New();
     mesh->ShallowCopy(rhs.mesh);
 }
+OutputMeshVTK::OutputMeshVTK(OutputMeshVTK&& source) noexcept : component(source.component) {
+    mesh = source.mesh;
+    source.mesh = nullptr;
+}
+
 
 OutputMeshVTK::~OutputMeshVTK() {
     if (mesh != nullptr)

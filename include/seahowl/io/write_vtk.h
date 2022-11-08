@@ -17,7 +17,9 @@ struct OutputMeshVTK {
 
     OutputMeshVTK(seahowl::elasto::ComponentElastoFEA& component);
     OutputMeshVTK(const OutputMeshVTK&);
+    OutputMeshVTK(OutputMeshVTK&&) noexcept;
     OutputMeshVTK& operator=(const OutputMeshVTK&) = delete;
+    OutputMeshVTK& operator=(OutputMeshVTK&&) = delete;
 
     ~OutputMeshVTK();
 
