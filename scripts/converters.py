@@ -100,8 +100,8 @@ def convert_aerodyn_files(filename, save_directory=None):
         for ii, line in enumerate(lines):
             words = line.split()
             if len(words) >= 2 and words[1] == "NumBlNds":
-                npoints = int(words[0])
-                for jj in range(3, nfiles + 3):
+                npoints= int(words[0])
+                for jj in range(3, npoints + 3):
                     vals = lines[ii + jj].split()
                     point = dict()
                     point["coordinates"] = [
