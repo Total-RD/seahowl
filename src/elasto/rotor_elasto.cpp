@@ -38,11 +38,11 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     // hub
     body_hub = chrono_types::make_shared<chrono::ChBodyEasyBox>(2.0, 2.0, 4.0, 0, true, false);
     // move hub along X for overhang and COG offset, and along Z for distance from towertop
-    body_hub->SetPos(chrono::ChVector<double>(hub.overhang + hub.center_of_mass, 0.0, shaft.distance_from_towertop));
+    body_hub->SetPos(chrono::ChVector<double>(hub.overhang + hub.center_of_mass, 0.0, 0.0));
     // local Z axis along global X axis + shaft tilt along global Y axis
     auto tilt_hub = Q_from_AngAxis(shaft.tilt, -chrono::VECT_Y);
     body_hub->SetRot(tilt_hub * Q_from_AngAxis(chrono::CH_C_PI / 2.0, chrono::VECT_Y));
-    body_hub->SetPos(tilt_hub.Rotate(body_hub->GetPos()));
+    body_hub->SetPos(tilt_hub.Rotate(body_hub->GetPos()) + chrono::ChVector<double>(0.0, 0.0, shaft.distance_from_towertop));
     // mass and inertia
     body_hub->SetMass(hub.mass);
     body_hub->SetInertiaXX(chrono::ChVector<double>(0., 0., hub.inertia));
@@ -90,18 +90,20 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
 
         // rotations + translations
         // blade root node is assumed to be originally at (0,0,0) and using IEC standard for coordinate system
+        // offset blade from hub apex 
+        blade->translate(chrono::ChVector<double>(0.0, 0.0, hub.radius));
         // apply precone
         blade->rotate(precone, chrono::VECT_Y);  // Y is the edge-wise axis for blade (IEC standard)
         double azimuth0 = ii * chrono::CH_C_2PI / nblades;
         blade->azimuth0 = azimuth0;
-        // offset blade from hub apex and add overhang
-        blade->translate(chrono::ChVector<double>(hub.overhang, 0.0, hub.radius));
+        // add overhang
+        blade->translate(chrono::ChVector<double>(hub.overhang, 0.0, 0.0));
         // rotate blade around hub
         blade->rotate(azimuth0, chrono::VECT_X);  // X is the axis pointing towards nacelle for blade (IEC standard)
-        // offset with distance from towertop
-        blade->translate(chrono::ChVector<double>(0.0, 0.0, shaft.distance_from_towertop));
         // apply shaft tilt to blades
         blade->rotate(shaft.tilt, -chrono::VECT_Y);
+        // offset with distance from towertop
+        blade->translate(chrono::ChVector<double>(0.0, 0.0, shaft.distance_from_towertop));
 
         // link root node of blade to rotor center
         auto link_hub_blade = chrono_types::make_shared<chrono::ChLinkMateFix>();
