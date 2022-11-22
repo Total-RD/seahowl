@@ -104,7 +104,7 @@ std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_
         }
 
         // populate json object
-        if (point.contains("airfoil_file")) {
+        if (point.contains("airfoil_file") && !point["airfoil_file"].get<std::string>().empty()) {
             auto main_directory = fs::path(filepath).parent_path();
             auto airfoil_filename = point.at("airfoil_file").get<std::string>();
             auto airfoil_filepath = main_directory / airfoil_filename;

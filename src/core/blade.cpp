@@ -46,7 +46,10 @@ void Blade::build() {
     aero->reference_points.clear();
     for (auto& point : reference_points) {
         elasto->reference_points.push_back(BladeReferencePointElasto(point));
-        aero->reference_points.push_back(BladeReferencePointAero(point));
+        // add aero reference point only if airfoil properties were defined
+        if (point.airfoil_properties.size() > 0) {
+            aero->reference_points.push_back(BladeReferencePointAero(point));
+        }
     }
     // build aero & elasto
     elasto->build();

@@ -1,34 +1,26 @@
 {
+  "precones": [-4.0, -4.0, -4.0],
   "shaft": {
     "tilt": -6.0,
-    "distance_from_towertop": 4.3495
+    "distance_from_towertop": 4.349459414248071
   },
   "nacelle": {
-    "yaw_bearing_mass": 28280.0,
-    "inertia": 24240914.0,
+    "CM": [-4.72, 0.0, 4.275],
     "mass": 646895.0,
-    "CM": [
-      -4.7201,
-      0.0,
-      4.2751
-    ]
+    "inertia": 24240914.0,
+    "yaw_bearing_mass": 28280.0
   },
   "drivetrain": {
-    "generator_efficiency": 95.756,
-    "generator_inertia": 1836784,
+    "generator_inertia": 1836784.0,
+    "gearbox_efficiency": 100.0,
     "gearbox_ratio": 1.0,
-    "gearbox_efficiency": 100.0
+    "generator_efficiency": 95.756
   },
   "hub": {
     "radius": 3.97,
-    "overhang": -12.098,
-    "inertia": 973520.0,
+    "CM": 0.0,
+    "overhang": -12.097571763912535,
     "mass": 69360.0,
-    "CM": 0.0
-  },
-  "precones": [
-    -4.0,
-    -4.0,
-    -4.0
-  ]
+    "inertia": 973520.0
+  }
 }
