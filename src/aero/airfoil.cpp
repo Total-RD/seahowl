@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 
+using namespace std;
 using seahowl::aero::AirfoilCoefficients;
 using seahowl::aero::AirfoilProperties;
 

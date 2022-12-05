@@ -21,7 +21,8 @@ class Blade : public ComponentDynamic {
     std::shared_ptr<seahowl::aero::BladeAero> aero;        ///< Aerodynamic element mesh
     std::vector<seahowl::core::BladeReferencePoint>
         reference_points;  ///<@todo  Refactor: Only used for construction to pass to elasto and aero. Use a Builder
-    std::vector<seahowl::core::DiscretizationPoint> mapping_aero2elasto;
+    std::vector<seahowl::core::DiscretizationPoint> mapping_aero2elasto_nodes;
+    std::vector<seahowl::core::DiscretizationPoint> mapping_aero2elasto_elements;
     std::vector<seahowl::core::DiscretizationPoint> mapping_elasto2aero;
 
     Blade();

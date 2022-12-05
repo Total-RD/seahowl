@@ -4,14 +4,12 @@ using namespace seahowl::aero;
 
 BladeReferencePointAero::BladeReferencePointAero() {
     rotation = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
-    velocity = chrono::ChVector<double>(0.0, 0.0, 0.0);
 }
 
 BladeReferencePointAero::BladeReferencePointAero(seahowl::core::BladeReferencePoint& point) {
     fraction = point.fraction;
     coordinates = point.m_coordinates;
     rotation = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
-    velocity = chrono::ChVector<double>(0.0, 0.0, 0.0);
     chord = point.chord;
     structural_twist = point.structural_twist;
     airfoil_properties = point.airfoil_properties;
@@ -24,7 +22,6 @@ BladeReferencePointAero BladeReferencePointAero::operator*(const double factor) 
     new_point.fraction *= factor;
     new_point.coordinates *= factor;
     new_point.rotation *= factor;
-    new_point.velocity *= factor;
     new_point.chord *= factor;
     new_point.structural_twist *= factor;
     for (int ii = 0; ii < airfoil_properties.size(); ii++) {
@@ -38,7 +35,6 @@ BladeReferencePointAero BladeReferencePointAero::operator+(const BladeReferenceP
     new_point.fraction += other.fraction;
     new_point.coordinates += other.coordinates;
     new_point.rotation += other.rotation;
-    new_point.velocity += other.velocity;
     new_point.chord += other.chord;
     new_point.structural_twist += other.structural_twist;
     for (int ii = 0; ii < airfoil_properties.size(); ii++) {

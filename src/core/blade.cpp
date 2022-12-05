@@ -70,47 +70,51 @@ void Blade::set_discretization_aero(std::vector<double> fractions) {
 
 void Blade::compute_mapping_aero2elasto() {
     // get aero element position (center) from which loads will be applied
-    std::vector<double> aero_discretization_fractions;
-    for (int ii = 0; ii < aero->elements.size(); ii++) {
-        aero_discretization_fractions.push_back(aero->elements[ii].properties.fraction);
+    std::vector<double> aero_discretization_fractions_elements;
+    for (auto& element : aero->elements) {
+        aero_discretization_fractions_elements.push_back(element.fraction);
     }
-    mapping_aero2elasto =
-        get_indice_and_positions(aero_discretization_fractions, elasto->discretization_fractions);
+    mapping_aero2elasto_elements =
+        get_indice_and_positions(aero_discretization_fractions_elements, elasto->discretization_fractions);
+    std::vector<double> aero_discretization_fractions_nodes;
+    for (auto& node : aero->nodes) {
+        aero_discretization_fractions_nodes.push_back(node.properties.fraction);
+    }
+    mapping_aero2elasto_nodes =
+        get_indice_and_positions(aero_discretization_fractions_nodes, elasto->discretization_fractions);
 }
 
 void Blade::compute_mapping_elasto2aero() {
-    mapping_elasto2aero =
-        get_indice_and_positions(elasto->discretization_fractions, aero->discretization_fractions);
+    mapping_elasto2aero = get_indice_and_positions(elasto->discretization_fractions, aero->discretization_fractions);
 }
 
-
 void Blade::update_positions_aero() {
-    for (int ii = 0; ii < aero->elements.size(); ii++) {
+    for (int ii = 0; ii < aero->nodes.size(); ii++) {
         // update position and rotation of aero elements
-        int elasto_element_index = mapping_aero2elasto[ii].index;
-        double eta = mapping_aero2elasto[ii].eta;
-        elasto->evaluate_position_rotation(aero->elements[ii].properties.coordinates,
-                                           aero->elements[ii].properties.rotation, elasto_element_index, eta);
+        int elasto_element_index = mapping_aero2elasto_nodes[ii].index;
+        double eta = mapping_aero2elasto_nodes[ii].eta;
+        elasto->evaluate_position_rotation(aero->nodes[ii].coordinates, aero->nodes[ii].rotation, elasto_element_index,
+                                           eta);
 
         // update velocity of aero elements
-        aero->elements[ii].properties.velocity = 0.5 * (std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(
-                                                            elasto->elements[elasto_element_index]->GetNodeN(0))
-                                                            ->GetPos_dt() +
-                                                        std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(
-                                                            elasto->elements[elasto_element_index]->GetNodeN(1))
-                                                            ->GetPos_dt());
-
-        // update pitch of aero elements
-        aero->elements[ii].pitch = elasto->pitch;
+        aero->nodes[ii].velocity = 0.5 * (std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(
+                                              elasto->elements[elasto_element_index]->GetNodeN(0))
+                                              ->GetPos_dt() +
+                                          std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(
+                                              elasto->elements[elasto_element_index]->GetNodeN(1))
+                                              ->GetPos_dt());
     }
+    // update pitch of blade for aero
+    aero->pitch = elasto->pitch;
 }
 
 void Blade::update_loads_elasto() {
     elasto->reset_loads();
-    if (aero->loads.size() != mapping_aero2elasto.size()) {
+    if (aero->loads.size() != mapping_aero2elasto_elements.size()) {
         throw std::runtime_error("length of vector of loads and aero to elasto mapping do not match.");
     }
     for (int ii = 0; ii < aero->loads.size(); ii++) {
-        elasto->accumulate_element_load(aero->loads[ii], mapping_aero2elasto[ii].index, mapping_aero2elasto[ii].eta);
+        elasto->accumulate_element_load(aero->loads[ii], mapping_aero2elasto_elements[ii].index,
+                                        mapping_aero2elasto_elements[ii].eta);
     }
 }

@@ -20,11 +20,12 @@ AirfoilCoefficients get_aero_coefficients_from_alpha(
     const double alpha,
     std::vector<AirfoilProperties>& airfoil_properties);
 
-chrono::ChVector2<double> get_induced_velocity(BladeElementAero& element,
+chrono::ChVector2<double> get_induced_velocity(BladeNodeAero& element,
                                                const chrono::ChVector2<double>& local_velocity_rotor0,
-                                               size_t nblades = 3,
-                                               bool tip_loss = true,
-                                               bool hub_loss = true);
+                                               const double blade_pitch = 0.0,
+                                               const size_t nblades = 3,
+                                               const bool tip_loss = true,
+                                               const bool hub_loss = true);
 
 void apply_tower_shadow_effect_on_wind(chrono::ChVector<double>& wind_velocity,
                                        const chrono::ChVector<double>& position,

@@ -30,13 +30,10 @@ void RotorAero::build(std::vector<std::shared_ptr<BladeAero>> blades) {
 
 void RotorAero::compute_chords_solidity() {
     auto nblades = blades.size();
-    for (int ii = 0; ii < blades.size(); ii++) {
-        auto& blade = blades[ii];
-        for (int jj = 0; jj < blade->elements.size(); jj++) {
-            auto& element = blade->elements[jj];
-            auto radius = (element.properties.coordinates - hub_position).Length();
-            element.swept_annulus = element.length * 2 * chrono::CH_C_PI * radius;
-            element.chord_solidity = nblades * element.properties.chord / (2 * chrono::CH_C_PI * radius);
+    for (auto& blade : blades) {
+        for (auto& node : blade->nodes) {
+            auto radius = (node.coordinates - hub_position).Length();
+            node.chord_solidity = nblades * node.properties.chord / (2 * chrono::CH_C_PI * radius);
             // std::cout << element.swept_annulus << " " << element.chord_solidity << std::endl;
         }
     }
@@ -70,19 +67,19 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
                                         bool tip_loss,
                                         bool hub_loss) {
     double density = wind_model.get_density();
-    for (int kk = 0; kk < 3; kk++) {
-        auto& blade = blades[kk];
+    for (auto& blade : blades) {
         auto blade_azimuth = azimuth + blade->azimuth0;
         // check that blade_azimuth is between pi and -pi
         if (blade_azimuth < -chrono::CH_C_PI || blade_azimuth > chrono::CH_C_PI) {
             blade_azimuth =
                 abs(std::fmod((blade_azimuth + 3 * chrono::CH_C_PI), 2 * chrono::CH_C_PI)) - chrono::CH_C_PI;
         }
-        for (int ii = 0; ii < blade->elements.size(); ii++) {
-            auto& element = blade->elements[ii];
-            auto& position = element.properties.coordinates;
-            auto& rotation = element.properties.rotation;
-            auto& velocity = element.properties.velocity;
+        int count = -1;
+        for (auto& node : blade->nodes) {
+            count += 1;
+            auto& position = node.coordinates;
+            auto& rotation = node.rotation;
+            auto& velocity = node.velocity;
 
             // get fluid relative velocity
             auto wind_velocity0 = wind_model.get_wind_velocity(position, time);
@@ -101,10 +98,10 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
             // pointing from hub towards nacelle
             auto local_direction_normal = chrono::ChVector<double>(0.0, 0.0, 1.0);
             auto global_direction_normal = hub_rotation.Rotate(local_direction_normal);
-            // pointing from hub to element position
-            auto global_direction_hub2element = (position - hub_position).GetNormalized();
+            // pointing from hub to node position
+            auto global_direction_hub2node = (position - hub_position).GetNormalized();
             // pointing in tangential direction
-            auto global_direction_tangent = (global_direction_normal % global_direction_hub2element).GetNormalized();
+            auto global_direction_tangent = (global_direction_normal % global_direction_hub2node).GetNormalized();
 
             // uninduced local velocity (2D)
             // frame perpendicular to rotor disc
@@ -115,18 +112,18 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
             auto local_velocity0 = chrono::ChVector2<double>(local_velocity_tangent, local_velocity_normal);
 
             if (local_velocity0.Length() == 0.0) {
-                blade->loads[ii] = chrono::ChVector<double>(0.0, 0.0, 0.0);
+                node.load = chrono::ChVector<double>(0.0, 0.0, 0.0);
             } else {
-                // get induced velocity (2D) from blade element
+                // get induced velocity (2D) from blade node
                 auto local_velocity =
-                    element.get_induced_velocity_rotor(local_velocity0, blades.size(), tip_loss, hub_loss);
+                    node.get_induced_velocity_rotor(local_velocity0, blade->pitch, blades.size(), tip_loss, hub_loss);
 
                 // get coefficients from angle of attack
                 double phi = seahowl::aero::get_phi(local_velocity);
                 double alpha =
-                    seahowl::aero::get_alpha_from_phi(phi, (element.pitch + element.properties.structural_twist));
+                    seahowl::aero::get_alpha_from_phi(phi, (blade->pitch + node.properties.structural_twist));
                 auto coefficients =
-                    seahowl::aero::get_aero_coefficients_from_alpha(alpha, element.properties.airfoil_properties);
+                    seahowl::aero::get_aero_coefficients_from_alpha(alpha, node.properties.airfoil_properties);
 
                 // get drag and lift coefficients
                 auto cl = coefficients.lift;
@@ -139,10 +136,9 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
 
                 // calculate drag and lift force
                 auto vel = local_velocity.Length();
-                auto chord = element.properties.chord;
-                auto length = element.length;
-                auto load_n = 0.5 * density * vel * vel * chord * cn * length;
-                auto load_t = 0.5 * density * vel * vel * chord * ct * length;
+                auto chord = node.properties.chord;
+                auto load_n = 0.5 * density * vel * vel * chord * cn;
+                auto load_t = 0.5 * density * vel * vel * chord * ct;
 
                 // transform from local to global load
                 auto load_n_global = global_direction_normal * load_n;
@@ -150,12 +146,16 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
                 auto load_global = load_n_global + load_t_global;
 
                 // store load in global frame
-                blade->loads[ii] = load_global;
-                blade->wind_velocities[ii] = wind_velocity0;
-                blade->wind_velocities_shadowed[ii] = wind_velocity;
-                blade->relative_velocities_induced[ii] =
+                node.load = load_global;
+                node.wind_velocity = wind_velocity0;
+                node.wind_velocity_shadowed = wind_velocity;
+                node.relative_velocity_induced =
                     global_direction_normal * local_velocity.y() + global_direction_tangent * local_velocity.x();
             }
+        }
+        // update loads of blade
+        for (int ii = 0; ii < blade->elements.size(); ii++) {
+            blade->loads[ii] = blade->elements[ii].get_load();
         }
     }
 }

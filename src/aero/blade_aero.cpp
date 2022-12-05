@@ -1,22 +1,41 @@
 #include "seahowl/aero/blade_aero.h"
 #include <seahowl/aero/bemt.h>
 
+using seahowl::aero::BladeNodeAero;
 using seahowl::aero::BladeElementAero;
 using seahowl::aero::BladeAero;
 using seahowl::aero::get_induced_velocity;
 
-BladeElementAero::BladeElementAero(BladeReferencePointAero& point1, BladeReferencePointAero& point2) {
-    properties = (point1 + point2) * 0.5;
-    length = (point1.coordinates - point2.coordinates).Length();
+BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
+    properties = point;
+    coordinates = point.coordinates;
+    rotation = point.rotation;
+    velocity = chrono::ChVector<double>(0.0, 0.0, 0.0);
+    load = chrono::ChVector<double>(0.0, 0.0, 0.0);
+    wind_velocity = chrono::ChVector<double>(0.0, 0.0, 0.0);
+    wind_velocity_shadowed = chrono::ChVector<double>(0.0, 0.0, 0.0);
+    relative_velocity_induced = chrono::ChVector<double>(0.0, 0.0, 0.0);
+}
+
+BladeNodeAero::~BladeNodeAero() {}
+
+chrono::ChVector2<double> BladeNodeAero::get_induced_velocity_rotor(chrono::ChVector2<double>& local_velocity_rotor0,
+                                                                    double blade_pitch,
+                                                                    size_t nblades,
+                                                                    bool tip_loss,
+                                                                    bool hub_loss) {
+    return get_induced_velocity(*this, local_velocity_rotor0, blade_pitch, nblades, tip_loss, hub_loss);
+}
+
+BladeElementAero::BladeElementAero(BladeNodeAero& node1, BladeNodeAero& node2) : node1(node1), node2(node2) {
+    fraction = 0.5 * (node1.properties.fraction + node2.properties.fraction);
+    length = (node1.coordinates - node2.coordinates).Length();
 }
 
 BladeElementAero::~BladeElementAero() {}
 
-chrono::ChVector2<double> BladeElementAero::get_induced_velocity_rotor(chrono::ChVector2<double>& local_velocity_rotor0,
-                                                                       size_t nblades,
-                                                                       bool tip_loss,
-                                                                       bool hub_loss) {
-    return get_induced_velocity(*this, local_velocity_rotor0, nblades, tip_loss, hub_loss);
+chrono::ChVector<double> BladeElementAero::get_load() {
+    return 0.5 * (node1.load + node2.load) * length;
 }
 
 BladeAero::BladeAero() {}
@@ -45,15 +64,17 @@ void BladeAero::build() {
 
     // build
     discretized_points = seahowl::core::get_discretized_points(discretization_fractions, reference_points);
-    for (int ii = 0; ii < discretized_points.size() - 1; ii++) {
-        // make element
-        auto element = BladeElementAero(discretized_points[ii], discretized_points[ii + 1]);
-        elements.push_back(element);
+    // nodes
+    nodes.clear();
+    for (int ii = 0; ii < discretized_points.size(); ii++) {
         // push empty load
+        nodes.push_back(BladeNodeAero(discretized_points[ii]));
+    }
+    // elements
+    elements.clear();
+    for (int ii = 0; ii < discretized_points.size() - 1; ii++) {
+        elements.push_back(BladeElementAero(nodes[ii], nodes[ii + 1]));
         loads.push_back(chrono::ChVector<double>(0.0, 0.0, 0.0));
-        relative_velocities_induced.push_back(chrono::ChVector<double>(0.0, 0.0, 0.0));
-        wind_velocities.push_back(chrono::ChVector<double>(0.0, 0.0, 0.0));
-        wind_velocities_shadowed.push_back(chrono::ChVector<double>(0.0, 0.0, 0.0));
     }
 
     // get distance from tip
@@ -62,33 +83,30 @@ void BladeAero::build() {
 
 void BladeAero::compute_distances_from_tip() {
     // this is the position of the element at the tip
-    auto& element_tip_position = elements.back().properties.coordinates;
-    // need to add 0.5*length of the element to get actual distance from tip
-    double offset = 0.5 * elements.back().length;
-    for (int ii = 0; ii < elements.size(); ii++) {
-        auto& element = elements[ii];
-        element.distance_from_tip = (element.properties.coordinates - element_tip_position).Length() + offset;
+    auto& tip_position = discretized_points.back().coordinates;
+    for (auto& node : nodes) {
+        node.distance_from_tip = (node.coordinates - tip_position).Length();
     }
 }
 
 void BladeAero::compute_distances_from_hub(chrono::ChVector<double> hub_apex_position, double hub_radius) {
-    for (auto& element : elements) {
-        element.distance_from_hub = (element.properties.coordinates - hub_apex_position).Length() - hub_radius;
+    for (auto& node : nodes) {
+        node.distance_from_hub = (node.coordinates - hub_apex_position).Length() - hub_radius;
     }
 }
 
 void BladeAero::compute_radii(chrono::ChVector<double> hub_apex_position) {
-    for (auto& element : elements) {
-        element.radius = (element.properties.coordinates - hub_apex_position).Length();
+    for (auto& node : nodes) {
+        node.radius = (node.coordinates - hub_apex_position).Length();
     }
 }
 
 chrono::ChVector<double> BladeAero::get_average_wind_velocity() {
     auto average = chrono::ChVector<double>(0.0, 0.0, 0.0);
-    for (auto& vel : wind_velocities_shadowed) {
-        average += vel;
+    for (auto& node : nodes) {
+        average += node.wind_velocity_shadowed;
     }
-    average /= wind_velocities_shadowed.size();
+    average /= nodes.size();
     return average;
 }
 

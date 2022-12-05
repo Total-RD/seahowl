@@ -36,23 +36,24 @@ seahowl::aero::AirfoilCoefficients seahowl::aero::get_aero_coefficients_from_alp
     return coefficients;
 }
 
-chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::BladeElementAero& element,
+chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
                                                               const chrono::ChVector2<double>& local_velocity_rotor0,
-                                                              size_t nblades,
-                                                              bool tip_loss,
-                                                              bool hub_loss) {
+                                                              const double blade_pitch,
+                                                              const size_t nblades,
+                                                              const bool tip_loss,
+                                                              const bool hub_loss) {
     // local_velocity is in local element frame
     chrono::ChVector2<double> local_velocity;
     chrono::ChVector2<double> local_velocity_rotor;
-    double pitch_twist = element.pitch + element.properties.structural_twist;
+    double pitch_twist = blade_pitch + node.properties.structural_twist;
 
     double tol_rel = 1e-3;
     double tol_abs = 1e-3;
     int max_iter = 100;
     double alpha = -1000.0;
     double alpha_previous;
-    auto aa = element.induction_factor_axial;
-    auto ap = element.induction_factor_tangential;
+    auto aa = node.induction_factor_axial;
+    auto ap = node.induction_factor_tangential;
     // limits
     double aa_max = 1.0;
     double aa_min = -1.0;
@@ -71,9 +72,8 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
 
         // get coefficients from angle of attack
         double phi = seahowl::aero::get_phi(local_velocity_rotor);
-        alpha = seahowl::aero::get_alpha_from_phi(phi, (element.pitch + element.properties.structural_twist));
-        auto coefficients =
-            seahowl::aero::get_aero_coefficients_from_alpha(alpha, element.properties.airfoil_properties);
+        double alpha = seahowl::aero::get_alpha_from_phi(phi, (blade_pitch + node.properties.structural_twist));
+        auto coefficients = seahowl::aero::get_aero_coefficients_from_alpha(alpha, node.properties.airfoil_properties);
 
         // get drag and lift coefficients
         auto cl = coefficients.lift;
@@ -87,22 +87,22 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
         // losses
         double loss_factor = 1.0;
         if (tip_loss) {
-            // Prandtl's approximation for tip-loss factor
+            // Prandtl's approximation for tip-loss factor=
             loss_factor *= (2.0 / chrono::CH_C_PI) *
-                           acos(exp(nblades * (-element.distance_from_tip) / (2.0 * element.radius * fabs(sin_phi))));
+                           acos(exp(nblades * (-node.distance_from_tip) / (2.0 * node.radius * fabs(sin_phi))));
         }
         if (hub_loss) {
             // hub loss
-            double hub_radius = (element.radius - element.distance_from_hub);
+            double hub_radius = (node.radius - node.distance_from_hub);
             loss_factor *= (2.0 / chrono::CH_C_PI) *
-                           acos(exp(nblades * (-element.distance_from_hub) / (2.0 * hub_radius * fabs(sin_phi))));
+                           acos(exp(nblades * (-node.distance_from_hub) / (2.0 * hub_radius * fabs(sin_phi))));
         }
 
         // update induction factors
 
         double tol_induction = 1e-6;  // tolerance for induction variables to avoid singularities
         // axial induction, based on AeroDyn v15 implementation
-        double kk = element.chord_solidity * cn / (4.0 * loss_factor * pow(sin_phi, 2));
+        double kk = node.chord_solidity * cn / (4.0 * loss_factor * pow(sin_phi, 2));
         if (kk <= 2.0 / 3.0) {
             if (fabs(kk + 1.0) < tol_induction) {
                 aa = copysign(aa_max, -(1.0 + kk));
@@ -171,8 +171,8 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
     }
 
     // store induction factors for starting point of next time iteration
-    element.induction_factor_axial = aa;
-    element.induction_factor_tangential = ap;
+    node.induction_factor_axial = aa;
+    node.induction_factor_tangential = ap;
 
     // return velocity in local
     return local_velocity_rotor;

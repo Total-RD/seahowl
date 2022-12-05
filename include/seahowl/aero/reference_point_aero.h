@@ -8,9 +8,8 @@ namespace aero {
 /**@brief Reference aerodynamic (DOF) point for blade */
 struct BladeReferencePointAero {
     double fraction;                                    ///< Fraction (normalized abscissa)
-    chrono::ChVector<double> coordinates;             ///< Point coordinates
+    chrono::ChVector<double> coordinates;               ///< Point coordinates
     chrono::ChQuaternion<double> rotation;              ///< Rotation
-    chrono::ChVector<double> velocity;                  ///< Velocity
     double chord;                                       ///< Chord length
     double structural_twist;                            ///< Twist
     std::vector<AirfoilProperties> airfoil_properties;  ///< Airfoil properties for each elements

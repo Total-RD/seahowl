@@ -460,6 +460,7 @@ def merge_beamdyn2aerodyn(beamdyn_json, aerodyn_json, save_directory=None):
         json_points2=aerodyn_json["reference_points"],
     )
     merged_json["reference_points"] = reference_points
+    merged_json["discretization_aero"] = aerodyn_json["discretization_aero"]
 
     # save to file
     if save_directory is not None:
@@ -584,6 +585,7 @@ def merge_elastodyn2aerodyn_tower(elastodyn_json, aerodyn_json, save_directory=N
         json_points2=aerodyn_json["reference_points"],
     )
     merged_json["reference_points"] = reference_points
+    merged_json["discretization_aero"] = aerodyn_json["discretization_aero"]
 
     # save to file
     if save_directory is not None:
