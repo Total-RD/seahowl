@@ -32,6 +32,7 @@ struct BladeNodeAero {
     BladeNodeAero(BladeReferencePointAero& point);
     ~BladeNodeAero();
 
+    chrono::ChVector<double> get_offset_aero_absolute() const;
     // ChVector2<double> get_induced_velocity_element(ChVector2<double>& local_velocity0);
     chrono::ChVector2<double> get_induced_velocity_rotor(chrono::ChVector2<double>& local_velocity_rotor0,
                                                          double blade_pitch = 0.0,
@@ -46,11 +47,15 @@ struct BladeElementAero {
     const BladeNodeAero& node2;
     double fraction;
     double length;
+    chrono::ChVector2<double> offset_aero;
 
     BladeElementAero(BladeNodeAero& node1, BladeNodeAero& node2);
     ~BladeElementAero();
 
-    chrono::ChVector<double> get_load();
+    chrono::ChVector<double> get_load() const;
+    chrono::ChVector<double> get_position() const;
+    chrono::ChQuaternion<double> get_rotation() const;
+    chrono::ChVector<double> get_offset_aero_absolute() const;
 };
 
 /**@brief Aerodynamic model for blade */

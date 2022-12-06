@@ -27,15 +27,38 @@ chrono::ChVector2<double> BladeNodeAero::get_induced_velocity_rotor(chrono::ChVe
     return get_induced_velocity(*this, local_velocity_rotor0, blade_pitch, nblades, tip_loss, hub_loss);
 }
 
+chrono::ChVector<double> BladeNodeAero::get_offset_aero_absolute() const {
+    auto& offset = properties.offset_aero;
+    auto coordsys = chrono::ChCoordsys(coordinates, rotation);
+    auto offset3D = chrono::ChVector<double>(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
+    auto offset_absolute = coordsys.TransformLocalToParent(offset3D) - coordinates;
+    return offset_absolute;
+}
+
 BladeElementAero::BladeElementAero(BladeNodeAero& node1, BladeNodeAero& node2) : node1(node1), node2(node2) {
     fraction = 0.5 * (node1.properties.fraction + node2.properties.fraction);
+    offset_aero = 0.5 * (node1.properties.offset_aero + node2.properties.offset_aero);
     length = (node1.coordinates - node2.coordinates).Length();
 }
 
 BladeElementAero::~BladeElementAero() {}
 
-chrono::ChVector<double> BladeElementAero::get_load() {
+chrono::ChVector<double> BladeElementAero::get_load() const {
     return 0.5 * (node1.load + node2.load) * length;
+}
+
+chrono::ChVector<double> BladeElementAero::get_position() const {
+    return 0.5 * (node1.coordinates + node2.coordinates);
+}
+
+chrono::ChQuaternion<double> BladeElementAero::get_rotation() const {
+    // returning rotation of node1
+    // TODO: average rotation of node1 and node2
+    return node1.rotation;
+}
+
+chrono::ChVector<double> BladeElementAero::get_offset_aero_absolute() const {
+    return 0.5 * (node1.get_offset_aero_absolute() + node2.get_offset_aero_absolute());
 }
 
 BladeAero::BladeAero() {}

@@ -5,9 +5,9 @@ using namespace seahowl::elasto;
 BladeReferencePointElasto::BladeReferencePointElasto() {}
 
 BladeReferencePointElasto::BladeReferencePointElasto(seahowl::core::BladeReferencePoint point) {
-    coordinates = point.m_coordinates;
-    offset_elastic = point.m_offset_elastic;
-    offset_gravity = point.m_offset_gravity;
+    coordinates = point.coordinates;
+    offset_elastic = point.offset_elastic;
+    offset_gravity = point.offset_gravity;
     stiffness_matrix = point.stiffness_matrix;
     mass_matrix = point.mass_matrix;
     fraction = point.fraction;

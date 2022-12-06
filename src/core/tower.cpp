@@ -72,13 +72,16 @@ void Tower::update_positions_aero() {
     for (int ii = 0; ii < aero.elements.size(); ii++) {
         // update position and rotation of aero elements
         int elasto_element_index = mapping_aero2elasto[ii].index;
+        auto element_elasto = elasto.elements[elasto_element_index];
         double eta = mapping_aero2elasto[ii].eta;
-        elasto.evaluate_position_rotation(aero.elements[ii].properties.coordinates,
-                                          aero.elements[ii].properties.rotation, elasto_element_index, eta);
+        auto& element_aero = aero.elements[ii];
+        elasto.evaluate_position_rotation(element_aero.properties.coordinates, element_aero.properties.rotation,
+                                          elasto_element_index, eta);
 
         // update velocity of aero elements
-        aero.elements[ii].properties.velocity = 0.5 * (std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(elasto.elements[elasto_element_index]->GetNodeN(0))->GetPos_dt() +
-                                                       std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(elasto.elements[elasto_element_index]->GetNodeN(1))->GetPos_dt());
+        aero.elements[ii].properties.velocity =
+            0.5 * (std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetPos_dt() +
+                   std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetPos_dt());
     }
 }
 
@@ -87,7 +90,9 @@ void Tower::update_loads_elasto() {
     if (aero.loads.size() != mapping_aero2elasto.size()) {
         throw std::runtime_error("length of vector of loads and aero to elasto mapping do not match.");
     }
+    auto offset = chrono::ChVector<double>(0.0, 0.0, 0.0);
     for (int ii = 0; ii < aero.loads.size(); ii++) {
-        elasto.accumulate_element_load(aero.loads[ii], mapping_aero2elasto[ii].index, mapping_aero2elasto[ii].eta);
+        elasto.accumulate_element_load(aero.loads[ii], mapping_aero2elasto[ii].index, mapping_aero2elasto[ii].eta,
+                                       offset);
     }
 }

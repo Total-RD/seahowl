@@ -48,14 +48,18 @@ std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_
             throw std::runtime_error("Coordinates has to be vector of length 3.");
         }
         reference_point.fraction = coords[2] / blade_length;
-        reference_point.m_coordinates = chrono::ChVector<double>(coords[0], coords[1], coords[2]);
-        if (point.contains("m_offset_gravity")) {
+        reference_point.coordinates = chrono::ChVector<double>(coords[0], coords[1], coords[2]);
+        if (point.contains("offset_gravity")) {
             auto og = point.at("offsets_gravity").get<std::vector<double>>();
-            reference_point.m_offset_gravity = chrono::ChVector2<double>(og[0], og[1]);
+            reference_point.offset_gravity = chrono::ChVector2<double>(og[0], og[1]);
         }
         if (point.contains("offset_elastic")) {
             auto oe = point.at("offsets_elastic").get<std::vector<double>>();
-            reference_point.m_offset_elastic = chrono::ChVector2<double>(oe[0], oe[1]);
+            reference_point.offset_elastic = chrono::ChVector2<double>(oe[0], oe[1]);
+        }
+        if (point.contains("offset_aero")) {
+            auto oa = point.at("offset_aero").get<std::vector<double>>();
+            reference_point.offset_aero = chrono::ChVector2<double>(oa[0], oa[1]);
         }
 
         auto sm = point.at("stiffness_matrix").get<std::vector<std::vector<double>>>();

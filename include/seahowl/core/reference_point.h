@@ -10,9 +10,10 @@ namespace core {
 
 /**@brief Reference point (mesh) for Blade */
 struct BladeReferencePoint {
-    chrono::ChVector<double> m_coordinates{0.0, 0.0, 0.0};             ///< Reference coordinates
-    chrono::ChVector2<double> m_offset_elastic{0.0, 0.0};              ///< Offset of center of elasticity
-    chrono::ChVector2<double> m_offset_gravity{0.0, 0.0};              ///< Offset of center of gravity
+    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};               ///< Reference coordinates
+    chrono::ChVector2<double> offset_elastic{0.0, 0.0};                ///< Offset of center of elasticity
+    chrono::ChVector2<double> offset_gravity{0.0, 0.0};                ///< Offset of center of gravity
+    chrono::ChVector2<double> offset_aero{0.0, 0.0};                   ///< Aerodynamic offset
     chrono::ChMatrixNM<double, 6, 6> stiffness_matrix;                 ///< Stiffness matrix
     chrono::ChMatrixNM<double, 6, 6> mass_matrix;                      ///< Mass matrix
     double fraction = 0.0;                                             ///< Fraction (normalized abscissa)

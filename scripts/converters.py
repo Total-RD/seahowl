@@ -455,12 +455,14 @@ def convert_beamdyn_blade_file(filename, save_directory=None):
 def merge_beamdyn2aerodyn(beamdyn_json, aerodyn_json, save_directory=None):
 
     merged_json = copy.deepcopy(beamdyn_json)
+    merged_json["discretization_aero"] = aerodyn_json["discretization_aero"]
     reference_points = merge_interpolate_points(
         json_points1=beamdyn_json["reference_points"],
         json_points2=aerodyn_json["reference_points"],
     )
     merged_json["reference_points"] = reference_points
-    merged_json["discretization_aero"] = aerodyn_json["discretization_aero"]
+    for reference_point in merged_json["reference_points"]:
+        reference_point["offset_aero"] = (np.array(reference_point["coordinates_aero"])-np.array(reference_point["coordinates"])).tolist()[:2]
 
     # save to file
     if save_directory is not None:

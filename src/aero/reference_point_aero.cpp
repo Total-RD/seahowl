@@ -8,8 +8,9 @@ BladeReferencePointAero::BladeReferencePointAero() {
 
 BladeReferencePointAero::BladeReferencePointAero(seahowl::core::BladeReferencePoint& point) {
     fraction = point.fraction;
-    coordinates = point.m_coordinates;
+    coordinates = point.coordinates;
     rotation = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
+    offset_aero = point.offset_aero;
     chord = point.chord;
     structural_twist = point.structural_twist;
     airfoil_properties = point.airfoil_properties;

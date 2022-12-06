@@ -52,7 +52,10 @@ class ComponentElastoFEA : public ComponentElasto {
                                             chrono::ChQuaternion<double>& rotation,
                                             int element_index,
                                             double eta) const;
-    void accumulate_element_load(chrono::ChVector<double> load, int element_index, double eta);
+    void accumulate_element_load(chrono::ChVector<double> load,
+                                 int element_index,
+                                 double eta,
+                                 chrono::ChVector<double> offset);
 
     std::vector<chrono::ChVector<double>> get_nodes_positions() const;      ///< Get all nodes positions.
     std::vector<chrono::ChVector<double>> get_nodes_velocities() const;     ///< Get all nodes velocities.

@@ -16,9 +16,9 @@ BladeReferencePoint::~BladeReferencePoint() {}
 
 BladeReferencePoint BladeReferencePoint::operator*(const double factor) const {
     BladeReferencePoint new_point = *this;
-    new_point.m_coordinates *= factor;
-    new_point.m_offset_elastic *= factor;
-    new_point.m_offset_gravity *= factor;
+    new_point.coordinates *= factor;
+    new_point.offset_elastic *= factor;
+    new_point.offset_gravity *= factor;
     new_point.fraction *= factor;
     new_point.structural_twist *= factor;
     new_point.mass_matrix *= factor;
@@ -36,9 +36,9 @@ BladeReferencePoint BladeReferencePoint::operator*(const double factor) const {
 
 BladeReferencePoint BladeReferencePoint::operator+(const BladeReferencePoint& other) const {
     BladeReferencePoint new_point = *this;
-    new_point.m_coordinates += other.m_coordinates;
-    new_point.m_offset_elastic += other.m_offset_elastic;
-    new_point.m_offset_gravity += other.m_offset_gravity;
+    new_point.coordinates += other.coordinates;
+    new_point.offset_elastic += other.offset_elastic;
+    new_point.offset_gravity += other.offset_gravity;
     new_point.fraction += other.fraction;
     new_point.structural_twist += other.structural_twist;
     new_point.stiffness_matrix += other.stiffness_matrix;

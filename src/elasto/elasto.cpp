@@ -85,30 +85,35 @@ void ComponentElastoFEA::evaluate_position_rotation(chrono::ChVector<double>& po
     element->EvaluateSectionFrame(eta, position, rotation);
 }
 
-void ComponentElastoFEA::accumulate_element_load(chrono::ChVector<double> load, int element_index, double eta) {
+void ComponentElastoFEA::accumulate_element_load(chrono::ChVector<double> load,
+                                                 int element_index,
+                                                 double eta,
+                                                 chrono::ChVector<double> offset) {
+    // sanity check
     if (element_index >= elements.size() || element_index < 0) {
         throw std::runtime_error("Element index " + std::to_string(element_index) + " does not exist (max " +
                                  std::to_string(elements.size()) + ").");
     }
+
+    // get position and rotation
     chrono::ChVector<double> position{0.0, 0.0, 0.0};
     chrono::ChQuaternion<double> rotation{0.0, 0.0, 0.0, 0.0};
     evaluate_position_rotation(position, rotation, element_index, eta);
 
+    // apply loads
     auto& element = elements[element_index];
-
     // load on first node
     double weight0 = 0.5 * abs(eta - 1);
     auto load0 = load * weight0;
     auto node0 = std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element->GetNodeN(0));
     node0->SetForce(node0->GetForce() + load0);
-    node0->SetTorque(node0->GetTorque() + (position - node0->GetPos()) % load0);
-
+    node0->SetTorque(node0->GetTorque() + (position + offset - node0->GetPos()) % load0);
     // load on second node
     double weight1 = 0.5 * abs(eta - 1);
     auto load1 = load * weight1;
     auto node1 = std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element->GetNodeN(1));
     node1->SetForce(node1->GetForce() + load1);
-    node1->SetTorque(node1->GetTorque() + (position - node1->GetPos()) % load1);
+    node1->SetTorque(node1->GetTorque() + (position + offset - node1->GetPos()) % load1);
 }
 
 std::vector<chrono::ChVector<double>> ComponentElastoFEA::get_nodes_positions() const {

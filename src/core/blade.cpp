@@ -92,18 +92,23 @@ void Blade::update_positions_aero() {
     for (int ii = 0; ii < aero->nodes.size(); ii++) {
         // update position and rotation of aero elements
         int elasto_element_index = mapping_aero2elasto_nodes[ii].index;
+        auto element_elasto = elasto->elements[elasto_element_index];
         double eta = mapping_aero2elasto_nodes[ii].eta;
-        elasto->evaluate_position_rotation(aero->nodes[ii].coordinates, aero->nodes[ii].rotation, elasto_element_index,
-                                           eta);
+        auto& node_aero = aero->nodes[ii];
+        elasto->evaluate_position_rotation(node_aero.coordinates, node_aero.rotation, elasto_element_index, eta);
+
+        // add offset
+        auto& offset = node_aero.properties.offset_aero;
+        auto coordsys = chrono::ChCoordsys(node_aero.coordinates, node_aero.rotation);
+        auto offset3D = chrono::ChVector<double>(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
+        node_aero.coordinates = coordsys.TransformLocalToParent(offset3D);
 
         // update velocity of aero elements
-        aero->nodes[ii].velocity = 0.5 * (std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(
-                                              elasto->elements[elasto_element_index]->GetNodeN(0))
-                                              ->GetPos_dt() +
-                                          std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(
-                                              elasto->elements[elasto_element_index]->GetNodeN(1))
-                                              ->GetPos_dt());
+        node_aero.velocity =
+            0.5 * (std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetPos_dt() +
+                   std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetPos_dt());
     }
+
     // update pitch of blade for aero
     aero->pitch = elasto->pitch;
 }
@@ -115,6 +120,7 @@ void Blade::update_loads_elasto() {
     }
     for (int ii = 0; ii < aero->loads.size(); ii++) {
         elasto->accumulate_element_load(aero->loads[ii], mapping_aero2elasto_elements[ii].index,
-                                        mapping_aero2elasto_elements[ii].eta);
+                                        mapping_aero2elasto_elements[ii].eta,
+                                        aero->elements[ii].get_offset_aero_absolute());
     }
 }
