@@ -18,12 +18,16 @@ void Turbine::init(double time, double dt) {
     rotor.init(time, dt);
     tower.init(time, dt);
     controller->init(time, dt, *this);
+    #ifdef HAVE_AERODYN
+        aerodyn->init(time, dt, *this);
+    #endif
 }
 
 void Turbine::prestep(double time, double dt) {
     rotor.prestep(time, dt);
     tower.prestep(time, dt);
 }
+
 void Turbine::poststep(double time, double dt) {
     // controller step
     controller->step(time, dt, *this);
@@ -85,7 +89,12 @@ void Turbine::rotate(double angle, chrono::ChVector<double> axis) {
 }
 
 void Turbine::compute_wind_loads(seahowl::aero::WindModel& wind_model, double time) {
-    rotor.aero.compute_wind_loads_bemt(wind_model, time, tower.aero, true, true, true);
+    #ifdef HAVE_AERODYN 
+        aerodyn->calcul(time, *this);
+        rotor.aero.compute_wind_loads_aerodyn(aerodyn->pImpl.MeshFrc, wind_model, time, tower.aero, true, true, true);
+    #else
+        rotor.aero.compute_wind_loads_bemt(wind_model, time, tower.aero, true, true, true);
+    #endif
     tower.aero.compute_wind_loads_morison(wind_model, time);
 }
 
