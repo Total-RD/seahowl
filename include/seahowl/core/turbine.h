@@ -4,6 +4,7 @@
 #include <seahowl/core/rotor.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/servo/controller.h>
+#include <seahowl/aero/aerodyn.h> 
 
 #include <vector>
 
@@ -11,6 +12,10 @@
 namespace seahowl {
 namespace servo {
 class Controller;
+}
+
+namespace aero {
+class AeroDyn;
 }
 
 /**@brief Seahowl core module */

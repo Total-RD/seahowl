@@ -28,6 +28,10 @@ using json = nlohmann::json;
     #include <seahowl/servo/controller_discon.h>
 #endif
 
+#ifdef HAVE_AERODYN
+    #include <seahowl/aero/aerodyn.h>  
+#endif
+
 #include <seahowl/aero/wind_models.h>
 #include <seahowl/core/system.h>
 
@@ -123,6 +127,10 @@ int main(int argc, char* argv[]) {
         seahowl::core::System(seahowl::core::Turbine(get_turbine_from_json(filepath_turbine)), wind_model);
     auto& turbine = seahowl_system.turbine;
 
+    turbine.aerodyn =
+        std::make_shared<seahowl::aero::AeroDyn>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
+                                                 (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind_Steady.dat").generic_string());
+
     // build turbine (Chrono)
     turbine.build();
     turbine.assemble(system, mesh);
@@ -174,6 +182,10 @@ int main(int argc, char* argv[]) {
     application->SetCameraVertical(chrono::CameraVerticalDir::Z);
     application->AddLogo(logoname);
     draw_system_init(system, application);
+#endif
+
+#ifdef HAVE_AERODYN
+    remove_all("./vtk-ADI");
 #endif
 
     // simulation loop
