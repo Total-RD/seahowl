@@ -27,6 +27,7 @@ class Turbine : public ComponentDynamic {
     Rotor rotor;                                             ///< Rotor.  @todo Should be Hub + Blades
     Tower tower;                                             ///< Tower
     std::shared_ptr<seahowl::servo::Controller> controller;  ///< Controller
+    std::shared_ptr<seahowl::aero::AeroDyn> aerodyn;         ///< Aerodyn 
 
     double generator_efficiency = 1.0;  ///< Efficiency of generator
     double gearbox_ratio = 1.0;         ///< Gearbox ratio
