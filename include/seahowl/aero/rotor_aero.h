@@ -33,6 +33,13 @@ class RotorAero {
                                  bool tower_shadow = true,
                                  bool tip_loss = true,
                                  bool hub_loss = true);
+    void compute_wind_loads_aerodyn(float *LoadAeroDyn,
+                                 const WindModel& wind_model,
+                                 double time,
+                                 const TowerAero& tower_aero,
+                                 bool tower_shadow = true,
+                                 bool tip_loss = true,
+                                 bool hub_loss = true);
 };
 
 }  // namespace aero
