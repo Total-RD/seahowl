@@ -31,6 +31,7 @@ using json = nlohmann::json;
 #ifdef HAVE_AERODYN
     #include <seahowl/aero/aerodyn.h>  
 #endif
+# include <time.h>
 
 #include <seahowl/aero/wind_models.h>
 #include <seahowl/core/system.h>
@@ -52,6 +53,11 @@ void output_results(seahowl::core::System& seahowl_system, chrono::ChSystemSMC& 
 /**@brief Driver main function */
 int main(int argc, char* argv[]) {
     // SETUP
+
+    // CPU timer
+    struct timespec startTime, finishTime;
+    double elapsed;
+    clock_gettime(CLOCK_MONOTONIC, &startTime);
 
     auto DATADIR = absolute(path(u8"../data"));
     auto logoname = (DATADIR / ".." / "doc" / "source" / "totalenergies_alpha.png").generic_string();
@@ -240,6 +246,10 @@ int main(int argc, char* argv[]) {
             dt_outputs_next += dt_outputs;
         }
     }
+
+    clock_gettime(CLOCK_MONOTONIC, &finishTime);
+    elapsed = (finishTime.tv_sec - startTime.tv_sec);
+    GetLog() << "Total CPU time: " << elapsed << " seconds\n";
 
     return 0;
 }
