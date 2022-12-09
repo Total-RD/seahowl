@@ -23,11 +23,13 @@ def merge_interpolate_points(json_points1, json_points2):
     # get fractions as lists
     fractions1 = list()
     fractions2 = list()
+    tol = 6
     for point in json_points1:
         fractions1.append(point["fraction"])
     for point in json_points2:
         fractions2.append(point["fraction"])
 
+    tol = 6
     # interpolate and merge data
     idx1 = 0
     idx2 = 0
@@ -62,15 +64,22 @@ def merge_interpolate_points(json_points1, json_points2):
             if f1_1 == f2_1:
                 # no interpolation needed (just merge data)
                 point = copy.deepcopy(json_points1[idx1])
+                fraction = f1_1
                 for key, val in json_points2[idx2].items():
                     point[key] = copy.deepcopy(val)
                 # increment indices
-                idx1 += 1
-                idx2 += 1
+                if f1_2 == f2_2:
+                    idx1 += 1
+                    idx2 += 1
+                elif f1_2 > f2_2:
+                    idx2 += 1
+                elif f1_2 < f2_2:
+                    idx1 += 1
             else:
                 if f1_1 > f2_1:
                     # start from point in json_points1
                     point = copy.deepcopy(json_points1[idx1])
+                    fraction = f1_1
                     # find interpolation coefficients
                     frange = f2_2 - f2_1
                     coeff1 = 1.0 - (f1_1 - f2_1) / frange
@@ -79,12 +88,14 @@ def merge_interpolate_points(json_points1, json_points2):
                     point_interp1 = json_points2[idx2]
                     point_interp2 = json_points2[idx2 + 1]
                     # increment index
-                    idx2 += 1
-                    if fractions2[idx2] > f1_2:
+                    if f1_2 > f2_2:
+                        idx2 += 1
+                    else:
                         idx1 += 1
                 elif f1_1 < f2_1:
                     # start from point in json_points2
                     point = copy.deepcopy(json_points2[idx2])
+                    fraction = f2_1
                     # find interpolation coefficients
                     frange = f1_2 - f1_1
                     coeff1 = 1.0 - (f2_1 - f1_1) / frange
@@ -93,10 +104,10 @@ def merge_interpolate_points(json_points1, json_points2):
                     point_interp1 = json_points1[idx1]
                     point_interp2 = json_points1[idx1 + 1]
                     # increment index
-                    idx1 += 1
-                    if fractions1[idx1] > f2_2:
+                    if f1_2 > f2_2:
                         idx2 += 1
-
+                    else:
+                        idx1 += 1
                 for key in point_interp1.keys():
                     val1 = point_interp1[key]
                     val2 = point_interp2[key]
@@ -138,14 +149,12 @@ def merge_interpolate_points(json_points1, json_points2):
 
         # add point to list
         merged_points.append(point)
-
         fractions.append(point["fraction"])
 
     sort_order = np.argsort(fractions)
     sorted_points = list()
     for idx in sort_order:
         sorted_points.append(merged_points[idx])
-
     return sorted_points
 
 
@@ -462,7 +471,10 @@ def merge_beamdyn2aerodyn(beamdyn_json, aerodyn_json, save_directory=None):
     )
     merged_json["reference_points"] = reference_points
     for reference_point in merged_json["reference_points"]:
-        reference_point["offset_aero"] = (np.array(reference_point["coordinates_aero"])-np.array(reference_point["coordinates"])).tolist()[:2]
+        reference_point["offset_aero"] = (
+            np.array(reference_point["coordinates_aero"])
+            - np.array(reference_point["coordinates"])
+        ).tolist()[:2]
 
     # save to file
     if save_directory is not None:
