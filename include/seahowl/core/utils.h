@@ -65,9 +65,10 @@ std::vector<T> get_discretized_points(const std::vector<double>& discretization_
             double fraction_upper = reference_fractions[idx + 1];
             double fraction_range = fraction_upper - fraction_lower;
             // check if fraction is same as lower or upper bound to avoid division by zero
-            if (fraction_lower == fraction) {
+            double tol = 1e-6;
+            if (abs(fraction_lower - fraction) < tol) {
                 discretized_points.push_back(reference_points[idx]);
-            } else if (fraction_upper == fraction) {
+            } else if (abs(fraction_upper - fraction) < tol) {
                 discretized_points.push_back(reference_points[idx + 1]);
             } else {
                 // get weighted point

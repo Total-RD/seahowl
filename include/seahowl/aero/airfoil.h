@@ -24,9 +24,9 @@ struct AirfoilCoefficients {
 @todo depends also of air density
 */
 struct AirfoilProperties {
-    double reynolds_number = 0.0;  ///< Reynlods number
-    std::vector<AirfoilCoefficients>
-        coefficients_list;  ///< (For each elements ?) the tabulated Lift, drag coefficient according to angle of attack
+    double reynolds_number = 0.0;                          ///< Reynolds number
+    std::vector<AirfoilCoefficients> coefficients_list{};  ///< Tabulated angle of attack (alpha) and corresponding
+                                                           ///< lift, drag, added_mass coefficients
 
     AirfoilProperties();
     ~AirfoilProperties();
