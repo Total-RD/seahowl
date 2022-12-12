@@ -28,3 +28,6 @@ seahowl::core::Rotor get_rotor_from_json(std::string filepath);
 seahowl::core::Turbine get_turbine_from_json(std::vector<std::string> filepaths_blades,
                                              std::string filepath_rotor,
                                              std::string filepath_tower);
+
+
+seahowl::core::Turbine get_turbine_from_main_file(std::string main_filepath);

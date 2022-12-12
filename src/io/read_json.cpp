@@ -7,6 +7,7 @@
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/elasto/blade_elasto.h>
+#include <seahowl/servo/controller_discon.h>
 
 #include <string>
 #include <memory>
@@ -15,6 +16,7 @@
 #include <iostream>
 #include <filesystem>
 namespace fs = std::filesystem;
+using std::filesystem::path;
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -293,6 +295,76 @@ seahowl::core::Turbine get_turbine_from_json(std::vector<std::string> filepaths_
     json json_obj;
     json_file >> json_obj;
     auto drivetrain = json_obj.at("drivetrain");
+    // gearbox
+    drivetrain.at("gearbox_ratio").get_to(turbine.gearbox_ratio);
+    drivetrain.at("gearbox_efficiency").get_to(turbine.gearbox_efficiency);
+    turbine.gearbox_efficiency /= 100.0;
+    // generator
+    drivetrain.at("generator_efficiency").get_to(turbine.generator_efficiency);
+    turbine.generator_efficiency /= 100.0;
+    // add inertia of generator to hub directly
+    double drivetrain_inertia;
+    drivetrain.at("generator_inertia").get_to(drivetrain_inertia);
+    turbine.rotor.elasto.hub.inertia += drivetrain_inertia;
+
+    return turbine;
+}
+
+seahowl::core::Turbine get_turbine_from_main_file(std::string main_filepath) {
+    // get extra drivetrain info
+    std::ifstream json_file(main_filepath);
+    // populate json object
+    json json_obj;
+    json_file >> json_obj;
+
+
+    auto DATADIR = absolute(path(main_filepath).parent_path());
+
+    auto turbine_json = json_obj.at("turbine");
+    auto blades_json = turbine_json.at("blades");
+    auto tower_json = turbine_json.at("tower");
+    auto rna_json = turbine_json.at("rna");
+    auto controller_json = turbine_json.at("controller");
+
+    // blades
+    std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
+    auto blades_json2 = blades_json.at("blades");
+    for (auto& blade_json : blades_json2) {
+        auto filepath_blade = (DATADIR / blade_json.at("file").get<std::string>()).generic_string();
+        auto blade = std::make_shared<seahowl::core::Blade>(get_blade_from_json(filepath_blade));
+        blades_json.at("discretization").at("elasto").get_to(blade->elasto->discretization_fractions);
+        blades_json.at("discretization").at("aero").get_to(blade->aero->discretization_fractions);
+        blades_json.at("fpm").get_to(blade->elasto->fpm_mode);
+        blades.push_back(blade);
+    }
+
+    // RNA
+    auto filepath_rotor = (DATADIR / rna_json.at("file").get<std::string>()).generic_string();
+    auto rotor = get_rotor_from_json(filepath_rotor);
+
+    // tower
+    auto filepath_tower = (DATADIR / tower_json.at("file").get<std::string>()).generic_string();
+    auto tower = get_tower_from_json(filepath_tower);
+    tower_json.at("discretization").at("elasto").get_to(tower.elasto.discretization_fractions);
+    tower_json.at("discretization").at("aero").get_to(tower.aero.discretization_fractions);
+
+    auto turbine = seahowl::core::Turbine();
+    turbine.rotor = rotor;
+    turbine.tower = tower;
+    turbine.blades = blades;
+
+    // controller
+    if (controller_json.at("type").get<std::string>() == "ROSCO") {
+        turbine.controller = std::make_shared<seahowl::servo::ControllerDISCON>(
+            (DATADIR / controller_json.at("options").at("file")).generic_string());
+    }
+
+    // get extra drivetrain info
+    std::ifstream json_file2(filepath_rotor);
+    // populate json object
+    json json_obj2;
+    json_file2 >> json_obj2;
+    auto drivetrain = json_obj2.at("drivetrain");
     // gearbox
     drivetrain.at("gearbox_ratio").get_to(turbine.gearbox_ratio);
     drivetrain.at("gearbox_efficiency").get_to(turbine.gearbox_efficiency);

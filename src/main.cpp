@@ -79,6 +79,7 @@ int main(int argc, char* argv[]) {
 
     auto logoname = (DATADIR / ".." / "doc" / "source" / "totalenergies_alpha.png").generic_string();
 
+    auto main_file = (DATADIR / "IEA15MW.json").generic_string();
     auto blade_file = (DATADIR / "IEA15MW_blade.json").generic_string();
     auto rotor_file = (DATADIR / "IEA15MW_RNA.json").generic_string();
     auto tower_file = (DATADIR / "IEA15MW_tower.json").generic_string();
@@ -160,18 +161,9 @@ int main(int argc, char* argv[]) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
 
-    auto seahowl_system = seahowl::core::System(
-        seahowl::core::Turbine(get_turbine_from_json(blades_files, rotor_file, tower_file)), wind_model);
+    auto seahowl_system = seahowl::core::System(seahowl::core::Turbine(get_turbine_from_main_file(main_file)), wind_model);
     auto& turbine = seahowl_system.turbine;
-    turbine.controller =
-        std::make_shared<seahowl::servo::ControllerDISCON>((DATADIR / "controller/DISCON.IN").generic_string());
 
-    // clear discretization defined in file
-    for (auto& blade : turbine.blades) {
-        blade->elasto->discretization_fractions.clear();
-        blade->aero->discretization_fractions.clear();
-    }
-    std::cout << "hello" << std::endl;
     // build turbine (Chrono)
     turbine.build();
     turbine.assemble(system, blades_mesh);
