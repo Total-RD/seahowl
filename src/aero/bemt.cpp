@@ -88,20 +88,20 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
         double loss_factor = 1.0;
         if (tip_loss) {
             // Prandtl's approximation for tip-loss factor
-            loss_factor *= (2.0 / chrono::CH_C_PI) * std::acos(std::exp(nblades * (-element.distance_from_tip)) /
-                                                               (2.0 * element.radius * std::fabs(sin_phi)));
+            loss_factor *= (2.0 / chrono::CH_C_PI) * std::acos(std::exp(nblades * (-element.distance_from_tip) /
+                                                               (2.0 * element.radius * std::fabs(sin_phi))));
         }
         if (hub_loss) {
             // hub loss
             double hub_radius = (element.radius - element.distance_from_hub);
-            loss_factor *= (2.0 / chrono::CH_C_PI) * std::acos(std::exp(nblades * (-element.distance_from_hub)) /
-                                                               (2.0 * hub_radius * std::fabs(sin_phi)));
+            loss_factor *= (2.0 / chrono::CH_C_PI) * std::acos(std::exp(nblades * (-element.distance_from_hub) /
+                                                               (2.0 * hub_radius * std::fabs(sin_phi))));
         }
 
         // update induction factors
 
         // axial induction, based on AeroDyn v15 implementation
-        double kk = element.chord_solidity * cn / (4.0 * pow(sin_phi, 2));
+        double kk = element.chord_solidity * cn / (4.0 * loss_factor * pow(sin_phi, 2));
         if (kk <= 2.0 / 3.0) {
             if (kk == -1.0) {
                 double temp = -aa_max * (1.0 + kk);
@@ -142,7 +142,7 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
         }
 
         if ((fabs(aa - aa_previous) <= tol_rel * fabs(std::max(aa_previous, aa))) &&
-                (fabs(ap - ap_previous) <= tol_rel * fabs(std::max(ap_previous, aa))) ||
+                (fabs(ap - ap_previous) <= tol_rel * fabs(std::max(ap_previous, ap))) ||
             (fabs(aa - aa_previous) <= tol_abs) && (fabs(ap - ap_previous) <= tol_abs)) {
             break;
         } else if (ii >= max_iter) {
