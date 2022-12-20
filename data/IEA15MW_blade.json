@@ -1,8 +1,5 @@
 {
-  "fpm_mode": false,
   "damping_coefficients": [0.03, 0.03, 0.03, 0.06],
-  "discretization_aero": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 0.9, 1.0],
-  "discretization_elasto": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 0.9, 1.0],
   "reference_points": [{
     "coordinates": [-0.006354122360450852, 0.0, 0.0],
     "twist": 15.59455301971172,

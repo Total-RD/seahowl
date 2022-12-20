@@ -14,6 +14,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <typeinfo>
 #include <filesystem>
 namespace fs = std::filesystem;
 using std::filesystem::path;
@@ -150,16 +151,7 @@ seahowl::core::Blade get_blade_from_json(std::string filepath) {
     json_file >> json_obj;
 
     seahowl::core::Blade blade{};
-    blade.elasto->fpm_mode = json_obj.at("fpm_mode").get<bool>();
     blade.reference_points = get_blade_reference_points_from_json(filepath);
-    if (json_obj.contains("discretization_elasto")) {
-        auto discretization_elasto = json_obj.at("discretization_elasto").get<std::vector<double>>();
-        blade.set_discretization_elasto(discretization_elasto);
-    }
-    if (json_obj.contains("discretization_aero")) {
-        auto discretization_aero = json_obj.at("discretization_aero").get<std::vector<double>>();
-        blade.set_discretization_aero(discretization_aero);
-    }
 
     return blade;
 }
@@ -216,14 +208,6 @@ seahowl::core::Tower get_tower_from_json(std::string filepath) {
     tower.elasto.height = json_obj.at("height").get<double>();
     tower.elasto.base_height = json_obj.at("base_height").get<double>();
     tower.reference_points = get_tower_reference_points_from_json(filepath);
-    if (json_obj.contains("discretization_elasto")) {
-        auto discretization_elasto = json_obj.at("discretization_elasto").get<std::vector<double>>();
-        tower.set_discretization_elasto(discretization_elasto);
-    }
-    if (json_obj.contains("discretization_aero")) {
-        auto discretization_aero = json_obj.at("discretization_aero").get<std::vector<double>>();
-        tower.set_discretization_aero(discretization_aero);
-    }
 
     return tower;
 }
@@ -272,9 +256,9 @@ seahowl::core::Rotor get_rotor_from_json(std::string filepath) {
     return rotor;
 }
 
-seahowl::core::Turbine get_turbine_from_json(std::vector<std::string> filepaths_blades,
-                                             std::string filepath_rotor,
-                                             std::string filepath_tower) {
+seahowl::core::Turbine get_turbine_from_json_files(std::vector<std::string> filepaths_blades,
+                                                   std::string filepath_rotor,
+                                                   std::string filepath_tower) {
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
     for (auto& fpath : filepaths_blades) {
         blades.push_back(std::make_shared<seahowl::core::Blade>(get_blade_from_json(fpath)));
@@ -310,21 +294,19 @@ seahowl::core::Turbine get_turbine_from_json(std::vector<std::string> filepaths_
     return turbine;
 }
 
-seahowl::core::Turbine get_turbine_from_main_file(std::string main_filepath) {
-    // get extra drivetrain info
-    std::ifstream json_file(main_filepath);
+seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
+    // get turbine info
+    std::ifstream json_file(filepath_turbine);
     // populate json object
     json json_obj;
     json_file >> json_obj;
 
+    auto DATADIR = absolute(path(filepath_turbine).parent_path());
 
-    auto DATADIR = absolute(path(main_filepath).parent_path());
-
-    auto turbine_json = json_obj.at("turbine");
-    auto blades_json = turbine_json.at("blades");
-    auto tower_json = turbine_json.at("tower");
-    auto rna_json = turbine_json.at("rna");
-    auto controller_json = turbine_json.at("controller");
+    auto blades_json = json_obj.at("blades");
+    auto tower_json = json_obj.at("tower");
+    auto rna_json = json_obj.at("rna");
+    auto controller_json = json_obj.at("controller");
 
     // blades
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
@@ -335,12 +317,14 @@ seahowl::core::Turbine get_turbine_from_main_file(std::string main_filepath) {
         blades_json.at("discretization").at("elasto").get_to(blade->elasto->discretization_fractions);
         blades_json.at("discretization").at("aero").get_to(blade->aero->discretization_fractions);
         blades_json.at("fpm").get_to(blade->elasto->fpm_mode);
+        blade_json.at("initial_pitch").get_to(blade->elasto->pitch);
         blades.push_back(blade);
     }
 
     // RNA
     auto filepath_rotor = (DATADIR / rna_json.at("file").get<std::string>()).generic_string();
     auto rotor = get_rotor_from_json(filepath_rotor);
+    rna_json.at("initial_pitch_collective").get_to(rotor.elasto.pitch_collective);
 
     // tower
     auto filepath_tower = (DATADIR / tower_json.at("file").get<std::string>()).generic_string();

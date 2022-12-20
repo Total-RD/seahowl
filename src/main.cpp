@@ -7,6 +7,9 @@
 
 using namespace chrono;
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
 #ifdef HAVE_IRRLICHT
     #include <chrono_irrlicht/ChIrrApp.h>
 using namespace chrono::irrlicht;
@@ -73,18 +76,25 @@ int main(int argc, char* argv[]) {
     // SETUP
 
     auto DATADIR = absolute(path(u8"../data"));
-    if (argc > 1) {
-        DATADIR = absolute(path(argv[1]));
-    }
 
     auto logoname = (DATADIR / ".." / "doc" / "source" / "totalenergies_alpha.png").generic_string();
 
-    auto main_file = (DATADIR / "IEA15MW.json").generic_string();
-    auto blade_file = (DATADIR / "IEA15MW_blade.json").generic_string();
-    auto rotor_file = (DATADIR / "IEA15MW_RNA.json").generic_string();
-    auto tower_file = (DATADIR / "IEA15MW_tower.json").generic_string();
+    auto filepath_main = DATADIR / "IEA15MW_main.json";
+    if (argc > 1) {
+        filepath_main = absolute(path(argv[1]));
+    }
 
-    std::vector<std::string> blades_files = {blade_file, blade_file, blade_file};
+    std::ifstream json_file(filepath_main);
+    // populate json object
+    json json_obj;
+    json_file >> json_obj;
+
+    auto filepath_turbine =
+        (absolute(filepath_main.parent_path()) / json_obj.at("turbines")[0].at("file").get<std::string>())
+            .generic_string();
+    auto environment_json = json_obj.at("environment");
+    auto gravity = environment_json.at("gravity").get<std::vector<double>>();
+    auto wind_json = environment_json.at("wind");
 
 // general options
 #ifdef HAVE_IRRLICHT
@@ -94,29 +104,38 @@ int main(int argc, char* argv[]) {
 #else
     bool visualization_on = false;
 #endif
+
     bool statics_prestep = true;
     // solver
     auto solver_type = ChSolver::Type::SPARSE_LU;
     auto verbose = false;
     // timestepping
     auto timestepper_type = ChTimestepper::Type::HHT;
-    double dt = 0.05;
+    double dt = json_obj.at("numerics").at("dt").get<double>();
     // system
     ChSystemSMC system;
-    system.Set_G_acc(ChVector<double>(0.0, -9.81, 0.0));
+    system.Set_G_acc(ChVector<double>(gravity[0], gravity[1], gravity[2]));
     system.SetNumThreads(ChOMP::GetNumProcs(), 0, 1);
     // wind
-    auto wind_model = seahowl::aero::WindRamp();
-    wind_model.wind_velocity_start = ChVector<double>(12.0, 0.0, 0.0);
-    wind_model.wind_velocity_stop = ChVector<double>(12.0, 0.0, 0.0);
-    wind_model.direction_gravity = system.Get_G_acc().GetNormalized();
-    wind_model.reference_height = 0.0;
-    wind_model.time_start = 500.0;
-    wind_model.time_stop = 1700;
-    wind_model.shear_coefficient = 0.12;
-    wind_model.reference_height = 150.0;
-    // turbine
-    double initial_pitch = 0.0 * CH_C_PI / 8.0;
+
+    seahowl::aero::WindRamp wind_model;
+
+    if (wind_json.at("type").get<std::string>() == "ramp") {
+        auto wind_options = wind_json.at("options");
+        wind_model = seahowl::aero::WindRamp();
+        auto v0 = wind_options.at("velocity_start").get<std::vector<double>>();
+        wind_model.wind_velocity_start = ChVector<double>(v0[0], v0[1], v0[2]);
+        auto v1 = wind_options.at("velocity_stop").get<std::vector<double>>();
+        wind_model.wind_velocity_stop = ChVector<double>(v1[0], v1[1], v1[2]);
+        wind_model.direction_gravity = system.Get_G_acc().GetNormalized();
+        wind_model.reference_height = wind_options.at("reference_height").get<double>();
+        wind_model.time_start = wind_options.at("time_start").get<double>();
+        wind_model.time_stop = wind_options.at("time_stop").get<double>();
+        wind_model.shear_coefficient = wind_options.at("shear_coefficient").get<double>();
+        wind_model.density = environment_json.at("air_density").get<double>();
+    } else {
+        throw std::runtime_error("Only wind ramp is allowed as input.");
+    }
 
     switch (solver_type) {
         case ChSolver::Type::SPARSE_QR: {
@@ -161,7 +180,8 @@ int main(int argc, char* argv[]) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
 
-    auto seahowl_system = seahowl::core::System(seahowl::core::Turbine(get_turbine_from_main_file(main_file)), wind_model);
+    auto seahowl_system =
+        seahowl::core::System(seahowl::core::Turbine(get_turbine_from_json(filepath_turbine)), wind_model);
     auto& turbine = seahowl_system.turbine;
 
     // build turbine (Chrono)
@@ -196,8 +216,11 @@ int main(int argc, char* argv[]) {
             ->SetDrawThickness(6.0, 6.0);
     }
 
-    turbine.translate(ChVector<double>(0.0, 0.0, 0.0));
-    turbine.rotate(-CH_C_PI / 2.0, VECT_X);
+    auto turbine_json = json_obj.at("turbines")[0];
+    auto trans = turbine_json.at("translation").get<std::vector<double>>();
+    turbine.translate(ChVector<double>(trans[0], trans[1], trans[2]));
+    // rotation around axis opposite to gravity
+    turbine.rotate(turbine_json.at("rotation").get<double>(), -system.Get_G_acc().GetNormalized());
 
 #ifdef POVRAY
     // Create an exporter to POVray !!!
@@ -272,7 +295,16 @@ int main(int argc, char* argv[]) {
         system.DoStaticNonlinear(10, true);
     }
 
-    turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
+    // apply initial pitches
+    for (auto blade : turbine.blades) {
+        auto pitch0 = blade->elasto->pitch;
+        blade->elasto->apply_pitch_increment(pitch0);
+        blade->elasto->pitch = pitch0;
+    }
+    auto rotor_pitch0 = turbine.rotor.elasto.pitch_collective;
+    turbine.rotor.elasto.apply_collective_pitch_increment(rotor_pitch0);
+    turbine.rotor.elasto.pitch_collective = rotor_pitch0;
+
     seahowl_system.init(time, dt);
 #ifdef HAVE_ROSCO
     double omega = turbine.rotor.elasto.get_rpm() * (2 * CH_C_PI) / 60;
@@ -286,7 +318,7 @@ int main(int argc, char* argv[]) {
     for (int ii = 0; ii < seahowl_system.turbine.rotor.blades.size(); ii++) {
         auto& post_blade = vtk_outputs.emplace_back(*seahowl_system.turbine.rotor.blades[ii]->elasto.get());
         post_blade.init(("./vtk/blade" + std::to_string(ii + 1)).c_str());
-    }   
+    }
     auto& post_tower = vtk_outputs.emplace_back(seahowl_system.turbine.tower.elasto);
     post_tower.init("./vtk/tower");
 #endif
