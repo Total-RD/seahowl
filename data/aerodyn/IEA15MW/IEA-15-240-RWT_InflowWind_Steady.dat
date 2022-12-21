@@ -12,11 +12,11 @@ False         Echo           - Echo input data to <RootName>.ech (flag)
 ================== Parameters for Steady Wind Conditions [used only for WindType = 1] =========================
           8   HWindSpeed     - Horizontal wind speed                           (m/s)
         150   RefHt          - Reference height for horizontal wind speed      (m)
-          0  PLExp  - Power law experiment
+        0.12  PLExp  - Power law experiment
 ================== Parameters for Uniform wind file   [used only for WindType = 2] ============================
-"unused"     Filename_Uni    - Filename of time series data for uniform wind field.      (-)
-         90   RefHt_Uni      - Reference height for horizontal wind speed                (m)
-     125.88   RefLength      - Reference length for linear horizontal and vertical sheer (-)
+"long_step_wind.wnd"     Filename_Uni    - Filename of time series data for uniform wind field.      (-)
+        150   RefHt_Uni      - Reference height for horizontal wind speed                (m)
+        240   RefLength      - Reference length for linear horizontal and vertical sheer (-)
 ================== Parameters for Binary TurbSim Full-Field files   [used only for WindType = 3] ==============
 "unused"      FileName_BTS   - Name of the Full field wind file to use (.bts)
 ================== Parameters for Binary Bladed-style Full-Field files   [used only for WindType = 4 or WindType = 7] =========

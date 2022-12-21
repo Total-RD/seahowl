@@ -218,7 +218,6 @@ int main(int argc, char* argv[]) {
     while (system.GetChTime() < t_end) {
         // prestep
         seahowl_system.prestep(system.GetChTime(), dt);
-
         // step
         system.DoStepDynamics(dt);
         step += 1;
