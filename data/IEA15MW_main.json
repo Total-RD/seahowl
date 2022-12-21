@@ -1,7 +1,10 @@
 ﻿{
   "numerics": {
-    "dt": 0.05,
-    "dt_outputs": 0.1
+    "dt": 0.05
+  },
+  "outputs": {
+    "dt": 0.1,
+    "VTK": false
   },
   "environment": {
     "gravity": [0.0, 0.0, -9.81],

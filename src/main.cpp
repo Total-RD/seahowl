@@ -70,7 +70,8 @@ int main(int argc, char* argv[]) {
     // timestepping
     auto timestepper_type = chrono::ChTimestepper::Type::HHT;
     double dt = json_obj.at("numerics").at("dt").get<double>();
-    double dt_outputs = json_obj.at("numerics").at("dt_outputs").get<double>();
+    double dt_outputs = json_obj.at("outputs").at("dt").get<double>();
+    bool output_vtk = json_obj.at("outputs").at("VTK").get<bool>();
     // system
     chrono::ChSystemSMC system;
     system.Set_G_acc(chrono::ChVector<double>(gravity[0], gravity[1], gravity[2]));
@@ -148,15 +149,17 @@ int main(int argc, char* argv[]) {
     turbine.rotor.elasto.pitch_collective = rotor_pitch0;
 
 #ifdef HAVE_VTK
-    std::vector<OutputMeshVTK> vtk_outputs;
-    remove_all("./vtk");
-    create_directory("./vtk");
-    for (int ii = 0; ii < seahowl_system.turbine.rotor.blades.size(); ii++) {
-        auto& post_blade = vtk_outputs.emplace_back(*seahowl_system.turbine.rotor.blades[ii]->elasto.get());
-        post_blade.init(("./vtk/blade" + std::to_string(ii + 1)).c_str());
+    if (output_vtk) {
+        std::vector<OutputMeshVTK> vtk_outputs;
+        remove_all("./vtk");
+        create_directory("./vtk");
+        for (int ii = 0; ii < seahowl_system.turbine.rotor.blades.size(); ii++) {
+            auto& post_blade = vtk_outputs.emplace_back(*seahowl_system.turbine.rotor.blades[ii]->elasto.get());
+            post_blade.init(("./vtk/blade" + std::to_string(ii + 1)).c_str());
+        }
+        auto& post_tower = vtk_outputs.emplace_back(seahowl_system.turbine.tower.elasto);
+        post_tower.init("./vtk/tower");
     }
-    auto& post_tower = vtk_outputs.emplace_back(seahowl_system.turbine.tower.elasto);
-    post_tower.init("./vtk/tower");
 #endif
 
     // simulation loop
@@ -172,8 +175,10 @@ int main(int argc, char* argv[]) {
 
     output_results(seahowl_system, system);
 #ifdef HAVE_VTK
-    for (auto const& vtk_output : vtk_outputs) {
-        vtk_output.write(time, step);
+    if (output_vtk) {
+        for (auto const& vtk_output : vtk_outputs) {
+            vtk_output.write(time, step);
+        }
     }
 #endif
     int step = 0;
@@ -193,8 +198,10 @@ int main(int argc, char* argv[]) {
         if (system.GetChTime() >= (dt_outputs_next - dt_outputs_next * 1e-6)) {
             output_results(seahowl_system, system);
 #ifdef HAVE_VTK
-            for (auto const& vtk_output : vtk_outputs) {
-                vtk_output.write(time, step);
+            if (output_vtk) {
+                for (auto const& vtk_output : vtk_outputs) {
+                    vtk_output.write(time, step);
+                }
             }
 #endif
         }
