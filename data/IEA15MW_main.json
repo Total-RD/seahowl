@@ -1,9 +1,10 @@
 ﻿{
   "numerics": {
-    "dt": 0.05
+    "dt": 0.05,
+    "dt_outputs": 0.1
   },
   "environment": {
-    "gravity": [0, 0, -9.81],
+    "gravity": [0.0, 0.0, -9.81],
     "air_density": 1.225,
     "wind": {
       "type": "ramp",
