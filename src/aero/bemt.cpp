@@ -126,19 +126,32 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
             }
         }
 
-        // tangential induction
-        if (abs(cos_phi) < tol_induction) {
-            ap = -1.0;
-        } else {
-            double kp = element.chord_solidity * ct / (4.0 * loss_factor * sin_phi * cos_phi);
-            if (local_velocity_rotor.y() < 0.0) {
-                kp = -kp;
-            }
-            if (abs(kp - 1.0) < tol_induction) {
-                ap = copysign(ap_max, 1.0 - kp);
-            } else {
-                ap = kp / (1.0 - kp);
-            }
+        //// tangential induction
+        //if (abs(cos_phi) < tol_induction) {
+        //    ap = -1.0;
+        //} else {
+        //    double kp = element.chord_solidity * ct / (4.0 * loss_factor * sin_phi * cos_phi);
+        //    if (local_velocity_rotor.y() < 0.0) {
+        //        kp = -kp;
+        //    }
+        //    if (abs(kp - 1.0) < tol_induction) {
+        //        ap = copysign(ap_max, 1.0 - kp);
+        //    } else {
+        //        ap = kp / (1.0 - kp);
+        //    }
+        //}
+        ap = 0.0;  // deactivate tangential induction
+
+        // apply limits on induction factors
+        if (aa > aa_max) {
+            aa = aa_max;
+        } else if (aa < aa_min) {
+            aa = aa_min;
+        }
+        if (ap < ap_min) {
+            ap = ap_min;
+        } else if (ap > ap_max) {
+            ap = ap_max;
         }
 
         if ((fabs(alpha - alpha_previous) <= tol_rel * fabs(std::max(alpha_previous, alpha))) ||
@@ -156,23 +169,10 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
         }
     }
 
-    // apply limits on induction factors
-    if (aa > aa_max) {
-        aa = aa_max;
-    } else if (aa < aa_min) {
-        aa = aa_min;
-    }
-    if (ap < ap_min) {
-        ap = ap_min;
-    } else if (ap > ap_max) {
-        ap = ap_max;
-    }
-    local_velocity_rotor =
-        chrono::ChVector2<double>(local_velocity_rotor0.x() * (1.0 + ap), local_velocity_rotor0.y() * (1.0 - aa));
-
     // store induction factors for starting point of next time iteration
     element.induction_factor_axial = aa;
     element.induction_factor_tangential = ap;
+
     // return velocity in local
     return local_velocity_rotor;
 }
