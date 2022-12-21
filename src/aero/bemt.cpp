@@ -126,6 +126,7 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
             }
         }
 
+        // @todo fix tangential induction factor calculation (convergence)
         //// tangential induction
         //if (abs(cos_phi) < tol_induction) {
         //    ap = -1.0;
