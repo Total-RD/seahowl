@@ -21,8 +21,8 @@ find_library(ROSCO_LIBRARY
 #  PATHS ${PC_ROSCO_LIBRARY_DIRS}/Debug
 #)
 
-include(SelectLibraryConfigurations)
-select_library_configurations(ROSCO)
+#include(SelectLibraryConfigurations)
+#select_library_configurations(ROSCO)
 
 set(Foo_VERSION "2.5.1") #${PC_ROSCO_VERSION})
 
