@@ -17,7 +17,7 @@ double seahowl::aero::get_alpha_from_phi(const double phi, const double pitch) {
     double alpha = phi - pitch;
     // check that alpha is still in range
     if (alpha < -chrono::CH_C_PI || alpha > chrono::CH_C_PI) {
-        alpha = abs(std::fmod((alpha + 3 * chrono::CH_C_PI), 2 * chrono::CH_C_PI)) - chrono::CH_C_PI;
+        alpha = fabs(std::fmod((alpha + 3 * chrono::CH_C_PI), 2 * chrono::CH_C_PI)) - chrono::CH_C_PI;
     }
     return alpha;
 }
@@ -104,7 +104,7 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
         // axial induction, based on AeroDyn v15 implementation
         double kk = element.chord_solidity * cn / (4.0 * loss_factor * pow(sin_phi, 2));
         if (kk <= 2.0 / 3.0) {
-            if (abs(kk + 1.0) < tol_induction) {
+            if (fabs(kk + 1.0) < tol_induction) {
                 aa = copysign(aa_max, -(1.0 + kk));
             } else {
                 aa = kk / (1.0 + kk);
@@ -119,23 +119,23 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
             double g2 = temp - (4.0 / 3.0 - ff) * ff;
             double g3 = temp - (25.0 / 9.0 - 2.0 * ff);
 
-            if (abs(g3) < tol_induction) {
+            if (fabs(g3) < tol_induction) {
                 aa = 1.0 - 0.5 / sqrt(g2);
             } else {
-                aa = (g1 - sqrt(abs(g2))) / g3;
+                aa = (g1 - sqrt(fabs(g2))) / g3;
             }
         }
 
         // @todo fix tangential induction factor calculation (convergence)
         //// tangential induction
-        //if (abs(cos_phi) < tol_induction) {
+        //if (fabs(cos_phi) < tol_induction) {
         //    ap = -1.0;
         //} else {
         //    double kp = element.chord_solidity * ct / (4.0 * loss_factor * sin_phi * cos_phi);
         //    if (local_velocity_rotor.y() < 0.0) {
         //        kp = -kp;
         //    }
-        //    if (abs(kp - 1.0) < tol_induction) {
+        //    if (fabs(kp - 1.0) < tol_induction) {
         //        ap = copysign(ap_max, 1.0 - kp);
         //    } else {
         //        ap = kp / (1.0 - kp);
