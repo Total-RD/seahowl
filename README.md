@@ -32,47 +32,24 @@ option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
 
 #### Core
 
-- Chrono:
-  - repo: https://github.com/projectchrono/chrono
-  - version: 7.0.3
-
-- json:
-  - repo: https://github.com/nlohmann/json
-  - version: 3.10.5
-
-- ROSCO:
-  - repo: https://github.com/NREL/ROSCO
-  - version: 2.5.0
+- Chrono (7.0.3): https://github.com/projectchrono/chrono
+- nlohmann-json (v3.10.5): https://github.com/nlohmann/json
+- ROSCO (v2.5.0): https://github.com/NREL/ROSCO
 
 #### Documentation
 
-- Doxygen (optional):
-  - repo: https://doxygen.nl/
-  - version: 1.8.0+
-
-- Graphviz (optional):
-  - repo: https://graphviz.org/
-  - version: latest
-
-- Sphinx (optional):
-  - repo: https://www.sphinx-doc.org/en/master/
-  - version: 4.4.0+
+- Doxygen (Release_1_8_20): https://github.com/doxygen/doxygen
+- Graphviz (7.0.4): https://graphviz.org/
+- Sphinx (v5.3.0): https://github.com/sphinx-doc/sphinx
 
 #### Visualization
 
-  - VTK (optional):
-    - repo: https://gitlab.kitware.com/vtk/vtk
-    - version: v9.2.0
-
-  - Irrlicht (optional):
-    - repo: https://irrlicht.sourceforge.io/
-    - version: 1.8.4
+- VTK (v9.2.0): https://gitlab.kitware.com/vtk/vtk
+- Irrlicht (1.8.4): https://irrlicht.sourceforge.io/
 
 #### Tests
 
-  - Google tests (optional):
-    - repo: https://github.com/google/googletest
-    - version: 1.12.1
+- GoogleTest (release-1.12.1): https://github.com/google/googletest
 
 
 
