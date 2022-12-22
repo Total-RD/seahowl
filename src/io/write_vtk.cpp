@@ -16,12 +16,13 @@ OutputMeshVTK::OutputMeshVTK(seahowl::elasto::ComponentElastoFEA& component) : c
 OutputMeshVTK::OutputMeshVTK(const OutputMeshVTK& rhs) : component(rhs.component) {
     mesh = vtkUnstructuredGrid::New();
     mesh->ShallowCopy(rhs.mesh);
+    base = rhs.base;
 }
 OutputMeshVTK::OutputMeshVTK(OutputMeshVTK&& source) noexcept : component(source.component) {
     mesh = source.mesh;
     source.mesh = nullptr;
+    base = source.base;
 }
-
 
 OutputMeshVTK::~OutputMeshVTK() {
     if (mesh != nullptr)
@@ -54,7 +55,6 @@ void OutputMeshVTK::init(const char* base_name) {
 
     // initialize arrays properties
     for (auto const& key : myKeys) {
-
         auto val = vtkSmartPointer<vtkDoubleArray>::New();
 
         val->SetName(key.c_str());
