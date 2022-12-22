@@ -33,11 +33,11 @@ using std::filesystem::path;
 using std::filesystem::create_directory;
 using std::filesystem::remove_all;
 
-void output_results(seahowl::core::System& seahowl_system, chrono::ChSystemSMC& system) {
+void output_results(seahowl::core::System& seahowl_system, chrono::ChSystemSMC& system, int step) {
     // output
     auto time = system.GetChTime();
-    chrono::GetLog() << "time " << system.GetChTime() << " rpm: " << seahowl_system.turbine.rotor.elasto.get_rpm()
-                     << "\n";
+    chrono::GetLog() << "time: " << system.GetChTime() << " step: " << step
+                     << " rpm: " << seahowl_system.turbine.rotor.elasto.get_rpm() << "\n";
     write_turbine_info_to_csv("output.csv", seahowl_system, system.GetChTime());
 }
 
@@ -150,8 +150,8 @@ int main(int argc, char* argv[]) {
     turbine.rotor.elasto.pitch_collective = rotor_pitch0;
 
 #ifdef HAVE_VTK
+    std::vector<OutputMeshVTK> vtk_outputs;
     if (output_vtk) {
-        std::vector<OutputMeshVTK> vtk_outputs;
         remove_all("./vtk");
         create_directory("./vtk");
         for (int ii = 0; ii < seahowl_system.turbine.rotor.blades.size(); ii++) {
@@ -174,15 +174,15 @@ int main(int argc, char* argv[]) {
 
     seahowl_system.init(system.GetChTime(), dt);
 
-    output_results(seahowl_system, system);
+    int step = 0;
+    output_results(seahowl_system, system, step);
 #ifdef HAVE_VTK
     if (output_vtk) {
         for (auto const& vtk_output : vtk_outputs) {
-            vtk_output.write(time, step);
+            vtk_output.write(system.GetChTime(), step);
         }
     }
 #endif
-    int step = 0;
     double dt_outputs_next = dt_outputs;
     while (system.GetChTime() < t_end) {
         // prestep
@@ -197,11 +197,11 @@ int main(int argc, char* argv[]) {
 
         // output
         if (system.GetChTime() >= (dt_outputs_next - dt_outputs_next * 1e-6)) {
-            output_results(seahowl_system, system);
+            output_results(seahowl_system, system, step);
 #ifdef HAVE_VTK
             if (output_vtk) {
                 for (auto const& vtk_output : vtk_outputs) {
-                    vtk_output.write(time, step);
+                    vtk_output.write(system.GetChTime(), step);
                 }
             }
 #endif

@@ -227,7 +227,7 @@ void BladeElasto::evaluate_position_rotation(chrono::ChVector<double>& position,
                                              chrono::ChQuaternion<double>& rotation,
                                              int element_index,
                                              double eta) const {
-    auto& element = std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(elements[element_index]);
+    auto element = std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(elements[element_index]);
 
     // // unfortunately line below does not always work (returns nans sometimes when fpm_mode is true)
     element->EvaluateSectionFrame(eta, position, rotation);
