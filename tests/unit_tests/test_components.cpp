@@ -26,13 +26,14 @@ using std::filesystem::path;
 using std::filesystem::absolute;
 
 static path DATADIR{};
+// static path DATADIR = path("../../data");
 
 int main(int argc, char** argv) {
     const char* env_p = std::getenv("SEAHOWL_DATADIR");
 
     if (env_p == nullptr) {
         if (argc < 2) {
-            std::cerr << "Usage: test_01.exe [<datadir>] or set SEAHOWL_DATADIR environement variable" << std::endl;
+            std::cerr << "Usage: test_01.exe [<datadir>] or set SEAHOWL_DATADIR environment variable" << std::endl;
             return 1;
         } else {
             DATADIR = absolute(path(argv[1]));
@@ -40,9 +41,6 @@ int main(int argc, char** argv) {
     } else {
         DATADIR = absolute(path(env_p));
     }
-
-
-    
 
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
@@ -61,11 +59,7 @@ TEST(test_blade, mass_deflection) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
     // blade
-    std::cout << "file: " << (DATADIR / "IEA15MW_blade.json").generic_string() << std::endl;
     auto blade_core = get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string());
-    std::vector<double> fractions;
-    fractions.clear();
-    blade_core.set_discretization_elasto(fractions);
     blade_core.build();
     blade_core.assemble(system, blades_mesh);
     auto blade = blade_core.elasto;
@@ -107,16 +101,12 @@ TEST(test_rotor, mass) {
     for (int ii = 0; ii < 3; ii++) {
         auto blade_core = std::make_shared<seahowl::core::Blade>(
             get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string()));
-
-        std::vector<double> fractions;
-        fractions.clear();
-        blade_core->set_discretization_elasto(fractions);
         blade_core->build();
         blade_core->assemble(system, blades_mesh);
         blades.push_back(blade_core);
     }
 
-    auto rotor = get_rotor_from_json((DATADIR / "IEA15MW_RNA.json").generic_string());
+    auto rotor = get_rotor_from_json((DATADIR / "IEA15MW_rna.json").generic_string());
     rotor.build(blades);
     rotor.assemble(system);
     rotor.elasto.body_yaw_bearing->SetBodyFixed(true);
@@ -169,9 +159,6 @@ TEST(test_blade, natural_period_dynamic_edge) {
     system.AddMesh(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string());
-    std::vector<double> fractions;
-    fractions.clear();
-    blade_core.set_discretization_elasto(fractions);
     blade_core.build();
     blade_core.assemble(system, blades_mesh);
     auto blade = blade_core.elasto;
@@ -230,9 +217,6 @@ TEST(test_blade, natural_period_dynamic_flap) {
     system.AddMesh(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string());
-    std::vector<double> fractions;
-    fractions.clear();
-    blade_core.set_discretization_elasto(fractions);
     blade_core.build();
     blade_core.assemble(system, blades_mesh);
     auto blade = blade_core.elasto;
@@ -297,7 +281,7 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     // system
     ChSystemSMC system;
-    system.Set_G_acc(ChVector<double>(0.0, -9.81, 0.0));
+    system.Set_G_acc(ChVector<double>(0.0, 0.0, -9.81));
     auto solver = chrono_types::make_shared<ChSolverSparseLU>();
     system.SetSolver(solver);
     solver->UseSparsityPatternLearner(true);
@@ -312,12 +296,10 @@ TEST(test_turbine, rpm_initial_pitch) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
 
-    std::vector<std::string> blades_files = {(DATADIR / "IEA15MW_blade.json").generic_string(),
-                                             (DATADIR / "IEA15MW_blade.json").generic_string(),
-                                             (DATADIR / "IEA15MW_blade.json").generic_string()};
-    auto rotor_file = (DATADIR / "IEA15MW_RNA.json").generic_string();
-    auto tower_file = (DATADIR / "IEA15MW_tower.json").generic_string();
-    auto turbine = get_turbine_from_json(blades_files, rotor_file, tower_file);
+    auto turbine_file = (DATADIR / "IEA15MW_turbine.json").generic_string();
+    auto turbine = get_turbine_from_json(turbine_file);
+    // remove controller
+    turbine.controller = std::make_shared<seahowl::servo::Controller>();
     // clear discretization defined in file
     for (auto& blade : turbine.blades) {
         blade->elasto->discretization_fractions.clear();
@@ -327,8 +309,6 @@ TEST(test_turbine, rpm_initial_pitch) {
     turbine.assemble(system, blades_mesh);
     turbine.tower.elasto.nodes[0]->SetFixed(true);
 
-    turbine.rotate(-CH_C_PI / 2.0, VECT_X);
-
     // statics
     if (statics_prestep) {
         system.DoStaticLinear();
@@ -337,8 +317,7 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     double time = 0.0;
     turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
-    turbine.prestep(time, dt);
-    turbine.poststep(time, dt);
+    turbine.init(time, dt);
     // while (application.GetDevice()->run()) {
     while (time < 50) {
         // prestep
@@ -354,5 +333,5 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.8, 0.02);
+    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.819, 0.02);
 }
