@@ -70,6 +70,7 @@ int main(int argc, char* argv[]) {
     // timestepping
     auto timestepper_type = chrono::ChTimestepper::Type::HHT;
     double dt = json_obj.at("numerics").at("dt").get<double>();
+    double t_end = json_obj.at("numerics").at("t_end").get<double>();
     double dt_outputs = json_obj.at("outputs").at("dt").get<double>();
     bool output_vtk = json_obj.at("outputs").at("VTK").get<bool>();
     // system
@@ -183,7 +184,7 @@ int main(int argc, char* argv[]) {
 #endif
     int step = 0;
     double dt_outputs_next = dt_outputs;
-    while (true) {
+    while (system.GetChTime() < t_end) {
         // prestep
         seahowl_system.prestep(system.GetChTime(), dt);
 

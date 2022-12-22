@@ -80,6 +80,7 @@ It is a JSON dictionary containing:
 
 - numerics: (dict)
   - **dt**: (float) the time stepping value for the simulation [s].
+  - **t_end**: (float) the ending time of the simulation [s].
 - outputs: (dict)
   - **dt**: (float) the time stepping value for outputs of the simulation [s].
   - **VTK**: (bool) whether VTK will be part of outputs or not.
