@@ -95,7 +95,8 @@ It is a JSON dictionary containing:
 
 #### Turbine file (turbine.json)
 
-The turbine JSON file pilots the discretization options of the blades and tower, as well as other general options. 
+The turbine JSON file pilots the discretization options of the blades and tower, as well as other general options.
+For discretization of blades and tower, it is possible to either use an ordered array of floats between 0 and 1 (with 0 and 1 included in the array as bounds) corresponding to the normalized abscissa of the reference points or only one integer corresponding to the number of elements to use for discretization.
 It is a JSON dictionary containing:
 - blades: (dict)
   - **fpm**: (bool) whether to consider Fully-Populated Matrix (FPM) elements (6x6 material properties) or not.
@@ -116,6 +117,7 @@ It is a JSON dictionary containing:
 - controller: (dict)
   - **type**: (string) type of controller.
   - **options**: (dict) options of controller.
+
 
  #### Rotor-Nacelle Assembly file (rna.json)
  
@@ -141,7 +143,8 @@ It is a JSON dictionary containing:
   - **mass**: (float) mass of hub [kg].
   - **CM**: (float) offset of center of mass of hub [m].
 - **precones**: (array of floats) precone of blades [°].
- 
+
+
 #### Blade file (blade.json)
 
 The blade JSON file is a reference file that should be defined only once per blade type and not be changed by the user (unless the blade properties themselves change).
@@ -157,7 +160,8 @@ It is a json dictionary containing:
   - **chord**: (float) chord length of blade at reference point [m].
   - **airfoil_file**: (string) file path of airfoil file (relative to this file path).
 
- #### Tower file (tower.json)
+
+#### Tower file (tower.json)
 
 The tower JSON file is a reference file that should be defined only once per tower type and not be changed by the user (unless the tower properties themselves change).
 All the options that can change per simulation such as discretization should be defined in the turbine JSON file.
