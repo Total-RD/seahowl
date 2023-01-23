@@ -3,7 +3,6 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
 
-#include <chrono/physics/ChBodyEasy.h>
 #include <chrono/physics/ChBody.h>
 #include <chrono/physics/ChSystemSMC.h>
 #include <chrono/physics/ChLinkMate.h>
@@ -36,7 +35,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     auto rotation0 = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
 
     // hub
-    body_hub = chrono_types::make_shared<chrono::ChBodyEasyBox>(2.0, 2.0, 4.0, 0, true, false);
+    body_hub = chrono_types::make_shared<chrono::ChBody>();
     // move hub along X for overhang and COG offset, and along Z for distance from towertop
     body_hub->SetPos(chrono::ChVector<double>(hub.overhang + hub.center_of_mass, 0.0, 0.0));
     // local Z axis along global X axis + shaft tilt along global Y axis
@@ -48,7 +47,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     body_hub->SetInertiaXX(chrono::ChVector<double>(0., 0., hub.inertia));
 
     // shaft
-    body_shaft = chrono_types::make_shared<chrono::ChBodyEasyBox>(2.0, 2.0, 4.0, 0, true, false);
+    body_shaft = chrono_types::make_shared<chrono::ChBody>();
     // move end of shaft at yaw axis of nacelle
     body_shaft->SetPos(chrono::ChVector<double>(0.0, 0.0, shaft.distance_from_towertop));
     // align rotation
@@ -60,7 +59,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     link_shaft_hub->Initialize(body_hub, body_shaft, body_shaft->GetAssetsFrame());
 
     // nacelle
-    body_nacelle = chrono_types::make_shared<chrono::ChBodyEasyBox>(2.0, 2.0, 4.0, 0, true, false);
+    body_nacelle = chrono_types::make_shared<chrono::ChBody>();
     body_nacelle->SetPos(nacelle.center_of_mass);
     body_nacelle->SetRot(rotation0);
     // mass and inertia
@@ -72,7 +71,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     link_shaft_nacelle->Initialize(body_nacelle, body_shaft);
 
     // yaw bearing
-    body_yaw_bearing = chrono_types::make_shared<chrono::ChBodyEasyBox>(2.0, 2.0, 4.0, 0, true, false);
+    body_yaw_bearing = chrono_types::make_shared<chrono::ChBody>();
     body_yaw_bearing->SetPos(chrono::ChVector<double>(0.0, 0.0, 0.0));
     body_yaw_bearing->SetRot(rotation0);
     body_yaw_bearing->SetMass(nacelle.yaw_bearing_mass);

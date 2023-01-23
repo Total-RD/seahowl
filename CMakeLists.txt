@@ -194,6 +194,10 @@ if(SEAHOWL_ENABLE_VTK)
     list(APPEND SEAHOWL_IO_SOURCES src/io/write_vtk.cpp)
     list(APPEND SEAHOWL_IO_HEADERS include/seahowl/io/write_vtk.h)
 endif(SEAHOWL_ENABLE_VTK)
+if(SEAHOWL_ENABLE_IRRLICHT)
+    list(APPEND SEAHOWL_IO_SOURCES src/io/viz_insitu.cpp)
+    list(APPEND SEAHOWL_IO_HEADERS include/seahowl/io/viz_insitu.h)
+endif(SEAHOWL_ENABLE_IRRLICHT)
 source_group(io FILES ${SEAHOWL_IO_SOURCES} ${SEAHOWL_IO_HEADERS})
 
 # seahowl lib

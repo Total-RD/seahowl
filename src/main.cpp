@@ -14,6 +14,11 @@ using json = nlohmann::json;
     #include <seahowl/io/write_vtk.h>
 #endif
 
+#ifdef HAVE_IRRLICHT
+    #include <chrono_irrlicht/ChIrrApp.h>
+    #include <seahowl/io/viz_insitu.h>
+#endif
+
 #include <cmath>
 
 #include <seahowl/io/read_json.h>
@@ -163,6 +168,14 @@ int main(int argc, char* argv[]) {
     }
 #endif
 
+#ifdef HAVE_IRRLICHT
+    chrono::irrlicht::ChIrrApp application(&system, L"SEAHOWL: WindTurbine",
+                                           irr::core::dimension2d<std::uint32_t>(1200, 900),
+                                           chrono::irrlicht::VerticalDir::Z, false, true);
+    application.AddTypicalLogo(logoname);
+    draw_system_init(system, application);
+#endif
+
     // simulation loop
 
     // initialization
@@ -204,6 +217,11 @@ int main(int argc, char* argv[]) {
                     vtk_output.write(system.GetChTime(), step);
                 }
             }
+#endif
+#ifdef HAVE_IRRLICHT
+            application.GetDevice()->run();
+            draw_system(system, application);
+            application.EndScene();
 #endif
         }
         while (system.GetChTime() >= (dt_outputs_next - dt_outputs_next * 1e-6)) {
