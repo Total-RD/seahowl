@@ -72,7 +72,7 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
 
         // get coefficients from angle of attack
         double phi = seahowl::aero::get_phi(local_velocity_rotor);
-        double alpha = seahowl::aero::get_alpha_from_phi(phi, (blade_pitch + node.properties.structural_twist));
+        alpha = seahowl::aero::get_alpha_from_phi(phi, (blade_pitch + node.properties.structural_twist));
         auto coefficients = seahowl::aero::get_aero_coefficients_from_alpha(alpha, node.properties.airfoil_properties);
 
         // get drag and lift coefficients
