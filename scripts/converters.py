@@ -7,6 +7,7 @@ import jsbeautifier
 import numpy as np
 import copy
 import argparse
+import shutil
 
 options = jsbeautifier.default_options
 options.indent_size = 2
@@ -312,7 +313,6 @@ def convert_beamdyn_file(filename, save_directory=None):
     beamdyn_json["discretization_elasto"] = fractions
 
     # add default options
-    beamdyn_json["fpm_mode"] = False
     beamdyn_json["damping_coefficients"] = [0.03, 0.03, 0.03, 0.06]
 
     reference_points = merge_interpolate_points(
@@ -464,7 +464,8 @@ def convert_beamdyn_blade_file(filename, save_directory=None):
 def merge_beamdyn2aerodyn(beamdyn_json, aerodyn_json, save_directory=None):
 
     merged_json = copy.deepcopy(beamdyn_json)
-    merged_json["discretization_aero"] = aerodyn_json["discretization_aero"]
+    merged_json.pop("discretization_aero", None)
+    merged_json.pop("discretization_elasto", None)
     reference_points = merge_interpolate_points(
         json_points1=beamdyn_json["reference_points"],
         json_points2=aerodyn_json["reference_points"],
@@ -579,6 +580,8 @@ def convert_aerodyn_tower_file(filename, save_directory=None):
     for point in points:
         point["fraction"] = (point["elevation"] - tower_bottom) / tower_length
         fractions.append(point["fraction"])
+        point.pop("elevation", None)
+        point.pop("TI", None)
 
     aerodyn_json["discretization_aero"] = fractions
     aerodyn_json["reference_points"] = points
@@ -599,7 +602,8 @@ def merge_elastodyn2aerodyn_tower(elastodyn_json, aerodyn_json, save_directory=N
         json_points2=aerodyn_json["reference_points"],
     )
     merged_json["reference_points"] = reference_points
-    merged_json["discretization_aero"] = aerodyn_json["discretization_aero"]
+    merged_json.pop("discretization_aero", None)
+    merged_json.pop("discretization_elasto", None)
 
     # save to file
     if save_directory is not None:
@@ -696,6 +700,34 @@ def convert_openfast_fst(filename, save_directory=None):
     filepath = Path(filename)
     filedir = filepath.parents[0]
 
+    # main json with default values to overwrite when parsing OpenFAST files
+    main_json = {
+        "numerics": {"dt": 0.1, "t_end": 2000.0},
+        "outputs": {"dt": 0.1, "VTK": False},
+        "environment": {
+            "gravity": [0.0, 0.0, -9.81],
+            "air_density": 1.225,
+            "wind": {
+                "type": "ramp",
+                "options": {
+                    "reference_height": 150,
+                    "shear_coefficient": 0.12,
+                    "velocity_start": [12, 0, 0],
+                    "velocity_stop": [25, 0, 0],
+                    "time_start": 500,
+                    "time_stop": 1700,
+                },
+            },
+        },
+        "turbines": [
+            {
+                "translation": [0, 0, 0],
+                "rotation": 0,
+                "file": str(Path("./turbine.json")),
+            }
+        ],
+    }
+
     with open(filepath, "r") as f:
         lines = f.readlines()
         npoints = 0
@@ -703,8 +735,22 @@ def convert_openfast_fst(filename, save_directory=None):
         npoints = 0
         for ii, line in enumerate(lines):
             words = line.split()
+            # Main
+            if len(words) > 1 and words[1] == "DT":
+                main_json["numerics"]["dt"] = float(words[0])
+            elif len(words) > 1 and words[1] == "TMax":
+                main_json["numerics"]["t_end"] = float(words[0])
+            elif len(words) > 1 and words[1] == "Gravity":
+                main_json["environment"]["gravity"][2] = -float(words[0])
+            elif len(words) > 1 and words[1] == "AirDens":
+                main_json["environment"]["air_density"] = float(words[0])
+            elif len(words) > 1 and words[1] == "WrVTK":
+                if float(words[0]) != 0.0:
+                    main_json["outputs"]["VTK"] = True
+            elif len(words) > 1 and words[1] == "VTK_fps":
+                main_json["outputs"]["dt"] = 1.0 / float(words[0])
             # ElastoDyn
-            if words[1] == "EDFile":
+            elif len(words) > 1 and words[1] == "EDFile":
                 path_ED = filedir / words[0].replace('"', "")
                 with open(path_ED, "r") as f2:
                     lines2 = f2.readlines()
@@ -722,13 +768,13 @@ def convert_openfast_fst(filename, save_directory=None):
                     save_directory=None,
                 )
             # BeamDyn
-            if words[1] == "BDBldFile(1)":
+            elif len(words) > 1 and words[1] == "BDBldFile(1)":
                 path_BD = filedir / words[0].replace('"', "")
                 blade_elasto_json = convert_beamdyn_file(
                     filename=path_BD, save_directory=None
                 )
             # AeroDyn
-            if words[1] == "AeroFile":
+            elif len(words) > 1 and words[1] == "AeroFile":
                 path_AD = filedir / words[0].replace('"', "")
                 blade_aero_json = convert_aerodyn_files(
                     filename=path_AD,
@@ -740,7 +786,7 @@ def convert_openfast_fst(filename, save_directory=None):
                     filename=path_AD, save_directory=None
                 )
             # ServoDyn
-            if words[1] == "ServoFile":
+            elif len(words) > 1 and words[1] == "ServoFile":
                 path_servo = filedir / words[0].replace('"', "")
 
         # tower
@@ -763,6 +809,83 @@ def convert_openfast_fst(filename, save_directory=None):
             aerodyn_json=blade_aero_json,
             save_directory=save_directory,
         )
+
+        # turbine
+        # get DISCON path
+        filepath = Path(path_servo)
+        path_DISCON_new = ""
+        with open(filepath, "r") as f:
+            lines = f.readlines()
+            for ii, line in enumerate(lines):
+                words = line.split()
+                if len(words) > 1 and words[1] == "DLL_InFile":
+                    path_DISCON = filedir / words[0].replace('"', "")
+                    path_DISCON_new = Path("controller") / path_DISCON.name
+                    (Path(save_directory) / path_DISCON_new).parent.mkdir(
+                        parents=True, exist_ok=True
+                    )
+                    # open DISCON file
+                    with open(path_DISCON, "r") as f2:
+                        lines2 = f2.readlines()
+                        for jj, line2 in enumerate(lines2):
+                            words2 = line2.split()
+                            if len(words2) > 2 and words2[2] == "PerfFileName":
+                                path_PerFile = path_DISCON.parent / words2[0].replace(
+                                    '"', ""
+                                )
+                                path_PerFile_new = (
+                                    path_DISCON_new.parent / path_PerFile.name
+                                )
+                                shutil.copyfile(
+                                    path_PerFile,
+                                    Path(save_directory) / path_PerFile_new,
+                                )
+                                # replace path of PerFile i new DISCON file
+                                lines2[jj] = lines2[jj].replace(
+                                    words2[0].replace('"', ""), str(path_PerFile.name)
+                                )
+                                break
+                        with open(Path(save_directory) / path_DISCON_new, "w") as f3:
+                            f3.writelines(lines2)
+
+        turbine_json = {
+            "blades": {
+                "fpm": False,
+                "discretization": {
+                    "elasto": blade_elasto_json["discretization_elasto"],
+                    "aero": blade_aero_json["discretization_aero"],
+                },
+                "blades": [
+                    {
+                        "file": str(Path("./blade.json")),
+                        "initial_pitch": 0.0,
+                    }
+                    for _ in range(3)
+                ],
+            },
+            "rna": {
+                "initial_pitch_collective": 0.0,
+                "file": str(Path("./rna.json")),
+            },
+            "tower": {
+                "discretization": {
+                    "elasto": tower_elasto_json["discretization_elasto"],
+                    "aero": tower_aero_json["discretization_aero"],
+                },
+                "file": str(Path("./tower.json")),
+            },
+            "controller": {"type": "ROSCO", "options": {"file": str(path_DISCON_new)}},
+        }
+
+        # save turbine json
+        if save_directory is not None:
+            fullpath = Path(save_directory) / "turbine.json"
+            save_json(turbine_json, fullpath)
+
+        # save main json
+        if save_directory is not None:
+            fullpath = Path(save_directory) / "main.json"
+            save_json(main_json, fullpath)
 
 
 if __name__ == "__main__":
