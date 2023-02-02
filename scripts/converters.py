@@ -42,7 +42,13 @@ def merge_interpolate_points(json_points1, json_points2):
         f1_1 = fractions1[idx1]
         f2_1 = fractions2[idx2]
 
-        if idx1 + 1 == len(fractions1):
+        if fractions1[idx1] == fractions2[idx2] == 1.0:
+            merge_finished = True
+            # finished, get last point at 1.0
+            point = copy.deepcopy(json_points1[idx1])
+            for key, val in json_points2[idx2].items():
+                point[key] = copy.deepcopy(val)
+        elif idx1 + 1 == len(fractions1):
             merge_finished = True
             # finished, get last point at 1.0
             assert f1_1 == fractions2[idx2 + 1], "wrong"
@@ -819,7 +825,7 @@ def convert_openfast_fst(filename, save_directory=None):
             for ii, line in enumerate(lines):
                 words = line.split()
                 if len(words) > 1 and words[1] == "DLL_InFile":
-                    path_DISCON = filedir / words[0].replace('"', "")
+                    path_DISCON = filepath.parent / words[0].replace('"', "")
                     path_DISCON_new = Path("controller") / path_DISCON.name
                     (Path(save_directory) / path_DISCON_new).parent.mkdir(
                         parents=True, exist_ok=True
