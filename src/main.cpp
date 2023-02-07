@@ -133,9 +133,14 @@ int main(int argc, char* argv[]) {
         seahowl::core::System(seahowl::core::Turbine(get_turbine_from_json(filepath_turbine)), wind_model);
     auto& turbine = seahowl_system.turbine;
 
-    turbine.aerodyn =
-        std::make_shared<seahowl::aero::AeroDyn>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
-                                                 (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind_Steady.dat").generic_string());
+    bool use_aerodyn = json_obj.at("numerics").at("aerodyn").get<bool>();
+    // if (use_aerodyn){std::cout <<"use aerodyn " << std::endl; }
+    
+    if (use_aerodyn) {
+        turbine.aerodyn =
+            std::make_shared<seahowl::aero::AeroDyn>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
+                                                     (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind_Steady.dat").generic_string());
+    }
 
     // build turbine (Chrono)
     turbine.build();
@@ -191,7 +196,9 @@ int main(int argc, char* argv[]) {
 #endif
 
 #ifdef HAVE_AERODYN
-    remove_all("./vtk-ADI");
+    if (use_aerodyn) {
+        remove_all("./vtk-ADI");
+    }
 #endif
 
     // simulation loop
@@ -248,7 +255,7 @@ int main(int argc, char* argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC, &finishTime);
     elapsed = (finishTime.tv_sec - startTime.tv_sec);
-    GetLog() << "Total CPU time: " << elapsed << " seconds\n";
+    chrono::GetLog() << "Total CPU time: " << elapsed << " seconds\n";
 
     return 0;
 }
