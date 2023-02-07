@@ -2,8 +2,8 @@
   "blades": {
     "fpm": false,
     "discretization": {
-      "elasto": [50],
-      "aero": [50]
+      "elasto": [49],
+      "aero": [49]
     },
     "blades": [
       {
@@ -27,7 +27,7 @@
   "tower": {
     "discretization": {
       "elasto": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-      "aero": [20]
+      "aero": [19]
     },
     "file": "./IEA15MW_tower.json"
   },
