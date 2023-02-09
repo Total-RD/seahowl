@@ -13,6 +13,12 @@ cmake .. -DChrono_DIR=/path/to/your/chrono/cmake/build/directory
 make
 ```
 
+If compiling with AeroDyn:
+```bash
+cmake .. -DChrono_DIR=/path/to/your/chrono/cmake/build/directory -DAERODYN_LIBRARY_RELEASE=/path/to/your/libaerodyn_inflow_c_binding.so
+make
+```
+
 
 #### Default CMAKE Options:
 
@@ -25,6 +31,7 @@ option(SEAHOWL_ENABLE_PYTHON "Enable python binding" OFF)
 option(SEAHOWL_ENABLE_EXAMPLES "Enable examples" ON)
 option(SEAHOWL_ENABLE_ROSCO "Enable ROSCO controller" ON)
 option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
+option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
 ```
 
 
@@ -35,6 +42,7 @@ option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
 - Chrono (8.0.0): https://github.com/projectchrono/chrono
 - nlohmann-json (v3.10.5): https://github.com/nlohmann/json
 - ROSCO (v2.5.0): https://github.com/NREL/ROSCO
+- AeroDyn: https://github.com/Total-RD/aerodyn4seahowl
 
 #### Documentation
 
@@ -81,6 +89,7 @@ It is a JSON dictionary containing:
 - numerics: (dict)
   - **dt**: (float) the time stepping value for the simulation [s].
   - **t_end**: (float) the ending time of the simulation [s].
+  - **aerodyn**: (bool) option to enable aerodyn module. In-house BEMT will be used if this option is disable.
 - outputs: (dict)
   - **dt**: (float) the time stepping value for outputs of the simulation [s].
   - **VTK**: (bool) whether VTK will be part of outputs or not.
