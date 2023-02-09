@@ -133,10 +133,9 @@ int main(int argc, char* argv[]) {
         seahowl::core::System(seahowl::core::Turbine(get_turbine_from_json(filepath_turbine)), wind_model);
     auto& turbine = seahowl_system.turbine;
 
-    bool use_aerodyn = json_obj.at("numerics").at("aerodyn").get<bool>();
-    // if (use_aerodyn){std::cout <<"use aerodyn " << std::endl; }
+    turbine.use_aerodyn = json_obj.at("numerics").at("aerodyn").get<bool>();
     
-    if (use_aerodyn) {
+    if (turbine.use_aerodyn) {
         turbine.aerodyn =
             std::make_shared<seahowl::aero::AeroDyn>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
                                                      (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind_Steady.dat").generic_string());
@@ -196,7 +195,7 @@ int main(int argc, char* argv[]) {
 #endif
 
 #ifdef HAVE_AERODYN
-    if (use_aerodyn) {
+    if (turbine.use_aerodyn) {
         remove_all("./vtk-ADI");
     }
 #endif

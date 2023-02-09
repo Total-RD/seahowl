@@ -38,6 +38,8 @@ class Turbine : public ComponentDynamic {
     double gearbox_ratio = 1.0;         ///< Gearbox ratio
     double gearbox_efficiency = 1.0;    ///< Efficiency of gearbox
 
+    bool use_aerodyn = false; ///< active aerodyn module
+
     Turbine();
     ~Turbine();
 
