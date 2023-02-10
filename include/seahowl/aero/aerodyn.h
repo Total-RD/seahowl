@@ -127,7 +127,7 @@ struct AeroDynInflowLib {
     bool IfWinputFilePassed = false; // false: read input info from a primary input file; true: passing info from data
 
     // aerodynamic load computed on mesh point
-    float *MeshFrc = new float [6 * NumMeshPts];
+    float *MeshFrc;
     
     void SetADINFILE(std::string name);
     void SetIFWINFILE(std::string name);
@@ -211,21 +211,21 @@ struct AeroDynInflowLib {
 
     // Initial position of hub and blades
     // used for setup of AD, not used after init.
-    float  *HubPos = new float  [3];
-    double *HubOri = new double [9];
-    float  *HubVel = new float  [6];
-    float  *HubAcc = new float  [6];
+    float  *HubPos;
+    double *HubOri;
+    float  *HubVel;
+    float  *HubAcc;
 
-    float  *NacPos = new float  [3]; 
-    double *NacOri = new double [9];
-    float  *NacVel = new float  [6];
-    float  *NacAcc = new float  [6];
+    float  *NacPos; 
+    double *NacOri;
+    float  *NacVel;
+    float  *NacAcc;
 
     int NumBlades;                                     
-    float  *BldRootPos = new float  [3*NumBlades]; 
-    double *BldRootOri = new double [9*NumBlades];
-    float  *BldRootVel = new float  [6*NumBlades];
-    float  *BldRootAcc = new float  [6*NumBlades];                     
+    float  *BldRootPos; 
+    double *BldRootOri;
+    float  *BldRootVel;
+    float  *BldRootAcc;                     
     
     /* Structural Mesh
      * The number of nodes must be constant throughout simulation. The
@@ -233,10 +233,10 @@ struct AeroDynInflowLib {
      * Rotations are given in radians assuming small angles.  See note at top of this file.
      */  
     int NumMeshPts; // NumMeshPts = nblade x meshPts of each balde
-    float  *MeshPos = new float  [3*NumMeshPts];
-    double *MeshOri = new double [9*NumMeshPts];
-    float  *MeshVel = new float  [6*NumMeshPts];
-    float  *MeshAcc = new float  [6*NumMeshPts];
+    float  *MeshPos;
+    double *MeshOri;
+    float  *MeshVel;
+    float  *MeshAcc;
 
     // number of output channels
     int NumChannels = 0; 
@@ -254,7 +254,7 @@ class AeroDyn {
     seahowl::aero::AeroDynInflowLib pImpl;
     std::vector<chrono::ChVector<double>> loads;
     
-    AeroDyn (std::string AerodynInfile, std::string InflowInfile);
+    AeroDyn(std::string AerodynInfile, std::string InflowInfile);
     ~AeroDyn();
 
     void init(double time, double dt, seahowl::core::Turbine& turbine);

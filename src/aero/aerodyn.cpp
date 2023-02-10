@@ -32,10 +32,10 @@ void seahowl::aero::AeroDyn::init(double time, double dt, seahowl::core::Turbine
 void seahowl::aero::AeroDyn::calcul(double time, seahowl::core::Turbine& turbine) {
     pImpl.SetTime(time);
     update_turbine_variables(turbine);
-    if (time == 0.) {
-        pImpl.Calcul();
-    } else {
+    if (time > 0.) {
         pImpl.Update();
+        pImpl.Calcul();
+    } else {        
         pImpl.Calcul();
     }
 }

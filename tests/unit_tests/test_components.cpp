@@ -17,6 +17,8 @@
 
 #include <seahowl/io/read_json.h>
 
+#include <seahowl/aero/aerodyn.h>
+
 using namespace chrono;
 
 #include <filesystem>  // C++17
@@ -298,6 +300,9 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     auto turbine_file = (DATADIR / "IEA15MW_turbine.json").generic_string();
     auto turbine = get_turbine_from_json(turbine_file);
+
+    turbine.use_aerodyn = false;
+
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     // clear discretization defined in file
@@ -335,3 +340,83 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.819, 0.02);
 }
+
+TEST(test_aerodyn, rpm_initial_pitch) {
+    // general options
+    bool visualization_on = true;
+    bool statics_prestep = true;
+    // solver
+    auto verbose = false;
+    // timestepping
+    auto timestepper_type = ChTimestepper::Type::HHT;
+    double dt = 0.1;
+    // wind
+    auto wind_model = seahowl::aero::ConstantWind();
+    wind_model.set_wind_velocity(ChVector<double>(8.0, 0.0, 0.0));
+    // turbine
+    double initial_pitch = CH_C_PI / 8.0;
+
+    // system
+    ChSystemSMC system;
+    system.Set_G_acc(ChVector<double>(0.0, 0.0, -9.81));
+    auto solver = chrono_types::make_shared<ChSolverSparseLU>();
+    system.SetSolver(solver);
+    solver->UseSparsityPatternLearner(true);
+    solver->LockSparsityPattern(true);
+    solver->SetVerbose(verbose);
+    system.SetTimestepperType(ChTimestepper::Type::HHT);
+    auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system.GetTimestepper());
+    mystepper->SetStepControl(false);
+    mystepper->SetModifiedNewton(false);
+
+    // mesh for blade
+    auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
+    system.AddMesh(blades_mesh);
+
+    auto turbine_file = (DATADIR / "IEA15MW_turbine.json").generic_string();
+    auto turbine = get_turbine_from_json(turbine_file);
+    // remove controller
+    turbine.controller = std::make_shared<seahowl::servo::Controller>();
+
+    turbine.use_aerodyn = true;
+
+    turbine.aerodyn =
+            std::make_shared<seahowl::aero::AeroDyn>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
+                                                     (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind_Steady.dat").generic_string());
+
+    // clear discretization defined in file
+    for (auto& blade : turbine.blades) {
+        blade->elasto->discretization_fractions.clear();
+        blade->aero->discretization_fractions.clear();
+    }
+    turbine.build();
+    turbine.assemble(system, blades_mesh);
+    turbine.tower.elasto.nodes[0]->SetFixed(true);
+
+    // statics
+    if (statics_prestep) {
+        system.DoStaticLinear();
+        system.DoStaticNonlinear(10, verbose);
+    }
+
+    double time = 0.0;
+    turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
+    turbine.init(time, dt);
+    // while (application.GetDevice()->run()) {
+    while (time < 50) {
+        // prestep
+        // compute forces
+        turbine.compute_wind_loads(wind_model, time);
+        // prestep (accumulates loads from aero to elasto)
+        turbine.prestep(time, dt);
+
+        system.DoStepDynamics(dt);
+        time += system.GetStep();
+
+        // poststep
+        turbine.poststep(time, dt);
+    }
+
+    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.77, 0.02);
+}
+
