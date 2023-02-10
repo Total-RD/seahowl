@@ -343,6 +343,7 @@ TEST(test_turbine, rpm_initial_pitch) {
     ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.819, 0.02);
 }
 
+#ifdef HAVE_AERODYN
 TEST(test_aerodyn, rpm_initial_pitch) {
     // general options
     bool visualization_on = true;
@@ -421,4 +422,5 @@ TEST(test_aerodyn, rpm_initial_pitch) {
 
     ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.77, 0.02);
 }
+#endif
 

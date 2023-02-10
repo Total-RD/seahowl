@@ -135,11 +135,13 @@ int main(int argc, char* argv[]) {
 
     turbine.use_aerodyn = json_obj.at("numerics").at("aerodyn").get<bool>();
     
-    if (turbine.use_aerodyn) {
-        turbine.aerodyn =
-            std::make_shared<seahowl::aero::AeroDynAdapter>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
-                                                            (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind.dat").generic_string());
-    }
+    #ifdef HAVE_AERODYN
+        if (turbine.use_aerodyn) {
+            turbine.aerodyn =
+                std::make_shared<seahowl::aero::AeroDynAdapter>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
+                                                                (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind.dat").generic_string());
+        }
+    #endif
 
     // build turbine (Chrono)
     turbine.build();

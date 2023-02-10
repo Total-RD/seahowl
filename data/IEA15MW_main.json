@@ -2,7 +2,7 @@
   "numerics": {
     "dt": 0.05,
     "t_end": 2000.0,
-    "aerodyn": true 
+    "aerodyn": false 
   },
   "outputs": {
     "dt": 0.1,
