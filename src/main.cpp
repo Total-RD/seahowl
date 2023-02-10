@@ -29,7 +29,7 @@ using json = nlohmann::json;
 #endif
 
 #ifdef HAVE_AERODYN
-    #include <seahowl/aero/aerodyn.h>  
+    #include <seahowl/aero/aerodyn_adapter.h>  
 #endif
 # include <time.h>
 
@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
     
     if (turbine.use_aerodyn) {
         turbine.aerodyn =
-            std::make_shared<seahowl::aero::AeroDyn>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
+            std::make_shared<seahowl::aero::AeroDynAdapter>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
                                                      (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind_Steady.dat").generic_string());
     }
 

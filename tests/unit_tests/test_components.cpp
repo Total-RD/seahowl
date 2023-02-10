@@ -17,7 +17,9 @@
 
 #include <seahowl/io/read_json.h>
 
-#include <seahowl/aero/aerodyn.h>
+#ifdef HAVE_AERODYN
+    #include <seahowl/aero/aerodyn_adapter.h>  
+#endif
 
 using namespace chrono;
 
@@ -381,7 +383,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     turbine.use_aerodyn = true;
 
     turbine.aerodyn =
-            std::make_shared<seahowl::aero::AeroDyn>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
+            std::make_shared<seahowl::aero::AeroDynAdapter>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
                                                      (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind_Steady.dat").generic_string());
 
     // clear discretization defined in file

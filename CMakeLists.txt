@@ -186,10 +186,10 @@ set(SEAHOWL_AERO_HEADERS
 )
 if (SEAHOWL_ENABLE_AERODYN)
     list(APPEND SEAHOWL_AERO_SOURCES 
-        src/aero/aerodyn.cpp
+        src/aero/aerodyn_adapter.cpp
     )
     list(APPEND SEAHOWL_AERO_HEADERS 
-        include/seahowl/aero/aerodyn.h
+        include/seahowl/aero/aerodyn_adapter.h
     )    
 endif (SEAHOWL_ENABLE_AERODYN)
 source_group(aero FILES

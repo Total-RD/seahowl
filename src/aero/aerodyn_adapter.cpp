@@ -1,4 +1,4 @@
-#include "seahowl/aero/aerodyn.h"
+#include "seahowl/aero/aerodyn_adapter.h"
 
 #include <stdexcept>
 #include <vector>
@@ -8,7 +8,7 @@
 // #include <numeric>
 // #include <sstream>
 
-seahowl::aero::AeroDyn::AeroDyn(std::string AerodynInfile, std::string InflowInfile) {
+seahowl::aero::AeroDynAdapter::AeroDynAdapter(std::string AerodynInfile, std::string InflowInfile) {
     std::cout << "Initialising Aerodyn15" << std::endl;
 
     pImpl.ADinputFilePassed  = false;
@@ -20,16 +20,16 @@ seahowl::aero::AeroDyn::AeroDyn(std::string AerodynInfile, std::string InflowInf
     pImpl.SetOUTNAME("Output_ADIlib_default");
 }
 
-seahowl::aero::AeroDyn::~AeroDyn() {}
+seahowl::aero::AeroDynAdapter::~AeroDynAdapter() {}
 
-void seahowl::aero::AeroDyn::init(double time, double dt, seahowl::core::Turbine& turbine) {
+void seahowl::aero::AeroDynAdapter::init(double time, double dt, seahowl::core::Turbine& turbine) {
     pImpl.SetTimeStep(dt);
     pImpl.SetTime(time);
     update_turbine_variables(turbine);
     pImpl.Init();
 }
 
-void seahowl::aero::AeroDyn::calcul(double time, seahowl::core::Turbine& turbine) {
+void seahowl::aero::AeroDynAdapter::calcul(double time, seahowl::core::Turbine& turbine) {
     pImpl.SetTime(time);
     update_turbine_variables(turbine);
     if (time > 0.) {
@@ -40,25 +40,25 @@ void seahowl::aero::AeroDyn::calcul(double time, seahowl::core::Turbine& turbine
     }
 }
 
-void seahowl::aero::AeroDyn::update(double time, double dt, seahowl::core::Turbine& turbine) {
+void seahowl::aero::AeroDynAdapter::update(double time, double dt, seahowl::core::Turbine& turbine) {
     pImpl.SetTime(time);
     pImpl.SetTimeNext(time+dt);
     update_turbine_variables(turbine);
     pImpl.Update();
 }
 
-void seahowl::aero::AeroDyn::end(double time, double dt, seahowl::core::Turbine& turbine) {
+void seahowl::aero::AeroDynAdapter::end(double time, double dt, seahowl::core::Turbine& turbine) {
     pImpl.End();
 }
 
-void seahowl::aero::AeroDyn::update_turbine_variables(seahowl::core::Turbine& turbine) {
+void seahowl::aero::AeroDynAdapter::update_turbine_variables(seahowl::core::Turbine& turbine) {
     setMotionHub(turbine);
     setMotionNac(turbine);
     setMotionRoot(turbine);
     setMotionMesh(turbine);
 }
 
-void seahowl::aero::AeroDyn::setMotionHub(seahowl::core::Turbine& turbine) {
+void seahowl::aero::AeroDynAdapter::setMotionHub(seahowl::core::Turbine& turbine) {
     float  *hubPos_C = new float  [3];
     double *hubOri_C = new double [9];
     float  *hubVel_C = new float  [6];
@@ -99,7 +99,7 @@ void seahowl::aero::AeroDyn::setMotionHub(seahowl::core::Turbine& turbine) {
     pImpl.SetHubAcc(hubAcc_C);
 }
 
-void seahowl::aero::AeroDyn::setMotionNac(seahowl::core::Turbine& turbine) {
+void seahowl::aero::AeroDynAdapter::setMotionNac(seahowl::core::Turbine& turbine) {
     float  *nacPos_C = new float  [3];
     double *nacOri_C = new double [9];
     float  *nacVel_C = new float  [6];
@@ -137,7 +137,7 @@ void seahowl::aero::AeroDyn::setMotionNac(seahowl::core::Turbine& turbine) {
     pImpl.SetNacAcc(nacAcc_C);
 }
 
-void seahowl::aero::AeroDyn::setMotionRoot(seahowl::core::Turbine& turbine) {
+void seahowl::aero::AeroDynAdapter::setMotionRoot(seahowl::core::Turbine& turbine) {
     auto nblades = turbine.blades.size();
     float  *bldRootPos_C = new float  [3 * nblades];
     double *bldRootOri_C = new double [9 * nblades];
@@ -182,7 +182,7 @@ void seahowl::aero::AeroDyn::setMotionRoot(seahowl::core::Turbine& turbine) {
     pImpl.SetBldRootAcc(bldRootAcc_C);
 }
 
-void seahowl::aero::AeroDyn::setMotionMesh(seahowl::core::Turbine& turbine) {
+void seahowl::aero::AeroDynAdapter::setMotionMesh(seahowl::core::Turbine& turbine) {
     auto   nblades = turbine.blades.size();
     auto   nMeshPerBlade = turbine.rotor.blades[0]->elasto->nodes.size();
     auto   nMesh = nMeshPerBlade * nblades;

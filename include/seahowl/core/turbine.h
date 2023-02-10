@@ -4,7 +4,7 @@
 #include <seahowl/core/rotor.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/servo/controller.h>
-#include <seahowl/aero/aerodyn.h> 
+#include <seahowl/aero/aerodyn_adapter.h> 
 
 #include <vector>
 
@@ -15,7 +15,7 @@ class Controller;
 }
 
 namespace aero {
-class AeroDyn;
+class AeroDynAdapter;
 }
 
 /**@brief Seahowl core module */
@@ -32,7 +32,7 @@ class Turbine : public ComponentDynamic {
     Rotor rotor;                                             ///< Rotor.  @todo Should be Hub + Blades
     Tower tower;                                             ///< Tower
     std::shared_ptr<seahowl::servo::Controller> controller;  ///< Controller
-    std::shared_ptr<seahowl::aero::AeroDyn> aerodyn;         ///< Aerodyn 
+    std::shared_ptr<seahowl::aero::AeroDynAdapter> aerodyn;         ///< Aerodyn 
 
     double generator_efficiency = 1.0;  ///< Efficiency of generator
     double gearbox_ratio = 1.0;         ///< Gearbox ratio

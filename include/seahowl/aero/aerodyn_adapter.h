@@ -248,14 +248,14 @@ struct AeroDynInflowLib {
 };
 
 
-class AeroDyn {
+class AeroDynAdapter {
 
   public:
     seahowl::aero::AeroDynInflowLib pImpl;
     std::vector<chrono::ChVector<double>> loads;
     
-    AeroDyn(std::string AerodynInfile, std::string InflowInfile);
-    ~AeroDyn();
+    AeroDynAdapter(std::string AerodynInfile, std::string InflowInfile);
+    ~AeroDynAdapter();
 
     void init(double time, double dt, seahowl::core::Turbine& turbine);
     void calcul(double time, seahowl::core::Turbine& turbine);
