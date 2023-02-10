@@ -37,7 +37,7 @@ option(SEAHOWL_ENABLE_PYTHON "Enable python binding" OFF)
 option(SEAHOWL_ENABLE_EXAMPLES "Enable examples" ON)
 option(SEAHOWL_ENABLE_ROSCO "Enable ROSCO controller" ON)
 option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
-option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" ON)
+option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
 
 # =======================
 # External libraries
@@ -68,13 +68,13 @@ if(SEAHOWL_ENABLE_ROSCO)
 endif(SEAHOWL_ENABLE_ROSCO)
 
 # AeroDyn module 
-if (SEAHOWL_ENABLE_AERODYN)
+if(SEAHOWL_ENABLE_AERODYN)
     find_package(AERODYN REQUIRED)
     add_compile_definitions(SEAHOWL_HAVE_AERODYN=1)
     add_definitions("-DHAVE_AERODYN=1")
-endif( SEAHOWL_ENABLE_AERODYN)
+endif(SEAHOWL_ENABLE_AERODYN)
 
-if( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
 	message(FATAL_ERROR "ONLY 64 BITS SUPPORTED")
 endif()
 
@@ -185,13 +185,9 @@ set(SEAHOWL_AERO_HEADERS
     include/seahowl/aero/wind_models.h
 )
 if (SEAHOWL_ENABLE_AERODYN)
-    list(APPEND SEAHOWL_AERO_SOURCES 
-        src/aero/aerodyn_adapter.cpp
-    )
-    list(APPEND SEAHOWL_AERO_HEADERS 
-        include/seahowl/aero/aerodyn_adapter.h
-    )    
-endif (SEAHOWL_ENABLE_AERODYN)
+    list(APPEND SEAHOWL_AERO_SOURCES src/aero/aerodyn_adapter.cpp)
+    list(APPEND SEAHOWL_AERO_HEADERS include/seahowl/aero/aerodyn_adapter.h)    
+endif(SEAHOWL_ENABLE_AERODYN)
 source_group(aero FILES
     ${SEAHOWL_AERO_SOURCES}
     ${SEAHOWL_AERO_HEADERS})

@@ -159,14 +159,6 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
             (fabs(alpha - alpha_previous) <= tol_abs)) {
             break;
         } else if (ii >= max_iter) {
-            // std::cout << "Warning: could not converge to new induction factor after " + std::to_string(ii) +
-            //                  " iterations. Axial: " + std::to_string(aa) + ", previous:" + std::to_string(aa_previous) +
-            //                  ". Tangential: " + std::to_string(ap) + ", previous " + std::to_string(ap_previous) +
-            //                  ". Alpha: " + std::to_string(alpha) + ", previous: " + std::to_string(alpha_previous) +
-            //                  ". Local velocity in: (" + std::to_string(local_velocity_rotor0.x()) + ", " +
-            //                  std::to_string(local_velocity_rotor0.y()) + ")."
-            //           << std::endl;
-
             std::cout << "Warning: could not converge to new induction factor after " + std::to_string(ii) +
                              " iterations. Axial: " + std::to_string(aa) +
                              ", previous: " + std::to_string(aa_previous) + ". Tangential: " + std::to_string(ap) +
@@ -175,11 +167,9 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
                              std::to_string(local_velocity_rotor0.x()) + ", " +
                              std::to_string(local_velocity_rotor0.y()) + ")."
                       << std::endl;
-
-            ap = 0.0;
         }
     }
-    
+
     // store induction factors for starting point of next time iteration
     element.induction_factor_axial = aa;
     element.induction_factor_tangential = ap;
