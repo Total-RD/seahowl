@@ -190,12 +190,6 @@ void RotorAero::compute_wind_loads_aerodyn(float *LoadAeroDyn,
             auto loady = (LoadAeroDyn[pp+1] + LoadAeroDyn[qq+1]) / 2.0 * length ;
             auto loadz = (LoadAeroDyn[pp+2] + LoadAeroDyn[qq+2]) / 2.0 * length ;
             blade->loads[ii].Set(loadx, loady, loadz);
-            
-            blade->wind_velocities[ii] = 0.0;
-            blade->wind_velocities_shadowed[ii] = 0.0;
-            blade->relative_velocities_induced[ii] = 0.0;
-                    
-            
         }
     }
 }
