@@ -64,6 +64,11 @@ TEST(test_blade, mass_deflection) {
     system.AddMesh(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string());
+    // make 50 elements
+    blade_core.elasto->discretization_fractions.clear();
+    for (int ii = 0; ii < 51; ii++) {
+        blade_core.elasto->discretization_fractions.push_back(0.02*ii);
+    }
     blade_core.build();
     blade_core.assemble(system, blades_mesh);
     auto blade = blade_core.elasto;
@@ -73,17 +78,17 @@ TEST(test_blade, mass_deflection) {
     system.DoStaticLinear();
 
     // check mass
-    double blade_mass = 67058.294688;
+    double blade_mass = 67051.5;
     ASSERT_NEAR(blade_mass, blade->get_mass(), 1.0);
 
     // check deflection from gravity (edge)
-    double deflection_edge = -1.2164;
+    double deflection_edge = -0.8580;
     blade->rotate(CH_C_PI, VECT_Z);
     system.DoStaticLinear();
     ASSERT_NEAR(deflection_edge, blade->nodes.back()->GetPos().y(), 0.001);
 
     // check deflection from gravity (flap)
-    double deflection_flap = 2.9169;
+    double deflection_flap = 2.91411;
     blade->rotate(CH_C_PI / 2.0, VECT_Z);
     system.DoStaticLinear();
     ASSERT_NEAR(deflection_flap, blade->nodes.back()->GetPos().y(), 0.001);
@@ -105,6 +110,11 @@ TEST(test_rotor, mass) {
     for (int ii = 0; ii < 3; ii++) {
         auto blade_core = std::make_shared<seahowl::core::Blade>(
             get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string()));
+        // make 50 elements
+        blade_core->elasto->discretization_fractions.clear();
+        for (int ii = 0; ii < 51; ii++) {
+            blade_core->elasto->discretization_fractions.push_back(0.02*ii);
+        }
         blade_core->build();
         blade_core->assemble(system, blades_mesh);
         blades.push_back(blade_core);
@@ -118,7 +128,7 @@ TEST(test_rotor, mass) {
     system.Setup();
     system.DoStaticLinear();
     // check mass
-    double rotor_total_mass = 945710.88406;
+    double rotor_total_mass = 945690.92;
     ASSERT_NEAR(rotor_total_mass, rotor.elasto.get_mass(), 1.0);
 }
 
@@ -163,6 +173,11 @@ TEST(test_blade, natural_period_dynamic_edge) {
     system.AddMesh(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string());
+    // make 50 elements
+    blade_core.elasto->discretization_fractions.clear();
+    for (int ii = 0; ii < 51; ii++) {
+        blade_core.elasto->discretization_fractions.push_back(0.02*ii);
+    }
     blade_core.build();
     blade_core.assemble(system, blades_mesh);
     auto blade = blade_core.elasto;
@@ -203,7 +218,7 @@ TEST(test_blade, natural_period_dynamic_edge) {
     }
 
     // literature edgewise natural frequency for IEA15MW: 0.642Hz (1.558s)
-    double natural_period_ref = 1.35;
+    double natural_period_ref = 1.356;
     ASSERT_NEAR(natural_period_ref, natural_period, 0.01);
 }
 
@@ -221,6 +236,11 @@ TEST(test_blade, natural_period_dynamic_flap) {
     system.AddMesh(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string());
+    // make 50 elements
+    blade_core.elasto->discretization_fractions.clear();
+    for (int ii = 0; ii < 51; ii++) {
+        blade_core.elasto->discretization_fractions.push_back(0.02*ii);
+    }
     blade_core.build();
     blade_core.assemble(system, blades_mesh);
     auto blade = blade_core.elasto;
@@ -307,11 +327,6 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
-    // clear discretization defined in file
-    for (auto& blade : turbine.blades) {
-        blade->elasto->discretization_fractions.clear();
-        blade->aero->discretization_fractions.clear();
-    }
     turbine.build();
     turbine.assemble(system, blades_mesh);
     turbine.tower.elasto.nodes[0]->SetFixed(true);
@@ -340,7 +355,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.819, 0.02);
+    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.809, 0.02);
 }
 
 #ifdef HAVE_AERODYN
@@ -387,11 +402,6 @@ TEST(test_aerodyn, rpm_initial_pitch) {
             std::make_shared<seahowl::aero::AeroDynAdapter>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
                                                      (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind.dat").generic_string());
 
-    // clear discretization defined in file
-    for (auto& blade : turbine.blades) {
-        blade->elasto->discretization_fractions.clear();
-        blade->aero->discretization_fractions.clear();
-    }
     turbine.build();
     turbine.assemble(system, blades_mesh);
     turbine.tower.elasto.nodes[0]->SetFixed(true);
