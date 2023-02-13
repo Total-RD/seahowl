@@ -24,145 +24,90 @@ def merge_interpolate_points(json_points1, json_points2):
     # get fractions as lists
     fractions1 = list()
     fractions2 = list()
-    tol = 6
     for point in json_points1:
         fractions1.append(point["fraction"])
     for point in json_points2:
         fractions2.append(point["fraction"])
+    tol = 4
+    fractions1 = np.round(fractions1, tol)
+    fractions2 = np.round(fractions2, tol)
 
-    tol = 6
-    # interpolate and merge data
+    fractions = np.union1d(fractions1, fractions2)
+
     idx1 = 0
     idx2 = 0
     merged_points = list()
-    merge_finished = False
-    fractions = list()
-    while merge_finished is False:
-        # get fraction values
-        f1_1 = fractions1[idx1]
-        f2_1 = fractions2[idx2]
-
-        if fractions1[idx1] == fractions2[idx2] == 1.0:
-            merge_finished = True
-            # finished, get last point at 1.0
-            point = copy.deepcopy(json_points1[idx1])
-            for key, val in json_points2[idx2].items():
-                point[key] = copy.deepcopy(val)
-        elif idx1 + 1 == len(fractions1):
-            merge_finished = True
-            # finished, get last point at 1.0
-            assert f1_1 == fractions2[idx2 + 1], "wrong"
-            point = copy.deepcopy(json_points1[idx1])
-            for key, val in json_points2[idx2 + 1].items():
-                point[key] = copy.deepcopy(val)
-        elif idx2 + 1 == len(fractions2):
-            merge_finished = True
-            # finished, get last point at 1.0
-            assert f2_1 == fractions1[idx1 + 1], "wrong"
-            point = copy.deepcopy(json_points2[idx2])
-            for key, val in json_points1[idx1 + 1].items():
-                point[key] = copy.deepcopy(val)
+    for idx, fraction in enumerate(fractions):
+        interp = False  # interpolate a point ?
+        if fraction == fractions1[idx1]:
+            point1 = copy.deepcopy(json_points1[idx1])
+            idx1 += 1
         else:
-            # keep going
-            f1_2 = fractions1[idx1 + 1]
-            f2_2 = fractions2[idx2 + 1]
+            interp = True
+            frange = fractions1[idx1] - fractions1[idx1 - 1]
+            coeff1 = 1.0 - (fractions1[idx1] - fraction) / frange
+            coeff2 = 1.0 - (fraction - fractions1[idx1 - 1]) / frange
+            interp1 = json_points1[idx1 - 1]
+            interp2 = json_points1[idx1]
+            point1 = copy.deepcopy(json_points1[idx1])
+            interp_point = point1  # pointer to point1
+            if idx > len(fractions) and fractions[idx + 1] > fractions1[idx1]:
+                idx1 += 1
 
-        if merge_finished is False:
-            if f1_1 == f2_1:
-                # no interpolation needed (just merge data)
-                point = copy.deepcopy(json_points1[idx1])
-                fraction = f1_1
-                for key, val in json_points2[idx2].items():
-                    point[key] = copy.deepcopy(val)
-                # increment indices
-                if f1_2 == f2_2:
-                    idx1 += 1
-                    idx2 += 1
-                elif f1_2 > f2_2:
-                    idx2 += 1
-                elif f1_2 < f2_2:
-                    idx1 += 1
-            else:
-                if f1_1 > f2_1:
-                    # start from point in json_points1
-                    point = copy.deepcopy(json_points1[idx1])
-                    fraction = f1_1
-                    # find interpolation coefficients
-                    frange = f2_2 - f2_1
-                    coeff1 = 1.0 - (f1_1 - f2_1) / frange
-                    coeff2 = 1.0 - (f2_2 - f1_1) / frange
-                    # get points to interpolate from
-                    point_interp1 = json_points2[idx2]
-                    point_interp2 = json_points2[idx2 + 1]
-                    # increment index
-                    if f1_2 > f2_2:
-                        idx2 += 1
+        if fraction == fractions2[idx2]:
+            point2 = copy.deepcopy(json_points2[idx2])
+            idx2 += 1
+        else:
+            interp = True
+            frange = fractions2[idx2] - fractions2[idx2 - 1]
+            coeff1 = 1.0 - (fractions2[idx2] - fraction) / frange
+            coeff2 = 1.0 - (fraction - fractions2[idx2 - 1]) / frange
+            interp1 = json_points2[idx2 - 1]
+            interp2 = json_points2[idx2]
+            point2 = copy.deepcopy(json_points2[idx2])
+            interp_point = point2  # pointer to point1
+            if idx > len(fractions) and fractions[idx + 1] > fractions2[idx2]:
+                idx2 += 1
+
+        if interp is True:
+            # get points to interpolate from
+            for key in interp_point.keys():
+                val1 = interp1[key]
+                val2 = interp2[key]
+
+                # if string
+                if isinstance(val1, str) and isinstance(val2, str):
+                    print(val1, val2)
+                    if val1 == val2:
+                        # only copy if they are the same
+                        interp_point[key] = val1
                     else:
-                        idx1 += 1
-                elif f1_1 < f2_1:
-                    # start from point in json_points2
-                    point = copy.deepcopy(json_points2[idx2])
-                    fraction = f2_1
-                    # find interpolation coefficients
-                    frange = f1_2 - f1_1
-                    coeff1 = 1.0 - (f2_1 - f1_1) / frange
-                    coeff2 = 1.0 - (f1_2 - f2_1) / frange
-                    # get points to interpolate from
-                    point_interp1 = json_points1[idx1]
-                    point_interp2 = json_points1[idx1 + 1]
-                    # increment index
-                    if f1_2 > f2_2:
-                        idx2 += 1
-                    else:
-                        idx1 += 1
-                for key in point_interp1.keys():
-                    val1 = point_interp1[key]
-                    val2 = point_interp2[key]
+                        # otherwise, empty string
+                        interp_point[key] = ""
+                else:
+                    # if list, convert to ndarray for interpolation
+                    is_list = False
+                    if isinstance(val1, list) or isinstance(val2, list):
+                        is_list = True
+                        val1 = np.array(val1)
+                        val2 = np.array(val2)
 
-                    # if string
-                    if isinstance(val1, str) and isinstance(val2, str):
-                        if val1 == val2:
-                            # only copy if they are the same
-                            point[key] = val1
-                        else:
-                            # otherwise, empty string
-                            point[key] = ""
-                    else:
-                        # if list, convert to ndarray for interpolation
-                        is_list = False
-                        if isinstance(val1, list) or isinstance(val2, list):
-                            is_list = True
-                            val1 = np.array(val1)
-                            val2 = np.array(val2)
+                    # interpolate values to point
+                    interp_point[key] = coeff1 * val1 + coeff2 * val2
 
-                        # interpolate values to point
-                        point[key] = coeff1 * val1 + coeff2 * val2
+                    # convert back to list if it was converted to ndarray
+                    if is_list is True:
+                        interp_point[key] = interp_point[key].tolist()
 
-                        # convert back to list if it was converted to ndarray
-                        if is_list is True:
-                            point[key] = point[key].tolist()
-
-            # sanity check
-            if (
-                idx2 + 1 < len(fractions2) - 1
-                and fractions1[idx1] > fractions2[idx2 + 1]
-            ):
-                idx1 -= 1
-            elif (
-                idx1 + 1 < len(fractions1) - 1
-                and fractions2[idx2] > fractions1[idx1 + 1]
-            ):
-                idx2 -= 1
+        point = copy.deepcopy(point1)
+        for key, val in point2.items():
+            point[key] = val
+        point["fraction"] = fraction
 
         # add point to list
         merged_points.append(point)
-        fractions.append(point["fraction"])
 
-    sort_order = np.argsort(fractions)
-    sorted_points = list()
-    for idx in sort_order:
-        sorted_points.append(merged_points[idx])
-    return sorted_points
+    return merged_points
 
 
 def convert_polar_file(filename, save_directory=None):
