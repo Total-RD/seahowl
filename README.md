@@ -102,6 +102,31 @@ It is a JSON dictionary containing:
   - **rotation**: rotation of turbine (yaw) [°].
   - **file**: file path of turbine file (relative to this file path).
 
+#### Available Wind Models
+
+- Wind ramp:
+```json
+{
+  "type": "ramp",
+  "options": {
+    "reference_height": 150,
+    "shear_coefficient": 0.12,
+     "velocity_start": [12, 0, 0],
+     "velocity_stop": [25, 0, 0],
+     "time_start": 500,
+     "time_stop": 1700   
+  }
+}
+```
+- InflowWind (only works with AeroDyn):
+```json
+{
+  "type": "InflowWind",
+  "options": {
+    "file": "./aerodyn/IEA-15-240-RWT_InflowWind.dat"
+  }
+}
+``` 
 
 #### Turbine file (turbine.json)
 
@@ -110,6 +135,7 @@ For discretization of blades and tower, it is possible to either use an ordered 
 It is a JSON dictionary containing:
 - blades: (dict)
   - **fpm**: (bool) whether to consider Fully-Populated Matrix (FPM) elements (6x6 material properties) or not.
+  - **file_aerodyn**: file path of aerodyn file (relative to this file path), only used if aerodyn option is true in turbine file.
   - **discretization**: (dict)
     - **elasto**: (array of floats) discretization fractions (between 0 and 1) for elasto part of blade.
     - **aero**: (array of floats) discretization fractions (between 0 and 1) for aero part of blade.
