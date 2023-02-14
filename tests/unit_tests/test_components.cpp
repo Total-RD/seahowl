@@ -18,7 +18,7 @@
 #include <seahowl/io/read_json.h>
 
 #ifdef HAVE_AERODYN
-    #include <seahowl/aero/aerodyn_adapter.h>  
+    #include <seahowl/aero/aerodyn_adapter.h>
 #endif
 
 using namespace chrono;
@@ -30,7 +30,7 @@ using std::filesystem::path;
 using std::filesystem::absolute;
 
 static path DATADIR{};
-// static path DATADIR = path("../../data");
+// static path DATADIR = path("../../data/IEA15MW");
 
 int main(int argc, char** argv) {
     const char* env_p = std::getenv("SEAHOWL_DATADIR");
@@ -63,11 +63,11 @@ TEST(test_blade, mass_deflection) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
     // blade
-    auto blade_core = get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string());
+    auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
     // make 50 elements
     blade_core.elasto->discretization_fractions.clear();
     for (int ii = 0; ii < 51; ii++) {
-        blade_core.elasto->discretization_fractions.push_back(0.02*ii);
+        blade_core.elasto->discretization_fractions.push_back(0.02 * ii);
     }
     blade_core.build();
     blade_core.assemble(system, blades_mesh);
@@ -108,19 +108,19 @@ TEST(test_rotor, mass) {
     system.AddMesh(blades_mesh);
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
     for (int ii = 0; ii < 3; ii++) {
-        auto blade_core = std::make_shared<seahowl::core::Blade>(
-            get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string()));
+        auto blade_core =
+            std::make_shared<seahowl::core::Blade>(get_blade_from_json((DATADIR / "blade.json").generic_string()));
         // make 50 elements
         blade_core->elasto->discretization_fractions.clear();
         for (int ii = 0; ii < 51; ii++) {
-            blade_core->elasto->discretization_fractions.push_back(0.02*ii);
+            blade_core->elasto->discretization_fractions.push_back(0.02 * ii);
         }
         blade_core->build();
         blade_core->assemble(system, blades_mesh);
         blades.push_back(blade_core);
     }
 
-    auto rotor = get_rotor_from_json((DATADIR / "IEA15MW_rna.json").generic_string());
+    auto rotor = get_rotor_from_json((DATADIR / "rna.json").generic_string());
     rotor.build(blades);
     rotor.assemble(system);
     rotor.elasto.body_yaw_bearing->SetBodyFixed(true);
@@ -147,7 +147,7 @@ TEST(test_tower, mass) {
     auto tower_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(tower_mesh);
     // tower
-    auto tower = get_tower_from_json((DATADIR / "IEA15MW_tower.json").generic_string());
+    auto tower = get_tower_from_json((DATADIR / "tower.json").generic_string());
     tower.build();
     tower.assemble(tower_mesh);
 
@@ -172,11 +172,11 @@ TEST(test_blade, natural_period_dynamic_edge) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
     // blade
-    auto blade_core = get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string());
+    auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
     // make 50 elements
     blade_core.elasto->discretization_fractions.clear();
     for (int ii = 0; ii < 51; ii++) {
-        blade_core.elasto->discretization_fractions.push_back(0.02*ii);
+        blade_core.elasto->discretization_fractions.push_back(0.02 * ii);
     }
     blade_core.build();
     blade_core.assemble(system, blades_mesh);
@@ -235,11 +235,11 @@ TEST(test_blade, natural_period_dynamic_flap) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
     // blade
-    auto blade_core = get_blade_from_json((DATADIR / "IEA15MW_blade.json").generic_string());
+    auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
     // make 50 elements
     blade_core.elasto->discretization_fractions.clear();
     for (int ii = 0; ii < 51; ii++) {
-        blade_core.elasto->discretization_fractions.push_back(0.02*ii);
+        blade_core.elasto->discretization_fractions.push_back(0.02 * ii);
     }
     blade_core.build();
     blade_core.assemble(system, blades_mesh);
@@ -320,7 +320,7 @@ TEST(test_turbine, rpm_initial_pitch) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
 
-    auto turbine_file = (DATADIR / "IEA15MW_turbine.json").generic_string();
+    auto turbine_file = (DATADIR / "turbine.json").generic_string();
     auto turbine = get_turbine_from_json(turbine_file);
 
     turbine.use_aerodyn = false;
@@ -391,16 +391,16 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
 
-    auto turbine_file = (DATADIR / "IEA15MW_turbine.json").generic_string();
+    auto turbine_file = (DATADIR / "turbine.json").generic_string();
     auto turbine = get_turbine_from_json(turbine_file);
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
 
     turbine.use_aerodyn = true;
 
-    turbine.aerodyn =
-            std::make_shared<seahowl::aero::AeroDynAdapter>((DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
-                                                     (DATADIR / "aerodyn/IEA15MW/IEA-15-240-RWT_InflowWind.dat").generic_string());
+    turbine.aerodyn = std::make_shared<seahowl::aero::AeroDynAdapter>(
+        (DATADIR / "aerodyn/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
+        (DATADIR / "aerodyn/IEA-15-240-RWT_InflowWind.dat").generic_string());
 
     turbine.build();
     turbine.assemble(system, blades_mesh);
@@ -433,4 +433,3 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.77, 0.02);
 }
 #endif
-
