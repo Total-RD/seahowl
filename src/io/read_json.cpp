@@ -8,6 +8,7 @@
 #include <seahowl/core/turbine.h>
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/servo/controller_discon.h>
+#include <seahowl/core/system.h>
 
 #include <string>
 #include <memory>
@@ -18,6 +19,7 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 using std::filesystem::path;
+using std::filesystem::absolute;
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -366,4 +368,99 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
     turbine.rotor.elasto.hub.inertia += drivetrain_inertia;
 
     return turbine;
+}
+
+seahowl::core::System get_system_from_json(std::string filepath_main,
+                                           chrono::ChSystemSMC& chrono_system,
+                                           std::shared_ptr<chrono::fea::ChMesh> chrono_mesh) {
+    auto DATADIR = absolute(path(filepath_main)).parent_path();
+
+    // get main info
+    std::ifstream json_file(filepath_main);
+    // populate json object
+    json json_obj;
+    json_file >> json_obj;
+
+    // environmental info
+    auto environment_json = json_obj.at("environment");
+    // gravity
+    auto gravity = environment_json.at("gravity").get<std::vector<double>>();
+    chrono_system.Set_G_acc(chrono::ChVector<double>(gravity[0], gravity[1], gravity[2]));
+
+    // turbine
+    auto turbine_json = json_obj.at("turbines")[0];
+    auto filepath_turbine = (DATADIR / turbine_json.at("file").get<std::string>()).generic_string();
+    // system
+    auto seahowl_system = seahowl::core::System(seahowl::core::Turbine(get_turbine_from_json(filepath_turbine)));
+    auto wind_json = environment_json.at("wind");
+    if (wind_json.at("type").get<std::string>() == "ramp") {
+        seahowl_system.wind_model = std::make_shared<seahowl::aero::WindRamp>();
+        auto wind_options = wind_json.at("options");
+        auto wind_model = std::dynamic_pointer_cast<seahowl::aero::WindRamp>(seahowl_system.wind_model);
+        auto v0 = wind_options.at("velocity_start").get<std::vector<double>>();
+        wind_model->wind_velocity_start = chrono::ChVector<double>(v0[0], v0[1], v0[2]);
+        auto v1 = wind_options.at("velocity_stop").get<std::vector<double>>();
+        wind_model->wind_velocity_stop = chrono::ChVector<double>(v1[0], v1[1], v1[2]);
+        wind_model->direction_gravity = chrono_system.Get_G_acc().GetNormalized();
+        wind_model->reference_height = wind_options.at("reference_height").get<double>();
+        wind_model->time_start = wind_options.at("time_start").get<double>();
+        wind_model->time_stop = wind_options.at("time_stop").get<double>();
+        wind_model->shear_coefficient = wind_options.at("shear_coefficient").get<double>();
+        wind_model->density = environment_json.at("air_density").get<double>();
+    } else if (wind_json.at("type").get<std::string>() == "InflowWind") {
+        // TODO: make it work without this wind_model initialization for AeroDyn
+        seahowl_system.wind_model = std::make_shared<seahowl::aero::WindRamp>();
+    } else {
+        throw std::runtime_error("Only wind ramp or InflowWind is allowed as input.");
+    }
+
+    auto& turbine = seahowl_system.turbine;
+    // aerodyn option
+    turbine.use_aerodyn = json_obj.at("numerics").at("aerodyn").get<bool>();
+#ifdef HAVE_AERODYN
+    if (turbine.use_aerodyn) {
+        if (wind_json.at("type") != "InflowWind") {
+            throw std::runtime_error("AeroDyn has to use InflowWind input type for wind.");
+        }
+        auto wind_options = wind_json.at("options");
+        auto inflowwind_filepath = (DATADIR / wind_options.at("file")).generic_string();
+        // get aerodyn path
+        std::ifstream turbine_json_file(filepath_turbine);
+        // populate json object
+        json turbine_json_obj;
+        turbine_json_file >> turbine_json_obj;
+        turbine.aerodyn = std::make_shared<seahowl::aero::AeroDynAdapter>(
+            (DATADIR / turbine_json_obj.at("blades").at("file_aerodyn")).generic_string(),
+            inflowwind_filepath);
+    }
+#endif
+    // build turbine (Chrono)
+    turbine.build();
+    turbine.assemble(chrono_system, chrono_mesh);
+    turbine.tower.elasto.nodes.front()->SetFixed(true);  // foundation of the tower
+    // rotate turbine to align tower with gravity vector
+    auto v1 = -chrono_system.Get_G_acc().GetNormalized();
+    auto v2 = (seahowl_system.turbine.tower.elasto.nodes[1]->GetPos() -
+               seahowl_system.turbine.tower.elasto.nodes[0]->GetPos())
+                  .GetNormalized();
+    auto rot_axis = v2 % v1;
+    auto rot_angle = acos(v1 ^ v2);
+    turbine.rotate(rot_angle, rot_axis);
+    // rotation around axis opposite to gravity (yaw)
+    turbine.rotate(turbine_json.at("rotation").get<double>(), -chrono_system.Get_G_acc().GetNormalized());
+    // translate turbine
+    auto trans = turbine_json.at("translation").get<std::vector<double>>();
+    turbine.translate(chrono::ChVector<double>(trans[0], trans[1], trans[2]));
+
+    // apply initial pitches
+    for (auto blade : turbine.blades) {
+        auto pitch0 = blade->elasto->pitch;
+        blade->elasto->apply_pitch_increment(pitch0);
+        blade->elasto->pitch = pitch0;
+    }
+    auto rotor_pitch0 = turbine.rotor.elasto.pitch_collective;
+    turbine.rotor.elasto.apply_collective_pitch_increment(rotor_pitch0);
+    turbine.rotor.elasto.pitch_collective = rotor_pitch0;
+
+    return seahowl_system;
 }

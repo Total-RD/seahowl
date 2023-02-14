@@ -6,6 +6,7 @@ class Blade;
 class Rotor;
 class Tower;
 class Turbine;
+class System;
 struct BladeReferencePoint;
 struct TowerReferencePoint;
 }  // namespace core
@@ -14,6 +15,9 @@ struct TowerReferencePoint;
 #include <vector>
 #include <string>
 #include <memory>
+
+#include <chrono/physics/ChSystemSMC.h>
+#include <chrono/fea/ChMesh.h>
 
 std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_json(std::string filepath);
 
@@ -30,3 +34,7 @@ seahowl::core::Turbine get_turbine_from_json_files(std::vector<std::string> file
                                                    std::string filepath_tower);
 
 seahowl::core::Turbine get_turbine_from_json(std::string main_filepath);
+
+seahowl::core::System get_system_from_json(std::string filepath_main,
+                                           chrono::ChSystemSMC& system,
+                                           std::shared_ptr<chrono::fea::ChMesh> mesh);

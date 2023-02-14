@@ -11,9 +11,9 @@ namespace core {
 class System {
   public:
     Turbine turbine;
-    seahowl::aero::WindModel& wind_model;
+    std::shared_ptr<seahowl::aero::WindModel> wind_model;
 
-    System(Turbine turbine, seahowl::aero::WindModel& wind_model);
+    System(Turbine turbine);
     ~System();
 
     virtual void init(double time, double dt);

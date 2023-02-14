@@ -2,7 +2,8 @@
   "numerics": {
     "dt": 0.05,
     "t_end": 2000.0,
-    "aerodyn": false 
+    "aerodyn": false,
+    "statics_prestep": true
   },
   "outputs": {
     "dt": 0.1,
@@ -27,7 +28,7 @@
     {
       "translation": [0, 0, 0],
       "rotation": 0,
-      "file": "./IEA15MW_turbine.json"
+      "file": "./turbine.json"
     }
   ]
 }
