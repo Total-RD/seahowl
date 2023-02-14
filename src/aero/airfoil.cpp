@@ -12,7 +12,8 @@ AirfoilCoefficients::~AirfoilCoefficients() {}
 
 AirfoilCoefficients AirfoilCoefficients::operator*(const double factor) const {
     AirfoilCoefficients new_point = *this;
-    // new_point.alpha *= factor;
+    // Note: alpha (angle of attack) is not multiplicated since it should not be changed in operations between airfoils
+    // (and angles of attack should be the same for both airfoils)
     new_point.lift *= factor;
     new_point.drag *= factor;
     new_point.added_mass *= factor;
@@ -21,8 +22,8 @@ AirfoilCoefficients AirfoilCoefficients::operator*(const double factor) const {
 
 AirfoilCoefficients AirfoilCoefficients::operator+(const AirfoilCoefficients& other) const {
     AirfoilCoefficients new_point = *this;
-    /* new_point.reynolds_number += other.reynolds_number; */
-    // new_point.alpha += other.alpha;
+    // Note: alpha (angle of attack) is not additioned since it should not be changed in operations between airfoils
+    // (and angles of attack should be the same for both airfoils)
     new_point.lift += other.lift;
     new_point.drag += other.drag;
     new_point.added_mass += other.added_mass;
@@ -35,7 +36,8 @@ AirfoilProperties::~AirfoilProperties() {}
 
 AirfoilProperties AirfoilProperties::operator*(const double factor) const {
     AirfoilProperties new_point = *this;
-    /* new_point.reynolds_number *= factor; */
+    // Note: reynolds_number is not additioned since it should not be changed in operations between airfoils
+    // (and reynolds_number should be the same for both airfoils)
     for (int ii = 0; ii < coefficients_list.size(); ii++) {
         new_point.coefficients_list[ii] = coefficients_list[ii] * factor;
     }
@@ -43,7 +45,8 @@ AirfoilProperties AirfoilProperties::operator*(const double factor) const {
 };
 AirfoilProperties AirfoilProperties::operator+(const AirfoilProperties& other) const {
     AirfoilProperties new_point = *this;
-    /* new_point.reynolds_number += other.reynolds_number; */
+    // Note: reynolds_number is not additioned since it should not be changed in operations between airfoils
+    // (and reynolds_number should be the same for both airfoils)
     int idx1 = 0;
     int idx2 = 0;
     new_point.coefficients_list.clear();
