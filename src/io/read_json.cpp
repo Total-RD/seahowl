@@ -407,31 +407,27 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         wind_model->time_stop = wind_options.at("time_stop").get<double>();
         wind_model->shear_coefficient = wind_options.at("shear_coefficient").get<double>();
         wind_model->density = environment_json.at("air_density").get<double>();
-    } else if (wind_json.at("type").get<std::string>() == "InflowWind") {
-        // TODO: make it work without this wind_model initialization for AeroDyn
-        seahowl_system.wind_model = std::make_shared<seahowl::aero::WindRamp>();
     } else {
-        throw std::runtime_error("Only wind ramp or InflowWind is allowed as input.");
+        throw std::runtime_error("Only wind ramp is allowed as input.");
     }
 
     auto& turbine = seahowl_system.turbine;
-    // aerodyn option
-    turbine.use_aerodyn = json_obj.at("numerics").at("aerodyn").get<bool>();
 #ifdef HAVE_AERODYN
+    turbine.use_aerodyn = turbine_json.at("use_aerodyn").get<bool>();
     if (turbine.use_aerodyn) {
-        if (wind_json.at("type") != "InflowWind") {
-            throw std::runtime_error("AeroDyn has to use InflowWind input type for wind.");
+        std::string inflowwind_filepath;
+        std::string aerodyn_filepath;
+        if (turbine_json.contains("file_aerodyn")) {
+            aerodyn_filepath = (DATADIR / turbine_json.at("file_aerodyn")).generic_string();
+        } else {
+            throw std::runtime_error("Turbine set to use aerodyn but AeroDyn file path not defined.");
         }
-        auto wind_options = wind_json.at("options");
-        auto inflowwind_filepath = (DATADIR / wind_options.at("file")).generic_string();
-        // get aerodyn path
-        std::ifstream turbine_json_file(filepath_turbine);
-        // populate json object
-        json turbine_json_obj;
-        turbine_json_file >> turbine_json_obj;
-        turbine.aerodyn = std::make_shared<seahowl::aero::AeroDynAdapter>(
-            (DATADIR / turbine_json_obj.at("blades").at("file_aerodyn")).generic_string(),
-            inflowwind_filepath);
+        if (turbine_json.contains("file_inflowwind")) {
+            inflowwind_filepath = (DATADIR / turbine_json.at("file_inflowwind")).generic_string();
+        } else {
+            throw std::runtime_error("Turbine set to use aerodyn but InflowWind file not defined.");
+        }
+        turbine.aerodyn = std::make_shared<seahowl::aero::AeroDynAdapter>(aerodyn_filepath, inflowwind_filepath);
     }
 #endif
     // build turbine (Chrono)

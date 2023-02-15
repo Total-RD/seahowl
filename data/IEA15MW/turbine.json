@@ -1,7 +1,6 @@
 ﻿{
   "blades": {
     "fpm": false,
-    "file_aerodyn": "./aerodyn/IEA-15-240-RWT_AeroDyn15.dat",
     "discretization": {
       "elasto": [49],
       "aero": [49]

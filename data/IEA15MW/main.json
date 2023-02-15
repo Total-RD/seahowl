@@ -2,7 +2,6 @@
   "numerics": {
     "dt": 0.05,
     "t_end": 2000.0,
-    "aerodyn": false,
     "statics_prestep": true
   },
   "outputs": {
@@ -28,7 +27,10 @@
     {
       "translation": [0, 0, 0],
       "rotation": 0,
-      "file": "./turbine.json"
+      "file": "./turbine.json",
+      "use_aerodyn": true,
+      "file_aerodyn": "./aerodyn/IEA-15-240-RWT_AeroDyn15.dat",
+      "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat"
     }
   ]
 }
