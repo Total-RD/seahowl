@@ -101,6 +101,9 @@ It is a JSON dictionary containing:
   - **translation**: (float array of length 3) translation of turbine in space [m].
   - **rotation**: rotation of turbine (yaw) [°].
   - **file**: file path of turbine file (relative to this file path).
+  - **use_aerodyn**: whether to use AeroDyn or not for this turbine.
+  - **file_aerodyn**: path to AeroDyn .dat input file (only used if use_aerodyn is true).
+  - **file_inflowwind**: path to InflowWind .dat input file (only used if use_aerodyn is true).
 
 #### Available Wind Models
 
@@ -118,15 +121,6 @@ It is a JSON dictionary containing:
   }
 }
 ```
-- InflowWind (only works with AeroDyn):
-```json
-{
-  "type": "InflowWind",
-  "options": {
-    "file": "./aerodyn/IEA-15-240-RWT_InflowWind.dat"
-  }
-}
-``` 
 
 #### Turbine file (turbine.json)
 
