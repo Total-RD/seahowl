@@ -31,7 +31,7 @@ void output_results(seahowl::core::System& seahowl_system, chrono::ChSystemSMC& 
     // output
     auto time = system.GetChTime();
     chrono::GetLog() << "time: " << system.GetChTime() << " step: " << step
-                     << " rpm: " << seahowl_system.turbine.rotor.elasto.get_rpm() << "\n";
+                     << " rpm: " << seahowl_system.turbines[0].rotor.elasto.get_rpm() << "\n";
     write_turbine_info_to_csv("output.csv", seahowl_system, system.GetChTime());
 }
 
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
     system.AddMesh(mesh);
 
     auto seahowl_system = get_system_from_json(filepath_main.generic_string(), system, mesh);
-    auto& turbine = seahowl_system.turbine;
+    auto& turbine = seahowl_system.turbines[0];
 
     // get main info
     std::ifstream json_file(filepath_main);

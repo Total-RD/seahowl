@@ -16,14 +16,11 @@ namespace core {
 class System : public ComponentDynamic {
   public:
     /** @brief Wind turbines. */
-    Turbine turbine;
+    std::vector<Turbine> turbines{};
     /** @brief Wind model. */
     std::shared_ptr<seahowl::aero::WindModel> wind_model;
 
-    /**
-     * @brief Constructor.
-     */
-    System(Turbine turbine);
+    System();
 
     /**
      * @brief Initialize system.
