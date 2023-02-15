@@ -30,7 +30,6 @@ using std::filesystem::path;
 using std::filesystem::absolute;
 
 static path DATADIR{};
-// static path DATADIR = path("../../data/IEA15MW");
 
 int main(int argc, char** argv) {
     const char* env_p = std::getenv("SEAHOWL_DATADIR");

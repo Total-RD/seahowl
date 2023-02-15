@@ -129,7 +129,6 @@ For discretization of blades and tower, it is possible to either use an ordered 
 It is a JSON dictionary containing:
 - blades: (dict)
   - **fpm**: (bool) whether to consider Fully-Populated Matrix (FPM) elements (6x6 material properties) or not.
-  - **file_aerodyn**: file path of aerodyn file (relative to this file path), only used if aerodyn option is true in turbine file.
   - **discretization**: (dict)
     - **elasto**: (array of floats) discretization fractions (between 0 and 1) for elasto part of blade.
     - **aero**: (array of floats) discretization fractions (between 0 and 1) for aero part of blade.
