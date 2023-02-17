@@ -145,12 +145,12 @@ void seahowl::aero::AeroDynAdapter::setMotionRoot(seahowl::core::Turbine& turbin
     float* bldRootAcc_C = new float[6 * nblades];
 
     for (int i = 0; i < nblades; i++) {
-        auto bldRootPos = turbine.rotor.blades[i]->elasto->nodes[0]->GetPos();
-        auto bldRootOri = turbine.rotor.blades[i]->elasto->nodes[0]->GetA();
-        auto bldRootTranVel = turbine.rotor.blades[i]->elasto->nodes[0]->GetPos_dt();
-        auto bldRootRotVel = turbine.rotor.blades[i]->elasto->nodes[0]->GetWvel_par();
-        auto bldRootTranAcc = turbine.rotor.blades[i]->elasto->nodes[0]->GetPos_dtdt();
-        auto bldRootRotAcc = turbine.rotor.blades[i]->elasto->nodes[0]->GetWacc_par();
+        auto bldRootPos = turbine.rotor.blades[i]->aero->nodes[0].coordinates;
+        auto bldRootOri = chrono::ChMatrix33(turbine.rotor.blades[i]->aero->nodes[0].rotation);
+        auto bldRootTranVel = turbine.rotor.blades[i]->aero->nodes[0].velocity;
+        auto bldRootRotVel = turbine.rotor.blades[i]->aero->nodes[0].rot_velocity;
+        auto bldRootTranAcc = turbine.rotor.blades[i]->aero->nodes[0].acceleration;
+        auto bldRootRotAcc = turbine.rotor.blades[i]->aero->nodes[0].rot_acceleration;
         for (int j = 0; j < 3; j++) {
             int p = i * 3 + j;
             int q = i * 6 + j;
@@ -193,12 +193,12 @@ void seahowl::aero::AeroDynAdapter::setMotionMesh(seahowl::core::Turbine& turbin
 
     for (int i = 0; i < nblades; i++) {
         for (int j = 0; j < nMeshPerBlade; j++) {
-            auto meshPos = turbine.rotor.blades[i]->elasto->nodes[j]->GetPos();
-            auto meshOri = turbine.rotor.blades[i]->elasto->nodes[j]->GetA();
-            auto meshTranVel = turbine.rotor.blades[i]->elasto->nodes[j]->GetPos_dt();
-            auto meshRotVel = turbine.rotor.blades[i]->elasto->nodes[j]->GetWvel_par();
-            auto meshTranAcc = turbine.rotor.blades[i]->elasto->nodes[j]->GetPos_dtdt();
-            auto meshRotAcc = turbine.rotor.blades[i]->elasto->nodes[j]->GetWacc_par();
+            auto meshPos = turbine.rotor.blades[i]->aero->nodes[j].coordinates;
+            auto meshOri = chrono::ChMatrix33(turbine.rotor.blades[i]->aero->nodes[j].rotation);
+            auto meshTranVel = turbine.rotor.blades[i]->aero->nodes[j].velocity;
+            auto meshRotVel = turbine.rotor.blades[i]->aero->nodes[j].rot_velocity;
+            auto meshTranAcc = turbine.rotor.blades[i]->aero->nodes[j].acceleration;
+            auto meshRotAcc = turbine.rotor.blades[i]->aero->nodes[j].rot_acceleration;
 
             auto ii = i * nMeshPerBlade + j;
             for (int k = 0; k < 3; k++) {
@@ -375,10 +375,10 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     // VTK
     WrVTK = 2;       // default of no vtk output
     WrVTK_Type = 1;  // defautl of surface meshes
-    VTKNacDim = new float[6]{
-        0,  -4.2751, -4.2751,
-        12, 8.552,   8.552};  // default nacelle dimension for VTK surface rendering [x0,y0,z0,Lx,Ly,Lz] (m)
-    VTKHubRad = 3.97;         // default hub radius for VTK surface rendering
+    VTKNacDim =
+        new float[6]{0,     -4.2751, -4.2751, 12,
+                     8.552, 8.552};  // default nacelle dimension for VTK surface rendering [x0,y0,z0,Lx,Ly,Lz] (m)
+    VTKHubRad = 3.97;                // default hub radius for VTK surface rendering
 
     // NumBlades    = 3;
     // NumMeshPts   = 1;

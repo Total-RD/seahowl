@@ -11,6 +11,9 @@ BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
     coordinates = point.coordinates;
     rotation = point.rotation;
     velocity = chrono::ChVector<double>(0.0, 0.0, 0.0);
+    rot_velocity = chrono::ChVector<double>(0.0, 0.0, 0.0);
+    acceleration = chrono::ChVector<double>(0.0, 0.0, 0.0);
+    rot_acceleration = chrono::ChVector<double>(0.0, 0.0, 0.0);
     load = chrono::ChVector<double>(0.0, 0.0, 0.0);
     wind_velocity = chrono::ChVector<double>(0.0, 0.0, 0.0);
     wind_velocity_shadowed = chrono::ChVector<double>(0.0, 0.0, 0.0);

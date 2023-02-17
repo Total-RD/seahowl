@@ -13,9 +13,12 @@ namespace aero {
 
 /**@brief Blade aerodynamic node */
 struct BladeNodeAero {
-    chrono::ChVector<double> coordinates;   ///< Point coordinates
-    chrono::ChQuaternion<double> rotation;  ///< Rotation
-    chrono::ChVector<double> velocity;      ///< Velocity
+    chrono::ChVector<double> coordinates;       ///< Point coordinates
+    chrono::ChQuaternion<double> rotation;      ///< Rotation
+    chrono::ChVector<double> velocity;          ///< Translational Velocity
+    chrono::ChVector<double> rot_velocity;      ///< Rotational Velocity
+    chrono::ChVector<double> acceleration;      ///< Translational acceleration
+    chrono::ChVector<double> rot_acceleration;  ///< Rotational acceleration
     chrono::ChVector<double> load;
     chrono::ChVector<double> wind_velocity;              ///< Uninduced wind velocities on blade nodes
     chrono::ChVector<double> wind_velocity_shadowed;     ///< Wind velocities on blade nodes with tower shadow effect

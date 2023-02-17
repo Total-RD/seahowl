@@ -104,9 +104,27 @@ void Blade::update_positions_aero() {
         node_aero.coordinates = coordsys.TransformLocalToParent(offset3D);
 
         // update velocity of aero elements
+        double eta_scaled = 0.5 * (eta + 1.0);
         node_aero.velocity =
-            0.5 * (std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetPos_dt() +
-                   std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetPos_dt());
+            ((1.0 - eta_scaled) *
+                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetPos_dt() +
+             eta_scaled *
+                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetPos_dt());
+        node_aero.rot_velocity =
+            ((1.0 - eta_scaled) *
+                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetWvel_par() +
+             eta_scaled *
+                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetWvel_par());
+        node_aero.acceleration =
+            ((1.0 - eta_scaled) *
+                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetPos_dtdt() +
+             eta_scaled *
+                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetPos_dtdt());
+        node_aero.rot_acceleration =
+            ((1.0 - eta_scaled) *
+                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetWacc_par() +
+             eta_scaled *
+                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetWacc_par());
     }
 
     // update pitch of blade for aero
