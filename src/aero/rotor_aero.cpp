@@ -160,7 +160,7 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
     }
 }
 
-void RotorAero::compute_wind_loads_aerodyn(float *LoadAeroDyn,
+void RotorAero::compute_wind_loads_aerodyn(float* LoadAeroDyn,
                                            const WindModel& wind_model,
                                            double time,
                                            const TowerAero& tower_aero,
@@ -168,28 +168,25 @@ void RotorAero::compute_wind_loads_aerodyn(float *LoadAeroDyn,
                                            bool tip_loss,
                                            bool hub_loss) {
     double density = wind_model.get_density();
-    for (int kk = 0; kk < 3; kk++) {
-        auto& blade = blades[kk];
+    int count_blade = -1;
+    for (auto& blade : blades) {
+        count_blade += 1;
         auto blade_azimuth = azimuth + blade->azimuth0;
         // check that blade_azimuth is between pi and -pi
         if (blade_azimuth < -chrono::CH_C_PI || blade_azimuth > chrono::CH_C_PI) {
             blade_azimuth =
                 abs(std::fmod((blade_azimuth + 3 * chrono::CH_C_PI), 2 * chrono::CH_C_PI)) - chrono::CH_C_PI;
         }
-        for (int ii = 0; ii < blade->elements.size(); ii++) {
-
-            auto& element = blade->elements[ii];
-            auto length = element.length;
-
+        int count_node = -1;
+        for (auto& node : blade->nodes) {
+            count_node += 1;
             // store load in global frame
-            int indp = kk * blade->elements.size() + ii;
-            int pp = (kk * (blade->elements.size() + 1) + ii) * 6;
-            int qq = (kk * (blade->elements.size() + 1) + ii + 1) * 6;
-
-            auto loadx = (LoadAeroDyn[pp]   + LoadAeroDyn[qq]  ) / 2.0 * length ;
-            auto loady = (LoadAeroDyn[pp+1] + LoadAeroDyn[qq+1]) / 2.0 * length ;
-            auto loadz = (LoadAeroDyn[pp+2] + LoadAeroDyn[qq+2]) / 2.0 * length ;
-            blade->loads[ii].Set(loadx, loady, loadz);
+            int pp = (count_blade * (blade->elements.size() + 1) + count_node) * 6;
+            node.load = chrono::ChVector<double>(LoadAeroDyn[pp], LoadAeroDyn[pp + 1], LoadAeroDyn[pp + 2]);
+        }
+        // update loads of blade
+        for (int ii = 0; ii < blade->elements.size(); ii++) {
+            blade->loads[ii] = blade->elements[ii].get_load();
         }
     }
 }
