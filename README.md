@@ -29,7 +29,6 @@ option(SEAHOWL_ENABLE_DOC "Generate html documentation" OFF)
 option(SEAHOWL_ENABLE_BUILD "Build library and drivers" ON)
 option(SEAHOWL_ENABLE_PYTHON "Enable python binding" OFF)
 option(SEAHOWL_ENABLE_EXAMPLES "Enable examples" ON)
-option(SEAHOWL_ENABLE_ROSCO "Enable ROSCO controller" ON)
 option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
 option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
 ```

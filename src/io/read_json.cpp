@@ -346,7 +346,8 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
     // controller
     if (controller_json.at("type").get<std::string>() == "ROSCO") {
         turbine.controller = std::make_shared<seahowl::servo::ControllerDISCON>(
-            (DATADIR / controller_json.at("options").at("file")).generic_string());
+            (DATADIR / controller_json.at("options").at("infile")).generic_string(),
+            (DATADIR / controller_json.at("options").at("libfile")).generic_string());
     }
 
     // get extra drivetrain info

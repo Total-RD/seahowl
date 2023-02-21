@@ -14,7 +14,6 @@
 /// <param name="accINFILE"></param>
 /// <param name="avcOUTNAME"></param>
 /// <param name="avcMSG"></param>
-extern "C" void DISCON(float* avrSWAP, int* aviFAIL, char* accINFILE, char* avcOUTNAME, char* avcMSG);
 
 namespace seahowl {
 namespace servo {
@@ -24,6 +23,10 @@ namespace servo {
  * @todo Set as Pimpl private implementation of seahowl::servo::Controller class
  */
 struct DisconController {
+    // declare DISCON routine type and variable to load from dynamic library
+    typedef void (*DISCON_routine)(float* avrSWAP, int* aviFAIL, char* accINFILE, char* avcOUTNAME, char* avcMSG);
+    DISCON_routine DISCON;
+
     float& m_time = avrSWAP[1];     ///<@brief Time
     float& m_dt = avrSWAP[2];       ///<@brief Time step
     float& m_pitch = avrSWAP[41];   ///<@brief Pitch return controller states
@@ -50,7 +53,7 @@ struct DisconController {
     /// <param name="omega">rotor speed</param>
     /// <param name="pitch">pitch collective</param>
     /// <param name="nblades">number of blades</param>
-    void Init();
+    void Init(std::string libfile);
 
     /// <summary>
     /// Call the DISCON controller
@@ -174,7 +177,9 @@ class ControllerDISCON : public Controller {
      * @param[in] infile Path of parameters file.
      * @param[in] infile Path of output file.
      */
-    ControllerDISCON(std::string infile = u8"DISCON.IN", std::string outname = u8"simDEBUG.RO.dbg");
+    ControllerDISCON(std::string infile = u8"DISCON.IN",
+                     std::string libfile = u8"libdiscon.so",
+                     std::string outname = u8"simDEBUG.RO.dbg");
 
     /**
      * @brief Initialization of controller.
@@ -204,6 +209,9 @@ class ControllerDISCON : public Controller {
     virtual double get_collective_pitch() const override;
 
   private:
+    /** @brief Filepath of dynamic library (for DISCON routine). */
+    std::string libfile;
+
     // init called from other init function
     void init(double time,
               double dt,
@@ -212,6 +220,7 @@ class ControllerDISCON : public Controller {
               double pitch_collective,
               double rotor_azimuth,
               size_t nblades);
+
     // updates turbine variables of object communicating with DISCON module
     void update_turbine_variables(double time,
                                   double dt,
@@ -220,6 +229,7 @@ class ControllerDISCON : public Controller {
                                   double pitch_collective,
                                   double rotor_azimuth,
                                   double power);
+
     // step called from other step function
     void step(double time,
               double dt,

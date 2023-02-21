@@ -34,7 +34,8 @@
   "controller": {
     "type": "ROSCO",
     "options": {
-      "file": "./controller/DISCON.IN"
+      "infile": "./controller/DISCON.IN",
+      "libfile": "./controller/libdiscon.so"
     }
   }
 }

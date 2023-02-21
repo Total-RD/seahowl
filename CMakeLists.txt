@@ -35,7 +35,6 @@ option(SEAHOWL_ENABLE_DOC "Generate html documentation" OFF)
 option(SEAHOWL_ENABLE_BUILD "Build library and drivers" ON)
 option(SEAHOWL_ENABLE_PYTHON "Enable python binding" OFF)
 option(SEAHOWL_ENABLE_EXAMPLES "Enable examples" ON)
-option(SEAHOWL_ENABLE_ROSCO "Enable ROSCO controller" ON)
 option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
 option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
 
@@ -59,13 +58,6 @@ find_package(
 
 # JSON Parser library
 find_package(nlohmann_json REQUIRED)
-
-# ROSCO Discon Wind Turbine controller
-if(SEAHOWL_ENABLE_ROSCO)
-    find_package(ROSCO REQUIRED)
-    add_compile_definitions(SEAHOWL_HAVE_ROSCO=1)
-    add_definitions("-DHAVE_ROSCO=1")
-endif(SEAHOWL_ENABLE_ROSCO)
 
 # AeroDyn module
 if(SEAHOWL_ENABLE_AERODYN)
@@ -193,12 +185,14 @@ source_group(aero FILES
     ${SEAHOWL_AERO_HEADERS})
 
 # servo
-set(SEAHOWL_SERVO_SOURCES src/servo/controller.cpp)
-set(SEAHOWL_SERVO_HEADERS include/seahowl/servo/controller.h)
-if(SEAHOWL_ENABLE_ROSCO)
-    list(APPEND SEAHOWL_SERVO_SOURCES src/servo/controller_discon.cpp)
-    list(APPEND SEAHOWL_SERVO_HEADERS include/seahowl/servo/controller_discon.h)
-endif(SEAHOWL_ENABLE_ROSCO)
+set(SEAHOWL_SERVO_SOURCES
+    src/servo/controller.cpp
+    src/servo/controller_discon.cpp
+)
+set(SEAHOWL_SERVO_HEADERS
+    include/seahowl/servo/controller.h
+    include/seahowl/servo/controller_discon.h
+)
 source_group(servo FILES ${SEAHOWL_SERVO_SOURCES} ${SEAHOWL_SERVO_HEADERS})
 
 # io
@@ -247,10 +241,6 @@ set_target_properties(
 )
 
 target_link_libraries(seahowl_core PRIVATE nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES})
-
-if(SEAHOWL_ENABLE_ROSCO)
-    target_link_libraries(seahowl_core PRIVATE ROSCO::ROSCO)
-endif(SEAHOWL_ENABLE_ROSCO)
 
 if(SEAHOWL_ENABLE_VTK)
     target_link_libraries(seahowl_core PRIVATE VTK::CommonDataModel VTK::IOXML)

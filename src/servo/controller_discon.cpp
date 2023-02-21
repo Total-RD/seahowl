@@ -4,11 +4,19 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <filesystem>
 
-seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::string outname) {
+#include <dlfcn.h>
+
+seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::string libfile_in, std::string outname) {
     has_pitch_control = true;
     has_torque_control = true;
 
+    if (!std::filesystem::exists(std::filesystem::path(libfile_in))) {
+        throw std::runtime_error("Dynamic library path for DISCON routine does not exist: " + libfile_in + ".");
+    }
+
+    libfile = libfile_in;
     pImpl.ResetAll();
     pImpl.SetINFILE(infile);
     pImpl.SetOUTNAME(outname);
@@ -90,7 +98,7 @@ void seahowl::servo::ControllerDISCON::init(double time,
 
     pImpl.SetAvrSWAP(27, 10.0);  // estimated wind speed (needs to be != 0 at init for it to work in ROSCO!)
 
-    pImpl.Init();
+    pImpl.Init(libfile);
 }
 
 double seahowl::servo::ControllerDISCON::get_torque_elec() const {
@@ -374,7 +382,18 @@ not... IF (LocalVar%iStatus == 0) THEN LocalVar%BlPitch(1) = avrSWAP(4) LocalVar
 
     */
 
-void seahowl::servo::DisconController::Init() {
+/*
+
+
+auto* handler = dlopen("/home/tridelat/work/NREL/ROSCO/ROSCO/build/libdiscon.so");
+auto discon1 = dlsym(handler, "DISCON");
+*/
+
+void seahowl::servo::DisconController::Init(std::string libfile) {
+    // Load dynamic library and point to DISCON routine
+    void* handler = dlopen(libfile.c_str(), RTLD_LAZY);
+    DISCON = (DISCON_routine)dlsym(handler, "DISCON");
+
     avrSWAP[58] = 500;  // Buffer chaar size
     avrSWAP[50] = 500;  // self.char_buffer
     avrSWAP[51] = 500;  // self.char_buffer
