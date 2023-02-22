@@ -32,7 +32,7 @@ void output_results(seahowl::core::System& seahowl_system, chrono::ChSystemSMC& 
     auto time = system.GetChTime();
     chrono::GetLog() << "time: " << system.GetChTime() << " step: " << step
                      << " rpm: " << seahowl_system.turbines[0].rotor.elasto.get_rpm() << "\n";
-    write_turbine_info_to_csv("output.csv", seahowl_system, system.GetChTime());
+    write_turbine_info_to_csv("./output/output.csv", seahowl_system, system.GetChTime());
 }
 
 /**@brief Driver main function */
@@ -41,6 +41,9 @@ int main(int argc, char* argv[]) {
 
     auto DATADIR = absolute(path(u8"../data"));
     auto logoname = (DATADIR / ".." / "doc" / "source" / "totalenergies_alpha.png").generic_string();
+    // outputs
+    remove_all("./output");
+    create_directory("./output");
 
     // path of main input file
     auto filepath_main = DATADIR / "IEA15MW/main.json";
@@ -56,7 +59,6 @@ int main(int argc, char* argv[]) {
     system.AddMesh(mesh);
 
     auto seahowl_system = get_system_from_json(filepath_main.generic_string(), system, mesh);
-    auto& turbine = seahowl_system.turbines[0];
 
     // get main info
     std::ifstream json_file(filepath_main);
@@ -90,14 +92,19 @@ int main(int argc, char* argv[]) {
 #ifdef HAVE_VTK
     std::vector<OutputMeshVTK> vtk_outputs;
     if (output_vtk) {
-        remove_all("./vtk");
-        create_directory("./vtk");
-        for (int ii = 0; ii < seahowl_system.turbine.rotor.blades.size(); ii++) {
-            auto& post_blade = vtk_outputs.emplace_back(*seahowl_system.turbine.rotor.blades[ii]->elasto.get());
-            post_blade.init(("./vtk/blade" + std::to_string(ii + 1)).c_str());
+        for (auto [turbine_ptr, idx_turbine] = std::tuple{seahowl_system.turbines.begin(), 0};
+             turbine_ptr != seahowl_system.turbines.end(); turbine_ptr++, idx_turbine++) {
+            auto& turbine = *turbine_ptr;
+            create_directory("./output/vtk");
+            for (auto [blade_ptr, idx_blade] = std::tuple{turbine.blades.begin(), 0}; blade_ptr != turbine.blades.end();
+                 blade_ptr++, idx_blade++) {
+                auto& blade = *blade_ptr;
+                auto& post_blade = vtk_outputs.emplace_back(*blade->elasto.get());
+                post_blade.init(("./output/vtk/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade)).c_str());
+            }
+            auto& post_tower = vtk_outputs.emplace_back(turbine.tower.elasto);
+            post_tower.init(("./output/vtk/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
         }
-        auto& post_tower = vtk_outputs.emplace_back(seahowl_system.turbine.tower.elasto);
-        post_tower.init("./vtk/tower");
     }
 #endif
 

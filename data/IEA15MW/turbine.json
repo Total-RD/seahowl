@@ -32,7 +32,7 @@
     "file": "./tower.json"
   },
   "controller": {
-    "type": "ROSCO",
+    "type": "DISCON",
     "options": {
       "infile": "./controller/DISCON.IN",
       "libfile": "./controller/libdiscon.so"

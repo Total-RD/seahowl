@@ -344,7 +344,7 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
     turbine.blades = blades;
 
     // controller
-    if (controller_json.at("type").get<std::string>() == "ROSCO") {
+    if (controller_json.at("type").get<std::string>() == "DISCON") {
         turbine.controller = std::make_shared<seahowl::servo::ControllerDISCON>(
             (DATADIR / controller_json.at("options").at("infile")).generic_string(),
             (DATADIR / controller_json.at("options").at("libfile")).generic_string());
