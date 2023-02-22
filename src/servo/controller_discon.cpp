@@ -5,8 +5,12 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
-
-#include <dlfcn.h>
+#ifdef __unix__
+    #include <dlfcn.h>
+#endif
+#ifdef _WIN32
+    #include <windows.h>
+#endif
 
 seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::string libfile_in, std::string outname) {
     has_pitch_control = true;
@@ -391,8 +395,14 @@ auto discon1 = dlsym(handler, "DISCON");
 
 void seahowl::servo::DisconController::Init(std::string libfile) {
     // Load dynamic library and point to DISCON routine
+#ifdef __unix__
     void* handler = dlopen(libfile.c_str(), RTLD_LAZY);
     DISCON = (DISCON_routine)dlsym(handler, "DISCON");
+#endif
+#ifdef _WIN32
+    HMODULE handler = LoadLibrary(libfile.c_str());
+    DISCON = (DISCON_routine)GetProcAddress(handler, "DISCON");
+#endif
 
     avrSWAP[58] = 500;  // Buffer chaar size
     avrSWAP[50] = 500;  // self.char_buffer
