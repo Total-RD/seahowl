@@ -184,7 +184,7 @@ void seahowl::aero::AeroDynAdapter::setMotionRoot(seahowl::core::Turbine& turbin
 
 void seahowl::aero::AeroDynAdapter::setMotionMesh(seahowl::core::Turbine& turbine) {
     auto nblades = turbine.blades.size();
-    auto nMeshPerBlade = turbine.rotor.blades[0]->elasto->nodes.size();
+    auto nMeshPerBlade = turbine.rotor.blades[0]->aero->nodes.size();
     auto nMesh = nMeshPerBlade * nblades;
     float* meshPos_C = new float[3 * nMesh];
     double* meshOri_C = new double[9 * nMesh];
