@@ -12,7 +12,7 @@
     #include <windows.h>
 #endif
 
-seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::string libfile_in, std::string outname) {
+seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::string libfile_in) {
     has_pitch_control = true;
     has_torque_control = true;
 
@@ -23,7 +23,7 @@ seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::stri
     libfile = libfile_in;
     pImpl.ResetAll();
     pImpl.SetINFILE(infile);
-    pImpl.SetOUTNAME(outname);
+    pImpl.SetOUTNAME(libfile + ".dbg");
 }
 
 void seahowl::servo::ControllerDISCON::step(double time, double dt, const seahowl::core::Turbine& turbine) {

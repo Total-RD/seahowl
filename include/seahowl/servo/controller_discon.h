@@ -177,9 +177,7 @@ class ControllerDISCON : public Controller {
      * @param[in] infile Path of parameters file.
      * @param[in] infile Path of output file.
      */
-    ControllerDISCON(std::string infile = u8"DISCON.IN",
-                     std::string libfile = u8"libdiscon.so",
-                     std::string outname = u8"simDEBUG.RO.dbg");
+    ControllerDISCON(std::string infile = u8"DISCON.IN", std::string libfile = u8"libdiscon.so");
 
     /**
      * @brief Initialization of controller.
