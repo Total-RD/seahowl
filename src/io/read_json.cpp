@@ -24,6 +24,38 @@ using std::filesystem::absolute;
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
+
+/**@brief Copy file to destination dir, increment file name if already exists, and return path to new copid file.
+*/
+std::string copy_file_and_increment(std::string filepath, std::string destination_dir) {
+    if (!fs::exists(destination_dir)) {
+        fs::create_directory(destination_dir);
+    }
+    path pfilepath = fs::path(filepath);
+    path filecopypath;
+    if (fs::exists(destination_dir / pfilepath.filename())) {
+        auto filename = pfilepath.stem().generic_string();
+        auto fileext = pfilepath.extension().generic_string();
+        bool copied = false;
+        int file_idx = 0;
+        while (!copied) {
+            filecopypath = fs::path(destination_dir) / (filename + std::to_string(file_idx) + fileext);
+            if (!fs::exists(filecopypath)) {
+                fs::copy(pfilepath, filecopypath);
+                pfilepath = filecopypath;
+                copied = true;
+            } else {
+                file_idx += 1;
+            }
+        }
+    } else {
+        filecopypath = destination_dir / pfilepath.filename();
+        fs::copy(pfilepath, filecopypath);
+    }
+    return filecopypath.generic_string();
+}
+
+
 std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_json(std::string filepath) {
     std::ifstream json_file(filepath);
 
@@ -345,9 +377,12 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
 
     // controller
     if (controller_json.at("type").get<std::string>() == "DISCON") {
+        auto OUTPUT_CONTROLLER_DIR = path("./output/dynlib_copies");
+        auto libfilepath = path(DATADIR / controller_json.at("options").at("libfile"));
+        auto copyfilepath = copy_file_and_increment(libfilepath.generic_string(), OUTPUT_CONTROLLER_DIR.generic_string());
         turbine.controller = std::make_shared<seahowl::servo::ControllerDISCON>(
             (DATADIR / controller_json.at("options").at("infile")).generic_string(),
-            (DATADIR / controller_json.at("options").at("libfile")).generic_string());
+            copyfilepath);
     }
 
     // get extra drivetrain info
