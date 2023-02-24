@@ -9,27 +9,52 @@
 namespace seahowl {
 namespace core {
 
-
+/**
+ * @brief Component that evolves dynamically during simulation.
+ */
 class ComponentDynamic {
   public:
+    /**
+     * @brief Initialize the component, called before starting the simulation.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
     virtual void init(double time, double dt) = 0;
+
+    /**
+     * @brief Prestep for component, called before elastodynamic stepping.
+     *
+     * @param[in] time Time of the simulation.
+     * @param[in] dt Time step length.
+     */
     virtual void prestep(double time, double dt) = 0;
+
+    /**
+     * @brief Poststep for component, called after elastodynamic stepping.
+     *
+     * @param[in] time Time of the simulation.
+     * @param[in] dt Time step length.
+     */
     virtual void poststep(double time, double dt) = 0;
 };
 
-
-/**@brief Parametric discretization point */
+/**
+ * @brief Parametric discretization point.
+ */
 struct DiscretizationPoint {
+    /** @brief Index of element. */
     int index = 0;
+    /** @brief Abscissa along element within range [-1, +1], with -1 at node1, and +1 at node2. */
     double eta = 0;
 };
 
 std::vector<DiscretizationPoint> get_indice_and_positions(const std::vector<double>& discretization_fractions,
                                                           const std::vector<double>& reference_fractions);
 
-
 template <typename T>
-std::vector<T> get_discretized_points(const std::vector<double>& discretization_fractions, const std::vector<T>& reference_points) {
+std::vector<T> get_discretized_points(const std::vector<double>& discretization_fractions,
+                                      const std::vector<T>& reference_points) {
     if (discretization_fractions.size() == 0) {
         // discretize at centers of reference directly
         return reference_points;

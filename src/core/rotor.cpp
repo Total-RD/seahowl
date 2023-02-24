@@ -16,8 +16,6 @@ Rotor::Rotor() {
     aero = RotorAero();
 }
 
-Rotor::~Rotor() {}
-
 void Rotor::init(double time, double dt) {
     prestep(time, dt);
     poststep(time, dt);

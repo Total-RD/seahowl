@@ -16,33 +16,114 @@ class ChMesh;
 namespace seahowl {
 namespace core {
 
+/**
+ * @brief Tower of wind turbine, with both elasto and aero components.
+ *
+ * This class acts as a "mediator" between the elasto and aero components.
+ * Mappings between elasto nodes to aero domain and aero nodes to elasto domain are used to ensure communication between
+ * the aero and elasto components. The aero loads are communicated to the elasto component in the prestep, while the
+ * aero positions are updated using the elasto positions in the poststep.
+ */
 class Tower : public ComponentDynamic {
   public:
-    seahowl::elasto::TowerElasto elasto;  ///< Elastodynamic element mesh
-    seahowl::aero::TowerAero aero;        ///< Aerodynamic element mesh
-    std::vector<seahowl::core::TowerReferencePoint>
-        reference_points;  ///<@todo  Refactor: Only used for construction to pass to elasto and aero. Use a Builder
+    /** @brief Elastodynamic model of the tower. */
+    seahowl::elasto::TowerElasto elasto;
+    /** @brief Aerodynamic model of the tower. */
+    seahowl::aero::TowerAero aero;
+    /** @brief List of reference points describing the tower properties along its longitudinal axis.
+     * @todo  Refactor: Only used for construction to pass to elasto and aero. Use a Builder */
+    std::vector<seahowl::core::TowerReferencePoint> reference_points;
+    /** @brief Mapping of aero elements into elasto domain. */
     std::vector<seahowl::core::DiscretizationPoint> mapping_aero2elasto;
+    /** @brief Mapping of elasto nodes into aero domain. */
     std::vector<seahowl::core::DiscretizationPoint> mapping_elasto2aero;
 
+    /**
+     * @brief Constructor.
+     *
+     * Creates elasto and aero tower instances.
+     */
     Tower();
-    ~Tower();
 
+    /**
+     * @brief Initialize tower, called before starting the simulation.
+     *
+     * Runs the preset and poststep once to make elasto and aero components match.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
     void init(double time, double dt) override;
-    void prestep(double time, double dt) override;
-    void poststep(double time, double dt) override;
-    void assemble(std::shared_ptr<chrono::fea::ChMesh> mesh);
-    void build();
-    void set_discretization_elasto(std::vector<double> fractions);
-    void set_discretization_aero(std::vector<double> fractions);
-    void compute_mapping_aero2elasto();
-    void compute_mapping_elasto2aero();
 
-    /**@brief Updates positions for aero elements */
+    /**
+     * @brief Prestep for tower, called before elastodynamic stepping.
+     *
+     * Updates aero loads on elasto component.
+     *
+     * @param[in] time Time of the simulation.
+     * @param[in] dt Time step length.
+     */
+    void prestep(double time, double dt) override;
+
+    /**
+     * @brief Poststep for tower, called afetr elastodynamic stepping.
+     *
+     * Updates aero positions from elasto component.
+     *
+     * @param[in] time Absolute time of the simulation.
+     * @param[in] dt Time step length.
+     */
+    void poststep(double time, double dt) override;
+
+    /**
+     * @brief Builds the tower (aero and elasto part).
+     *
+     * Sets the nodes and elements for elasto and aero components of the tower, as well as the aero->elasto mapping and
+     * elasto->aero mapping.
+     */
+    void build();
+
+    /**
+     * @brief Assembles the tower (elasto part).
+     *
+     * @param[out] mesh Mesh on which to add nodes and elements.
+     */
+    void assemble(std::shared_ptr<chrono::fea::ChMesh> mesh);
+
+    /**
+     * @brief Sets the discretization fractions to use when building the elasto part of the tower.
+     *
+     * @param[in] fractions Normalized discretization fractions within [0, 1].
+     */
+    void set_discretization_elasto(std::vector<double> fractions);
+
+    /**
+     * @brief Sets the discretization fractions to use when building the aero part of the tower.
+     *
+     * @param[in] fractions Normalized discretization fractions within [0, 1].
+     */
+    void set_discretization_aero(std::vector<double> fractions);
+
+    /**
+     * @brief Updates aero positions, rotations, velocities and accelerations from elasto component of the tower.
+     */
     void update_positions_aero();
 
-    /**@brief Applies elastodynamic loadings */
+    /**
+     * @brief Accumulates aero loads to the elasto component of the tower.
+     */
     void update_loads_elasto();
+
+  private:
+    /**
+     * @brief Computes the aero->elasto mapping that is used when accumulating aero loads on elasto component.
+     */
+    void compute_mapping_aero2elasto();
+
+    /**
+     * @brief Computes the elasto->aero mapping.
+     */
+    void compute_mapping_elasto2aero();
 };
 
 }  // namespace core

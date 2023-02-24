@@ -8,44 +8,87 @@
 namespace seahowl {
 namespace core {
 
-/**@brief Reference point (mesh) for Blade */
+/**
+ * @brief Blade elasto reference point.
+ *
+ * The coordinate system used here is the IEC reference coordinate system for wind turbines:
+ * x-axis: flapwise pointing towards nacelle,
+ * y-axis: edgewise pointing towards trailing edge,
+ * z-axis: longitudinal pointing towards blade tip.
+ * (0, 0, 0) is at the root of the blade.
+ */
 struct BladeReferencePoint {
-    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};               ///< Reference coordinates
-    chrono::ChVector2<double> offset_elastic{0.0, 0.0};                ///< Offset of center of elasticity
-    chrono::ChVector2<double> offset_gravity{0.0, 0.0};                ///< Offset of center of gravity
-    chrono::ChVector2<double> offset_aero{0.0, 0.0};                   ///< Aerodynamic offset
-    chrono::ChMatrixNM<double, 6, 6> stiffness_matrix;                 ///< Stiffness matrix
-    chrono::ChMatrixNM<double, 6, 6> mass_matrix;                      ///< Mass matrix
-    double fraction = 0.0;                                             ///< Fraction (normalized abscissa)
-    double structural_twist = 0.0;                                     ///< Twist
-    double chord = 0.0;                                                ///< Chord
-    chrono::fea::DampingCoefficients damping_coefficients;             ///< Damping coefficients
-    std::vector<seahowl::aero::AirfoilProperties> airfoil_properties;  ///< Airfoil properties for each element
+    // elasto
+    //
+    /** @brief Coordinates of reference point. */
+    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};
+    /** @brief Offset (x, y) for the center of elasticity of blade at reference point. */
+    chrono::ChVector2<double> offset_elastic{0.0, 0.0};
+    /** @brief Offset (x, y) for the center of gravity of blade at reference point. */
+    chrono::ChVector2<double> offset_gravity{0.0, 0.0};
+    /** @brief Offset (x, y) for the aerodynamic center of blade at reference point. */
+    chrono::ChVector2<double> offset_aero{0.0, 0.0};
+    /** @brief Stiffness matrix of blade at reference point. */
+    chrono::ChMatrixNM<double, 6, 6> stiffness_matrix;
+    /** @brief Mass matrix of blade at reference point. */
+    chrono::ChMatrixNM<double, 6, 6> mass_matrix;
+    /** @brief Fraction (normalized abscissa along longitudinal axis of component) of reference point. */
+    double fraction = 0.0;
+    /** @brief Structural twist angle of blade at reference point. */
+    double structural_twist = 0.0;
 
+    // aero
+    //
+    /** @brief Chord of blade at reference point. */
+    double chord = 0.0;
+    /** @brief Damping coefficients of blade at reference point. */
+    chrono::fea::DampingCoefficients damping_coefficients;
+    /** @brief Airfoil properties of blade at reference point. */
+    std::vector<seahowl::aero::AirfoilProperties> airfoil_properties{};
+
+    /**
+     * @brief Constructor.
+     */
     BladeReferencePoint();
-    ~BladeReferencePoint();
 
     BladeReferencePoint operator*(const double factor) const;
     BladeReferencePoint operator+(const BladeReferencePoint& other) const;
 };
 
-/**@brief Reference point (mesh) for Tower */
+/**
+ * @brief Tower reference point.
+ */
 struct TowerReferencePoint {
-    chrono::ChVector<double> coordinates;  ///< Coordinates of reference point
-    double fraction = 0.0;                 ///< Fraction (normalized abscissa along tower)
     // elasto
-    double density = 0.0;                                   ///< Density
-    double stiffness_axial = 0.0;                           ///< Axial stiffness
-    double stiffness_foreaft = 0.0;                         ///< Fore-aft stiffness
-    double stiffness_sideside = 0.0;                        ///< Side-side stiffness
-    double stiffness_torsion = 0.0;                         ///< Torsional stiffness
-    chrono::fea::DampingCoefficients damping_coefficients;  ///< Damping coefficients
+    //
+    /** @brief Coordinates of reference point. */
+    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};
+    /** @brief Fraction (normalized abscissa along longitudinal axis of component) of reference point. */
+    double fraction = 0.0;
+    /** @brief Lineic density of tower at reference point. */
+    double density = 0.0;
+    /** @brief Axial stiffness of tower at reference point. */
+    double stiffness_axial = 0.0;
+    /** @brief Fore-aft stiffness of tower at reference point. */
+    double stiffness_foreaft = 0.0;
+    /** @brief Side-side stiffness of tower at reference point. */
+    double stiffness_sideside = 0.0;
+    /** @brief Torsional stiffness of tower at reference point. */
+    double stiffness_torsion = 0.0;
+    /** @brief Damping coefficients of tower at reference point. */
+    chrono::fea::DampingCoefficients damping_coefficients;
+
     // aero
+    //
+    /** @brief Diameter of tower at reference point. */
     double diameter = 0.0;
+    /** @brief Drag coefficient of tower at reference point. */
     double drag_coefficient = 0.0;
 
+    /**
+     * @brief Constructor.
+     */
     TowerReferencePoint();
-    ~TowerReferencePoint();
 
     TowerReferencePoint operator*(const double factor) const;
     TowerReferencePoint operator+(const TowerReferencePoint& other) const;

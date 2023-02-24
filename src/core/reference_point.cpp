@@ -12,8 +12,6 @@ BladeReferencePoint::BladeReferencePoint() {
     damping_coefficients.alpha = 0.0;
 }
 
-BladeReferencePoint::~BladeReferencePoint() {}
-
 BladeReferencePoint BladeReferencePoint::operator*(const double factor) const {
     BladeReferencePoint new_point = *this;
     new_point.coordinates *= factor;
@@ -64,8 +62,6 @@ TowerReferencePoint::TowerReferencePoint() {
     damping_coefficients.bt = 0.06;
     damping_coefficients.alpha = 0.0;
 }
-
-TowerReferencePoint::~TowerReferencePoint() {}
 
 TowerReferencePoint TowerReferencePoint::operator*(const double factor) const {
     TowerReferencePoint new_point = *this;

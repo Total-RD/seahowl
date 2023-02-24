@@ -19,8 +19,6 @@ Blade::Blade() {
     aero = std::make_shared<BladeAero>();
 }
 
-Blade::~Blade() {}
-
 void Blade::init(double time, double dt) {
     prestep(time, dt);
     poststep(time, dt);
@@ -36,7 +34,7 @@ void Blade::poststep(double time, double dt) {
     update_positions_aero();
 }
 
-void Blade::assemble(chrono::ChSystemSMC& system, std::shared_ptr<chrono::fea::ChMesh> mesh) {
+void Blade::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) {
     elasto->assemble(mesh);
 }
 

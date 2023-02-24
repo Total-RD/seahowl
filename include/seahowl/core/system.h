@@ -8,17 +8,46 @@
 namespace seahowl {
 namespace core {
 
-class System {
+/**
+ * @brief System composed of wind turbines and environmental conditions.
+ *
+ * This class controls the workflow between wind turbines and the environment (wind, waves, etc).
+ */
+class System : public ComponentDynamic {
   public:
+    /** @brief Wind turbines. */
     Turbine turbine;
+    /** @brief Wind model. */
     std::shared_ptr<seahowl::aero::WindModel> wind_model;
 
+    /**
+     * @brief Constructor.
+     */
     System(Turbine turbine);
-    ~System();
 
-    virtual void init(double time, double dt);
-    virtual void prestep(double time, double dt);
-    virtual void poststep(double time, double dt);
+    /**
+     * @brief Initialize system.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
+    virtual void init(double time, double dt) override;
+
+    /**
+     * @brief Prestep for system, called before elastodynamic stepping.
+     *
+     * @param[in] time Time of the simulation.
+     * @param[in] dt Time step length.
+     */
+    virtual void prestep(double time, double dt) override;
+
+    /**
+     * @brief Poststep for system, called after elastodynamic stepping.
+     *
+     * @param[in] time Time of the simulation.
+     * @param[in] dt Time step length.
+     */
+    virtual void poststep(double time, double dt) override;
 };
 }  // namespace core
 }  // namespace seahowl

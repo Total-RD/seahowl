@@ -4,8 +4,6 @@ using namespace seahowl::core;
 
 System::System(Turbine turbine) : turbine(turbine) {}
 
-System::~System() {}
-
 void System::init(double time, double dt) {
     turbine.init(time, dt);
 }

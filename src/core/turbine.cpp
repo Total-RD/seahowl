@@ -12,17 +12,15 @@ Turbine::Turbine() {
     controller = std::make_shared<Controller>();
 }
 
-Turbine::~Turbine() {}
-
 void Turbine::init(double time, double dt) {
     rotor.init(time, dt);
     tower.init(time, dt);
     controller->init(time, dt, *this);
-    #ifdef HAVE_AERODYN
-        if (use_aerodyn) {
-            aerodyn->init(time, dt, *this);
-        }        
-    #endif
+#ifdef HAVE_AERODYN
+    if (use_aerodyn) {
+        aerodyn->init(time, dt, *this);
+    }
+#endif
 }
 
 void Turbine::prestep(double time, double dt) {
@@ -58,7 +56,7 @@ void Turbine::poststep(double time, double dt) {
 void Turbine::assemble(chrono::ChSystemSMC& system, std::shared_ptr<chrono::fea::ChMesh> mesh) {
     // assemble blades
     for (auto& blade : blades) {
-        blade->assemble(system, mesh);
+        blade->assemble(mesh);
     }
 
     // assemble rotor & tower
@@ -91,17 +89,16 @@ void Turbine::rotate(double angle, chrono::ChVector<double> axis) {
 }
 
 void Turbine::compute_wind_loads(seahowl::aero::WindModel& wind_model, double time) {
-    #ifdef HAVE_AERODYN
-        if (use_aerodyn) {
-            aerodyn->calcul(time, *this);
-            rotor.aero.compute_wind_loads_aerodyn(aerodyn->pImpl.MeshFrc, wind_model, time, tower.aero, true, true, true);
-        }
-        else {
-            rotor.aero.compute_wind_loads_bemt(wind_model, time, tower.aero, true, true, true);    
-        }
-    #else
+#ifdef HAVE_AERODYN
+    if (use_aerodyn) {
+        aerodyn->calcul(time, *this);
+        rotor.aero.compute_wind_loads_aerodyn(aerodyn->pImpl.MeshFrc, wind_model, time, tower.aero, true, true, true);
+    } else {
         rotor.aero.compute_wind_loads_bemt(wind_model, time, tower.aero, true, true, true);
-    #endif
+    }
+#else
+    rotor.aero.compute_wind_loads_bemt(wind_model, time, tower.aero, true, true, true);
+#endif
     tower.aero.compute_wind_loads_morison(wind_model, time);
 }
 

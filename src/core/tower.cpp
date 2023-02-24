@@ -9,8 +9,6 @@ Tower::Tower() {
     aero = TowerAero();
 }
 
-Tower::~Tower() {}
-
 void Tower::init(double time, double dt) {
     prestep(time, dt);
     poststep(time, dt);
