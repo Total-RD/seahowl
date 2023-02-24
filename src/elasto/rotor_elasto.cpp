@@ -14,8 +14,6 @@ using seahowl::elasto::RotorElasto;
 
 RotorElasto::RotorElasto() {}
 
-RotorElasto::~RotorElasto() {}
-
 void RotorElasto::assemble(chrono::ChSystemSMC& system) {
     system.Add(body_hub);
     system.Add(body_shaft);
@@ -41,7 +39,8 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     // local Z axis along global X axis + shaft tilt along global Y axis
     auto tilt_hub = Q_from_AngAxis(shaft.tilt, -chrono::VECT_Y);
     body_hub->SetRot(tilt_hub * Q_from_AngAxis(chrono::CH_C_PI / 2.0, chrono::VECT_Y));
-    body_hub->SetPos(tilt_hub.Rotate(body_hub->GetPos()) + chrono::ChVector<double>(0.0, 0.0, shaft.distance_from_towertop));
+    body_hub->SetPos(tilt_hub.Rotate(body_hub->GetPos()) +
+                     chrono::ChVector<double>(0.0, 0.0, shaft.distance_from_towertop));
     // mass and inertia
     body_hub->SetMass(hub.mass);
     body_hub->SetInertiaXX(chrono::ChVector<double>(0., 0., hub.inertia));
@@ -89,7 +88,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
 
         // rotations + translations
         // blade root node is assumed to be originally at (0,0,0) and using IEC standard for coordinate system
-        // offset blade from hub apex 
+        // offset blade from hub apex
         blade->translate(chrono::ChVector<double>(0.0, 0.0, hub.radius));
         // apply precone
         blade->rotate(precone, chrono::VECT_Y);  // Y is the edge-wise axis for blade (IEC standard)
@@ -111,7 +110,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     }
 }
 
-void RotorElasto::link_tower(TowerElasto& tower, chrono::ChSystemSMC& system) {
+void RotorElasto::link_tower(const TowerElasto& tower, chrono::ChSystemSMC& system) {
     auto towertop_node = tower.nodes[tower.nodes.size() - 1];
     // translate RNA center of origin to towertop
     this->translate(towertop_node->GetPos());
@@ -121,7 +120,7 @@ void RotorElasto::link_tower(TowerElasto& tower, chrono::ChSystemSMC& system) {
     link_towertop_yaw_bearing->Initialize(towertop_node, body_yaw_bearing);
 }
 
-void RotorElasto::rotate(double angle, chrono::ChVector<double> axis) const {
+void RotorElasto::rotate(double angle, const chrono::ChVector<double>& axis) const {
     // blades
     for (auto& blade : blades) {
         blade->rotate(angle, axis);
@@ -149,7 +148,7 @@ void RotorElasto::rotate(double angle, chrono::ChVector<double> axis) const {
     body_yaw_bearing->SetRot(new_rotation_yaw_bearing);
 }
 
-void RotorElasto::translate(chrono::ChVector<double> translation_vector) const {
+void RotorElasto::translate(const chrono::ChVector<double>& translation_vector) const {
     // blades
     for (auto& blade : blades) {
         blade->translate(translation_vector);
@@ -201,8 +200,7 @@ double RotorElasto::get_rpm() const {
 }
 
 double RotorElasto::get_azimuth() const {
-    auto rotation_relative = body_shaft->GetCoord().TransformParentToLocal(
-        body_hub->GetCoord()).rot.Q_to_Euler123();
+    auto rotation_relative = body_shaft->GetCoord().TransformParentToLocal(body_hub->GetCoord()).rot.Q_to_Euler123();
     double angle = rotation_relative.z();
     return angle;
 }

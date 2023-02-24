@@ -4,7 +4,7 @@ using namespace seahowl::elasto;
 
 BladeReferencePointElasto::BladeReferencePointElasto() {}
 
-BladeReferencePointElasto::BladeReferencePointElasto(seahowl::core::BladeReferencePoint point) {
+BladeReferencePointElasto::BladeReferencePointElasto(const seahowl::core::BladeReferencePoint& point) {
     coordinates = point.coordinates;
     offset_elastic = point.offset_elastic;
     offset_gravity = point.offset_gravity;
@@ -14,8 +14,6 @@ BladeReferencePointElasto::BladeReferencePointElasto(seahowl::core::BladeReferen
     structural_twist = point.structural_twist;
     damping_coefficients = point.damping_coefficients;
 }
-
-BladeReferencePointElasto::~BladeReferencePointElasto() {}
 
 BladeReferencePointElasto BladeReferencePointElasto::operator*(const double factor) const {
     BladeReferencePointElasto new_point = *this;
@@ -53,7 +51,7 @@ BladeReferencePointElasto BladeReferencePointElasto::operator+(const BladeRefere
 
 TowerReferencePointElasto::TowerReferencePointElasto() {}
 
-TowerReferencePointElasto::TowerReferencePointElasto(seahowl::core::TowerReferencePoint point) {
+TowerReferencePointElasto::TowerReferencePointElasto(const seahowl::core::TowerReferencePoint& point) {
     coordinates = point.coordinates;
     fraction = point.fraction;
     density = point.density;
@@ -63,8 +61,6 @@ TowerReferencePointElasto::TowerReferencePointElasto(seahowl::core::TowerReferen
     stiffness_torsion = point.stiffness_torsion;
     damping_coefficients = point.damping_coefficients;
 }
-
-TowerReferencePointElasto::~TowerReferencePointElasto() {}
 
 TowerReferencePointElasto TowerReferencePointElasto::operator*(const double factor) const {
     TowerReferencePointElasto new_point;
@@ -100,10 +96,7 @@ TowerReferencePointElasto TowerReferencePointElasto::operator+(const TowerRefere
     return new_point;
 };
 
-
 ReferencePointElasto::ReferencePointElasto() {}
-
-ReferencePointElasto::~ReferencePointElasto() {}
 
 ReferencePointElasto ReferencePointElasto::operator*(const double factor) const {
     ReferencePointElasto new_point = *this;

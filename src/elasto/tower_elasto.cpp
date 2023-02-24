@@ -12,8 +12,6 @@ using seahowl::elasto::TowerElasto;
 
 TowerElasto::TowerElasto() {}
 
-TowerElasto::~TowerElasto() {}
-
 void TowerElasto::build() {
     // check that enough reference points were defined to create elements (at least 2)
     if (reference_points.size() <= 2) {

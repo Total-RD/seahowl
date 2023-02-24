@@ -8,24 +8,48 @@
 namespace seahowl {
 namespace elasto {
 
-/**@brief Wind turbine tower elastodynamic model
-
-Implemented as Finite Element Beams
-*/
+/**
+ * @brief Tower of wind turbine as an elastodynamic FEA component.
+ *
+ * Towers are discretized into beam elements that are either simple Timoshenko elements described through lineic
+ * density, foreaft and sideside stiffnesses.
+ */
 class TowerElasto : public ComponentElastoFEA {
   public:
+    /** @brief List of reference points describing the tower properties along its longitudinal axis. */
     std::vector<TowerReferencePointElasto> reference_points;
+    /** @brief List of discretized points (interpolated reference points) describing the tower properties. */
     std::vector<TowerReferencePointElasto> discretized_points;
+    /** @brief Height of the tower (absolute value above ground / sea water level). */
     double height;
+    /** @brief Height of the base of the tower (absolute value above ground / sea water level). */
     double base_height;
 
+    /**
+     * @brief Constructor.
+     */
     TowerElasto();
-    ~TowerElasto();
 
+    /**
+     * @brief Builds the blade (to call before assemble).
+     */
     void build();
-    void build_elements_tapered_timoshenko();
 
+    /**
+     * @brief Sets damping coefficients of the tower.
+     *
+     * @param[in] axial Axial damping coefficient.
+     * @param[in] edge Edge damping coefficient.
+     * @param[in] flap Flap damping coefficient.
+     * @param[in] torsion Torsion damping coefficient.
+     */
     virtual void set_damping_coefficients(double axial, double edge, double flap, double torsion);
+
+  private:
+    /**
+     * @brief Builds the blade with Timoshenko elements (lineic density, foreaft stiffness, sideside stiffness).
+     */
+    void build_elements_tapered_timoshenko();
 };
 
 }  // namespace elasto

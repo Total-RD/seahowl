@@ -8,7 +8,7 @@
 
 using namespace seahowl::elasto;
 
-void ComponentElastoFEA::build_nodes(std::vector<ReferencePointElasto>& discretized_points) {
+void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& discretized_points) {
     nodes.clear();
     const auto nnodes = discretized_points.size();
 
@@ -48,7 +48,7 @@ void ComponentElastoFEA::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) con
     }
 }
 
-void ComponentElastoFEA::rotate(double angle, chrono::ChVector<double> axis) const {
+void ComponentElastoFEA::rotate(double angle, const chrono::ChVector<double>& axis) const {
     auto rotation = Q_from_AngAxis(angle, axis);
     for (auto& node : nodes) {
         auto new_position = rotation.Rotate(node->GetPos());
@@ -58,7 +58,7 @@ void ComponentElastoFEA::rotate(double angle, chrono::ChVector<double> axis) con
     }
 }
 
-void ComponentElastoFEA::translate(chrono::ChVector<double> translation_vector) const {
+void ComponentElastoFEA::translate(const chrono::ChVector<double>& translation_vector) const {
     for (auto& node : nodes) {
         node->SetPos(node->GetPos() + translation_vector);
     }
@@ -85,10 +85,10 @@ void ComponentElastoFEA::evaluate_position_rotation(chrono::ChVector<double>& po
     element->EvaluateSectionFrame(eta, position, rotation);
 }
 
-void ComponentElastoFEA::accumulate_element_load(chrono::ChVector<double> load,
+void ComponentElastoFEA::accumulate_element_load(const chrono::ChVector<double>& load,
                                                  int element_index,
                                                  double eta,
-                                                 chrono::ChVector<double> offset) {
+                                                 const chrono::ChVector<double>& offset) {
     // sanity check
     if (element_index >= elements.size() || element_index < 0) {
         throw std::runtime_error("Element index " + std::to_string(element_index) + " does not exist (max " +

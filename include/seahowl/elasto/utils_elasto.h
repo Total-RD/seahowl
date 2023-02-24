@@ -10,7 +10,9 @@
 namespace seahowl {
 namespace elasto {
 
-/**@brief Loader : extend Chrono class */
+/**
+ * @brief Weighted loader extending Chrono class.
+ */
 class ChLoaderWeighted : public chrono::ChLoaderUdistributed {
   public:
     std::vector<chrono::ChVector<double>> loads;

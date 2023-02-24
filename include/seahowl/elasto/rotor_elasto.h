@@ -20,87 +20,158 @@ class TowerElasto;  ///@todo move out of rotor
 namespace seahowl {
 namespace elasto {
 
-/**@brief Hub properties
-
-
-\image html NREL_ad_driver_geom.png "source image: NREL/Openfast" width=300cm
-*/
+/**
+ * @brief Hub properties.
+ */
 struct HubProperties {
-    double center_of_mass = 0.0;  ///< COG Center Of Gravity
-    double mass = 0.0;            ///< Total mass of the hub
-    double inertia = 0.0;         ///< Coefficient of inertia
-    double overhang = 0.0;        ///< Overhang
-    double radius = 0.0;          ///< Radius of the hub (from hub apex to hub edge in rotor plane)
+    /** @brief Center of mass (COM/COG) offset. */
+    double center_of_mass = 0.0;
+    /** @brief Mass of the hub. */
+    double mass = 0.0;
+    /** @brief Inertia of the hub. */
+    double inertia = 0.0;
+    /** @brief Overhang of the hub (horizontal distance from towertop). */
+    double overhang = 0.0;
+    /** @brief Radius of hub (from hub apex to hub edge in rotor plane). */
+    double radius = 0.0;
 };
 
-/**@brief Nacelle properties */
+/**
+ * @brief Nacelle properties.
+ */
 struct NacelleProperties {
-    chrono::ChVector<double> center_of_mass{0.0, 0.0, 0.0};  ///< COG Center Of Gravity @todo Initialize in constructor
-    double mass = 0.0;                                       ///< Mass of the nacelle (without bearing)
-    double inertia = 0.0;                                    ///< Inertia @todo include 3x3 inertia
-    double yaw_bearing_mass = 0.0;                           ///< Bearing mass
+    /** @brief Center of mass (COM/COG). */
+    chrono::ChVector<double> center_of_mass{0.0, 0.0, 0.0};
+    /** @brief Mass of the nacelle. */
+    double mass = 0.0;
+    /** @brief Inertia of the nacelle (@todo include 3x3 inertia). */
+    double inertia = 0.0;
+    /** @brief Yaw bearing mass. */
+    double yaw_bearing_mass = 0.0;
 };
 
-/**@brief Shaft properties */
+/**
+ *@brief Shaft properties.
+ */
 struct ShaftProperties {
-    double tilt = 0.0;                    ///< Tilt angle (radians)
-    double distance_from_towertop = 0.0;  ///< Distance from Tower top reference point
+    /** @brief Tilt angle of the shaft (radians). */
+    double tilt = 0.0;
+    /** @brief Distance of shaft axis from towertop. */
+    double distance_from_towertop = 0.0;
 };
 
-/**@brief Rotor properties
-
-Implemented as collection of rigid bodies + blades
-*/
+/**
+ * @brief Rotor Nacelle Assembly (RNA) of wind turbine as an elasto component.
+ *
+ * The RNA is composed of rigid bodies (hub, shaft, nacelle, yaw bearing), links (hub-shaft, shaft-nacelle, shaft-yaw
+ * bearing, yaw bearing-towertop), and blades (FEA components).
+ */
 class RotorElasto : public ComponentElasto {
   public:
-    std::vector<double> blade_precones;  ///< Blade precones (radians)
-    double pitch_collective;             ///< Collective pitch (for all blades)
-
-    // bodies
-    ///@{
-    std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades;  ///<@brief Finite Element Blades
-    std::shared_ptr<chrono::ChBody> body_hub;                           ///< Hub rigid body
-    std::shared_ptr<chrono::ChBody> body_shaft;                         ///< Shaft rigid body
-    std::shared_ptr<chrono::ChBody> body_nacelle;                       ///< Nacelle rigid body
-    std::shared_ptr<chrono::ChBody> body_yaw_bearing;                   ///< Yaw bearing rigid body
-    ///@}
+    // RNA components
+    //
+    /** @brief List of blades. */
+    std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades;
+    /** @brief Hub rigid body. */
+    std::shared_ptr<chrono::ChBody> body_hub;
+    /** @brief Shaft rigid body. */
+    std::shared_ptr<chrono::ChBody> body_shaft;
+    /** @brief Nacelle rigid body. */
+    std::shared_ptr<chrono::ChBody> body_nacelle;
+    /** @brief Yaw bearing rigid body. */
+    std::shared_ptr<chrono::ChBody> body_yaw_bearing;
 
     // links
-    ///@{
+    //
+    /** @brief Links between blades and hub. */
     std::vector<std::shared_ptr<chrono::ChLinkMateFix>> links_blades;
+    /** @brief Link between shaft and hub (revolute). */
     std::shared_ptr<chrono::ChLinkRevolute> link_shaft_hub;
+    /** @brief Link between shaft and nacelle (fixed). */
     std::shared_ptr<chrono::ChLinkMateFix> link_shaft_nacelle;
+    /** @brief Link between shaft and yaw bearing (fixed). */
     std::shared_ptr<chrono::ChLinkMateFix> link_shaft_yaw_bearing;
-    std::shared_ptr<chrono::ChLinkMateFix> link_towertop_yaw_bearing;  ///< External link with TowerElasto
+    /** @brief Link between towertop (if any) and yaw bearing (fixed). */
+    std::shared_ptr<chrono::ChLinkMateFix> link_towertop_yaw_bearing;
     ///@}
 
-    // properties
-    ///@{
-    ShaftProperties shaft;      ///< Shaft properties
-    NacelleProperties nacelle;  ///< Nacelle properties
-    HubProperties hub;          ///< Hub properties
-    ///@}
+    // reference properties
+    //
+    /** @brief Shaft reference properties. */
+    ShaftProperties shaft;
+    /** @brief Nacelle reference properties. */
+    NacelleProperties nacelle;
+    /** @brief Hub reference properties. */
+    HubProperties hub;
+    /** @brief Blades precones (in radians). */
+    std::vector<double> blade_precones;
 
+    /** @brief Collective pitch of blades (in radians). */
+    double pitch_collective = 0;
+
+    /**
+     * @brief Constructor.
+     */
     RotorElasto();
-    ~RotorElasto();
 
+    /**
+     * @brief Assembles the component (adds all rigid bodies and links to the system).
+     *
+     * @param[out] system System to which rigid bodies and links are added.
+     */
     void assemble(chrono::ChSystemSMC& system);
+
+    /**
+     * @brief Builds the rotor.
+     *
+     * @param[in] blades List of blades in rotor.
+     */
     void build(std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades);
-    void link_tower(TowerElasto& tower, chrono::ChSystemSMC& system);
 
-    ///@{
-    void rotate(double angle, chrono::ChVector<double> axis) const override;     ///< @see ElastoComponent::rotate
-    void translate(chrono::ChVector<double> translation_vector) const override;  ///< @see ElastoComponent::translate
-    double get_mass() const override;                                            ///< @see ElastoComponent::get_mass
-    ///@}
+    /**
+     * @brief Links RNA to tower.
+     *
+     * This function links the towertop node to the yaw bearing rigid body by translating the RNA so that the tower
+     * towertop node and yaw bearing coordinates match each other.
+     * The link between towertop node and yaw bearing is fixed.
+     */
+    void link_tower(const TowerElasto& tower, chrono::ChSystemSMC& system);
 
-    ///@{
-    void apply_collective_pitch_increment(double pitch_increment);  ///< Applies pitch on all blades
-    double get_rpm() const;                                         ///< Rotation speed @todo in general class Rotor
-    double get_axial_torque() const;  ///< Reaction torque on hub @todo in general class Rotor
-    double get_azimuth() const;       ///< Azimuth @todo in general class Rotor
-    double get_axial_thrust() const;  ///< Reaction thrust on hub @todo in general class Rotor
-    ///@}
+    void rotate(double angle, const chrono::ChVector<double>& axis) const override;  ///< @see ElastoComponent::rotate
+    void translate(
+        const chrono::ChVector<double>& translation_vector) const override;  ///< @see ElastoComponent::translate
+    double get_mass() const override;                                        ///< @see ElastoComponent::get_mass
+
+    /**
+     * @brief Applies pitch increment to all blades (i.e. rotates blades around their respective longitudinal axis).
+     *
+     * This function links the towertop node to the yaw bearing rigid body by translating the RNA so that the tower
+     * towertop node and yaw bearing coordinates match each other.
+     * The link between towertop node and yaw bearing is fixed.
+     *
+     * @param[in] pitch_increment Pitch increment to apply (in radians).
+     */
+    void apply_collective_pitch_increment(double pitch_increment);
+
+    /**
+     * @brief Returns the RPM of the rotor.
+     */
+    double get_rpm() const;
+
+    /**
+     * @brief Returns the axial torque of the rotor.
+     */
+    double get_axial_torque() const;
+
+    /**
+     * @brief Returns the axial thrust of the rotor.
+     */
+    double get_axial_thrust() const;
+
+    /**
+     * @brief Returns azimuth of rotor.
+     */
+    double get_azimuth() const;
 };
 
 }  // namespace elasto
