@@ -14,9 +14,7 @@ seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::stri
     pImpl.SetOUTNAME(outname);
 }
 
-seahowl::servo::ControllerDISCON::~ControllerDISCON() {}
-
-void seahowl::servo::ControllerDISCON::step(double time, double dt, seahowl::core::Turbine& turbine) {
+void seahowl::servo::ControllerDISCON::step(double time, double dt, const seahowl::core::Turbine& turbine) {
     auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * chrono::CH_C_PI / 60.0);
     auto omega_generator = turbine.get_generator_rpm() * (2 * chrono::CH_C_PI / 60.0);
     auto pitch_collective = turbine.rotor.elasto.pitch_collective;
@@ -69,7 +67,7 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
     pImpl.SetGeneratedPower(power);
 }
 
-void seahowl::servo::ControllerDISCON::init(double time, double dt, seahowl::core::Turbine& turbine) {
+void seahowl::servo::ControllerDISCON::init(double time, double dt, const seahowl::core::Turbine& turbine) {
     auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * chrono::CH_C_PI / 60.0);
     auto omega_generator = turbine.get_generator_rpm() * (2 * chrono::CH_C_PI / 60.0);
     auto pitch_collective = turbine.rotor.elasto.pitch_collective;
@@ -95,12 +93,12 @@ void seahowl::servo::ControllerDISCON::init(double time,
     pImpl.Init();
 }
 
-double seahowl::servo::ControllerDISCON::get_torque_elec() {
+double seahowl::servo::ControllerDISCON::get_torque_elec() const {
     double torque_elec = pImpl.GetAvrSWAP(47);
     return torque_elec;
 }
 
-double seahowl::servo::ControllerDISCON::get_collective_pitch() {
+double seahowl::servo::ControllerDISCON::get_collective_pitch() const {
     double collective_pitch = pImpl.GetAvrSWAP(45);
     return collective_pitch;
 }

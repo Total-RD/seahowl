@@ -133,12 +133,12 @@ class Turbine : public ComponentDynamic {
     /**
      * @brief Returns generated power.
      */
-    double get_generated_power();
+    double get_generated_power() const;
 
     /**
      * @brief Returns generator RPM.
      */
-    double get_generator_rpm();
+    double get_generator_rpm() const;
 };
 
 }  // namespace core

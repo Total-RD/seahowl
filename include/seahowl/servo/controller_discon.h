@@ -160,20 +160,51 @@ struct DisconController {
     char avcMSG[4096];
 };
 
-/**@brief DISCON controler */
+/**
+ * @brief Controller using DISCON routine.
+ */
 class ControllerDISCON : public Controller {
-  private:
-    double torque_elec_previous = 0.0;
-
   public:
+    /** @brief Object for communication with DISCON routine. */
     seahowl::servo::DisconController pImpl;
-    double target_rpm = 0.0;
 
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] infile Path of parameters file.
+     * @param[in] infile Path of output file.
+     */
     ControllerDISCON(std::string infile = u8"DISCON.IN", std::string outname = u8"simDEBUG.RO.dbg");
-    ~ControllerDISCON();
 
-    virtual void init(double time, double dt, seahowl::core::Turbine& turbine) override;
-    virtual void step(double time, double dt, seahowl::core::Turbine& turbine) override;
+    /**
+     * @brief Initialization of controller.
+     *
+     * @param[in] time Time of simulation.
+     * @param[in] dt Time step legnth.
+     * @param[in] turbine Turbine that is controlled by this controller.
+     */
+    virtual void init(double time, double dt, const seahowl::core::Turbine& turbine) override;
+    /**
+     * @brief Stepping of controller.
+     *
+     * @param[in] time Time of simulation.
+     * @param[in] dt Time step legnth.
+     * @param[in] turbine Turbine that is controlled by this controller.
+     */
+    virtual void step(double time, double dt, const seahowl::core::Turbine& turbine) override;
+
+    /**
+     * @brief Returns electrical torque to apply.
+     */
+    virtual double get_torque_elec() const override;
+
+    /**
+     * @brief Returns collective pitch to apply.
+     */
+    virtual double get_collective_pitch() const override;
+
+  private:
+    // init called from other init function
     void init(double time,
               double dt,
               double omega_rotor,
@@ -181,6 +212,7 @@ class ControllerDISCON : public Controller {
               double pitch_collective,
               double rotor_azimuth,
               size_t nblades);
+    // updates turbine variables of object communicating with DISCON module
     void update_turbine_variables(double time,
                                   double dt,
                                   double omega_rotor,
@@ -188,6 +220,7 @@ class ControllerDISCON : public Controller {
                                   double pitch_collective,
                                   double rotor_azimuth,
                                   double power);
+    // step called from other step function
     void step(double time,
               double dt,
               double omega_rotor,
@@ -195,8 +228,6 @@ class ControllerDISCON : public Controller {
               double pitch_collective,
               double rotor_azimuth,
               double power);
-    double get_torque_elec();
-    double get_collective_pitch();
 };
 
 }  // namespace servo
