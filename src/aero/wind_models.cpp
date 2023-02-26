@@ -20,9 +20,8 @@ chrono::ChVector<double> get_sheared_wind_velocity(const chrono::ChVector<double
 }
 
 WindModel::WindModel() {}
-WindModel::~WindModel() {}
 
-chrono::ChVector<double> WindModel::get_wind_velocity(chrono::ChVector<double>& position, double time) const {
+chrono::ChVector<double> WindModel::get_wind_velocity(const chrono::ChVector<double>& position, double time) const {
     return chrono::ChVector<double>(0.0, 0.0, 0.0);
 };
 
@@ -35,13 +34,11 @@ ConstantWind::ConstantWind() {
     direction_gravity = chrono::ChVector<double>(0.0, 0.0, -1.0);
 }
 
-ConstantWind ::~ConstantWind() {}
-
 void ConstantWind::set_wind_velocity(chrono::ChVector<double> velocity) {
     wind_velocity = velocity;
 }
 
-chrono::ChVector<double> ConstantWind::get_wind_velocity(chrono::ChVector<double>& position, double time) const {
+chrono::ChVector<double> ConstantWind::get_wind_velocity(const chrono::ChVector<double>& position, double time) const {
     auto velocity = get_sheared_wind_velocity(wind_velocity, position, direction_gravity, shear_coefficient,
                                               reference_height, reference_length);
     return velocity;
@@ -53,8 +50,6 @@ WindRamp::WindRamp() {
     direction_gravity = chrono::ChVector<double>(0.0, 0.0, -1.0);
 }
 
-WindRamp ::~WindRamp() {}
-
 void WindRamp::set_wind_velocity_start(chrono::ChVector<double> velocity) {
     wind_velocity_start = velocity;
 }
@@ -62,7 +57,7 @@ void WindRamp::set_wind_velocity_stop(chrono::ChVector<double> velocity) {
     wind_velocity_stop = velocity;
 }
 
-chrono::ChVector<double> WindRamp::get_wind_velocity(chrono::ChVector<double>& position, double time) const {
+chrono::ChVector<double> WindRamp::get_wind_velocity(const chrono::ChVector<double>& position, double time) const {
     auto velocity = wind_velocity_start;
     if (time >= time_start) {
         double w1 = 1.0 - std::min((time - time_start) / (time_stop - time_start), 1.0);

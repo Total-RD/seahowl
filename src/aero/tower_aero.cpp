@@ -3,16 +3,12 @@
 using seahowl::aero::TowerElementAero;
 using seahowl::aero::TowerAero;
 
-TowerElementAero::TowerElementAero(TowerReferencePointAero& point1, TowerReferencePointAero& point2) {
+TowerElementAero::TowerElementAero(const TowerReferencePointAero& point1, const TowerReferencePointAero& point2) {
     properties = (point1 + point2) * 0.5;
     length = (point1.coordinates - point2.coordinates).Length();
 }
 
-TowerElementAero::~TowerElementAero() {}
-
 TowerAero::TowerAero() {}
-
-TowerAero::~TowerAero() {}
 
 void TowerAero::build() {
     // check that enough reference points were defined to create elements (at least 2)

@@ -5,19 +5,42 @@
 namespace seahowl {
 namespace aero {
 
-/**@brief Reference aerodynamic (DOF) point for blade */
+/**
+ * @brief Blade aero reference point.
+ *
+ * The coordinate system used here is the IEC reference coordinate system for wind turbines:
+ * x-axis: flapwise pointing towards nacelle,
+ * y-axis: edgewise pointing towards trailing edge,
+ * z-axis: longitudinal pointing towards blade tip.
+ * (0, 0, 0) is at the root of the blade.
+ */
 struct BladeReferencePointAero {
-    double fraction;                                            ///< Fraction (normalized abscissa)
-    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};        ///< Point coordinates
-    chrono::ChQuaternion<double> rotation{1.0, 0.0, 0.0, 0.0};  ///< Rotation
-    chrono::ChVector2<double> offset_aero{0.0, 0.0};            ///< Aerodynamic offset
-    double chord = 0.0;                                         ///< Chord length
-    double structural_twist = 0.0;                              ///< Twist
-    std::vector<AirfoilProperties> airfoil_properties;          ///< Airfoil properties for each elements
+    /** @brief Fraction (normalized abscissa along longitudinal axis of component) of reference point. */
+    double fraction = 0.0;
+    /** @brief Coordinates of reference point. */
+    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};
+    /** @brief Rotation of reference point. */
+    chrono::ChQuaternion<double> rotation{1.0, 0.0, 0.0, 0.0};
+    /** @brief Offset (x, y) for the aerodynamic center of blade at reference point. */
+    chrono::ChVector2<double> offset_aero{0.0, 0.0};
+    /** @brief Chord of blade at reference point. */
+    double chord = 0.0;
+    /** @brief Structural twist angle of blade at reference point. */
+    double structural_twist = 0.0;
+    /** @brief Airfoil properties of blade at reference point. */
+    std::vector<AirfoilProperties> airfoil_properties{};
 
+    /**
+     * @brief Constructor.
+     */
     BladeReferencePointAero();
+
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] point General blade reference point holding aero info.
+     */
     BladeReferencePointAero(seahowl::core::BladeReferencePoint& point);
-    ~BladeReferencePointAero();
 
     BladeReferencePointAero operator*(const double factor) const;
     BladeReferencePointAero operator+(const BladeReferencePointAero& other) const;
@@ -25,16 +48,30 @@ struct BladeReferencePointAero {
 
 /**@brief Tower aerodynamic element */
 struct TowerReferencePointAero {
-    double fraction;                        ///< Fraction (normalized abscissa)
-    chrono::ChVector<double> coordinates;   ///< Reference point coordinates
-    chrono::ChQuaternion<double> rotation;  ///< Rotation of reference point
-    chrono::ChVector<double> velocity;      ///< Velocity of reference point
-    double diameter = 0.0;                  ///< Diameter of tower at reference point
-    double drag_coefficient = 0.0;          ///< Drag coefficient of tower at reference point
+    /** @brief Fraction (normalized abscissa along longitudinal axis of component) of reference point. */
+    double fraction = 0.0;
+    /** @brief Coordinates of reference point. */
+    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};
+    /** @brief Velocity of reference point. */
+    chrono::ChVector<double> velocity{0.0, 0.0, 0.0};
+    /** @brief Rotation of reference point. */
+    chrono::ChQuaternion<double> rotation{0.0, 0.0, 0.0, 0.0};
+    /** @brief Diameter of tower at reference point. */
+    double diameter = 0.0;
+    /** @brief Drag coefficient of tower at reference point. */
+    double drag_coefficient = 0.0;
 
+    /**
+     * @brief Constructor.
+     */
     TowerReferencePointAero();
+
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] point General tower reference point holding aero info.
+     */
     TowerReferencePointAero(seahowl::core::TowerReferencePoint& point);
-    ~TowerReferencePointAero();
 
     TowerReferencePointAero operator*(const double factor) const;
     TowerReferencePointAero operator+(const TowerReferencePointAero& other) const;

@@ -8,8 +8,6 @@ using seahowl::aero::AirfoilProperties;
 
 AirfoilCoefficients::AirfoilCoefficients() {}
 
-AirfoilCoefficients::~AirfoilCoefficients() {}
-
 AirfoilCoefficients AirfoilCoefficients::operator*(const double factor) const {
     AirfoilCoefficients new_point = *this;
     // Note: alpha (angle of attack) is not multiplicated since it should not be changed in operations between airfoils
@@ -31,8 +29,6 @@ AirfoilCoefficients AirfoilCoefficients::operator+(const AirfoilCoefficients& ot
 };
 
 AirfoilProperties::AirfoilProperties() {}
-
-AirfoilProperties::~AirfoilProperties() {}
 
 AirfoilProperties AirfoilProperties::operator*(const double factor) const {
     AirfoilProperties new_point = *this;

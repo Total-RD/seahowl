@@ -20,13 +20,12 @@ BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
     relative_velocity_induced = chrono::ChVector<double>(0.0, 0.0, 0.0);
 }
 
-BladeNodeAero::~BladeNodeAero() {}
-
-chrono::ChVector2<double> BladeNodeAero::get_induced_velocity_rotor(chrono::ChVector2<double>& local_velocity_rotor0,
-                                                                    double blade_pitch,
-                                                                    size_t nblades,
-                                                                    bool tip_loss,
-                                                                    bool hub_loss) {
+chrono::ChVector2<double> BladeNodeAero::get_induced_velocity_rotor(
+    const chrono::ChVector2<double>& local_velocity_rotor0,
+    double blade_pitch,
+    size_t nblades,
+    bool tip_loss,
+    bool hub_loss) {
     return get_induced_velocity(*this, local_velocity_rotor0, blade_pitch, nblades, tip_loss, hub_loss);
 }
 
@@ -38,13 +37,11 @@ chrono::ChVector<double> BladeNodeAero::get_offset_aero_absolute() const {
     return offset_absolute;
 }
 
-BladeElementAero::BladeElementAero(BladeNodeAero& node1, BladeNodeAero& node2) : node1(node1), node2(node2) {
+BladeElementAero::BladeElementAero(const BladeNodeAero& node1, const BladeNodeAero& node2)
+    : node1(node1), node2(node2) {
     fraction = 0.5 * (node1.properties.fraction + node2.properties.fraction);
-    offset_aero = 0.5 * (node1.properties.offset_aero + node2.properties.offset_aero);
     length = (node1.coordinates - node2.coordinates).Length();
 }
-
-BladeElementAero::~BladeElementAero() {}
 
 chrono::ChVector<double> BladeElementAero::get_load() const {
     return 0.5 * (node1.load + node2.load) * length;
@@ -65,8 +62,6 @@ chrono::ChVector<double> BladeElementAero::get_offset_aero_absolute() const {
 }
 
 BladeAero::BladeAero() {}
-
-BladeAero::~BladeAero() {}
 
 void BladeAero::build() {
     // check that enough reference points were defined to create elements (at least 2)
@@ -115,13 +110,13 @@ void BladeAero::compute_distances_from_tip() {
     }
 }
 
-void BladeAero::compute_distances_from_hub(chrono::ChVector<double> hub_apex_position, double hub_radius) {
+void BladeAero::compute_distances_from_hub(const chrono::ChVector<double>& hub_apex_position, double hub_radius) {
     for (auto& node : nodes) {
         node.distance_from_hub = (node.coordinates - hub_apex_position).Length() - hub_radius;
     }
 }
 
-void BladeAero::compute_radii(chrono::ChVector<double> hub_apex_position) {
+void BladeAero::compute_radii(const chrono::ChVector<double>& hub_apex_position) {
     for (auto& node : nodes) {
         node.radius = (node.coordinates - hub_apex_position).Length();
     }

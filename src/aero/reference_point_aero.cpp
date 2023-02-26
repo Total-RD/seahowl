@@ -16,8 +16,6 @@ BladeReferencePointAero::BladeReferencePointAero(seahowl::core::BladeReferencePo
     airfoil_properties = point.airfoil_properties;
 }
 
-BladeReferencePointAero::~BladeReferencePointAero() {}
-
 BladeReferencePointAero BladeReferencePointAero::operator*(const double factor) const {
     BladeReferencePointAero new_point = *this;
     new_point.fraction *= factor;
@@ -60,8 +58,6 @@ TowerReferencePointAero::TowerReferencePointAero(seahowl::core::TowerReferencePo
     diameter = point.diameter;
     drag_coefficient = point.drag_coefficient;
 }
-
-TowerReferencePointAero::~TowerReferencePointAero() {}
 
 TowerReferencePointAero TowerReferencePointAero::operator*(const double factor) const {
     TowerReferencePointAero new_point = *this;
