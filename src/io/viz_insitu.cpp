@@ -39,7 +39,8 @@ void draw_system_init(chrono::ChSystem& system, std::shared_ptr<chrono::irrlicht
     application->SetShadows(true);
 }
 
-void draw_system(chrono::ChSystem& system, std::shared_ptr<chrono::irrlicht::ChVisualSystemIrrlicht> application) {
+void draw_system(const chrono::ChSystem& system,
+                 std::shared_ptr<chrono::irrlicht::ChVisualSystemIrrlicht> application) {
     // irrlicht must prepare frame to draw
     application->BeginScene(true, true, chrono::ChColor(255, 140, 161));
 
@@ -53,5 +54,5 @@ void draw_system(chrono::ChSystem& system, std::shared_ptr<chrono::irrlicht::ChV
     chrono::irrlicht::tools::drawAllCOGs(application.get(), 5.0);
 
     // grid
-    //chrono::irrlicht::tools::drawGrid(application, 10, 10);
+    // chrono::irrlicht::tools::drawGrid(application, 10, 10);
 }

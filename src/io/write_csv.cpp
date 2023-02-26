@@ -5,12 +5,13 @@
 #include <fstream>
 #include <string>
 
-void write_turbine_info_to_csv(std::string filename, seahowl::core::System ssystem, double time) {
+void write_turbine_info_to_csv(std::string filename, const seahowl::core::System& ssystem, double time) {
     std::ofstream myfile;
     if (time == 0.0) {
         myfile.open(filename);
-        myfile << "time (s),wind x (m/s),wind y (m/s),wind z (m/s),rpm,power (W),pitch (rad),torque elec (Nm),axial thrust (N),axial torque (Nm),rotor azimuth (rad),";
-        for (int ii = 1; ii < ssystem.turbine.blades.size()+1; ii++) {
+        myfile << "time (s),wind x (m/s),wind y (m/s),wind z (m/s),rpm,power (W),pitch (rad),torque elec (Nm),axial "
+                  "thrust (N),axial torque (Nm),rotor azimuth (rad),";
+        for (int ii = 1; ii < ssystem.turbine.blades.size() + 1; ii++) {
             myfile << "blade" + std::to_string(ii) + " wind x (m/s),";
             myfile << "blade" + std::to_string(ii) + " wind y (m/s),";
             myfile << "blade" + std::to_string(ii) + " wind z (m/s),";
@@ -27,8 +28,7 @@ void write_turbine_info_to_csv(std::string filename, seahowl::core::System ssyst
     myfile << ",";
     auto wind_velocity_hub =
         ssystem.wind_model->get_wind_velocity(ssystem.turbine.rotor.elasto.body_hub->GetPos(), time);
-    myfile << std::to_string(
-        wind_velocity_hub.x());
+    myfile << std::to_string(wind_velocity_hub.x());
     myfile << ",";
     myfile << std::to_string(wind_velocity_hub.y());
     myfile << ",";
