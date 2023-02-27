@@ -78,7 +78,7 @@ void ComponentElastoFEA::reset_loads() {
 }
 
 void ComponentElastoFEA::evaluate_position_rotation(Vector3d& position,
-                                                    chrono::ChQuaternion<double>& rotation,
+                                                    Quaternion& rotation,
                                                     int element_index,
                                                     double eta) const {
     auto& element = elements[element_index];
@@ -98,7 +98,7 @@ void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
 
     // get position and rotation
     Vector3d position{0.0, 0.0, 0.0};
-    chrono::ChQuaternion<double> rotation{0.0, 0.0, 0.0, 0.0};
+    Quaternion rotation{0.0, 0.0, 0.0, 0.0};
     evaluate_position_rotation(position, rotation, element_index, eta);
 
     // apply loads
@@ -141,8 +141,8 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_accelerations() const {
     return accelerations;
 }
 
-std::vector<chrono::ChQuaternion<double>> ComponentElastoFEA::get_nodes_rotations() const {
-    std::vector<chrono::ChQuaternion<double>> rotations;
+std::vector<Quaternion> ComponentElastoFEA::get_nodes_rotations() const {
+    std::vector<Quaternion> rotations;
     for (auto& node : nodes) {
         rotations.push_back(node->GetRot());
     }

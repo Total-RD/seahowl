@@ -54,7 +54,7 @@ class BladeElasto : public ComponentElastoFEA {
     virtual void set_damping_coefficients(double axial, double edge, double flap, double torsion);
 
     virtual void evaluate_position_rotation(Vector3d& position,
-                                            chrono::ChQuaternion<double>& rotation,
+                                            Quaternion& rotation,
                                             int element_index,
                                             double eta) const override;
 

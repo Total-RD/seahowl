@@ -18,7 +18,7 @@ class RotorAero {
     /** @brief Position of hub. */
     Vector3d hub_position{0.0, 0.0, 0.0};
     /** @brief Rotation of hub. */
-    chrono::ChQuaternion<double> hub_rotation;
+    Quaternion hub_rotation;
     /** @brief Total radius of the rotor (hub + blades). */
     double radius = 0.0;
     /** @brief Radius of hub. */

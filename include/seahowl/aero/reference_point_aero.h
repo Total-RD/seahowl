@@ -21,7 +21,7 @@ struct BladeReferencePointAero {
     /** @brief Coordinates of reference point. */
     Vector3d coordinates{0.0, 0.0, 0.0};
     /** @brief Rotation of reference point. */
-    chrono::ChQuaternion<double> rotation{1.0, 0.0, 0.0, 0.0};
+    Quaternion rotation{1.0, 0.0, 0.0, 0.0};
     /** @brief Offset (x, y) for the aerodynamic center of blade at reference point. */
     Vector2d offset_aero{0.0, 0.0};
     /** @brief Chord of blade at reference point. */
@@ -56,7 +56,7 @@ struct TowerReferencePointAero {
     /** @brief Velocity of reference point. */
     Vector3d velocity{0.0, 0.0, 0.0};
     /** @brief Rotation of reference point. */
-    chrono::ChQuaternion<double> rotation{0.0, 0.0, 0.0, 0.0};
+    Quaternion rotation{0.0, 0.0, 0.0, 0.0};
     /** @brief Diameter of tower at reference point. */
     double diameter = 0.0;
     /** @brief Drag coefficient of tower at reference point. */

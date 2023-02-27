@@ -3,13 +3,13 @@
 using namespace seahowl::aero;
 
 BladeReferencePointAero::BladeReferencePointAero() {
-    rotation = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
+    rotation = Quaternion(1.0, 0.0, 0.0, 0.0);
 }
 
 BladeReferencePointAero::BladeReferencePointAero(seahowl::core::BladeReferencePoint& point) {
     fraction = point.fraction;
     coordinates = point.coordinates;
-    rotation = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
+    rotation = Quaternion(1.0, 0.0, 0.0, 0.0);
     offset_aero = point.offset_aero;
     chord = point.chord;
     structural_twist = point.structural_twist;
@@ -46,14 +46,14 @@ BladeReferencePointAero BladeReferencePointAero::operator+(const BladeReferenceP
 };
 
 TowerReferencePointAero::TowerReferencePointAero() {
-    rotation = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
+    rotation = Quaternion(1.0, 0.0, 0.0, 0.0);
     velocity = Vector3d(0.0, 0.0, 0.0);
 }
 
 TowerReferencePointAero::TowerReferencePointAero(seahowl::core::TowerReferencePoint& point) {
     fraction = point.fraction;
     coordinates = point.coordinates;
-    rotation = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
+    rotation = Quaternion(1.0, 0.0, 0.0, 0.0);
     velocity = Vector3d(0.0, 0.0, 0.0);
     diameter = point.diameter;
     drag_coefficient = point.drag_coefficient;

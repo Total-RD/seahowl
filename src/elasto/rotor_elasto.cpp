@@ -30,7 +30,7 @@ void RotorElasto::assemble(chrono::ChSystemSMC& system) {
 void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     this->blades = blades;
 
-    auto rotation0 = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
+    auto rotation0 = Quaternion(1.0, 0.0, 0.0, 0.0);
 
     // hub
     body_hub = chrono_types::make_shared<chrono::ChBody>();

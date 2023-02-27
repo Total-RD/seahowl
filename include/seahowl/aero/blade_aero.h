@@ -17,7 +17,7 @@ struct BladeNodeAero {
     /** @brief Coordinates of node. */
     Vector3d coordinates;
     /** @brief Rotation of node. */
-    chrono::ChQuaternion<double> rotation;
+    Quaternion rotation;
     /** @brief Translational velocity of node. */
     Vector3d velocity;
     /** @brief Rotational velocity (global) of node. */
@@ -112,7 +112,7 @@ struct BladeElementAero {
     /**
      * @brief Get rotation of center of element.
      */
-    chrono::ChQuaternion<double> get_rotation() const;
+    Quaternion get_rotation() const;
 
     /**
      * @brief Get aero offset of center of element in global frame of reference.

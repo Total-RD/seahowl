@@ -7,6 +7,7 @@ using seahowl::aero::BladeAero;
 using seahowl::aero::get_induced_velocity;
 using seahowl::Vector3d;
 using seahowl::Vector2d;
+using seahowl::Quaternion;
 
 BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
     properties = point;
@@ -52,7 +53,7 @@ Vector3d BladeElementAero::get_position() const {
     return 0.5 * (node1.coordinates + node2.coordinates);
 }
 
-chrono::ChQuaternion<double> BladeElementAero::get_rotation() const {
+Quaternion BladeElementAero::get_rotation() const {
     // returning rotation of node1
     // TODO: average rotation of node1 and node2
     return node1.rotation;

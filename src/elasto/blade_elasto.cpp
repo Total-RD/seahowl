@@ -132,8 +132,8 @@ void BladeElasto::build_elements_tapered_timoshenko() {
         // apply prebend and structural twist
         auto rotation_relative = (nodes[ii]->GetRot() * nodes[ii - 1]->GetRot().GetInverse()).GetNormalized();
         // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
-        rotation_relative = chrono::ChQuaternion<>(rotation_relative[0], rotation_relative[3], rotation_relative[2],
-                                                   rotation_relative[1]);
+        rotation_relative =
+            Quaternion(rotation_relative[0], rotation_relative[3], rotation_relative[2], rotation_relative[1]);
         element->SetNodeBreferenceRot(rotation_relative);
     }
 }
@@ -190,8 +190,8 @@ void BladeElasto::build_elements_tapered_timoshenko_fpm() {
         // apply prebend and structural twist
         auto rotation_relative = (nodes[ii]->GetRot() * nodes[ii - 1]->GetRot().GetInverse()).GetNormalized();
         // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
-        rotation_relative = chrono::ChQuaternion<>(rotation_relative[0], rotation_relative[3], rotation_relative[2],
-                                                   rotation_relative[1]);
+        rotation_relative =
+            Quaternion(rotation_relative[0], rotation_relative[3], rotation_relative[2], rotation_relative[1]);
         element->SetNodeBreferenceRot(rotation_relative);
     }
 }
@@ -224,7 +224,7 @@ void BladeElasto::set_damping_coefficients(double axial, double edge, double fla
 }
 
 void BladeElasto::evaluate_position_rotation(Vector3d& position,
-                                             chrono::ChQuaternion<double>& rotation,
+                                             Quaternion& rotation,
                                              int element_index,
                                              double eta) const {
     auto element = std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(elements[element_index]);
