@@ -206,15 +206,15 @@ struct AeroDynInflowLib {
 
     // Initial position of hub and blades
     // used for setup of AD, not used after init.
-    float  *HubPos;
-    double *HubOri;
-    float  *HubVel;
-    float  *HubAcc;
+    float* HubPos;
+    double* HubOri;
+    float* HubVel;
+    float* HubAcc;
 
-    float  *NacPos; 
-    double *NacOri;
-    float  *NacVel;
-    float  *NacAcc;
+    float* NacPos;
+    double* NacOri;
+    float* NacVel;
+    float* NacAcc;
 
     int NumBlades;
     float* BldRootPos;

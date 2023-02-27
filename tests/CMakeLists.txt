@@ -6,7 +6,7 @@ find_package(GTest CONFIG REQUIRED)
 
 add_executable(test_01 unit_tests/test_components.cpp )
 
-set_target_properties(test_01 
+set_target_properties(test_01
 
 	PROPERTIES
 
@@ -34,7 +34,6 @@ target_include_directories(test_01
 	$<TARGET_PROPERTY:seahowl_core,INCLUDE_DIRECTORIES>)
 
 add_test(
-	NAME test_01 
+	NAME test_01
 	COMMAND $<TARGET_FILE:test_01> ${SEAHOWL_DATADIR}
 )
-

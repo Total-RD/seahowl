@@ -16,7 +16,7 @@ Global parameters
 	:header-rows: 1
 	:widths: 30, 12, 12, 12, 50
 
-	
+
 
 Input files
 ============

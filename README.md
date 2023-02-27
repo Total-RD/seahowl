@@ -117,7 +117,7 @@ It is a JSON dictionary containing:
      "velocity_start": [12, 0, 0],
      "velocity_stop": [25, 0, 0],
      "time_start": 500,
-     "time_stop": 1700   
+     "time_stop": 1700
   }
 }
 ```
@@ -149,7 +149,7 @@ It is a JSON dictionary containing:
 
 
  #### Rotor-Nacelle Assembly file (rna.json)
- 
+
  The Rotor-Nacelle Assembly (RNA) JSON file describes everything related to the rotor, nacelle, drivetrain, generator, gearbox.
  It is a JSON dictionary containing:
 - **shaft**: (dict)
@@ -183,7 +183,7 @@ It is a json dictionary containing:
 - **damping_coefficients**: (array of floats of length 4) damping coefficients of blade.
 - **reference_points**: (list of dict) list of reference points.
   - **coordinates**: (array of floats of length 3) coordinates of reference point (IEC standard) [m].
-  - **twist**: (float) structural twist of blade at reference point [°]. 
+  - **twist**: (float) structural twist of blade at reference point [°].
   - **mass_matrix**: (6x6 matrix of floats) mass matrix of blade at reference point [kg].
   - **stiffness_matrix**: (6x6 matrix of floats) stiffness matrix of blade at reference point [N/m].
   - **chord**: (float) chord length of blade at reference point [m].
@@ -201,7 +201,7 @@ It is a json dictionary containing:
 - **damping_coefficients**: (array of floats of length 4) damping coefficients of blade.
 - **reference_points**: (list of dict) list of reference points.
   - **fraction**: (float) normalized abscissa along tower (starting from base) of reference point.
-  - **density**: (float) density of tower at reference point [kg/m3]. 
+  - **density**: (float) density of tower at reference point [kg/m3].
   - **stiffness_foreaft**: (float) fore-aft stiffness of tower at reference point [N/m].
   - **stiffness_sideside**: (float) side-side stiffness of tower at reference point [N/m].
   - **diameter**: (float) diameter of tower at reference point [m].

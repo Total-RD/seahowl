@@ -67,7 +67,7 @@ add_custom_target(documentation ALL DEPENDS Sphinx doxygen)
 
 # For MSVC IDE
 set_target_properties(
-        Sphinx documentation doxygen		
+        Sphinx documentation doxygen
 
 		PROPERTIES
 

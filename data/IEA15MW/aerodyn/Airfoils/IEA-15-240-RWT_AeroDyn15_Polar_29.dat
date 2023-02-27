@@ -9,7 +9,7 @@ DEFAULT                  InterpOrd   ! Interpolation order to use for quasi-stea
 AF29_BL.txt              BL_file     ! The file name including the boundary layer characteristics of the profile. Ignored if the aeroacoustic module is not called.
 1                        NumTabs     ! Number of airfoil tables in this file.  Each table must have lines for Re and Ctrl.
 ! ------------------------------------------------------------------------------
-! data for table 1 
+! data for table 1
 ! ------------------------------------------------------------------------------
 3.000000                 Re          ! Reynolds number in millions
 0                        Ctrl        ! Control setting (must be 0 for current AirfoilInfo)

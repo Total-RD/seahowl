@@ -128,19 +128,19 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
 
         // @todo fix tangential induction factor calculation (convergence)
         //// tangential induction
-        //if (fabs(cos_phi) < tol_induction) {
-        //    ap = -1.0;
-        //} else {
-        //    double kp = element.chord_solidity * ct / (4.0 * loss_factor * sin_phi * cos_phi);
-        //    if (local_velocity_rotor.y() < 0.0) {
-        //        kp = -kp;
-        //    }
-        //    if (fabs(kp - 1.0) < tol_induction) {
-        //        ap = copysign(ap_max, 1.0 - kp);
-        //    } else {
-        //        ap = kp / (1.0 - kp);
-        //    }
-        //}
+        // if (fabs(cos_phi) < tol_induction) {
+        //     ap = -1.0;
+        // } else {
+        //     double kp = element.chord_solidity * ct / (4.0 * loss_factor * sin_phi * cos_phi);
+        //     if (local_velocity_rotor.y() < 0.0) {
+        //         kp = -kp;
+        //     }
+        //     if (fabs(kp - 1.0) < tol_induction) {
+        //         ap = copysign(ap_max, 1.0 - kp);
+        //     } else {
+        //         ap = kp / (1.0 - kp);
+        //     }
+        // }
         ap = 0.0;  // deactivate tangential induction
 
         // apply limits on induction factors

@@ -67,7 +67,7 @@ if(SEAHOWL_ENABLE_ROSCO)
     add_definitions("-DHAVE_ROSCO=1")
 endif(SEAHOWL_ENABLE_ROSCO)
 
-# AeroDyn module 
+# AeroDyn module
 if(SEAHOWL_ENABLE_AERODYN)
     find_package(AERODYN REQUIRED)
     add_compile_definitions(SEAHOWL_HAVE_AERODYN=1)
@@ -186,7 +186,7 @@ set(SEAHOWL_AERO_HEADERS
 )
 if (SEAHOWL_ENABLE_AERODYN)
     list(APPEND SEAHOWL_AERO_SOURCES src/aero/aerodyn_adapter.cpp)
-    list(APPEND SEAHOWL_AERO_HEADERS include/seahowl/aero/aerodyn_adapter.h)    
+    list(APPEND SEAHOWL_AERO_HEADERS include/seahowl/aero/aerodyn_adapter.h)
 endif(SEAHOWL_ENABLE_AERODYN)
 source_group(aero FILES
     ${SEAHOWL_AERO_SOURCES}

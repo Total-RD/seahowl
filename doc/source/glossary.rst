@@ -10,7 +10,7 @@ Glossary
 
     FOWT : fowt
         Floatting Offshore Wind Turbines
-    
+
     Controller : fowt
         Controller
 

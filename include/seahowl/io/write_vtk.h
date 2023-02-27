@@ -1,7 +1,5 @@
 #include <seahowl/elasto/elasto.h>
 
-
-
 // Forward declaration
 class vtkUnstructuredGrid;
 

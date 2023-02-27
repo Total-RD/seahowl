@@ -31,7 +31,7 @@ void BladeElasto::build() {
         }
     } else if (discretization_fractions.size() == 1) {
         double npoints = discretization_fractions[0] + 1;
-        double dp = 1.0 / (npoints-1);
+        double dp = 1.0 / (npoints - 1);
         discretization_fractions.clear();
         for (int ii = 0; ii < int(npoints); ii++) {
             discretization_fractions.push_back(ii * dp);
