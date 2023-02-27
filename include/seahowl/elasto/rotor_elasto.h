@@ -5,6 +5,8 @@
 #include <vector>
 #include <memory>
 
+#include <seahowl/utils.h>
+
 #include <chrono/physics/ChBody.h>
 #include <chrono/physics/ChSystemSMC.h>
 #include <chrono/physics/ChLinkMate.h>
@@ -41,7 +43,7 @@ struct HubProperties {
  */
 struct NacelleProperties {
     /** @brief Center of mass (COM/COG). */
-    chrono::ChVector<double> center_of_mass{0.0, 0.0, 0.0};
+    Vector3d center_of_mass{0.0, 0.0, 0.0};
     /** @brief Mass of the nacelle. */
     double mass = 0.0;
     /** @brief Inertia of the nacelle (@todo include 3x3 inertia). */
@@ -137,10 +139,9 @@ class RotorElasto : public ComponentElasto {
      */
     void link_tower(const TowerElasto& tower, chrono::ChSystemSMC& system);
 
-    void rotate(double angle, const chrono::ChVector<double>& axis) const override;  ///< @see ElastoComponent::rotate
-    void translate(
-        const chrono::ChVector<double>& translation_vector) const override;  ///< @see ElastoComponent::translate
-    double get_mass() const override;                                        ///< @see ElastoComponent::get_mass
+    void rotate(double angle, const Vector3d& axis) const override;     ///< @see ElastoComponent::rotate
+    void translate(const Vector3d& translation_vector) const override;  ///< @see ElastoComponent::translate
+    double get_mass() const override;                                   ///< @see ElastoComponent::get_mass
 
     /**
      * @brief Applies pitch increment to all blades (i.e. rotates blades around their respective longitudinal axis).

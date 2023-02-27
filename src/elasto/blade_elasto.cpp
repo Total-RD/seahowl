@@ -53,7 +53,7 @@ void BladeElasto::build() {
     for (int ii = 0; ii < nodes.size(); ii++) {
         auto& node = nodes[ii];
         auto& point = discretized_points[ii];
-        auto axis = node->TransformDirectionLocalToParent(chrono::ChVector<double>(1.0, 0.0, 0.0));
+        auto axis = node->TransformDirectionLocalToParent(Vector3d(1.0, 0.0, 0.0));
         chrono::ChMatrix33<> twist_matrix(Q_from_AngAxis(-point.structural_twist, axis));
         nodes[ii]->Frame().SetRot(twist_matrix * chrono::ChMatrix33(nodes[ii]->Frame().coord.rot));
     }
@@ -223,7 +223,7 @@ void BladeElasto::set_damping_coefficients(double axial, double edge, double fla
     }
 }
 
-void BladeElasto::evaluate_position_rotation(chrono::ChVector<double>& position,
+void BladeElasto::evaluate_position_rotation(Vector3d& position,
                                              chrono::ChQuaternion<double>& rotation,
                                              int element_index,
                                              double eta) const {
@@ -239,7 +239,7 @@ void BladeElasto::evaluate_position_rotation(chrono::ChVector<double>& position,
 
 void BladeElasto::apply_pitch_increment(double pitch_increment) {
     // apply pitch from root node direction and position
-    auto root_dir = nodes.front()->TransformDirectionLocalToParent(chrono::ChVector<double>(1.0, 0.0, 0.0));
+    auto root_dir = nodes.front()->TransformDirectionLocalToParent(Vector3d(1.0, 0.0, 0.0));
     auto root_pos = nodes.front()->GetPos();
     translate(-root_pos);
     rotate(-pitch_increment, root_dir);

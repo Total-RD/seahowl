@@ -1,4 +1,5 @@
 #include <seahowl/io/write_vtk.h>
+#include <seahowl/utils.h>
 
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
@@ -7,7 +8,7 @@
 #include <vtkPointData.h>
 #include <vtkDoubleArray.h>
 
-#include <chrono/core/ChVector.h>
+using seahowl::Vector3d;
 
 OutputMeshVTK::OutputMeshVTK(seahowl::elasto::ComponentElastoFEA& component) : component(component) {
     mesh = vtkUnstructuredGrid::New();
@@ -71,7 +72,7 @@ void OutputMeshVTK::init(const char* base_name) {
 }
 
 void OutputMeshVTK::write(double time, int time_step) const {
-    std::map<std::string, std::vector<chrono::ChVector<double>>> arrays_values;
+    std::map<std::string, std::vector<Vector3d>> arrays_values;
 
     // positions
     auto points = mesh->GetPoints();

@@ -47,14 +47,14 @@ BladeReferencePointAero BladeReferencePointAero::operator+(const BladeReferenceP
 
 TowerReferencePointAero::TowerReferencePointAero() {
     rotation = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
-    velocity = chrono::ChVector<double>(0.0, 0.0, 0.0);
+    velocity = Vector3d(0.0, 0.0, 0.0);
 }
 
 TowerReferencePointAero::TowerReferencePointAero(seahowl::core::TowerReferencePoint& point) {
     fraction = point.fraction;
     coordinates = point.coordinates;
     rotation = chrono::ChQuaternion<double>(1.0, 0.0, 0.0, 0.0);
-    velocity = chrono::ChVector<double>(0.0, 0.0, 0.0);
+    velocity = Vector3d(0.0, 0.0, 0.0);
     diameter = point.diameter;
     drag_coefficient = point.drag_coefficient;
 }

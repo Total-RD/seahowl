@@ -1,5 +1,6 @@
 #pragma once
 #include <seahowl/elasto/elasto.h>
+#include <seahowl/utils.h>
 
 #include <chrono/fea/ChElementBeamEuler.h>
 #include <chrono/fea/ChContactSurfaceNodeCloud.h>
@@ -16,9 +17,9 @@ namespace elasto {
 class MooringElasto : public ComponentElastoFEA {
   public:
     /** @brief Position of the fairlead. */
-    chrono::ChVector<double> fairlead_position = {0.0, 0.0, 0.0};
+    Vector3d fairlead_position = {0.0, 0.0, 0.0};
     /** @brief Position of the anchor. */
-    chrono::ChVector<double> anchor_position = {0.0, 0.0, 0.0};
+    Vector3d anchor_position = {0.0, 0.0, 0.0};
     /** @brief Position of the mooring line. */
     double diameter = 0.0;
     /** @brief Axial stiffness of the mooring line. */

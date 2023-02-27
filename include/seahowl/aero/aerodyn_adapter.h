@@ -7,8 +7,8 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/rotor_elasto.h>
 #include <seahowl/elasto/elasto.h>
+#include <seahowl/utils.h>
 
-#include <chrono/core/ChVector.h>
 #include <chrono/physics/ChBody.h>
 #include <chrono/core/ChMatrix33.h>
 
@@ -245,7 +245,7 @@ struct AeroDynInflowLib {
 class AeroDynAdapter {
   public:
     seahowl::aero::AeroDynInflowLib pImpl;
-    std::vector<chrono::ChVector<double>> loads;
+    std::vector<Vector3d> loads;
 
     AeroDynAdapter(std::string AerodynInfile, std::string InflowInfile);
     ~AeroDynAdapter();

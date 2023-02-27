@@ -3,8 +3,7 @@
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/aero/wind_models.h>
-
-#include <chrono/core/ChVector.h>
+#include <seahowl/utils.h>
 
 namespace seahowl {
 namespace aero {
@@ -17,7 +16,7 @@ class RotorAero {
     /** @brief List of blades. */
     std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades;
     /** @brief Position of hub. */
-    chrono::ChVector<double> hub_position{0.0, 0.0, 0.0};
+    Vector3d hub_position{0.0, 0.0, 0.0};
     /** @brief Rotation of hub. */
     chrono::ChQuaternion<double> hub_rotation;
     /** @brief Total radius of the rotor (hub + blades). */

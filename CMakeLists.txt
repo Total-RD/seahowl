@@ -210,6 +210,7 @@ source_group(io FILES ${SEAHOWL_IO_SOURCES} ${SEAHOWL_IO_HEADERS})
 
 # seahowl lib
 set(SEAHOWL_FILES
+    include/seahowl/utils.h
     ${SEAHOWL_CORE_SOURCES}
     ${SEAHOWL_CORE_HEADERS}
     ${SEAHOWL_ELASTO_SOURCES}

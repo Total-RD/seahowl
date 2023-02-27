@@ -1,5 +1,7 @@
 #include "seahowl/core/utils.h"
 
+#include <string>
+
 using seahowl::core::DiscretizationPoint;
 
 std::vector<seahowl::core::DiscretizationPoint> seahowl::core::get_indice_and_positions(

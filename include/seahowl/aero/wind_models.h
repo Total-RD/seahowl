@@ -1,6 +1,6 @@
 #pragma once
 
-#include <chrono/core/ChVector.h>
+#include "seahowl/utils.h"
 
 namespace seahowl {
 namespace aero {
@@ -24,7 +24,7 @@ class WindModel {
      * @param[in] position Position at which wind velocity is extracted.
      * @param[in] time Time of simulation.
      */
-    virtual chrono::ChVector<double> get_wind_velocity(const chrono::ChVector<double>& position, double time) const;
+    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const;
 
     /**
      * @brief Returns air density.
@@ -36,7 +36,7 @@ class WindModel {
 class ConstantWind : public WindModel {
   public:
     /** @brief Constant wind velocity. */
-    chrono::ChVector<double> wind_velocity;
+    Vector3d wind_velocity;
     /** @brief Wind shear coefficient. */
     double shear_coefficient = 0.0;
     /** @brief Reference height (where constant velocity is defined). */
@@ -44,7 +44,7 @@ class ConstantWind : public WindModel {
     /** @brief Reference length (length of shear). */
     double reference_length = 240.0;
     /** @brief Direction of gravitational acceleration. */
-    chrono::ChVector<double> direction_gravity;
+    Vector3d direction_gravity;
 
     /**
      * @brief Constructor.
@@ -56,7 +56,7 @@ class ConstantWind : public WindModel {
      *
      * @param[in] wind_velocity Wind velocity to use as constant.
      */
-    void set_wind_velocity(chrono::ChVector<double> velocity);
+    void set_wind_velocity(Vector3d velocity);
 
     /**
      * @brief Returns wind velocity at given coordinates.
@@ -64,7 +64,7 @@ class ConstantWind : public WindModel {
      * @param[in] position Position at which wind velocity is extracted.
      * @param[in] time Time of simulation.
      */
-    virtual chrono::ChVector<double> get_wind_velocity(const chrono::ChVector<double>& position, double time) const;
+    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const;
 };
 
 /**@brief Wind ramp model */
@@ -75,9 +75,9 @@ class WindRamp : public WindModel {
     /** @brief Ending time of ramp. */
     double time_stop = 1.0;
     /** @brief Wind velocity at beginning of ramp. */
-    chrono::ChVector<double> wind_velocity_start;
+    Vector3d wind_velocity_start;
     /** @brief Wind velocity at end of ramp. */
-    chrono::ChVector<double> wind_velocity_stop;
+    Vector3d wind_velocity_stop;
     /** @brief Wind shear coefficient. */
     double shear_coefficient = 0.0;
     /** @brief Reference height (where constant velocity is defined). */
@@ -85,7 +85,7 @@ class WindRamp : public WindModel {
     /** @brief Reference length (length of shear). */
     double reference_length = 240.0;
     /** @brief Direction of gravitational acceleration. */
-    chrono::ChVector<double> direction_gravity;
+    Vector3d direction_gravity;
 
     /**
      * @brief Constructor.
@@ -97,14 +97,14 @@ class WindRamp : public WindModel {
      *
      * @param[in] wind_velocity Wind velocity to use.
      */
-    void set_wind_velocity_start(chrono::ChVector<double> velocity);
+    void set_wind_velocity_start(Vector3d velocity);
 
     /**
      * @brief Sets wind velocity at end of ramp.
      *
      * @param[in] wind_velocity Wind velocity to use.
      */
-    void set_wind_velocity_stop(chrono::ChVector<double> velocity);
+    void set_wind_velocity_stop(Vector3d velocity);
 
     /**
      * @brief Returns wind velocity at given coordinates.
@@ -112,7 +112,7 @@ class WindRamp : public WindModel {
      * @param[in] position Position at which wind velocity is extracted.
      * @param[in] time Time of simulation.
      */
-    virtual chrono::ChVector<double> get_wind_velocity(const chrono::ChVector<double>& position, double time) const;
+    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const;
 };
 
 }  // namespace aero

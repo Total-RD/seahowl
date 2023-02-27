@@ -5,10 +5,10 @@
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/core/utils.h>
 
-#include <chrono/core/ChVector.h>
-#include <chrono/core/ChVector2.h>
+using seahowl::Vector2d;
+using seahowl::Vector3d;
 
-double seahowl::aero::get_phi(const chrono::ChVector2<double>& fluid_velocity) {
+double seahowl::aero::get_phi(const Vector2d& fluid_velocity) {
     double phi = atan2(fluid_velocity.y(), -fluid_velocity.x());
     return phi;
 }
@@ -22,7 +22,7 @@ double seahowl::aero::get_alpha_from_phi(const double phi, const double pitch) {
     return alpha;
 }
 
-double seahowl::aero::get_alpha(const chrono::ChVector2<double>& fluid_velocity, const double pitch) {
+double seahowl::aero::get_alpha(const Vector2d& fluid_velocity, const double pitch) {
     double phi = get_phi(fluid_velocity);
     double alpha = get_alpha_from_phi(phi, pitch);
     return alpha;
@@ -36,15 +36,15 @@ seahowl::aero::AirfoilCoefficients seahowl::aero::get_aero_coefficients_from_alp
     return coefficients;
 }
 
-chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
-                                                              const chrono::ChVector2<double>& local_velocity_rotor0,
-                                                              const double blade_pitch,
-                                                              const size_t nblades,
-                                                              const bool tip_loss,
-                                                              const bool hub_loss) {
+Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
+                                             const Vector2d& local_velocity_rotor0,
+                                             const double blade_pitch,
+                                             const size_t nblades,
+                                             const bool tip_loss,
+                                             const bool hub_loss) {
     // local_velocity is in local element frame
-    chrono::ChVector2<double> local_velocity;
-    chrono::ChVector2<double> local_velocity_rotor;
+    Vector2d local_velocity;
+    Vector2d local_velocity_rotor;
     double pitch_twist = blade_pitch + node.properties.structural_twist;
 
     double tol_rel = 1e-3;
@@ -67,8 +67,7 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
         auto ap_previous = ap;
 
         // local velocity updated with induction factors
-        local_velocity_rotor =
-            chrono::ChVector2<double>(local_velocity_rotor0.x() * (1.0 + ap), local_velocity_rotor0.y() * (1.0 - aa));
+        local_velocity_rotor = Vector2d(local_velocity_rotor0.x() * (1.0 + ap), local_velocity_rotor0.y() * (1.0 - aa));
 
         // get coefficients from angle of attack
         double phi = seahowl::aero::get_phi(local_velocity_rotor);
@@ -178,8 +177,8 @@ chrono::ChVector2<double> seahowl::aero::get_induced_velocity(seahowl::aero::Bla
     return local_velocity_rotor;
 }
 
-void seahowl::aero::apply_tower_shadow_effect_on_wind(chrono::ChVector<double>& wind_velocity,
-                                                      const chrono::ChVector<double>& position,
+void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
+                                                      const Vector3d& position,
                                                       double blade_azimuth,
                                                       const seahowl::aero::TowerAero& tower_aero) {
     if (blade_azimuth > chrono::CH_C_PI / 2.0 || blade_azimuth < -chrono::CH_C_PI / 2.0) {
@@ -208,7 +207,7 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(chrono::ChVector<double>& 
             auto yy2 = pow(yy, 2);
             wind_velocity_tower =
                 (wind_velocity_tower + wind_velocity_tower * pow(tower_radius, 2) / pow(yy2 + xx2, 2) *
-                                           chrono::ChVector<double>(0.0, (-2.0 * xx * yy), (yy2 - xx2)));
+                                           Vector3d(0.0, (-2.0 * xx * yy), (yy2 - xx2)));
 
             // correct wind velocity
             wind_velocity = towertop_rotation.Rotate(wind_velocity_tower);

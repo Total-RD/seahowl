@@ -3,7 +3,8 @@
 #include <vector>
 #include <memory>
 
-#include <chrono/core/ChVector.h>
+#include <seahowl/utils.h>
+
 #include <chrono/fea/ChMesh.h>
 
 namespace chrono {
@@ -34,14 +35,14 @@ class ComponentElasto {
      * @param[in] translation_vector The angle of rotation (in radians).
      * @param[in] axis The axis of rotation (3D vector).
      */
-    virtual void rotate(double angle, const chrono::ChVector<double>& axis) const = 0;
+    virtual void rotate(double angle, const Vector3d& axis) const = 0;
 
     /**
      * @brief Translates the component.
      *
      * @param[in] translation_vector The 3D translation vector.
      */
-    virtual void translate(const chrono::ChVector<double>& translation_vector) const = 0;
+    virtual void translate(const Vector3d& translation_vector) const = 0;
 
     /**
      * @brief Returns the mass of the component.
@@ -77,8 +78,8 @@ class ComponentElastoFEA : public ComponentElasto {
      */
     void assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) const;
 
-    virtual void rotate(double angle, const chrono::ChVector<double>& axis) const override;
-    virtual void translate(const chrono::ChVector<double>& translation_vector) const override;
+    virtual void rotate(double angle, const Vector3d& axis) const override;
+    virtual void translate(const Vector3d& translation_vector) const override;
     virtual double get_mass() const override;
 
     /**
@@ -94,7 +95,7 @@ class ComponentElastoFEA : public ComponentElasto {
      * @param[in] element_index Index of the element on which the evaluation is undertaken.
      * @param[in] eta Abscissa of the element within the range [-1, +1], with -1 at node1 and +1 at node2.
      */
-    virtual void evaluate_position_rotation(chrono::ChVector<double>& position,
+    virtual void evaluate_position_rotation(Vector3d& position,
                                             chrono::ChQuaternion<double>& rotation,
                                             int element_index,
                                             double eta) const;
@@ -107,25 +108,22 @@ class ComponentElastoFEA : public ComponentElasto {
      * @param[in] eta Abscissa of the element within the range [-1, +1], with -1 at node1 and +1 at node2.
      * @param[in] offset Offset from given abscissa along longitudinal axis of element.
      */
-    void accumulate_element_load(const chrono::ChVector<double>& load,
-                                 int element_index,
-                                 double eta,
-                                 const chrono::ChVector<double>& offset);
+    void accumulate_element_load(const Vector3d& load, int element_index, double eta, const Vector3d& offset);
 
     /**
      * @brief Returns all nodes positions (global frame of reference).
      */
-    std::vector<chrono::ChVector<double>> get_nodes_positions() const;
+    std::vector<Vector3d> get_nodes_positions() const;
 
     /**
      * @brief Returns all nodes velocities (global frame of reference).
      */
-    std::vector<chrono::ChVector<double>> get_nodes_velocities() const;
+    std::vector<Vector3d> get_nodes_velocities() const;
 
     /**
      * @brief Returns all nodes accelerations (global frame of reference).
      */
-    std::vector<chrono::ChVector<double>> get_nodes_accelerations() const;
+    std::vector<Vector3d> get_nodes_accelerations() const;
 
     /**
      * @brief Returns all nodes rotations (global frame of reference).
@@ -135,22 +133,22 @@ class ComponentElastoFEA : public ComponentElasto {
     /**
      * @brief Returns all nodes directions (global frame of reference).
      */
-    std::vector<chrono::ChVector<double>> get_nodes_directions() const;
+    std::vector<Vector3d> get_nodes_directions() const;
 
     /**
      * @brief Returns all nodes rotational velocities (local frame of reference).
      */
-    std::vector<chrono::ChVector<double>> get_nodes_rotational_velocities() const;
+    std::vector<Vector3d> get_nodes_rotational_velocities() const;
 
     /**
      * @brief Returns all nodes rotational accelerations (local frame of reference).
      */
-    std::vector<chrono::ChVector<double>> get_nodes_rotational_accelerations() const;
+    std::vector<Vector3d> get_nodes_rotational_accelerations() const;
 
     /**
      * @brief Returns all nodes loads (global frame of reference).
      */
-    std::vector<chrono::ChVector<double>> get_nodes_loads() const;
+    std::vector<Vector3d> get_nodes_loads() const;
 };
 
 }  // namespace elasto

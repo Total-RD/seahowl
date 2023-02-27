@@ -1,10 +1,14 @@
 #include "seahowl/io/viz_insitu.h"
 
+#include <seahowl/utils.h>
+
+using seahowl::Vector3d;
+
 void draw_system_init(chrono::ChSystem& system, std::shared_ptr<chrono::irrlicht::ChVisualSystemIrrlicht> application) {
     // initialize default
     application->AddTypicalLights();
     application->AddSkyBox();
-    application->AddCamera(chrono::ChVector<double>(-150, -150, 150), chrono::ChVector<double>(0, 0, 150.));
+    application->AddCamera(Vector3d(-150, -150, 150), Vector3d(0, 0, 150.));
 
     // meshes
     for (auto mesh : system.Get_meshlist()) {

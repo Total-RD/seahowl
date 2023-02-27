@@ -6,6 +6,8 @@
 using seahowl::aero::BladeAero;
 using seahowl::aero::RotorAero;
 using seahowl::aero::TowerAero;
+using seahowl::Vector3d;
+using seahowl::Vector2d;
 
 RotorAero::RotorAero() {}
 
@@ -95,7 +97,7 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
 
             // get global/local directions
             // pointing from hub towards nacelle
-            auto local_direction_normal = chrono::ChVector<double>(0.0, 0.0, 1.0);
+            auto local_direction_normal = Vector3d(0.0, 0.0, 1.0);
             auto global_direction_normal = hub_rotation.Rotate(local_direction_normal);
             // pointing from hub to node position
             auto global_direction_hub2node = (position - hub_position).GetNormalized();
@@ -108,10 +110,10 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
             // y: normal velocity (normal to rotor disc, pointing from hub to nacelle)
             double local_velocity_normal = (global_velocity ^ global_direction_normal);
             double local_velocity_tangent = (global_velocity ^ global_direction_tangent);
-            auto local_velocity0 = chrono::ChVector2<double>(local_velocity_tangent, local_velocity_normal);
+            auto local_velocity0 = Vector2d(local_velocity_tangent, local_velocity_normal);
 
             if (local_velocity0.Length() == 0.0) {
-                node.load = chrono::ChVector<double>(0.0, 0.0, 0.0);
+                node.load = Vector3d(0.0, 0.0, 0.0);
             } else {
                 // get induced velocity (2D) from blade node
                 auto local_velocity =
@@ -182,7 +184,7 @@ void RotorAero::compute_wind_loads_aerodyn(float* LoadAeroDyn,
             count_node += 1;
             // store load in global frame
             int pp = (count_blade * (blade->elements.size() + 1) + count_node) * 6;
-            node.load = chrono::ChVector<double>(LoadAeroDyn[pp], LoadAeroDyn[pp + 1], LoadAeroDyn[pp + 2]);
+            node.load = Vector3d(LoadAeroDyn[pp], LoadAeroDyn[pp + 1], LoadAeroDyn[pp + 2]);
         }
         // update loads of blade
         for (int ii = 0; ii < blade->elements.size(); ii++) {

@@ -5,6 +5,7 @@
 #include <seahowl/core/tower.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/aero/aerodyn_adapter.h>
+#include <seahowl/utils.h>
 
 #include <vector>
 
@@ -112,7 +113,7 @@ class Turbine : public ComponentDynamic {
      *
      * @param[in] translation_vector The 3D translation vector.
      */
-    void translate(chrono::ChVector<double> translation_vector);
+    void translate(Vector3d translation_vector);
 
     /**
      * @brief Rotates the turbine.
@@ -120,7 +121,7 @@ class Turbine : public ComponentDynamic {
      * @param[in] translation_vector The angle of rotation (in radians).
      * @param[in] axis The axis of rotation (3D vector).
      */
-    void rotate(double angle, chrono::ChVector<double> axis);
+    void rotate(double angle, Vector3d axis);
 
     /**
      * @brief Computes wind loads on blades and tower.

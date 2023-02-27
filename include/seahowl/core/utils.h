@@ -4,8 +4,6 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include <chrono/core/ChVector.h>
-
 namespace seahowl {
 namespace core {
 

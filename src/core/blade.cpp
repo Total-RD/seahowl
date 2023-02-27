@@ -13,6 +13,7 @@
 using namespace seahowl::core;
 using namespace seahowl::elasto;
 using namespace seahowl::aero;
+using seahowl::Vector3d;
 
 Blade::Blade() {
     elasto = std::make_shared<BladeElasto>();
@@ -98,7 +99,7 @@ void Blade::update_positions_aero() {
         // add offset
         auto& offset = node_aero.properties.offset_aero;
         auto coordsys = chrono::ChCoordsys(node_aero.coordinates, node_aero.rotation);
-        auto offset3D = chrono::ChVector<double>(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
+        auto offset3D = Vector3d(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
         node_aero.coordinates = coordsys.TransformLocalToParent(offset3D);
 
         // update velocity of aero elements

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <seahowl/core/reference_point.h>
+#include <seahowl/utils.h>
 
 namespace seahowl {
 namespace aero {
@@ -18,11 +19,11 @@ struct BladeReferencePointAero {
     /** @brief Fraction (normalized abscissa along longitudinal axis of component) of reference point. */
     double fraction = 0.0;
     /** @brief Coordinates of reference point. */
-    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};
+    Vector3d coordinates{0.0, 0.0, 0.0};
     /** @brief Rotation of reference point. */
     chrono::ChQuaternion<double> rotation{1.0, 0.0, 0.0, 0.0};
     /** @brief Offset (x, y) for the aerodynamic center of blade at reference point. */
-    chrono::ChVector2<double> offset_aero{0.0, 0.0};
+    Vector2d offset_aero{0.0, 0.0};
     /** @brief Chord of blade at reference point. */
     double chord = 0.0;
     /** @brief Structural twist angle of blade at reference point. */
@@ -51,9 +52,9 @@ struct TowerReferencePointAero {
     /** @brief Fraction (normalized abscissa along longitudinal axis of component) of reference point. */
     double fraction = 0.0;
     /** @brief Coordinates of reference point. */
-    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};
+    Vector3d coordinates{0.0, 0.0, 0.0};
     /** @brief Velocity of reference point. */
-    chrono::ChVector<double> velocity{0.0, 0.0, 0.0};
+    Vector3d velocity{0.0, 0.0, 0.0};
     /** @brief Rotation of reference point. */
     chrono::ChQuaternion<double> rotation{0.0, 0.0, 0.0, 0.0};
     /** @brief Diameter of tower at reference point. */

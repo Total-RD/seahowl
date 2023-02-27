@@ -2,6 +2,7 @@
 
 using seahowl::aero::TowerElementAero;
 using seahowl::aero::TowerAero;
+using seahowl::Vector3d;
 
 TowerElementAero::TowerElementAero(const TowerReferencePointAero& point1, const TowerReferencePointAero& point2) {
     properties = (point1 + point2) * 0.5;
@@ -37,7 +38,7 @@ void TowerAero::build() {
         auto element = TowerElementAero(discretized_points[ii], discretized_points[ii + 1]);
         elements.push_back(element);
         // push empty load
-        loads.push_back(chrono::ChVector<double>(0.0, 0.0, 0.0));
+        loads.push_back(Vector3d(0.0, 0.0, 0.0));
     }
 }
 

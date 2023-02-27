@@ -2,6 +2,8 @@
 
 #include <seahowl/core/reference_point.h>
 
+#include <seahowl/utils.h>
+
 #include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
 
 namespace seahowl {
@@ -14,7 +16,7 @@ namespace elasto {
  */
 struct ReferencePointElasto {
     /** @brief Coordinates of reference point. */
-    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};
+    Vector3d coordinates{0.0, 0.0, 0.0};
     /** @brief Fraction (normalized abscissa along longitudinal axis of component) of reference point. */
     double fraction = 0.0;
 
@@ -38,9 +40,9 @@ struct ReferencePointElasto {
  */
 struct BladeReferencePointElasto : ReferencePointElasto {
     /** @brief Offset (x, y) for the center of elasticity of blade at reference point. */
-    chrono::ChVector2<double> offset_elastic{0.0, 0.0};
+    Vector2d offset_elastic{0.0, 0.0};
     /** @brief Offset (x, y) for the center of gravity of blade at reference point. */
-    chrono::ChVector2<double> offset_gravity{0.0, 0.0};
+    Vector2d offset_gravity{0.0, 0.0};
     /** @brief Stiffness matrix of blade at reference point. */
     chrono::ChMatrixNM<double, 6, 6> stiffness_matrix;
     /** @brief Mass matrix of blade at reference point. */

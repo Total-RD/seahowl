@@ -5,8 +5,7 @@
 #include <seahowl/aero/reference_point_aero.h>
 #include <seahowl/aero/wind_models.h>
 #include <seahowl/core/utils.h>
-
-#include <chrono/core/ChVector.h>
+#include <seahowl/utils.h>
 
 namespace seahowl {
 
@@ -39,7 +38,7 @@ class TowerAero {
     /** @brief Aero elements. */
     std::vector<TowerElementAero> elements;
     /** @brief Loads at center of tower elements. */
-    std::vector<chrono::ChVector<double>> loads;
+    std::vector<Vector3d> loads;
 
     /**
      * @brief Constructor.

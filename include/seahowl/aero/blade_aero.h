@@ -3,8 +3,7 @@
 #include <seahowl/aero/reference_point_aero.h>
 #include <seahowl/aero/wind_models.h>
 #include <seahowl/core/utils.h>
-
-#include <chrono/core/ChVector.h>
+#include <seahowl/utils.h>
 
 namespace seahowl {
 
@@ -16,25 +15,25 @@ namespace aero {
  */
 struct BladeNodeAero {
     /** @brief Coordinates of node. */
-    chrono::ChVector<double> coordinates;
+    Vector3d coordinates;
     /** @brief Rotation of node. */
     chrono::ChQuaternion<double> rotation;
     /** @brief Translational velocity of node. */
-    chrono::ChVector<double> velocity;
+    Vector3d velocity;
     /** @brief Rotational velocity (global) of node. */
-    chrono::ChVector<double> rot_velocity;
+    Vector3d rot_velocity;
     /** @brief Translational acceleration of node. */
-    chrono::ChVector<double> acceleration;
+    Vector3d acceleration;
     /** @brief Rotational accelation (global) of node. */
-    chrono::ChVector<double> rot_acceleration;
+    Vector3d rot_acceleration;
     /** @brief Load calculated at node. */
-    chrono::ChVector<double> load;
+    Vector3d load;
     /** @brief Uninduced wind velocity at node. */
-    chrono::ChVector<double> wind_velocity;
+    Vector3d wind_velocity;
     /** @brief Tower-shadowed wind velocity at node. */
-    chrono::ChVector<double> wind_velocity_shadowed;
+    Vector3d wind_velocity_shadowed;
     /** @brief Induced wind velocity at node. */
-    chrono::ChVector<double> relative_velocity_induced;
+    Vector3d relative_velocity_induced;
     /** @brief Reference point associated to node (aerodynamic properties). */
     BladeReferencePointAero properties;
 
@@ -59,7 +58,7 @@ struct BladeNodeAero {
     /**
      * @brief Get aero offset in global frame of reference.
      */
-    chrono::ChVector<double> get_offset_aero_absolute() const;
+    Vector3d get_offset_aero_absolute() const;
 
     /**
      * @brief Returns induced velocity.
@@ -70,11 +69,11 @@ struct BladeNodeAero {
      * @param[in] tip_loss Whether to take tip loss into account or not.
      * @param[in] hub_loss Whether to take hub loss into account or not.
      */
-    chrono::ChVector2<double> get_induced_velocity_rotor(const chrono::ChVector2<double>& local_velocity_rotor0,
-                                                         double blade_pitch = 0.0,
-                                                         size_t nblades = 3,
-                                                         bool tip_loss = true,
-                                                         bool hub_loss = true);
+    Vector2d get_induced_velocity_rotor(const Vector2d& local_velocity_rotor0,
+                                        double blade_pitch = 0.0,
+                                        size_t nblades = 3,
+                                        bool tip_loss = true,
+                                        bool hub_loss = true);
 };
 
 /**
@@ -90,7 +89,7 @@ struct BladeElementAero {
     /** @brief Length of element. */
     double length;
     /** @brief Offset (x, y) for the aerodynamic center of blade at center of element. */
-    chrono::ChVector2<double> offset_aero;
+    Vector2d offset_aero;
 
     /**
      * @brief Constructor.
@@ -103,12 +102,12 @@ struct BladeElementAero {
     /**
      * @brief Returns integrated load at center of element.
      */
-    chrono::ChVector<double> get_load() const;
+    Vector3d get_load() const;
 
     /**
      * @brief Get position of center of element.
      */
-    chrono::ChVector<double> get_position() const;
+    Vector3d get_position() const;
 
     /**
      * @brief Get rotation of center of element.
@@ -118,7 +117,7 @@ struct BladeElementAero {
     /**
      * @brief Get aero offset of center of element in global frame of reference.
      */
-    chrono::ChVector<double> get_offset_aero_absolute() const;
+    Vector3d get_offset_aero_absolute() const;
 };
 
 /**
@@ -140,7 +139,7 @@ class BladeAero {
     /** @brief Aero elements. */
     std::vector<BladeElementAero> elements;
     /** @brief Loads at center of blade elements. */
-    std::vector<chrono::ChVector<double>> loads;
+    std::vector<Vector3d> loads;
     /** @brief Initial azimuth of the blade relative to rotor azimuth (in radians). */
     double azimuth0 = 0.0;
     /** @brief Pitch of the blade (in radians). */
@@ -167,24 +166,24 @@ class BladeAero {
      * @param[in] hub_apex_position Position of the hub's apex.
      * @param[in] hub_radius Radius of hub.
      */
-    void compute_distances_from_hub(const chrono::ChVector<double>& hub_apex_position, double hub_radius);
+    void compute_distances_from_hub(const Vector3d& hub_apex_position, double hub_radius);
 
     /**
      * @brief Computes node radii.
      *
      * @param[in] hub_apex_position Position of the hub's apex.
      */
-    void compute_radii(const chrono::ChVector<double>& hub_apex_position);
+    void compute_radii(const Vector3d& hub_apex_position);
 
     /**
      * @brief Returns average wind velocity along blade.
      */
-    chrono::ChVector<double> get_average_wind_velocity();
+    Vector3d get_average_wind_velocity();
 
     /**
      * @brief Returns total aero load on blade.
      */
-    chrono::ChVector<double> get_total_load();
+    Vector3d get_total_load();
 };
 
 }  // namespace aero

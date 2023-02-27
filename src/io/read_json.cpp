@@ -9,6 +9,7 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/servo/controller_discon.h>
 #include <seahowl/core/system.h>
+#include <seahowl/utils.h>
 
 #include <string>
 #include <memory>
@@ -23,6 +24,9 @@ using std::filesystem::absolute;
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
+
+using seahowl::Vector3d;
+using seahowl::Vector2d;
 
 /**@brief Copy file to destination dir, increment file name if already exists, and return path to new copid file.
  */
@@ -80,18 +84,18 @@ std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_
             throw std::runtime_error("Coordinates has to be vector of length 3.");
         }
         reference_point.fraction = coords[2] / blade_length;
-        reference_point.coordinates = chrono::ChVector<double>(coords[0], coords[1], coords[2]);
+        reference_point.coordinates = Vector3d(coords[0], coords[1], coords[2]);
         if (point.contains("offset_gravity")) {
             auto og = point.at("offsets_gravity").get<std::vector<double>>();
-            reference_point.offset_gravity = chrono::ChVector2<double>(og[0], og[1]);
+            reference_point.offset_gravity = Vector2d(og[0], og[1]);
         }
         if (point.contains("offset_elastic")) {
             auto oe = point.at("offsets_elastic").get<std::vector<double>>();
-            reference_point.offset_elastic = chrono::ChVector2<double>(oe[0], oe[1]);
+            reference_point.offset_elastic = Vector2d(oe[0], oe[1]);
         }
         if (point.contains("offset_aero")) {
             auto oa = point.at("offset_aero").get<std::vector<double>>();
-            reference_point.offset_aero = chrono::ChVector2<double>(oa[0], oa[1]);
+            reference_point.offset_aero = Vector2d(oa[0], oa[1]);
         }
 
         auto sm = point.at("stiffness_matrix").get<std::vector<std::vector<double>>>();
@@ -212,7 +216,7 @@ std::vector<seahowl::core::TowerReferencePoint> get_tower_reference_points_from_
         auto reference_point = seahowl::core::TowerReferencePoint();
         point.at("fraction").get_to(reference_point.fraction);
         reference_point.coordinates =
-            chrono::ChVector<double>(0.0, 0.0, (height - base_height) * reference_point.fraction + base_height);
+            Vector3d(0.0, 0.0, (height - base_height) * reference_point.fraction + base_height);
         point.at("stiffness_sideside").get_to(reference_point.stiffness_sideside);
         point.at("stiffness_foreaft").get_to(reference_point.stiffness_foreaft);
         point.at("density").get_to(reference_point.density);
@@ -278,7 +282,7 @@ seahowl::core::Rotor get_rotor_from_json(std::string filepath) {
     if (cm.size() != 3) {
         throw std::runtime_error("Center of mass of nacelle has to be vector of length 3.");
     }
-    rotor.elasto.nacelle.center_of_mass = chrono::ChVector<double>(cm[0], cm[1], cm[2]);
+    rotor.elasto.nacelle.center_of_mass = Vector3d(cm[0], cm[1], cm[2]);
     nacelle.at("mass").get_to(rotor.elasto.nacelle.mass);
     nacelle.at("inertia").get_to(rotor.elasto.nacelle.inertia);
     nacelle.at("yaw_bearing_mass").get_to(rotor.elasto.nacelle.yaw_bearing_mass);
@@ -423,7 +427,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
     auto environment_json = json_obj.at("environment");
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
-    chrono_system.Set_G_acc(chrono::ChVector<double>(gravity[0], gravity[1], gravity[2]));
+    chrono_system.Set_G_acc(Vector3d(gravity[0], gravity[1], gravity[2]));
 
     // system
     auto seahowl_system = seahowl::core::System();
@@ -433,9 +437,9 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         auto wind_options = wind_json.at("options");
         auto wind_model = std::dynamic_pointer_cast<seahowl::aero::WindRamp>(seahowl_system.wind_model);
         auto v0 = wind_options.at("velocity_start").get<std::vector<double>>();
-        wind_model->wind_velocity_start = chrono::ChVector<double>(v0[0], v0[1], v0[2]);
+        wind_model->wind_velocity_start = Vector3d(v0[0], v0[1], v0[2]);
         auto v1 = wind_options.at("velocity_stop").get<std::vector<double>>();
-        wind_model->wind_velocity_stop = chrono::ChVector<double>(v1[0], v1[1], v1[2]);
+        wind_model->wind_velocity_stop = Vector3d(v1[0], v1[1], v1[2]);
         wind_model->direction_gravity = chrono_system.Get_G_acc().GetNormalized();
         wind_model->reference_height = wind_options.at("reference_height").get<double>();
         wind_model->time_start = wind_options.at("time_start").get<double>();
@@ -485,7 +489,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         turbine.rotate(turbine_json.at("rotation").get<double>(), -chrono_system.Get_G_acc().GetNormalized());
         // translate turbine
         auto trans = turbine_json.at("translation").get<std::vector<double>>();
-        turbine.translate(chrono::ChVector<double>(trans[0], trans[1], trans[2]));
+        turbine.translate(Vector3d(trans[0], trans[1], trans[2]));
 
         // apply initial pitches
         for (auto blade : turbine.blades) {

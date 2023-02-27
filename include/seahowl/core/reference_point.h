@@ -2,6 +2,7 @@
 
 #include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
 #include <seahowl/aero/airfoil.h>  ///< @todo Bad dependencyof aero on core ?
+#include <seahowl/utils.h>
 
 #include <vector>
 
@@ -21,13 +22,13 @@ struct BladeReferencePoint {
     // elasto
     //
     /** @brief Coordinates of reference point. */
-    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};
+    Vector3d coordinates{0.0, 0.0, 0.0};
     /** @brief Offset (x, y) for the center of elasticity of blade at reference point. */
-    chrono::ChVector2<double> offset_elastic{0.0, 0.0};
+    Vector2d offset_elastic{0.0, 0.0};
     /** @brief Offset (x, y) for the center of gravity of blade at reference point. */
-    chrono::ChVector2<double> offset_gravity{0.0, 0.0};
+    Vector2d offset_gravity{0.0, 0.0};
     /** @brief Offset (x, y) for the aerodynamic center of blade at reference point. */
-    chrono::ChVector2<double> offset_aero{0.0, 0.0};
+    Vector2d offset_aero{0.0, 0.0};
     /** @brief Stiffness matrix of blade at reference point. */
     chrono::ChMatrixNM<double, 6, 6> stiffness_matrix;
     /** @brief Mass matrix of blade at reference point. */
@@ -62,7 +63,7 @@ struct TowerReferencePoint {
     // elasto
     //
     /** @brief Coordinates of reference point. */
-    chrono::ChVector<double> coordinates{0.0, 0.0, 0.0};
+    Vector3d coordinates{0.0, 0.0, 0.0};
     /** @brief Fraction (normalized abscissa along longitudinal axis of component) of reference point. */
     double fraction = 0.0;
     /** @brief Lineic density of tower at reference point. */

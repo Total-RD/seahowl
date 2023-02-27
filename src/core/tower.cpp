@@ -88,7 +88,7 @@ void Tower::update_loads_elasto() {
     if (aero.loads.size() != mapping_aero2elasto.size()) {
         throw std::runtime_error("length of vector of loads and aero to elasto mapping do not match.");
     }
-    auto offset = chrono::ChVector<double>(0.0, 0.0, 0.0);
+    auto offset = Vector3d(0.0, 0.0, 0.0);
     for (int ii = 0; ii < aero.loads.size(); ii++) {
         elasto.accumulate_element_load(aero.loads[ii], mapping_aero2elasto[ii].index, mapping_aero2elasto[ii].eta,
                                        offset);

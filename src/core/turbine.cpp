@@ -37,7 +37,7 @@ void Turbine::poststep(double time, double dt) {
         // apply torque elec to hub rigid body
         rotor.elasto.body_hub->Empty_forces_accumulators();
         // torque elec is apply on Z axis of hub body (locally)
-        rotor.elasto.body_hub->Accumulate_torque(chrono::ChVector<double>(0.0, 0.0, -torque_elec), true);
+        rotor.elasto.body_hub->Accumulate_torque(Vector3d(0.0, 0.0, -torque_elec), true);
     }
     // apply pitch from controller
     if (controller->has_pitch_control) {
@@ -78,12 +78,12 @@ void Turbine::build() {
     tower.build();
 }
 
-void Turbine::translate(chrono::ChVector<double> translation_vector) {
+void Turbine::translate(Vector3d translation_vector) {
     rotor.elasto.translate(translation_vector);
     tower.elasto.translate(translation_vector);
 }
 
-void Turbine::rotate(double angle, chrono::ChVector<double> axis) {
+void Turbine::rotate(double angle, Vector3d axis) {
     rotor.elasto.rotate(angle, axis);
     tower.elasto.rotate(angle, axis);
 }
