@@ -37,9 +37,9 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     // move hub along X for overhang and COG offset, and along Z for distance from towertop
     body_hub->set_position(Vector3d(hub.overhang + hub.center_of_mass, 0.0, 0.0));
     // local Z axis along global X axis + shaft tilt along global Y axis
-    auto tilt_hub = Q_from_AngAxis(shaft.tilt, -chrono::VECT_Y);
-    body_hub->set_rotation(tilt_hub * Q_from_AngAxis(chrono::CH_C_PI / 2.0, chrono::VECT_Y));
-    body_hub->set_position(tilt_hub.Rotate(body_hub->GetPos()) + Vector3d(0.0, 0.0, shaft.distance_from_towertop));
+    auto tilt_hub = Quaternion(Q_from_AngAxis(shaft.tilt, -chrono::VECT_Y));
+    body_hub->set_rotation(tilt_hub * Q_from_AngAxis(PI / 2.0, chrono::VECT_Y));
+    body_hub->set_position((tilt_hub * body_hub->GetPos()) + Vector3d(0.0, 0.0, shaft.distance_from_towertop));
     // mass and inertia
     body_hub->set_mass(hub.mass);
     body_hub->SetInertiaXX(Vector3d(0., 0., hub.inertia));
@@ -124,27 +124,27 @@ void RotorElasto::rotate(double angle, const Vector3d& axis) const {
     for (auto& blade : blades) {
         blade->rotate(angle, axis);
     }
-    auto rotation = Q_from_AngAxis(angle, axis);
+    auto rotation = Quaternion(Q_from_AngAxis(angle, axis));
     // hub
-    auto new_position_hub = rotation.Rotate(body_hub->GetPos());
-    auto new_rotation_hub = (rotation * body_hub->GetRot()).GetNormalized();
+    auto new_position_hub = rotation * body_hub->get_position();
+    auto new_rotation_hub = (rotation * body_hub->get_rotation()).normalized();
     body_hub->SetPos(new_position_hub);
     body_hub->SetRot(new_rotation_hub);
     // shaft
-    auto new_position_shaft = rotation.Rotate(body_shaft->GetPos());
-    auto new_rotation_shaft = (rotation * body_shaft->GetRot()).GetNormalized();
+    auto new_position_shaft = rotation * body_shaft->GetPos();
+    auto new_rotation_shaft = (rotation * body_shaft->get_rotation()).normalized();
     body_shaft->SetPos(new_position_shaft);
     body_shaft->SetRot(new_rotation_shaft);
     // nacelle
-    auto new_position_nacelle = rotation.Rotate(body_nacelle->GetPos());
-    auto new_rotation_nacelle = (rotation * body_nacelle->GetRot()).GetNormalized();
+    auto new_position_nacelle = rotation * body_nacelle->get_position();
+    auto new_rotation_nacelle = (rotation * body_nacelle->get_rotation()).normalized();
     body_nacelle->SetPos(new_position_nacelle);
     body_nacelle->SetRot(new_rotation_nacelle);
     // yaw bearing
-    auto new_position_yaw_bearing = rotation.Rotate(body_yaw_bearing->GetPos());
-    auto new_rotation_yaw_bearing = (rotation * body_yaw_bearing->GetRot()).GetNormalized();
-    body_yaw_bearing->SetPos(new_position_yaw_bearing);
-    body_yaw_bearing->SetRot(new_rotation_yaw_bearing);
+    auto new_position_yaw_bearing = rotation * body_yaw_bearing->get_position();
+    auto new_rotation_yaw_bearing = (rotation * body_yaw_bearing->get_rotation()).normalized();
+    body_yaw_bearing->set_position(new_position_yaw_bearing);
+    body_yaw_bearing->set_rotation(new_rotation_yaw_bearing);
 }
 
 void RotorElasto::translate(const Vector3d& translation_vector) const {
@@ -153,13 +153,13 @@ void RotorElasto::translate(const Vector3d& translation_vector) const {
         blade->translate(translation_vector);
     }
     // hub
-    body_hub->SetPos(body_hub->GetPos() + translation_vector);
+    body_hub->set_position(body_hub->get_position() + translation_vector);
     // shaft
-    body_shaft->SetPos(body_shaft->GetPos() + translation_vector);
+    body_shaft->set_position(body_shaft->get_position() + translation_vector);
     // nacelle
-    body_nacelle->SetPos(body_nacelle->GetPos() + translation_vector);
+    body_nacelle->set_position(body_nacelle->get_position() + translation_vector);
     // yaw_bearing
-    body_yaw_bearing->SetPos(body_yaw_bearing->GetPos() + translation_vector);
+    body_yaw_bearing->set_position(body_yaw_bearing->get_position() + translation_vector);
 }
 
 double RotorElasto::get_mass() const {
@@ -169,13 +169,13 @@ double RotorElasto::get_mass() const {
         total_mass += blade->get_mass();
     }
     // hub
-    total_mass += body_hub->GetMass();
+    total_mass += body_hub->get_mass();
     // shaft
-    total_mass += body_shaft->GetMass();
+    total_mass += body_shaft->get_mass();
     // nacelle
-    total_mass += body_nacelle->GetMass();
+    total_mass += body_nacelle->get_mass();
     // yaw_bearing
-    total_mass += body_yaw_bearing->GetMass();
+    total_mass += body_yaw_bearing->get_mass();
     return total_mass;
 }
 
@@ -194,7 +194,7 @@ void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
 double RotorElasto::get_rpm() const {
     Vector3d angles;
     body_hub->coord.rot.Qdt_to_Wrel(angles, body_hub->coord_dt.rot);
-    double rpm = -angles.z() * 60 / (2 * chrono::CH_C_PI);
+    double rpm = -angles.z() * 60 / (2 * PI);
     return rpm;
 }
 

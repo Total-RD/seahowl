@@ -27,8 +27,8 @@ seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::stri
 }
 
 void seahowl::servo::ControllerDISCON::step(double time, double dt, const seahowl::core::Turbine& turbine) {
-    auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * chrono::CH_C_PI / 60.0);
-    auto omega_generator = turbine.get_generator_rpm() * (2 * chrono::CH_C_PI / 60.0);
+    auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * PI / 60.0);
+    auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
     auto pitch_collective = turbine.rotor.elasto.pitch_collective;
     auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
     auto power = turbine.get_generated_power();
@@ -80,8 +80,8 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
 }
 
 void seahowl::servo::ControllerDISCON::init(double time, double dt, const seahowl::core::Turbine& turbine) {
-    auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * chrono::CH_C_PI / 60.0);
-    auto omega_generator = turbine.get_generator_rpm() * (2 * chrono::CH_C_PI / 60.0);
+    auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * PI / 60.0);
+    auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
     auto pitch_collective = turbine.rotor.elasto.pitch_collective;
     auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
     auto nblades = turbine.blades.size();

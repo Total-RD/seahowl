@@ -130,7 +130,7 @@ void BladeElasto::build_elements_tapered_timoshenko() {
         section->SetBeamRaleyghDamping(discretized_point.damping_coefficients);
 
         // apply prebend and structural twist
-        auto rotation_relative = (nodes[ii]->GetRot() * nodes[ii - 1]->GetRot().GetInverse()).GetNormalized();
+        auto rotation_relative = (nodes[ii]->get_rotation() * nodes[ii - 1]->get_rotation().inverse()).normalized();
         // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
         rotation_relative =
             Quaternion(rotation_relative[0], rotation_relative[3], rotation_relative[2], rotation_relative[1]);
@@ -188,7 +188,7 @@ void BladeElasto::build_elements_tapered_timoshenko_fpm() {
         section->SetBeamRaleyghDamping(discretized_point.damping_coefficients);
 
         // apply prebend and structural twist
-        auto rotation_relative = (nodes[ii]->GetRot() * nodes[ii - 1]->GetRot().GetInverse()).GetNormalized();
+        auto rotation_relative = (nodes[ii]->get_rotation() * nodes[ii - 1]->get_rotation().inverse()).normalized();
         // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
         rotation_relative =
             Quaternion(rotation_relative[0], rotation_relative[3], rotation_relative[2], rotation_relative[1]);

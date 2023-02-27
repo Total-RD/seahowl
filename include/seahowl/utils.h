@@ -18,6 +18,8 @@ namespace seahowl {
 //    Vector3d normalized() { this->GetNormalized(); };
 //};
 
+const double PI = (double)chrono::CH_C_PI;
+
 class Vector3d : public chrono::ChVector<double> {
   public:
     Vector3d() : chrono::ChVector<double>(){};
@@ -39,7 +41,6 @@ class Vector3d : public chrono::ChVector<double> {
     inline Vector3d Vector3d::operator+(const Vector3d& other) const {
         chrono::ChVector<double> v1 = *this;
         chrono::ChVector<double> v2 = other;
-
         return Vector3d(v1 + v2);
     }
     inline Vector3d Vector3d::operator-(const Vector3d& other) const {
@@ -47,11 +48,15 @@ class Vector3d : public chrono::ChVector<double> {
         chrono::ChVector<double> v2 = other;
         return Vector3d(v1 - v2);
     }
+    inline Vector3d Vector3d::operator*(const Vector3d& other) const {
+        chrono::ChVector<double> v1 = *this;
+        chrono::ChVector<double> v2 = other;
+        return Vector3d(v1 * v2);
+    }
     inline Vector3d Vector3d::operator*(double s) const {
         chrono::ChVector<double> v1 = *this;
         return Vector3d(v1 * s);
     }
-
     inline Vector3d Vector3d::operator/(double s) const {
         chrono::ChVector<double> v1 = *this;
         return Vector3d(v1 / s);
@@ -67,13 +72,30 @@ class Vector3d : public chrono::ChVector<double> {
 };
 // using Vector3d = chrono::ChVector<double>;
 using Vector2d = chrono::ChVector2<double>;
-using Quaternion = chrono::ChQuaternion<double>;
+
+class Quaternion : public chrono::ChQuaternion<double> {
+  public:
+    Quaternion() : chrono::ChQuaternion<double>(){};
+    Quaternion(double e0, double e1, double e2, double e3) : chrono::ChQuaternion<double>(e0, e1, e2, e3){};
+    Quaternion(const chrono::ChQuaternion<double>& chquaternion) : chrono::ChQuaternion<double>(chquaternion){};
+
+    Quaternion normalized() const { return Quaternion(this->GetNormalized()); };
+    Quaternion inverse() const { return Quaternion(this->GetInverse()); };
+
+    inline Quaternion Quaternion::operator*(const Quaternion& other) const {
+        chrono::ChQuaternion<double> q;
+        q.Cross(*this, other);
+        return Quaternion(q);
+    }
+    inline Vector3d Quaternion::operator*(const Vector3d& other) const { return this->Rotate(other); }
+};
 
 class RigidBody : public chrono::ChBody {
   public:
     RigidBody() : chrono::ChBody(){};
     void set_position(Vector3d position) { this->SetPos(position); };
     void set_mass(double mass) { this->SetMass(mass); };
+    double get_mass() { return this->GetMass(); };
     void set_rotation(Quaternion rotation) { this->SetRot(rotation); };
     Vector3d get_position() { return this->GetPos(); };
     Vector3d get_velocity() { return this->GetPos_dt(); };
@@ -91,14 +113,14 @@ class NodeFEA : public chrono::fea::ChNodeFEAxyzrot {
 
     void set_position(Vector3d position) { this->SetPos(position); };
     void set_rotation(Quaternion rotation) { this->SetRot(rotation); };
-    Vector3d get_position() { return this->GetPos(); };
-    Vector3d get_velocity() { return this->GetPos_dt(); };
-    Vector3d get_acceleration() { return this->GetPos_dtdt(); };
-    Quaternion get_rotation() { return this->GetRot(); };
-    Vector3d get_direction() { return this->GetRot().GetVector(); };
-    Vector3d get_rotational_velocity_local() { return this->GetWvel_loc(); };
-    Vector3d get_rotational_acceleration_local() { return this->GetWacc_loc(); };
-    Vector3d get_load() { return this->GetForce(); };
+    Vector3d get_position() { return Vector3d(this->GetPos()); };
+    Vector3d get_velocity() { return Vector3d(this->GetPos_dt()); };
+    Vector3d get_acceleration() { return Vector3d(this->GetPos_dtdt()); };
+    Quaternion get_rotation() { return Quaternion(this->GetRot()); };
+    Vector3d get_direction() { return Vector3d(this->GetRot().GetVector()); };
+    Vector3d get_rotational_velocity_local() { return Vector3d(this->GetWvel_loc()); };
+    Vector3d get_rotational_acceleration_local() { return Vector3d(this->GetWacc_loc()); };
+    Vector3d get_load() { return Vector3d(this->GetForce()); };
 };
 
 // using Vector3d = Eigen::Vector3d;

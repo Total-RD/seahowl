@@ -104,7 +104,7 @@ void Turbine::compute_wind_loads(seahowl::aero::WindModel& wind_model, double ti
 
 double Turbine::get_generated_power() const {
     // get generator rotation in rad/s scaled by gearbox ratio and efficiency
-    auto rot_rads = rotor.elasto.get_rpm() * (2.0 * chrono::CH_C_PI / 60.0) * gearbox_ratio * gearbox_efficiency;
+    auto rot_rads = rotor.elasto.get_rpm() * (2.0 * PI / 60.0) * gearbox_ratio * gearbox_efficiency;
     // get torque elec from rotor
     auto torque_elec = controller->get_torque_elec();
 

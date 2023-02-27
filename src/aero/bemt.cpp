@@ -7,6 +7,7 @@
 
 using seahowl::Vector2d;
 using seahowl::Vector3d;
+using seahowl::PI;
 
 double seahowl::aero::get_phi(const Vector2d& fluid_velocity) {
     double phi = atan2(fluid_velocity.y(), -fluid_velocity.x());
@@ -16,8 +17,8 @@ double seahowl::aero::get_phi(const Vector2d& fluid_velocity) {
 double seahowl::aero::get_alpha_from_phi(const double phi, const double pitch) {
     double alpha = phi - pitch;
     // check that alpha is still in range
-    if (alpha < -chrono::CH_C_PI || alpha > chrono::CH_C_PI) {
-        alpha = fabs(std::fmod((alpha + 3 * chrono::CH_C_PI), 2 * chrono::CH_C_PI)) - chrono::CH_C_PI;
+    if (alpha < -PI || alpha > PI) {
+        alpha = fabs(std::fmod((alpha + 3 * PI), 2 * PI)) - PI;
     }
     return alpha;
 }
@@ -32,7 +33,7 @@ seahowl::aero::AirfoilCoefficients seahowl::aero::get_aero_coefficients_from_alp
     const double alpha,
     std::vector<seahowl::aero::AirfoilProperties>& airfoil_properties) {
     // get coefficients from angle of attack
-    auto coefficients = airfoil_properties[0].find_coefficients(alpha * 180 / chrono::CH_C_PI);
+    auto coefficients = airfoil_properties[0].find_coefficients(alpha * 180 / PI);
     return coefficients;
 }
 
@@ -87,14 +88,14 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
         double loss_factor = 1.0;
         if (tip_loss) {
             // Prandtl's approximation for tip-loss factor=
-            loss_factor *= (2.0 / chrono::CH_C_PI) *
-                           acos(exp(nblades * (-node.distance_from_tip) / (2.0 * node.radius * fabs(sin_phi))));
+            loss_factor *=
+                (2.0 / PI) * acos(exp(nblades * (-node.distance_from_tip) / (2.0 * node.radius * fabs(sin_phi))));
         }
         if (hub_loss) {
             // hub loss
             double hub_radius = (node.radius - node.distance_from_hub);
-            loss_factor *= (2.0 / chrono::CH_C_PI) *
-                           acos(exp(nblades * (-node.distance_from_hub) / (2.0 * hub_radius * fabs(sin_phi))));
+            loss_factor *=
+                (2.0 / PI) * acos(exp(nblades * (-node.distance_from_hub) / (2.0 * hub_radius * fabs(sin_phi))));
         }
 
         // update induction factors
@@ -181,18 +182,18 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
                                                       const Vector3d& position,
                                                       double blade_azimuth,
                                                       const seahowl::aero::TowerAero& tower_aero) {
-    if (blade_azimuth > chrono::CH_C_PI / 2.0 || blade_azimuth < -chrono::CH_C_PI / 2.0) {
+    if (blade_azimuth > PI / 2.0 || blade_azimuth < -PI / 2.0) {
         // get wind velocity in tower reference frame
         auto& towertop_position = tower_aero.elements.back().properties.coordinates;
         auto& towertop_rotation = tower_aero.elements.back().properties.rotation;
-        auto wind_velocity_tower0 = towertop_rotation.RotateBack(wind_velocity);
+        auto wind_velocity_tower0 = towertop_rotation.inverse() * wind_velocity;
         // only take wind velocity perpendicular to tower axis
         auto wind_velocity_tower = wind_velocity_tower0;
         wind_velocity_tower.Set(0.0, wind_velocity.y(), wind_velocity_tower.z());
 
         // project element coordinates to tower reference frame
         auto& tower_top = tower_aero.elements.back();
-        auto coordinates_projected = -towertop_rotation.RotateBack(position - towertop_position);
+        auto coordinates_projected = -(towertop_rotation.inverse() * (position - towertop_position));
 
         // find tower radius
         auto tower_length =
@@ -210,7 +211,7 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
                                            Vector3d(0.0, (-2.0 * xx * yy), (yy2 - xx2)));
 
             // correct wind velocity
-            wind_velocity = towertop_rotation.Rotate(wind_velocity_tower);
+            wind_velocity = towertop_rotation * wind_velocity_tower;
         }
     }
 }

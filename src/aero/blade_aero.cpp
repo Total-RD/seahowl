@@ -12,7 +12,6 @@ using seahowl::Quaternion;
 BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
     properties = point;
     coordinates = point.coordinates;
-    rotation = point.rotation;
     velocity = Vector3d(0.0, 0.0, 0.0);
     rot_velocity = Vector3d(0.0, 0.0, 0.0);
     acceleration = Vector3d(0.0, 0.0, 0.0);

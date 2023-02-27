@@ -37,8 +37,8 @@ void Rotor::poststep(double time, double dt) {
 }
 
 void Rotor::update_positions_aero() {
-    aero.hub_position = elasto.body_hub->GetPos();
-    aero.hub_rotation = elasto.body_hub->GetRot();
+    aero.hub_position = elasto.body_hub->get_position();
+    aero.hub_rotation = elasto.body_hub->get_rotation();
 }
 
 void Rotor::assemble(chrono::ChSystemSMC& system) {

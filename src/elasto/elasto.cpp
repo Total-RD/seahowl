@@ -46,11 +46,11 @@ void ComponentElastoFEA::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) con
 }
 
 void ComponentElastoFEA::rotate(double angle, const Vector3d& axis) const {
-    auto rotation = Q_from_AngAxis(angle, axis);
+    auto rotation = Quaternion(Q_from_AngAxis(angle, axis));
     for (auto& node : nodes) {
-        auto new_position = rotation.Rotate(node->get_position());
+        auto new_position = rotation * node->get_position();
         node->set_position(new_position);
-        auto new_rotation = (rotation * node->get_rotation()).GetNormalized();
+        auto new_rotation = (rotation * node->get_rotation()).normalized();
         node->set_rotation(new_rotation);
     }
 }

@@ -3,6 +3,7 @@
 using seahowl::aero::TowerElementAero;
 using seahowl::aero::TowerAero;
 using seahowl::Vector3d;
+using seahowl::PI;
 
 TowerElementAero::TowerElementAero(const TowerReferencePointAero& point1, const TowerReferencePointAero& point2) {
     properties = (point1 + point2) * 0.5;
@@ -59,8 +60,7 @@ void TowerAero::compute_wind_loads_morison(WindModel& wind_model, double time) {
         auto length = element.length;
         auto diameter = properties.diameter;
         auto cd = properties.drag_coefficient;
-        auto load_drag =
-            0.5 * density * cd * chrono::CH_C_PI * diameter * velocity_normal.Length() * velocity_normal * length;
+        auto load_drag = 0.5 * density * cd * PI * diameter * velocity_normal.Length() * velocity_normal * length;
 
         loads[ii] = load_drag;
     }

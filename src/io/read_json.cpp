@@ -27,6 +27,7 @@ using json = nlohmann::json;
 
 using seahowl::Vector3d;
 using seahowl::Vector2d;
+using seahowl::PI;
 
 /**@brief Copy file to destination dir, increment file name if already exists, and return path to new copid file.
  */
@@ -133,7 +134,7 @@ std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_
                 reference_point.mass_matrix(jj + jjo, kk + kko) = mm[jj][kk];
             }
         }
-        reference_point.structural_twist = point.at("twist").get<double>() * chrono::CH_C_PI / 180.0;
+        reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
         reference_point.damping_coefficients.bx = damping_coefficients[0];
         reference_point.damping_coefficients.by = damping_coefficients[1];
         reference_point.damping_coefficients.bz = damping_coefficients[2];
@@ -266,7 +267,7 @@ seahowl::core::Rotor get_rotor_from_json(std::string filepath) {
     json_obj.at("precones").get_to(rotor.elasto.blade_precones);
     for (int ii = 0; ii < rotor.elasto.blade_precones.size(); ii++) {
         // convert to radians
-        rotor.elasto.blade_precones[ii] *= chrono::CH_C_PI / 180.0;
+        rotor.elasto.blade_precones[ii] *= PI / 180.0;
     }
     // hub
     auto hub = json_obj.at("hub");
@@ -291,7 +292,7 @@ seahowl::core::Rotor get_rotor_from_json(std::string filepath) {
     shaft.at("distance_from_towertop").get_to(rotor.elasto.shaft.distance_from_towertop);
     shaft.at("tilt").get_to(rotor.elasto.shaft.tilt);
     // convert to radians
-    rotor.elasto.shaft.tilt *= chrono::CH_C_PI / 180.0;
+    rotor.elasto.shaft.tilt *= PI / 180.0;
 
     return rotor;
 }

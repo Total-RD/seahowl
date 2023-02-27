@@ -8,6 +8,7 @@ using seahowl::aero::RotorAero;
 using seahowl::aero::TowerAero;
 using seahowl::Vector3d;
 using seahowl::Vector2d;
+using seahowl::PI;
 
 RotorAero::RotorAero() {}
 
@@ -34,7 +35,7 @@ void RotorAero::compute_chords_solidity() {
     for (auto& blade : blades) {
         for (auto& node : blade->nodes) {
             auto radius = (node.coordinates - hub_position).Length();
-            node.chord_solidity = nblades * node.properties.chord / (2 * chrono::CH_C_PI * radius);
+            node.chord_solidity = nblades * node.properties.chord / (2 * PI * radius);
             // std::cout << element.swept_annulus << " " << element.chord_solidity << std::endl;
         }
     }
@@ -71,9 +72,8 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
     for (auto& blade : blades) {
         auto blade_azimuth = azimuth + blade->azimuth0;
         // check that blade_azimuth is between pi and -pi
-        if (blade_azimuth < -chrono::CH_C_PI || blade_azimuth > chrono::CH_C_PI) {
-            blade_azimuth =
-                abs(std::fmod((blade_azimuth + 3 * chrono::CH_C_PI), 2 * chrono::CH_C_PI)) - chrono::CH_C_PI;
+        if (blade_azimuth < -PI || blade_azimuth > PI) {
+            blade_azimuth = abs(std::fmod((blade_azimuth + 3 * PI), 2 * PI)) - PI;
         }
         int count = -1;
         for (auto& node : blade->nodes) {
@@ -93,12 +93,12 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
 
             auto global_velocity = Vector3d(wind_velocity - velocity);
             // project in disc frame
-            auto local_velocity_disc = hub_rotation.RotateBack(global_velocity);
+            auto local_velocity_disc = hub_rotation.inverse() * global_velocity;
 
             // get global/local directions
             // pointing from hub towards nacelle
             auto local_direction_normal = Vector3d(0.0, 0.0, 1.0);
-            auto global_direction_normal = Vector3d(hub_rotation.Rotate(local_direction_normal));
+            auto global_direction_normal = hub_rotation * local_direction_normal;
             // pointing from hub to node position
             auto global_direction_hub2node = (position - hub_position).normalized();
             // pointing in tangential direction
@@ -175,9 +175,8 @@ void RotorAero::compute_wind_loads_aerodyn(float* LoadAeroDyn,
         count_blade += 1;
         auto blade_azimuth = azimuth + blade->azimuth0;
         // check that blade_azimuth is between pi and -pi
-        if (blade_azimuth < -chrono::CH_C_PI || blade_azimuth > chrono::CH_C_PI) {
-            blade_azimuth =
-                abs(std::fmod((blade_azimuth + 3 * chrono::CH_C_PI), 2 * chrono::CH_C_PI)) - chrono::CH_C_PI;
+        if (blade_azimuth < -PI || blade_azimuth > PI) {
+            blade_azimuth = abs(std::fmod((blade_azimuth + 3 * PI), 2 * PI)) - PI;
         }
         int count_node = -1;
         for (auto& node : blade->nodes) {

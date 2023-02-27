@@ -1,9 +1,10 @@
 #include <seahowl/io/write_csv.h>
-#include <seahowl/elasto/blade_elasto.h>
 
 #include <iostream>
 #include <fstream>
 #include <string>
+
+using seahowl::PI;
 
 void write_turbine_info_to_csv(std::string filename, const seahowl::core::System& ssystem, double time) {
     std::ofstream myfile;
@@ -72,9 +73,8 @@ void write_turbine_info_to_csv(std::string filename, const seahowl::core::System
             myfile << ",";
             auto blade_azimuth = blade->elasto->azimuth0 + turbine.rotor.elasto.get_azimuth();
             // check that blade_azimuth is between pi and -pi
-            if (blade_azimuth < -chrono::CH_C_PI || blade_azimuth > chrono::CH_C_PI) {
-                blade_azimuth =
-                    abs(std::fmod((blade_azimuth + 3 * chrono::CH_C_PI), 2 * chrono::CH_C_PI)) - chrono::CH_C_PI;
+            if (blade_azimuth < -PI || blade_azimuth > PI) {
+                blade_azimuth = abs(std::fmod((blade_azimuth + 3 * PI), 2 * PI)) - PI;
             }
             myfile << std::to_string(blade_azimuth);
             myfile << ",";

@@ -20,8 +20,6 @@ struct BladeReferencePointAero {
     double fraction = 0.0;
     /** @brief Coordinates of reference point. */
     Vector3d coordinates{0.0, 0.0, 0.0};
-    /** @brief Rotation of reference point. */
-    Quaternion rotation{1.0, 0.0, 0.0, 0.0};
     /** @brief Offset (x, y) for the aerodynamic center of blade at reference point. */
     Vector2d offset_aero{0.0, 0.0};
     /** @brief Chord of blade at reference point. */
