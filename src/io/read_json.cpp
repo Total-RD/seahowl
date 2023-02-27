@@ -440,7 +440,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         wind_model->wind_velocity_start = Vector3d(v0[0], v0[1], v0[2]);
         auto v1 = wind_options.at("velocity_stop").get<std::vector<double>>();
         wind_model->wind_velocity_stop = Vector3d(v1[0], v1[1], v1[2]);
-        wind_model->direction_gravity = chrono_system.Get_G_acc().GetNormalized();
+        wind_model->direction_gravity = Vector3d(chrono_system.Get_G_acc()).normalized();
         wind_model->reference_height = wind_options.at("reference_height").get<double>();
         wind_model->time_start = wind_options.at("time_start").get<double>();
         wind_model->time_stop = wind_options.at("time_stop").get<double>();
@@ -480,13 +480,13 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         turbine.assemble(chrono_system, chrono_mesh);
         turbine.tower.elasto.nodes.front()->SetFixed(true);  // foundation of the tower
         // rotate turbine to align tower with gravity vector
-        auto v1 = -chrono_system.Get_G_acc().GetNormalized();
-        auto v2 = (turbine.tower.elasto.nodes[1]->GetPos() - turbine.tower.elasto.nodes[0]->GetPos()).GetNormalized();
-        auto rot_axis = v2 % v1;
-        auto rot_angle = acos(v1 ^ v2);
+        auto v1 = Vector3d(-chrono_system.Get_G_acc()).normalized();
+        auto v2 = (turbine.tower.elasto.nodes[1]->get_position() - turbine.tower.elasto.nodes[0]->get_position()).normalized();
+        auto rot_axis = v2.cross(v1);
+        auto rot_angle = acos(v1.dot(v2));
         turbine.rotate(rot_angle, rot_axis);
         // rotation around axis opposite to gravity (yaw)
-        turbine.rotate(turbine_json.at("rotation").get<double>(), -chrono_system.Get_G_acc().GetNormalized());
+        turbine.rotate(turbine_json.at("rotation").get<double>(), Vector3d(-chrono_system.Get_G_acc()).normalized());
         // translate turbine
         auto trans = turbine_json.at("translation").get<std::vector<double>>();
         turbine.translate(Vector3d(trans[0], trans[1], trans[2]));

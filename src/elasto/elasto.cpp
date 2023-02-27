@@ -21,21 +21,17 @@ void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& di
         Vector3d node_axis;
         chrono::ChMatrix33<> node_rotation;
         if (ii == 0) {
-            node_axis = (discretized_points[ii + 1].coordinates - node_pos).GetNormalized();
+            node_axis = (discretized_points[ii + 1].coordinates - node_pos).normalized();
             node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
         } else if (ii == nnodes - 1) {
-            node_axis = (node_pos - discretized_points[ii - 1].coordinates).GetNormalized();
+            node_axis = (node_pos - discretized_points[ii - 1].coordinates).normalized();
             node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
         } else {
-            node_axis =
-                (discretized_points[ii + 1].coordinates - discretized_points[ii - 1].coordinates).GetNormalized();
+            node_axis = (discretized_points[ii + 1].coordinates - discretized_points[ii - 1].coordinates).normalized();
             node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
         }
-        auto node_frame = chrono::ChFrame<>(node_pos, node_rotation);
 
-        // make node
-        auto node = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(node_frame);
-        // add node to blade nodes vector
+        auto node = std::make_shared<NodeFEA>(node_pos, node_rotation.Get_A_quaternion());
         nodes.push_back(node);
     };
 };
@@ -52,16 +48,16 @@ void ComponentElastoFEA::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) con
 void ComponentElastoFEA::rotate(double angle, const Vector3d& axis) const {
     auto rotation = Q_from_AngAxis(angle, axis);
     for (auto& node : nodes) {
-        auto new_position = rotation.Rotate(node->GetPos());
-        node->SetPos(new_position);
-        auto new_rotation = (rotation * node->GetRot()).GetNormalized();
-        node->SetRot(new_rotation);
+        auto new_position = rotation.Rotate(node->get_position());
+        node->set_position(new_position);
+        auto new_rotation = (rotation * node->get_rotation()).GetNormalized();
+        node->set_rotation(new_rotation);
     }
 }
 
 void ComponentElastoFEA::translate(const Vector3d& translation_vector) const {
     for (auto& node : nodes) {
-        node->SetPos(node->GetPos() + translation_vector);
+        node->set_position(node->get_position() + translation_vector);
     }
 }
 double ComponentElastoFEA::get_mass() const {
@@ -120,7 +116,7 @@ void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_positions() const {
     std::vector<Vector3d> positions;
     for (auto& node : nodes) {
-        positions.push_back(node->GetPos());
+        positions.push_back(node->get_position());
     }
     return positions;
 }
@@ -128,7 +124,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_positions() const {
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_velocities() const {
     std::vector<Vector3d> velocities;
     for (auto& node : nodes) {
-        velocities.push_back(node->GetPos_dt());
+        velocities.push_back(node->get_velocity());
     }
     return velocities;
 }
@@ -136,7 +132,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_velocities() const {
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_accelerations() const {
     std::vector<Vector3d> accelerations;
     for (auto& node : nodes) {
-        accelerations.push_back(node->GetPos_dtdt());
+        accelerations.push_back(node->get_acceleration());
     }
     return accelerations;
 }
@@ -144,7 +140,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_accelerations() const {
 std::vector<Quaternion> ComponentElastoFEA::get_nodes_rotations() const {
     std::vector<Quaternion> rotations;
     for (auto& node : nodes) {
-        rotations.push_back(node->GetRot());
+        rotations.push_back(node->get_rotation());
     }
     return rotations;
 }
@@ -152,7 +148,7 @@ std::vector<Quaternion> ComponentElastoFEA::get_nodes_rotations() const {
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_directions() const {
     std::vector<Vector3d> directions;
     for (auto& node : nodes) {
-        directions.push_back(node->GetRot().GetVector());
+        directions.push_back(node->get_direction());
     }
     return directions;
 }
@@ -160,7 +156,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_directions() const {
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_velocities() const {
     std::vector<Vector3d> rotational_velocities;
     for (auto& node : nodes) {
-        rotational_velocities.push_back(node->GetWvel_loc());
+        rotational_velocities.push_back(node->get_rotational_velocity_local());
     }
     return rotational_velocities;
 }
@@ -168,7 +164,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_velocities() cons
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_accelerations() const {
     std::vector<Vector3d> rotational_accelerations;
     for (auto& node : nodes) {
-        rotational_accelerations.push_back(node->GetWacc_loc());
+        rotational_accelerations.push_back(node->get_rotational_acceleration_local());
     }
     return rotational_accelerations;
 }
@@ -176,7 +172,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_accelerations() c
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_loads() const {
     std::vector<Vector3d> loads;
     for (auto& node : nodes) {
-        loads.push_back(node->GetForce());
+        loads.push_back(node->get_load());
     }
     return loads;
 }

@@ -51,8 +51,8 @@ void TowerAero::compute_wind_loads_morison(WindModel& wind_model, double time) {
         // get fluid relative velocity
         auto wind_velocity = wind_model.get_wind_velocity(properties.coordinates, time);
         auto velocity_relative = wind_velocity - properties.velocity;
-        auto dir = properties.rotation.GetVector();  // tangent direction
-        auto dot = velocity_relative ^ dir;
+        auto dir = Vector3d(properties.rotation.GetVector());  // tangent direction
+        auto dot = velocity_relative.dot(dir);
         auto velocity_tangent = dir * dot;
         auto velocity_normal = velocity_relative - velocity_tangent;
 

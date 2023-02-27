@@ -91,25 +91,25 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
                 seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity, position, blade_azimuth, tower_aero);
             }
 
-            auto global_velocity = wind_velocity - velocity;
+            auto global_velocity = Vector3d(wind_velocity - velocity);
             // project in disc frame
             auto local_velocity_disc = hub_rotation.RotateBack(global_velocity);
 
             // get global/local directions
             // pointing from hub towards nacelle
             auto local_direction_normal = Vector3d(0.0, 0.0, 1.0);
-            auto global_direction_normal = hub_rotation.Rotate(local_direction_normal);
+            auto global_direction_normal = Vector3d(hub_rotation.Rotate(local_direction_normal));
             // pointing from hub to node position
-            auto global_direction_hub2node = (position - hub_position).GetNormalized();
+            auto global_direction_hub2node = (position - hub_position).normalized();
             // pointing in tangential direction
-            auto global_direction_tangent = (global_direction_normal % global_direction_hub2node).GetNormalized();
+            auto global_direction_tangent = global_direction_normal.cross(global_direction_hub2node).normalized();
 
             // uninduced local velocity (2D)
             // frame perpendicular to rotor disc
             // x: tangential velocity (coplanar with rotor disc)
             // y: normal velocity (normal to rotor disc, pointing from hub to nacelle)
-            double local_velocity_normal = (global_velocity ^ global_direction_normal);
-            double local_velocity_tangent = (global_velocity ^ global_direction_tangent);
+            double local_velocity_normal = global_velocity.dot(global_direction_normal);
+            double local_velocity_tangent = global_velocity.dot(global_direction_tangent);
             auto local_velocity0 = Vector2d(local_velocity_tangent, local_velocity_normal);
 
             if (local_velocity0.Length() == 0.0) {

@@ -58,7 +58,7 @@ class ComponentElasto {
 class ComponentElastoFEA : public ComponentElasto {
   public:
     /** @brief Finite element nodes. */
-    std::vector<std::shared_ptr<chrono::fea::ChNodeFEAxyzrot>> nodes;
+    std::vector<std::shared_ptr<NodeFEA>> nodes;
     /** @brief Finite element beams. */
     std::vector<std::shared_ptr<chrono::fea::ChElementBeam>> elements;
     /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the FEA component. */
@@ -96,7 +96,7 @@ class ComponentElastoFEA : public ComponentElasto {
      * @param[in] eta Abscissa of the element within the range [-1, +1], with -1 at node1 and +1 at node2.
      */
     virtual void evaluate_position_rotation(Vector3d& position,
-                                            Quaternion& rotation,
+                                            chrono::ChQuaternion<double>& rotation,
                                             int element_index,
                                             double eta) const;
 
@@ -128,7 +128,7 @@ class ComponentElastoFEA : public ComponentElasto {
     /**
      * @brief Returns all nodes rotations (global frame of reference).
      */
-    std::vector<Quaternion> get_nodes_rotations() const;
+    std::vector<chrono::ChQuaternion<double>> get_nodes_rotations() const;
 
     /**
      * @brief Returns all nodes directions (global frame of reference).

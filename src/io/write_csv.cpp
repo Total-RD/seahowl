@@ -32,7 +32,8 @@ void write_turbine_info_to_csv(std::string filename, const seahowl::core::System
     myfile << std::to_string(time);
     myfile << ",";
     for (auto& turbine : ssystem.turbines) {
-        auto wind_velocity_hub = ssystem.wind_model->get_wind_velocity(turbine.rotor.elasto.body_hub->GetPos(), time);
+        auto wind_velocity_hub =
+            ssystem.wind_model->get_wind_velocity(turbine.rotor.elasto.body_hub->get_position(), time);
         myfile << std::to_string(wind_velocity_hub.x());
         myfile << ",";
         myfile << std::to_string(wind_velocity_hub.y());
