@@ -1,14 +1,9 @@
 #pragma once
 #include <seahowl/elasto/elasto.h>
 
-#include <seahowl/elasto/utils_elasto.h>  // WeightedElasto
+#include <seahowl/elasto/utils_elasto.h>
 
-#include <chrono/physics/ChLoad.h>
-#include <chrono/physics/ChBody.h>
-#include <chrono/physics/ChSystemSMC.h>
 #include <chrono/fea/ChMesh.h>
-#include <chrono/fea/ChNodeFEAxyzrot.h>
-#include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
 
 namespace seahowl {
 namespace elasto {
@@ -42,16 +37,6 @@ class BladeElasto : public ComponentElastoFEA {
      * @brief Builds the blade (to call before assemble).
      */
     void build();
-
-    /**
-     * @brief Sets damping coefficients of the blade.
-     *
-     * @param[in] axial Axial damping coefficient.
-     * @param[in] edge Edge damping coefficient.
-     * @param[in] flap Flap damping coefficient.
-     * @param[in] torsion Torsion damping coefficient.
-     */
-    virtual void set_damping_coefficients(double axial, double edge, double flap, double torsion);
 
     virtual void evaluate_position_rotation(Vector3d& position,
                                             Quaternion& rotation,

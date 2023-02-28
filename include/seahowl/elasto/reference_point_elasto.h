@@ -4,8 +4,6 @@
 
 #include <seahowl/utils.h>
 
-#include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
-
 namespace seahowl {
 namespace elasto {
 
@@ -50,7 +48,7 @@ struct BladeReferencePointElasto : ReferencePointElasto {
     /** @brief Structural twist angle of blade at reference point. */
     double structural_twist = 0.0;
     /** @brief Damping coefficients of blade at reference point. */
-    chrono::fea::DampingCoefficients damping_coefficients;
+    std::vector<double> damping_coefficients{0.03, 0.03, 0.03, 0.06, 0.0};
 
     /**
      * @brief Constructor.
@@ -83,7 +81,7 @@ struct TowerReferencePointElasto : ReferencePointElasto {
     /** @brief Torsional stiffness of tower at reference point. */
     double stiffness_torsion = 0.0;
     /** @brief Damping coefficients of tower at reference point. */
-    chrono::fea::DampingCoefficients damping_coefficients;
+    std::vector<double> damping_coefficients{0.03, 0.03, 0.03, 0.06, 0.0};
 
     /**
      * @brief Constructor.

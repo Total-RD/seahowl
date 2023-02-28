@@ -53,8 +53,8 @@ void BladeElasto::build() {
     for (int ii = 0; ii < nodes.size(); ii++) {
         auto& node = nodes[ii];
         auto& point = discretized_points[ii];
-        auto axis = node->TransformDirectionLocalToParent(Vector3d(1.0, 0.0, 0.0));
-        chrono::ChMatrix33<> twist_matrix(Q_from_AngAxis(-point.structural_twist, axis));
+        auto axis = node->get_direction();
+        chrono::ChMatrix33<> twist_matrix(chrono::Q_from_AngAxis(-point.structural_twist, axis));
         nodes[ii]->Frame().SetRot(twist_matrix * chrono::ChMatrix33(nodes[ii]->Frame().coord.rot));
     }
     for (int ii = 0; ii < nodes.size(); ii++) {
@@ -114,7 +114,13 @@ void BladeElasto::build_elements_tapered_timoshenko_fpm() {
     section->SetMassMatrixFPM(discretized_point.mass_matrix);
     section->SetStiffnessMatrixFPM(discretized_point.stiffness_matrix);
     // damping
-    section->SetBeamRaleyghDamping(discretized_point.damping_coefficients);
+    chrono::fea::DampingCoefficients damping_coefficients;
+    damping_coefficients.bx = discretized_point.damping_coefficients[0];
+    damping_coefficients.by = discretized_point.damping_coefficients[1];
+    damping_coefficients.bz = discretized_point.damping_coefficients[2];
+    damping_coefficients.bt = discretized_point.damping_coefficients[3];
+    damping_coefficients.alpha = discretized_point.damping_coefficients[4];
+    section->SetBeamRaleyghDamping(damping_coefficients);
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
@@ -143,7 +149,13 @@ void BladeElasto::build_elements_tapered_timoshenko_fpm() {
         section->SetMassMatrixFPM(discretized_point.mass_matrix);
         section->SetStiffnessMatrixFPM(discretized_point.stiffness_matrix);
         // damping
-        section->SetBeamRaleyghDamping(discretized_point.damping_coefficients);
+        chrono::fea::DampingCoefficients damping_coefficients;
+        damping_coefficients.bx = discretized_point.damping_coefficients[0];
+        damping_coefficients.by = discretized_point.damping_coefficients[1];
+        damping_coefficients.bz = discretized_point.damping_coefficients[2];
+        damping_coefficients.bt = discretized_point.damping_coefficients[3];
+        damping_coefficients.alpha = discretized_point.damping_coefficients[4];
+        section->SetBeamRaleyghDamping(damping_coefficients);
 
         // apply prebend and structural twist
         auto rotation_relative = (nodes[ii]->get_rotation() * nodes[ii - 1]->get_rotation().inverse()).normalized();
@@ -165,21 +177,6 @@ void BladeElasto::build_elements_tapered_timoshenko_fpm() {
 //        loadcontainer->Add(loader_weighted);
 //    }
 //}
-
-void BladeElasto::set_damping_coefficients(double axial, double edge, double flap, double torsion) {
-    const chrono::fea::DampingCoefficients damping_coefficients{axial, edge, flap, torsion};
-
-    for (auto& point : reference_points) {
-        point.damping_coefficients = damping_coefficients;
-    }
-
-    for (auto& element : elements) {
-        auto section =
-            std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(element)->GetTaperedSection();
-        section->GetSectionA()->SetBeamRaleyghDamping(damping_coefficients);
-        section->GetSectionB()->SetBeamRaleyghDamping(damping_coefficients);
-    }
-}
 
 void BladeElasto::evaluate_position_rotation(Vector3d& position,
                                              Quaternion& rotation,

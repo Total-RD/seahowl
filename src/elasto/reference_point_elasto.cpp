@@ -24,11 +24,11 @@ BladeReferencePointElasto BladeReferencePointElasto::operator*(const double fact
     new_point.structural_twist *= factor;
     new_point.mass_matrix *= factor;
     new_point.stiffness_matrix *= factor;
-    new_point.damping_coefficients.bx *= factor;
-    new_point.damping_coefficients.by *= factor;
-    new_point.damping_coefficients.bz *= factor;
-    new_point.damping_coefficients.bt *= factor;
-    new_point.damping_coefficients.alpha *= factor;
+    new_point.damping_coefficients[0] *= factor;
+    new_point.damping_coefficients[1] *= factor;
+    new_point.damping_coefficients[2] *= factor;
+    new_point.damping_coefficients[3] *= factor;
+    new_point.damping_coefficients[4] *= factor;
     return new_point;
 };
 
@@ -41,11 +41,11 @@ BladeReferencePointElasto BladeReferencePointElasto::operator+(const BladeRefere
     new_point.structural_twist += other.structural_twist;
     new_point.stiffness_matrix += other.stiffness_matrix;
     new_point.mass_matrix += other.mass_matrix;
-    new_point.damping_coefficients.bx += other.damping_coefficients.bx;
-    new_point.damping_coefficients.by += other.damping_coefficients.by;
-    new_point.damping_coefficients.bz += other.damping_coefficients.bz;
-    new_point.damping_coefficients.bt += other.damping_coefficients.bt;
-    new_point.damping_coefficients.alpha += other.damping_coefficients.alpha;
+    new_point.damping_coefficients[0] += other.damping_coefficients[0];
+    new_point.damping_coefficients[1] += other.damping_coefficients[1];
+    new_point.damping_coefficients[2] += other.damping_coefficients[2];
+    new_point.damping_coefficients[3] += other.damping_coefficients[3];
+    new_point.damping_coefficients[4] += other.damping_coefficients[4];
     return new_point;
 };
 
@@ -63,19 +63,19 @@ TowerReferencePointElasto::TowerReferencePointElasto(const seahowl::core::TowerR
 }
 
 TowerReferencePointElasto TowerReferencePointElasto::operator*(const double factor) const {
-    TowerReferencePointElasto new_point;
-    new_point.coordinates = coordinates * factor;
-    new_point.fraction = fraction * factor;
-    new_point.density = density * factor;
-    new_point.stiffness_axial = stiffness_axial * factor;
-    new_point.stiffness_foreaft = stiffness_foreaft * factor;
-    new_point.stiffness_sideside = stiffness_sideside * factor;
-    new_point.stiffness_torsion = stiffness_torsion * factor;
-    new_point.damping_coefficients.bx = damping_coefficients.bx * factor;
-    new_point.damping_coefficients.by = damping_coefficients.by * factor;
-    new_point.damping_coefficients.bz = damping_coefficients.bz * factor;
-    new_point.damping_coefficients.bt = damping_coefficients.bt * factor;
-    new_point.damping_coefficients.alpha = damping_coefficients.alpha * factor;
+    TowerReferencePointElasto new_point = *this;
+    new_point.coordinates *= factor;
+    new_point.fraction *= factor;
+    new_point.density *= factor;
+    new_point.stiffness_axial *= factor;
+    new_point.stiffness_foreaft *= factor;
+    new_point.stiffness_sideside *= factor;
+    new_point.stiffness_torsion *= factor;
+    new_point.damping_coefficients[0] *= factor;
+    new_point.damping_coefficients[1] *= factor;
+    new_point.damping_coefficients[2] *= factor;
+    new_point.damping_coefficients[3] *= factor;
+    new_point.damping_coefficients[4] *= factor;
     return new_point;
 };
 
@@ -88,11 +88,11 @@ TowerReferencePointElasto TowerReferencePointElasto::operator+(const TowerRefere
     new_point.stiffness_foreaft += other.stiffness_foreaft;
     new_point.stiffness_sideside += other.stiffness_sideside;
     new_point.stiffness_torsion += other.stiffness_torsion;
-    new_point.damping_coefficients.bx += other.damping_coefficients.bx;
-    new_point.damping_coefficients.by += other.damping_coefficients.by;
-    new_point.damping_coefficients.bz += other.damping_coefficients.bz;
-    new_point.damping_coefficients.bt += other.damping_coefficients.bt;
-    new_point.damping_coefficients.alpha += other.damping_coefficients.alpha;
+    new_point.damping_coefficients[0] += other.damping_coefficients[0];
+    new_point.damping_coefficients[1] += other.damping_coefficients[1];
+    new_point.damping_coefficients[2] += other.damping_coefficients[2];
+    new_point.damping_coefficients[3] += other.damping_coefficients[3];
+    new_point.damping_coefficients[4] += other.damping_coefficients[4];
     return new_point;
 };
 

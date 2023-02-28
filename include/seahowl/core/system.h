@@ -3,7 +3,6 @@
 #include <seahowl/aero/wind_models.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/servo/controller_discon.h>
-#include <chrono/physics/ChBody.h>
 
 namespace seahowl {
 namespace core {

@@ -35,16 +35,6 @@ class TowerElasto : public ComponentElastoFEA {
      */
     void build();
 
-    /**
-     * @brief Sets damping coefficients of the tower.
-     *
-     * @param[in] axial Axial damping coefficient.
-     * @param[in] edge Edge damping coefficient.
-     * @param[in] flap Flap damping coefficient.
-     * @param[in] torsion Torsion damping coefficient.
-     */
-    virtual void set_damping_coefficients(double axial, double edge, double flap, double torsion);
-
   private:
     /**
      * @brief Builds the blade with Timoshenko elements (lineic density, foreaft stiffness, sideside stiffness).

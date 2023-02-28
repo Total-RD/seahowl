@@ -64,7 +64,13 @@ void TowerElasto::build_elements_tapered_timoshenko() {
     // sideside
     section->SetYbendingRigidity(discretized_point.stiffness_sideside);
     // damping
-    section->SetBeamRaleyghDamping(discretized_point.damping_coefficients);
+    chrono::fea::DampingCoefficients damping_coefficients;
+    damping_coefficients.bx = discretized_point.damping_coefficients[0];
+    damping_coefficients.by = discretized_point.damping_coefficients[1];
+    damping_coefficients.bz = discretized_point.damping_coefficients[2];
+    damping_coefficients.bt = discretized_point.damping_coefficients[3];
+    damping_coefficients.alpha = discretized_point.damping_coefficients[4];
+    section->SetBeamRaleyghDamping(damping_coefficients);
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
@@ -95,24 +101,12 @@ void TowerElasto::build_elements_tapered_timoshenko() {
         // sideside
         section->SetYbendingRigidity(discretized_point.stiffness_sideside);
         // damping
-        section->SetBeamRaleyghDamping(discretized_point.damping_coefficients);
-    }
-}
-
-void TowerElasto::set_damping_coefficients(double axial, double edge, double flap, double torsion) {
-    chrono::fea::DampingCoefficients damping_coefficients;
-    damping_coefficients.bx = axial;
-    damping_coefficients.by = edge;
-    damping_coefficients.bz = flap;
-    damping_coefficients.bt = torsion;
-    for (int ii = 0; ii < reference_points.size(); ii++) {
-        auto reference_point = reference_points[ii];
-        reference_point.damping_coefficients = damping_coefficients;
-    }
-    for (int ii = 0; ii < elements.size(); ii++) {
-        auto section =
-            std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(elements[ii])->GetTaperedSection();
-        section->GetSectionA()->SetBeamRaleyghDamping(damping_coefficients);
-        section->GetSectionB()->SetBeamRaleyghDamping(damping_coefficients);
+        chrono::fea::DampingCoefficients damping_coefficients;
+        damping_coefficients.bx = discretized_point.damping_coefficients[0];
+        damping_coefficients.by = discretized_point.damping_coefficients[1];
+        damping_coefficients.bz = discretized_point.damping_coefficients[2];
+        damping_coefficients.bt = discretized_point.damping_coefficients[3];
+        damping_coefficients.alpha = discretized_point.damping_coefficients[4];
+        section->SetBeamRaleyghDamping(damping_coefficients);
     }
 }

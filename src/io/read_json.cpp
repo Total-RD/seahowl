@@ -135,10 +135,10 @@ std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_
             }
         }
         reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
-        reference_point.damping_coefficients.bx = damping_coefficients[0];
-        reference_point.damping_coefficients.by = damping_coefficients[1];
-        reference_point.damping_coefficients.bz = damping_coefficients[2];
-        reference_point.damping_coefficients.bt = damping_coefficients[3];
+        reference_point.damping_coefficients[0] = damping_coefficients[0];
+        reference_point.damping_coefficients[1] = damping_coefficients[1];
+        reference_point.damping_coefficients[2] = damping_coefficients[2];
+        reference_point.damping_coefficients[3] = damping_coefficients[3];
 
         if (point.contains("chord")) {
             reference_point.chord = point["chord"];
@@ -223,10 +223,10 @@ std::vector<seahowl::core::TowerReferencePoint> get_tower_reference_points_from_
         point.at("density").get_to(reference_point.density);
         point.at("diameter").get_to(reference_point.diameter);
         point.at("drag_coefficient").get_to(reference_point.drag_coefficient);
-        reference_point.damping_coefficients.bx = damping_coefficients[0];
-        reference_point.damping_coefficients.by = damping_coefficients[1];
-        reference_point.damping_coefficients.bz = damping_coefficients[2];
-        reference_point.damping_coefficients.bt = damping_coefficients[3];
+        reference_point.damping_coefficients[0] = damping_coefficients[0];
+        reference_point.damping_coefficients[1] = damping_coefficients[1];
+        reference_point.damping_coefficients[2] = damping_coefficients[2];
+        reference_point.damping_coefficients[3] = damping_coefficients[3];
 
         ///@todo change to actual values
         reference_point.stiffness_axial = 210e9;

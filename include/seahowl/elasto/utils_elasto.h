@@ -65,7 +65,13 @@ class NodeFEA : public chrono::fea::ChNodeFEAxyzrot {
         // edge
         section->SetZbendingRigidity(ref.stiffness_matrix(5, 5));
         // damping
-        section->SetBeamRaleyghDamping(ref.damping_coefficients);
+        chrono::fea::DampingCoefficients damping_coefficients;
+        damping_coefficients.bx = ref.damping_coefficients[0];
+        damping_coefficients.by = ref.damping_coefficients[1];
+        damping_coefficients.bz = ref.damping_coefficients[2];
+        damping_coefficients.bt = ref.damping_coefficients[3];
+        damping_coefficients.alpha = ref.damping_coefficients[4];
+        section->SetBeamRaleyghDamping(damping_coefficients);
     };
 };
 
