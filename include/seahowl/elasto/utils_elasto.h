@@ -17,41 +17,107 @@
 namespace seahowl {
 namespace elasto {
 
-class RigidBody : public chrono::ChBody {
+class RigidBody {
   public:
-    RigidBody() : chrono::ChBody(){};
-    void set_position(Vector3d position) { this->SetPos(position); };
-    void set_mass(double mass) { this->SetMass(mass); };
-    double get_mass() { return this->GetMass(); };
-    void set_rotation(Quaternion rotation) { this->SetRot(rotation); };
-    Vector3d get_position() { return this->GetPos(); };
-    Vector3d get_velocity() { return this->GetPos_dt(); };
-    Vector3d get_acceleration() { return this->GetPos_dtdt(); };
-    Quaternion get_rotation() { return this->GetRot(); };
-    Vector3d get_direction() { return this->GetRot().GetVector(); };
-    Vector3d get_rotational_velocity_local() { return this->GetWvel_loc(); };
-    Vector3d get_rotational_acceleration_local() { return this->GetWacc_loc(); };
+    virtual void set_position(Vector3d position) = 0;
+    virtual void set_mass(double mass) = 0;
+    virtual void set_inertia_diagonal(Vector3d inertia) = 0;
+    virtual void set_rotation(Quaternion rotation) = 0;
+    virtual void reset_forces() = 0;
+    virtual void accumulate_torque(Vector3d torque, bool is_local) = 0;
+    virtual double get_mass() = 0;
+    virtual Vector3d get_position() const = 0;
+    virtual Vector3d get_velocity() const = 0;
+    virtual Vector3d get_acceleration() const = 0;
+    virtual Quaternion get_rotation() const = 0;
+    virtual Vector3d get_direction() const = 0;
+    virtual Vector3d get_rotational_velocity_local() const = 0;
+    virtual Vector3d get_rotational_acceleration_local() const = 0;
+    virtual Vector3d get_rotational_velocity_global() const = 0;
+    virtual Vector3d get_rotational_acceleration_global() const = 0;
 };
 
-class NodeFEA : public chrono::fea::ChNodeFEAxyzrot {
+class NodeFEA {
+  public:
+    virtual void set_position(Vector3d position) = 0;
+    virtual void set_rotation(Quaternion rotation) = 0;
+    virtual void set_load(Vector3d force) = 0;
+    virtual void set_torque(Vector3d torque) = 0;
+    virtual Vector3d get_position() const = 0;
+    virtual Vector3d get_velocity() const = 0;
+    virtual Vector3d get_acceleration() const = 0;
+    virtual Quaternion get_rotation() const = 0;
+    virtual Vector3d get_direction() const = 0;
+    virtual Vector3d get_rotational_velocity_local() const = 0;
+    virtual Vector3d get_rotational_acceleration_local() const = 0;
+    virtual Vector3d get_rotational_velocity_global() const = 0;
+    virtual Vector3d get_rotational_acceleration_global() const = 0;
+    virtual Vector3d get_load() const = 0;
+    virtual Vector3d get_torque() const = 0;
+};
+
+class ElementFEA {
+  public:
+    std::vector<std::shared_ptr<NodeFEA>> nodes0;
+
+    virtual void set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) = 0;
+    virtual double get_mass() = 0;
+
+    virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) = 0;
+};
+
+class BladeElementFEA : public ElementFEA {
+  public:
+    virtual void set_prebend(const Quaternion& prebend) = 0;
+};
+
+class RigidBodyChrono : public RigidBody, public chrono::ChBody {
+  public:
+    RigidBodyChrono() : chrono::ChBody(){};
+    virtual void set_position(Vector3d position) override { this->SetPos(position); };
+    virtual void set_mass(double mass) override { this->SetMass(mass); };
+    virtual void set_inertia_diagonal(Vector3d inertia) override { this->SetInertiaXX(inertia); };
+    virtual void set_rotation(Quaternion rotation) override { this->SetRot(rotation); };
+    virtual void reset_forces() override { this->Empty_forces_accumulators(); };
+    virtual void accumulate_torque(Vector3d torque, bool is_local) override {
+        this->Accumulate_torque(torque, is_local);
+    };
+    virtual double get_mass() override { return this->GetMass(); };
+    virtual Vector3d get_position() const override { return this->GetPos(); };
+    virtual Vector3d get_velocity() const override { return this->GetPos_dt(); };
+    virtual Vector3d get_acceleration() const override { return this->GetPos_dtdt(); };
+    virtual Quaternion get_rotation() const override { return this->GetRot(); };
+    virtual Vector3d get_direction() const override { return this->GetRot().GetVector(); };
+    virtual Vector3d get_rotational_velocity_local() const override { return this->GetWvel_loc(); };
+    virtual Vector3d get_rotational_acceleration_local() const override { return this->GetWacc_loc(); };
+    virtual Vector3d get_rotational_velocity_global() const override { return this->GetWvel_par(); };
+    virtual Vector3d get_rotational_acceleration_global() const override { return this->GetWacc_par(); };
+};
+
+class NodeFEAChrono : public NodeFEA, public chrono::fea::ChNodeFEAxyzrot {
   public:
     std::shared_ptr<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric> section;
 
-    NodeFEA(Vector3d position, Quaternion rotation)
+    NodeFEAChrono(Vector3d position, Quaternion rotation)
         : chrono::fea::ChNodeFEAxyzrot(chrono::ChFrame<>(position, rotation)){};
 
-    void set_position(Vector3d position) { this->SetPos(position); };
-    void set_rotation(Quaternion rotation) { this->SetRot(rotation); };
-    Vector3d get_position() { return Vector3d(this->GetPos()); };
-    Vector3d get_velocity() { return Vector3d(this->GetPos_dt()); };
-    Vector3d get_acceleration() { return Vector3d(this->GetPos_dtdt()); };
-    Quaternion get_rotation() { return Quaternion(this->GetRot()); };
-    Vector3d get_direction() { return Vector3d(this->TransformDirectionLocalToParent(Vector3d(1.0, 0.0, 0.0))); };
-    Vector3d get_rotational_velocity_local() { return Vector3d(this->GetWvel_loc()); };
-    Vector3d get_rotational_acceleration_local() { return Vector3d(this->GetWacc_loc()); };
-    Vector3d get_rotational_velocity_global() { return Vector3d(this->GetWvel_par()); };
-    Vector3d get_rotational_acceleration_global() { return Vector3d(this->GetWacc_par()); };
-    Vector3d get_load() { return Vector3d(this->GetForce()); };
+    virtual void set_position(Vector3d position) override { this->SetPos(position); };
+    virtual void set_rotation(Quaternion rotation) override { this->SetRot(rotation); };
+    virtual void set_load(Vector3d force) override { this->SetForce(force); };
+    virtual void set_torque(Vector3d torque) override { this->SetTorque(torque); };
+    virtual Vector3d get_position() const override { return Vector3d(this->GetPos()); };
+    virtual Vector3d get_velocity() const override { return Vector3d(this->GetPos_dt()); };
+    virtual Vector3d get_acceleration() const override { return Vector3d(this->GetPos_dtdt()); };
+    virtual Quaternion get_rotation() const override { return Quaternion(this->GetRot()); };
+    virtual Vector3d get_direction() const override {
+        return Vector3d(this->TransformDirectionLocalToParent(Vector3d(1.0, 0.0, 0.0)));
+    };
+    virtual Vector3d get_rotational_velocity_local() const override { return Vector3d(this->GetWvel_loc()); };
+    virtual Vector3d get_rotational_acceleration_local() const override { return Vector3d(this->GetWacc_loc()); };
+    virtual Vector3d get_rotational_velocity_global() const override { return Vector3d(this->GetWvel_par()); };
+    virtual Vector3d get_rotational_acceleration_global() const override { return Vector3d(this->GetWacc_par()); };
+    virtual Vector3d get_load() const override { return Vector3d(this->GetForce()); };
+    virtual Vector3d get_torque() const override { return Vector3d(this->GetTorque()); };
     void set_properties(const BladeReferencePointElasto& ref) {
         section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric>();
         // offsets
@@ -99,38 +165,47 @@ class NodeFEA : public chrono::fea::ChNodeFEAxyzrot {
     };
 };
 
-class BladeElementFEA : public chrono::fea::ChElementBeamTaperedTimoshenko {
+class BladeElementFEAChrono : public BladeElementFEA, public chrono::fea::ChElementBeamTaperedTimoshenko {
   public:
-    std::vector<std::shared_ptr<NodeFEA>> nodes;
-    BladeElementFEA() : chrono::fea::ChElementBeamTaperedTimoshenko() {
+    BladeElementFEAChrono() : chrono::fea::ChElementBeamTaperedTimoshenko() {
         // create blade section
         auto blade_section = chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGeneric>();
         this->SetTaperedSection(blade_section);
     };
 
-    void set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) {
-        nodes.clear();
-        nodes.push_back(node1);
-        nodes.push_back(node2);
+    virtual void set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) override {
+        nodes0.clear();
+        nodes0.push_back(node1);
+        nodes0.push_back(node2);
 
         // set nodes
-        this->SetNodes(node1, node2);
+        auto ch1 = std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(node1);
+        auto ch2 = std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(node2);
+        this->SetNodes(ch1, ch2);
         // set tapered sections
-        this->GetTaperedSection()->SetSectionA(node1->section);
-        this->GetTaperedSection()->SetSectionB(node2->section);
+        this->GetTaperedSection()->SetSectionA(std::dynamic_pointer_cast<NodeFEAChrono>(node1)->section);
+        this->GetTaperedSection()->SetSectionB(std::dynamic_pointer_cast<NodeFEAChrono>(node2)->section);
     };
 
-    void set_prebend(const Quaternion& prebend) { this->SetNodeBreferenceRot(prebend); };
+    virtual void set_prebend(const Quaternion& prebend) override { this->SetNodeBreferenceRot(prebend); };
+
+    virtual double get_mass() override { return this->GetMass(); };
+
+    virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) override {
+        this->EvaluateSectionFrame(eta, position, rotation);
+    };
 };
 
 class LinkFix : public chrono::ChLinkMateFix {
   public:
     LinkFix() : chrono::ChLinkMateFix(){};
     void initialize(std::shared_ptr<RigidBody> body1, std::shared_ptr<RigidBody> body2) {
-        this->Initialize(body1, body2);
+        this->Initialize(std::dynamic_pointer_cast<RigidBodyChrono>(body1),
+                         std::dynamic_pointer_cast<RigidBodyChrono>(body2));
     };
     void initialize(std::shared_ptr<NodeFEA> node1, std::shared_ptr<RigidBody> body2) {
-        this->Initialize(node1, body2);
+        this->Initialize(std::dynamic_pointer_cast<NodeFEAChrono>(node1),
+                         std::dynamic_pointer_cast<RigidBodyChrono>(body2));
     };
 };
 
@@ -138,23 +213,27 @@ class LinkRevolute : public chrono::ChLinkRevolute {
   public:
     LinkRevolute() : chrono::ChLinkRevolute(){};
     void initialize(std::shared_ptr<RigidBody> body1, std::shared_ptr<RigidBody> body2) {
-        this->Initialize(body1, body2, body2->GetFrame_COG_to_abs());
+        this->Initialize(std::dynamic_pointer_cast<RigidBodyChrono>(body1),
+                         std::dynamic_pointer_cast<RigidBodyChrono>(body2),
+                         std::dynamic_pointer_cast<RigidBodyChrono>(body2)->GetFrame_COG_to_abs());
     };
 };
 
 class MeshElasto : public chrono::fea::ChMesh {
   public:
     MeshElasto() : chrono::fea::ChMesh(){};
-    void add(std::shared_ptr<NodeFEA> node) { this->AddNode(node); };
-    void add(std::shared_ptr<BladeElementFEA> element) { this->AddElement(element); };
+    void add(std::shared_ptr<NodeFEA> node) { this->AddNode(std::dynamic_pointer_cast<NodeFEAChrono>(node)); };
+    void add(std::shared_ptr<ElementFEA> element) {
+        this->AddElement(std::dynamic_pointer_cast<BladeElementFEAChrono>(element));
+    };
     void add(std::shared_ptr<chrono::fea::ChElementBeam> element) { this->AddElement(element); };
 };
 
 class SystemElasto : public chrono::ChSystemSMC {
   public:
     SystemElasto() : chrono::ChSystemSMC(){};
-    void add(std::shared_ptr<RigidBody> body) { this->Add(body); };
-    void add(std::shared_ptr<MeshElasto> mesh) { this->Add(mesh); };
+    void add(std::shared_ptr<RigidBody> body) { this->Add(std::dynamic_pointer_cast<RigidBodyChrono>(body)); };
+    void add(std::shared_ptr<MeshElasto> mesh) { this->Add(std::dynamic_pointer_cast<MeshElasto>(mesh)); };
     void add(std::shared_ptr<LinkFix> link) { this->Add(link); };
     void add(std::shared_ptr<LinkRevolute> link) { this->Add(link); };
 };

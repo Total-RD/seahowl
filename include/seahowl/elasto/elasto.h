@@ -56,7 +56,7 @@ class ComponentElastoFEA : public ComponentElasto {
     /** @brief Finite element nodes. */
     std::vector<std::shared_ptr<NodeFEA>> nodes;
     /** @brief Finite element beams. */
-    std::vector<std::shared_ptr<chrono::fea::ChElementBeam>> elements;
+    std::vector<std::shared_ptr<ElementFEA>> elements;
     /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the FEA component. */
     std::vector<double> discretization_fractions;
 

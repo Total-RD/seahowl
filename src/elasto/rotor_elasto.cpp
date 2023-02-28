@@ -10,15 +10,15 @@ using seahowl::elasto::RotorElasto;
 RotorElasto::RotorElasto() {}
 
 void RotorElasto::assemble(seahowl::elasto::SystemElasto& system) {
-    system.Add(body_hub);
-    system.Add(body_shaft);
-    system.Add(link_shaft_hub);
-    system.Add(body_nacelle);
-    system.Add(link_shaft_nacelle);
-    system.Add(body_yaw_bearing);
-    system.Add(link_shaft_yaw_bearing);
+    system.add(body_hub);
+    system.add(body_shaft);
+    system.add(link_shaft_hub);
+    system.add(body_nacelle);
+    system.add(link_shaft_nacelle);
+    system.add(body_yaw_bearing);
+    system.add(link_shaft_yaw_bearing);
     for (auto link_blade : links_blades) {
-        system.Add(link_blade);
+        system.add(link_blade);
     }
 }
 
@@ -28,23 +28,23 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     auto rotation0 = Quaternion(1.0, 0.0, 0.0, 0.0);
 
     // hub
-    body_hub = std::make_shared<RigidBody>();
+    body_hub = std::make_shared<RigidBodyChrono>();
     // move hub along X for overhang and COG offset, and along Z for distance from towertop
     body_hub->set_position(Vector3d(hub.overhang + hub.center_of_mass, 0.0, 0.0));
     // local Z axis along global X axis + shaft tilt along global Y axis
     auto tilt_hub = Quaternion(Q_from_AngAxis(shaft.tilt, -chrono::VECT_Y));
     body_hub->set_rotation(tilt_hub * Q_from_AngAxis(PI / 2.0, chrono::VECT_Y));
-    body_hub->set_position((tilt_hub * body_hub->GetPos()) + Vector3d(0.0, 0.0, shaft.distance_from_towertop));
+    body_hub->set_position((tilt_hub * body_hub->get_position()) + Vector3d(0.0, 0.0, shaft.distance_from_towertop));
     // mass and inertia
     body_hub->set_mass(hub.mass);
-    body_hub->SetInertiaXX(Vector3d(0., 0., hub.inertia));
+    body_hub->set_inertia_diagonal(Vector3d(0., 0., hub.inertia));
 
     // shaft
-    body_shaft = std::make_shared<RigidBody>();
+    body_shaft = std::make_shared<RigidBodyChrono>();
     // move end of shaft at yaw axis of nacelle
     body_shaft->set_position(Vector3d(0.0, 0.0, shaft.distance_from_towertop));
     // align rotation
-    body_shaft->set_rotation(body_hub->GetRot());
+    body_shaft->set_rotation(body_hub->get_rotation());
     // massless body
     body_shaft->set_mass(0.0);
     // link hub to shaft
@@ -52,19 +52,19 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     link_shaft_hub->initialize(body_hub, body_shaft);
 
     // nacelle
-    body_nacelle = std::make_shared<RigidBody>();
+    body_nacelle = std::make_shared<RigidBodyChrono>();
     body_nacelle->set_position(nacelle.center_of_mass);
     body_nacelle->set_rotation(rotation0);
     // mass and inertia
     body_nacelle->set_mass(nacelle.mass);
     ///@todo  change to full 3x3 inertia matrix
-    body_nacelle->SetInertiaXX(Vector3d(0.0, 0.0, nacelle.inertia));
+    body_nacelle->set_inertia_diagonal(Vector3d(0.0, 0.0, nacelle.inertia));
     // link nacelle body to shaft body
     link_shaft_nacelle = std::make_shared<LinkFix>();
     link_shaft_nacelle->initialize(body_nacelle, body_shaft);
 
     // yaw bearing
-    body_yaw_bearing = std::make_shared<RigidBody>();
+    body_yaw_bearing = std::make_shared<RigidBodyChrono>();
     body_yaw_bearing->set_position(Vector3d(0.0, 0.0, 0.0));
     body_yaw_bearing->set_rotation(rotation0);
     body_yaw_bearing->set_mass(nacelle.yaw_bearing_mass);
@@ -107,7 +107,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
 void RotorElasto::link_tower(const TowerElasto& tower, seahowl::elasto::SystemElasto& system) {
     auto towertop_node = tower.nodes[tower.nodes.size() - 1];
     // translate RNA center of origin to towertop
-    this->translate(towertop_node->GetPos());
+    this->translate(towertop_node->get_position());
     // link yaw bearing body to towertop
     link_towertop_yaw_bearing = chrono_types::make_shared<LinkFix>();
     system.Add(link_towertop_yaw_bearing);
@@ -123,18 +123,18 @@ void RotorElasto::rotate(double angle, const Vector3d& axis) const {
     // hub
     auto new_position_hub = rotation * body_hub->get_position();
     auto new_rotation_hub = (rotation * body_hub->get_rotation()).normalized();
-    body_hub->SetPos(new_position_hub);
-    body_hub->SetRot(new_rotation_hub);
+    body_hub->set_position(new_position_hub);
+    body_hub->set_rotation(new_rotation_hub);
     // shaft
-    auto new_position_shaft = rotation * body_shaft->GetPos();
+    auto new_position_shaft = rotation * body_shaft->get_position();
     auto new_rotation_shaft = (rotation * body_shaft->get_rotation()).normalized();
-    body_shaft->SetPos(new_position_shaft);
-    body_shaft->SetRot(new_rotation_shaft);
+    body_shaft->set_position(new_position_shaft);
+    body_shaft->set_rotation(new_rotation_shaft);
     // nacelle
     auto new_position_nacelle = rotation * body_nacelle->get_position();
     auto new_rotation_nacelle = (rotation * body_nacelle->get_rotation()).normalized();
-    body_nacelle->SetPos(new_position_nacelle);
-    body_nacelle->SetRot(new_rotation_nacelle);
+    body_nacelle->set_position(new_position_nacelle);
+    body_nacelle->set_rotation(new_rotation_nacelle);
     // yaw bearing
     auto new_position_yaw_bearing = rotation * body_yaw_bearing->get_position();
     auto new_rotation_yaw_bearing = (rotation * body_yaw_bearing->get_rotation()).normalized();
@@ -181,20 +181,25 @@ void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
         blade->apply_pitch_increment(pitch_increment);
         // update blade-hub constraint
         auto link = links_blades[ii];
-        link->Initialize(blade->nodes.front(), body_hub);
+        link->initialize(blade->nodes.front(), body_hub);
     }
     pitch_collective += pitch_increment;
 }
 
 double RotorElasto::get_rpm() const {
     Vector3d angles;
-    body_hub->coord.rot.Qdt_to_Wrel(angles, body_hub->coord_dt.rot);
+    std::dynamic_pointer_cast<chrono::ChBody>(body_hub)->coord.rot.Qdt_to_Wrel(
+        angles, std::dynamic_pointer_cast<chrono::ChBody>(body_hub)->coord_dt.rot);
     double rpm = -angles.z() * 60 / (2 * PI);
     return rpm;
 }
 
 double RotorElasto::get_azimuth() const {
-    auto rotation_relative = body_shaft->GetCoord().TransformParentToLocal(body_hub->GetCoord()).rot.Q_to_Euler123();
+    auto rotation_relative =
+        std::dynamic_pointer_cast<chrono::ChBody>(body_shaft)
+            ->GetCoord()
+            .TransformParentToLocal(std::dynamic_pointer_cast<chrono::ChBody>(body_hub)->GetCoord())
+            .rot.Q_to_Euler123();
     double angle = rotation_relative.z();
     return angle;
 }

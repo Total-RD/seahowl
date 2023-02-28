@@ -28,8 +28,8 @@ void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& di
             node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
         }
 
-        auto node = std::make_shared<NodeFEA>(node_pos, node_rotation.Get_A_quaternion());
-        nodes.push_back(node);
+        auto node = std::make_shared<NodeFEAChrono>(node_pos, node_rotation.Get_A_quaternion());
+        nodes.push_back(std::dynamic_pointer_cast<NodeFEA>(node));
     };
 };
 
@@ -60,13 +60,13 @@ void ComponentElastoFEA::translate(const Vector3d& translation_vector) const {
 double ComponentElastoFEA::get_mass() const {
     return std::accumulate(
         cbegin(elements), cend(elements), 0.0,
-        [](double total, decltype(elements)::value_type pElem) { return total += pElem->GetMass(); });
+        [](double total, decltype(elements)::value_type pElem) { return total += pElem->get_mass(); });
 }
 
 void ComponentElastoFEA::reset_loads() {
     for (auto& node : nodes) {
-        node->SetForce({0.0, 0.0, 0.0});
-        node->SetTorque({0.0, 0.0, 0.0});
+        node->set_load(Vector3d(0.0, 0.0, 0.0));
+        node->set_torque(Vector3d(0.0, 0.0, 0.0));
     }
 }
 
@@ -76,7 +76,7 @@ void ComponentElastoFEA::evaluate_position_rotation(Vector3d& position,
                                                     double eta) const {
     auto& element = elements[element_index];
 
-    element->EvaluateSectionFrame(eta, position, rotation);
+    element->evaluate_position_rotation(eta, position, rotation);
 }
 
 void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
@@ -99,15 +99,15 @@ void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
     // load on first node
     double weight0 = 0.5 * abs(eta - 1);
     auto load0 = load * weight0;
-    auto node0 = std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element->GetNodeN(0));
-    node0->SetForce(node0->GetForce() + load0);
-    node0->SetTorque(node0->GetTorque() + (position + offset - node0->GetPos()) % load0);
+    auto node0 = element->nodes0[0];
+    node0->set_load(node0->get_load() + load0);
+    node0->set_torque(node0->get_torque() + (position + offset - node0->get_position()).cross(load0));
     // load on second node
     double weight1 = 0.5 * abs(eta + 1);
     auto load1 = load * weight1;
-    auto node1 = std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element->GetNodeN(1));
-    node1->SetForce(node1->GetForce() + load1);
-    node1->SetTorque(node1->GetTorque() + (position + offset - node1->GetPos()) % load1);
+    auto node1 = element->nodes0[1];
+    node1->set_load(node1->get_load() + load1);
+    node1->set_torque(node1->get_torque() + (position + offset - node1->get_position()).cross(load1));
 }
 
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_positions() const {

@@ -479,7 +479,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         // build turbine (Chrono)
         turbine.build();
         turbine.assemble(chrono_system, chrono_mesh);
-        turbine.tower.elasto.nodes.front()->SetFixed(true);  // foundation of the tower
+        std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(turbine.tower.elasto.nodes.front())->SetFixed(true);  // foundation of the tower
         // rotate turbine to align tower with gravity vector
         auto v1 = Vector3d(-chrono_system.Get_G_acc()).normalized();
         auto v2 = (turbine.tower.elasto.nodes[1]->get_position() - turbine.tower.elasto.nodes[0]->get_position()).normalized();

@@ -34,9 +34,9 @@ void Turbine::poststep(double time, double dt) {
     if (controller->has_torque_control) {
         auto torque_elec = controller->get_torque_elec();
         // apply torque elec to hub rigid body
-        rotor.elasto.body_hub->Empty_forces_accumulators();
+        rotor.elasto.body_hub->reset_forces();
         // torque elec is apply on Z axis of hub body (locally)
-        rotor.elasto.body_hub->Accumulate_torque(Vector3d(0.0, 0.0, -torque_elec), true);
+        rotor.elasto.body_hub->accumulate_torque(Vector3d(0.0, 0.0, -torque_elec), true);
     }
     // apply pitch from controller
     if (controller->has_pitch_control) {

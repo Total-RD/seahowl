@@ -2,7 +2,7 @@
 
 #include <seahowl/elasto/reference_point_elasto.h>
 #include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/elasto/utils_elasto.h>
+#include <seahowl/elasto/elasto.h>
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/core/utils.h>
 
@@ -100,28 +100,17 @@ void Blade::update_positions_aero() {
         auto offset3D = Vector3d(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
         node_aero.coordinates = coordsys.TransformLocalToParent(offset3D);
 
-        // update velocity of aero elements
-        double eta_scaled = 0.5 * (eta + 1.0);
-        node_aero.velocity =
-            ((1.0 - eta_scaled) *
-                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetPos_dt() +
-             eta_scaled *
-                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetPos_dt());
+        // update properties of aero nodes
+        double weight1 = 0.5 * fabs(eta - 1.0);
+        double weight2 = 0.5 * fabs(eta + 1.0);
+        auto node1 = element_elasto->nodes0[0];
+        auto node2 = element_elasto->nodes0[1];
+        node_aero.velocity = weight1 * node1->get_velocity() + weight2 * node2->get_velocity();
         node_aero.rot_velocity =
-            ((1.0 - eta_scaled) *
-                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetWvel_par() +
-             eta_scaled *
-                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetWvel_par());
-        node_aero.acceleration =
-            ((1.0 - eta_scaled) *
-                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetPos_dtdt() +
-             eta_scaled *
-                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetPos_dtdt());
-        node_aero.rot_acceleration =
-            ((1.0 - eta_scaled) *
-                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetWacc_par() +
-             eta_scaled *
-                 std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetWacc_par());
+            weight1 * node1->get_rotational_velocity_global() + weight2 * node2->get_rotational_velocity_global();
+        node_aero.acceleration = weight1 * node1->get_acceleration() + weight2 * node2->get_acceleration();
+        node_aero.rot_acceleration = weight1 * node1->get_rotational_acceleration_global() +
+                                     weight2 * node2->get_rotational_acceleration_global();
     }
 
     // update pitch of blade for aero

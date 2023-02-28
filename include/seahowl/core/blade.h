@@ -6,7 +6,7 @@
 #include <seahowl/core/reference_point.h>
 #include <seahowl/core/utils.h>
 #include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/elasto/utils_elasto.h>
+#include <seahowl/elasto/elasto.h>
 #include <seahowl/aero/blade_aero.h>
 
 namespace seahowl {

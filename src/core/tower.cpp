@@ -78,8 +78,7 @@ void Tower::update_positions_aero() {
 
         // update velocity of aero elements
         aero.elements[ii].properties.velocity =
-            0.5 * (std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(0))->GetPos_dt() +
-                   std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(element_elasto->GetNodeN(1))->GetPos_dt());
+            0.5 * (element_elasto->nodes0[0]->get_velocity() + element_elasto->nodes0[1]->get_velocity());
     }
 }
 

@@ -45,7 +45,7 @@ void BladeElasto::build() {
     build_nodes(discretized_points0);
     // apply properties
     for (int ii = 0; ii < nodes.size(); ii++) {
-        nodes[ii]->set_properties(discretized_points[ii]);
+        std::dynamic_pointer_cast<NodeFEAChrono>(nodes[ii])->set_properties(discretized_points[ii]);
     }
     // apply structural twist
     for (int ii = 0; ii < nodes.size(); ii++) {
@@ -53,7 +53,9 @@ void BladeElasto::build() {
         auto& point = discretized_points[ii];
         auto axis = node->get_direction();
         chrono::ChMatrix33<> twist_matrix(chrono::Q_from_AngAxis(-point.structural_twist, axis));
-        nodes[ii]->Frame().SetRot(twist_matrix * chrono::ChMatrix33(nodes[ii]->Frame().coord.rot));
+        std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(nodes[ii])->Frame().SetRot(
+            twist_matrix *
+            chrono::ChMatrix33(std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(nodes[ii])->Frame().coord.rot));
     }
 
     if (fpm_mode) {
@@ -75,7 +77,7 @@ void BladeElasto::build_elements_tapered_timoshenko() {
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
-        auto element = std::make_shared<BladeElementFEA>();
+        auto element = std::make_shared<BladeElementFEAChrono>();
         // add element to blade elements vector
         elements.push_back(element);
         // set element nodes
@@ -91,74 +93,75 @@ void BladeElasto::build_elements_tapered_timoshenko() {
 }
 
 void BladeElasto::build_elements_tapered_timoshenko_fpm() {
-    elements.clear();
-    const auto nelements = nodes.size() - 1;
+    // elements.clear();
+    // const auto nelements = nodes.size() - 1;
 
-    chrono::ChMatrixNM<double, 6, 6> mm;
-    for (int jj = 0; jj < 6; jj++) {
-        mm(jj, jj) = 1.0;
-    }
-    // make first section for tapered section
-    auto section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>();
-    auto& discretized_point = discretized_points[0];
-    // offsets
-    section->SetCenterOfMass(discretized_point.offset_gravity.y(), -discretized_point.offset_gravity.x());
-    section->SetCentroidY(discretized_point.offset_elastic.y());
-    section->SetCentroidZ(-discretized_point.offset_elastic.x());
-    // material properties
-    section->SetMassMatrixFPM(discretized_point.mass_matrix);
-    section->SetStiffnessMatrixFPM(discretized_point.stiffness_matrix);
-    // damping
-    chrono::fea::DampingCoefficients damping_coefficients;
-    damping_coefficients.bx = discretized_point.damping_coefficients[0];
-    damping_coefficients.by = discretized_point.damping_coefficients[1];
-    damping_coefficients.bz = discretized_point.damping_coefficients[2];
-    damping_coefficients.bt = discretized_point.damping_coefficients[3];
-    damping_coefficients.alpha = discretized_point.damping_coefficients[4];
-    section->SetBeamRaleyghDamping(damping_coefficients);
+    // chrono::ChMatrixNM<double, 6, 6> mm;
+    // for (int jj = 0; jj < 6; jj++) {
+    //     mm(jj, jj) = 1.0;
+    // }
+    //// make first section for tapered section
+    // auto section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>();
+    // auto& discretized_point = discretized_points[0];
+    //// offsets
+    // section->SetCenterOfMass(discretized_point.offset_gravity.y(), -discretized_point.offset_gravity.x());
+    // section->SetCentroidY(discretized_point.offset_elastic.y());
+    // section->SetCentroidZ(-discretized_point.offset_elastic.x());
+    //// material properties
+    // section->SetMassMatrixFPM(discretized_point.mass_matrix);
+    // section->SetStiffnessMatrixFPM(discretized_point.stiffness_matrix);
+    //// damping
+    // chrono::fea::DampingCoefficients damping_coefficients;
+    // damping_coefficients.bx = discretized_point.damping_coefficients[0];
+    // damping_coefficients.by = discretized_point.damping_coefficients[1];
+    // damping_coefficients.bz = discretized_point.damping_coefficients[2];
+    // damping_coefficients.bt = discretized_point.damping_coefficients[3];
+    // damping_coefficients.alpha = discretized_point.damping_coefficients[4];
+    // section->SetBeamRaleyghDamping(damping_coefficients);
 
-    for (size_t ii = 1; ii < nelements + 1; ii++) {
-        // create element
-        auto element = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenkoFPM>();
-        // add element to blade elements vector
-        elements.push_back(element);
-        // set element nodes
-        element->SetNodes(nodes[ii - 1], nodes[ii]);
+    // for (size_t ii = 1; ii < nelements + 1; ii++) {
+    //     // create element
+    //     auto element = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenkoFPM>();
+    //     // add element to blade elements vector
+    //     elements.push_back(element);
+    //     // set element nodes
+    //     element->SetNodes(nodes[ii - 1], nodes[ii]);
 
-        // create blade section
-        auto blade_section = chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGenericFPM>();
-        element->SetTaperedSection(blade_section);
+    //    // create blade section
+    //    auto blade_section =
+    //    chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGenericFPM>();
+    //    element->SetTaperedSection(blade_section);
 
-        // set first section for tapered section
-        blade_section->SetSectionA(section);
+    //    // set first section for tapered section
+    //    blade_section->SetSectionA(section);
 
-        // make second section for tapered section
-        section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>();
-        blade_section->SetSectionB(section);
-        auto& discretized_point = discretized_points[ii];
-        // offsets
-        section->SetCenterOfMass(discretized_point.offset_gravity.y(), -discretized_point.offset_gravity.x());
-        section->SetCentroidY(discretized_point.offset_elastic.y());
-        section->SetCentroidZ(-discretized_point.offset_elastic.x());
-        // material properties
-        section->SetMassMatrixFPM(discretized_point.mass_matrix);
-        section->SetStiffnessMatrixFPM(discretized_point.stiffness_matrix);
-        // damping
-        chrono::fea::DampingCoefficients damping_coefficients;
-        damping_coefficients.bx = discretized_point.damping_coefficients[0];
-        damping_coefficients.by = discretized_point.damping_coefficients[1];
-        damping_coefficients.bz = discretized_point.damping_coefficients[2];
-        damping_coefficients.bt = discretized_point.damping_coefficients[3];
-        damping_coefficients.alpha = discretized_point.damping_coefficients[4];
-        section->SetBeamRaleyghDamping(damping_coefficients);
+    //    // make second section for tapered section
+    //    section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>();
+    //    blade_section->SetSectionB(section);
+    //    auto& discretized_point = discretized_points[ii];
+    //    // offsets
+    //    section->SetCenterOfMass(discretized_point.offset_gravity.y(), -discretized_point.offset_gravity.x());
+    //    section->SetCentroidY(discretized_point.offset_elastic.y());
+    //    section->SetCentroidZ(-discretized_point.offset_elastic.x());
+    //    // material properties
+    //    section->SetMassMatrixFPM(discretized_point.mass_matrix);
+    //    section->SetStiffnessMatrixFPM(discretized_point.stiffness_matrix);
+    //    // damping
+    //    chrono::fea::DampingCoefficients damping_coefficients;
+    //    damping_coefficients.bx = discretized_point.damping_coefficients[0];
+    //    damping_coefficients.by = discretized_point.damping_coefficients[1];
+    //    damping_coefficients.bz = discretized_point.damping_coefficients[2];
+    //    damping_coefficients.bt = discretized_point.damping_coefficients[3];
+    //    damping_coefficients.alpha = discretized_point.damping_coefficients[4];
+    //    section->SetBeamRaleyghDamping(damping_coefficients);
 
-        // apply prebend and structural twist
-        auto rotation_relative = (nodes[ii]->get_rotation() * nodes[ii - 1]->get_rotation().inverse()).normalized();
-        // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
-        rotation_relative =
-            Quaternion(rotation_relative[0], rotation_relative[3], rotation_relative[2], rotation_relative[1]);
-        element->SetNodeBreferenceRot(rotation_relative);
-    }
+    //    // apply prebend and structural twist
+    //    auto rotation_relative = (nodes[ii]->get_rotation() * nodes[ii - 1]->get_rotation().inverse()).normalized();
+    //    // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
+    //    rotation_relative =
+    //        Quaternion(rotation_relative[0], rotation_relative[3], rotation_relative[2], rotation_relative[1]);
+    //    element->SetNodeBreferenceRot(rotation_relative);
+    //}
 }
 
 // void BladeElasto::build_loads(chrono::ChSystemSMC& system) {
@@ -189,8 +192,8 @@ void BladeElasto::evaluate_position_rotation(Vector3d& position,
 
 void BladeElasto::apply_pitch_increment(double pitch_increment) {
     // apply pitch from root node direction and position
-    auto root_dir = nodes.front()->TransformDirectionLocalToParent(Vector3d(1.0, 0.0, 0.0));
-    auto root_pos = nodes.front()->GetPos();
+    auto root_dir = nodes.front()->get_direction();
+    auto root_pos = nodes.front()->get_position();
     translate(-root_pos);
     rotate(-pitch_increment, root_dir);
     translate(root_pos);

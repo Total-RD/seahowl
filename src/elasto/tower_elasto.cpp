@@ -46,7 +46,7 @@ void TowerElasto::build() {
     build_nodes(discretized_points0);
     // apply properties
     for (int ii = 0; ii < nodes.size(); ii++) {
-        nodes[ii]->set_properties(discretized_points[ii]);
+        std::dynamic_pointer_cast<NodeFEAChrono>(nodes[ii])->set_properties(discretized_points[ii]);
     }
 
     build_elements_tapered_timoshenko();
@@ -62,7 +62,7 @@ void TowerElasto::build_elements_tapered_timoshenko() {
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
-        auto element = std::make_shared<BladeElementFEA>();
+        auto element = std::make_shared<BladeElementFEAChrono>();
         // add element to blade elements vector
         elements.push_back(element);
         // set element nodes
