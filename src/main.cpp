@@ -53,13 +53,14 @@ int main(int argc, char* argv[]) {
     }
 
     // system
-    seahowl::elasto::SystemElasto system;
+    seahowl::elasto::SystemElastoChrono system_elasto;
+    auto& system = system_elasto.chobj;
     system.SetNumThreads(chrono::ChOMP::GetNumProcs(), 0, 1);
     // mesh
-    auto mesh = std::make_shared<seahowl::elasto::MeshElasto>();
-    system.AddMesh(mesh);
+    auto mesh_elasto = std::make_shared<seahowl::elasto::MeshElastoChrono>();
+    system_elasto.add(mesh_elasto);
 
-    auto seahowl_system = get_system_from_json(filepath_main.generic_string(), system, mesh);
+    auto seahowl_system = get_system_from_json(filepath_main.generic_string(), system_elasto, mesh_elasto);
 
     // get main info
     std::ifstream json_file(filepath_main);

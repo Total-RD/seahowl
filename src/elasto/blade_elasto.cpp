@@ -53,9 +53,9 @@ void BladeElasto::build() {
         auto& point = discretized_points[ii];
         auto axis = node->get_direction();
         chrono::ChMatrix33<> twist_matrix(chrono::Q_from_AngAxis(-point.structural_twist, axis));
-        std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(nodes[ii])->Frame().SetRot(
+        std::dynamic_pointer_cast<NodeFEAChrono>(nodes[ii])->chobj->Frame().SetRot(
             twist_matrix *
-            chrono::ChMatrix33(std::dynamic_pointer_cast<chrono::fea::ChNodeFEAxyzrot>(nodes[ii])->Frame().coord.rot));
+            chrono::ChMatrix33(std::dynamic_pointer_cast<NodeFEAChrono>(nodes[ii])->chobj->Frame().coord.rot));
     }
 
     if (fpm_mode) {
@@ -180,7 +180,7 @@ void BladeElasto::evaluate_position_rotation(Vector3d& position,
                                              Quaternion& rotation,
                                              int element_index,
                                              double eta) const {
-    auto element = std::dynamic_pointer_cast<chrono::fea::ChElementBeamTaperedTimoshenko>(elements[element_index]);
+    auto element = std::dynamic_pointer_cast<BladeElementFEAChrono>(elements[element_index])->chobj;
 
     // // unfortunately line below does not always work (returns nans sometimes when fpm_mode is true)
     element->EvaluateSectionFrame(eta, position, rotation);

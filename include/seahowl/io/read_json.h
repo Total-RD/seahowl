@@ -79,5 +79,5 @@ seahowl::core::Turbine get_turbine_from_json(std::string main_filepath);
  * @param[in] filepath Path of the json file describing the system.
  */
 seahowl::core::System get_system_from_json(std::string filepath_main,
-                                           seahowl::elasto::SystemElasto& system,
+                                           seahowl::elasto::SystemElasto& system_elasto,
                                            std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
