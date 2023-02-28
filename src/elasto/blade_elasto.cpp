@@ -57,6 +57,9 @@ void BladeElasto::build() {
         chrono::ChMatrix33<> twist_matrix(Q_from_AngAxis(-point.structural_twist, axis));
         nodes[ii]->Frame().SetRot(twist_matrix * chrono::ChMatrix33(nodes[ii]->Frame().coord.rot));
     }
+    for (int ii = 0; ii < nodes.size(); ii++) {
+        nodes[ii]->set_properties(discretized_points[ii]);
+    }
 
     if (fpm_mode) {
         build_elements_tapered_timoshenko_fpm();
@@ -75,68 +78,23 @@ void BladeElasto::build_elements_tapered_timoshenko() {
         throw std::runtime_error("Trying to build blade with no element.");
     }
 
-    // make first section for tapered section
-    auto section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric>();
-    auto& discretized_point = discretized_points[0];
-    // offsets
-    section->SetCenterOfMass(discretized_point.offset_gravity.y(), -discretized_point.offset_gravity.x());
-    section->SetCentroidY(discretized_point.offset_elastic.y());
-    section->SetCentroidZ(-discretized_point.offset_elastic.x());
-    // material properties
-    section->SetMassPerUnitLength(discretized_point.mass_matrix(0, 0));
-    // axial
-    section->SetAxialRigidity(discretized_point.stiffness_matrix(0, 0));
-    section->SetXtorsionRigidity(discretized_point.stiffness_matrix(3, 3));
-    // flap
-    section->SetYbendingRigidity(discretized_point.stiffness_matrix(4, 4));
-    // edge
-    section->SetZbendingRigidity(discretized_point.stiffness_matrix(5, 5));
-    // damping
-    section->SetBeamRaleyghDamping(discretized_point.damping_coefficients);
-
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
-        auto element = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenko>();
+        auto element = std::make_shared<BladeElementFEA>();
         // add element to blade elements vector
         elements.push_back(element);
         // set element nodes
-        element->SetNodes(nodes[ii - 1], nodes[ii]);
-
-        // create blade section
-        auto blade_section = chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGeneric>();
-        element->SetTaperedSection(blade_section);
-
-        // set first section for tapered section
-        blade_section->SetSectionA(section);
-
-        // make second section for tapered section
-        section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric>();
-        blade_section->SetSectionB(section);
-        auto& discretized_point = discretized_points[ii];
-        // offsets
-        section->SetCenterOfMass(discretized_point.offset_gravity.y(), -discretized_point.offset_gravity.x());
-        section->SetCentroidY(discretized_point.offset_elastic.y());
-        section->SetCentroidZ(-discretized_point.offset_elastic.x());
-        // material properties
-        section->SetMassPerUnitLength(discretized_point.mass_matrix(0, 0));
-        // axial
-        section->SetAxialRigidity(discretized_point.stiffness_matrix(0, 0));
-        section->SetXtorsionRigidity(discretized_point.stiffness_matrix(3, 3));
-        // flap
-        section->SetYbendingRigidity(discretized_point.stiffness_matrix(4, 4));
-        // edge
-        section->SetZbendingRigidity(discretized_point.stiffness_matrix(5, 5));
-        // damping
-        section->SetBeamRaleyghDamping(discretized_point.damping_coefficients);
+        element->set_nodes(nodes[ii - 1], nodes[ii]);
 
         // apply prebend and structural twist
         auto rotation_relative = (nodes[ii]->get_rotation() * nodes[ii - 1]->get_rotation().inverse()).normalized();
         // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
         rotation_relative =
             Quaternion(rotation_relative[0], rotation_relative[3], rotation_relative[2], rotation_relative[1]);
-        element->SetNodeBreferenceRot(rotation_relative);
+        element->set_prebend(rotation_relative);
     }
 }
+
 void BladeElasto::build_elements_tapered_timoshenko_fpm() {
     elements.clear();
     const auto nelements = nodes.size() - 1;

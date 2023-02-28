@@ -90,39 +90,6 @@ class Quaternion : public chrono::ChQuaternion<double> {
     inline Vector3d Quaternion::operator*(const Vector3d& other) const { return this->Rotate(other); }
 };
 
-class RigidBody : public chrono::ChBody {
-  public:
-    RigidBody() : chrono::ChBody(){};
-    void set_position(Vector3d position) { this->SetPos(position); };
-    void set_mass(double mass) { this->SetMass(mass); };
-    double get_mass() { return this->GetMass(); };
-    void set_rotation(Quaternion rotation) { this->SetRot(rotation); };
-    Vector3d get_position() { return this->GetPos(); };
-    Vector3d get_velocity() { return this->GetPos_dt(); };
-    Vector3d get_acceleration() { return this->GetPos_dtdt(); };
-    Quaternion get_rotation() { return this->GetRot(); };
-    Vector3d get_direction() { return this->GetRot().GetVector(); };
-    Vector3d get_rotational_velocity_local() { return this->GetWvel_loc(); };
-    Vector3d get_rotational_acceleration_local() { return this->GetWacc_loc(); };
-};
-
-class NodeFEA : public chrono::fea::ChNodeFEAxyzrot {
-  public:
-    NodeFEA(Vector3d position, Quaternion rotation)
-        : chrono::fea::ChNodeFEAxyzrot(chrono::ChFrame<>(position, rotation)){};
-
-    void set_position(Vector3d position) { this->SetPos(position); };
-    void set_rotation(Quaternion rotation) { this->SetRot(rotation); };
-    Vector3d get_position() { return Vector3d(this->GetPos()); };
-    Vector3d get_velocity() { return Vector3d(this->GetPos_dt()); };
-    Vector3d get_acceleration() { return Vector3d(this->GetPos_dtdt()); };
-    Quaternion get_rotation() { return Quaternion(this->GetRot()); };
-    Vector3d get_direction() { return Vector3d(this->GetRot().GetVector()); };
-    Vector3d get_rotational_velocity_local() { return Vector3d(this->GetWvel_loc()); };
-    Vector3d get_rotational_acceleration_local() { return Vector3d(this->GetWacc_loc()); };
-    Vector3d get_load() { return Vector3d(this->GetForce()); };
-};
-
 // using Vector3d = Eigen::Vector3d;
 // using Vector2d = Eigen::Vector2d;
 }  // namespace seahowl
