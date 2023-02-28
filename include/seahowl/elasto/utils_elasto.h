@@ -5,6 +5,8 @@
 #include <chrono/core/ChMatrix.h>
 #include <chrono/fea/ChBeamSectionTaperedTimoshenkoFPM.h>
 #include <chrono/fea/ChElementBeamTaperedTimoshenkoFPM.h>
+#include <chrono/physics/ChLinkMate.h>
+#include <chrono/physics/ChLinkRevolute.h>
 
 #include <seahowl/elasto/reference_point_elasto.h>
 
@@ -43,7 +45,7 @@ class NodeFEA : public chrono::fea::ChNodeFEAxyzrot {
     Vector3d get_velocity() { return Vector3d(this->GetPos_dt()); };
     Vector3d get_acceleration() { return Vector3d(this->GetPos_dtdt()); };
     Quaternion get_rotation() { return Quaternion(this->GetRot()); };
-    Vector3d get_direction() { return Vector3d(this->GetRot().GetVector()); };
+    Vector3d get_direction() { return Vector3d(this->TransformDirectionLocalToParent(Vector3d(1.0, 0.0, 0.0))); };
     Vector3d get_rotational_velocity_local() { return Vector3d(this->GetWvel_loc()); };
     Vector3d get_rotational_acceleration_local() { return Vector3d(this->GetWacc_loc()); };
     Vector3d get_load() { return Vector3d(this->GetForce()); };
@@ -69,6 +71,7 @@ class NodeFEA : public chrono::fea::ChNodeFEAxyzrot {
 
 class BladeElementFEA : public chrono::fea::ChElementBeamTaperedTimoshenko {
   public:
+    std::vector<std::shared_ptr<NodeFEA>> nodes;
     BladeElementFEA() : chrono::fea::ChElementBeamTaperedTimoshenko() {
         // create blade section
         auto blade_section = chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGeneric>();
@@ -76,6 +79,10 @@ class BladeElementFEA : public chrono::fea::ChElementBeamTaperedTimoshenko {
     };
 
     void set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) {
+        nodes.clear();
+        nodes.push_back(node1);
+        nodes.push_back(node2);
+
         // set nodes
         this->SetNodes(node1, node2);
         // set tapered sections
@@ -86,64 +93,23 @@ class BladeElementFEA : public chrono::fea::ChElementBeamTaperedTimoshenko {
     void set_prebend(const Quaternion& prebend) { this->SetNodeBreferenceRot(prebend); };
 };
 
-/**
- * @brief Weighted loader extending Chrono class.
- */
-class ChLoaderWeighted : public chrono::ChLoaderUdistributed {
+class LinkFix : public chrono::ChLinkMateFix {
   public:
-    std::vector<chrono::ChVector<double>> loads;
-    std::vector<double> positions;
-    int integration_points;
-
-    ChLoaderWeighted(std::shared_ptr<chrono::ChLoadableU> mloadable) : chrono::ChLoaderUdistributed(mloadable) {
-        integration_points = 10;
+    LinkFix() : chrono::ChLinkMateFix(){};
+    void initialize(std::shared_ptr<RigidBody> body1, std::shared_ptr<RigidBody> body2) {
+        this->Initialize(body1, body2);
     };
+    void initialize(std::shared_ptr<NodeFEA> node1, std::shared_ptr<RigidBody> body2) {
+        this->Initialize(node1, body2);
+    };
+};
 
-    void set_positions(std::vector<double> positions) {
-        this->positions.clear();
-        this->positions.assign(positions.begin(), positions.end());
-    }
-
-    void set_loads(std::vector<chrono::ChVector<double>> loads) {
-        // check that number of loads is the same as number of positions
-        if (loads.size() != this->positions.size()) {
-            throw std::runtime_error("Number of loads (" + std::to_string(loads.size()) +
-                                     ") for element is different from number of positions (" +
-                                     std::to_string(this->positions.size()) + ") along element.");
-        }
-        this->loads.clear();
-        this->loads.assign(loads.begin(), loads.end());
-    }
-
-    // Compute F=F(u)
-    virtual void ComputeF(const double U,                      // parametric coordinate along element
-                          chrono::ChVectorDynamic<>& F,        // resulting loads go here
-                          chrono::ChVectorDynamic<>* state_x,  // if !=0 update pos
-                          chrono::ChVectorDynamic<>* state_w   // if !=0 update speed
-    ) {
-        // initialize load
-        auto load = chrono::ChVector<double>(0.0, 0.0, 0.0);
-        // find between which load positions is U and interpolate
-        for (int ii = 0; ii < std::max(0, (int)positions.size() - 1); ii++) {
-            if (positions[ii] <= U && U <= positions[ii + 1]) {
-                double range = positions[ii + 1] - positions[ii];
-                load = (1 - (U - positions[ii]) / range) * loads[ii] +
-                       (1 - (positions[ii + 1] - U) / range) * loads[ii + 1];
-                break;
-            }
-        }
-        // apply load
-        // forces
-        F(0) = load.x();
-        F(1) = load.y();
-        F(2) = load.z();
-        // moments
-        F(3) = 0.0;
-        F(4) = 0.0;
-        F(5) = 0.0;
-    }
-
-    virtual int GetIntegrationPointsU() { return integration_points; }
+class LinkRevolute : public chrono::ChLinkRevolute {
+  public:
+    LinkRevolute() : chrono::ChLinkRevolute(){};
+    void initialize(std::shared_ptr<RigidBody> body1, std::shared_ptr<RigidBody> body2) {
+        this->Initialize(body1, body2, body2->GetFrame_COG_to_abs());
+    };
 };
 
 }  // namespace elasto
