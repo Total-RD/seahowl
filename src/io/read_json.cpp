@@ -414,8 +414,8 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
 }
 
 seahowl::core::System get_system_from_json(std::string filepath_main,
-                                           chrono::ChSystemSMC& chrono_system,
-                                           std::shared_ptr<chrono::fea::ChMesh> chrono_mesh) {
+                                           seahowl::elasto::SystemElasto& chrono_system,
+                                           std::shared_ptr<seahowl::elasto::MeshElasto> chrono_mesh) {
     auto DATADIR = absolute(path(filepath_main)).parent_path();
 
     // get main info

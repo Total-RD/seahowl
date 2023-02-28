@@ -7,13 +7,6 @@
 
 #include <numeric>
 
-#include <chrono/fea/ChBuilderBeam.h>
-#include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
-#include <chrono/fea/ChElementBeamTaperedTimoshenkoFPM.h>
-#include <chrono/fea/ChMesh.h>
-#include <chrono/physics/ChSystemSMC.h>
-#include <chrono/physics/ChLoadContainer.h>
-
 using namespace seahowl::elasto;
 
 BladeElasto::BladeElasto() {}
@@ -48,7 +41,12 @@ void BladeElasto::build() {
         discretized_point0.fraction = discretized_points[ii].fraction;
         discretized_points0.push_back(discretized_point0);
     }
+    // build nodes
     build_nodes(discretized_points0);
+    // apply properties
+    for (int ii = 0; ii < nodes.size(); ii++) {
+        nodes[ii]->set_properties(discretized_points[ii]);
+    }
     // apply structural twist
     for (int ii = 0; ii < nodes.size(); ii++) {
         auto& node = nodes[ii];
@@ -56,9 +54,6 @@ void BladeElasto::build() {
         auto axis = node->get_direction();
         chrono::ChMatrix33<> twist_matrix(chrono::Q_from_AngAxis(-point.structural_twist, axis));
         nodes[ii]->Frame().SetRot(twist_matrix * chrono::ChMatrix33(nodes[ii]->Frame().coord.rot));
-    }
-    for (int ii = 0; ii < nodes.size(); ii++) {
-        nodes[ii]->set_properties(discretized_points[ii]);
     }
 
     if (fpm_mode) {

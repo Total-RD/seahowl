@@ -4,14 +4,9 @@
 #include <vector>
 
 #include <seahowl/elasto/tower_elasto.h>
+#include <seahowl/elasto/utils_elasto.h>
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/core/reference_point.h>
-
-namespace chrono {
-namespace fea {
-class ChMesh;
-}
-}  // namespace chrono
 
 namespace seahowl {
 namespace core {
@@ -88,7 +83,7 @@ class Tower : public ComponentDynamic {
      *
      * @param[out] mesh Mesh on which to add nodes and elements.
      */
-    void assemble(std::shared_ptr<chrono::fea::ChMesh> mesh);
+    void assemble(std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
 
     /**
      * @brief Sets the discretization fractions to use when building the elasto part of the tower.

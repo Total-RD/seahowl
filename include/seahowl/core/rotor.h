@@ -69,7 +69,7 @@ class Rotor : public ComponentDynamic {
      *
      * @param[out] system System on which to add bodies and links.
      */
-    void assemble(chrono::ChSystemSMC& system);
+    void assemble(seahowl::elasto::SystemElasto& system);
 
     /**
      * @brief Builds the RNA and blades associated to it.

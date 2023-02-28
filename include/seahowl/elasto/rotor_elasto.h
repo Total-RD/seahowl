@@ -7,8 +7,6 @@
 
 #include <seahowl/utils.h>
 
-#include <chrono/physics/ChSystemSMC.h>
-
 namespace seahowl {
 namespace elasto {
 class BladeElasto;
@@ -118,7 +116,7 @@ class RotorElasto : public ComponentElasto {
      *
      * @param[out] system System to which rigid bodies and links are added.
      */
-    void assemble(chrono::ChSystemSMC& system);
+    void assemble(seahowl::elasto::SystemElasto& system);
 
     /**
      * @brief Builds the rotor.
@@ -134,7 +132,7 @@ class RotorElasto : public ComponentElasto {
      * towertop node and yaw bearing coordinates match each other.
      * The link between towertop node and yaw bearing is fixed.
      */
-    void link_tower(const TowerElasto& tower, chrono::ChSystemSMC& system);
+    void link_tower(const TowerElasto& tower, seahowl::elasto::SystemElasto& system);
 
     void rotate(double angle, const Vector3d& axis) const override;     ///< @see ElastoComponent::rotate
     void translate(const Vector3d& translation_vector) const override;  ///< @see ElastoComponent::translate

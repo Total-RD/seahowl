@@ -2,11 +2,9 @@
 
 #include <seahowl/elasto/reference_point_elasto.h>
 #include <seahowl/elasto/blade_elasto.h>
+#include <seahowl/elasto/utils_elasto.h>
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/core/utils.h>
-
-#include <chrono/fea/ChMesh.h>
-#include <chrono/physics/ChSystemSMC.h>
 
 #include <memory>
 
@@ -35,7 +33,7 @@ void Blade::poststep(double time, double dt) {
     update_positions_aero();
 }
 
-void Blade::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) {
+void Blade::assemble(std::shared_ptr<MeshElasto> mesh) {
     elasto->assemble(mesh);
 }
 

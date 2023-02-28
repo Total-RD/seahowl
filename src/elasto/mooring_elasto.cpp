@@ -60,7 +60,7 @@ void MooringElasto::build_elements_euler() {
     }
 }
 
-void MooringElasto::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) {
+void MooringElasto::assemble(std::shared_ptr<MeshElasto> mesh) {
     // call parent class assemble
     ComponentElastoFEA::assemble(mesh);
 

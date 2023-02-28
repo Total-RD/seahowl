@@ -6,6 +6,7 @@
 #include <seahowl/servo/controller.h>
 #include <seahowl/aero/aerodyn_adapter.h>
 #include <seahowl/utils.h>
+#include <seahowl/elasto/utils_elasto.h>
 
 #include <vector>
 
@@ -99,7 +100,7 @@ class Turbine : public ComponentDynamic {
      *
      * @param[out] mesh Mesh on which to add nodes and elements.
      */
-    void assemble(chrono::ChSystemSMC& system, std::shared_ptr<chrono::fea::ChMesh> mesh);
+    void assemble(seahowl::elasto::SystemElasto& system, std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
 
     /**
      * @brief Builds the turbine.

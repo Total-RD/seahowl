@@ -24,7 +24,7 @@ void Tower::poststep(double time, double dt) {
     update_positions_aero();
 }
 
-void Tower::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) {
+void Tower::assemble(std::shared_ptr<MeshElasto> mesh) {
     elasto.assemble(mesh);
 }
 

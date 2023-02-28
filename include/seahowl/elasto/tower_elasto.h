@@ -2,9 +2,6 @@
 
 #include <seahowl/elasto/elasto.h>
 
-#include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
-#include <chrono/fea/ChMesh.h>
-
 namespace seahowl {
 namespace elasto {
 

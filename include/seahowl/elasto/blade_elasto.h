@@ -3,8 +3,6 @@
 
 #include <seahowl/elasto/utils_elasto.h>
 
-#include <chrono/fea/ChMesh.h>
-
 namespace seahowl {
 namespace elasto {
 

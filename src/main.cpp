@@ -18,6 +18,7 @@ using json = nlohmann::json;
 
 #include <seahowl/io/read_json.h>
 #include <seahowl/io/write_csv.h>
+#include <seahowl/elasto/utils_elasto.h>
 
 #include <seahowl/core/system.h>
 
@@ -52,10 +53,10 @@ int main(int argc, char* argv[]) {
     }
 
     // system
-    chrono::ChSystemSMC system;
+    seahowl::elasto::SystemElasto system;
     system.SetNumThreads(chrono::ChOMP::GetNumProcs(), 0, 1);
     // mesh
-    auto mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
+    auto mesh = std::make_shared<seahowl::elasto::MeshElasto>();
     system.AddMesh(mesh);
 
     auto seahowl_system = get_system_from_json(filepath_main.generic_string(), system, mesh);

@@ -1,9 +1,8 @@
 #include "seahowl/core/turbine.h"
 
-#include <chrono/physics/ChBody.h>
-
 using namespace seahowl::core;
 using namespace seahowl::servo;
+using namespace seahowl::elasto;
 
 Turbine::Turbine() {
     blades.resize(0);
@@ -53,7 +52,7 @@ void Turbine::poststep(double time, double dt) {
     controller->poststep(time, dt, *this);
 }
 
-void Turbine::assemble(chrono::ChSystemSMC& system, std::shared_ptr<chrono::fea::ChMesh> mesh) {
+void Turbine::assemble(SystemElasto& system, std::shared_ptr<MeshElasto> mesh) {
     // assemble blades
     for (auto& blade : blades) {
         blade->assemble(mesh);

@@ -1,12 +1,13 @@
 #pragma once
 
-#include <chrono/physics/ChLoaderU.h>
 #include <chrono/core/ChVector.h>
 #include <chrono/core/ChMatrix.h>
 #include <chrono/fea/ChBeamSectionTaperedTimoshenkoFPM.h>
 #include <chrono/fea/ChElementBeamTaperedTimoshenkoFPM.h>
 #include <chrono/physics/ChLinkMate.h>
 #include <chrono/physics/ChLinkRevolute.h>
+#include <chrono/fea/ChMesh.h>
+#include <chrono/physics/ChSystemSMC.h>
 
 #include <seahowl/elasto/reference_point_elasto.h>
 
@@ -48,6 +49,8 @@ class NodeFEA : public chrono::fea::ChNodeFEAxyzrot {
     Vector3d get_direction() { return Vector3d(this->TransformDirectionLocalToParent(Vector3d(1.0, 0.0, 0.0))); };
     Vector3d get_rotational_velocity_local() { return Vector3d(this->GetWvel_loc()); };
     Vector3d get_rotational_acceleration_local() { return Vector3d(this->GetWacc_loc()); };
+    Vector3d get_rotational_velocity_global() { return Vector3d(this->GetWvel_par()); };
+    Vector3d get_rotational_acceleration_global() { return Vector3d(this->GetWacc_par()); };
     Vector3d get_load() { return Vector3d(this->GetForce()); };
     void set_properties(const BladeReferencePointElasto& ref) {
         section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric>();
@@ -64,6 +67,27 @@ class NodeFEA : public chrono::fea::ChNodeFEAxyzrot {
         section->SetYbendingRigidity(ref.stiffness_matrix(4, 4));
         // edge
         section->SetZbendingRigidity(ref.stiffness_matrix(5, 5));
+        // damping
+        chrono::fea::DampingCoefficients damping_coefficients;
+        damping_coefficients.bx = ref.damping_coefficients[0];
+        damping_coefficients.by = ref.damping_coefficients[1];
+        damping_coefficients.bz = ref.damping_coefficients[2];
+        damping_coefficients.bt = ref.damping_coefficients[3];
+        damping_coefficients.alpha = ref.damping_coefficients[4];
+        section->SetBeamRaleyghDamping(damping_coefficients);
+    };
+    void set_properties(const TowerReferencePointElasto& ref) {
+        // make first section for tapered section
+        section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric>();
+        // material properties
+        section->SetMassPerUnitLength(ref.density);
+        // axial
+        section->SetAxialRigidity(ref.stiffness_axial);
+        section->SetXtorsionRigidity(ref.stiffness_torsion);
+        // foreaft
+        section->SetZbendingRigidity(ref.stiffness_foreaft);
+        // sideside
+        section->SetYbendingRigidity(ref.stiffness_sideside);
         // damping
         chrono::fea::DampingCoefficients damping_coefficients;
         damping_coefficients.bx = ref.damping_coefficients[0];
@@ -116,6 +140,23 @@ class LinkRevolute : public chrono::ChLinkRevolute {
     void initialize(std::shared_ptr<RigidBody> body1, std::shared_ptr<RigidBody> body2) {
         this->Initialize(body1, body2, body2->GetFrame_COG_to_abs());
     };
+};
+
+class MeshElasto : public chrono::fea::ChMesh {
+  public:
+    MeshElasto() : chrono::fea::ChMesh(){};
+    void add(std::shared_ptr<NodeFEA> node) { this->AddNode(node); };
+    void add(std::shared_ptr<BladeElementFEA> element) { this->AddElement(element); };
+    void add(std::shared_ptr<chrono::fea::ChElementBeam> element) { this->AddElement(element); };
+};
+
+class SystemElasto : public chrono::ChSystemSMC {
+  public:
+    SystemElasto() : chrono::ChSystemSMC(){};
+    void add(std::shared_ptr<RigidBody> body) { this->Add(body); };
+    void add(std::shared_ptr<MeshElasto> mesh) { this->Add(mesh); };
+    void add(std::shared_ptr<LinkFix> link) { this->Add(link); };
+    void add(std::shared_ptr<LinkRevolute> link) { this->Add(link); };
 };
 
 }  // namespace elasto

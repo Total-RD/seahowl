@@ -1,6 +1,5 @@
 #pragma once
 
-#include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
 #include <seahowl/aero/airfoil.h>  ///< @todo Bad dependencyof aero on core ?
 #include <seahowl/utils.h>
 

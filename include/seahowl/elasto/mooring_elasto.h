@@ -46,7 +46,7 @@ class MooringElasto : public ComponentElastoFEA {
      *
      * @param[out] mesh Mesh on which to add nodes and elements.
      */
-    void assemble(std::shared_ptr<chrono::fea::ChMesh> mesh);
+    void assemble(std::shared_ptr<MeshElasto> mesh);
 
   private:
     /**

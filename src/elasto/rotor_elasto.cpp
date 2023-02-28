@@ -3,15 +3,13 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
 
-#include <chrono/physics/ChSystemSMC.h>
-
 using seahowl::elasto::BladeElasto;
 using seahowl::elasto::RotorElasto;
 // using seahowl::elasto::TowerElasto;
 
 RotorElasto::RotorElasto() {}
 
-void RotorElasto::assemble(chrono::ChSystemSMC& system) {
+void RotorElasto::assemble(seahowl::elasto::SystemElasto& system) {
     system.Add(body_hub);
     system.Add(body_shaft);
     system.Add(link_shaft_hub);
@@ -106,7 +104,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     }
 }
 
-void RotorElasto::link_tower(const TowerElasto& tower, chrono::ChSystemSMC& system) {
+void RotorElasto::link_tower(const TowerElasto& tower, seahowl::elasto::SystemElasto& system) {
     auto towertop_node = tower.nodes[tower.nodes.size() - 1];
     // translate RNA center of origin to towertop
     this->translate(towertop_node->GetPos());

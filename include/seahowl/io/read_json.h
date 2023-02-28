@@ -10,14 +10,15 @@ class System;
 struct BladeReferencePoint;
 struct TowerReferencePoint;
 }  // namespace core
+namespace elasto {
+class SystemElasto;
+class MeshElasto;
+}  // namespace elasto
 }  // namespace seahowl
 
 #include <vector>
 #include <string>
 #include <memory>
-
-#include <chrono/physics/ChSystemSMC.h>
-#include <chrono/fea/ChMesh.h>
 
 /**
  * @brief Returns blade reference points given a json file.
@@ -78,5 +79,5 @@ seahowl::core::Turbine get_turbine_from_json(std::string main_filepath);
  * @param[in] filepath Path of the json file describing the system.
  */
 seahowl::core::System get_system_from_json(std::string filepath_main,
-                                           chrono::ChSystemSMC& system,
-                                           std::shared_ptr<chrono::fea::ChMesh> mesh);
+                                           seahowl::elasto::SystemElasto& system,
+                                           std::shared_ptr<seahowl::elasto::MeshElasto> mesh);

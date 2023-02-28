@@ -3,9 +3,6 @@
 #include <vector>
 #include <numeric>
 
-#include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
-#include <chrono/fea/ChMesh.h>
-
 using namespace seahowl::elasto;
 using namespace seahowl;
 
@@ -36,12 +33,12 @@ void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& di
     };
 };
 
-void ComponentElastoFEA::assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) const {
+void ComponentElastoFEA::assemble(std::shared_ptr<MeshElasto> mesh) const {
     for (auto node : nodes) {
-        mesh->AddNode(node);
+        mesh->add(node);
     }
     for (auto element : elements) {
-        mesh->AddElement(element);
+        mesh->add(element);
     }
 }
 

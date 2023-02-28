@@ -5,12 +5,8 @@
 
 #include <seahowl/utils.h>
 
-#include <chrono/fea/ChMesh.h>
-
 namespace chrono {
 namespace fea {
-class ChNodeFEAxyzrot;
-class ChElementBeamTaperedTimoshenko;
 class ChElementBeam;
 }  // namespace fea
 }  // namespace chrono
@@ -76,7 +72,7 @@ class ComponentElastoFEA : public ComponentElasto {
      *
      * @param[out] mesh Mesh on which to add nodes and elements.
      */
-    void assemble(std::shared_ptr<chrono::fea::ChMesh> mesh) const;
+    void assemble(std::shared_ptr<MeshElasto> mesh) const;
 
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;
