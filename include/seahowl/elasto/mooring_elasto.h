@@ -28,25 +28,13 @@ class MooringElasto : public ComponentElastoFEA {
     double density = 0.0;
     /** @brief Unstretched length of the mooring line. */
     double length = 0.0;
-    /** @brief Contact cloud of the mooring line. */
-    std::shared_ptr<chrono::fea::ChContactSurfaceNodeCloud> contact_cloud;
-    /** @brief Contact material of the mooring line. */
-    std::shared_ptr<chrono::ChMaterialSurfaceSMC> contact_material;
 
     MooringElasto();
-    ~MooringElasto();
 
     /**
      * @brief Builds the mooring (to call before assemble).
      */
     void build();
-
-    /**
-     * @brief Assembles the FEA component (adds all nodes and elements to mesh).
-     *
-     * @param[out] mesh Mesh on which to add nodes and elements.
-     */
-    void assemble(std::shared_ptr<MeshElasto> mesh);
 
   private:
     /**

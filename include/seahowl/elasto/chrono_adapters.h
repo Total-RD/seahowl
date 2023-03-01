@@ -4,6 +4,7 @@
 #include <chrono/core/ChMatrix.h>
 #include <chrono/fea/ChBeamSectionTaperedTimoshenkoFPM.h>
 #include <chrono/fea/ChElementBeamTaperedTimoshenkoFPM.h>
+#include <chrono/fea/ChElementBeamEuler.h>
 #include <chrono/physics/ChLinkMate.h>
 #include <chrono/physics/ChLinkRevolute.h>
 #include <chrono/fea/ChMesh.h>
@@ -121,11 +122,17 @@ class NodeFEAChrono : public NodeFEA {
     };
 };
 
-class BladeElementFEAChrono : public BladeElementFEA {
+class ElementFEAChrono {
+  public:
+    std::shared_ptr<chrono::fea::ChElementBeam> chobj_base;
+};
+
+class BladeElementFEAChrono : public ElementFEAChrono, public BladeElementFEA {
   public:
     std::shared_ptr<chrono::fea::ChElementBeamTaperedTimoshenko> chobj;
     BladeElementFEAChrono() {
         chobj = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenko>();
+        chobj_base = chobj;
         // create blade section
         auto blade_section = chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGeneric>();
         chobj->SetTaperedSection(blade_section);
@@ -156,6 +163,48 @@ class BladeElementFEAChrono : public BladeElementFEA {
         position[1] = chvec[1];
         position[2] = chvec[2];
         rotation = ch2quat(chquat);
+    };
+};
+
+class MooringElementFEAChrono : public ElementFEAChrono, public ElementFEA {
+  public:
+    std::shared_ptr<chrono::fea::ChElementBeamEuler> chobj;
+    MooringElementFEAChrono() {
+        chobj = chrono_types::make_shared<chrono::fea::ChElementBeamEuler>();
+        chobj_base = chobj;
+    };
+
+    virtual void set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) override {
+        nodes0.clear();
+        nodes0.push_back(node1);
+        nodes0.push_back(node2);
+
+        // set nodes
+        chobj->SetNodes(std::dynamic_pointer_cast<NodeFEAChrono>(node1)->chobj,
+                        std::dynamic_pointer_cast<NodeFEAChrono>(node2)->chobj);
+    };
+
+    virtual double get_mass() override { return chobj->GetMass(); };
+
+    virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) override {
+        auto chvec = vec2ch(position);
+        auto chquat = quat2ch(rotation);
+        chobj->EvaluateSectionFrame(eta, chvec, chquat);
+        position[0] = chvec[0];
+        position[1] = chvec[1];
+        position[2] = chvec[2];
+        rotation = ch2quat(chquat);
+    };
+    void set_properties(double density, double diameter, double stiffness_axial) {
+        // create mooring section
+        auto section = chrono_types::make_shared<chrono::fea::ChBeamSectionEulerAdvanced>();
+        chobj->SetSection(section);
+        section->SetDensity(density);
+        double area = chrono::CH_C_PI * pow(diameter, 2) / 4.0;
+        section->SetArea(area);
+        section->SetYoungModulus(stiffness_axial / area);
+        section->SetGshearModulus(0.0);
+        section->SetAsCircularSection(diameter);
     };
 };
 
@@ -196,7 +245,7 @@ class MeshElastoChrono : public MeshElasto {
         chobj->AddNode(std::dynamic_pointer_cast<NodeFEAChrono>(node)->chobj);
     };
     virtual void add(std::shared_ptr<ElementFEA> element) override {
-        chobj->AddElement(std::dynamic_pointer_cast<BladeElementFEAChrono>(element)->chobj);
+        chobj->AddElement(std::dynamic_pointer_cast<ElementFEAChrono>(element)->chobj_base);
     };
     void add(std::shared_ptr<chrono::fea::ChElementBeam> element) { chobj->AddElement(element); };
 };
