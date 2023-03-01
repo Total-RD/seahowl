@@ -1,4 +1,5 @@
 #include <seahowl/elasto/elasto.h>
+#include <seahowl/elasto/chrono_adapters.h>
 
 #include <vector>
 #include <numeric>

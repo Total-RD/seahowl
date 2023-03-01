@@ -2,6 +2,7 @@
 
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
+#include <seahowl/elasto/chrono_adapters.h>
 
 using seahowl::elasto::BladeElasto;
 using seahowl::elasto::RotorElasto;

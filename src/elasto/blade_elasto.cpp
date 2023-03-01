@@ -1,9 +1,9 @@
 #include <seahowl/elasto/blade_elasto.h>
 
-#include <seahowl/elasto/utils_elasto.h>  // WeightedElasto
-#include <seahowl/core/utils.h>           // For DiscretizationPoint
+#include <seahowl/elasto/chrono_adapters.h>
+#include <seahowl/core/utils.h>  // For DiscretizationPoint
 #include <seahowl/elasto/reference_point_elasto.h>
-#include <seahowl/elasto/utils_elasto.h>
+#include <seahowl/elasto/chrono_adapters.h>
 
 #include <numeric>
 

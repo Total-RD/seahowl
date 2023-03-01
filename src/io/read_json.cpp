@@ -5,6 +5,7 @@
 #include <seahowl/core/rotor.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/elasto/tower_elasto.h>
+#include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/servo/controller_discon.h>

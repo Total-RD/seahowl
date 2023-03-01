@@ -1,12 +1,10 @@
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/core/utils.h>
+#include <seahowl/elasto/chrono_adapters.h>
 
 #include <memory>
 #include <vector>
 #include <numeric>
-
-#include <chrono/fea/ChMesh.h>
-#include <chrono/fea/ChElementBeamTaperedTimoshenko.h>
 
 using seahowl::elasto::TowerElasto;
 

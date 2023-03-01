@@ -18,7 +18,7 @@ using json = nlohmann::json;
 
 #include <seahowl/io/read_json.h>
 #include <seahowl/io/write_csv.h>
-#include <seahowl/elasto/utils_elasto.h>
+#include <seahowl/elasto/chrono_adapters.h>
 
 #include <seahowl/core/system.h>
 
