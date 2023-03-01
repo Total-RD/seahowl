@@ -15,6 +15,8 @@
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/core/system.h>
+#include <seahowl/elasto/chrono_adapters.h>
+#include <seahowl/utils.h>
 
 #include <seahowl/io/read_json.h>
 
@@ -23,6 +25,8 @@
 #endif
 
 using namespace chrono;
+using namespace seahowl::elasto;
+using namespace seahowl;
 
 #include <filesystem>  // C++17
 #include <cstdlib>
@@ -52,16 +56,17 @@ int main(int argc, char** argv) {
 
 TEST(test_blade, mass_deflection) {
     // system
-    ChSystemSMC system;
-    system.Set_G_acc(ChVector<double>(0.0, -9.81, 0.0));
+    SystemElastoChrono system_elasto;
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto& system_chrono = system_elasto.chobj;
     auto solver = chrono_types::make_shared<ChSolverSparseLU>();
-    system.SetSolver(solver);
+    system_chrono.SetSolver(solver);
     solver->UseSparsityPatternLearner(true);
     solver->LockSparsityPattern(true);
 
     // mesh for blade
-    auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
-    system.AddMesh(blades_mesh);
+    auto blades_mesh = std::make_shared<MeshElastoChrono>();
+    system_elasto.add(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
     // make 50 elements
@@ -70,12 +75,12 @@ TEST(test_blade, mass_deflection) {
         blade_core.elasto->discretization_fractions.push_back(0.02 * ii);
     }
     blade_core.build();
-    blade_core.assemble(system, blades_mesh);
+    blade_core.assemble(blades_mesh);
     auto blade = blade_core.elasto;
-    blade->nodes[0]->SetFixed(true);
+    std::dynamic_pointer_cast<NodeFEAChrono>(blade->nodes[0])->chobj->SetFixed(true);
 
-    system.Setup();
-    system.DoStaticLinear();
+    system_chrono.Setup();
+    system_chrono.DoStaticLinear();
 
     // check mass
     double blade_mass = 67051.5;
@@ -83,29 +88,30 @@ TEST(test_blade, mass_deflection) {
 
     // check deflection from gravity (edge)
     double deflection_edge = -0.8580;
-    blade->rotate(CH_C_PI, VECT_Z);
-    system.DoStaticLinear();
-    ASSERT_NEAR(deflection_edge, blade->nodes.back()->GetPos().y(), 0.001);
+    blade->rotate(PI, Vector3d(0.0, 0.0, 1.0));
+    system_chrono.DoStaticLinear();
+    ASSERT_NEAR(deflection_edge, blade->nodes.back()->get_position().y(), 0.001);
 
     // check deflection from gravity (flap)
     double deflection_flap = 2.91411;
-    blade->rotate(CH_C_PI / 2.0, VECT_Z);
-    system.DoStaticLinear();
-    ASSERT_NEAR(deflection_flap, blade->nodes.back()->GetPos().y(), 0.001);
+    blade->rotate(PI / 2.0, Vector3d(0.0, 0.0, 1.0));
+    system_chrono.DoStaticLinear();
+    ASSERT_NEAR(deflection_flap, blade->nodes.back()->get_position().y(), 0.001);
 }
 
 TEST(test_rotor, mass) {
     // system
-    ChSystemSMC system;
-    system.Set_G_acc(ChVector<double>(0.0, -9.81, 0.0));
+    SystemElastoChrono system_elasto;
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto& system_chrono = system_elasto.chobj;
     auto solver = chrono_types::make_shared<chrono::ChSolverSparseLU>();
-    system.SetSolver(solver);
+    system_chrono.SetSolver(solver);
     solver->UseSparsityPatternLearner(true);
     solver->LockSparsityPattern(true);
 
     // check mass with blades
-    auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
-    system.AddMesh(blades_mesh);
+    auto blades_mesh = std::make_shared<MeshElastoChrono>();
+    system_elasto.add(blades_mesh);
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
     for (int ii = 0; ii < 3; ii++) {
         auto blade_core =
@@ -116,17 +122,17 @@ TEST(test_rotor, mass) {
             blade_core->elasto->discretization_fractions.push_back(0.02 * ii);
         }
         blade_core->build();
-        blade_core->assemble(system, blades_mesh);
+        blade_core->assemble(blades_mesh);
         blades.push_back(blade_core);
     }
 
     auto rotor = get_rotor_from_json((DATADIR / "rna.json").generic_string());
     rotor.build(blades);
-    rotor.assemble(system);
-    rotor.elasto.body_yaw_bearing->SetBodyFixed(true);
+    rotor.assemble(system_elasto);
+    std::dynamic_pointer_cast<RigidBodyChrono>(rotor.elasto.body_yaw_bearing)->chobj->SetBodyFixed(true);
 
-    system.Setup();
-    system.DoStaticLinear();
+    system_chrono.Setup();
+    system_chrono.DoStaticLinear();
     // check mass
     double rotor_total_mass = 945690.92;
     ASSERT_NEAR(rotor_total_mass, rotor.elasto.get_mass(), 1.0);
@@ -134,25 +140,26 @@ TEST(test_rotor, mass) {
 
 TEST(test_tower, mass) {
     // system
-    ChSystemSMC system;
-    system.Set_G_acc(ChVector<double>(0.0, -9.81, 0.0));
+    SystemElastoChrono system_elasto;
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto& system_chrono = system_elasto.chobj;
     auto solver = chrono_types::make_shared<chrono::ChSolverMINRES>();
-    system.SetSolver(solver);
+    system_chrono.SetSolver(solver);
     solver->EnableDiagonalPreconditioner(true);
     solver->EnableWarmStart(true);
     solver->SetMaxIterations(40000);
     solver->SetTolerance(1e-12);
 
     // mesh for tower
-    auto tower_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
-    system.AddMesh(tower_mesh);
+    auto tower_mesh = std::make_shared<MeshElastoChrono>();
+    system_elasto.add(tower_mesh);
     // tower
     auto tower = get_tower_from_json((DATADIR / "tower.json").generic_string());
     tower.build();
     tower.assemble(tower_mesh);
 
-    system.Setup();
-    system.DoStaticLinear();
+    system_chrono.Setup();
+    system_chrono.DoStaticLinear();
 
     // check mass
     double tower_mass = 870391.59776;
@@ -161,16 +168,17 @@ TEST(test_tower, mass) {
 
 TEST(test_blade, natural_period_dynamic_edge) {
     // system
-    ChSystemSMC system;
-    system.Set_G_acc(ChVector<double>(0.0, -9.81, 0.0));
+    SystemElastoChrono system_elasto;
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto& system_chrono = system_elasto.chobj;
     auto solver = chrono_types::make_shared<chrono::ChSolverSparseLU>();
-    system.SetSolver(solver);
+    system_chrono.SetSolver(solver);
     solver->UseSparsityPatternLearner(true);
     solver->LockSparsityPattern(true);
 
     // mesh for blade
-    auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
-    system.AddMesh(blades_mesh);
+    auto blades_mesh = std::make_shared<MeshElastoChrono>();
+    system_elasto.add(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
     // make 50 elements
@@ -179,15 +187,15 @@ TEST(test_blade, natural_period_dynamic_edge) {
         blade_core.elasto->discretization_fractions.push_back(0.02 * ii);
     }
     blade_core.build();
-    blade_core.assemble(system, blades_mesh);
+    blade_core.assemble(blades_mesh);
     auto blade = blade_core.elasto;
-    blade->nodes[0]->SetFixed(true);
+    std::dynamic_pointer_cast<NodeFEAChrono>(blade->nodes[0])->chobj->SetFixed(true);
 
-    system.Setup();
-    system.DoStaticLinear();
+    system_chrono.Setup();
+    system_chrono.DoStaticLinear();
 
     // static position of blade tip
-    double pos0 = blade->nodes.back()->GetPos().y();
+    double pos0 = blade->nodes.back()->get_position().y();
 
     // check zero-crossings (static position of blade tip)
     int step = 0;
@@ -198,11 +206,11 @@ TEST(test_blade, natural_period_dynamic_edge) {
     double time = 0.0;
     double end_time = 10.0;
     double start_time = 0.0;
-    blade->nodes.back()->SetForce(ChVector<double>(0.0, 1000.0, 0.0));
+    blade->nodes.back()->set_load(Vector3d(0.0, 1000.0, 0.0));
     while (time < end_time) {
         if (time > 0.5) {
-            blade->nodes.back()->SetForce(ChVector<double>(0.0, 0.0, 0.0));
-            if (blade->nodes.back()->GetPos().y() < pos0 && pos_y > pos0) {
+            blade->nodes.back()->set_load(Vector3d(0.0, 0.0, 0.0));
+            if (blade->nodes.back()->get_position().y() < pos0 && pos_y > pos0) {
                 if (start_time == 0.0) {
                     start_time = time;
                 } else {
@@ -211,8 +219,8 @@ TEST(test_blade, natural_period_dynamic_edge) {
                 }
             }
         }
-        pos_y = blade->nodes.back()->GetPos().y();
-        system.DoStepDynamics(dt);
+        pos_y = blade->nodes.back()->get_position().y();
+        system_chrono.DoStepDynamics(dt);
         time += dt;
         step += 1;
     }
@@ -224,16 +232,17 @@ TEST(test_blade, natural_period_dynamic_edge) {
 
 TEST(test_blade, natural_period_dynamic_flap) {
     // system
-    ChSystemSMC system;
-    system.Set_G_acc(ChVector<double>(0.0, -9.81, 0.0));
+    SystemElastoChrono system_elasto;
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto& system_chrono = system_elasto.chobj;
     auto solver = chrono_types::make_shared<ChSolverSparseLU>();
-    system.SetSolver(solver);
+    system_chrono.SetSolver(solver);
     solver->UseSparsityPatternLearner(true);
     solver->LockSparsityPattern(true);
 
     // mesh for blade
-    auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
-    system.AddMesh(blades_mesh);
+    auto blades_mesh = std::make_shared<MeshElastoChrono>();
+    system_elasto.add(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
     // make 50 elements
@@ -242,18 +251,18 @@ TEST(test_blade, natural_period_dynamic_flap) {
         blade_core.elasto->discretization_fractions.push_back(0.02 * ii);
     }
     blade_core.build();
-    blade_core.assemble(system, blades_mesh);
+    blade_core.assemble(blades_mesh);
     auto blade = blade_core.elasto;
-    blade->nodes[0]->SetFixed(true);
+    std::dynamic_pointer_cast<NodeFEAChrono>(blade->nodes[0])->chobj->SetFixed(true);
 
     // rotate blade for flap
-    blade->rotate(-CH_C_PI / 2.0, VECT_Z);
+    blade->rotate(-PI / 2.0, Vector3d(0.0, 0.0, 1.0));
 
-    system.Setup();
-    system.DoStaticLinear();
+    system_chrono.Setup();
+    system_chrono.DoStaticLinear();
 
     // static position of blade tip
-    double pos0 = blade->nodes.back()->GetPos().y();
+    double pos0 = blade->nodes.back()->get_position().y();
 
     // check zero-crossings (static position of blade tip)
     int step = 0;
@@ -264,11 +273,11 @@ TEST(test_blade, natural_period_dynamic_flap) {
     double time = 0.0;
     double end_time = 10.0;
     double start_time = 0.0;
-    blade->nodes.back()->SetForce(chrono::ChVector<double>(0.0, 1000.0, 0.0));
+    blade->nodes.back()->set_load(Vector3d(0.0, 1000.0, 0.0));
     while (time < end_time) {
         if (time > 0.5) {
-            blade->nodes.back()->SetForce(chrono::ChVector<double>(0.0, 0.0, 0.0));
-            if (blade->nodes.back()->GetPos().y() < pos0 && pos_y > pos0) {
+            blade->nodes.back()->set_load(Vector3d(0.0, 0.0, 0.0));
+            if (blade->nodes.back()->get_position().y() < pos0 && pos_y > pos0) {
                 if (start_time == 0.0) {
                     start_time = time;
                 } else {
@@ -277,8 +286,8 @@ TEST(test_blade, natural_period_dynamic_flap) {
                 }
             }
         }
-        pos_y = blade->nodes.back()->GetPos().y();
-        system.DoStepDynamics(dt);
+        pos_y = blade->nodes.back()->get_position().y();
+        system_chrono.DoStepDynamics(dt);
         time += dt;
         step += 1;
     }
@@ -299,26 +308,27 @@ TEST(test_turbine, rpm_initial_pitch) {
     double dt = 0.1;
     // wind
     auto wind_model = seahowl::aero::ConstantWind();
-    wind_model.set_wind_velocity(ChVector<double>(8.0, 0.0, 0.0));
+    wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
     double initial_pitch = CH_C_PI / 8.0;
 
     // system
-    ChSystemSMC system;
-    system.Set_G_acc(ChVector<double>(0.0, 0.0, -9.81));
+    SystemElastoChrono system_elasto;
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto& system_chrono = system_elasto.chobj;
     auto solver = chrono_types::make_shared<ChSolverSparseLU>();
-    system.SetSolver(solver);
+    system_chrono.SetSolver(solver);
     solver->UseSparsityPatternLearner(true);
     solver->LockSparsityPattern(true);
     solver->SetVerbose(verbose);
-    system.SetTimestepperType(ChTimestepper::Type::HHT);
-    auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system.GetTimestepper());
+    system_chrono.SetTimestepperType(ChTimestepper::Type::HHT);
+    auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system_chrono.GetTimestepper());
     mystepper->SetStepControl(false);
     mystepper->SetModifiedNewton(false);
 
     // mesh for blade
-    auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
-    system.AddMesh(blades_mesh);
+    auto blades_mesh = std::make_shared<MeshElastoChrono>();
+    system_elasto.add(blades_mesh);
 
     auto turbine_file = (DATADIR / "turbine_nocontrol.json").generic_string();
     auto turbine = get_turbine_from_json(turbine_file);
@@ -328,13 +338,13 @@ TEST(test_turbine, rpm_initial_pitch) {
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
-    turbine.assemble(system, blades_mesh);
-    turbine.tower.elasto.nodes[0]->SetFixed(true);
+    turbine.assemble(system_elasto, blades_mesh);
+    std::dynamic_pointer_cast<NodeFEAChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
 
     // statics
     if (statics_prestep) {
-        system.DoStaticLinear();
-        system.DoStaticNonlinear(10, verbose);
+        system_chrono.DoStaticLinear();
+        system_chrono.DoStaticNonlinear(10, verbose);
     }
 
     double time = 0.0;
@@ -348,8 +358,8 @@ TEST(test_turbine, rpm_initial_pitch) {
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
-        system.DoStepDynamics(dt);
-        time += system.GetStep();
+        system_chrono.DoStepDynamics(dt);
+        time += system_chrono.GetStep();
 
         // poststep
         turbine.poststep(time, dt);
@@ -370,26 +380,27 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     double dt = 0.1;
     // wind
     auto wind_model = seahowl::aero::ConstantWind();
-    wind_model.set_wind_velocity(ChVector<double>(8.0, 0.0, 0.0));
+    wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
     double initial_pitch = CH_C_PI / 8.0;
 
     // system
-    ChSystemSMC system;
-    system.Set_G_acc(ChVector<double>(0.0, 0.0, -9.81));
+    SystemElastoChrono system_elasto;
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto& system_chrono = system_elasto.chobj;
     auto solver = chrono_types::make_shared<ChSolverSparseLU>();
-    system.SetSolver(solver);
+    system_chrono.SetSolver(solver);
     solver->UseSparsityPatternLearner(true);
     solver->LockSparsityPattern(true);
     solver->SetVerbose(verbose);
-    system.SetTimestepperType(ChTimestepper::Type::HHT);
-    auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system.GetTimestepper());
+    system_chrono.SetTimestepperType(ChTimestepper::Type::HHT);
+    auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system_chrono.GetTimestepper());
     mystepper->SetStepControl(false);
     mystepper->SetModifiedNewton(false);
 
     // mesh for blade
-    auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
-    system.AddMesh(blades_mesh);
+    auto blades_mesh = std::make_shared<MeshElastoChrono>();
+    system_elasto.add(blades_mesh);
 
     auto turbine_file = (DATADIR / "turbine_nocontrol.json").generic_string();
     auto turbine = get_turbine_from_json(turbine_file);
@@ -403,13 +414,13 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         (DATADIR / "aerodyn/IEA-15-240-RWT_InflowWind.dat").generic_string());
 
     turbine.build();
-    turbine.assemble(system, blades_mesh);
-    turbine.tower.elasto.nodes[0]->SetFixed(true);
+    turbine.assemble(system_elasto, blades_mesh);
+    std::dynamic_pointer_cast<NodeFEAChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
 
     // statics
     if (statics_prestep) {
-        system.DoStaticLinear();
-        system.DoStaticNonlinear(10, verbose);
+        system_chrono.DoStaticLinear();
+        system_chrono.DoStaticNonlinear(10, verbose);
     }
 
     double time = 0.0;
@@ -423,8 +434,8 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
-        system.DoStepDynamics(dt);
-        time += system.GetStep();
+        system_chrono.DoStepDynamics(dt);
+        time += system_chrono.GetStep();
 
         // poststep
         turbine.poststep(time, dt);
@@ -445,13 +456,14 @@ TEST(test_turbine, multiturbines) {
     double dt = 0.1;
     // wind
     auto wind_model = std::make_shared<seahowl::aero::ConstantWind>();
-    wind_model->set_wind_velocity(ChVector<double>(8.0, 0.0, 0.0));
+    wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
     double initial_pitch = CH_C_PI / 8.0;
 
     // system
-    ChSystemSMC system_chrono;
-    system_chrono.Set_G_acc(ChVector<double>(0.0, 0.0, -9.81));
+    SystemElastoChrono system_elasto;
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto& system_chrono = system_elasto.chobj;
     auto solver = chrono_types::make_shared<ChSolverSparseLU>();
     system_chrono.SetSolver(solver);
     solver->UseSparsityPatternLearner(true);
@@ -463,8 +475,8 @@ TEST(test_turbine, multiturbines) {
     mystepper->SetModifiedNewton(false);
 
     // mesh for blade
-    auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
-    system_chrono.AddMesh(blades_mesh);
+    auto mesh_elasto = std::make_shared<MeshElastoChrono>();
+    system_elasto.add(mesh_elasto);
 
     // system core
     seahowl::core::System system_core;
@@ -476,25 +488,25 @@ TEST(test_turbine, multiturbines) {
     system_core.turbines.push_back(get_turbine_from_json(turbine_file));
     auto& turbine1 = system_core.turbines.back();
     turbine1.build();
-    turbine1.assemble(system_chrono, blades_mesh);
+    turbine1.assemble(system_elasto, mesh_elasto);
     // turbine 2
     system_core.turbines.push_back(get_turbine_from_json(turbine_file));
     auto& turbine2 = system_core.turbines.back();
     turbine2.build();
-    turbine2.assemble(system_chrono, blades_mesh);
-    turbine2.translate(chrono::ChVector<double>(150.0, -150.0, 0.0));
+    turbine2.assemble(system_elasto, mesh_elasto);
+    turbine2.translate(Vector3d(150.0, -150.0, 0.0));
     // turbine 3
     system_core.turbines.push_back(get_turbine_from_json(turbine_file));
     auto& turbine3 = system_core.turbines.back();
     turbine3.build();
-    turbine3.assemble(system_chrono, blades_mesh);
-    turbine3.translate(chrono::ChVector<double>(150.0, 150.0, 0.0));
+    turbine3.assemble(system_elasto, mesh_elasto);
+    turbine3.translate(Vector3d(150.0, 150.0, 0.0));
 
     // remove controller
     for (auto& turbine : system_core.turbines) {
         // empty controller
         turbine.controller = std::make_shared<seahowl::servo::Controller>();
-        turbine.tower.elasto.nodes.front()->SetFixed(true);
+    std::dynamic_pointer_cast<NodeFEAChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
         turbine.use_aerodyn = true;
     }
 
