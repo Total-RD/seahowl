@@ -1,6 +1,6 @@
 #pragma once
 
-#include <seahowl/aero/airfoil.h>  ///< @todo Bad dependencyof aero on core ?
+#include <seahowl/aero/airfoil.h>
 #include <seahowl/utils.h>
 
 #include <vector>
@@ -29,9 +29,9 @@ struct BladeReferencePoint {
     /** @brief Offset (x, y) for the aerodynamic center of blade at reference point. */
     Vector2d offset_aero{0.0, 0.0};
     /** @brief Stiffness matrix of blade at reference point. */
-    chrono::ChMatrixNM<double, 6, 6> stiffness_matrix;
+    Eigen::Matrix<double, 6, 6> stiffness_matrix;
     /** @brief Mass matrix of blade at reference point. */
-    chrono::ChMatrixNM<double, 6, 6> mass_matrix;
+    Eigen::Matrix<double, 6, 6> mass_matrix;
     /** @brief Fraction (normalized abscissa along longitudinal axis of component) of reference point. */
     double fraction = 0.0;
     /** @brief Structural twist angle of blade at reference point. */

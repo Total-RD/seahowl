@@ -42,9 +42,9 @@ struct BladeReferencePointElasto : ReferencePointElasto {
     /** @brief Offset (x, y) for the center of gravity of blade at reference point. */
     Vector2d offset_gravity{0.0, 0.0};
     /** @brief Stiffness matrix of blade at reference point. */
-    chrono::ChMatrixNM<double, 6, 6> stiffness_matrix;
+    Eigen::Matrix<double, 6, 6> stiffness_matrix;
     /** @brief Mass matrix of blade at reference point. */
-    chrono::ChMatrixNM<double, 6, 6> mass_matrix;
+    Eigen::Matrix<double, 6, 6> mass_matrix;
     /** @brief Structural twist angle of blade at reference point. */
     double structural_twist = 0.0;
     /** @brief Damping coefficients of blade at reference point. */

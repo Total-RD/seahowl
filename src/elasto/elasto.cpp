@@ -15,22 +15,27 @@ void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& di
         auto& discretized_point = discretized_points[ii];
         auto& node_pos = discretized_point.coordinates;
 
-        // get node coordinate system
+        // get node main axis (direction)
         Vector3d node_axis;
-        chrono::ChMatrix33<> node_rotation;
         if (ii == 0) {
             node_axis = (discretized_points[ii + 1].coordinates - node_pos).normalized();
-            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
         } else if (ii == nnodes - 1) {
             node_axis = (node_pos - discretized_points[ii - 1].coordinates).normalized();
-            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
         } else {
             node_axis = (discretized_points[ii + 1].coordinates - discretized_points[ii - 1].coordinates).normalized();
-            node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
         }
 
-        auto node = std::make_shared<NodeFEAChrono>(node_pos, Quaternion(node_rotation));
-        nodes.push_back(std::dynamic_pointer_cast<NodeFEA>(node));
+        // make coordinate system of node
+        auto up = Vector3d(0.0, 1.0, 0.0);
+        auto zaxis = node_axis.cross(up).normalized();
+        auto yaxis = zaxis.cross(node_axis).normalized();
+        Eigen::Matrix3d coordsys;
+        coordsys << node_axis.x(), yaxis.x(), zaxis.x(), node_axis.y(), yaxis.y(), zaxis.y(), node_axis.z(), yaxis.z(),
+            zaxis.z();
+
+        // make node
+        auto node = std::make_shared<NodeFEAChrono>(node_pos, Quaternion(coordsys).normalized());
+        nodes.push_back(node);
     };
 };
 

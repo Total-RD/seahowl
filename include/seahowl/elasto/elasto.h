@@ -64,13 +64,19 @@ class BladeElementFEA : public ElementFEA {
     virtual void set_prebend(const Quaternion& prebend) = 0;
 };
 
-class LinkFix {
+class Link {
+  public:
+    virtual Vector3d get_reaction_force() const = 0;
+    virtual Vector3d get_reaction_torque() const = 0;
+};
+
+class LinkFix : public Link {
   public:
     virtual void initialize(std::shared_ptr<RigidBody> body1, std::shared_ptr<RigidBody> body2) = 0;
     virtual void initialize(std::shared_ptr<NodeFEA> node1, std::shared_ptr<RigidBody> body2) = 0;
 };
 
-class LinkRevolute {
+class LinkRevolute : public Link {
   public:
     virtual void initialize(std::shared_ptr<RigidBody> body1, std::shared_ptr<RigidBody> body2) = 0;
 };

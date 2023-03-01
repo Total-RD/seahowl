@@ -86,21 +86,21 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
         // offset blade from hub apex
         blade->translate(Vector3d(0.0, 0.0, hub.radius));
         // apply precone
-        blade->rotate(precone, ch2vec(chrono::VECT_Y));  // Y is the edge-wise axis for blade (IEC standard)
-        double azimuth0 = ii * chrono::CH_C_2PI / nblades;
+        blade->rotate(precone, Vector3d(0.0, 1.0, 0.0));  // Y is the edge-wise axis for blade (IEC standard)
+        double azimuth0 = ii * 2 * PI / nblades;
         blade->azimuth0 = azimuth0;
         // add overhang
         blade->translate(Vector3d(hub.overhang, 0.0, 0.0));
         // rotate blade around hub
         blade->rotate(azimuth0,
-                      ch2vec(chrono::VECT_X));  // X is the axis pointing towards nacelle for blade (IEC standard)
+                      Vector3d(1.0, 0.0, 0.0));  // X is the axis pointing towards nacelle for blade (IEC standard)
         // apply shaft tilt to blades
-        blade->rotate(shaft.tilt, ch2vec(-chrono::VECT_Y));
+        blade->rotate(shaft.tilt, Vector3d(0.0, -1.0, 0.0));
         // offset with distance from towertop
         blade->translate(Vector3d(0.0, 0.0, shaft.distance_from_towertop));
 
         // link root node of blade to rotor center
-        auto link_hub_blade = chrono_types::make_shared<LinkFixChrono>();
+        auto link_hub_blade = std::make_shared<LinkFixChrono>();
         link_hub_blade->initialize(blade->nodes[0], body_hub);
         links_blades.push_back(link_hub_blade);
     }
@@ -189,29 +189,30 @@ void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
 }
 
 double RotorElasto::get_rpm() const {
-    chrono::ChVector<double> angles;
-    std::dynamic_pointer_cast<RigidBodyChrono>(body_hub)->chobj->coord.rot.Qdt_to_Wrel(
-        angles, std::dynamic_pointer_cast<RigidBodyChrono>(body_hub)->chobj->coord_dt.rot);
-    double rpm = -angles.z() * 60 / (2 * PI);
+    // relative rotational velocity between hub and shaft
+    auto rotational_velocity = body_hub->get_rotational_velocity_local() - body_shaft->get_rotational_velocity_local();
+    // convert to rpm
+    auto rpm = rotational_velocity.z() * 60 / (2 * PI);
     return rpm;
 }
 
 double RotorElasto::get_azimuth() const {
-    auto rotation_relative =
-        std::dynamic_pointer_cast<RigidBodyChrono>(body_shaft)
-            ->chobj->GetCoord()
-            .TransformParentToLocal(std::dynamic_pointer_cast<RigidBodyChrono>(body_hub)->chobj->GetCoord())
-            .rot.Q_to_Euler123();
-    double angle = rotation_relative.z();
-    return angle;
+    // get angle between quaternions
+    auto qq = (body_shaft->get_rotation().conjugate() * body_hub->get_rotation()).normalized();
+    double angle0 = std::atan2(qq.vec().z(), qq.w());
+    // get angle between 0 and 2pi
+    double angle1 = fmod(angle0, 2 * PI);
+    // get angle between -pi and +pi
+    double angle2 = fmod(angle1 + PI, 2 * PI) - PI;
+    return angle2;
 }
 
 double RotorElasto::get_axial_thrust() const {
-    auto react_force = std::dynamic_pointer_cast<LinkRevoluteChrono>(link_shaft_hub)->chobj->Get_react_force();
+    auto react_force = link_shaft_hub->get_reaction_force();
     return react_force.z();
 }
 
 double RotorElasto::get_axial_torque() const {
-    auto react_torque = std::dynamic_pointer_cast<LinkRevoluteChrono>(link_shaft_hub)->chobj->Get_react_torque();
+    auto react_torque = link_shaft_hub->get_reaction_torque();
     return react_torque.x();
 }

@@ -171,6 +171,8 @@ class LinkFixChrono : public LinkFix {
         chobj->Initialize(std::dynamic_pointer_cast<NodeFEAChrono>(node1)->chobj,
                           std::dynamic_pointer_cast<RigidBodyChrono>(body2)->chobj);
     };
+    Vector3d get_reaction_force() const override { return ch2vec(chobj->Get_react_force()); };
+    Vector3d get_reaction_torque() const override { return ch2vec(chobj->Get_react_torque()); };
 };
 
 class LinkRevoluteChrono : public LinkRevolute {
@@ -182,6 +184,8 @@ class LinkRevoluteChrono : public LinkRevolute {
                           std::dynamic_pointer_cast<RigidBodyChrono>(body2)->chobj,
                           std::dynamic_pointer_cast<RigidBodyChrono>(body2)->chobj->GetFrame_COG_to_abs());
     };
+    Vector3d get_reaction_force() const override { return ch2vec(chobj->Get_react_force()); };
+    Vector3d get_reaction_torque() const override { return ch2vec(chobj->Get_react_torque()); };
 };
 
 class MeshElastoChrono : public MeshElasto {

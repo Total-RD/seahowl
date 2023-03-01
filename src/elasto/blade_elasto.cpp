@@ -51,10 +51,9 @@ void BladeElasto::build() {
         auto& node = nodes[ii];
         auto& point = discretized_points[ii];
         auto axis = node->get_direction();
-        chrono::ChMatrix33<> twist_matrix(chrono::Q_from_AngAxis(-point.structural_twist, axis));
-        std::dynamic_pointer_cast<NodeFEAChrono>(nodes[ii])->chobj->Frame().SetRot(
-            twist_matrix *
-            chrono::ChMatrix33(std::dynamic_pointer_cast<NodeFEAChrono>(nodes[ii])->chobj->Frame().coord.rot));
+        auto twist_matrix = AngleAxisd(-point.structural_twist, axis);
+        auto rotation_matrix = twist_matrix * nodes[ii]->get_rotation().toRotationMatrix();
+        nodes[ii]->set_rotation(Quaternion(rotation_matrix));
     }
 
     if (fpm_mode) {
