@@ -86,15 +86,16 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
         // offset blade from hub apex
         blade->translate(Vector3d(0.0, 0.0, hub.radius));
         // apply precone
-        blade->rotate(precone, chrono::VECT_Y);  // Y is the edge-wise axis for blade (IEC standard)
+        blade->rotate(precone, ch2vec(chrono::VECT_Y));  // Y is the edge-wise axis for blade (IEC standard)
         double azimuth0 = ii * chrono::CH_C_2PI / nblades;
         blade->azimuth0 = azimuth0;
         // add overhang
         blade->translate(Vector3d(hub.overhang, 0.0, 0.0));
         // rotate blade around hub
-        blade->rotate(azimuth0, chrono::VECT_X);  // X is the axis pointing towards nacelle for blade (IEC standard)
+        blade->rotate(azimuth0,
+                      ch2vec(chrono::VECT_X));  // X is the axis pointing towards nacelle for blade (IEC standard)
         // apply shaft tilt to blades
-        blade->rotate(shaft.tilt, -chrono::VECT_Y);
+        blade->rotate(shaft.tilt, ch2vec(-chrono::VECT_Y));
         // offset with distance from towertop
         blade->translate(Vector3d(0.0, 0.0, shaft.distance_from_towertop));
 
@@ -120,7 +121,7 @@ void RotorElasto::rotate(double angle, const Vector3d& axis) const {
     for (auto& blade : blades) {
         blade->rotate(angle, axis);
     }
-    auto rotation = Quaternion(Q_from_AngAxis(angle, axis));
+    auto rotation = Quaternion(Q_from_AngAxis(angle, vec2ch(axis)));
     // hub
     auto new_position_hub = rotation * body_hub->get_position();
     auto new_rotation_hub = (rotation * body_hub->get_rotation()).normalized();
@@ -188,7 +189,7 @@ void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
 }
 
 double RotorElasto::get_rpm() const {
-    Vector3d angles;
+    chrono::ChVector<double> angles;
     std::dynamic_pointer_cast<RigidBodyChrono>(body_hub)->chobj->coord.rot.Qdt_to_Wrel(
         angles, std::dynamic_pointer_cast<RigidBodyChrono>(body_hub)->chobj->coord_dt.rot);
     double rpm = -angles.z() * 60 / (2 * PI);

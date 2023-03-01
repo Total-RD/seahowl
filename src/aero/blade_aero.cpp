@@ -1,5 +1,6 @@
 #include "seahowl/aero/blade_aero.h"
 #include <seahowl/aero/bemt.h>
+#include <seahowl/elasto/chrono_adapters.h>
 
 using seahowl::aero::BladeNodeAero;
 using seahowl::aero::BladeElementAero;
@@ -32,16 +33,16 @@ Vector2d BladeNodeAero::get_induced_velocity_rotor(const Vector2d& local_velocit
 
 Vector3d BladeNodeAero::get_offset_aero_absolute() const {
     auto& offset = properties.offset_aero;
-    auto coordsys = chrono::ChCoordsys(coordinates, rotation);
+    auto coordsys = chrono::ChCoordsys(seahowl::elasto::vec2ch(coordinates), rotation);
     auto offset3D = Vector3d(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
-    auto offset_absolute = coordsys.TransformLocalToParent(offset3D) - coordinates;
-    return offset_absolute;
+    auto offset_absolute = coordsys.TransformLocalToParent(seahowl::elasto::vec2ch(offset3D)) - coordinates;
+    return seahowl::elasto::ch2vec(offset_absolute);
 }
 
 BladeElementAero::BladeElementAero(const BladeNodeAero& node1, const BladeNodeAero& node2)
     : node1(node1), node2(node2) {
     fraction = 0.5 * (node1.properties.fraction + node2.properties.fraction);
-    length = (node1.coordinates - node2.coordinates).Length();
+    length = (node1.coordinates - node2.coordinates).norm();
 }
 
 Vector3d BladeElementAero::get_load() const {
@@ -107,19 +108,19 @@ void BladeAero::compute_distances_from_tip() {
     // this is the position of the element at the tip
     auto& tip_position = discretized_points.back().coordinates;
     for (auto& node : nodes) {
-        node.distance_from_tip = (node.coordinates - tip_position).Length();
+        node.distance_from_tip = (node.coordinates - tip_position).norm();
     }
 }
 
 void BladeAero::compute_distances_from_hub(const Vector3d& hub_apex_position, double hub_radius) {
     for (auto& node : nodes) {
-        node.distance_from_hub = (node.coordinates - hub_apex_position).Length() - hub_radius;
+        node.distance_from_hub = (node.coordinates - hub_apex_position).norm() - hub_radius;
     }
 }
 
 void BladeAero::compute_radii(const Vector3d& hub_apex_position) {
     for (auto& node : nodes) {
-        node.radius = (node.coordinates - hub_apex_position).Length();
+        node.radius = (node.coordinates - hub_apex_position).norm();
     }
 }
 

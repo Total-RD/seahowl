@@ -11,7 +11,7 @@ Vector3d get_sheared_wind_velocity(const Vector3d& velocity,
                                    double shear_coefficient,
                                    double reference_height,
                                    double reference_length) {
-    double distance = position ^ (-direction_gravity);
+    double distance = position.dot(-direction_gravity);
     if (distance > reference_length) {
         distance = reference_length;
     }

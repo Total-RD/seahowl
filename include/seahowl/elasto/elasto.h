@@ -4,13 +4,6 @@
 #include <memory>
 
 #include <seahowl/utils.h>
-
-namespace chrono {
-namespace fea {
-class ChElementBeam;
-}  // namespace fea
-}  // namespace chrono
-
 #include <seahowl/elasto/reference_point_elasto.h>
 
 namespace seahowl {

@@ -3,7 +3,6 @@
 #include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/core/utils.h>  // For DiscretizationPoint
 #include <seahowl/elasto/reference_point_elasto.h>
-#include <seahowl/elasto/chrono_adapters.h>
 
 #include <numeric>
 
@@ -180,14 +179,15 @@ void BladeElasto::evaluate_position_rotation(Vector3d& position,
                                              Quaternion& rotation,
                                              int element_index,
                                              double eta) const {
-    auto element = std::dynamic_pointer_cast<BladeElementFEAChrono>(elements[element_index])->chobj;
+    auto element = std::dynamic_pointer_cast<BladeElementFEAChrono>(elements[element_index]);
 
     // // unfortunately line below does not always work (returns nans sometimes when fpm_mode is true)
-    element->EvaluateSectionFrame(eta, position, rotation);
+    // // @todo fix this (Chrono issue ?)
+    // element->evaluate_position_rotation(eta, position, rotation);
     auto w1 = std::abs(eta - 1.0) * 0.5;
     auto w2 = std::abs(eta + 1.0) * 0.5;
-    position = w1 * element->GetNodeA()->GetPos() + w2 * element->GetNodeB()->GetPos();
-    rotation = element->GetNodeA()->GetRot();
+    position = w1 * element->nodes0[0]->get_position() + w2 * element->nodes0[1]->get_position();
+    rotation = element->nodes0[0]->get_rotation();
 }
 
 void BladeElasto::apply_pitch_increment(double pitch_increment) {

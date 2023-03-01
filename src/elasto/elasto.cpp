@@ -44,7 +44,7 @@ void ComponentElastoFEA::assemble(std::shared_ptr<MeshElasto> mesh) const {
 }
 
 void ComponentElastoFEA::rotate(double angle, const Vector3d& axis) const {
-    auto rotation = Quaternion(Q_from_AngAxis(angle, axis));
+    auto rotation = Quaternion(chrono::Q_from_AngAxis(angle, vec2ch(axis)));
     for (auto& node : nodes) {
         auto new_position = rotation * node->get_position();
         node->set_position(new_position);

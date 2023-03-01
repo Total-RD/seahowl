@@ -145,6 +145,7 @@ set(SEAHOWL_ELASTO_SOURCES
     src/elasto/rotor_elasto.cpp
     src/elasto/tower_elasto.cpp
     src/elasto/mooring_elasto.cpp
+    src/elasto/chrono_adapters.cpp
 )
 set(SEAHOWL_ELASTO_HEADERS
     include/seahowl/elasto/blade_elasto.h

@@ -10,6 +10,7 @@
 #include <chrono/physics/ChSystemSMC.h>
 
 #include <seahowl/elasto/reference_point_elasto.h>
+#include <seahowl/elasto/elasto.h>
 
 #include <vector>
 #include <memory>
@@ -17,28 +18,31 @@
 namespace seahowl {
 namespace elasto {
 
+chrono::ChVector<double> vec2ch(Vector3d vector_in);
+Vector3d ch2vec(chrono::ChVector<double> vector_in);
+
 class RigidBodyChrono : public RigidBody {
   public:
     std::shared_ptr<chrono::ChBody> chobj;
     RigidBodyChrono() { chobj = chrono_types::make_shared<chrono::ChBody>(); };
-    virtual void set_position(Vector3d position) override { chobj->SetPos(position); };
+    virtual void set_position(Vector3d position) override { chobj->SetPos(vec2ch(position)); };
     virtual void set_mass(double mass) override { chobj->SetMass(mass); };
-    virtual void set_inertia_diagonal(Vector3d inertia) override { chobj->SetInertiaXX(inertia); };
+    virtual void set_inertia_diagonal(Vector3d inertia) override { chobj->SetInertiaXX(vec2ch(inertia)); };
     virtual void set_rotation(Quaternion rotation) override { chobj->SetRot(rotation); };
     virtual void reset_forces() override { chobj->Empty_forces_accumulators(); };
     virtual void accumulate_torque(Vector3d torque, bool is_local) override {
         chobj->Accumulate_torque(torque, is_local);
     };
     virtual double get_mass() override { return chobj->GetMass(); };
-    virtual Vector3d get_position() const override { return chobj->GetPos(); };
-    virtual Vector3d get_velocity() const override { return chobj->GetPos_dt(); };
-    virtual Vector3d get_acceleration() const override { return chobj->GetPos_dtdt(); };
+    virtual Vector3d get_position() const override { return ch2vec(chobj->GetPos()); };
+    virtual Vector3d get_velocity() const override { return ch2vec(chobj->GetPos_dt()); };
+    virtual Vector3d get_acceleration() const override { return ch2vec(chobj->GetPos_dtdt()); };
     virtual Quaternion get_rotation() const override { return chobj->GetRot(); };
-    virtual Vector3d get_direction() const override { return chobj->GetRot().GetVector(); };
-    virtual Vector3d get_rotational_velocity_local() const override { return chobj->GetWvel_loc(); };
-    virtual Vector3d get_rotational_acceleration_local() const override { return chobj->GetWacc_loc(); };
-    virtual Vector3d get_rotational_velocity_global() const override { return chobj->GetWvel_par(); };
-    virtual Vector3d get_rotational_acceleration_global() const override { return chobj->GetWacc_par(); };
+    virtual Vector3d get_direction() const override { return ch2vec(chobj->GetRot().GetVector()); };
+    virtual Vector3d get_rotational_velocity_local() const override { return ch2vec(chobj->GetWvel_loc()); };
+    virtual Vector3d get_rotational_acceleration_local() const override { return ch2vec(chobj->GetWacc_loc()); };
+    virtual Vector3d get_rotational_velocity_global() const override { return ch2vec(chobj->GetWvel_par()); };
+    virtual Vector3d get_rotational_acceleration_global() const override { return ch2vec(chobj->GetWacc_par()); };
 };
 
 class NodeFEAChrono : public NodeFEA {
@@ -47,26 +51,26 @@ class NodeFEAChrono : public NodeFEA {
     std::shared_ptr<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric> section;
 
     NodeFEAChrono(Vector3d position, Quaternion rotation) {
-        chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(chrono::ChFrame<>(position, rotation));
+        chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(chrono::ChFrame<>(vec2ch(position), rotation));
     };
 
-    virtual void set_position(Vector3d position) override { chobj->SetPos(position); };
+    virtual void set_position(Vector3d position) override { chobj->SetPos(vec2ch(position)); };
     virtual void set_rotation(Quaternion rotation) override { chobj->SetRot(rotation); };
-    virtual void set_load(Vector3d force) override { chobj->SetForce(force); };
-    virtual void set_torque(Vector3d torque) override { chobj->SetTorque(torque); };
-    virtual Vector3d get_position() const override { return Vector3d(chobj->GetPos()); };
-    virtual Vector3d get_velocity() const override { return Vector3d(chobj->GetPos_dt()); };
-    virtual Vector3d get_acceleration() const override { return Vector3d(chobj->GetPos_dtdt()); };
+    virtual void set_load(Vector3d force) override { chobj->SetForce(vec2ch(force)); };
+    virtual void set_torque(Vector3d torque) override { chobj->SetTorque(vec2ch(torque)); };
+    virtual Vector3d get_position() const override { return ch2vec(chobj->GetPos()); };
+    virtual Vector3d get_velocity() const override { return ch2vec(chobj->GetPos_dt()); };
+    virtual Vector3d get_acceleration() const override { return ch2vec(chobj->GetPos_dtdt()); };
     virtual Quaternion get_rotation() const override { return Quaternion(chobj->GetRot()); };
     virtual Vector3d get_direction() const override {
-        return Vector3d(chobj->TransformDirectionLocalToParent(Vector3d(1.0, 0.0, 0.0)));
+        return ch2vec(chobj->TransformDirectionLocalToParent(chrono::ChVector<double>(1.0, 0.0, 0.0)));
     };
-    virtual Vector3d get_rotational_velocity_local() const override { return Vector3d(chobj->GetWvel_loc()); };
-    virtual Vector3d get_rotational_acceleration_local() const override { return Vector3d(chobj->GetWacc_loc()); };
-    virtual Vector3d get_rotational_velocity_global() const override { return Vector3d(chobj->GetWvel_par()); };
-    virtual Vector3d get_rotational_acceleration_global() const override { return Vector3d(chobj->GetWacc_par()); };
-    virtual Vector3d get_load() const override { return Vector3d(chobj->GetForce()); };
-    virtual Vector3d get_torque() const override { return Vector3d(chobj->GetTorque()); };
+    virtual Vector3d get_rotational_velocity_local() const override { return ch2vec(chobj->GetWvel_loc()); };
+    virtual Vector3d get_rotational_acceleration_local() const override { return ch2vec(chobj->GetWacc_loc()); };
+    virtual Vector3d get_rotational_velocity_global() const override { return ch2vec(chobj->GetWvel_par()); };
+    virtual Vector3d get_rotational_acceleration_global() const override { return ch2vec(chobj->GetWacc_par()); };
+    virtual Vector3d get_load() const override { return ch2vec(chobj->GetForce()); };
+    virtual Vector3d get_torque() const override { return ch2vec(chobj->GetTorque()); };
     void set_properties(const BladeReferencePointElasto& ref) {
         section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric>();
         // offsets
@@ -142,7 +146,11 @@ class BladeElementFEAChrono : public BladeElementFEA {
     virtual double get_mass() override { return chobj->GetMass(); };
 
     virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) override {
-        chobj->EvaluateSectionFrame(eta, position, rotation);
+        auto chvec = vec2ch(position);
+        chobj->EvaluateSectionFrame(eta, chvec, rotation);
+        position[0] = chvec[0];
+        position[1] = chvec[1];
+        position[2] = chvec[2];
     };
 };
 
@@ -188,7 +196,7 @@ class SystemElastoChrono : public SystemElasto {
   public:
     chrono::ChSystemSMC chobj;
     SystemElastoChrono(){};
-    virtual Vector3d get_gravitational_acceleration() const override { return Vector3d(chobj.Get_G_acc()); };
+    virtual Vector3d get_gravitational_acceleration() const override { return ch2vec(chobj.Get_G_acc()); };
     virtual void set_gravitational_acceleration(Vector3d gravitational_acceleration) override {
         chobj.Set_G_acc(gravitational_acceleration);
     };

@@ -65,12 +65,5 @@ void TowerElasto::build_elements_tapered_timoshenko() {
         elements.push_back(element);
         // set element nodes
         element->set_nodes(nodes[ii - 1], nodes[ii]);
-
-        // apply prebend and structural twist
-        auto rotation_relative = (nodes[ii]->get_rotation() * nodes[ii - 1]->get_rotation().inverse()).normalized();
-        // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
-        rotation_relative =
-            Quaternion(rotation_relative[0], rotation_relative[3], rotation_relative[2], rotation_relative[1]);
-        element->set_prebend(rotation_relative);
     }
 }

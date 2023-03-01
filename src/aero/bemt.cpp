@@ -68,7 +68,7 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
         auto ap_previous = ap;
 
         // local velocity updated with induction factors
-        local_velocity_rotor = Vector2d(local_velocity_rotor0.x() * (1.0 + ap), local_velocity_rotor0.y() * (1.0 - aa));
+        local_velocity_rotor = Vector2d(local_velocity_rotor0[0] * (1.0 + ap), local_velocity_rotor0[1] * (1.0 - aa));
 
         // get coefficients from angle of attack
         double phi = seahowl::aero::get_phi(local_velocity_rotor);
@@ -188,17 +188,16 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
         auto& towertop_rotation = tower_aero.elements.back().properties.rotation;
         auto wind_velocity_tower0 = towertop_rotation.inverse() * wind_velocity;
         // only take wind velocity perpendicular to tower axis
-        auto wind_velocity_tower = wind_velocity_tower0;
-        wind_velocity_tower.Set(0.0, wind_velocity.y(), wind_velocity_tower.z());
+        auto wind_velocity_tower = Vector3d(0.0, wind_velocity.y(), wind_velocity_tower0.z());
 
         // project element coordinates to tower reference frame
         auto& tower_top = tower_aero.elements.back();
-        auto coordinates_projected = -(towertop_rotation.inverse() * (position - towertop_position));
+        Vector3d coordinates_projected = -(towertop_rotation.inverse() * (position - towertop_position));
 
         // find tower radius
         auto tower_length =
-            (tower_aero.reference_points.back().coordinates - tower_aero.reference_points.front().coordinates).Length();
-        if (coordinates_projected.x() > 0.0) {
+            (tower_aero.reference_points.back().coordinates - tower_aero.reference_points.front().coordinates).norm();
+        if (coordinates_projected.x() > 0) {
             std::vector<double> fractions{1.0 - (tower_length - coordinates_projected.x()) / tower_length};
             auto tower_radius =
                 seahowl::core::get_discretized_points(fractions, tower_aero.reference_points)[0].diameter / 2.0;
@@ -207,8 +206,8 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
             auto yy = coordinates_projected.y();
             auto yy2 = pow(yy, 2);
             wind_velocity_tower =
-                (wind_velocity_tower + wind_velocity_tower * pow(tower_radius, 2) / pow(yy2 + xx2, 2) *
-                                           Vector3d(0.0, (-2.0 * xx * yy), (yy2 - xx2)));
+                (wind_velocity_tower + wind_velocity_tower.cwiseProduct(pow(tower_radius, 2) / pow(yy2 + xx2, 2) *
+                                                                        Vector3d(0.0, (-2.0 * xx * yy), (yy2 - xx2))));
 
             // correct wind velocity
             wind_velocity = towertop_rotation * wind_velocity_tower;

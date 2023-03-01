@@ -19,7 +19,7 @@ void RotorAero::build(std::vector<std::shared_ptr<BladeAero>> blades) {
     radius = 0.0;
     for (int ii = 0; ii < blades.size(); ii++) {
         auto& blade = blades[ii];
-        radius += (blade->discretized_points.back().coordinates - hub_position).Length();
+        radius += (blade->discretized_points.back().coordinates - hub_position).norm();
     }
     radius /= blades.size();
 
@@ -34,7 +34,7 @@ void RotorAero::compute_chords_solidity() {
     auto nblades = blades.size();
     for (auto& blade : blades) {
         for (auto& node : blade->nodes) {
-            auto radius = (node.coordinates - hub_position).Length();
+            auto radius = (node.coordinates - hub_position).norm();
             node.chord_solidity = nblades * node.properties.chord / (2 * PI * radius);
             // std::cout << element.swept_annulus << " " << element.chord_solidity << std::endl;
         }
@@ -112,7 +112,7 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
             double local_velocity_tangent = global_velocity.dot(global_direction_tangent);
             auto local_velocity0 = Vector2d(local_velocity_tangent, local_velocity_normal);
 
-            if (local_velocity0.Length() == 0.0) {
+            if (local_velocity0.norm() == 0.0) {
                 node.load = Vector3d(0.0, 0.0, 0.0);
             } else {
                 // get induced velocity (2D) from blade node
@@ -136,7 +136,7 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
                 double ct = cl * sin_phi - cd * cos_phi;
 
                 // calculate drag and lift force
-                auto vel = local_velocity.Length();
+                auto vel = local_velocity.norm();
                 auto chord = node.properties.chord;
                 auto load_n = 0.5 * density * vel * vel * chord * cn;
                 auto load_t = 0.5 * density * vel * vel * chord * ct;

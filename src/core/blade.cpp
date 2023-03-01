@@ -5,6 +5,7 @@
 #include <seahowl/elasto/elasto.h>
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/core/utils.h>
+#include <seahowl/elasto/chrono_adapters.h>
 
 #include <memory>
 
@@ -96,9 +97,9 @@ void Blade::update_positions_aero() {
 
         // add offset
         auto& offset = node_aero.properties.offset_aero;
-        auto coordsys = chrono::ChCoordsys(node_aero.coordinates, node_aero.rotation);
+        auto coordsys = chrono::ChCoordsys(vec2ch(node_aero.coordinates), node_aero.rotation);
         auto offset3D = Vector3d(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
-        node_aero.coordinates = coordsys.TransformLocalToParent(offset3D);
+        node_aero.coordinates = ch2vec(coordsys.TransformLocalToParent(vec2ch(offset3D)));
 
         // update properties of aero nodes
         double weight1 = 0.5 * fabs(eta - 1.0);

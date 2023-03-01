@@ -7,7 +7,7 @@ using seahowl::PI;
 
 TowerElementAero::TowerElementAero(const TowerReferencePointAero& point1, const TowerReferencePointAero& point2) {
     properties = (point1 + point2) * 0.5;
-    length = (point1.coordinates - point2.coordinates).Length();
+    length = (point1.coordinates - point2.coordinates).norm();
 }
 
 TowerAero::TowerAero() {}
@@ -52,7 +52,7 @@ void TowerAero::compute_wind_loads_morison(WindModel& wind_model, double time) {
         // get fluid relative velocity
         auto wind_velocity = wind_model.get_wind_velocity(properties.coordinates, time);
         auto velocity_relative = wind_velocity - properties.velocity;
-        auto dir = Vector3d(properties.rotation.GetVector());  // tangent direction
+        auto dir = properties.rotation.vec();  // tangent direction
         auto dot = velocity_relative.dot(dir);
         auto velocity_tangent = dir * dot;
         auto velocity_normal = velocity_relative - velocity_tangent;
@@ -60,7 +60,7 @@ void TowerAero::compute_wind_loads_morison(WindModel& wind_model, double time) {
         auto length = element.length;
         auto diameter = properties.diameter;
         auto cd = properties.drag_coefficient;
-        auto load_drag = 0.5 * density * cd * PI * diameter * velocity_normal.Length() * velocity_normal * length;
+        auto load_drag = 0.5 * density * cd * PI * diameter * velocity_normal.norm() * velocity_normal * length;
 
         loads[ii] = load_drag;
     }
