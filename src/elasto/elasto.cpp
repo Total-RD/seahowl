@@ -29,7 +29,7 @@ void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& di
             node_rotation.Set_A_Xdir(node_axis, chrono::VECT_Y);
         }
 
-        auto node = std::make_shared<NodeFEAChrono>(node_pos, node_rotation.Get_A_quaternion());
+        auto node = std::make_shared<NodeFEAChrono>(node_pos, Quaternion(node_rotation));
         nodes.push_back(std::dynamic_pointer_cast<NodeFEA>(node));
     };
 };
@@ -44,7 +44,7 @@ void ComponentElastoFEA::assemble(std::shared_ptr<MeshElasto> mesh) const {
 }
 
 void ComponentElastoFEA::rotate(double angle, const Vector3d& axis) const {
-    auto rotation = Quaternion(chrono::Q_from_AngAxis(angle, vec2ch(axis)));
+    auto rotation = AngleAxisd(angle, axis);
     for (auto& node : nodes) {
         auto new_position = rotation * node->get_position();
         node->set_position(new_position);

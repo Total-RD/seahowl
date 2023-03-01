@@ -20,6 +20,8 @@ namespace elasto {
 
 chrono::ChVector<double> vec2ch(Vector3d vector_in);
 Vector3d ch2vec(chrono::ChVector<double> vector_in);
+chrono::ChQuaternion<double> quat2ch(Quaternion quaternion_in);
+Quaternion ch2quat(chrono::ChQuaternion<double> quaternion_in);
 
 class RigidBodyChrono : public RigidBody {
   public:
@@ -28,7 +30,7 @@ class RigidBodyChrono : public RigidBody {
     virtual void set_position(Vector3d position) override { chobj->SetPos(vec2ch(position)); };
     virtual void set_mass(double mass) override { chobj->SetMass(mass); };
     virtual void set_inertia_diagonal(Vector3d inertia) override { chobj->SetInertiaXX(vec2ch(inertia)); };
-    virtual void set_rotation(Quaternion rotation) override { chobj->SetRot(rotation); };
+    virtual void set_rotation(Quaternion rotation) override { chobj->SetRot(quat2ch(rotation)); };
     virtual void reset_forces() override { chobj->Empty_forces_accumulators(); };
     virtual void accumulate_torque(Vector3d torque, bool is_local) override {
         chobj->Accumulate_torque(torque, is_local);
@@ -37,7 +39,7 @@ class RigidBodyChrono : public RigidBody {
     virtual Vector3d get_position() const override { return ch2vec(chobj->GetPos()); };
     virtual Vector3d get_velocity() const override { return ch2vec(chobj->GetPos_dt()); };
     virtual Vector3d get_acceleration() const override { return ch2vec(chobj->GetPos_dtdt()); };
-    virtual Quaternion get_rotation() const override { return chobj->GetRot(); };
+    virtual Quaternion get_rotation() const override { return ch2quat(chobj->GetRot()); };
     virtual Vector3d get_direction() const override { return ch2vec(chobj->GetRot().GetVector()); };
     virtual Vector3d get_rotational_velocity_local() const override { return ch2vec(chobj->GetWvel_loc()); };
     virtual Vector3d get_rotational_acceleration_local() const override { return ch2vec(chobj->GetWacc_loc()); };
@@ -51,17 +53,18 @@ class NodeFEAChrono : public NodeFEA {
     std::shared_ptr<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric> section;
 
     NodeFEAChrono(Vector3d position, Quaternion rotation) {
-        chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(chrono::ChFrame<>(vec2ch(position), rotation));
+        chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(
+            chrono::ChFrame<>(vec2ch(position), quat2ch(rotation)));
     };
 
     virtual void set_position(Vector3d position) override { chobj->SetPos(vec2ch(position)); };
-    virtual void set_rotation(Quaternion rotation) override { chobj->SetRot(rotation); };
+    virtual void set_rotation(Quaternion rotation) override { chobj->SetRot(quat2ch(rotation)); };
     virtual void set_load(Vector3d force) override { chobj->SetForce(vec2ch(force)); };
     virtual void set_torque(Vector3d torque) override { chobj->SetTorque(vec2ch(torque)); };
     virtual Vector3d get_position() const override { return ch2vec(chobj->GetPos()); };
     virtual Vector3d get_velocity() const override { return ch2vec(chobj->GetPos_dt()); };
     virtual Vector3d get_acceleration() const override { return ch2vec(chobj->GetPos_dtdt()); };
-    virtual Quaternion get_rotation() const override { return Quaternion(chobj->GetRot()); };
+    virtual Quaternion get_rotation() const override { return Quaternion(ch2quat(chobj->GetRot())); };
     virtual Vector3d get_direction() const override {
         return ch2vec(chobj->TransformDirectionLocalToParent(chrono::ChVector<double>(1.0, 0.0, 0.0)));
     };
@@ -141,16 +144,18 @@ class BladeElementFEAChrono : public BladeElementFEA {
         chobj->GetTaperedSection()->SetSectionB(std::dynamic_pointer_cast<NodeFEAChrono>(node2)->section);
     };
 
-    virtual void set_prebend(const Quaternion& prebend) override { chobj->SetNodeBreferenceRot(prebend); };
+    virtual void set_prebend(const Quaternion& prebend) override { chobj->SetNodeBreferenceRot(quat2ch(prebend)); };
 
     virtual double get_mass() override { return chobj->GetMass(); };
 
     virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) override {
         auto chvec = vec2ch(position);
-        chobj->EvaluateSectionFrame(eta, chvec, rotation);
+        auto chquat = quat2ch(rotation);
+        chobj->EvaluateSectionFrame(eta, chvec, chquat);
         position[0] = chvec[0];
         position[1] = chvec[1];
         position[2] = chvec[2];
+        rotation = ch2quat(chquat);
     };
 };
 

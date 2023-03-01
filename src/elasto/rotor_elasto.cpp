@@ -33,8 +33,8 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     // move hub along X for overhang and COG offset, and along Z for distance from towertop
     body_hub->set_position(Vector3d(hub.overhang + hub.center_of_mass, 0.0, 0.0));
     // local Z axis along global X axis + shaft tilt along global Y axis
-    auto tilt_hub = Quaternion(Q_from_AngAxis(shaft.tilt, -chrono::VECT_Y));
-    body_hub->set_rotation(tilt_hub * Q_from_AngAxis(PI / 2.0, chrono::VECT_Y));
+    auto tilt_hub = AngleAxisd(shaft.tilt, -Vector3d(0.0, 1.0, 0.0));
+    body_hub->set_rotation(tilt_hub * AngleAxisd(PI / 2.0, Vector3d(0.0, 1.0, 0.0)));
     body_hub->set_position((tilt_hub * body_hub->get_position()) + Vector3d(0.0, 0.0, shaft.distance_from_towertop));
     // mass and inertia
     body_hub->set_mass(hub.mass);
@@ -121,7 +121,7 @@ void RotorElasto::rotate(double angle, const Vector3d& axis) const {
     for (auto& blade : blades) {
         blade->rotate(angle, axis);
     }
-    auto rotation = Quaternion(Q_from_AngAxis(angle, vec2ch(axis)));
+    auto rotation = AngleAxisd(angle, axis);
     // hub
     auto new_position_hub = rotation * body_hub->get_position();
     auto new_rotation_hub = (rotation * body_hub->get_rotation()).normalized();

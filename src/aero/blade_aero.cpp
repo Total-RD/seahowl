@@ -33,7 +33,7 @@ Vector2d BladeNodeAero::get_induced_velocity_rotor(const Vector2d& local_velocit
 
 Vector3d BladeNodeAero::get_offset_aero_absolute() const {
     auto& offset = properties.offset_aero;
-    auto coordsys = chrono::ChCoordsys(seahowl::elasto::vec2ch(coordinates), rotation);
+    auto coordsys = chrono::ChCoordsys(seahowl::elasto::vec2ch(coordinates), seahowl::elasto::quat2ch(rotation));
     auto offset3D = Vector3d(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
     auto offset_absolute = coordsys.TransformLocalToParent(seahowl::elasto::vec2ch(offset3D)) - coordinates;
     return seahowl::elasto::ch2vec(offset_absolute);

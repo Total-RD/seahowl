@@ -97,7 +97,7 @@ void Blade::update_positions_aero() {
 
         // add offset
         auto& offset = node_aero.properties.offset_aero;
-        auto coordsys = chrono::ChCoordsys(vec2ch(node_aero.coordinates), node_aero.rotation);
+        auto coordsys = chrono::ChCoordsys(vec2ch(node_aero.coordinates), quat2ch(node_aero.rotation));
         auto offset3D = Vector3d(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
         node_aero.coordinates = ch2vec(coordsys.TransformLocalToParent(vec2ch(offset3D)));
 

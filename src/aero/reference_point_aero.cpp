@@ -58,7 +58,7 @@ TowerReferencePointAero TowerReferencePointAero::operator*(const double factor) 
     TowerReferencePointAero new_point = *this;
     new_point.fraction *= factor;
     new_point.coordinates *= factor;
-    new_point.rotation *= factor;
+    // new_point.rotation *= factor;
     new_point.velocity *= factor;
     new_point.diameter *= factor;
     new_point.drag_coefficient *= factor;
@@ -69,7 +69,7 @@ TowerReferencePointAero TowerReferencePointAero::operator+(const TowerReferenceP
     TowerReferencePointAero new_point = *this;
     new_point.fraction += other.fraction;
     new_point.coordinates += other.coordinates;
-    new_point.rotation += other.rotation;
+    // new_point.rotation += other.rotation;
     new_point.velocity += other.velocity;
     new_point.diameter += other.diameter;
     new_point.drag_coefficient += other.drag_coefficient;

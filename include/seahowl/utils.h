@@ -7,13 +7,14 @@
 
 namespace seahowl {
 
-// class Vector3d : public chrono::ChVector<double> {
-//  public:
-//    Vector3d(double x, double y, double z) : ChVector<double>(x, y, z){};
-//    Vector3d normalized() { this->GetNormalized(); };
-//};
-
 const double PI = (double)chrono::CH_C_PI;
+
+using Vector3d = Eigen::Vector3d;
+using Vector2d = Eigen::Vector2d;
+
+using Quaternion = Eigen::Quaterniond;
+
+using AngleAxisd = Eigen::AngleAxisd;
 
 // class Vector3d : public chrono::ChVector<double> {
 //   public:
@@ -69,31 +70,40 @@ const double PI = (double)chrono::CH_C_PI;
 //         return Vector3d(v1 - s);
 //     }
 // };
-using Vector3d = Eigen::Vector3d;
-using Vector2d = Eigen::Vector2d;
-
-class Quaternion : public chrono::ChQuaternion<double> {
-  public:
-    Quaternion() : chrono::ChQuaternion<double>(){};
-    Quaternion(double e0, double e1, double e2, double e3) : chrono::ChQuaternion<double>(e0, e1, e2, e3){};
-    Quaternion(const chrono::ChQuaternion<double>& chquaternion) : chrono::ChQuaternion<double>(chquaternion){};
-
-    Quaternion normalized() const { return Quaternion(this->GetNormalized()); };
-    Quaternion inverse() const { return Quaternion(this->GetInverse()); };
-    Vector3d vec() const {
-        auto vec = this->GetVector();
-        return Vector3d(vec[0], vec[1], vec[2]);
-    };
-
-    inline Quaternion Quaternion::operator*(const Quaternion& other) const {
-        chrono::ChQuaternion<double> q;
-        q.Cross(*this, other);
-        return Quaternion(q);
-    }
-    inline Vector3d Quaternion::operator*(const Vector3d& other) const {
-        auto vec = this->Rotate(chrono::ChVector<double>(other[0], other[1], other[2]));
-        return Vector3d(vec[0], vec[1], vec[2]);
-    }
-};
+//
+// class Quaternion : public chrono::ChQuaternion<double> {
+//  public:
+//    Quaternion() : chrono::ChQuaternion<double>(){};
+//    Quaternion(double e0, double e1, double e2, double e3) : chrono::ChQuaternion<double>(e0, e1, e2, e3){};
+//    Quaternion(const chrono::ChQuaternion<double>& chquaternion) : chrono::ChQuaternion<double>(chquaternion){};
+//
+//    Quaternion normalized() const { return Quaternion(this->GetNormalized()); };
+//    Quaternion inverse() const { return Quaternion(this->GetInverse()); };
+//    Vector3d vec() const {
+//        auto vec = this->GetVector();
+//        return Vector3d(vec[0], vec[1], vec[2]);
+//    };
+//
+//    inline Quaternion Quaternion::operator*(const Quaternion& other) const {
+//        chrono::ChQuaternion<double> q;
+//        q.Cross(*this, other);
+//        return Quaternion(q);
+//    }
+//    inline Vector3d Quaternion::operator*(const Vector3d& other) const {
+//        auto vec = this->Rotate(chrono::ChVector<double>(other[0], other[1], other[2]));
+//        return Vector3d(vec[0], vec[1], vec[2]);
+//    }
+//
+//    double w() { return this->e0(); };
+//    double x() { return this->e1(); };
+//    double y() { return this->e2(); };
+//    double z() { return this->e3(); };
+//};
+//
+// Quaternion AngleAxisd(double angle, const Vector3d& axis) {
+//    chrono::ChQuaternion<double> chquat;
+//    chquat.Q_from_AngAxis(angle, chrono::ChVector<double>(axis[0], axis[1], axis[2]);
+//    return Quaternion(chquat[0], chquat[1], chquat[2], chquat[3]);
+//};
 
 }  // namespace seahowl
