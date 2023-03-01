@@ -1,4 +1,5 @@
 #include "seahowl/aero/aerodyn_adapter.h"
+#include "seahowl/utils.h"
 
 #include <stdexcept>
 #include <vector>
@@ -65,12 +66,12 @@ void seahowl::aero::AeroDynAdapter::setMotionHub(seahowl::core::Turbine& turbine
     float* hubAcc_C = new float[6];
 
     // Get the information about hub
-    auto hubPos = turbine.rotor.elasto.body_hub->GetPos();
-    auto hubOri = turbine.rotor.elasto.body_hub->GetA();  // get a rotation matrix 3x3
-    auto hubTranVel = turbine.rotor.elasto.body_hub->GetPos_dt();
-    auto hubRotVel = turbine.rotor.elasto.body_hub->GetWvel_par();
-    auto hubTranAcc = turbine.rotor.elasto.body_hub->GetPos_dtdt();
-    auto hubRotAcc = turbine.rotor.elasto.body_hub->GetWacc_par();
+    auto hubPos = turbine.rotor.elasto.body_hub->get_position();
+    auto hubOri = turbine.rotor.elasto.body_hub->get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+    auto hubTranVel = turbine.rotor.elasto.body_hub->get_velocity();
+    auto hubRotVel = turbine.rotor.elasto.body_hub->get_rotational_velocity_global();
+    auto hubTranAcc = turbine.rotor.elasto.body_hub->get_acceleration();
+    auto hubRotAcc = turbine.rotor.elasto.body_hub->get_rotational_acceleration_global();
 
     for (int i = 0; i < 3; i++) {
         hubPos_C[i] = hubPos[i];
@@ -81,7 +82,7 @@ void seahowl::aero::AeroDynAdapter::setMotionHub(seahowl::core::Turbine& turbine
     }
 
     // rotate the local coordinate system from seahowl to aerodyn
-    hubOri = hubOri * chrono::ChMatrix33(Q_from_AngAxis(-chrono::CH_C_PI / 2, chrono::VECT_Y));
+    hubOri = hubOri * AngleAxisd(-PI / 2, Vector3d(0.0, 1.0, 0.0)).toRotationMatrix();
 
     hubOri_C[0] = hubOri(0, 0);
     hubOri_C[1] = hubOri(0, 1);
@@ -106,12 +107,12 @@ void seahowl::aero::AeroDynAdapter::setMotionNac(seahowl::core::Turbine& turbine
     float* nacAcc_C = new float[6];
 
     // Get the information about nacelle
-    auto nacPos = turbine.rotor.elasto.body_nacelle->GetPos();
-    auto nacOri = turbine.rotor.elasto.body_nacelle->GetA();  // get a rotation matrix 3x3
-    auto nacTranVel = turbine.rotor.elasto.body_nacelle->GetPos_dt();
-    auto nacRotVel = turbine.rotor.elasto.body_nacelle->GetWvel_par();
-    auto nacTranAcc = turbine.rotor.elasto.body_nacelle->GetPos_dtdt();
-    auto nacRotAcc = turbine.rotor.elasto.body_nacelle->GetWacc_par();
+    auto nacPos = turbine.rotor.elasto.body_nacelle->get_position();
+    auto nacOri = turbine.rotor.elasto.body_nacelle->get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+    auto nacTranVel = turbine.rotor.elasto.body_nacelle->get_velocity();
+    auto nacRotVel = turbine.rotor.elasto.body_nacelle->get_rotational_velocity_global();
+    auto nacTranAcc = turbine.rotor.elasto.body_nacelle->get_acceleration();
+    auto nacRotAcc = turbine.rotor.elasto.body_nacelle->get_rotational_acceleration_global();
 
     for (int i = 0; i < 3; i++) {
         nacPos_C[i] = nacPos[i];
@@ -146,7 +147,7 @@ void seahowl::aero::AeroDynAdapter::setMotionRoot(seahowl::core::Turbine& turbin
 
     for (int i = 0; i < nblades; i++) {
         auto bldRootPos = turbine.rotor.blades[i]->aero->nodes[0].coordinates;
-        auto bldRootOri = chrono::ChMatrix33(turbine.rotor.blades[i]->aero->nodes[0].rotation);
+        auto bldRootOri = turbine.rotor.blades[i]->aero->nodes[0].rotation.toRotationMatrix();
         auto bldRootTranVel = turbine.rotor.blades[i]->aero->nodes[0].velocity;
         auto bldRootRotVel = turbine.rotor.blades[i]->aero->nodes[0].rot_velocity;
         auto bldRootTranAcc = turbine.rotor.blades[i]->aero->nodes[0].acceleration;
@@ -162,7 +163,7 @@ void seahowl::aero::AeroDynAdapter::setMotionRoot(seahowl::core::Turbine& turbin
         }
 
         // rotate the local coordinate system from seahowl to aerodyn
-        bldRootOri = bldRootOri * chrono::ChMatrix33(Q_from_AngAxis(chrono::CH_C_PI / 2, chrono::VECT_Y));
+        bldRootOri = bldRootOri * AngleAxisd(PI / 2, Vector3d(0.0, 1.0, 0.0)).toRotationMatrix();
 
         bldRootOri_C[i * 9] = bldRootOri(0, 0);
         bldRootOri_C[i * 9 + 1] = bldRootOri(0, 1);
@@ -194,7 +195,7 @@ void seahowl::aero::AeroDynAdapter::setMotionMesh(seahowl::core::Turbine& turbin
     for (int i = 0; i < nblades; i++) {
         for (int j = 0; j < nMeshPerBlade; j++) {
             auto meshPos = turbine.rotor.blades[i]->aero->nodes[j].coordinates;
-            auto meshOri = chrono::ChMatrix33(turbine.rotor.blades[i]->aero->nodes[j].rotation);
+            auto meshOri = turbine.rotor.blades[i]->aero->nodes[j].rotation.toRotationMatrix();
             auto meshTranVel = turbine.rotor.blades[i]->aero->nodes[j].velocity;
             auto meshRotVel = turbine.rotor.blades[i]->aero->nodes[j].rot_velocity;
             auto meshTranAcc = turbine.rotor.blades[i]->aero->nodes[j].acceleration;
@@ -212,7 +213,7 @@ void seahowl::aero::AeroDynAdapter::setMotionMesh(seahowl::core::Turbine& turbin
             }
 
             // rotate the local coordinate system from seahowl to aerodyn
-            meshOri = meshOri * chrono::ChMatrix33(Q_from_AngAxis(chrono::CH_C_PI / 2, chrono::VECT_Y));
+            meshOri = meshOri * AngleAxisd(PI / 2, Vector3d(0.0, 1.0, 0.0)).toRotationMatrix();;
 
             meshOri_C[ii * 9] = meshOri(0, 0);
             meshOri_C[ii * 9 + 1] = meshOri(0, 1);
