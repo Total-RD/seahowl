@@ -100,7 +100,9 @@ int main(int argc, char* argv[]) {
                  blade_ptr++, idx_blade++) {
                 auto& blade = *blade_ptr;
                 auto& post_blade = vtk_outputs.emplace_back(*blade->elasto.get());
-                post_blade.init(("./output/vtk/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade)).c_str());
+                post_blade.init(
+                    ("./output/vtk/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
+                        .c_str());
             }
             auto& post_tower = vtk_outputs.emplace_back(turbine.tower.elasto);
             post_tower.init(("./output/vtk/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
@@ -118,7 +120,7 @@ int main(int argc, char* argv[]) {
 #endif
 
 #ifdef HAVE_AERODYN
-    if (turbine.use_aerodyn) {
+    if (seahowl_system.turbines[0].use_aerodyn) {
         remove_all("./vtk-ADI");
     }
 #endif
