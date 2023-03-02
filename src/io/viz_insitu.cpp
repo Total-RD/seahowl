@@ -1,6 +1,6 @@
 #include "seahowl/io/viz_insitu.h"
 
-#include <seahowl/utils.h>
+#include <seahowl/commons.h>
 
 using seahowl::Vector3d;
 

@@ -1,5 +1,5 @@
 #include "seahowl/aero/aerodyn_adapter.h"
-#include "seahowl/utils.h"
+#include "seahowl/commons.h"
 
 #include <stdexcept>
 #include <vector>
@@ -213,7 +213,8 @@ void seahowl::aero::AeroDynAdapter::setMotionMesh(seahowl::core::Turbine& turbin
             }
 
             // rotate the local coordinate system from seahowl to aerodyn
-            meshOri = meshOri * AngleAxisd(PI / 2, Vector3d(0.0, 1.0, 0.0)).toRotationMatrix();;
+            meshOri = meshOri * AngleAxisd(PI / 2, Vector3d(0.0, 1.0, 0.0)).toRotationMatrix();
+            ;
 
             meshOri_C[ii * 9] = meshOri(0, 0);
             meshOri_C[ii * 9 + 1] = meshOri(0, 1);

@@ -10,7 +10,7 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/servo/controller_discon.h>
 #include <seahowl/core/system.h>
-#include <seahowl/utils.h>
+#include <seahowl/commons.h>
 
 #include <string>
 #include <memory>

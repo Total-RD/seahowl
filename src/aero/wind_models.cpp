@@ -1,7 +1,5 @@
 #include "seahowl/aero/wind_models.h"
 
-#pragma once
-
 using namespace seahowl::aero;
 using seahowl::Vector3d;
 

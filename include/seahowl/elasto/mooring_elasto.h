@@ -1,6 +1,6 @@
 #pragma once
 #include <seahowl/elasto/elasto.h>
-#include <seahowl/utils.h>
+#include <seahowl/commons.h>
 
 #include <chrono/fea/ChElementBeamEuler.h>
 #include <chrono/fea/ChContactSurfaceNodeCloud.h>

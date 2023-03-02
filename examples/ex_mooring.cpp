@@ -1,6 +1,6 @@
 #include <seahowl/elasto/mooring_elasto.h>
 #include <seahowl/elasto/chrono_adapters.h>
-#include <seahowl/utils.h>
+#include <seahowl/commons.h>
 
 #include <chrono/physics/ChSystemSMC.h>
 #include <chrono/solver/ChDirectSolverLS.h>

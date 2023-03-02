@@ -1,7 +1,7 @@
 #pragma once
 
 #include <seahowl/aero/airfoil.h>
-#include <seahowl/utils.h>
+#include <seahowl/commons.h>
 
 #include <vector>
 

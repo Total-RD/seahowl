@@ -16,7 +16,7 @@
 #include <seahowl/core/turbine.h>
 #include <seahowl/core/system.h>
 #include <seahowl/elasto/chrono_adapters.h>
-#include <seahowl/utils.h>
+#include <seahowl/commons.h>
 
 #include <seahowl/io/read_json.h>
 

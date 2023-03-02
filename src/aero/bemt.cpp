@@ -5,6 +5,8 @@
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/core/utils.h>
 
+#include <iostream>
+
 using seahowl::Vector2d;
 using seahowl::Vector3d;
 using seahowl::PI;

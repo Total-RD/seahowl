@@ -3,7 +3,9 @@
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/aero/wind_models.h>
-#include <seahowl/utils.h>
+#include <seahowl/commons.h>
+
+#include <memory>
 
 namespace seahowl {
 namespace aero {
