@@ -34,7 +34,7 @@ void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& di
             zaxis.z();
 
         // make node
-        auto node = std::make_shared<NodeFEAChrono>(node_pos, Quaternion(coordsys).normalized());
+        auto node = std::make_shared<NodeElastoChrono>(node_pos, Quaternion(coordsys).normalized());
         nodes.push_back(node);
     };
 };

@@ -44,7 +44,7 @@ void BladeElasto::build() {
     build_nodes(discretized_points0);
     // apply properties
     for (int ii = 0; ii < nodes.size(); ii++) {
-        std::dynamic_pointer_cast<NodeFEAChrono>(nodes[ii])->set_properties(discretized_points[ii], fpm_mode);
+        std::dynamic_pointer_cast<NodeElastoChrono>(nodes[ii])->set_properties(discretized_points[ii], fpm_mode);
     }
     // apply structural twist
     for (int ii = 0; ii < nodes.size(); ii++) {
@@ -75,7 +75,7 @@ void BladeElasto::build_elements_tapered_timoshenko() {
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
-        auto element = std::make_shared<BladeElementFEAChrono>();
+        auto element = std::make_shared<ElementBladeElastoChrono>();
         // add element to blade elements vector
         elements.push_back(element);
         // set element nodes
@@ -100,7 +100,7 @@ void BladeElasto::build_elements_tapered_timoshenko_fpm() {
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
-        auto element = std::make_shared<BladeElementFEAChronoFPM>();
+        auto element = std::make_shared<ElementBladeElastoChronoFPM>();
         // add element to blade elements vector
         elements.push_back(element);
         // set element nodes
@@ -131,7 +131,7 @@ void BladeElasto::evaluate_position_rotation(Vector3d& position,
                                              Quaternion& rotation,
                                              int element_index,
                                              double eta) const {
-    auto element = std::dynamic_pointer_cast<BladeElementFEAChrono>(elements[element_index]);
+    auto element = std::dynamic_pointer_cast<ElementBladeElastoChrono>(elements[element_index]);
 
     // // unfortunately line below does not always work (returns nans sometimes when fpm_mode is true)
     // // @todo fix this (Chrono issue ?)

@@ -54,9 +54,9 @@ int main(int argc, char* argv[]) {
     system_chrono.Add(fairlead);
     // attach to fairlead
     auto fairlead_link = chrono_types::make_shared<ChLinkMateGeneric>();
-    fairlead_link->Initialize(std::dynamic_pointer_cast<NodeFEAChrono>(mooring.nodes.front())->chobj, fairlead, false,
-                              std::dynamic_pointer_cast<NodeFEAChrono>(mooring.nodes.front())->chobj->Frame(),
-                              std::dynamic_pointer_cast<NodeFEAChrono>(mooring.nodes.front())->chobj->Frame());
+    fairlead_link->Initialize(std::dynamic_pointer_cast<NodeElastoChrono>(mooring.nodes.front())->chobj, fairlead,
+                              false, std::dynamic_pointer_cast<NodeElastoChrono>(mooring.nodes.front())->chobj->Frame(),
+                              std::dynamic_pointer_cast<NodeElastoChrono>(mooring.nodes.front())->chobj->Frame());
     system_chrono.Add(fairlead_link);
     fairlead_link->SetConstrainedCoords(true, true, true,     // x, y, z
                                         true, false, false);  // Rx, Ry, Rz
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
     system_chrono.Add(anchor);
     // attach to anchor
     auto anchor_link = chrono_types::make_shared<ChLinkMateFix>();
-    anchor_link->Initialize(std::dynamic_pointer_cast<NodeFEAChrono>(mooring.nodes.back())->chobj, anchor);
+    anchor_link->Initialize(std::dynamic_pointer_cast<NodeElastoChrono>(mooring.nodes.back())->chobj, anchor);
     system_chrono.Add(anchor_link);
     anchor_link->SetConstrainedCoords(true, true, true,     // x, y, z
                                       true, false, false);  // Rx, Ry, Rz
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
     auto contact_cloud = chrono_types::make_shared<chrono::fea::ChContactSurfaceNodeCloud>(
         contact_material, std::dynamic_pointer_cast<MeshElastoChrono>(mesh)->chobj.get());
     for (auto& node : mooring.nodes) {
-        contact_cloud->AddNode(std::dynamic_pointer_cast<NodeFEAChrono>(node)->chobj, mooring.diameter);
+        contact_cloud->AddNode(std::dynamic_pointer_cast<NodeElastoChrono>(node)->chobj, mooring.diameter);
     }
     std::dynamic_pointer_cast<MeshElastoChrono>(mesh)->chobj->AddContactSurface(contact_cloud);
 

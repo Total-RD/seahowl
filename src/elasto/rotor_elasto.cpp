@@ -29,7 +29,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     auto rotation0 = Quaternion(1.0, 0.0, 0.0, 0.0);
 
     // hub
-    body_hub = std::make_shared<RigidBodyChrono>();
+    body_hub = std::make_shared<BodyElastoChrono>();
     // move hub along X for overhang and COG offset, and along Z for distance from towertop
     body_hub->set_position(Vector3d(hub.overhang + hub.center_of_mass, 0.0, 0.0));
     // local Z axis along global X axis + shaft tilt along global Y axis
@@ -41,7 +41,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     body_hub->set_inertia_diagonal(Vector3d(0., 0., hub.inertia));
 
     // shaft
-    body_shaft = std::make_shared<RigidBodyChrono>();
+    body_shaft = std::make_shared<BodyElastoChrono>();
     // move end of shaft at yaw axis of nacelle
     body_shaft->set_position(Vector3d(0.0, 0.0, shaft.distance_from_towertop));
     // align rotation
@@ -53,7 +53,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     link_shaft_hub->initialize(body_hub, body_shaft);
 
     // nacelle
-    body_nacelle = std::make_shared<RigidBodyChrono>();
+    body_nacelle = std::make_shared<BodyElastoChrono>();
     body_nacelle->set_position(nacelle.center_of_mass);
     body_nacelle->set_rotation(rotation0);
     // mass and inertia
@@ -65,7 +65,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     link_shaft_nacelle->initialize(body_nacelle, body_shaft);
 
     // yaw bearing
-    body_yaw_bearing = std::make_shared<RigidBodyChrono>();
+    body_yaw_bearing = std::make_shared<BodyElastoChrono>();
     body_yaw_bearing->set_position(Vector3d(0.0, 0.0, 0.0));
     body_yaw_bearing->set_rotation(rotation0);
     body_yaw_bearing->set_mass(nacelle.yaw_bearing_mass);

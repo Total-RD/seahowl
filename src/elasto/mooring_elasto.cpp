@@ -33,7 +33,7 @@ void MooringElasto::build_elements_euler() {
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
-        auto element = std::make_shared<MooringElementFEAChrono>();
+        auto element = std::make_shared<ElementMooringElastoChrono>();
         // add element to elements vector
         elements.push_back(element);
         // set element nodes

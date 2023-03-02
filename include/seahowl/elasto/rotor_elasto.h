@@ -9,7 +9,7 @@
 
 namespace seahowl {
 namespace elasto {
-class RigidBody;
+class BodyElasto;
 class BladeElasto;
 class TowerElasto;  ///@todo move out of rotor
 }  // namespace elasto
@@ -71,13 +71,13 @@ class RotorElasto : public ComponentElasto {
     /** @brief List of blades. */
     std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades;
     /** @brief Hub rigid body. */
-    std::shared_ptr<seahowl::elasto::RigidBody> body_hub;
+    std::shared_ptr<seahowl::elasto::BodyElasto> body_hub;
     /** @brief Shaft rigid body. */
-    std::shared_ptr<seahowl::elasto::RigidBody> body_shaft;
+    std::shared_ptr<seahowl::elasto::BodyElasto> body_shaft;
     /** @brief Nacelle rigid body. */
-    std::shared_ptr<seahowl::elasto::RigidBody> body_nacelle;
+    std::shared_ptr<seahowl::elasto::BodyElasto> body_nacelle;
     /** @brief Yaw bearing rigid body. */
-    std::shared_ptr<seahowl::elasto::RigidBody> body_yaw_bearing;
+    std::shared_ptr<seahowl::elasto::BodyElasto> body_yaw_bearing;
 
     // links
     //

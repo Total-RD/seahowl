@@ -77,7 +77,7 @@ TEST(test_blade, mass_deflection) {
     blade_core.build();
     blade_core.assemble(blades_mesh);
     auto blade = blade_core.elasto;
-    std::dynamic_pointer_cast<NodeFEAChrono>(blade->nodes[0])->chobj->SetFixed(true);
+    std::dynamic_pointer_cast<NodeElastoChrono>(blade->nodes[0])->chobj->SetFixed(true);
 
     system_chrono.Setup();
     system_chrono.DoStaticLinear();
@@ -129,7 +129,7 @@ TEST(test_rotor, mass) {
     auto rotor = get_rotor_from_json((DATADIR / "rna.json").generic_string());
     rotor.build(blades);
     rotor.assemble(system_elasto);
-    std::dynamic_pointer_cast<RigidBodyChrono>(rotor.elasto.body_yaw_bearing)->chobj->SetBodyFixed(true);
+    std::dynamic_pointer_cast<BodyElastoChrono>(rotor.elasto.body_yaw_bearing)->chobj->SetBodyFixed(true);
 
     system_chrono.Setup();
     system_chrono.DoStaticLinear();
@@ -189,7 +189,7 @@ TEST(test_blade, natural_period_dynamic_edge) {
     blade_core.build();
     blade_core.assemble(blades_mesh);
     auto blade = blade_core.elasto;
-    std::dynamic_pointer_cast<NodeFEAChrono>(blade->nodes[0])->chobj->SetFixed(true);
+    std::dynamic_pointer_cast<NodeElastoChrono>(blade->nodes[0])->chobj->SetFixed(true);
 
     system_chrono.Setup();
     system_chrono.DoStaticLinear();
@@ -253,7 +253,7 @@ TEST(test_blade, natural_period_dynamic_flap) {
     blade_core.build();
     blade_core.assemble(blades_mesh);
     auto blade = blade_core.elasto;
-    std::dynamic_pointer_cast<NodeFEAChrono>(blade->nodes[0])->chobj->SetFixed(true);
+    std::dynamic_pointer_cast<NodeElastoChrono>(blade->nodes[0])->chobj->SetFixed(true);
 
     // rotate blade for flap
     blade->rotate(-PI / 2.0, Vector3d(0.0, 0.0, 1.0));
@@ -339,7 +339,7 @@ TEST(test_turbine, rpm_initial_pitch) {
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
     turbine.assemble(system_elasto, blades_mesh);
-    std::dynamic_pointer_cast<NodeFEAChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
+    std::dynamic_pointer_cast<NodeElastoChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
 
     // statics
     if (statics_prestep) {
@@ -415,7 +415,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
 
     turbine.build();
     turbine.assemble(system_elasto, blades_mesh);
-    std::dynamic_pointer_cast<NodeFEAChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
+    std::dynamic_pointer_cast<NodeElastoChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
 
     // statics
     if (statics_prestep) {
@@ -506,7 +506,7 @@ TEST(test_turbine, multiturbines) {
     for (auto& turbine : system_core.turbines) {
         // empty controller
         turbine.controller = std::make_shared<seahowl::servo::Controller>();
-    std::dynamic_pointer_cast<NodeFEAChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
+    std::dynamic_pointer_cast<NodeElastoChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
         turbine.use_aerodyn = true;
     }
 

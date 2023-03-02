@@ -24,10 +24,15 @@ Vector3d ch2vec(chrono::ChVector<double> vector_in);
 chrono::ChQuaternion<double> quat2ch(Quaternion quaternion_in);
 Quaternion ch2quat(chrono::ChQuaternion<double> quaternion_in);
 
-class RigidBodyChrono : public RigidBody {
+/**
+ * @brief Chrono rigid body class.
+ */
+class BodyElastoChrono : public BodyElasto {
   public:
+    /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::ChBody> chobj;
-    RigidBodyChrono();
+
+    BodyElastoChrono();
     virtual void set_position(Vector3d position) override;
     virtual void set_mass(double mass) override;
     virtual void set_inertia_diagonal(Vector3d inertia) override;
@@ -46,11 +51,16 @@ class RigidBodyChrono : public RigidBody {
     virtual Vector3d get_rotational_acceleration_global() const override;
 };
 
-class NodeFEAChrono : public NodeFEA {
+/**
+ * @brief Chrono elasto node class.
+ */
+class NodeElastoChrono : public NodeElasto {
   public:
+    /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::fea::ChNodeFEAxyzrot> chobj;
     std::shared_ptr<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric> section;
-    NodeFEAChrono(Vector3d position, Quaternion rotation);
+
+    NodeElastoChrono(Vector3d position, Quaternion rotation);
     virtual void set_position(Vector3d position) override;
     virtual void set_rotation(Quaternion rotation) override;
     virtual void set_load(Vector3d force) override;
@@ -70,76 +80,114 @@ class NodeFEAChrono : public NodeFEA {
     void set_properties(const TowerReferencePointElasto& ref);
 };
 
-class ElementFEAChrono {
+/**
+ * @brief Chrono elasto element class.
+ */
+class ElementElastoChrono {
   public:
     std::shared_ptr<chrono::fea::ChElementBeam> chobj_base;
 };
 
-class BladeElementFEAChrono : public ElementFEAChrono, public BladeElementFEA {
+/**
+ * @brief Chrono elasto blade element class.
+ */
+class ElementBladeElastoChrono : public ElementElastoChrono, public ElementBladeElasto {
   public:
+    /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::fea::ChElementBeamTaperedTimoshenko> chobj;
-    BladeElementFEAChrono();
-    virtual void set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) override;
+
+    ElementBladeElastoChrono();
+    virtual void set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) override;
     virtual void set_prebend(const Quaternion& prebend) override;
     virtual double get_mass() override;
     virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) override;
 };
 
-class BladeElementFEAChronoFPM : public ElementFEAChrono, public BladeElementFEA {
+/**
+ * @brief Chrono FPM elasto blade element class.
+ */
+class ElementBladeElastoChronoFPM : public ElementElastoChrono, public ElementBladeElasto {
   public:
+    /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::fea::ChElementBeamTaperedTimoshenkoFPM> chobj;
-    BladeElementFEAChronoFPM();
-    virtual void set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) override;
+
+    ElementBladeElastoChronoFPM();
+    virtual void set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) override;
     virtual void set_prebend(const Quaternion& prebend) override;
     virtual double get_mass() override;
     virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) override;
 };
 
-class MooringElementFEAChrono : public ElementFEAChrono, public ElementFEA {
+/**
+ * @brief Chrono elasto mooring element class.
+ */
+class ElementMooringElastoChrono : public ElementElastoChrono, public ElementMooringElasto {
   public:
+    /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::fea::ChElementBeamEuler> chobj;
-    MooringElementFEAChrono();
-    virtual void set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) override;
+
+    ElementMooringElastoChrono();
+    virtual void set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) override;
     virtual double get_mass() override;
     virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) override;
-    void set_properties(double density, double diameter, double stiffness_axial);
+    virtual void set_properties(double density, double diameter, double stiffness_axial) override;
 };
 
+/**
+ * @brief Chrono fixed link class.
+ */
 class LinkFixChrono : public LinkFix {
   public:
+    /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::ChLinkMateFix> chobj;
+
     LinkFixChrono();
-    virtual void initialize(std::shared_ptr<RigidBody> body1, std::shared_ptr<RigidBody> body2) override;
-    virtual void initialize(std::shared_ptr<NodeFEA> node1, std::shared_ptr<RigidBody> body2) override;
+    virtual void initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) override;
+    virtual void initialize(std::shared_ptr<NodeElasto> node1, std::shared_ptr<BodyElasto> body2) override;
     Vector3d get_reaction_force() const override;
     Vector3d get_reaction_torque() const override;
 };
 
+/**
+ * @brief Chrono revolute link class.
+ */
 class LinkRevoluteChrono : public LinkRevolute {
   public:
+    /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::ChLinkRevolute> chobj;
+
     LinkRevoluteChrono();
-    virtual void initialize(std::shared_ptr<RigidBody> body1, std::shared_ptr<RigidBody> body2) override;
+    virtual void initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) override;
     Vector3d get_reaction_force() const override;
     Vector3d get_reaction_torque() const override;
 };
 
+/**
+ * @brief Chrono elasto mesh class.
+ */
 class MeshElastoChrono : public MeshElasto {
   public:
+    /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::fea::ChMesh> chobj;
+
     MeshElastoChrono();
-    virtual void add(std::shared_ptr<NodeFEA> node) override;
-    virtual void add(std::shared_ptr<ElementFEA> element) override;
+    virtual void add(std::shared_ptr<NodeElasto> node) override;
+    virtual void add(std::shared_ptr<ElementElasto> element) override;
     void add(std::shared_ptr<chrono::fea::ChElementBeam> element);
 };
 
+/**
+ * @brief Chrono elasto system class.
+ */
 class SystemElastoChrono : public SystemElasto {
   public:
+    /** @brief Pointer to underlying Chrono object. */
     chrono::ChSystemSMC chobj;
+
     SystemElastoChrono();
     virtual Vector3d get_gravitational_acceleration() const override;
     virtual void set_gravitational_acceleration(Vector3d gravitational_acceleration) override;
-    virtual void add(std::shared_ptr<RigidBody> body) override;
+    virtual void add(std::shared_ptr<BodyElasto> body) override;
     virtual void add(std::shared_ptr<MeshElasto> mesh) override;
     virtual void add(std::shared_ptr<LinkFix> link) override;
     virtual void add(std::shared_ptr<LinkRevolute> link) override;

@@ -481,7 +481,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         turbine.build();
         turbine.assemble(system_elasto, mesh_elasto);
         // fix foundation of the tower
-        std::dynamic_pointer_cast<seahowl::elasto::NodeFEAChrono>(turbine.tower.elasto.nodes.front())
+        std::dynamic_pointer_cast<seahowl::elasto::NodeElastoChrono>(turbine.tower.elasto.nodes.front())
             ->chobj->SetFixed(true);
         // rotate turbine to align tower with gravity vector
         auto v1 = Vector3d(-system_elasto.get_gravitational_acceleration()).normalized();
