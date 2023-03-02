@@ -166,29 +166,49 @@ Vector3d NodeFEAChrono::get_torque() const {
     return ch2vec(chobj->GetTorque());
 }
 
-void NodeFEAChrono::set_properties(const BladeReferencePointElasto& ref) {
-    section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric>();
-    // offsets
-    section->SetCenterOfMass(ref.offset_gravity.y(), -ref.offset_gravity.x());
-    section->SetCentroidY(ref.offset_elastic.y());
-    section->SetCentroidZ(-ref.offset_elastic.x());
-    // material properties
-    section->SetMassPerUnitLength(ref.mass_matrix(0, 0));
-    // axial
-    section->SetAxialRigidity(ref.stiffness_matrix(0, 0));
-    section->SetXtorsionRigidity(ref.stiffness_matrix(3, 3));
-    // flap
-    section->SetYbendingRigidity(ref.stiffness_matrix(4, 4));
-    // edge
-    section->SetZbendingRigidity(ref.stiffness_matrix(5, 5));
-    // damping
-    chrono::fea::DampingCoefficients damping_coefficients;
-    damping_coefficients.bx = ref.damping_coefficients[0];
-    damping_coefficients.by = ref.damping_coefficients[1];
-    damping_coefficients.bz = ref.damping_coefficients[2];
-    damping_coefficients.bt = ref.damping_coefficients[3];
-    damping_coefficients.alpha = ref.damping_coefficients[4];
-    section->SetBeamRaleyghDamping(damping_coefficients);
+void NodeFEAChrono::set_properties(const BladeReferencePointElasto& ref, bool fpm) {
+    if (fpm == true) {
+        auto sectionFPM = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>();
+        section = sectionFPM;
+        // offsets
+        sectionFPM->SetCenterOfMass(ref.offset_gravity.y(), -ref.offset_gravity.x());
+        sectionFPM->SetCentroidY(ref.offset_elastic.y());
+        sectionFPM->SetCentroidZ(-ref.offset_elastic.x());
+        // material properties
+        sectionFPM->SetMassMatrixFPM(ref.mass_matrix);
+        sectionFPM->SetStiffnessMatrixFPM(ref.stiffness_matrix);
+        // damping
+        chrono::fea::DampingCoefficients damping_coefficients;
+        damping_coefficients.bx = ref.damping_coefficients[0];
+        damping_coefficients.by = ref.damping_coefficients[1];
+        damping_coefficients.bz = ref.damping_coefficients[2];
+        damping_coefficients.bt = ref.damping_coefficients[3];
+        damping_coefficients.alpha = ref.damping_coefficients[4];
+        sectionFPM->SetBeamRaleyghDamping(damping_coefficients);
+    } else {
+        section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric>();
+        // offsets
+        section->SetCenterOfMass(ref.offset_gravity.y(), -ref.offset_gravity.x());
+        section->SetCentroidY(ref.offset_elastic.y());
+        section->SetCentroidZ(-ref.offset_elastic.x());
+        // material properties
+        section->SetMassPerUnitLength(ref.mass_matrix(0, 0));
+        // axial
+        section->SetAxialRigidity(ref.stiffness_matrix(0, 0));
+        section->SetXtorsionRigidity(ref.stiffness_matrix(3, 3));
+        // flap
+        section->SetYbendingRigidity(ref.stiffness_matrix(4, 4));
+        // edge
+        section->SetZbendingRigidity(ref.stiffness_matrix(5, 5));
+        // damping
+        chrono::fea::DampingCoefficients damping_coefficients;
+        damping_coefficients.bx = ref.damping_coefficients[0];
+        damping_coefficients.by = ref.damping_coefficients[1];
+        damping_coefficients.bz = ref.damping_coefficients[2];
+        damping_coefficients.bt = ref.damping_coefficients[3];
+        damping_coefficients.alpha = ref.damping_coefficients[4];
+        section->SetBeamRaleyghDamping(damping_coefficients);
+    }
 }
 
 void NodeFEAChrono::set_properties(const TowerReferencePointElasto& ref) {
@@ -243,6 +263,49 @@ double BladeElementFEAChrono::get_mass() {
 }
 
 void BladeElementFEAChrono::evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) {
+    auto chvec = vec2ch(position);
+    auto chquat = quat2ch(rotation);
+    chobj->EvaluateSectionFrame(eta, chvec, chquat);
+    position[0] = chvec[0];
+    position[1] = chvec[1];
+    position[2] = chvec[2];
+    rotation = ch2quat(chquat);
+}
+
+BladeElementFEAChronoFPM::BladeElementFEAChronoFPM() {
+    chobj = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenkoFPM>();
+    chobj_base = chobj;
+    // create blade section
+    auto blade_section = chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGenericFPM>();
+    chobj->SetTaperedSection(blade_section);
+}
+
+void BladeElementFEAChronoFPM::set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) {
+    nodes0.clear();
+    nodes0.push_back(node1);
+    nodes0.push_back(node2);
+
+    // set nodes
+    chobj->SetNodes(std::dynamic_pointer_cast<NodeFEAChrono>(node1)->chobj,
+                    std::dynamic_pointer_cast<NodeFEAChrono>(node2)->chobj);
+    // set tapered sections
+    chobj->GetTaperedSection()->SetSectionA(
+        std::dynamic_pointer_cast<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>(
+            std::dynamic_pointer_cast<NodeFEAChrono>(node1)->section));
+    chobj->GetTaperedSection()->SetSectionB(
+        std::dynamic_pointer_cast<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>(
+            std::dynamic_pointer_cast<NodeFEAChrono>(node2)->section));
+}
+
+void BladeElementFEAChronoFPM::set_prebend(const Quaternion& prebend) {
+    chobj->SetNodeBreferenceRot(quat2ch(prebend));
+}
+
+double BladeElementFEAChronoFPM::get_mass() {
+    return chobj->GetMass();
+}
+
+void BladeElementFEAChronoFPM::evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) {
     auto chvec = vec2ch(position);
     auto chquat = quat2ch(rotation);
     chobj->EvaluateSectionFrame(eta, chvec, chquat);

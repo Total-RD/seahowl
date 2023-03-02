@@ -66,7 +66,7 @@ class NodeFEAChrono : public NodeFEA {
     virtual Vector3d get_rotational_acceleration_global() const override;
     virtual Vector3d get_load() const override;
     virtual Vector3d get_torque() const override;
-    void set_properties(const BladeReferencePointElasto& ref);
+    void set_properties(const BladeReferencePointElasto& ref, bool fpm = false);
     void set_properties(const TowerReferencePointElasto& ref);
 };
 
@@ -79,6 +79,16 @@ class BladeElementFEAChrono : public ElementFEAChrono, public BladeElementFEA {
   public:
     std::shared_ptr<chrono::fea::ChElementBeamTaperedTimoshenko> chobj;
     BladeElementFEAChrono();
+    virtual void set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) override;
+    virtual void set_prebend(const Quaternion& prebend) override;
+    virtual double get_mass() override;
+    virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) override;
+};
+
+class BladeElementFEAChronoFPM : public ElementFEAChrono, public BladeElementFEA {
+  public:
+    std::shared_ptr<chrono::fea::ChElementBeamTaperedTimoshenkoFPM> chobj;
+    BladeElementFEAChronoFPM();
     virtual void set_nodes(std::shared_ptr<NodeFEA> node1, std::shared_ptr<NodeFEA> node2) override;
     virtual void set_prebend(const Quaternion& prebend) override;
     virtual double get_mass() override;
