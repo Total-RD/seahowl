@@ -190,7 +190,7 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
         auto& towertop_rotation = tower_aero.elements.back().properties.rotation;
         auto wind_velocity_tower0 = towertop_rotation.inverse() * wind_velocity;
         // only take wind velocity perpendicular to tower axis
-        auto wind_velocity_tower = Vector3d(0.0, wind_velocity.y(), wind_velocity_tower0.z());
+        auto wind_velocity_tower = Vector3d(wind_velocity.x(), wind_velocity.y(), 0.0);
 
         // project element coordinates to tower reference frame
         auto& tower_top = tower_aero.elements.back();

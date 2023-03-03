@@ -62,6 +62,12 @@ int main(int argc, char* argv[]) {
 
     auto seahowl_system = get_system_from_json(filepath_main.generic_string(), system_elasto, mesh_elasto);
 
+    for (auto& turbine : seahowl_system.turbines) {
+        // fix foundation of the tower
+        std::dynamic_pointer_cast<seahowl::elasto::NodeElastoChrono>(turbine.tower.elasto.nodes.front())
+            ->chobj->SetFixed(true);
+    }
+
     // get main info
     std::ifstream json_file(filepath_main);
     // populate json object

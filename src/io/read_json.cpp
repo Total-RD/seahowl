@@ -5,7 +5,6 @@
 #include <seahowl/core/rotor.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/elasto/tower_elasto.h>
-#include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/servo/controller_discon.h>
@@ -103,36 +102,15 @@ std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_
         auto sm = point.at("stiffness_matrix").get<std::vector<std::vector<double>>>();
         auto mm = point.at("mass_matrix").get<std::vector<std::vector<double>>>();
         if (sm.size() != 6 || mm.size() != 6) {
-            throw std::runtime_error("Mass and stiffness matrices hqve to be defined as 6x6 matrices.");
+            throw std::runtime_error("Mass and stiffness matrices have to be defined as 6x6 matrices.");
         }
-        int jjo, kko;
-        // apply offsets to indices to switch from IEC standard to Chrono standard
-        for (int jj = 0; jj < 6; jj++) {
-            if (sm[jj].size() != 6 || mm[jj].size() != 6) {
-                throw std::runtime_error("Mass and stiffness matrices hqve to be defined as 6x6 matrices.");
+        for (int irow = 0; irow < 6; irow++) {
+            if (sm[irow].size() != 6 || mm[irow].size() != 6) {
+                throw std::runtime_error("Mass and stiffness matrices have to be defined as 6x6 matrices.");
             }
-
-            if (jj == 2 || jj == 5) {
-                jjo = -2;
-            }
-            if (jj == 1 || jj == 4) {
-                jjo = +0;
-            }
-            if (jj == 0 || jj == 3) {
-                jjo = +2;
-            }
-            for (int kk = 0; kk < 6; kk++) {
-                if (kk == 2 || kk == 5) {
-                    kko = -2;
-                }
-                if (kk == 1 || kk == 4) {
-                    kko = +0;
-                }
-                if (kk == 0 || kk == 3) {
-                    kko = +2;
-                }
-                reference_point.stiffness_matrix(jj + jjo, kk + kko) = sm[jj][kk];
-                reference_point.mass_matrix(jj + jjo, kk + kko) = mm[jj][kk];
+            for (int icol = 0; icol < 6; icol++) {
+                reference_point.mass_matrix(irow, icol) = mm[irow][icol];
+                reference_point.stiffness_matrix(irow, icol) = sm[irow][icol];
             }
         }
         reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
@@ -480,9 +458,6 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         // build turbine (Chrono)
         turbine.build();
         turbine.assemble(system_elasto, mesh_elasto);
-        // fix foundation of the tower
-        std::dynamic_pointer_cast<seahowl::elasto::NodeElastoChrono>(turbine.tower.elasto.nodes.front())
-            ->chobj->SetFixed(true);
         // rotate turbine to align tower with gravity vector
         auto v1 = Vector3d(-system_elasto.get_gravitational_acceleration()).normalized();
         auto v2 = (turbine.tower.elasto.nodes[1]->get_position() - turbine.tower.elasto.nodes[0]->get_position())

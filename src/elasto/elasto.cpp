@@ -26,12 +26,13 @@ void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& di
         }
 
         // make coordinate system of node
+        // uses IEC convention
+        auto zaxis = node_axis;
         auto up = Vector3d(0.0, 1.0, 0.0);
-        auto zaxis = node_axis.cross(up).normalized();
-        auto yaxis = zaxis.cross(node_axis).normalized();
+        auto xaxis = up.cross(zaxis).normalized();
+        auto yaxis = zaxis.cross(xaxis).normalized();
         Eigen::Matrix3d coordsys;
-        coordsys << node_axis.x(), yaxis.x(), zaxis.x(), node_axis.y(), yaxis.y(), zaxis.y(), node_axis.z(), yaxis.z(),
-            zaxis.z();
+        coordsys << xaxis.x(), yaxis.x(), zaxis.x(), xaxis.y(), yaxis.y(), zaxis.y(), xaxis.z(), yaxis.z(), zaxis.z();
 
         // make node
         auto node = std::make_shared<NodeElastoChrono>(node_pos, Quaternion(coordsys).normalized());

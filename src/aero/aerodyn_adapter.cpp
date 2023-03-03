@@ -162,9 +162,6 @@ void seahowl::aero::AeroDynAdapter::setMotionRoot(seahowl::core::Turbine& turbin
             bldRootAcc_C[q + 3] = bldRootRotAcc[j];
         }
 
-        // rotate the local coordinate system from seahowl to aerodyn
-        bldRootOri = bldRootOri * AngleAxisd(PI / 2, Vector3d(0.0, 1.0, 0.0)).toRotationMatrix();
-
         bldRootOri_C[i * 9] = bldRootOri(0, 0);
         bldRootOri_C[i * 9 + 1] = bldRootOri(0, 1);
         bldRootOri_C[i * 9 + 2] = bldRootOri(0, 2);
@@ -211,10 +208,6 @@ void seahowl::aero::AeroDynAdapter::setMotionMesh(seahowl::core::Turbine& turbin
                 meshAcc_C[q] = meshTranAcc[k];
                 meshAcc_C[q + 3] = meshRotAcc[k];
             }
-
-            // rotate the local coordinate system from seahowl to aerodyn
-            meshOri = meshOri * AngleAxisd(PI / 2, Vector3d(0.0, 1.0, 0.0)).toRotationMatrix();
-            ;
 
             meshOri_C[ii * 9] = meshOri(0, 0);
             meshOri_C[ii * 9 + 1] = meshOri(0, 1);

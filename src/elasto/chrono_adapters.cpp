@@ -33,6 +33,36 @@ Quaternion ch2quat(chrono::ChQuaternion<double> quaternion_in) {
     return Quaternion(quaternion_in[0], quaternion_in[1], quaternion_in[2], quaternion_in[3]);
 }
 
+Quaternion node_ch2iec(chrono::ChQuaternion<double> quaternion_in) {
+    // Convert from Chrono standard ro IEC standard.
+    // IEC convention:
+    // x-axis: flapwise pointing towards nacelle,
+    // y-axis : edgewise pointing towards trailing edge,
+    // z-axis : longitudinal pointing towards blade tip.
+    // Chrono convention:
+    // x-axis: longitudinal pointing towards blade tip,
+    // y-axis : edgewise pointing towards trailing edge,
+    // z-axis : flapwise pointing away from nacelle.
+    // ==> need to rotate +90 degrees around Chrono y-axis to transform to IEC convention.
+    auto angle = +PI / 2.0;
+    return ch2quat(quaternion_in) * Quaternion(cos(angle / 2), 0, sin(angle / 2), 0);
+}
+
+chrono::ChQuaternion<double> node_iec2ch(Quaternion quaternion_in) {
+    // Convert from IEC standard to Chrono standard.
+    // IEC convention:
+    // x-axis: flapwise pointing towards nacelle,
+    // y-axis : edgewise pointing towards trailing edge,
+    // z-axis : longitudinal pointing towards blade tip.
+    // Chrono convention:
+    // x-axis: longitudinal pointing towards blade tip,
+    // y-axis : edgewise pointing towards trailing edge,
+    // z-axis : flapwise pointing away from nacelle.
+    // ==> need to rotate -90 degrees around IEC y-axis to transform to Chrono convention.
+    auto angle = -PI / 2.0;
+    return quat2ch(quaternion_in * Quaternion(cos(angle / 2), 0, sin(angle / 2), 0));
+}
+
 BodyElastoChrono::BodyElastoChrono() {
     chobj = chrono_types::make_shared<chrono::ChBody>();
 }
@@ -102,8 +132,8 @@ Vector3d BodyElastoChrono::get_rotational_acceleration_global() const {
 }
 
 NodeElastoChrono::NodeElastoChrono(Vector3d position, Quaternion rotation) {
-    chobj =
-        chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(chrono::ChFrame<>(vec2ch(position), quat2ch(rotation)));
+    chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(
+        chrono::ChFrame<>(vec2ch(position), node_iec2ch(rotation)));
 }
 
 void NodeElastoChrono::set_position(Vector3d position) {
@@ -111,7 +141,7 @@ void NodeElastoChrono::set_position(Vector3d position) {
 }
 
 void NodeElastoChrono::set_rotation(Quaternion rotation) {
-    chobj->SetRot(quat2ch(rotation));
+    chobj->SetRot(node_iec2ch(rotation));
 }
 
 void NodeElastoChrono::set_load(Vector3d force) {
@@ -135,7 +165,7 @@ Vector3d NodeElastoChrono::get_acceleration() const {
 }
 
 Quaternion NodeElastoChrono::get_rotation() const {
-    return Quaternion(ch2quat(chobj->GetRot()));
+    return node_ch2iec(chobj->GetRot());
 }
 
 Vector3d NodeElastoChrono::get_direction() const {
@@ -167,6 +197,42 @@ Vector3d NodeElastoChrono::get_torque() const {
 }
 
 void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool fpm) {
+    Eigen::Matrix<double, 6, 6> mm = ref.mass_matrix.replicate(1, 1);
+    Eigen::Matrix<double, 6, 6> sm = ref.stiffness_matrix.replicate(1, 1);
+    // Convert from IEC convention to Chrono convention.
+    // IEC standard:
+    // x-axis: flapwise pointing towards nacelle,
+    // y-axis : edgewise pointing towards trailing edge,
+    // z-axis : longitudinal pointing towards blade tip.
+    // Chrono convention:
+    // x-axis: longitudinal pointing towards blade tip,
+    // y-axis : edgewise pointing towards trailing edge,
+    // z-axis : flapwise pointing away from nacelle.
+    int jjo, kko;
+    for (int jj = 0; jj < 6; jj++) {
+        if (jj == 2 || jj == 5) {
+            jjo = -2;
+        }
+        if (jj == 1 || jj == 4) {
+            jjo = +0;
+        }
+        if (jj == 0 || jj == 3) {
+            jjo = +2;
+        }
+        for (int kk = 0; kk < 6; kk++) {
+            if (kk == 2 || kk == 5) {
+                kko = -2;
+            }
+            if (kk == 1 || kk == 4) {
+                kko = +0;
+            }
+            if (kk == 0 || kk == 3) {
+                kko = +2;
+            }
+            mm(jj + jjo, kk + kko) = ref.mass_matrix(jj, kk);
+            sm(jj + jjo, kk + kko) = ref.stiffness_matrix(jj, kk);
+        }
+    }
     if (fpm == true) {
         auto sectionFPM = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>();
         section = sectionFPM;
@@ -175,8 +241,8 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
         sectionFPM->SetCentroidY(ref.offset_elastic.y());
         sectionFPM->SetCentroidZ(-ref.offset_elastic.x());
         // material properties
-        sectionFPM->SetMassMatrixFPM(ref.mass_matrix);
-        sectionFPM->SetStiffnessMatrixFPM(ref.stiffness_matrix);
+        sectionFPM->SetMassMatrixFPM(mm);
+        sectionFPM->SetStiffnessMatrixFPM(sm);
         // damping
         chrono::fea::DampingCoefficients damping_coefficients;
         damping_coefficients.bx = ref.damping_coefficients[0];
@@ -192,14 +258,14 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
         section->SetCentroidY(ref.offset_elastic.y());
         section->SetCentroidZ(-ref.offset_elastic.x());
         // material properties
-        section->SetMassPerUnitLength(ref.mass_matrix(0, 0));
+        section->SetMassPerUnitLength(mm(0, 0));
         // axial
-        section->SetAxialRigidity(ref.stiffness_matrix(0, 0));
-        section->SetXtorsionRigidity(ref.stiffness_matrix(3, 3));
+        section->SetAxialRigidity(sm(0, 0));
+        section->SetXtorsionRigidity(sm(3, 3));
         // flap
-        section->SetYbendingRigidity(ref.stiffness_matrix(4, 4));
+        section->SetYbendingRigidity(sm(4, 4));
         // edge
-        section->SetZbendingRigidity(ref.stiffness_matrix(5, 5));
+        section->SetZbendingRigidity(sm(5, 5));
         // damping
         chrono::fea::DampingCoefficients damping_coefficients;
         damping_coefficients.bx = ref.damping_coefficients[0];
@@ -269,7 +335,7 @@ void ElementBladeElastoChrono::evaluate_position_rotation(double eta, Vector3d& 
     position[0] = chvec[0];
     position[1] = chvec[1];
     position[2] = chvec[2];
-    rotation = ch2quat(chquat);
+    rotation = node_ch2iec(chquat);
 }
 
 ElementBladeElastoChronoFPM::ElementBladeElastoChronoFPM() {
@@ -298,7 +364,7 @@ void ElementBladeElastoChronoFPM::set_nodes(std::shared_ptr<NodeElasto> node1, s
 }
 
 void ElementBladeElastoChronoFPM::set_prebend(const Quaternion& prebend) {
-    chobj->SetNodeBreferenceRot(quat2ch(prebend));
+    chobj->SetNodeBreferenceRot(node_iec2ch(prebend));
 }
 
 double ElementBladeElastoChronoFPM::get_mass() {
@@ -312,7 +378,7 @@ void ElementBladeElastoChronoFPM::evaluate_position_rotation(double eta, Vector3
     position[0] = chvec[0];
     position[1] = chvec[1];
     position[2] = chvec[2];
-    rotation = ch2quat(chquat);
+    rotation = node_ch2iec(chquat);
 }
 
 ElementMooringElastoChrono::ElementMooringElastoChrono() {
@@ -341,7 +407,7 @@ void ElementMooringElastoChrono::evaluate_position_rotation(double eta, Vector3d
     position[0] = chvec[0];
     position[1] = chvec[1];
     position[2] = chvec[2];
-    rotation = ch2quat(chquat);
+    rotation = node_ch2iec(chquat);
 }
 
 void ElementMooringElastoChrono::set_properties(double density, double diameter, double stiffness_axial) {
