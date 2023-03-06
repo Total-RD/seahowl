@@ -1,15 +1,15 @@
 #include <seahowl/elasto/mooring_elasto.h>
 #include <seahowl/core/utils.h>
-#include <seahowl/elasto/chrono_adapters.h>
-
-#include <chrono/fea/ChContactSurfaceNodeCloud.h>
-#include <chrono/physics/ChMaterialSurfaceSMC.h>
 
 using namespace seahowl::elasto;
 
 MooringElasto::MooringElasto() {}
 
 void MooringElasto::build() {
+    // check that a pointer to a strategy was initialized
+    if (!strategy_elasto) {
+        throw std::runtime_error("Must define elasto strategy for mooring.");
+    }
     // make reference points between fairlead and anchor
     std::vector<ReferencePointElasto> points;
     for (auto& fraction : discretization_fractions) {
@@ -33,12 +33,12 @@ void MooringElasto::build_elements_euler() {
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
-        auto element = std::make_shared<ElementMooringElastoChrono>();
+        auto element = strategy_elasto->make_element_mooring();
         // add element to elements vector
         elements.push_back(element);
         // set element nodes
         element->set_nodes(nodes[ii - 1], nodes[ii]);
         // set section
-        element->set_properties(density, diameter, stiffness_axial);
+        std::dynamic_pointer_cast<ElementMooringElasto>(element)->set_properties(density, diameter, stiffness_axial);
     }
 }

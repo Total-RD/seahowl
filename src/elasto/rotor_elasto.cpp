@@ -2,7 +2,7 @@
 
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
-#include <seahowl/elasto/chrono_adapters.h>
+#include <seahowl/elasto/entities_elasto.h>
 
 using seahowl::elasto::BladeElasto;
 using seahowl::elasto::RotorElasto;
@@ -24,12 +24,17 @@ void RotorElasto::assemble(std::shared_ptr<SystemElasto> system) {
 }
 
 void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
+    // check that a pointer to a strategy was initialized
+    if (!strategy_elasto) {
+        throw std::runtime_error("Must define elasto strategy for RNA.");
+    }
+
     this->blades = blades;
 
     auto rotation0 = Quaternion(1.0, 0.0, 0.0, 0.0);
 
     // hub
-    body_hub = std::make_shared<BodyElastoChrono>();
+    body_hub = strategy_elasto->make_body();
     // move hub along X for overhang and COG offset, and along Z for distance from towertop
     body_hub->set_position(Vector3d(hub.overhang + hub.center_of_mass, 0.0, 0.0));
     // local Z axis along global X axis + shaft tilt along global Y axis
@@ -41,7 +46,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     body_hub->set_inertia_diagonal(Vector3d(0., 0., hub.inertia));
 
     // shaft
-    body_shaft = std::make_shared<BodyElastoChrono>();
+    body_shaft = strategy_elasto->make_body();
     // move end of shaft at yaw axis of nacelle
     body_shaft->set_position(Vector3d(0.0, 0.0, shaft.distance_from_towertop));
     // align rotation
@@ -49,12 +54,12 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     // massless body
     body_shaft->set_mass(0.0);
     // link hub to shaft
-    link_shaft_hub = std::make_shared<LinkChrono>();
+    link_shaft_hub = strategy_elasto->make_link();
     link_shaft_hub->initialize(body_hub, body_shaft);
     link_shaft_hub->set_constraints(true, true, true, false, true, true);
 
     // nacelle
-    body_nacelle = std::make_shared<BodyElastoChrono>();
+    body_nacelle = strategy_elasto->make_body();
     body_nacelle->set_position(nacelle.center_of_mass);
     body_nacelle->set_rotation(rotation0);
     // mass and inertia
@@ -62,17 +67,17 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     ///@todo  change to full 3x3 inertia matrix
     body_nacelle->set_inertia_diagonal(Vector3d(0.0, 0.0, nacelle.inertia));
     // link nacelle body to shaft body
-    link_shaft_nacelle = std::make_shared<LinkChrono>();
+    link_shaft_nacelle = strategy_elasto->make_link();
     link_shaft_nacelle->initialize(body_nacelle, body_shaft);
     link_shaft_nacelle->set_constraints(true, true, true, true, true, true);
 
     // yaw bearing
-    body_yaw_bearing = std::make_shared<BodyElastoChrono>();
+    body_yaw_bearing = strategy_elasto->make_body();
     body_yaw_bearing->set_position(Vector3d(0.0, 0.0, 0.0));
     body_yaw_bearing->set_rotation(rotation0);
     body_yaw_bearing->set_mass(nacelle.yaw_bearing_mass);
     // link yaw bearing body to shaft body
-    link_shaft_yaw_bearing = std::make_shared<LinkChrono>();
+    link_shaft_yaw_bearing = strategy_elasto->make_link();
     link_shaft_yaw_bearing->initialize(body_shaft, body_yaw_bearing);
     link_shaft_yaw_bearing->set_constraints(true, true, true, true, true, true);
 
@@ -102,7 +107,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
         blade->translate(Vector3d(0.0, 0.0, shaft.distance_from_towertop));
 
         // link root node of blade to rotor center
-        auto link_hub_blade = std::make_shared<LinkChrono>();
+        auto link_hub_blade = strategy_elasto->make_link();
         link_hub_blade->initialize(blade->nodes[0], body_hub);
         link_hub_blade->set_constraints(true, true, true, true, true, true);
         links_blades.push_back(link_hub_blade);
@@ -114,7 +119,7 @@ void RotorElasto::link_tower(const TowerElasto& tower, std::shared_ptr<seahowl::
     // translate RNA center of origin to towertop
     this->translate(towertop_node->get_position() - this->body_yaw_bearing->get_position());
     // link yaw bearing body to towertop
-    link_towertop_yaw_bearing = std::make_shared<LinkChrono>();
+    link_towertop_yaw_bearing = strategy_elasto->make_link();
     system->add(link_towertop_yaw_bearing);
     link_towertop_yaw_bearing->initialize(towertop_node, body_yaw_bearing);
     link_towertop_yaw_bearing->set_constraints(true, true, true, true, true, true);

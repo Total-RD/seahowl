@@ -49,14 +49,12 @@ class BladeElasto : public ComponentElastoFEA {
 
   private:
     /**
-     * @brief Builds the blade with simple Timoshenko elements (lineic density, flap stiffness, edge stiffness).
+     * @brief Builds the blade with finite elements.
+     *
+     * Depending on strategy: simple Timoshenko (lineic density, flap stiffness, edge stiffness) or FPM Timoshenko
+     * elements (6x6 mass and stiffness matrices).
      */
-    void build_elements_tapered_timoshenko();
-
-    /**
-     * @brief Builds the blade with FPM Timoshenko elements (6x6 mass and stiffness matrices).
-     */
-    void build_elements_tapered_timoshenko_fpm();
+    void build_elements();
 };
 
 }  // namespace elasto

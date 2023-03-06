@@ -1,6 +1,6 @@
 #include <seahowl/elasto/tower_elasto.h>
-#include <seahowl/core/utils.h>
 #include <seahowl/elasto/chrono_adapters.h>
+#include <seahowl/core/utils.h>
 
 #include <memory>
 #include <vector>
@@ -13,7 +13,11 @@ TowerElasto::TowerElasto() {}
 void TowerElasto::build() {
     // check that enough reference points were defined to create elements (at least 2)
     if (reference_points.size() <= 2) {
-        throw std::runtime_error("Not enough elasto reference points defined for blade.");
+        throw std::runtime_error("Not enough elasto reference points defined for tower.");
+    }
+    // check that a pointer to a strategy was initialized
+    if (!strategy_elasto) {
+        throw std::runtime_error("Must define elasto strategy for tower.");
     }
 
     // check that discretization_fractions was defined, otherwise take reference point fractions
@@ -47,10 +51,10 @@ void TowerElasto::build() {
         std::dynamic_pointer_cast<NodeElastoChrono>(nodes[ii])->set_properties(discretized_points[ii]);
     }
 
-    build_elements_tapered_timoshenko();
+    build_elements();
 };
 
-void TowerElasto::build_elements_tapered_timoshenko() {
+void TowerElasto::build_elements() {
     elements.clear();
     const auto nelements = nodes.size() - 1;
 
@@ -60,7 +64,7 @@ void TowerElasto::build_elements_tapered_timoshenko() {
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
-        auto element = std::make_shared<ElementBladeElastoChrono>();
+        auto element = strategy_elasto->make_element_tower();
         // add element to blade elements vector
         elements.push_back(element);
         // set element nodes

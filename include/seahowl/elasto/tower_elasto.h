@@ -36,7 +36,7 @@ class TowerElasto : public ComponentElastoFEA {
     /**
      * @brief Builds the blade with Timoshenko elements (lineic density, foreaft stiffness, sideside stiffness).
      */
-    void build_elements_tapered_timoshenko();
+    void build_elements();
 };
 
 }  // namespace elasto

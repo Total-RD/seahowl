@@ -18,6 +18,7 @@
 #include <seahowl/core/turbine.h>
 #include <seahowl/core/system.h>
 #include <seahowl/elasto/chrono_adapters.h>
+#include <seahowl/elasto/chrono_strategy.h>
 #include <seahowl/commons.h>
 
 #include <seahowl/io/read_json.h>
@@ -67,6 +68,7 @@ TEST(test_blade, mass_deflection) {
     system_elasto->add(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
+    blade_core.elasto->strategy_elasto = std::make_shared<StrategyElastoChrono>();
     // make 50 elements
     blade_core.elasto->discretization_fractions.clear();
     for (int ii = 0; ii < 51; ii++) {
@@ -120,6 +122,7 @@ TEST(test_rotor, mass) {
     }
 
     auto rotor = get_rotor_from_json((DATADIR / "rna.json").generic_string());
+    rotor.elasto.strategy_elasto = std::make_shared<StrategyElastoChrono>();
     rotor.build(blades);
     rotor.assemble(system_elasto);
     rotor.elasto.body_yaw_bearing->set_fixed(true);
@@ -141,6 +144,7 @@ TEST(test_tower, mass) {
     system_elasto->add(tower_mesh);
     // tower
     auto tower = get_tower_from_json((DATADIR / "tower.json").generic_string());
+    tower.elasto.strategy_elasto = std::make_shared<StrategyElastoChrono>();
     tower.build();
     tower.assemble(tower_mesh);
 
@@ -162,6 +166,7 @@ TEST(test_blade, natural_period_dynamic_edge) {
     system_elasto->add(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
+    blade_core.elasto->strategy_elasto = std::make_shared<StrategyElastoChrono>();
     // make 50 elements
     blade_core.elasto->discretization_fractions.clear();
     for (int ii = 0; ii < 51; ii++) {
@@ -221,6 +226,7 @@ TEST(test_blade, natural_period_dynamic_flap) {
     system_elasto->add(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
+    blade_core.elasto->strategy_elasto = std::make_shared<StrategyElastoChrono>();
     // make 50 elements
     blade_core.elasto->discretization_fractions.clear();
     for (int ii = 0; ii < 51; ii++) {

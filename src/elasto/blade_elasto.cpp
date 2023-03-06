@@ -1,8 +1,8 @@
 #include <seahowl/elasto/blade_elasto.h>
 
-#include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/core/utils.h>  // For DiscretizationPoint
 #include <seahowl/elasto/reference_point_elasto.h>
+#include <seahowl/elasto/chrono_adapters.h>
 
 #include <numeric>
 
@@ -14,6 +14,10 @@ void BladeElasto::build() {
     // check that enough reference points were defined to create elements (at least 2)
     if (reference_points.size() <= 2) {
         throw std::runtime_error("Not enough elasto reference points defined for blade.");
+    }
+    // check that a pointer to a strategy was initialized
+    if (!strategy_elasto) {
+        throw std::runtime_error("Must define elasto strategy for blade.");
     }
 
     // check that discretization_fractions was defined, otherwise take reference point fractions
@@ -56,16 +60,10 @@ void BladeElasto::build() {
         nodes[ii]->set_rotation(Quaternion(rotation_matrix));
     }
 
-    if (fpm_mode) {
-        build_elements_tapered_timoshenko_fpm();
-    } else {
-        build_elements_tapered_timoshenko();
-    }
-    // commented out since loads are applied to nodes;
-    // build_loads(system);
+    build_elements();
 };
 
-void BladeElasto::build_elements_tapered_timoshenko() {
+void BladeElasto::build_elements() {
     elements.clear();
     const auto nelements = nodes.size() - 1;
 
@@ -75,7 +73,7 @@ void BladeElasto::build_elements_tapered_timoshenko() {
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
-        auto element = std::make_shared<ElementBladeElastoChrono>();
+        auto element = strategy_elasto->make_element_blade();
         // add element to blade elements vector
         elements.push_back(element);
         // set element nodes
@@ -86,46 +84,9 @@ void BladeElasto::build_elements_tapered_timoshenko() {
         // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
         rotation_relative =
             Quaternion(rotation_relative.w(), rotation_relative.z(), rotation_relative.y(), rotation_relative.x());
-        element->set_prebend(rotation_relative);
+        std::dynamic_pointer_cast<ElementBladeElasto>(element)->set_prebend(rotation_relative);
     }
 }
-
-void BladeElasto::build_elements_tapered_timoshenko_fpm() {
-    elements.clear();
-    const auto nelements = nodes.size() - 1;
-
-    if (nelements <= 0) {
-        throw std::runtime_error("Trying to build blade with no element.");
-    }
-
-    for (size_t ii = 1; ii < nelements + 1; ii++) {
-        // create element
-        auto element = std::make_shared<ElementBladeElastoChronoFPM>();
-        // add element to blade elements vector
-        elements.push_back(element);
-        // set element nodes
-        element->set_nodes(nodes[ii - 1], nodes[ii]);
-
-        // apply prebend and structural twist
-        auto rotation_relative = (nodes[ii]->get_rotation() * nodes[ii - 1]->get_rotation().inverse()).normalized();
-        // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
-        rotation_relative =
-            Quaternion(rotation_relative.w(), rotation_relative.z(), rotation_relative.y(), rotation_relative.x());
-        element->set_prebend(rotation_relative);
-    }
-}
-
-// void BladeElasto::build_loads(chrono::ChSystemSMC& system) {
-//    auto loadcontainer = chrono_types::make_shared<chrono::ChLoadContainer>();
-//    system.Add(loadcontainer);
-//
-//    for (auto element : elements) {
-//        std::shared_ptr<chrono::ChLoad<ChLoaderWeighted>> loader_weighted(
-//            new chrono::ChLoad<ChLoaderWeighted>(element));
-//        loaders_aero.push_back(loader_weighted);
-//        loadcontainer->Add(loader_weighted);
-//    }
-//}
 
 void BladeElasto::evaluate_position_rotation(Vector3d& position,
                                              Quaternion& rotation,

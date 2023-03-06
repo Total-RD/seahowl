@@ -153,12 +153,14 @@ set(SEAHOWL_ELASTO_SOURCES
 set(SEAHOWL_ELASTO_HEADERS
     include/seahowl/elasto/blade_elasto.h
     include/seahowl/elasto/entities_elasto.h
+    include/seahowl/elasto/strategy_elasto.h
     include/seahowl/elasto/component_elasto.h
     include/seahowl/elasto/reference_point_elasto.h
     include/seahowl/elasto/rotor_elasto.h
     include/seahowl/elasto/tower_elasto.h
     include/seahowl/elasto/mooring_elasto.h
     include/seahowl/elasto/chrono_adapters.h
+    include/seahowl/elasto/chrono_strategy.h
 )
 source_group(elasto FILES ${SEAHOWL_ELASTO_SOURCES} ${SEAHOWL_ELASTO_HEADERS})
 

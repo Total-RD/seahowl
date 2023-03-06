@@ -7,6 +7,7 @@
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/elasto/blade_elasto.h>
+#include <seahowl/elasto/chrono_strategy.h>
 #include <seahowl/servo/controller_discon.h>
 #include <seahowl/core/system.h>
 #include <seahowl/commons.h>
@@ -334,6 +335,7 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
     for (auto& blade_json : blades_json2) {
         auto filepath_blade = (DATADIR / blade_json.at("file").get<std::string>()).generic_string();
         auto blade = std::make_shared<seahowl::core::Blade>(get_blade_from_json(filepath_blade));
+        blade->elasto->strategy_elasto = std::make_shared<seahowl::elasto::StrategyElastoChrono>();
         blades_json.at("discretization").at("elasto").get_to(blade->elasto->discretization_fractions);
         blades_json.at("discretization").at("aero").get_to(blade->aero->discretization_fractions);
         blades_json.at("fpm").get_to(blade->elasto->fpm_mode);
@@ -344,11 +346,13 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
     // RNA
     auto filepath_rotor = (DATADIR / rna_json.at("file").get<std::string>()).generic_string();
     auto rotor = get_rotor_from_json(filepath_rotor);
+    rotor.elasto.strategy_elasto = std::make_shared<seahowl::elasto::StrategyElastoChrono>();
     rna_json.at("initial_pitch_collective").get_to(rotor.elasto.pitch_collective);
 
     // tower
     auto filepath_tower = (DATADIR / tower_json.at("file").get<std::string>()).generic_string();
     auto tower = get_tower_from_json(filepath_tower);
+    tower.elasto.strategy_elasto = std::make_shared<seahowl::elasto::StrategyElastoChrono>();
     tower_json.at("discretization").at("elasto").get_to(tower.elasto.discretization_fractions);
     tower_json.at("discretization").at("aero").get_to(tower.aero.discretization_fractions);
 

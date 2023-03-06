@@ -5,6 +5,7 @@
 
 #include <seahowl/commons.h>
 #include <seahowl/elasto/entities_elasto.h>
+#include <seahowl/elasto/strategy_elasto.h>
 #include <seahowl/elasto/reference_point_elasto.h>
 
 namespace seahowl {
@@ -18,6 +19,9 @@ namespace elasto {
  */
 class ComponentElasto {
   public:
+    /** @brief Elasto strategy to use on component. */
+    std::shared_ptr<StrategyElasto> strategy_elasto;
+
     /**
      * @brief Rotates the component.
      *
