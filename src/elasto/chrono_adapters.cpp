@@ -10,7 +10,7 @@
 #include <chrono/physics/ChSystemSMC.h>
 
 #include <seahowl/elasto/reference_point_elasto.h>
-#include <seahowl/elasto/elasto.h>
+#include <seahowl/elasto/entities_elasto.h>
 
 #include <vector>
 #include <memory>

@@ -142,7 +142,7 @@ source_group(core FILES ${SEAHOWL_CORE_SOURCES} ${SEAHOWL_CORE_HEADERS})
 
 # elasto
 set(SEAHOWL_ELASTO_SOURCES
-    src/elasto/elasto.cpp
+    src/elasto/component_elasto.cpp
     src/elasto/blade_elasto.cpp
     src/elasto/reference_point_elasto.cpp
     src/elasto/rotor_elasto.cpp
@@ -152,7 +152,8 @@ set(SEAHOWL_ELASTO_SOURCES
 )
 set(SEAHOWL_ELASTO_HEADERS
     include/seahowl/elasto/blade_elasto.h
-    include/seahowl/elasto/elasto.h
+    include/seahowl/elasto/entities_elasto.h
+    include/seahowl/elasto/component_elasto.h
     include/seahowl/elasto/reference_point_elasto.h
     include/seahowl/elasto/rotor_elasto.h
     include/seahowl/elasto/tower_elasto.h

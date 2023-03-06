@@ -1,6 +1,6 @@
 #pragma once
 
-#include <seahowl/elasto/elasto.h>
+#include <seahowl/elasto/component_elasto.h>
 
 namespace seahowl {
 namespace elasto {

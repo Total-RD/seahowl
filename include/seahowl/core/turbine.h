@@ -6,7 +6,6 @@
 #include <seahowl/servo/controller.h>
 #include <seahowl/aero/aerodyn_adapter.h>
 #include <seahowl/commons.h>
-#include <seahowl/elasto/elasto.h>
 
 #include <vector>
 

@@ -1,5 +1,6 @@
 #pragma once
-#include <seahowl/elasto/elasto.h>
+
+#include <seahowl/elasto/component_elasto.h>
 #include <seahowl/commons.h>
 
 #include <chrono/fea/ChElementBeamEuler.h>

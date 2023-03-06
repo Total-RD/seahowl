@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <seahowl/elasto/elasto.h>
+#include <seahowl/elasto/entities_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/core/reference_point.h>
