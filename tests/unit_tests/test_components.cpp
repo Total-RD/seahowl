@@ -14,6 +14,7 @@
 #include <seahowl/core/rotor.h>
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/core/turbine.h>
+#include <seahowl/core/system.h>
 
 #include <seahowl/io/read_json.h>
 
@@ -319,7 +320,7 @@ TEST(test_turbine, rpm_initial_pitch) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
 
-    auto turbine_file = (DATADIR / "turbine.json").generic_string();
+    auto turbine_file = (DATADIR / "turbine_nocontrol.json").generic_string();
     auto turbine = get_turbine_from_json(turbine_file);
 
     turbine.use_aerodyn = false;
@@ -390,7 +391,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
     system.AddMesh(blades_mesh);
 
-    auto turbine_file = (DATADIR / "turbine.json").generic_string();
+    auto turbine_file = (DATADIR / "turbine_nocontrol.json").generic_string();
     auto turbine = get_turbine_from_json(turbine_file);
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
@@ -432,3 +433,95 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.77, 0.02);
 }
 #endif
+
+TEST(test_turbine, multiturbines) {
+    // general options
+    bool visualization_on = true;
+    bool statics_prestep = true;
+    // solver
+    auto verbose = false;
+    // timestepping
+    auto timestepper_type = ChTimestepper::Type::HHT;
+    double dt = 0.1;
+    // wind
+    auto wind_model = std::make_shared<seahowl::aero::ConstantWind>();
+    wind_model->set_wind_velocity(ChVector<double>(8.0, 0.0, 0.0));
+    // turbine
+    double initial_pitch = CH_C_PI / 8.0;
+
+    // system
+    ChSystemSMC system_chrono;
+    system_chrono.Set_G_acc(ChVector<double>(0.0, 0.0, -9.81));
+    auto solver = chrono_types::make_shared<ChSolverSparseLU>();
+    system_chrono.SetSolver(solver);
+    solver->UseSparsityPatternLearner(true);
+    solver->LockSparsityPattern(true);
+    solver->SetVerbose(verbose);
+    system_chrono.SetTimestepperType(ChTimestepper::Type::HHT);
+    auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system_chrono.GetTimestepper());
+    mystepper->SetStepControl(false);
+    mystepper->SetModifiedNewton(false);
+
+    // mesh for blade
+    auto blades_mesh = chrono_types::make_shared<chrono::fea::ChMesh>();
+    system_chrono.AddMesh(blades_mesh);
+
+    // system core
+    seahowl::core::System system_core;
+    system_core.wind_model = wind_model;
+
+    // turbines
+    auto turbine_file = (DATADIR / "turbine_nocontrol.json").generic_string();
+    // turbine 1
+    system_core.turbines.push_back(get_turbine_from_json(turbine_file));
+    auto& turbine1 = system_core.turbines.back();
+    turbine1.build();
+    turbine1.assemble(system_chrono, blades_mesh);
+    // turbine 2
+    system_core.turbines.push_back(get_turbine_from_json(turbine_file));
+    auto& turbine2 = system_core.turbines.back();
+    turbine2.build();
+    turbine2.assemble(system_chrono, blades_mesh);
+    turbine2.translate(chrono::ChVector<double>(150.0, -150.0, 0.0));
+    // turbine 3
+    system_core.turbines.push_back(get_turbine_from_json(turbine_file));
+    auto& turbine3 = system_core.turbines.back();
+    turbine3.build();
+    turbine3.assemble(system_chrono, blades_mesh);
+    turbine3.translate(chrono::ChVector<double>(150.0, 150.0, 0.0));
+
+    // remove controller
+    for (auto& turbine : system_core.turbines) {
+        // empty controller
+        turbine.controller = std::make_shared<seahowl::servo::Controller>();
+        turbine.tower.elasto.nodes.front()->SetFixed(true);
+        turbine.use_aerodyn = true;
+    }
+
+    // statics
+    if (statics_prestep) {
+        system_chrono.DoStaticLinear();
+        system_chrono.DoStaticNonlinear(10, verbose);
+    }
+
+    double time = 0.0;
+    for (auto& turbine : system_core.turbines) {
+        turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
+    }
+    system_core.init(time, dt);
+    while (time < 50) {
+        // prestep
+        system_core.prestep(time, dt);
+
+        // step
+        system_chrono.DoStepDynamics(dt);
+        time += system_chrono.GetStep();
+
+        // poststep
+        system_core.poststep(time, dt);
+    }
+
+    for (auto& turbine : system_core.turbines) {
+        ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.809, 0.02);
+    }
+}
