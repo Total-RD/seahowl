@@ -97,7 +97,7 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
 
             // get global/local directions
             // pointing from hub towards nacelle
-            auto local_direction_normal = Vector3d(0.0, 0.0, 1.0);
+            auto local_direction_normal = Vector3d(1.0, 0.0, 0.0);
             auto global_direction_normal = hub_rotation * local_direction_normal;
             // pointing from hub to node position
             auto global_direction_hub2node = (position - hub_position).normalized();

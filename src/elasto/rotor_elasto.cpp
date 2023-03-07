@@ -33,8 +33,8 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     // move hub along X for overhang and COG offset, and along Z for distance from towertop
     body_hub->set_position(Vector3d(hub.overhang + hub.center_of_mass, 0.0, 0.0));
     // local Z axis along global X axis + shaft tilt along global Y axis
-    auto tilt_hub = AngleAxisd(shaft.tilt, -Vector3d(0.0, 1.0, 0.0));
-    body_hub->set_rotation(tilt_hub * AngleAxisd(PI / 2.0, Vector3d(0.0, 1.0, 0.0)));
+    auto tilt_hub = Quaternion(AngleAxisd(shaft.tilt, -Vector3d(0.0, 1.0, 0.0)));
+    body_hub->set_rotation(tilt_hub);
     body_hub->set_position((tilt_hub * body_hub->get_position()) + Vector3d(0.0, 0.0, shaft.distance_from_towertop));
     // mass and inertia
     body_hub->set_mass(hub.mass);
@@ -51,7 +51,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     // link hub to shaft
     link_shaft_hub = std::make_shared<LinkChrono>();
     link_shaft_hub->initialize(body_hub, body_shaft);
-    link_shaft_hub->set_constraints(true, true, true, true, true, false);
+    link_shaft_hub->set_constraints(true, true, true, false, true, true);
 
     // nacelle
     body_nacelle = std::make_shared<BodyElastoChrono>();
@@ -196,14 +196,14 @@ double RotorElasto::get_rpm() const {
     // relative rotational velocity between hub and shaft
     auto rotational_velocity = body_hub->get_rotational_velocity_local() - body_shaft->get_rotational_velocity_local();
     // convert to rpm
-    auto rpm = rotational_velocity.z() * 60 / (2 * PI);
+    auto rpm = rotational_velocity.x() * 60 / (2 * PI);
     return rpm;
 }
 
 double RotorElasto::get_azimuth() const {
     // get angle between quaternions
     auto qq = (body_shaft->get_rotation().conjugate() * body_hub->get_rotation()).normalized();
-    double angle0 = std::atan2(qq.vec().z(), qq.w());
+    double angle0 = std::atan2(qq.vec().x(), qq.w());
     // get angle between 0 and 2pi
     double angle1 = fmod(angle0, 2 * PI);
     // get angle between -pi and +pi
@@ -219,4 +219,8 @@ double RotorElasto::get_axial_thrust() const {
 double RotorElasto::get_axial_torque() const {
     auto react_torque = link_shaft_hub->get_reaction_torque();
     return react_torque.x();
+}
+
+void RotorElasto::accumulate_axial_torque(double torque) {
+    body_hub->accumulate_torque(Vector3d(torque, 0.0, 0.0), true);
 }

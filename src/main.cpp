@@ -31,8 +31,9 @@ using std::filesystem::remove_all;
 void output_results(seahowl::core::System& seahowl_system, chrono::ChSystemSMC& system, int step) {
     // output
     auto time = system.GetChTime();
-    chrono::GetLog() << "time: " << system.GetChTime() << " step: " << step
-                     << " rpm: " << seahowl_system.turbines[0].rotor.elasto.get_rpm() << "\n";
+    chrono::GetLog() << "time: " << system.GetChTime() << ", step: " << step
+                     << ", rpm: " << seahowl_system.turbines[0].rotor.elasto.get_rpm()
+                     << ", pitch: " << seahowl_system.turbines[0].rotor.elasto.pitch_collective << "\n";
     write_turbine_info_to_csv("./output/output.csv", seahowl_system, system.GetChTime());
 }
 

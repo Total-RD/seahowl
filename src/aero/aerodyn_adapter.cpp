@@ -81,9 +81,6 @@ void seahowl::aero::AeroDynAdapter::setMotionHub(seahowl::core::Turbine& turbine
         hubAcc_C[i + 3] = hubRotAcc[i];
     }
 
-    // rotate the local coordinate system from seahowl to aerodyn
-    hubOri = hubOri * AngleAxisd(-PI / 2, Vector3d(0.0, 1.0, 0.0)).toRotationMatrix();
-
     hubOri_C[0] = hubOri(0, 0);
     hubOri_C[1] = hubOri(0, 1);
     hubOri_C[2] = hubOri(0, 2);

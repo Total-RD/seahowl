@@ -169,6 +169,13 @@ class RotorElasto : public ComponentElasto {
      * @brief Returns azimuth of rotor.
      */
     double get_azimuth() const;
+
+    /**
+     * @brief Accumulates torque on the rotor.
+     *
+     * @param[in] torque Torque to accumulate on axial axis of hub.
+     */
+    void accumulate_axial_torque(double torque);
 };
 
 }  // namespace elasto
