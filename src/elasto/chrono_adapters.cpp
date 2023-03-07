@@ -422,43 +422,32 @@ void ElementMooringElastoChrono::set_properties(double density, double diameter,
     section->SetAsCircularSection(diameter);
 }
 
-LinkFixChrono::LinkFixChrono() {
-    chobj = chrono_types::make_shared<chrono::ChLinkMateFix>();
+LinkChrono::LinkChrono() {
+    chobj = chrono_types::make_shared<chrono::ChLinkMateGeneric>();
+    chobj->SetConstrainedCoords(true, true, true, true, true, true);
 }
 
-void LinkFixChrono::initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) {
-    chobj->Initialize(std::dynamic_pointer_cast<BodyElastoChrono>(body1)->chobj,
-                      std::dynamic_pointer_cast<BodyElastoChrono>(body2)->chobj);
-}
-
-void LinkFixChrono::initialize(std::shared_ptr<NodeElasto> node1, std::shared_ptr<BodyElasto> body2) {
-    chobj->Initialize(std::dynamic_pointer_cast<NodeElastoChrono>(node1)->chobj,
-                      std::dynamic_pointer_cast<BodyElastoChrono>(body2)->chobj);
-}
-
-Vector3d LinkFixChrono::get_reaction_force() const {
-    return ch2vec(chobj->Get_react_force());
-}
-
-Vector3d LinkFixChrono::get_reaction_torque() const {
-    return ch2vec(chobj->Get_react_torque());
-}
-
-LinkRevoluteChrono::LinkRevoluteChrono() {
-    chobj = chrono_types::make_shared<chrono::ChLinkRevolute>();
-}
-
-void LinkRevoluteChrono::initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) {
+void LinkChrono::initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) {
     chobj->Initialize(std::dynamic_pointer_cast<BodyElastoChrono>(body1)->chobj,
                       std::dynamic_pointer_cast<BodyElastoChrono>(body2)->chobj,
                       std::dynamic_pointer_cast<BodyElastoChrono>(body2)->chobj->GetFrame_COG_to_abs());
 }
 
-Vector3d LinkRevoluteChrono::get_reaction_force() const {
+void LinkChrono::initialize(std::shared_ptr<NodeElasto> node1, std::shared_ptr<BodyElasto> body2) {
+    chobj->Initialize(std::dynamic_pointer_cast<NodeElastoChrono>(node1)->chobj,
+                      std::dynamic_pointer_cast<BodyElastoChrono>(body2)->chobj,
+                      std::dynamic_pointer_cast<BodyElastoChrono>(body2)->chobj->GetFrame_COG_to_abs());
+}
+
+void LinkChrono::set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) {
+    chobj->SetConstrainedCoords(surge, sway, heave, roll, pitch, yaw);
+}
+
+Vector3d LinkChrono::get_reaction_force() const {
     return ch2vec(chobj->Get_react_force());
 }
 
-Vector3d LinkRevoluteChrono::get_reaction_torque() const {
+Vector3d LinkChrono::get_reaction_torque() const {
     return ch2vec(chobj->Get_react_torque());
 }
 
@@ -496,12 +485,8 @@ void SystemElastoChrono::add(std::shared_ptr<MeshElasto> mesh) {
     chobj.Add(std::dynamic_pointer_cast<MeshElastoChrono>(mesh)->chobj);
 }
 
-void SystemElastoChrono::add(std::shared_ptr<LinkFix> link) {
-    chobj.Add(std::dynamic_pointer_cast<LinkFixChrono>(link)->chobj);
-}
-
-void SystemElastoChrono::add(std::shared_ptr<LinkRevolute> link) {
-    chobj.Add(std::dynamic_pointer_cast<LinkRevoluteChrono>(link)->chobj);
+void SystemElastoChrono::add(std::shared_ptr<Link> link) {
+    chobj.Add(std::dynamic_pointer_cast<LinkChrono>(link)->chobj);
 }
 
 }  // namespace elasto

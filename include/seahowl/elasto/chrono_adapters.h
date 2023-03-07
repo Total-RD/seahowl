@@ -134,30 +134,17 @@ class ElementMooringElastoChrono : public ElementElastoChrono, public ElementMoo
 };
 
 /**
- * @brief Chrono fixed link class.
+ * @brief Chrono link class.
  */
-class LinkFixChrono : public LinkFix {
+class LinkChrono : public Link {
   public:
     /** @brief Pointer to underlying Chrono object. */
-    std::shared_ptr<chrono::ChLinkMateFix> chobj;
+    std::shared_ptr<chrono::ChLinkMateGeneric> chobj;
 
-    LinkFixChrono();
+    LinkChrono();
+    virtual void set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) override;
     virtual void initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) override;
     virtual void initialize(std::shared_ptr<NodeElasto> node1, std::shared_ptr<BodyElasto> body2) override;
-    Vector3d get_reaction_force() const override;
-    Vector3d get_reaction_torque() const override;
-};
-
-/**
- * @brief Chrono revolute link class.
- */
-class LinkRevoluteChrono : public LinkRevolute {
-  public:
-    /** @brief Pointer to underlying Chrono object. */
-    std::shared_ptr<chrono::ChLinkRevolute> chobj;
-
-    LinkRevoluteChrono();
-    virtual void initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) override;
     Vector3d get_reaction_force() const override;
     Vector3d get_reaction_torque() const override;
 };
@@ -189,8 +176,7 @@ class SystemElastoChrono : public SystemElasto {
     virtual void set_gravitational_acceleration(Vector3d gravitational_acceleration) override;
     virtual void add(std::shared_ptr<BodyElasto> body) override;
     virtual void add(std::shared_ptr<MeshElasto> mesh) override;
-    virtual void add(std::shared_ptr<LinkFix> link) override;
-    virtual void add(std::shared_ptr<LinkRevolute> link) override;
+    virtual void add(std::shared_ptr<Link> link) override;
 };
 
 }  // namespace elasto

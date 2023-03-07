@@ -49,8 +49,9 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     // massless body
     body_shaft->set_mass(0.0);
     // link hub to shaft
-    link_shaft_hub = std::make_shared<LinkRevoluteChrono>();
+    link_shaft_hub = std::make_shared<LinkChrono>();
     link_shaft_hub->initialize(body_hub, body_shaft);
+    link_shaft_hub->set_constraints(true, true, true, true, true, false);
 
     // nacelle
     body_nacelle = std::make_shared<BodyElastoChrono>();
@@ -61,8 +62,9 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     ///@todo  change to full 3x3 inertia matrix
     body_nacelle->set_inertia_diagonal(Vector3d(0.0, 0.0, nacelle.inertia));
     // link nacelle body to shaft body
-    link_shaft_nacelle = std::make_shared<LinkFixChrono>();
+    link_shaft_nacelle = std::make_shared<LinkChrono>();
     link_shaft_nacelle->initialize(body_nacelle, body_shaft);
+    link_shaft_nacelle->set_constraints(true, true, true, true, true, true);
 
     // yaw bearing
     body_yaw_bearing = std::make_shared<BodyElastoChrono>();
@@ -70,9 +72,9 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     body_yaw_bearing->set_rotation(rotation0);
     body_yaw_bearing->set_mass(nacelle.yaw_bearing_mass);
     // link yaw bearing body to shaft body
-    // link_shaft_yaw_bearing = chrono_types::make_shared<ChLinkRevolute>();
-    link_shaft_yaw_bearing = std::make_shared<LinkFixChrono>();
+    link_shaft_yaw_bearing = std::make_shared<LinkChrono>();
     link_shaft_yaw_bearing->initialize(body_shaft, body_yaw_bearing);
+    link_shaft_yaw_bearing->set_constraints(true, true, true, true, true, true);
 
     // blades
     links_blades.clear();
@@ -100,8 +102,9 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
         blade->translate(Vector3d(0.0, 0.0, shaft.distance_from_towertop));
 
         // link root node of blade to rotor center
-        auto link_hub_blade = std::make_shared<LinkFixChrono>();
+        auto link_hub_blade = std::make_shared<LinkChrono>();
         link_hub_blade->initialize(blade->nodes[0], body_hub);
+        link_hub_blade->set_constraints(true, true, true, true, true, true);
         links_blades.push_back(link_hub_blade);
     }
 }
@@ -111,9 +114,10 @@ void RotorElasto::link_tower(const TowerElasto& tower, seahowl::elasto::SystemEl
     // translate RNA center of origin to towertop
     this->translate(towertop_node->get_position());
     // link yaw bearing body to towertop
-    link_towertop_yaw_bearing = chrono_types::make_shared<LinkFixChrono>();
+    link_towertop_yaw_bearing = chrono_types::make_shared<LinkChrono>();
     system.add(link_towertop_yaw_bearing);
     link_towertop_yaw_bearing->initialize(towertop_node, body_yaw_bearing);
+    link_towertop_yaw_bearing->set_constraints(true, true, true, true, true, true);
 }
 
 void RotorElasto::rotate(double angle, const Vector3d& axis) const {

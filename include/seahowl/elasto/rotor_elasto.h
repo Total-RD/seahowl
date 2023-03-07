@@ -82,15 +82,15 @@ class RotorElasto : public ComponentElasto {
     // links
     //
     /** @brief Links between blades and hub. */
-    std::vector<std::shared_ptr<LinkFix>> links_blades;
+    std::vector<std::shared_ptr<Link>> links_blades;
     /** @brief Link between shaft and hub (revolute). */
-    std::shared_ptr<LinkRevolute> link_shaft_hub;
+    std::shared_ptr<Link> link_shaft_hub;
     /** @brief Link between shaft and nacelle (fixed). */
-    std::shared_ptr<LinkFix> link_shaft_nacelle;
+    std::shared_ptr<Link> link_shaft_nacelle;
     /** @brief Link between shaft and yaw bearing (fixed). */
-    std::shared_ptr<LinkFix> link_shaft_yaw_bearing;
+    std::shared_ptr<Link> link_shaft_yaw_bearing;
     /** @brief Link between towertop (if any) and yaw bearing (fixed). */
-    std::shared_ptr<LinkFix> link_towertop_yaw_bearing;
+    std::shared_ptr<Link> link_towertop_yaw_bearing;
     ///@}
 
     // reference properties

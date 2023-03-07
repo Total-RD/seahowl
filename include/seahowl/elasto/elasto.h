@@ -141,22 +141,6 @@ class ElementMooringElasto : public ElementElasto {
 class Link {
   public:
     /**
-     * @brief Returns reaction force.
-     */
-    virtual Vector3d get_reaction_force() const = 0;
-
-    /**
-     * @brief Returns reaction torque.
-     */
-    virtual Vector3d get_reaction_torque() const = 0;
-};
-
-/**
- * @brief Elasto fixed link/joint base class.
- */
-class LinkFix : public Link {
-  public:
-    /**
      * @brief Initialize link between bodies.
      */
     virtual void initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) = 0;
@@ -165,17 +149,28 @@ class LinkFix : public Link {
      * @brief Initialize link between node and body.
      */
     virtual void initialize(std::shared_ptr<NodeElasto> node1, std::shared_ptr<BodyElasto> body2) = 0;
-};
 
-/**
- * @brief Elasto revolute link/joint base class.
- */
-class LinkRevolute : public Link {
-  public:
     /**
-     * @brief Initialize link between bodies.
+     * @brief Sets constraints (true: constrained; false: unconstrained).
+     *
+     * @param[in] surge Translational x-axis constraint.
+     * @param[in] sway Translational y-axis constraint.
+     * @param[in] heave Translational z-axis constraint.
+     * @param[in] roll Rotational x-axis constraint.
+     * @param[in] pitch Rotational y-axis constraint.
+     * @param[in] yaw Rotational z-axis constraint.
      */
-    virtual void initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) = 0;
+    virtual void set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) = 0;
+
+    /**
+     * @brief Returns reaction force.
+     */
+    virtual Vector3d get_reaction_force() const = 0;
+
+    /**
+     * @brief Returns reaction torque.
+     */
+    virtual Vector3d get_reaction_torque() const = 0;
 };
 
 /**
@@ -234,14 +229,7 @@ class SystemElasto {
      *
      * @param[in] link Link to add to system.
      */
-    virtual void add(std::shared_ptr<LinkFix> link) = 0;
-
-    /**
-     * @brief Adds link to system.
-     *
-     * @param[in] link Link to add to system.
-     */
-    virtual void add(std::shared_ptr<LinkRevolute> link) = 0;
+    virtual void add(std::shared_ptr<Link> link) = 0;
 };
 
 /**
