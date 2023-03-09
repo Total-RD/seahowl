@@ -70,7 +70,7 @@ class RotorAero {
      * @param[in] tip_loss Whether to take tip loss into account or not.
      * @param[in] hub_loss Whether to take hub loss into account or not.
      */
-    void compute_wind_loads_bemt(const WindModel& wind_model,
+    void compute_wind_loads_bemt(WindModel& wind_model,
                                  double time,
                                  const TowerAero& tower_aero,
                                  bool tower_shadow = true,
@@ -90,7 +90,7 @@ class RotorAero {
      * @param[in] hub_loss Whether to take hub loss into account or not.
      */
     void compute_wind_loads_aerodyn(float* LoadAeroDyn,
-                                    const WindModel& wind_model,
+                                    WindModel& wind_model,
                                     double time,
                                     const TowerAero& tower_aero,
                                     bool tower_shadow = true,

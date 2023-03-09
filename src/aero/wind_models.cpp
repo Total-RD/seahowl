@@ -18,7 +18,7 @@ Vector3d get_sheared_wind_velocity(const Vector3d& velocity,
 
 WindModel::WindModel() {}
 
-Vector3d WindModel::get_wind_velocity(const Vector3d& position, double time) const {
+Vector3d WindModel::get_wind_velocity(const Vector3d& position, double time) {
     return Vector3d(0.0, 0.0, 0.0);
 };
 
@@ -35,7 +35,7 @@ void ConstantWind::set_wind_velocity(Vector3d velocity) {
     wind_velocity = velocity;
 }
 
-Vector3d ConstantWind::get_wind_velocity(const Vector3d& position, double time) const {
+Vector3d ConstantWind::get_wind_velocity(const Vector3d& position, double time) {
     auto velocity = get_sheared_wind_velocity(wind_velocity, position, direction_gravity, shear_coefficient,
                                               reference_height, reference_length);
     return velocity;
@@ -54,7 +54,7 @@ void WindRamp::set_wind_velocity_stop(Vector3d velocity) {
     wind_velocity_stop = velocity;
 }
 
-Vector3d WindRamp::get_wind_velocity(const Vector3d& position, double time) const {
+Vector3d WindRamp::get_wind_velocity(const Vector3d& position, double time) {
     auto velocity = wind_velocity_start;
     if (time >= time_start) {
         double w1 = 1.0 - std::min((time - time_start) / (time_stop - time_start), 1.0);

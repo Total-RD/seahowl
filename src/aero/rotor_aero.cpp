@@ -61,7 +61,7 @@ void RotorAero::compute_radii() {
     }
 }
 
-void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
+void RotorAero::compute_wind_loads_bemt(WindModel& wind_model,
                                         double time,
                                         const TowerAero& tower_aero,
                                         bool tower_shadow,
@@ -162,7 +162,7 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
 
 #ifdef HAVE_AERODYN
 void RotorAero::compute_wind_loads_aerodyn(float* LoadAeroDyn,
-                                           const WindModel& wind_model,
+                                           WindModel& wind_model,
                                            double time,
                                            const TowerAero& tower_aero,
                                            bool tower_shadow,
