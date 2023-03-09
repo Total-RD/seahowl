@@ -8,6 +8,11 @@
 #include <vtkPointData.h>
 #include <vtkDoubleArray.h>
 
+#include <string>
+#include <vector>
+#include <map>
+#include <cstdio>
+
 using seahowl::Vector3d;
 
 OutputMeshVTK::OutputMeshVTK(seahowl::elasto::ComponentElastoFEA& component) : component(component) {
