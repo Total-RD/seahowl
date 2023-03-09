@@ -6,7 +6,6 @@
 #include <seahowl/core/turbine.h>
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/rotor_elasto.h>
-#include <seahowl/elasto/elasto.h>
 
 #include <chrono/core/ChVector.h>
 #include <chrono/physics/ChBody.h>

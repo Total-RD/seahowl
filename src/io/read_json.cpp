@@ -10,6 +10,7 @@
 #include <seahowl/servo/controller_discon.h>
 #include <seahowl/core/system.h>
 #include <seahowl/commons/numerics.h>
+#include "seahowl/aero/inflowwind_adapter.h"
 
 #include <string>
 #include <memory>
@@ -426,8 +427,26 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         wind_model->time_stop = wind_options.at("time_stop").get<double>();
         wind_model->shear_coefficient = wind_options.at("shear_coefficient").get<double>();
         wind_model->density = environment_json.at("air_density").get<double>();
+    } else if (wind_json.at("type").get<std::string>() == "inflowwind") {
+        std::string inflowwind_filepath;
+        std::string windwnd_filepath;
+        auto wind_options = wind_json.at("options");
+        if (wind_options.contains("file_inflowwind")) {
+            inflowwind_filepath = (DATADIR / wind_options.at("file_inflowwind")).generic_string();
+        } else {
+            throw std::runtime_error("InflowWind file not defined.");
+        }
+        if (wind_options.contains("file_windwnd")) {
+            windwnd_filepath = (DATADIR / wind_options.at("file_windwnd")).generic_string();
+        } else {
+            throw std::runtime_error("Wind.wnd file not defined.");
+        }
+        system_core.wind_model = std::make_shared<seahowl::aero::InflowWindAdapter>(inflowwind_filepath,windwnd_filepath);
+        auto wind_model = std::dynamic_pointer_cast<seahowl::aero::InflowWindAdapter>(system_core.wind_model);
+        double dt = json_obj.at("numerics").at("dt").get<double>();
+        wind_model->init(dt);
     } else {
-        throw std::runtime_error("Only wind ramp is allowed as input.");
+        throw std::runtime_error("The input wind type is unknown. Please use the existing wind types: ramp or inflowwind.");
     }
 
     auto turbines_json = json_obj.at("turbines");
