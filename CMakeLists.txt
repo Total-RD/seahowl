@@ -37,6 +37,7 @@ option(SEAHOWL_ENABLE_PYTHON "Enable python binding" OFF)
 option(SEAHOWL_ENABLE_EXAMPLES "Enable examples" ON)
 option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
 option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
+option(SEAHOWL_ENABLE_INFLOWWIND "Enable InflowWind module" OFF)
 
 # =======================
 # External libraries
@@ -68,6 +69,13 @@ if(SEAHOWL_ENABLE_AERODYN)
     add_compile_definitions(SEAHOWL_HAVE_AERODYN=1)
     add_definitions("-DHAVE_AERODYN=1")
 endif(SEAHOWL_ENABLE_AERODYN)
+
+# InflowWind module
+if(SEAHOWL_ENABLE_INFLOWWIND)
+    find_package(INFLOWWIND REQUIRED)
+    add_compile_definitions(SEAHOWL_HAVE_INFLOWWIND=1)
+    add_definitions("-DHAVE_INFLOWWIND=1")
+endif(SEAHOWL_ENABLE_INFLOWWIND)
 
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
 	message(FATAL_ERROR "ONLY 64 BITS SUPPORTED")
@@ -196,6 +204,10 @@ if (SEAHOWL_ENABLE_AERODYN)
     list(APPEND SEAHOWL_AERO_SOURCES src/aero/aerodyn_adapter.cpp)
     list(APPEND SEAHOWL_AERO_HEADERS include/seahowl/aero/aerodyn_adapter.h)
 endif(SEAHOWL_ENABLE_AERODYN)
+if (SEAHOWL_ENABLE_INFLOWWIND)
+    list(APPEND SEAHOWL_AERO_SOURCES src/aero/inflowwind_adapter.cpp)
+    list(APPEND SEAHOWL_AERO_HEADERS include/seahowl/aero/inflowwind_adapter.h)
+endif(SEAHOWL_ENABLE_INFLOWWIND)
 source_group(aero FILES
     ${SEAHOWL_AERO_SOURCES}
     ${SEAHOWL_AERO_HEADERS})
@@ -269,6 +281,10 @@ endif(SEAHOWL_ENABLE_VTK)
 if (SEAHOWL_ENABLE_AERODYN)
     target_link_libraries(seahowl_core PRIVATE AERODYN::AERODYN)
 endif (SEAHOWL_ENABLE_AERODYN)
+
+if (SEAHOWL_ENABLE_INFLOWWIND)
+    target_link_libraries(seahowl_core PRIVATE INFLOWWIND::INFLOWWIND)
+endif (SEAHOWL_ENABLE_INFLOWWIND)
 
 
 # =============
