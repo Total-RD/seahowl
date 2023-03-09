@@ -58,7 +58,8 @@ TowerReferencePointAero TowerReferencePointAero::operator*(const double factor) 
     TowerReferencePointAero new_point = *this;
     new_point.fraction *= factor;
     new_point.coordinates *= factor;
-    // new_point.rotation *= factor;
+    // (!) the rotation is not interpolated here because quaternions do not scale this way
+    // @todo Fix interpolation of quaternions in reference points (through "interpolate" function possibly).
     new_point.velocity *= factor;
     new_point.diameter *= factor;
     new_point.drag_coefficient *= factor;
@@ -69,7 +70,8 @@ TowerReferencePointAero TowerReferencePointAero::operator+(const TowerReferenceP
     TowerReferencePointAero new_point = *this;
     new_point.fraction += other.fraction;
     new_point.coordinates += other.coordinates;
-    // new_point.rotation += other.rotation;
+    // (!) the rotation is not interpolated here because quaternions do not scale this way
+    // @todo Fix interpolation of quaternions in reference points (through "interpolate" function possibly).
     new_point.velocity += other.velocity;
     new_point.diameter += other.diameter;
     new_point.drag_coefficient += other.drag_coefficient;

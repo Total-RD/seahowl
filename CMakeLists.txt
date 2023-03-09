@@ -227,8 +227,8 @@ target_sources(seahowl_core PRIVATE ${SEAHOWL_FILES})
 
 target_include_directories(
     seahowl_core
-    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include> ${CHRONO_INCLUDE_DIRS}
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS}
 )
 
 target_compile_features(seahowl_core PRIVATE cxx_std_17)

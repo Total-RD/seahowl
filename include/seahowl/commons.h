@@ -4,7 +4,7 @@
 
 namespace seahowl {
 
-const double PI = 3.14159265358979323846;
+constexpr double PI = 3.14159265358979323846;
 
 using Vector3d = Eigen::Vector3d;
 using Vector2d = Eigen::Vector2d;

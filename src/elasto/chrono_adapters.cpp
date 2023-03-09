@@ -245,9 +245,10 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
         sectionFPM->SetStiffnessMatrixFPM(sm);
         // damping
         chrono::fea::DampingCoefficients damping_coefficients;
-        damping_coefficients.bx = ref.damping_coefficients[0];
+        // damping coefficients: IEC -> Chrono convention
+        damping_coefficients.bx = ref.damping_coefficients[2];
         damping_coefficients.by = ref.damping_coefficients[1];
-        damping_coefficients.bz = ref.damping_coefficients[2];
+        damping_coefficients.bz = ref.damping_coefficients[0];
         damping_coefficients.bt = ref.damping_coefficients[3];
         damping_coefficients.alpha = ref.damping_coefficients[4];
         sectionFPM->SetBeamRaleyghDamping(damping_coefficients);
@@ -268,9 +269,10 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
         section->SetZbendingRigidity(sm(5, 5));
         // damping
         chrono::fea::DampingCoefficients damping_coefficients;
-        damping_coefficients.bx = ref.damping_coefficients[0];
+        // damping coefficients: IEC -> Chrono convention
+        damping_coefficients.bx = ref.damping_coefficients[2];
         damping_coefficients.by = ref.damping_coefficients[1];
-        damping_coefficients.bz = ref.damping_coefficients[2];
+        damping_coefficients.bz = ref.damping_coefficients[0];
         damping_coefficients.bt = ref.damping_coefficients[3];
         damping_coefficients.alpha = ref.damping_coefficients[4];
         section->SetBeamRaleyghDamping(damping_coefficients);

@@ -9,7 +9,7 @@ namespace seahowl {
 namespace core {
 
 /**
- * @brief Blade elasto reference point.
+ * @brief Blade reference point.
  *
  * The coordinate system used here is the IEC reference coordinate system for wind turbines:
  * x-axis: flapwise pointing towards nacelle,
@@ -41,7 +41,7 @@ struct BladeReferencePoint {
     //
     /** @brief Chord of blade at reference point. */
     double chord = 0.0;
-    /** @brief Damping coefficients of blade at reference point. */
+    /** @brief Damping coefficients at reference point {along x, along y, along z, about x, mass-proportional}.*/
     std::vector<double> damping_coefficients{0.03, 0.03, 0.03, 0.06, 0.0};
     /** @brief Airfoil properties of blade at reference point. */
     std::vector<seahowl::aero::AirfoilProperties> airfoil_properties{};
@@ -75,7 +75,7 @@ struct TowerReferencePoint {
     double stiffness_sideside = 0.0;
     /** @brief Torsional stiffness of tower at reference point. */
     double stiffness_torsion = 0.0;
-    /** @brief Damping coefficients of tower at reference point. */
+    /** @brief Damping coefficients at reference point {along x, along y, along z, about x, mass-proportional}.*/
     std::vector<double> damping_coefficients{0.03, 0.03, 0.03, 0.06, 0.0};
 
     // aero
