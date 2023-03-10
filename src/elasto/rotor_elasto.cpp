@@ -114,7 +114,7 @@ void RotorElasto::link_tower(const TowerElasto& tower, seahowl::elasto::SystemEl
     // translate RNA center of origin to towertop
     this->translate(towertop_node->get_position());
     // link yaw bearing body to towertop
-    link_towertop_yaw_bearing = chrono_types::make_shared<LinkChrono>();
+    link_towertop_yaw_bearing = std::make_shared<LinkChrono>();
     system.add(link_towertop_yaw_bearing);
     link_towertop_yaw_bearing->initialize(towertop_node, body_yaw_bearing);
     link_towertop_yaw_bearing->set_constraints(true, true, true, true, true, true);

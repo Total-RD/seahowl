@@ -7,7 +7,8 @@
  * @param[in] system System to visualize.
  * @param[in] application Application on which system is visualized.
  */
-void draw_system_init(chrono::ChSystem& system, std::shared_ptr<chrono::irrlicht::ChVisualSystemIrrlicht> application);
+void draw_system_init(std::shared_ptr<chrono::ChSystem> system,
+                      std::shared_ptr<chrono::irrlicht::ChVisualSystemIrrlicht> application);
 
 /**
  * @brief Draw elements of systems (rigid bodies, FEA beams, etc).
@@ -15,4 +16,5 @@ void draw_system_init(chrono::ChSystem& system, std::shared_ptr<chrono::irrlicht
  * @param[in] system System to visualize.
  * @param[in] application Application on which system is visualized.
  */
-void draw_system(const chrono::ChSystem& system, std::shared_ptr<chrono::irrlicht::ChVisualSystemIrrlicht> application);
+void draw_system(const std::shared_ptr<chrono::ChSystem> system,
+                 std::shared_ptr<chrono::irrlicht::ChVisualSystemIrrlicht> application);

@@ -17,16 +17,16 @@ int main(int argc, char* argv[]) {
     // system
     SystemElastoChrono system_elasto;
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
-    auto& system_chrono = system_elasto.chobj;
+    auto system_chrono = system_elasto.chobj;
 
     auto solver = chrono_types::make_shared<ChSolverSparseLU>();
-    system_chrono.SetSolver(solver);
+    system_chrono->SetSolver(solver);
     solver->UseSparsityPatternLearner(true);
     solver->LockSparsityPattern(true);
     solver->SetVerbose(false);
 
-    system_chrono.SetTimestepperType(ChTimestepper::Type::HHT);
-    if (auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system_chrono.GetTimestepper())) {
+    system_chrono->SetTimestepperType(ChTimestepper::Type::HHT);
+    if (auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system_chrono->GetTimestepper())) {
         mystepper->SetStepControl(false);
         mystepper->SetModifiedNewton(false);
     }
@@ -51,24 +51,24 @@ int main(int argc, char* argv[]) {
     // make fairlead
     auto fairlead = chrono_types::make_shared<ChBody>();
     fairlead->SetBodyFixed(true);
-    system_chrono.Add(fairlead);
+    system_chrono->Add(fairlead);
     // attach to fairlead
     auto fairlead_link = chrono_types::make_shared<ChLinkMateGeneric>();
     fairlead_link->Initialize(std::dynamic_pointer_cast<NodeElastoChrono>(mooring.nodes.front())->chobj, fairlead,
                               false, std::dynamic_pointer_cast<NodeElastoChrono>(mooring.nodes.front())->chobj->Frame(),
                               std::dynamic_pointer_cast<NodeElastoChrono>(mooring.nodes.front())->chobj->Frame());
-    system_chrono.Add(fairlead_link);
+    system_chrono->Add(fairlead_link);
     fairlead_link->SetConstrainedCoords(true, true, true,     // x, y, z
                                         true, false, false);  // Rx, Ry, Rz
 
     // make anchor
     auto anchor = chrono_types::make_shared<ChBody>();
     anchor->SetBodyFixed(true);
-    system_chrono.Add(anchor);
+    system_chrono->Add(anchor);
     // attach to anchor
     auto anchor_link = chrono_types::make_shared<ChLinkMateFix>();
     anchor_link->Initialize(std::dynamic_pointer_cast<NodeElastoChrono>(mooring.nodes.back())->chobj, anchor);
-    system_chrono.Add(anchor_link);
+    system_chrono->Add(anchor_link);
     anchor_link->SetConstrainedCoords(true, true, true,     // x, y, z
                                       true, false, false);  // Rx, Ry, Rz
 
@@ -108,8 +108,8 @@ int main(int argc, char* argv[]) {
                                       false, false, false);  // Rx, Ry, Rz
 
     while (true) {
-        system_chrono.DoStepDynamics(dt);
-        time += system_chrono.GetStep();
+        system_chrono->DoStepDynamics(dt);
+        time += system_chrono->GetStep();
         step += 1;
         std::cout << time << std::endl;
         chrono::GetLog() << mooring.nodes.back()->get_position();

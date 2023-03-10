@@ -9,9 +9,6 @@
 #include <seahowl/elasto/elasto.h>
 #include <seahowl/commons.h>
 
-#include <chrono/physics/ChBody.h>
-#include <chrono/core/ChMatrix33.h>
-
 /// <summary>
 /// Aerodyn module in OpenFAST
 /// </summary>

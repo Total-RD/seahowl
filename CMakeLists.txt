@@ -42,6 +42,9 @@ option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
 # External libraries
 # =======================
 
+# Eigen library
+find_package(Eigen3 3.3.0 REQUIRED)
+
 # IRRLICHT Visualization library
 if(SEAHOWL_ENABLE_IRRLICHT)
     set(IRRLICHT_COMP Irrlicht)
@@ -227,7 +230,7 @@ target_sources(seahowl_core PRIVATE ${SEAHOWL_FILES})
 
 target_include_directories(
     seahowl_core
-    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include> ${EIGEN3_INCLUDE_DIR}
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS}
 )
 

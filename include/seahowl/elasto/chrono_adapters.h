@@ -1,20 +1,29 @@
 #pragma once
 
-#include <chrono/core/ChVector.h>
-#include <chrono/core/ChMatrix.h>
-#include <chrono/fea/ChBeamSectionTaperedTimoshenkoFPM.h>
-#include <chrono/fea/ChElementBeamTaperedTimoshenkoFPM.h>
-#include <chrono/fea/ChElementBeamEuler.h>
-#include <chrono/physics/ChLinkMate.h>
-#include <chrono/physics/ChLinkRevolute.h>
-#include <chrono/fea/ChMesh.h>
-#include <chrono/physics/ChSystemSMC.h>
-
 #include <seahowl/elasto/reference_point_elasto.h>
 #include <seahowl/elasto/elasto.h>
 
 #include <vector>
 #include <memory>
+
+namespace chrono {
+template <class Real>
+class ChVector;
+template <class Real>
+class ChQuaternion;
+class ChBody;
+class ChLinkMateGeneric;
+class ChSystem;
+namespace fea {
+class ChNodeFEAxyzrot;
+class ChElementBeam;
+class ChElementBeamEuler;
+class ChElementBeamTaperedTimoshenko;
+class ChElementBeamTaperedTimoshenkoFPM;
+class ChBeamSectionTimoshenkoAdvancedGeneric;
+class ChMesh;
+}  // namespace fea
+}  // namespace chrono
 
 namespace seahowl {
 namespace elasto {
@@ -169,7 +178,7 @@ class MeshElastoChrono : public MeshElasto {
 class SystemElastoChrono : public SystemElasto {
   public:
     /** @brief Pointer to underlying Chrono object. */
-    chrono::ChSystemSMC chobj;
+    std::shared_ptr<chrono::ChSystem> chobj;
 
     SystemElastoChrono();
     virtual Vector3d get_gravitational_acceleration() const override;

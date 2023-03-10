@@ -469,26 +469,28 @@ void MeshElastoChrono::add(std::shared_ptr<chrono::fea::ChElementBeam> element) 
     chobj->AddElement(element);
 }
 
-SystemElastoChrono::SystemElastoChrono() {}
+SystemElastoChrono::SystemElastoChrono() {
+    chobj = chrono_types::make_shared<chrono::ChSystemSMC>();
+}
 
 Vector3d SystemElastoChrono::get_gravitational_acceleration() const {
-    return ch2vec(chobj.Get_G_acc());
+    return ch2vec(chobj->Get_G_acc());
 }
 
 void SystemElastoChrono::set_gravitational_acceleration(Vector3d gravitational_acceleration) {
-    chobj.Set_G_acc(gravitational_acceleration);
+    chobj->Set_G_acc(gravitational_acceleration);
 }
 
 void SystemElastoChrono::add(std::shared_ptr<BodyElasto> body) {
-    chobj.Add(std::dynamic_pointer_cast<BodyElastoChrono>(body)->chobj);
+    chobj->Add(std::dynamic_pointer_cast<BodyElastoChrono>(body)->chobj);
 }
 
 void SystemElastoChrono::add(std::shared_ptr<MeshElasto> mesh) {
-    chobj.Add(std::dynamic_pointer_cast<MeshElastoChrono>(mesh)->chobj);
+    chobj->Add(std::dynamic_pointer_cast<MeshElastoChrono>(mesh)->chobj);
 }
 
 void SystemElastoChrono::add(std::shared_ptr<Link> link) {
-    chobj.Add(std::dynamic_pointer_cast<LinkChrono>(link)->chobj);
+    chobj->Add(std::dynamic_pointer_cast<LinkChrono>(link)->chobj);
 }
 
 }  // namespace elasto
