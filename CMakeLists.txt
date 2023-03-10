@@ -43,7 +43,7 @@ option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
 # =======================
 
 # Eigen library
-find_package(Eigen3 3.3.0 REQUIRED)
+find_package(Eigen3 3.3.0 REQUIRED NO_MODULE)
 
 # IRRLICHT Visualization library
 if(SEAHOWL_ENABLE_IRRLICHT)
@@ -230,7 +230,7 @@ target_sources(seahowl_core PRIVATE ${SEAHOWL_FILES})
 
 target_include_directories(
     seahowl_core
-    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include> ${EIGEN3_INCLUDE_DIR}
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS}
 )
 
@@ -245,7 +245,9 @@ set_target_properties(
                LINK_FLAGS "${CHRONO_LINKER_FLAGS}"
 )
 
-target_link_libraries(seahowl_core PRIVATE nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES})
+target_link_libraries(seahowl_core 
+    PUBLIC Eigen3::Eigen
+    PRIVATE nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES})
 
 if(SEAHOWL_ENABLE_VTK)
     target_link_libraries(seahowl_core PRIVATE VTK::CommonDataModel VTK::IOXML)
