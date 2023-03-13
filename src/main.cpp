@@ -34,7 +34,7 @@ void output_results(seahowl::core::System& seahowl_system, std::shared_ptr<chron
     std::cout << "time: " << system_chrono->GetChTime() << ", step: " << step
               << ", rpm: " << seahowl_system.turbines[0].rotor.elasto.get_rpm()
               << ", pitch: " << seahowl_system.turbines[0].rotor.elasto.pitch_collective << std::endl;
-    write_turbine_info_to_csv("./output/output.csv", seahowl_system, system_chrono->GetChTime());
+    write_turbine_info_to_csv("./output/output", seahowl_system, system_chrono->GetChTime());
 }
 
 /**@brief Driver main function */
