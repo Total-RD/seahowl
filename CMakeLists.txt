@@ -90,6 +90,12 @@ if(VTK_FOUND)
     add_definitions("-DHAVE_VTK=1")
 endif()
 
+
+# python
+if(SEAHOWL_ENABLE_PYTHON)
+    find_package(pybind11 REQUIRED)
+endif(SEAHOWL_ENABLE_PYTHON)
+
 # --------------------------------------------------------------
 # Tweaks to disable some warnings with MSVC
 # --------------------------------------------------------------
@@ -358,3 +364,12 @@ endif(SEAHOWL_ENABLE_TESTS)
 if(SEAHOWL_ENABLE_DOC)
     add_subdirectory(doc)
 endif(SEAHOWL_ENABLE_DOC)
+
+# ====================
+# PYTHON
+# ====================
+if (SEAHOWL_ENABLE_PYTHON)
+    set(SEAHOWL_PYTHON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/bindings)
+    pybind11_add_module(pyseahowl ${SEAHOWL_PYTHON_SOURCE_DIR}/pybind_core.cpp)
+    target_link_libraries(pyseahowl PRIVATE seahowl_core)
+endif (SEAHOWL_ENABLE_PYTHON)
