@@ -52,7 +52,7 @@ void Turbine::poststep(double time, double dt) {
     controller->poststep(time, dt, *this);
 }
 
-void Turbine::assemble(SystemElasto& system, std::shared_ptr<MeshElasto> mesh) {
+void Turbine::assemble(std::shared_ptr<SystemElasto> system, std::shared_ptr<MeshElasto> mesh) {
     // assemble blades
     for (auto& blade : blades) {
         blade->assemble(mesh);

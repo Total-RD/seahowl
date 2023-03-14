@@ -10,16 +10,16 @@ using seahowl::elasto::RotorElasto;
 
 RotorElasto::RotorElasto() {}
 
-void RotorElasto::assemble(seahowl::elasto::SystemElasto& system) {
-    system.add(body_hub);
-    system.add(body_shaft);
-    system.add(link_shaft_hub);
-    system.add(body_nacelle);
-    system.add(link_shaft_nacelle);
-    system.add(body_yaw_bearing);
-    system.add(link_shaft_yaw_bearing);
+void RotorElasto::assemble(std::shared_ptr<SystemElasto> system) {
+    system->add(body_hub);
+    system->add(body_shaft);
+    system->add(link_shaft_hub);
+    system->add(body_nacelle);
+    system->add(link_shaft_nacelle);
+    system->add(body_yaw_bearing);
+    system->add(link_shaft_yaw_bearing);
     for (auto link_blade : links_blades) {
-        system.add(link_blade);
+        system->add(link_blade);
     }
 }
 
@@ -109,13 +109,13 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
     }
 }
 
-void RotorElasto::link_tower(const TowerElasto& tower, seahowl::elasto::SystemElasto& system) {
+void RotorElasto::link_tower(const TowerElasto& tower, std::shared_ptr<seahowl::elasto::SystemElasto> system) {
     auto towertop_node = tower.nodes[tower.nodes.size() - 1];
     // translate RNA center of origin to towertop
     this->translate(towertop_node->get_position());
     // link yaw bearing body to towertop
     link_towertop_yaw_bearing = std::make_shared<LinkChrono>();
-    system.add(link_towertop_yaw_bearing);
+    system->add(link_towertop_yaw_bearing);
     link_towertop_yaw_bearing->initialize(towertop_node, body_yaw_bearing);
     link_towertop_yaw_bearing->set_constraints(true, true, true, true, true, true);
 }

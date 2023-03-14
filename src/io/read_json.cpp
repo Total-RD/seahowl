@@ -393,7 +393,7 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
 }
 
 seahowl::core::System get_system_from_json(std::string filepath_main,
-                                           seahowl::elasto::SystemElasto& system_elasto,
+                                           std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto,
                                            std::shared_ptr<seahowl::elasto::MeshElasto> mesh_elasto) {
     auto DATADIR = absolute(path(filepath_main)).parent_path();
 
@@ -407,7 +407,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
     auto environment_json = json_obj.at("environment");
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
-    system_elasto.set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
+    system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
 
     // system
     auto seahowl_system = seahowl::core::System();
@@ -420,7 +420,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         wind_model->wind_velocity_start = Vector3d(v0[0], v0[1], v0[2]);
         auto v1 = wind_options.at("velocity_stop").get<std::vector<double>>();
         wind_model->wind_velocity_stop = Vector3d(v1[0], v1[1], v1[2]);
-        wind_model->direction_gravity = Vector3d(system_elasto.get_gravitational_acceleration()).normalized();
+        wind_model->direction_gravity = Vector3d(system_elasto->get_gravitational_acceleration()).normalized();
         wind_model->reference_height = wind_options.at("reference_height").get<double>();
         wind_model->time_start = wind_options.at("time_start").get<double>();
         wind_model->time_stop = wind_options.at("time_stop").get<double>();
@@ -464,7 +464,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         turbine.build();
         turbine.assemble(system_elasto, mesh_elasto);
         // rotate turbine to align tower with gravity vector
-        auto v1 = Vector3d(-system_elasto.get_gravitational_acceleration()).normalized();
+        auto v1 = Vector3d(-system_elasto->get_gravitational_acceleration()).normalized();
         auto v2 = (turbine.tower.elasto.nodes[1]->get_position() - turbine.tower.elasto.nodes[0]->get_position())
                       .normalized();
         auto rot_axis = v2.cross(v1);
@@ -472,7 +472,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         turbine.rotate(rot_angle, rot_axis);
         // rotation around axis opposite to gravity (yaw)
         turbine.rotate(turbine_json.at("rotation").get<double>(),
-                       Vector3d(-system_elasto.get_gravitational_acceleration()).normalized());
+                       Vector3d(-system_elasto->get_gravitational_acceleration()).normalized());
         // translate turbine
         auto trans = turbine_json.at("translation").get<std::vector<double>>();
         turbine.translate(Vector3d(trans[0], trans[1], trans[2]));

@@ -69,7 +69,7 @@ class Rotor : public ComponentDynamic {
      *
      * @param[out] system System on which to add bodies and links.
      */
-    void assemble(seahowl::elasto::SystemElasto& system);
+    void assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system);
 
     /**
      * @brief Builds the RNA and blades associated to it.

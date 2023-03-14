@@ -27,12 +27,14 @@ using std::filesystem::path;
 using std::filesystem::create_directory;
 using std::filesystem::remove_all;
 
-void output_results(seahowl::core::System& seahowl_system, seahowl::elasto::SystemElasto& system_elasto, int step) {
+void output_results(seahowl::core::System& seahowl_system,
+                    std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto,
+                    int step) {
     // output
-    std::cout << "time: " << system_elasto.get_time() << ", step: " << step
+    std::cout << "time: " << system_elasto->get_time() << ", step: " << step
               << ", rpm: " << seahowl_system.turbines[0].rotor.elasto.get_rpm()
               << ", pitch: " << seahowl_system.turbines[0].rotor.elasto.pitch_collective << std::endl;
-    write_turbine_info_to_csv("./output/output", seahowl_system, system_elasto.get_time());
+    write_turbine_info_to_csv("./output/output", seahowl_system, system_elasto->get_time());
 }
 
 /**@brief Driver main function */
@@ -52,12 +54,12 @@ int main(int argc, char* argv[]) {
     }
 
     // system
-    seahowl::elasto::SystemElastoChrono system_elasto;
-    auto& system_chrono = system_elasto.chobj;
+    auto system_elasto = std::make_shared<seahowl::elasto::SystemElastoChrono>();
+    auto system_chrono = system_elasto->chobj;
     system_chrono->SetNumThreads(chrono::ChOMP::GetNumProcs(), 0, 1);
     // mesh
     auto mesh_elasto = std::make_shared<seahowl::elasto::MeshElastoChrono>();
-    system_elasto.add(mesh_elasto);
+    system_elasto->add(mesh_elasto);
     // foundation
 
     auto seahowl_system = get_system_from_json(filepath_main.generic_string(), system_elasto, mesh_elasto);
@@ -122,38 +124,38 @@ int main(int argc, char* argv[]) {
     // initialization
     // statics
     if (statics_prestep) {
-        system_elasto.do_statics(true, 10);
+        system_elasto->do_statics(true, 10);
     }
 
-    seahowl_system.init(system_elasto.get_time(), dt);
+    seahowl_system.init(system_elasto->get_time(), dt);
 
     int step = 0;
     output_results(seahowl_system, system_elasto, step);
 #ifdef HAVE_VTK
     if (output_vtk) {
         for (auto const& vtk_output : vtk_outputs) {
-            vtk_output.write(system_elasto.get_time(), step);
+            vtk_output.write(system_elasto->get_time(), step);
         }
     }
 #endif
     double time_outputs = dt_outputs;
-    while (system_elasto.get_time() < t_end) {
+    while (system_elasto->get_time() < t_end) {
         // prestep
-        seahowl_system.prestep(system_elasto.get_time(), dt);
+        seahowl_system.prestep(system_elasto->get_time(), dt);
         // step
-        system_elasto.step(dt);
+        system_elasto->step(dt);
         step += 1;
 
         // poststep
-        seahowl_system.poststep(system_elasto.get_time(), dt);
+        seahowl_system.poststep(system_elasto->get_time(), dt);
 
         // output
-        if (system_elasto.get_time() >= (time_outputs - 1e-6)) {
+        if (system_elasto->get_time() >= (time_outputs - 1e-6)) {
             output_results(seahowl_system, system_elasto, step);
 #ifdef HAVE_VTK
             if (output_vtk) {
                 for (auto const& vtk_output : vtk_outputs) {
-                    vtk_output.write(system_elasto.get_time(), step);
+                    vtk_output.write(system_elasto->get_time(), step);
                 }
             }
 #endif

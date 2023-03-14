@@ -105,7 +105,8 @@ class Turbine : public ComponentDynamic {
      *
      * @param[out] mesh Mesh on which to add nodes and elements.
      */
-    void assemble(seahowl::elasto::SystemElasto& system, std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
+    void assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system,
+                  std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
 
     /**
      * @brief Builds the turbine.

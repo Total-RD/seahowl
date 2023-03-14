@@ -1,6 +1,7 @@
 
 #include <gtest/gtest.h>
 #include <cmath>
+#include <memory>
 
 #include <chrono/physics/ChSystemSMC.h>
 #include <chrono/solver/ChDirectSolverLS.h>
@@ -57,13 +58,13 @@ int main(int argc, char** argv) {
 
 TEST(test_blade, mass_deflection) {
     // system
-    SystemElastoChrono system_elasto;
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto& system_chrono = system_elasto.chobj;
+    auto system_elasto = std::make_shared<SystemElastoChrono>();
+    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto->chobj;
 
     // mesh for blade
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto.add(blades_mesh);
+    system_elasto->add(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
     // make 50 elements
@@ -98,13 +99,13 @@ TEST(test_blade, mass_deflection) {
 
 TEST(test_rotor, mass) {
     // system
-    SystemElastoChrono system_elasto;
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
+    auto system_elasto = std::make_shared<SystemElastoChrono>();
+    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto->chobj;
 
     // check mass with blades
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto.add(blades_mesh);
+    system_elasto->add(blades_mesh);
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
     for (int ii = 0; ii < 3; ii++) {
         auto blade_core =
@@ -133,13 +134,13 @@ TEST(test_rotor, mass) {
 
 TEST(test_tower, mass) {
     // system
-    SystemElastoChrono system_elasto;
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
+    auto system_elasto = std::make_shared<SystemElastoChrono>();
+    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto->chobj;
 
     // mesh for tower
     auto tower_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto.add(tower_mesh);
+    system_elasto->add(tower_mesh);
     // tower
     auto tower = get_tower_from_json((DATADIR / "tower.json").generic_string());
     tower.build();
@@ -155,13 +156,13 @@ TEST(test_tower, mass) {
 
 TEST(test_blade, natural_period_dynamic_edge) {
     // system
-    SystemElastoChrono system_elasto;
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
+    auto system_elasto = std::make_shared<SystemElastoChrono>();
+    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto->chobj;
 
     // mesh for blade
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto.add(blades_mesh);
+    system_elasto->add(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
     // make 50 elements
@@ -215,13 +216,13 @@ TEST(test_blade, natural_period_dynamic_edge) {
 
 TEST(test_blade, natural_period_dynamic_flap) {
     // system
-    SystemElastoChrono system_elasto;
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
+    auto system_elasto = std::make_shared<SystemElastoChrono>();
+    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto->chobj;
 
     // mesh for blade
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto.add(blades_mesh);
+    system_elasto->add(blades_mesh);
     // blade
     auto blade_core = get_blade_from_json((DATADIR / "blade.json").generic_string());
     // make 50 elements
@@ -292,13 +293,13 @@ TEST(test_turbine, rpm_initial_pitch) {
     double initial_pitch = CH_C_PI / 8.0;
 
     // system
-    SystemElastoChrono system_elasto;
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
+    auto system_elasto = std::make_shared<SystemElastoChrono>();
+    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto->chobj;
 
     // mesh for blade
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto.add(blades_mesh);
+    system_elasto->add(blades_mesh);
 
     auto turbine_file = (DATADIR / "turbine_nocontrol.json").generic_string();
     auto turbine = get_turbine_from_json(turbine_file);
@@ -355,13 +356,13 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     double initial_pitch = CH_C_PI / 8.0;
 
     // system
-    SystemElastoChrono system_elasto;
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
+    auto system_elasto = std::make_shared<SystemElastoChrono>();
+    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto->chobj;
 
     // mesh for blade
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto.add(blades_mesh);
+    system_elasto->add(blades_mesh);
 
     auto turbine_file = (DATADIR / "turbine_nocontrol.json").generic_string();
     auto turbine = get_turbine_from_json(turbine_file);
@@ -422,13 +423,13 @@ TEST(test_turbine, multiturbines) {
     double initial_pitch = CH_C_PI / 8.0;
 
     // system
-    SystemElastoChrono system_elasto;
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
+    auto system_elasto = std::make_shared<SystemElastoChrono>();
+    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto->chobj;
 
     // mesh for blade
     auto mesh_elasto = std::make_shared<MeshElastoChrono>();
-    system_elasto.add(mesh_elasto);
+    system_elasto->add(mesh_elasto);
 
     // system core
     seahowl::core::System system_core;

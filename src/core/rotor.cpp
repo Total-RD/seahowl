@@ -41,7 +41,7 @@ void Rotor::update_positions_aero() {
     aero.hub_rotation = elasto.body_hub->get_rotation();
 }
 
-void Rotor::assemble(seahowl::elasto::SystemElasto& system) {
+void Rotor::assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system) {
     elasto.assemble(system);
 }
 
