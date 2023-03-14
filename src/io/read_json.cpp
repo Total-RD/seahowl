@@ -33,7 +33,7 @@ using seahowl::PI;
  */
 std::string copy_file_and_increment(std::string filepath, std::string destination_dir) {
     if (!fs::exists(destination_dir)) {
-        fs::create_directory(destination_dir);
+        fs::create_directories(destination_dir);
     }
     path pfilepath = fs::path(filepath);
     path filecopypath;
