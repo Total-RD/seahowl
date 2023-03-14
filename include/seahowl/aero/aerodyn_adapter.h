@@ -37,6 +37,7 @@ void AeroDyn_Inflow_C_Init(bool& ADinputFilePassed,
                            bool& TransposeDCM_in,
                            int& WrVTK_in,
                            int& WrVTK_inType,
+                           double& WrVTK_dt,
                            float* VTKNacDim_in,
                            float& VTKHubRad_in,
                            float* HubPos_C,
@@ -129,6 +130,7 @@ struct AeroDynInflowLib {
     void SetTime(double time);
     void SetTimeStep(double dt);
     void SetTimeNext(double timenext);
+    void SetVTK(int SaveVTK, int VTK_type, double VTK_dt);
     void SetHubPos(float* hubPos);
     void SetHubOri(double* hubOri);
     void SetHubVel(float* hubAcc);
@@ -197,7 +199,8 @@ struct AeroDynInflowLib {
 
     // VTK
     int WrVTK;         // default of no vtk output
-    int WrVTK_Type;    // defautl of surface meshes
+    int WrVTK_Type;    // default of surface meshes
+    double WrVTK_dt;   // vtk save time step
     float* VTKNacDim;  // default nacelle dimension for VTK surface rendering [x0,y0,z0,Lx,Ly,Lz] (m)
     float VTKHubRad;   // default hub radius for VTK surface rendering
 

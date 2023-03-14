@@ -54,6 +54,12 @@ class Turbine : public ComponentDynamic {
 
     /** @brief Whether to use AeroDyn or not (@todo move to aero part). */
     bool use_aerodyn = false;
+    /** @brief Option to save VTK in AeroDyn, 0: none; 1: init only; 2: animation (@todo move to aero part). */
+    int WrVTK = 0;
+    /** @brief VTK save type, 1: surface; 2: lines; 3: both (@todo move to aero part). */
+    int WrVTK_Type = 1;
+    /** @brief VTK save time step (@todo move to aero part). */
+    double WrVTK_dt;
 
     /**
      * @brief Constructor.

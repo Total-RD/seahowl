@@ -26,6 +26,7 @@ seahowl::aero::AeroDynAdapter::~AeroDynAdapter() {}
 void seahowl::aero::AeroDynAdapter::init(double time, double dt, seahowl::core::Turbine& turbine) {
     pImpl.SetTimeStep(dt);
     pImpl.SetTime(time);
+    pImpl.SetVTK(turbine.WrVTK, turbine.WrVTK_Type, turbine.WrVTK_dt);
     update_turbine_variables(turbine);
     pImpl.Init();
 }
@@ -267,6 +268,12 @@ void seahowl::aero::AeroDynInflowLib::SetTimeNext(double timenext) {
     TimeNext = timenext;
 }
 
+void seahowl::aero::AeroDynInflowLib::SetVTK(int SaveVTK, int VTK_type, double VTK_dt) {
+    WrVTK = SaveVTK;
+    WrVTK_Type = VTK_type;
+    WrVTK_dt = VTK_dt;
+}
+
 void seahowl::aero::AeroDynInflowLib::SetHubPos(float* hubPos) {
     HubPos = hubPos;
 }
@@ -364,9 +371,6 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     // DT           = 0.1; // typical default for AD
     TMax = 180;  // typical default for AD
 
-    // VTK
-    WrVTK = 2;       // default of no vtk output
-    WrVTK_Type = 1;  // defautl of surface meshes
     VTKNacDim =
         new float[6]{0,     -4.2751, -4.2751, 12,
                      8.552, 8.552};  // default nacelle dimension for VTK surface rendering [x0,y0,z0,Lx,Ly,Lz] (m)
@@ -378,7 +382,7 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     AeroDyn_Inflow_C_Init(ADinputFilePassed, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed, &IfWinputFile,
                           IfWinputFileStringLength, OutRootName, gravity, defFldDens, defKinVisc, defSpdSound, defPatm,
                           defPvap, WtrDpth, MSL2SWL, InterpOrder, Time, DT, TMax, storeHHVel, TransposeDCM, WrVTK,
-                          WrVTK_Type, VTKNacDim, VTKHubRad, HubPos, HubOri, NacPos, NacOri, NumBlades, BldRootPos,
+                          WrVTK_Type, WrVTK_dt, VTKNacDim, VTKHubRad, HubPos, HubOri, NacPos, NacOri, NumBlades, BldRootPos,
                           BldRootOri, NumMeshPts, MeshPos, MeshOri, NumChannels, OutputChannelNames, OutputChannelUnits,
                           ErrStat, ErrMsg);
 

@@ -6,7 +6,8 @@
   },
   "outputs": {
     "dt": 0.1,
-    "VTK": false
+    "VTK": false,
+    "VTK_Type": 1
   },
   "environment": {
     "gravity": [0.0, 0.0, -9.81],

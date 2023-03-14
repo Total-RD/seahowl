@@ -92,6 +92,7 @@ It is a JSON dictionary containing:
 - outputs: (dict)
   - **dt**: (float) the time stepping value for outputs of the simulation [s].
   - **VTK**: (bool) whether VTK will be part of outputs or not.
+  - **VTK_Type**: (int) VTK output type (only used if use_aerodyn is true). 1: surface; 2: lines; 3: both.
 - environment: (dict)
   - **gravity**: (array of floats length 3) gravitational acceleration [m/s2].
   - **air_density**: density of air [kg/m3].
