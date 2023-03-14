@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 
 #ifdef HAVE_AERODYN
     if (seahowl_system.turbines[0].use_aerodyn) {
-        remove_all("./vtk-ADI");
+        remove_all("./output/vtk-ADI");
     }
 #endif
 
