@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <seahowl/elasto/entities_elasto.h>
 #include <seahowl/elasto/component_elasto.h>
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/rotor_elasto.h>
@@ -69,7 +70,13 @@ PYBIND11_MODULE(pyseahowl, m) {
     // ELASTO
     //
     auto elasto = m.def_submodule("elasto", "Elasto submodule.");
-    // elasto/elasto.h
+    // elasto/entities_elasto.h
+    py::class_<seahowl::elasto::BodyElasto, std::shared_ptr<seahowl::elasto::BodyElasto>>(elasto, "BodyElasto")
+        .def("set_fixed", &seahowl::elasto::BodyElasto::set_fixed);
+    py::class_<seahowl::elasto::NodeElasto, std::shared_ptr<seahowl::elasto::NodeElasto>>(elasto, "NodeElasto")
+        .def("set_fixed", &seahowl::elasto::NodeElasto::set_fixed);
+
+    // elasto/component_elasto.h
     py::class_<seahowl::elasto::ComponentElasto, std::shared_ptr<seahowl::elasto::ComponentElasto>, PyComponentElasto>(
         elasto, "ComponentElasto")
         .def("rotate", &seahowl::elasto::ComponentElasto::rotate)
@@ -78,7 +85,8 @@ PYBIND11_MODULE(pyseahowl, m) {
                PyComponentElastoFEA>(elasto, "ComponentElastoFEA")
         .def(py::init<>())
         .def("rotate", &seahowl::elasto::ComponentElastoFEA::rotate)
-        .def("translate", &seahowl::elasto::ComponentElastoFEA::translate);
+        .def("translate", &seahowl::elasto::ComponentElastoFEA::translate)
+        .def_readonly("nodes", &seahowl::elasto::TowerElasto::nodes);
 
     // elasto/blade_elasto.h
     py::class_<seahowl::elasto::BladeElasto, std::shared_ptr<seahowl::elasto::BladeElasto>,
