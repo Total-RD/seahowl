@@ -27,14 +27,14 @@ using std::filesystem::path;
 using std::filesystem::create_directory;
 using std::filesystem::remove_all;
 
-void output_results(seahowl::core::System& seahowl_system,
+void output_results(seahowl::core::System& system_core,
                     std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto,
                     int step) {
     // output
     std::cout << "time: " << system_elasto->get_time() << ", step: " << step
-              << ", rpm: " << seahowl_system.turbines[0].rotor.elasto.get_rpm()
-              << ", pitch: " << seahowl_system.turbines[0].rotor.elasto.pitch_collective << std::endl;
-    write_turbine_info_to_csv("./output/output", seahowl_system, system_elasto->get_time());
+              << ", rpm: " << system_core.turbines[0].rotor.elasto.get_rpm()
+              << ", pitch: " << system_core.turbines[0].rotor.elasto.pitch_collective << std::endl;
+    write_turbine_info_to_csv("./output/output", system_core, system_elasto->get_time());
 }
 
 /**@brief Driver main function */
@@ -62,9 +62,9 @@ int main(int argc, char* argv[]) {
     system_elasto->add(mesh_elasto);
     // foundation
 
-    auto seahowl_system = get_system_from_json(filepath_main.generic_string(), system_elasto, mesh_elasto);
+    auto system_core = get_system_from_json(filepath_main.generic_string(), system_elasto, mesh_elasto);
 
-    for (auto& turbine : seahowl_system.turbines) {
+    for (auto& turbine : system_core.turbines) {
         // fix foundation of the tower
         turbine.tower.elasto.nodes.front()->set_fixed(true);
     }
@@ -86,8 +86,8 @@ int main(int argc, char* argv[]) {
 #ifdef HAVE_VTK
     std::vector<OutputMeshVTK> vtk_outputs;
     if (output_vtk) {
-        for (auto [turbine_ptr, idx_turbine] = std::tuple{seahowl_system.turbines.begin(), 0};
-             turbine_ptr != seahowl_system.turbines.end(); turbine_ptr++, idx_turbine++) {
+        for (auto [turbine_ptr, idx_turbine] = std::tuple{system_core.turbines.begin(), 0};
+             turbine_ptr != system_core.turbines.end(); turbine_ptr++, idx_turbine++) {
             auto& turbine = *turbine_ptr;
             create_directory("./output/vtk");
             for (auto [blade_ptr, idx_blade] = std::tuple{turbine.blades.begin(), 0}; blade_ptr != turbine.blades.end();
@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
 #endif
 
 #ifdef HAVE_AERODYN
-    if (seahowl_system.turbines[0].use_aerodyn) {
+    if (system_core.turbines[0].use_aerodyn) {
         remove_all("./output/vtk-ADI");
     }
 #endif
@@ -127,10 +127,10 @@ int main(int argc, char* argv[]) {
         system_elasto->do_statics(true, 10);
     }
 
-    seahowl_system.init(system_elasto->get_time(), dt);
+    system_core.init(system_elasto->get_time(), dt);
 
     int step = 0;
-    output_results(seahowl_system, system_elasto, step);
+    output_results(system_core, system_elasto, step);
 #ifdef HAVE_VTK
     if (output_vtk) {
         for (auto const& vtk_output : vtk_outputs) {
@@ -141,17 +141,17 @@ int main(int argc, char* argv[]) {
     double time_outputs = dt_outputs;
     while (system_elasto->get_time() < t_end) {
         // prestep
-        seahowl_system.prestep(system_elasto->get_time(), dt);
+        system_core.prestep(system_elasto->get_time(), dt);
         // step
         system_elasto->step(dt);
         step += 1;
 
         // poststep
-        seahowl_system.poststep(system_elasto->get_time(), dt);
+        system_core.poststep(system_elasto->get_time(), dt);
 
         // output
         if (system_elasto->get_time() >= (time_outputs - 1e-6)) {
-            output_results(seahowl_system, system_elasto, step);
+            output_results(system_core, system_elasto, step);
 #ifdef HAVE_VTK
             if (output_vtk) {
                 for (auto const& vtk_output : vtk_outputs) {

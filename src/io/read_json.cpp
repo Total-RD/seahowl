@@ -410,12 +410,12 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
     system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
 
     // system
-    auto seahowl_system = seahowl::core::System();
+    auto system_core = seahowl::core::System();
     auto wind_json = environment_json.at("wind");
     if (wind_json.at("type").get<std::string>() == "ramp") {
-        seahowl_system.wind_model = std::make_shared<seahowl::aero::WindRamp>();
+        system_core.wind_model = std::make_shared<seahowl::aero::WindRamp>();
         auto wind_options = wind_json.at("options");
-        auto wind_model = std::dynamic_pointer_cast<seahowl::aero::WindRamp>(seahowl_system.wind_model);
+        auto wind_model = std::dynamic_pointer_cast<seahowl::aero::WindRamp>(system_core.wind_model);
         auto v0 = wind_options.at("velocity_start").get<std::vector<double>>();
         wind_model->wind_velocity_start = Vector3d(v0[0], v0[1], v0[2]);
         auto v1 = wind_options.at("velocity_stop").get<std::vector<double>>();
@@ -434,8 +434,8 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
     for (int ii = 0; ii < turbines_json.size(); ii++) {
         auto turbine_json = turbines_json[ii];
         auto filepath_turbine = (DATADIR / turbine_json.at("file").get<std::string>()).generic_string();
-        seahowl_system.turbines.push_back(seahowl::core::Turbine(get_turbine_from_json(filepath_turbine)));
-        auto& turbine = seahowl_system.turbines.back();
+        system_core.turbines.push_back(seahowl::core::Turbine(get_turbine_from_json(filepath_turbine)));
+        auto& turbine = system_core.turbines.back();
         // aerodyn option
 #ifdef HAVE_AERODYN
         turbine.use_aerodyn = turbine_json.at("use_aerodyn").get<bool>();
@@ -488,5 +488,5 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         turbine.rotor.elasto.pitch_collective = rotor_pitch0;
     }
 
-    return seahowl_system;
+    return system_core;
 }
