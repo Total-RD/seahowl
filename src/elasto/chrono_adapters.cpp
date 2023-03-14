@@ -8,6 +8,7 @@
 #include <chrono/physics/ChLinkRevolute.h>
 #include <chrono/fea/ChMesh.h>
 #include <chrono/physics/ChSystemSMC.h>
+#include <chrono/solver/ChDirectSolverLS.h>
 
 #include <seahowl/elasto/reference_point_elasto.h>
 #include <seahowl/elasto/entities_elasto.h>
@@ -91,6 +92,10 @@ void BodyElastoChrono::accumulate_torque(Vector3d torque, bool is_local) {
     chobj->Accumulate_torque(torque, is_local);
 }
 
+void BodyElastoChrono::set_fixed(bool is_fixed) {
+    chobj->SetBodyFixed(is_fixed);
+}
+
 double BodyElastoChrono::get_mass() {
     return chobj->GetMass();
 }
@@ -150,6 +155,10 @@ void NodeElastoChrono::set_load(Vector3d force) {
 
 void NodeElastoChrono::set_torque(Vector3d torque) {
     chobj->SetTorque(vec2ch(torque));
+}
+
+void NodeElastoChrono::set_fixed(bool is_fixed) {
+    chobj->SetFixed(is_fixed);
 }
 
 Vector3d NodeElastoChrono::get_position() const {
@@ -471,7 +480,37 @@ void MeshElastoChrono::add(std::shared_ptr<chrono::fea::ChElementBeam> element) 
 
 SystemElastoChrono::SystemElastoChrono() {
     chobj = chrono_types::make_shared<chrono::ChSystemSMC>();
+
+    // solver
+    auto solver = chrono_types::make_shared<chrono::ChSolverSparseLU>();
+    chobj->SetSolver(solver);
+    solver->UseSparsityPatternLearner(true);
+    solver->LockSparsityPattern(true);
+    solver->SetVerbose(false);
+
+    // timestepping
+    chobj->SetTimestepperType(chrono::ChTimestepper::Type::HHT);
+    auto mystepper = std::dynamic_pointer_cast<chrono::ChTimestepperHHT>(chobj->GetTimestepper());
+    mystepper->SetStepControl(false);
+    mystepper->SetModifiedNewton(false);
 }
+
+void SystemElastoChrono::step(double dt) {
+    chobj->DoStepDynamics(dt);
+}
+
+double SystemElastoChrono::get_time() const {
+    return chobj->GetChTime();
+}
+
+void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
+    if (linear) {
+        chobj->DoStaticLinear();
+    }
+    if (nonlinear_steps > 0) {
+        chobj->DoStaticNonlinear(nonlinear_steps, true);
+    }
+};
 
 Vector3d SystemElastoChrono::get_gravitational_acceleration() const {
     return ch2vec(chobj->Get_G_acc());

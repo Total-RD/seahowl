@@ -60,10 +60,6 @@ TEST(test_blade, mass_deflection) {
     SystemElastoChrono system_elasto;
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
     auto& system_chrono = system_elasto.chobj;
-    auto solver = chrono_types::make_shared<ChSolverSparseLU>();
-    system_chrono->SetSolver(solver);
-    solver->UseSparsityPatternLearner(true);
-    solver->LockSparsityPattern(true);
 
     // mesh for blade
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
@@ -78,7 +74,7 @@ TEST(test_blade, mass_deflection) {
     blade_core.build();
     blade_core.assemble(blades_mesh);
     auto blade = blade_core.elasto;
-    std::dynamic_pointer_cast<NodeElastoChrono>(blade->nodes[0])->chobj->SetFixed(true);
+    blade->nodes.front()->set_fixed(true);
 
     system_chrono->Setup();
     system_chrono->DoStaticLinear();
@@ -105,10 +101,6 @@ TEST(test_rotor, mass) {
     SystemElastoChrono system_elasto;
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
     auto system_chrono = system_elasto.chobj;
-    auto solver = chrono_types::make_shared<chrono::ChSolverSparseLU>();
-    system_chrono->SetSolver(solver);
-    solver->UseSparsityPatternLearner(true);
-    solver->LockSparsityPattern(true);
 
     // check mass with blades
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
@@ -130,7 +122,7 @@ TEST(test_rotor, mass) {
     auto rotor = get_rotor_from_json((DATADIR / "rna.json").generic_string());
     rotor.build(blades);
     rotor.assemble(system_elasto);
-    std::dynamic_pointer_cast<BodyElastoChrono>(rotor.elasto.body_yaw_bearing)->chobj->SetBodyFixed(true);
+    rotor.elasto.body_yaw_bearing->set_fixed(true);
 
     system_chrono->Setup();
     system_chrono->DoStaticLinear();
@@ -144,12 +136,6 @@ TEST(test_tower, mass) {
     SystemElastoChrono system_elasto;
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
     auto system_chrono = system_elasto.chobj;
-    auto solver = chrono_types::make_shared<chrono::ChSolverMINRES>();
-    system_chrono->SetSolver(solver);
-    solver->EnableDiagonalPreconditioner(true);
-    solver->EnableWarmStart(true);
-    solver->SetMaxIterations(40000);
-    solver->SetTolerance(1e-12);
 
     // mesh for tower
     auto tower_mesh = std::make_shared<MeshElastoChrono>();
@@ -172,10 +158,6 @@ TEST(test_blade, natural_period_dynamic_edge) {
     SystemElastoChrono system_elasto;
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
     auto system_chrono = system_elasto.chobj;
-    auto solver = chrono_types::make_shared<chrono::ChSolverSparseLU>();
-    system_chrono->SetSolver(solver);
-    solver->UseSparsityPatternLearner(true);
-    solver->LockSparsityPattern(true);
 
     // mesh for blade
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
@@ -190,7 +172,7 @@ TEST(test_blade, natural_period_dynamic_edge) {
     blade_core.build();
     blade_core.assemble(blades_mesh);
     auto blade = blade_core.elasto;
-    std::dynamic_pointer_cast<NodeElastoChrono>(blade->nodes[0])->chobj->SetFixed(true);
+    blade->nodes.front()->set_fixed(true);
 
     system_chrono->Setup();
     system_chrono->DoStaticLinear();
@@ -236,10 +218,6 @@ TEST(test_blade, natural_period_dynamic_flap) {
     SystemElastoChrono system_elasto;
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
     auto system_chrono = system_elasto.chobj;
-    auto solver = chrono_types::make_shared<ChSolverSparseLU>();
-    system_chrono->SetSolver(solver);
-    solver->UseSparsityPatternLearner(true);
-    solver->LockSparsityPattern(true);
 
     // mesh for blade
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
@@ -254,7 +232,7 @@ TEST(test_blade, natural_period_dynamic_flap) {
     blade_core.build();
     blade_core.assemble(blades_mesh);
     auto blade = blade_core.elasto;
-    std::dynamic_pointer_cast<NodeElastoChrono>(blade->nodes[0])->chobj->SetFixed(true);
+    blade->nodes.front()->set_fixed(true);
 
     // rotate blade for flap
     blade->rotate(-PI / 2.0, Vector3d(0.0, 0.0, 1.0));
@@ -317,15 +295,6 @@ TEST(test_turbine, rpm_initial_pitch) {
     SystemElastoChrono system_elasto;
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
     auto system_chrono = system_elasto.chobj;
-    auto solver = chrono_types::make_shared<ChSolverSparseLU>();
-    system_chrono->SetSolver(solver);
-    solver->UseSparsityPatternLearner(true);
-    solver->LockSparsityPattern(true);
-    solver->SetVerbose(verbose);
-    system_chrono->SetTimestepperType(ChTimestepper::Type::HHT);
-    auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system_chrono->GetTimestepper());
-    mystepper->SetStepControl(false);
-    mystepper->SetModifiedNewton(false);
 
     // mesh for blade
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
@@ -340,7 +309,7 @@ TEST(test_turbine, rpm_initial_pitch) {
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
     turbine.assemble(system_elasto, blades_mesh);
-    std::dynamic_pointer_cast<NodeElastoChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
+    turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {
@@ -389,15 +358,6 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     SystemElastoChrono system_elasto;
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
     auto system_chrono = system_elasto.chobj;
-    auto solver = chrono_types::make_shared<ChSolverSparseLU>();
-    system_chrono->SetSolver(solver);
-    solver->UseSparsityPatternLearner(true);
-    solver->LockSparsityPattern(true);
-    solver->SetVerbose(verbose);
-    system_chrono->SetTimestepperType(ChTimestepper::Type::HHT);
-    auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system_chrono->GetTimestepper());
-    mystepper->SetStepControl(false);
-    mystepper->SetModifiedNewton(false);
 
     // mesh for blade
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
@@ -416,7 +376,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
 
     turbine.build();
     turbine.assemble(system_elasto, blades_mesh);
-    std::dynamic_pointer_cast<NodeElastoChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
+    turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {
@@ -465,15 +425,6 @@ TEST(test_turbine, multiturbines) {
     SystemElastoChrono system_elasto;
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
     auto system_chrono = system_elasto.chobj;
-    auto solver = chrono_types::make_shared<ChSolverSparseLU>();
-    system_chrono->SetSolver(solver);
-    solver->UseSparsityPatternLearner(true);
-    solver->LockSparsityPattern(true);
-    solver->SetVerbose(verbose);
-    system_chrono->SetTimestepperType(ChTimestepper::Type::HHT);
-    auto mystepper = std::dynamic_pointer_cast<ChTimestepperHHT>(system_chrono->GetTimestepper());
-    mystepper->SetStepControl(false);
-    mystepper->SetModifiedNewton(false);
 
     // mesh for blade
     auto mesh_elasto = std::make_shared<MeshElastoChrono>();
@@ -507,7 +458,7 @@ TEST(test_turbine, multiturbines) {
     for (auto& turbine : system_core.turbines) {
         // empty controller
         turbine.controller = std::make_shared<seahowl::servo::Controller>();
-        std::dynamic_pointer_cast<NodeElastoChrono>(turbine.tower.elasto.nodes[0])->chobj->SetFixed(true);
+        turbine.tower.elasto.nodes.front()->set_fixed(true);
         turbine.use_aerodyn = true;
     }
 

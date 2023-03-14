@@ -4,8 +4,6 @@
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
-#include <chrono/solver/ChDirectSolverLS.h>
-
 #ifdef HAVE_VTK
     #include <seahowl/io/write_vtk.h>
 #endif
@@ -29,12 +27,12 @@ using std::filesystem::path;
 using std::filesystem::create_directory;
 using std::filesystem::remove_all;
 
-void output_results(seahowl::core::System& seahowl_system, std::shared_ptr<chrono::ChSystem> system_chrono, int step) {
+void output_results(seahowl::core::System& seahowl_system, seahowl::elasto::SystemElasto& system_elasto, int step) {
     // output
-    std::cout << "time: " << system_chrono->GetChTime() << ", step: " << step
+    std::cout << "time: " << system_elasto.get_time() << ", step: " << step
               << ", rpm: " << seahowl_system.turbines[0].rotor.elasto.get_rpm()
               << ", pitch: " << seahowl_system.turbines[0].rotor.elasto.pitch_collective << std::endl;
-    write_turbine_info_to_csv("./output/output", seahowl_system, system_chrono->GetChTime());
+    write_turbine_info_to_csv("./output/output", seahowl_system, system_elasto.get_time());
 }
 
 /**@brief Driver main function */
@@ -60,13 +58,13 @@ int main(int argc, char* argv[]) {
     // mesh
     auto mesh_elasto = std::make_shared<seahowl::elasto::MeshElastoChrono>();
     system_elasto.add(mesh_elasto);
+    // foundation
 
     auto seahowl_system = get_system_from_json(filepath_main.generic_string(), system_elasto, mesh_elasto);
 
     for (auto& turbine : seahowl_system.turbines) {
         // fix foundation of the tower
-        std::dynamic_pointer_cast<seahowl::elasto::NodeElastoChrono>(turbine.tower.elasto.nodes.front())
-            ->chobj->SetFixed(true);
+        turbine.tower.elasto.nodes.front()->set_fixed(true);
     }
 
     // get main info
@@ -78,25 +76,10 @@ int main(int argc, char* argv[]) {
     // NUMERICS options
     bool statics_prestep = json_obj.at("numerics").at("statics_prestep").get<bool>();
     // timestepping
-    auto timestepper_type = chrono::ChTimestepper::Type::HHT;
     double dt = json_obj.at("numerics").at("dt").get<double>();
     double t_end = json_obj.at("numerics").at("t_end").get<double>();
     double dt_outputs = json_obj.at("outputs").at("dt").get<double>();
     bool output_vtk = json_obj.at("outputs").at("VTK").get<bool>();
-
-    // solver
-    auto solver = chrono_types::make_shared<chrono::ChSolverSparseLU>();
-    system_chrono->SetSolver(solver);
-    solver->UseSparsityPatternLearner(true);
-    solver->LockSparsityPattern(true);
-    solver->SetVerbose(false);
-
-    // timestepper
-    system_chrono->SetTimestepperType(chrono::ChTimestepper::Type::HHT);
-    if (auto mystepper = std::dynamic_pointer_cast<chrono::ChTimestepperHHT>(system_chrono->GetTimestepper())) {
-        mystepper->SetStepControl(false);
-        mystepper->SetModifiedNewton(false);
-    }
 
 #ifdef HAVE_VTK
     std::vector<OutputMeshVTK> vtk_outputs;
@@ -139,39 +122,38 @@ int main(int argc, char* argv[]) {
     // initialization
     // statics
     if (statics_prestep) {
-        system_chrono->DoStaticLinear();
-        system_chrono->DoStaticNonlinear(10, true);
+        system_elasto.do_statics(true, 10);
     }
 
-    seahowl_system.init(system_chrono->GetChTime(), dt);
+    seahowl_system.init(system_elasto.get_time(), dt);
 
     int step = 0;
-    output_results(seahowl_system, system_chrono, step);
+    output_results(seahowl_system, system_elasto, step);
 #ifdef HAVE_VTK
     if (output_vtk) {
         for (auto const& vtk_output : vtk_outputs) {
-            vtk_output.write(system_chrono->GetChTime(), step);
+            vtk_output.write(system_elasto.get_time(), step);
         }
     }
 #endif
     double time_outputs = dt_outputs;
-    while (system_chrono->GetChTime() < t_end) {
+    while (system_elasto.get_time() < t_end) {
         // prestep
-        seahowl_system.prestep(system_chrono->GetChTime(), dt);
+        seahowl_system.prestep(system_elasto.get_time(), dt);
         // step
-        system_chrono->DoStepDynamics(dt);
+        system_elasto.step(dt);
         step += 1;
 
         // poststep
-        seahowl_system.poststep(system_chrono->GetChTime(), dt);
+        seahowl_system.poststep(system_elasto.get_time(), dt);
 
         // output
-        if (system_chrono->GetChTime() >= (time_outputs - 1e-6)) {
-            output_results(seahowl_system, system_chrono, step);
+        if (system_elasto.get_time() >= (time_outputs - 1e-6)) {
+            output_results(seahowl_system, system_elasto, step);
 #ifdef HAVE_VTK
             if (output_vtk) {
                 for (auto const& vtk_output : vtk_outputs) {
-                    vtk_output.write(system_chrono->GetChTime(), step);
+                    vtk_output.write(system_elasto.get_time(), step);
                 }
             }
 #endif

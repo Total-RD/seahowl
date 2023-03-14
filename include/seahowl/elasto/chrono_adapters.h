@@ -48,6 +48,7 @@ class BodyElastoChrono : public BodyElasto {
     virtual void set_rotation(Quaternion rotation) override;
     virtual void reset_forces() override;
     virtual void accumulate_torque(Vector3d torque, bool is_local) override;
+    virtual void set_fixed(bool is_fixed) override;
     virtual double get_mass() override;
     virtual Vector3d get_position() const override;
     virtual Vector3d get_velocity() const override;
@@ -74,6 +75,7 @@ class NodeElastoChrono : public NodeElasto {
     virtual void set_rotation(Quaternion rotation) override;
     virtual void set_load(Vector3d force) override;
     virtual void set_torque(Vector3d torque) override;
+    virtual void set_fixed(bool is_fixed) override;
     virtual Vector3d get_position() const override;
     virtual Vector3d get_velocity() const override;
     virtual Vector3d get_acceleration() const override;
@@ -181,6 +183,9 @@ class SystemElastoChrono : public SystemElasto {
     std::shared_ptr<chrono::ChSystem> chobj;
 
     SystemElastoChrono();
+    virtual void step(double dt) override;
+    virtual double get_time() const override;
+    virtual void do_statics(bool linear, int nonlinear_steps) override;
     virtual Vector3d get_gravitational_acceleration() const override;
     virtual void set_gravitational_acceleration(Vector3d gravitational_acceleration) override;
     virtual void add(std::shared_ptr<BodyElasto> body) override;

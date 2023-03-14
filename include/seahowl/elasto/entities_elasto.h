@@ -46,6 +46,13 @@ class BodyElasto : public EntityDynamic {
      * @param[in] is_local Whether the torque is applied from local or global reference frame.
      */
     virtual void accumulate_torque(Vector3d torque, bool is_local) = 0;
+
+    /**
+     * @brief Fix body in space.
+     *
+     * param[in] is_fixed Fixed if true, free if false.
+     */
+    virtual void set_fixed(bool is_fixed) = 0;
 };
 
 /**
@@ -74,6 +81,13 @@ class NodeElasto : public EntityDynamic {
      * @brief Returns torque applied on node.
      */
     virtual Vector3d get_torque() const = 0;
+
+    /**
+     * @brief Fix node in space.
+     *
+     * param[in] is_fixed Fixed if true, free if false.
+     */
+    virtual void set_fixed(bool is_fixed) = 0;
 };
 
 /**
@@ -198,6 +212,26 @@ class MeshElasto {
  */
 class SystemElasto {
   public:
+    /**
+     * @brief Does an elasto step.
+     *
+     * @param[in] dt Time step length.
+     */
+    virtual void step(double dt) = 0;
+
+    /**
+     * @brief Returns time of simulation.
+     */
+    virtual double get_time() const = 0;
+
+    /**
+     * @brief Does statics step.
+     *
+     * @param[in] linear Do linear statics if true.
+     * @param[in] nonlinear_steps Number of nonlinear steps.
+     */
+    virtual void do_statics(bool linear, int nonlinear_steps) = 0;
+
     /**
      * @brief Returns gravitational acceleration.
      */
