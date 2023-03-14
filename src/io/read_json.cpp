@@ -460,9 +460,8 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
             turbine.aerodyn = std::make_shared<seahowl::aero::AeroDynAdapter>(aerodyn_filepath, inflowwind_filepath);
         }
 #endif
-        // build turbine (Chrono)
+        // build turbine
         turbine.build();
-        turbine.assemble(system_elasto, mesh_elasto);
         // rotate turbine to align tower with gravity vector
         auto v1 = Vector3d(-system_elasto->get_gravitational_acceleration()).normalized();
         auto v2 = (turbine.tower.elasto.nodes[1]->get_position() - turbine.tower.elasto.nodes[0]->get_position())
@@ -487,6 +486,9 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         turbine.rotor.elasto.apply_collective_pitch_increment(rotor_pitch0);
         turbine.rotor.elasto.pitch_collective = rotor_pitch0;
     }
+
+    // assemble whole system (Chrono)
+    system_core.assemble(system_elasto, mesh_elasto);
 
     return system_core;
 }

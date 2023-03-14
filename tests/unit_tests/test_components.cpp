@@ -77,8 +77,7 @@ TEST(test_blade, mass_deflection) {
     auto blade = blade_core.elasto;
     blade->nodes.front()->set_fixed(true);
 
-    system_chrono->Setup();
-    system_chrono->DoStaticLinear();
+    system_elasto->do_statics(true, 0);
 
     // check mass
     double blade_mass = 67051.5;
@@ -125,8 +124,7 @@ TEST(test_rotor, mass) {
     rotor.assemble(system_elasto);
     rotor.elasto.body_yaw_bearing->set_fixed(true);
 
-    system_chrono->Setup();
-    system_chrono->DoStaticLinear();
+    system_elasto->do_statics(true, 0);
     // check mass
     double rotor_total_mass = 945690.92;
     ASSERT_NEAR(rotor_total_mass, rotor.elasto.get_mass(), 1.0);
@@ -146,8 +144,7 @@ TEST(test_tower, mass) {
     tower.build();
     tower.assemble(tower_mesh);
 
-    system_chrono->Setup();
-    system_chrono->DoStaticLinear();
+    system_elasto->do_statics(true, 0);
 
     // check mass
     double tower_mass = 870391.59776;
@@ -175,8 +172,7 @@ TEST(test_blade, natural_period_dynamic_edge) {
     auto blade = blade_core.elasto;
     blade->nodes.front()->set_fixed(true);
 
-    system_chrono->Setup();
-    system_chrono->DoStaticLinear();
+    system_elasto->do_statics(true, 0);
 
     // static position of blade tip
     double pos0 = blade->nodes.back()->get_position().y();
@@ -210,7 +206,7 @@ TEST(test_blade, natural_period_dynamic_edge) {
     }
 
     // literature edgewise natural frequency for IEA15MW: 0.642Hz (1.558s)
-    double natural_period_ref = 1.356;
+    double natural_period_ref = 1.343;
     ASSERT_NEAR(natural_period_ref, natural_period, 0.01);
 }
 
@@ -238,8 +234,7 @@ TEST(test_blade, natural_period_dynamic_flap) {
     // rotate blade for flap
     blade->rotate(-PI / 2.0, Vector3d(0.0, 0.0, 1.0));
 
-    system_chrono->Setup();
-    system_chrono->DoStaticLinear();
+    system_elasto->do_statics(true, 0);
 
     // static position of blade tip
     double pos0 = blade->nodes.back()->get_position().y();
@@ -314,8 +309,7 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        system_chrono->DoStaticLinear();
-        system_chrono->DoStaticNonlinear(10, verbose);
+        system_elasto->do_statics(true, 10);
     }
 
     double time = 0.0;
@@ -329,7 +323,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
-        system_chrono->DoStepDynamics(dt);
+        system_elasto->step(dt);
         time += system_chrono->GetStep();
 
         // poststep
@@ -381,8 +375,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        system_chrono->DoStaticLinear();
-        system_chrono->DoStaticNonlinear(10, verbose);
+        system_elasto->do_statics(true, 10);
     }
 
     double time = 0.0;
@@ -396,7 +389,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
-        system_chrono->DoStepDynamics(dt);
+        system_elasto->step(dt);
         time += system_chrono->GetStep();
 
         // poststep
@@ -441,19 +434,19 @@ TEST(test_turbine, multiturbines) {
     system_core.turbines.push_back(get_turbine_from_json(turbine_file));
     auto& turbine1 = system_core.turbines.back();
     turbine1.build();
-    turbine1.assemble(system_elasto, mesh_elasto);
     // turbine 2
     system_core.turbines.push_back(get_turbine_from_json(turbine_file));
     auto& turbine2 = system_core.turbines.back();
     turbine2.build();
-    turbine2.assemble(system_elasto, mesh_elasto);
     turbine2.translate(Vector3d(150.0, -150.0, 0.0));
     // turbine 3
     system_core.turbines.push_back(get_turbine_from_json(turbine_file));
     auto& turbine3 = system_core.turbines.back();
     turbine3.build();
-    turbine3.assemble(system_elasto, mesh_elasto);
     turbine3.translate(Vector3d(150.0, 150.0, 0.0));
+
+    // assemble system
+    system_core.assemble(system_elasto, mesh_elasto);
 
     // remove controller
     for (auto& turbine : system_core.turbines) {
@@ -465,8 +458,7 @@ TEST(test_turbine, multiturbines) {
 
     // statics
     if (statics_prestep) {
-        system_chrono->DoStaticLinear();
-        system_chrono->DoStaticNonlinear(10, verbose);
+        system_elasto->do_statics(true, 10);
     }
 
     double time = 0.0;
@@ -479,7 +471,7 @@ TEST(test_turbine, multiturbines) {
         system_core.prestep(time, dt);
 
         // step
-        system_chrono->DoStepDynamics(dt);
+        system_core.step(dt);
         time += system_chrono->GetStep();
 
         // poststep

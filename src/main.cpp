@@ -27,14 +27,12 @@ using std::filesystem::path;
 using std::filesystem::create_directory;
 using std::filesystem::remove_all;
 
-void output_results(seahowl::core::System& system_core,
-                    std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto,
-                    int step) {
+void output_results(seahowl::core::System& system_core, int step) {
     // output
-    std::cout << "time: " << system_elasto->get_time() << ", step: " << step
+    std::cout << "time: " << system_core.get_time() << ", step: " << step
               << ", rpm: " << system_core.turbines[0].rotor.elasto.get_rpm()
               << ", pitch: " << system_core.turbines[0].rotor.elasto.pitch_collective << std::endl;
-    write_turbine_info_to_csv("./output/output", system_core, system_elasto->get_time());
+    write_turbine_info_to_csv("./output/output", system_core, system_core.get_time());
 }
 
 /**@brief Driver main function */
@@ -53,15 +51,14 @@ int main(int argc, char* argv[]) {
         filepath_main = absolute(path(argv[1]));
     }
 
-    // system
+    // system elasto
     auto system_elasto = std::make_shared<seahowl::elasto::SystemElastoChrono>();
     auto system_chrono = system_elasto->chobj;
     system_chrono->SetNumThreads(chrono::ChOMP::GetNumProcs(), 0, 1);
-    // mesh
+    // mesh elasto
     auto mesh_elasto = std::make_shared<seahowl::elasto::MeshElastoChrono>();
     system_elasto->add(mesh_elasto);
-    // foundation
-
+    // system core
     auto system_core = get_system_from_json(filepath_main.generic_string(), system_elasto, mesh_elasto);
 
     for (auto& turbine : system_core.turbines) {
@@ -130,7 +127,7 @@ int main(int argc, char* argv[]) {
     system_core.init(system_elasto->get_time(), dt);
 
     int step = 0;
-    output_results(system_core, system_elasto, step);
+    output_results(system_core, step);
 #ifdef HAVE_VTK
     if (output_vtk) {
         for (auto const& vtk_output : vtk_outputs) {
@@ -141,21 +138,21 @@ int main(int argc, char* argv[]) {
     double time_outputs = dt_outputs;
     while (system_elasto->get_time() < t_end) {
         // prestep
-        system_core.prestep(system_elasto->get_time(), dt);
+        system_core.prestep(system_core.get_time(), dt);
         // step
-        system_elasto->step(dt);
+        system_core.step(dt);
         step += 1;
 
         // poststep
-        system_core.poststep(system_elasto->get_time(), dt);
+        system_core.poststep(system_core.get_time(), dt);
 
         // output
-        if (system_elasto->get_time() >= (time_outputs - 1e-6)) {
-            output_results(system_core, system_elasto, step);
+        if (system_core.get_time() >= (time_outputs - 1e-6)) {
+            output_results(system_core, step);
 #ifdef HAVE_VTK
             if (output_vtk) {
                 for (auto const& vtk_output : vtk_outputs) {
-                    vtk_output.write(system_elasto->get_time(), step);
+                    vtk_output.write(system_core.get_time(), step);
                 }
             }
 #endif

@@ -3,6 +3,7 @@
 #include <seahowl/aero/wind_models.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/servo/controller_discon.h>
+#include <seahowl/elasto/entities_elasto.h>
 
 namespace seahowl {
 namespace core {
@@ -18,6 +19,7 @@ class System : public ComponentDynamic {
     std::vector<Turbine> turbines{};
     /** @brief Wind model. */
     std::shared_ptr<seahowl::aero::WindModel> wind_model;
+    std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto;
 
     System();
 
@@ -38,12 +40,35 @@ class System : public ComponentDynamic {
     virtual void prestep(double time, double dt) override;
 
     /**
+     * @brief Step for system, called for elastodynamic stepping.
+     *
+     * @param[in] time Time of the simulation.
+     */
+    void step(double dt);
+
+    /**
      * @brief Poststep for system, called after elastodynamic stepping.
      *
      * @param[in] time Time of the simulation.
      * @param[in] dt Time step length.
      */
     virtual void poststep(double time, double dt) override;
+
+    /**
+     * @brief Assembles the turbine (elasto part).*
+     *
+     * Calls assemble for each of the components of the turbine.
+     *
+     * @param[out] system System on which to add bodies, links, etc.
+     * @param[out] mesh Mesh on which to add nodes and elements.
+     */
+    void assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system,
+                  std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
+
+    /**
+     * @brief Returns time of simulation.
+     */
+    double get_time();
 };
 }  // namespace core
 }  // namespace seahowl
