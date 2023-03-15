@@ -18,7 +18,7 @@ seahowl::aero::AeroDynAdapter::AeroDynAdapter(std::string AerodynInfile, std::st
     pImpl.SetADINFILE(AerodynInfile);
     pImpl.SetIFWINFILE(InflowInfile);
 
-    pImpl.SetOUTNAME("Output_ADIlib_default");
+    pImpl.SetOUTNAME("Turbine");
 }
 
 seahowl::aero::AeroDynAdapter::~AeroDynAdapter() {}
