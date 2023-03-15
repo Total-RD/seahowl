@@ -1,5 +1,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/eigen.h>
+
+#include <seahowl/commons/entities.h>
 
 #include <seahowl/elasto/entities_elasto.h>
 #include <seahowl/elasto/component_elasto.h>
@@ -8,6 +11,9 @@
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/elasto/turbine_elasto.h>
 #include <seahowl/elasto/chrono_adapters.h>
+
+#include <seahowl/aero/blade_aero.h>
+#include <seahowl/aero/turbine_aero.h>
 
 #include <seahowl/servo/controller.h>
 
@@ -21,51 +27,6 @@
 
 namespace py = pybind11;
 
-class PyComponentElasto : public seahowl::elasto::ComponentElasto {
-  public:
-    /* Inherit the constructors */
-    using ComponentElasto::ComponentElasto;
-
-    /* Trampoline (need one for each virtual function) */
-    void rotate(double angle, const seahowl::Vector3d& axis) const override {
-        PYBIND11_OVERRIDE_PURE(void, ComponentElasto, rotate, angle, axis);
-    };
-    void translate(const seahowl::Vector3d& translation_vector) const override {
-        PYBIND11_OVERRIDE_PURE(void, ComponentElasto, translate, translation_vector);
-    };
-};
-
-class PyComponentElastoFEA : public seahowl::elasto::ComponentElastoFEA {
-  public:
-    /* Inherit the constructors */
-    using ComponentElastoFEA::ComponentElastoFEA;
-
-    /* Trampoline (need one for each virtual function) */
-    void rotate(double angle, const seahowl::Vector3d& axis) const override {
-        PYBIND11_OVERRIDE_PURE(void, ComponentElastoFEA, rotate, angle, axis);
-    };
-    void translate(const seahowl::Vector3d& translation_vector) const override {
-        PYBIND11_OVERRIDE_PURE(void, ComponentElastoFEA, translate, translation_vector);
-    };
-};
-
-class PyComponentDynamic : public seahowl::core::ComponentDynamic {
-  public:
-    /* Inherit the constructors */
-    using ComponentDynamic::ComponentDynamic;
-
-    /* Trampoline (need one for each virtual function) */
-    void initialize(double time, double dt) override {
-        PYBIND11_OVERRIDE_PURE(void, ComponentDynamic, init, time, dt);
-    };
-    void prestep(double time, double dt) override {
-        PYBIND11_OVERRIDE_PURE(void, ComponentDynamic, prestep, time, dt);
-    };
-    void poststep(double time, double dt) override {
-        PYBIND11_OVERRIDE_PURE(void, ComponentDynamic, poststep, time, dt);
-    };
-};
-
 PYBIND11_MODULE(pyseahowl, m) {
     // io/read_json.h
     m.def("populate_blade_from_json", &populate_blade_from_json);
@@ -73,14 +34,33 @@ PYBIND11_MODULE(pyseahowl, m) {
     m.def("populate_turbine_from_json", &populate_turbine_from_json);
     m.def("populate_system_from_json", &populate_system_from_json);
 
+    // commons.h
+    py::class_<seahowl::Entity, std::shared_ptr<seahowl::Entity>>(m, "Entity")
+        .def("get_position", &seahowl::Entity::get_position)
+        .def("set_position", &seahowl::Entity::set_position)
+        .def("get_rotation", &seahowl::Entity::get_rotation)
+        .def("set_rotation", &seahowl::Entity::set_rotation);
+    py::class_<seahowl::EntityDynamic, std::shared_ptr<seahowl::EntityDynamic>, seahowl::Entity>(m, "EntityDynamic")
+        .def("get_velocity", &seahowl::EntityDynamic::get_velocity)
+        .def("get_acceleration", &seahowl::EntityDynamic::get_acceleration)
+        .def("get_rotational_velocity", &seahowl::EntityDynamic::get_rotational_velocity)
+        .def("get_rotational_acceleration", &seahowl::EntityDynamic::get_rotational_acceleration);
+
     // ELASTO
     //
     auto m_elasto = m.def_submodule("elasto", "Elasto submodule.");
     // elasto/entities_elasto.h
-    py::class_<seahowl::elasto::BodyElasto, std::shared_ptr<seahowl::elasto::BodyElasto>>(m_elasto, "BodyElasto")
+    py::class_<seahowl::elasto::BodyElasto, std::shared_ptr<seahowl::elasto::BodyElasto>, seahowl::EntityDynamic>(
+        m_elasto, "BodyElasto")
         .def("set_fixed", &seahowl::elasto::BodyElasto::set_fixed);
-    py::class_<seahowl::elasto::NodeElasto, std::shared_ptr<seahowl::elasto::NodeElasto>>(m_elasto, "NodeElasto")
+    py::class_<seahowl::elasto::NodeElasto, std::shared_ptr<seahowl::elasto::NodeElasto>, seahowl::EntityDynamic>(
+        m_elasto, "NodeElasto")
+        .def("get_load", &seahowl::elasto::NodeElasto::get_load)
+        .def("get_torque", &seahowl::elasto::NodeElasto::get_torque)
         .def("set_fixed", &seahowl::elasto::NodeElasto::set_fixed);
+    py::class_<seahowl::elasto::Link, std::shared_ptr<seahowl::elasto::Link>>(m_elasto, "Link")
+        .def("get_reaction_force", &seahowl::elasto::Link::get_reaction_force)
+        .def("get_reaction_torque", &seahowl::elasto::Link::get_reaction_torque);
     py::class_<seahowl::elasto::MeshElasto, std::shared_ptr<seahowl::elasto::MeshElasto>>(m_elasto, "MeshElasto");
     py::class_<seahowl::elasto::SystemElasto, std::shared_ptr<seahowl::elasto::SystemElasto>>(m_elasto, "SystemElasto")
         .def("get_time", &seahowl::elasto::SystemElasto::get_time)
@@ -95,15 +75,12 @@ PYBIND11_MODULE(pyseahowl, m) {
         .def(py::init<>());
 
     // elasto/component_elasto.h
-    py::class_<seahowl::elasto::ComponentElasto, std::shared_ptr<seahowl::elasto::ComponentElasto>, PyComponentElasto>(
-        m_elasto, "ComponentElasto")
+    py::class_<seahowl::elasto::ComponentElasto, std::shared_ptr<seahowl::elasto::ComponentElasto>>(m_elasto,
+                                                                                                    "ComponentElasto")
         .def("rotate", &seahowl::elasto::ComponentElasto::rotate)
         .def("translate", &seahowl::elasto::ComponentElasto::translate);
     py::class_<seahowl::elasto::ComponentElastoFEA, std::shared_ptr<seahowl::elasto::ComponentElastoFEA>,
-               PyComponentElastoFEA>(m_elasto, "ComponentElastoFEA")
-        .def(py::init<>())
-        .def("rotate", &seahowl::elasto::ComponentElastoFEA::rotate)
-        .def("translate", &seahowl::elasto::ComponentElastoFEA::translate)
+               seahowl::elasto::ComponentElasto>(m_elasto, "ComponentElastoFEA")
         .def_readonly("nodes", &seahowl::elasto::TowerElasto::nodes);
 
     // elasto/blade_elasto.h
@@ -123,6 +100,31 @@ PYBIND11_MODULE(pyseahowl, m) {
         .def("get_axial_thrust", &seahowl::elasto::RotorElasto::get_axial_thrust)
         .def("get_axial_torque", &seahowl::elasto::RotorElasto::get_axial_torque)
         .def("get_azimuth", &seahowl::elasto::RotorElasto::get_azimuth)
+        .def_readonly("blades", &seahowl::elasto::RotorElasto::blades)
+        .def_property_readonly("body_hub", [](seahowl::elasto::RotorElasto& rotor) { return rotor.body_hub.get(); })
+        .def_property_readonly(
+            "body_shaft", [](seahowl::elasto::RotorElasto& rotor) { return rotor.body_shaft.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "body_nacelle", [](seahowl::elasto::RotorElasto& rotor) { return rotor.body_nacelle.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "body_yaw_bearing", [](seahowl::elasto::RotorElasto& rotor) { return rotor.body_yaw_bearing.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "link_shaft_hub", [](seahowl::elasto::RotorElasto& rotor) { return rotor.link_shaft_hub.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "link_shaft_nacelle", [](seahowl::elasto::RotorElasto& rotor) { return rotor.link_shaft_nacelle.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "link_shaft_yaw_bearing",
+            [](seahowl::elasto::RotorElasto& rotor) { return rotor.link_shaft_yaw_bearing.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "link_shaft_yaw_bearing",
+            [](seahowl::elasto::RotorElasto& rotor) { return rotor.link_towertop_yaw_bearing.get(); },
+            py::return_value_policy::reference_internal)
         .def_readonly("pitch_collective", &seahowl::elasto::RotorElasto::pitch_collective);
 
     // elasto/tower_elasto.h
@@ -137,6 +139,18 @@ PYBIND11_MODULE(pyseahowl, m) {
         .def_readonly("tower", &seahowl::elasto::TurbineElasto::tower)
         .def(py::init<>());
 
+    // AERO
+    //
+    auto m_aero = m.def_submodule("aero", "Aero submodule.");
+    // aero/blade_aero.h
+    py::class_<seahowl::aero::BladeAero, std::shared_ptr<seahowl::aero::BladeAero>>(m_aero, "BladeAero")
+        .def(py::init<>())
+        .def("get_total_load", &seahowl::aero::BladeAero::get_total_load);
+
+    // aero/turbine_aero.h
+    py::class_<seahowl::aero::TurbineAero, std::shared_ptr<seahowl::aero::TurbineAero>>(m_aero, "TurbineAero")
+        .def(py::init<>());
+
     // SERVO
     //
     auto m_servo = m.def_submodule("servo", "Servo submodule.");
@@ -149,8 +163,8 @@ PYBIND11_MODULE(pyseahowl, m) {
     //
     auto m_core = m.def_submodule("core", "Core submodule.");
     // core/utils.h
-    py::class_<seahowl::core::ComponentDynamic, std::shared_ptr<seahowl::core::ComponentDynamic>, PyComponentDynamic>(
-        m_core, "ComponentDynamic")
+    py::class_<seahowl::core::ComponentDynamic, std::shared_ptr<seahowl::core::ComponentDynamic>>(m_core,
+                                                                                                  "ComponentDynamic")
         .def("initialize", &seahowl::core::ComponentDynamic::initialize)
         .def("prestep", &seahowl::core::ComponentDynamic::prestep)
         .def("poststep", &seahowl::core::ComponentDynamic::poststep);
