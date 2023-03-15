@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
         }
     }
 #endif
-    double dt_outputs_next = dt_outputs;
+    double time_outputs = dt_outputs;
     while (system_chrono->GetChTime() < t_end) {
         // prestep
         seahowl_system.prestep(system_chrono->GetChTime(), dt);
@@ -166,7 +166,7 @@ int main(int argc, char* argv[]) {
         seahowl_system.poststep(system_chrono->GetChTime(), dt);
 
         // output
-        if (system_chrono->GetChTime() >= (dt_outputs_next - dt_outputs_next * 1e-6)) {
+        if (system_chrono->GetChTime() >= (time_outputs - 1e-6)) {
             output_results(seahowl_system, system_chrono, step);
 #ifdef HAVE_VTK
             if (output_vtk) {
@@ -180,9 +180,7 @@ int main(int argc, char* argv[]) {
             draw_system(system_chrono, application);
             application->EndScene();
 #endif
-        }
-        while (system_chrono->GetChTime() >= (dt_outputs_next - dt_outputs_next * 1e-6)) {
-            dt_outputs_next += dt_outputs;
+            time_outputs += dt_outputs;
         }
     }
 
