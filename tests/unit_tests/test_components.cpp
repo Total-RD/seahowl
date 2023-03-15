@@ -453,7 +453,6 @@ TEST(test_turbine, multiturbines) {
         // empty controller
         turbine.controller = std::make_shared<seahowl::servo::Controller>();
         turbine.tower.elasto.nodes.front()->set_fixed(true);
-        turbine.use_aerodyn = true;
     }
 
     // statics

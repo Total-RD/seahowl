@@ -112,7 +112,7 @@ void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
 void RotorElasto::link_tower(const TowerElasto& tower, std::shared_ptr<seahowl::elasto::SystemElasto> system) {
     auto towertop_node = tower.nodes[tower.nodes.size() - 1];
     // translate RNA center of origin to towertop
-    this->translate(towertop_node->get_position());
+    this->translate(towertop_node->get_position() - this->body_yaw_bearing->get_position());
     // link yaw bearing body to towertop
     link_towertop_yaw_bearing = std::make_shared<LinkChrono>();
     system->add(link_towertop_yaw_bearing);
