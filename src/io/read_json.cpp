@@ -443,7 +443,6 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         if (output_vtk) {
             turbine.WrVTK = 2;
         }
-        turbine.WrVTK_Type = json_obj.at("outputs").at("VTK_Type").get<int>();
         turbine.WrVTK_dt = json_obj.at("outputs").at("dt").get<double>();
         if (turbine.use_aerodyn) {
             std::string inflowwind_filepath;
