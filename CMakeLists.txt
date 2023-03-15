@@ -280,6 +280,7 @@ set_target_properties(
                COMPILE_FLAGS "${CHRONO_CXX_FLAGS} ${EXTRA_COMPILE_FLAGS}"
                COMPILE_DEFINITIONS "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\""
                LINK_FLAGS "${CHRONO_LINKER_FLAGS}"
+               POSITION_INDEPENDENT_CODE ON
 )
 
 target_link_libraries(seahowl_core
