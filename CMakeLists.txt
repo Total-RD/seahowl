@@ -93,7 +93,7 @@ endif()
 
 # python
 if(SEAHOWL_ENABLE_PYTHON)
-    find_package(Python COMPONENTS Interpreter Development)
+    find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
     find_package(pybind11 CONFIG REQUIRED)
 endif(SEAHOWL_ENABLE_PYTHON)
 
@@ -371,7 +371,6 @@ endif(SEAHOWL_ENABLE_DOC)
 # PYTHON
 # ====================
 if (SEAHOWL_ENABLE_PYTHON)
-    set(SEAHOWL_PYTHON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/bindings)
-    pybind11_add_module(pyseahowl ${SEAHOWL_PYTHON_SOURCE_DIR}/pybind_core.cpp)
-    target_link_libraries(pyseahowl PRIVATE pybind11::headers seahowl_core)
+    pybind11_add_module(pyseahowl ${CMAKE_CURRENT_SOURCE_DIR}/src/bindings/pybind_core.cpp)
+    target_link_libraries(pyseahowl PRIVATE seahowl_core)
 endif (SEAHOWL_ENABLE_PYTHON)
