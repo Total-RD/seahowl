@@ -66,12 +66,12 @@ void seahowl::aero::AeroDynAdapter::setMotionHub(seahowl::core::Turbine& turbine
     float* hubAcc_C = new float[6];
 
     // Get the information about hub
-    auto hubPos = turbine.rotor.elasto.body_hub->get_position();
-    auto hubOri = turbine.rotor.elasto.body_hub->get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
-    auto hubTranVel = turbine.rotor.elasto.body_hub->get_velocity();
-    auto hubRotVel = turbine.rotor.elasto.body_hub->get_rotational_velocity_global();
-    auto hubTranAcc = turbine.rotor.elasto.body_hub->get_acceleration();
-    auto hubRotAcc = turbine.rotor.elasto.body_hub->get_rotational_acceleration_global();
+    auto hubPos = turbine.rotor.aero.body_hub.get_position();
+    auto hubOri = turbine.rotor.aero.body_hub.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+    auto hubTranVel = turbine.rotor.aero.body_hub.get_velocity();
+    auto hubRotVel = turbine.rotor.aero.body_hub.get_rotational_velocity_global();
+    auto hubTranAcc = turbine.rotor.aero.body_hub.get_acceleration();
+    auto hubRotAcc = turbine.rotor.aero.body_hub.get_rotational_acceleration_global();
 
     for (int i = 0; i < 3; i++) {
         hubPos_C[i] = hubPos[i];

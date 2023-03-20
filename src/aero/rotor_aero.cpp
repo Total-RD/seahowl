@@ -19,7 +19,7 @@ void RotorAero::build(std::vector<std::shared_ptr<BladeAero>> blades) {
     radius = 0.0;
     for (int ii = 0; ii < blades.size(); ii++) {
         auto& blade = blades[ii];
-        radius += (blade->discretized_points.back().coordinates - hub_position).norm();
+        radius += (blade->discretized_points.back().coordinates - body_hub.get_position()).norm();
     }
     radius /= blades.size();
 
@@ -34,7 +34,7 @@ void RotorAero::compute_chords_solidity() {
     auto nblades = blades.size();
     for (auto& blade : blades) {
         for (auto& node : blade->nodes) {
-            auto radius = (node.get_position() - hub_position).norm();
+            auto radius = (node.get_position() - body_hub.get_position()).norm();
             node.chord_solidity = nblades * node.properties.chord / (2 * PI * radius);
             // std::cout << element.swept_annulus << " " << element.chord_solidity << std::endl;
         }
@@ -44,7 +44,7 @@ void RotorAero::compute_chords_solidity() {
 void RotorAero::compute_distances_from_hub() {
     for (int ii = 0; ii < blades.size(); ii++) {
         auto& blade = blades[ii];
-        blade->compute_distances_from_hub(hub_position, hub_radius);
+        blade->compute_distances_from_hub(body_hub.get_position(), hub_radius);
     }
 }
 
@@ -58,7 +58,7 @@ void RotorAero::compute_distances_from_tip() {
 void RotorAero::compute_radii() {
     for (int ii = 0; ii < blades.size(); ii++) {
         auto& blade = blades[ii];
-        blade->compute_radii(hub_position);
+        blade->compute_radii(body_hub.get_position());
     }
 }
 
@@ -93,14 +93,14 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
 
             auto global_velocity = Vector3d(wind_velocity - velocity);
             // project in disc frame
-            auto local_velocity_disc = hub_rotation.inverse() * global_velocity;
+            auto local_velocity_disc = body_hub.get_rotation().inverse() * global_velocity;
 
             // get global/local directions
             // pointing from hub towards nacelle
             auto local_direction_normal = Vector3d(1.0, 0.0, 0.0);
-            auto global_direction_normal = hub_rotation * local_direction_normal;
+            auto global_direction_normal = body_hub.get_rotation() * local_direction_normal;
             // pointing from hub to node position
-            auto global_direction_hub2node = (position - hub_position).normalized();
+            auto global_direction_hub2node = (position - body_hub.get_position()).normalized();
             // pointing in tangential direction
             auto global_direction_tangent = global_direction_normal.cross(global_direction_hub2node).normalized();
 

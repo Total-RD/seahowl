@@ -17,10 +17,8 @@ class RotorAero {
   public:
     /** @brief List of blades. */
     std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades;
-    /** @brief Position of hub. */
-    Vector3d hub_position{0.0, 0.0, 0.0};
-    /** @brief Rotation of hub. */
-    Quaternion hub_rotation;
+    /** @brief Hub. */
+    EntityDynamicEigen body_hub;
     /** @brief Total radius of the rotor (hub + blades). */
     double radius = 0.0;
     /** @brief Radius of hub. */

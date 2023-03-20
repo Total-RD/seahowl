@@ -37,8 +37,14 @@ void Rotor::poststep(double time, double dt) {
 }
 
 void Rotor::update_positions_aero() {
-    aero.hub_position = elasto.body_hub->get_position();
-    aero.hub_rotation = elasto.body_hub->get_rotation();
+    aero.body_hub.set_position(elasto.body_hub->get_position());
+    aero.body_hub.set_rotation(elasto.body_hub->get_rotation());
+    aero.body_hub.set_velocity(elasto.body_hub->get_velocity());
+    aero.body_hub.set_acceleration(elasto.body_hub->get_acceleration());
+    aero.body_hub.set_rotational_velocity_local(elasto.body_hub->get_rotational_velocity_local());
+    aero.body_hub.set_rotational_acceleration_local(elasto.body_hub->get_rotational_acceleration_local());
+    aero.body_hub.set_rotational_velocity_global(elasto.body_hub->get_rotational_velocity_global());
+    aero.body_hub.set_rotational_acceleration_global(elasto.body_hub->get_rotational_acceleration_global());
 }
 
 void Rotor::assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system) {
