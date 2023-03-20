@@ -3,7 +3,7 @@
 #include <seahowl/aero/airfoil.h>
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/aero/tower_aero.h>
-#include <seahowl/commons.h>
+#include <seahowl/commons/numerics.h>
 
 namespace seahowl {
 namespace aero {

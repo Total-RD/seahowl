@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include <seahowl/commons.h>
+#include <seahowl/commons/entities.h>
 #include <seahowl/elasto/reference_point_elasto.h>
 
 namespace seahowl {
@@ -60,6 +60,10 @@ class BodyElasto : public EntityDynamic {
  */
 class NodeElasto : public EntityDynamic {
   public:
+    /**
+     * @brief Returns main direction of node.
+     */
+    virtual Vector3d get_direction() const = 0;
     /**
      * @brief Sets load on node.
      *

@@ -11,6 +11,8 @@ template <class Real>
 class ChVector;
 template <class Real>
 class ChQuaternion;
+template <class Real>
+class ChFrameMoving;
 class ChBody;
 class ChLinkMateGeneric;
 class ChSystem;
@@ -33,6 +35,29 @@ Vector3d ch2vec(chrono::ChVector<double> vector_in);
 chrono::ChQuaternion<double> quat2ch(Quaternion quaternion_in);
 Quaternion ch2quat(chrono::ChQuaternion<double> quaternion_in);
 
+//
+class EntityDynamicChrono : public EntityDynamic {
+  public:
+    std::shared_ptr<chrono::ChFrameMoving<double>> chobj;
+
+    virtual void set_position(Vector3d position) override;
+    virtual Vector3d get_position() const override;
+    virtual void set_rotation(Quaternion rotation) override;
+    virtual Quaternion get_rotation() const override;
+    virtual void set_velocity(Vector3d velocity) override;
+    virtual Vector3d get_velocity() const override;
+    virtual void set_acceleration(Vector3d acceleration) override;
+    virtual Vector3d get_acceleration() const override;
+    virtual void set_rotational_velocity_local(Vector3d rotational_velocity_local) override;
+    virtual Vector3d get_rotational_velocity_local() const override;
+    virtual void set_rotational_acceleration_local(Vector3d rotational_acceleration_local) override;
+    virtual Vector3d get_rotational_acceleration_local() const override;
+    virtual void set_rotational_velocity_global(Vector3d rotational_velocity_global) override;
+    virtual Vector3d get_rotational_velocity_global() const override;
+    virtual void set_rotational_acceleration_global(Vector3d rotational_acceleration_global) override;
+    virtual Vector3d get_rotational_acceleration_global() const override;
+};
+
 /**
  * @brief Chrono rigid body class.
  */
@@ -43,22 +68,27 @@ class BodyElastoChrono : public BodyElasto {
 
     BodyElastoChrono();
     virtual void set_position(Vector3d position) override;
+    virtual Vector3d get_position() const override;
+    virtual void set_rotation(Quaternion rotation) override;
+    virtual Quaternion get_rotation() const override;
+    virtual void set_velocity(Vector3d velocity) override;
+    virtual Vector3d get_velocity() const override;
+    virtual void set_acceleration(Vector3d acceleration) override;
+    virtual Vector3d get_acceleration() const override;
+    virtual void set_rotational_velocity_local(Vector3d rotational_velocity_local) override;
+    virtual Vector3d get_rotational_velocity_local() const override;
+    virtual void set_rotational_acceleration_local(Vector3d rotational_acceleration_local) override;
+    virtual Vector3d get_rotational_acceleration_local() const override;
+    virtual void set_rotational_velocity_global(Vector3d rotational_velocity_global) override;
+    virtual Vector3d get_rotational_velocity_global() const override;
+    virtual void set_rotational_acceleration_global(Vector3d rotational_acceleration_global) override;
+    virtual Vector3d get_rotational_acceleration_global() const override;
     virtual void set_mass(double mass) override;
     virtual void set_inertia_diagonal(Vector3d inertia) override;
-    virtual void set_rotation(Quaternion rotation) override;
     virtual void reset_forces() override;
     virtual void accumulate_torque(Vector3d torque, bool is_local) override;
     virtual void set_fixed(bool is_fixed) override;
     virtual double get_mass() override;
-    virtual Vector3d get_position() const override;
-    virtual Vector3d get_velocity() const override;
-    virtual Vector3d get_acceleration() const override;
-    virtual Quaternion get_rotation() const override;
-    virtual Vector3d get_direction() const override;
-    virtual Vector3d get_rotational_velocity_local() const override;
-    virtual Vector3d get_rotational_acceleration_local() const override;
-    virtual Vector3d get_rotational_velocity_global() const override;
-    virtual Vector3d get_rotational_acceleration_global() const override;
 };
 
 /**
@@ -72,21 +102,27 @@ class NodeElastoChrono : public NodeElasto {
 
     NodeElastoChrono(Vector3d position, Quaternion rotation);
     virtual void set_position(Vector3d position) override;
-    virtual void set_rotation(Quaternion rotation) override;
-    virtual void set_load(Vector3d force) override;
-    virtual void set_torque(Vector3d torque) override;
-    virtual void set_fixed(bool is_fixed) override;
     virtual Vector3d get_position() const override;
-    virtual Vector3d get_velocity() const override;
-    virtual Vector3d get_acceleration() const override;
+    virtual void set_rotation(Quaternion rotation) override;
     virtual Quaternion get_rotation() const override;
-    virtual Vector3d get_direction() const override;
+    virtual void set_velocity(Vector3d velocity) override;
+    virtual Vector3d get_velocity() const override;
+    virtual void set_acceleration(Vector3d acceleration) override;
+    virtual Vector3d get_acceleration() const override;
+    virtual void set_rotational_velocity_local(Vector3d rotational_velocity_local) override;
     virtual Vector3d get_rotational_velocity_local() const override;
+    virtual void set_rotational_acceleration_local(Vector3d rotational_acceleration_local) override;
     virtual Vector3d get_rotational_acceleration_local() const override;
+    virtual void set_rotational_velocity_global(Vector3d rotational_velocity_global) override;
     virtual Vector3d get_rotational_velocity_global() const override;
+    virtual void set_rotational_acceleration_global(Vector3d rotational_acceleration_global) override;
     virtual Vector3d get_rotational_acceleration_global() const override;
+    virtual Vector3d get_direction() const override;
+    virtual void set_load(Vector3d force) override;
     virtual Vector3d get_load() const override;
+    virtual void set_torque(Vector3d torque) override;
     virtual Vector3d get_torque() const override;
+    virtual void set_fixed(bool is_fixed) override;
     void set_properties(const BladeReferencePointElasto& ref, bool fpm = false);
     void set_properties(const TowerReferencePointElasto& ref);
 };

@@ -1,5 +1,4 @@
 #include "seahowl/aero/aerodyn_adapter.h"
-#include "seahowl/commons.h"
 
 #include <stdexcept>
 #include <vector>
@@ -382,9 +381,9 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     AeroDyn_Inflow_C_Init(ADinputFilePassed, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed, &IfWinputFile,
                           IfWinputFileStringLength, OutRootName, gravity, defFldDens, defKinVisc, defSpdSound, defPatm,
                           defPvap, WtrDpth, MSL2SWL, InterpOrder, Time, DT, TMax, storeHHVel, TransposeDCM, WrVTK,
-                          WrVTK_Type, WrVTK_dt, VTKNacDim, VTKHubRad, HubPos, HubOri, NacPos, NacOri, NumBlades, BldRootPos,
-                          BldRootOri, NumMeshPts, MeshPos, MeshOri, NumChannels, OutputChannelNames, OutputChannelUnits,
-                          ErrStat, ErrMsg);
+                          WrVTK_Type, WrVTK_dt, VTKNacDim, VTKHubRad, HubPos, HubOri, NacPos, NacOri, NumBlades,
+                          BldRootPos, BldRootOri, NumMeshPts, MeshPos, MeshOri, NumChannels, OutputChannelNames,
+                          OutputChannelUnits, ErrStat, ErrMsg);
 
     CheckError();
 }

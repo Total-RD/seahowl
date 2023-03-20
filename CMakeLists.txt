@@ -119,6 +119,16 @@ endif()
 # ================
 add_library(seahowl_core)
 
+# commons
+set(SEAHOWL_COMMONS_SOURCES
+    src/commons/entities.cpp
+)
+set(SEAHOWL_COMMONS_HEADERS
+    include/seahowl/commons/numerics.h
+    include/seahowl/commons/entities.h
+)
+source_group(commons FILES ${SEAHOWL_COMMONS_SOURCES} ${SEAHOWL_COMMONS_HEADERS})
+
 # core
 set(SEAHOWL_CORE_SOURCES
     src/core/reference_point.cpp
@@ -215,7 +225,8 @@ source_group(io FILES ${SEAHOWL_IO_SOURCES} ${SEAHOWL_IO_HEADERS})
 
 # seahowl lib
 set(SEAHOWL_FILES
-    include/seahowl/commons.h
+    ${SEAHOWL_COMMONS_SOURCES}
+    ${SEAHOWL_COMMONS_HEADERS}
     ${SEAHOWL_CORE_SOURCES}
     ${SEAHOWL_CORE_HEADERS}
     ${SEAHOWL_ELASTO_SOURCES}
@@ -246,7 +257,7 @@ set_target_properties(
                LINK_FLAGS "${CHRONO_LINKER_FLAGS}"
 )
 
-target_link_libraries(seahowl_core 
+target_link_libraries(seahowl_core
     PUBLIC Eigen3::Eigen
     PRIVATE nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES})
 

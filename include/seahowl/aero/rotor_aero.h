@@ -3,7 +3,7 @@
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/aero/wind_models.h>
-#include <seahowl/commons.h>
+#include <seahowl/commons/numerics.h>
 
 #include <memory>
 

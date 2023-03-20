@@ -1,5 +1,5 @@
 #include <seahowl/io/write_vtk.h>
-#include <seahowl/commons.h>
+#include <seahowl/commons/numerics.h>
 
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>

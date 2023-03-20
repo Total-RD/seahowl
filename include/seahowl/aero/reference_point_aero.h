@@ -1,7 +1,7 @@
 #pragma once
 
 #include <seahowl/core/reference_point.h>
-#include <seahowl/commons.h>
+#include <seahowl/commons/numerics.h>
 
 namespace seahowl {
 namespace aero {

@@ -7,7 +7,7 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/rotor_elasto.h>
 #include <seahowl/elasto/entities_elasto.h>
-#include <seahowl/commons.h>
+#include <seahowl/commons/numerics.h>
 
 /// <summary>
 /// Aerodyn module in OpenFAST

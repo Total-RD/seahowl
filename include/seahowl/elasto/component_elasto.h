@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include <seahowl/commons.h>
+#include <seahowl/commons/numerics.h>
 #include <seahowl/elasto/entities_elasto.h>
 #include <seahowl/elasto/reference_point_elasto.h>
 
