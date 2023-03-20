@@ -332,7 +332,9 @@ void ElementBladeElastoChrono::set_nodes(std::shared_ptr<NodeElasto> node1, std:
 }
 
 void ElementBladeElastoChrono::set_prebend(const Quaternion& prebend) {
-    chobj->SetNodeBreferenceRot(quat2ch(prebend));
+    // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
+    auto prebend_ch = chrono::ChQuaternion<double>(prebend.w(), prebend.z(), prebend.y(), prebend.x());
+    chobj->SetNodeBreferenceRot(prebend_ch);
 }
 
 double ElementBladeElastoChrono::get_mass() {
@@ -375,7 +377,9 @@ void ElementBladeElastoChronoFPM::set_nodes(std::shared_ptr<NodeElasto> node1, s
 }
 
 void ElementBladeElastoChronoFPM::set_prebend(const Quaternion& prebend) {
-    chobj->SetNodeBreferenceRot(node_iec2ch(prebend));
+    // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
+    auto prebend_ch = chrono::ChQuaternion<double>(prebend.w(), prebend.z(), prebend.y(), prebend.x());
+    chobj->SetNodeBreferenceRot(prebend_ch);
 }
 
 double ElementBladeElastoChronoFPM::get_mass() {
