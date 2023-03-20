@@ -11,11 +11,11 @@ using seahowl::Quaternion;
 
 BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
     properties = point;
-    coordinates = point.coordinates;
-    velocity = Vector3d(0.0, 0.0, 0.0);
-    rot_velocity = Vector3d(0.0, 0.0, 0.0);
-    acceleration = Vector3d(0.0, 0.0, 0.0);
-    rot_acceleration = Vector3d(0.0, 0.0, 0.0);
+    set_position(point.coordinates);
+    set_velocity(Vector3d(0.0, 0.0, 0.0));
+    set_acceleration(Vector3d(0.0, 0.0, 0.0));
+    set_rotational_velocity_global(Vector3d(0.0, 0.0, 0.0));
+    set_rotational_acceleration_global(Vector3d(0.0, 0.0, 0.0));
     load = Vector3d(0.0, 0.0, 0.0);
     wind_velocity = Vector3d(0.0, 0.0, 0.0);
     wind_velocity_shadowed = Vector3d(0.0, 0.0, 0.0);
@@ -40,7 +40,7 @@ Vector3d BladeNodeAero::get_offset_aero_absolute() const {
 BladeElementAero::BladeElementAero(const BladeNodeAero& node1, const BladeNodeAero& node2)
     : node1(node1), node2(node2) {
     fraction = 0.5 * (node1.properties.fraction + node2.properties.fraction);
-    length = (node1.coordinates - node2.coordinates).norm();
+    length = (node1.get_position() - node2.get_position()).norm();
 }
 
 Vector3d BladeElementAero::get_load() const {
@@ -48,13 +48,13 @@ Vector3d BladeElementAero::get_load() const {
 }
 
 Vector3d BladeElementAero::get_position() const {
-    return 0.5 * (node1.coordinates + node2.coordinates);
+    return 0.5 * (node1.get_position() + node2.get_position());
 }
 
 Quaternion BladeElementAero::get_rotation() const {
     // returning rotation of node1
     // TODO: average rotation of node1 and node2
-    return node1.rotation;
+    return node1.get_rotation();
 }
 
 Vector3d BladeElementAero::get_offset_aero_absolute() const {
@@ -106,19 +106,19 @@ void BladeAero::compute_distances_from_tip() {
     // this is the position of the element at the tip
     auto& tip_position = discretized_points.back().coordinates;
     for (auto& node : nodes) {
-        node.distance_from_tip = (node.coordinates - tip_position).norm();
+        node.distance_from_tip = (node.get_position() - tip_position).norm();
     }
 }
 
 void BladeAero::compute_distances_from_hub(const Vector3d& hub_apex_position, double hub_radius) {
     for (auto& node : nodes) {
-        node.distance_from_hub = (node.coordinates - hub_apex_position).norm() - hub_radius;
+        node.distance_from_hub = (node.get_position() - hub_apex_position).norm() - hub_radius;
     }
 }
 
 void BladeAero::compute_radii(const Vector3d& hub_apex_position) {
     for (auto& node : nodes) {
-        node.radius = (node.coordinates - hub_apex_position).norm();
+        node.radius = (node.get_position() - hub_apex_position).norm();
     }
 }
 

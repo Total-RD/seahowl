@@ -4,6 +4,7 @@
 #include <seahowl/aero/wind_models.h>
 #include <seahowl/core/utils.h>
 #include <seahowl/commons/numerics.h>
+#include <seahowl/commons/entities.h>
 
 namespace seahowl {
 
@@ -13,19 +14,7 @@ namespace aero {
 /**
  * @brief Blade aerodynamic node.
  */
-struct BladeNodeAero {
-    /** @brief Coordinates of node. */
-    Vector3d coordinates;
-    /** @brief Rotation of node. */
-    Quaternion rotation;
-    /** @brief Translational velocity of node. */
-    Vector3d velocity;
-    /** @brief Rotational velocity (global) of node. */
-    Vector3d rot_velocity;
-    /** @brief Translational acceleration of node. */
-    Vector3d acceleration;
-    /** @brief Rotational accelation (global) of node. */
-    Vector3d rot_acceleration;
+struct BladeNodeAero : public EntityDynamicEigen {
     /** @brief Load calculated at node. */
     Vector3d load;
     /** @brief Uninduced wind velocity at node. */

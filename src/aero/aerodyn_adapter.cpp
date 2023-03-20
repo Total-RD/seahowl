@@ -143,12 +143,12 @@ void seahowl::aero::AeroDynAdapter::setMotionRoot(seahowl::core::Turbine& turbin
     float* bldRootAcc_C = new float[6 * nblades];
 
     for (int i = 0; i < nblades; i++) {
-        auto bldRootPos = turbine.rotor.blades[i]->aero->nodes[0].coordinates;
-        auto bldRootOri = turbine.rotor.blades[i]->aero->nodes[0].rotation.toRotationMatrix();
-        auto bldRootTranVel = turbine.rotor.blades[i]->aero->nodes[0].velocity;
-        auto bldRootRotVel = turbine.rotor.blades[i]->aero->nodes[0].rot_velocity;
-        auto bldRootTranAcc = turbine.rotor.blades[i]->aero->nodes[0].acceleration;
-        auto bldRootRotAcc = turbine.rotor.blades[i]->aero->nodes[0].rot_acceleration;
+        auto bldRootPos = turbine.rotor.blades[i]->aero->nodes[0].get_position();
+        auto bldRootOri = turbine.rotor.blades[i]->aero->nodes[0].get_rotation().toRotationMatrix();
+        auto bldRootTranVel = turbine.rotor.blades[i]->aero->nodes[0].get_velocity();
+        auto bldRootRotVel = turbine.rotor.blades[i]->aero->nodes[0].get_rotational_velocity_global();
+        auto bldRootTranAcc = turbine.rotor.blades[i]->aero->nodes[0].get_acceleration();
+        auto bldRootRotAcc = turbine.rotor.blades[i]->aero->nodes[0].get_rotational_acceleration_global();
         for (int j = 0; j < 3; j++) {
             int p = i * 3 + j;
             int q = i * 6 + j;
@@ -188,12 +188,12 @@ void seahowl::aero::AeroDynAdapter::setMotionMesh(seahowl::core::Turbine& turbin
 
     for (int i = 0; i < nblades; i++) {
         for (int j = 0; j < nMeshPerBlade; j++) {
-            auto meshPos = turbine.rotor.blades[i]->aero->nodes[j].coordinates;
-            auto meshOri = turbine.rotor.blades[i]->aero->nodes[j].rotation.toRotationMatrix();
-            auto meshTranVel = turbine.rotor.blades[i]->aero->nodes[j].velocity;
-            auto meshRotVel = turbine.rotor.blades[i]->aero->nodes[j].rot_velocity;
-            auto meshTranAcc = turbine.rotor.blades[i]->aero->nodes[j].acceleration;
-            auto meshRotAcc = turbine.rotor.blades[i]->aero->nodes[j].rot_acceleration;
+            auto meshPos = turbine.rotor.blades[i]->aero->nodes[j].get_position();
+            auto meshOri = turbine.rotor.blades[i]->aero->nodes[j].get_rotation().toRotationMatrix();
+            auto meshTranVel = turbine.rotor.blades[i]->aero->nodes[j].get_velocity();
+            auto meshRotVel = turbine.rotor.blades[i]->aero->nodes[j].get_rotational_velocity_global();
+            auto meshTranAcc = turbine.rotor.blades[i]->aero->nodes[j].get_acceleration();
+            auto meshRotAcc = turbine.rotor.blades[i]->aero->nodes[j].get_rotational_acceleration_global();
 
             auto ii = i * nMeshPerBlade + j;
             for (int k = 0; k < 3; k++) {

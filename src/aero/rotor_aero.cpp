@@ -34,7 +34,7 @@ void RotorAero::compute_chords_solidity() {
     auto nblades = blades.size();
     for (auto& blade : blades) {
         for (auto& node : blade->nodes) {
-            auto radius = (node.coordinates - hub_position).norm();
+            auto radius = (node.get_position() - hub_position).norm();
             node.chord_solidity = nblades * node.properties.chord / (2 * PI * radius);
             // std::cout << element.swept_annulus << " " << element.chord_solidity << std::endl;
         }
@@ -78,9 +78,9 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
         int count = -1;
         for (auto& node : blade->nodes) {
             count += 1;
-            auto& position = node.coordinates;
-            auto& rotation = node.rotation;
-            auto& velocity = node.velocity;
+            auto& position = node.get_position();
+            auto& rotation = node.get_rotation();
+            auto& velocity = node.get_velocity();
 
             // get fluid relative velocity
             auto wind_velocity0 = wind_model.get_wind_velocity(position, time);

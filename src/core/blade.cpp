@@ -91,24 +91,28 @@ void Blade::update_positions_aero() {
         auto element_elasto = elasto->elements[elasto_element_index];
         double eta = mapping_aero2elasto_nodes[ii].eta;
         auto& node_aero = aero->nodes[ii];
-        elasto->evaluate_position_rotation(node_aero.coordinates, node_aero.rotation, elasto_element_index, eta);
+        Vector3d new_position;
+        Quaternion new_rotation;
+        elasto->evaluate_position_rotation(new_position, new_rotation, elasto_element_index, eta);
+        node_aero.set_position(new_position);
+        node_aero.set_rotation(new_rotation);
 
         // add offset
         auto& offset = node_aero.properties.offset_aero;
         auto offset3D = Vector3d(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
-        node_aero.coordinates += node_aero.rotation * offset3D;
+        node_aero.set_position(node_aero.get_position() + node_aero.get_rotation() * offset3D);
 
         // update properties of aero nodes
         double weight1 = 0.5 * fabs(eta - 1.0);
         double weight2 = 0.5 * fabs(eta + 1.0);
         auto node1 = element_elasto->nodes0[0];
         auto node2 = element_elasto->nodes0[1];
-        node_aero.velocity = weight1 * node1->get_velocity() + weight2 * node2->get_velocity();
-        node_aero.rot_velocity =
-            weight1 * node1->get_rotational_velocity_global() + weight2 * node2->get_rotational_velocity_global();
-        node_aero.acceleration = weight1 * node1->get_acceleration() + weight2 * node2->get_acceleration();
-        node_aero.rot_acceleration = weight1 * node1->get_rotational_acceleration_global() +
-                                     weight2 * node2->get_rotational_acceleration_global();
+        node_aero.set_velocity(weight1 * node1->get_velocity() + weight2 * node2->get_velocity());
+        node_aero.set_rotational_velocity_global(weight1 * node1->get_rotational_velocity_global() +
+                                                 weight2 * node2->get_rotational_velocity_global());
+        node_aero.set_acceleration(weight1 * node1->get_acceleration() + weight2 * node2->get_acceleration());
+        node_aero.set_rotational_acceleration_global(weight1 * node1->get_rotational_acceleration_global() +
+                                                     weight2 * node2->get_rotational_acceleration_global());
     }
 
     // update pitch of blade for aero

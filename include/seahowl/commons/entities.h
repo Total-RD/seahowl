@@ -107,12 +107,13 @@ class EntityDynamic : public virtual Entity {
 };
 
 class EntityEigen : public virtual Entity {
-  public:
+  protected:
     /** @brief Position of entity. */
     Vector3d position{0.0, 0.0, 0.0};
     /** @brief Rotation of entity. */
     Quaternion rotation{0.0, 0.0, 0.0, 0.0};
 
+  public:
     virtual void set_position(Vector3d position) override;
     virtual Vector3d get_position() const override;
     virtual void set_rotation(Quaternion rotation) override;
@@ -120,7 +121,7 @@ class EntityEigen : public virtual Entity {
 };
 
 class EntityDynamicEigen : public EntityDynamic, public EntityEigen {
-  public:
+  protected:
     /** @brief Velocity of entity. */
     Vector3d velocity{0.0, 0.0, 0.0};
     /** @brief Acceleration of entity. */
@@ -134,6 +135,7 @@ class EntityDynamicEigen : public EntityDynamic, public EntityEigen {
     /** @brief Rotational acceleration of entity (global). */
     Vector3d rotational_acceleration_global{0.0, 0.0, 0.0};
 
+  public:
     // need to explicitly declare that some functions come from EntityEigen and not EntityDynamic to disable warnings
     virtual void set_position(Vector3d position) override { EntityEigen::set_position(position); };
     virtual Vector3d get_position() const override { return EntityEigen::get_position(); };
