@@ -108,11 +108,11 @@ void Blade::update_positions_aero() {
         auto node1 = element_elasto->nodes0[0];
         auto node2 = element_elasto->nodes0[1];
         node_aero.set_velocity(weight1 * node1->get_velocity() + weight2 * node2->get_velocity());
-        node_aero.set_rotational_velocity_global(weight1 * node1->get_rotational_velocity_global() +
-                                                 weight2 * node2->get_rotational_velocity_global());
+        node_aero.set_rotational_velocity(weight1 * node1->get_rotational_velocity() +
+                                          weight2 * node2->get_rotational_velocity());
         node_aero.set_acceleration(weight1 * node1->get_acceleration() + weight2 * node2->get_acceleration());
-        node_aero.set_rotational_acceleration_global(weight1 * node1->get_rotational_acceleration_global() +
-                                                     weight2 * node2->get_rotational_acceleration_global());
+        node_aero.set_rotational_acceleration(weight1 * node1->get_rotational_acceleration() +
+                                              weight2 * node2->get_rotational_acceleration());
     }
 
     // update pitch of blade for aero

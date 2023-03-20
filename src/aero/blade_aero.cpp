@@ -14,8 +14,8 @@ BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
     set_position(point.coordinates);
     set_velocity(Vector3d(0.0, 0.0, 0.0));
     set_acceleration(Vector3d(0.0, 0.0, 0.0));
-    set_rotational_velocity_global(Vector3d(0.0, 0.0, 0.0));
-    set_rotational_acceleration_global(Vector3d(0.0, 0.0, 0.0));
+    set_rotational_velocity(Vector3d(0.0, 0.0, 0.0));
+    set_rotational_acceleration(Vector3d(0.0, 0.0, 0.0));
     load = Vector3d(0.0, 0.0, 0.0);
     wind_velocity = Vector3d(0.0, 0.0, 0.0);
     wind_velocity_shadowed = Vector3d(0.0, 0.0, 0.0);

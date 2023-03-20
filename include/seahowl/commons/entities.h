@@ -4,6 +4,9 @@
 
 namespace seahowl {
 
+/**
+ * @brief Base entity, with position and rotation.
+ */
 class Entity {
   public:
     /**
@@ -31,6 +34,9 @@ class Entity {
     virtual Quaternion get_rotation() const = 0;
 };
 
+/**
+ * @brief Base dynamic entity, with position, rotation, velocity, acceleration.
+ */
 class EntityDynamic : public virtual Entity {
   public:
     /**
@@ -58,54 +64,33 @@ class EntityDynamic : public virtual Entity {
     virtual Vector3d get_acceleration() const = 0;
 
     /**
-     * @brief Sets rotational velocity of entity (local frame).
-     *
-     * @param[in] rotational_velocity_local of entity.
-     */
-    virtual void set_rotational_velocity_local(Vector3d rotational_velocity_local) = 0;
-
-    /**
-     * @brief Returns rotational velocity of entity (local reference frame).
-     */
-    virtual Vector3d get_rotational_velocity_local() const = 0;
-
-    /**
-     * @brief Sets rotational acceleration of entity (local frame).
-     *
-     * @param[in] rotational_acceleration_local of entity.
-     */
-    virtual void set_rotational_acceleration_local(Vector3d rotational_acceleration_local) = 0;
-
-    /**
-     * @brief Returns rotational acceleration of entity (local reference frame).
-     */
-    virtual Vector3d get_rotational_acceleration_local() const = 0;
-
-    /**
-     * @brief Sets rotational velocity of entity (global frame).
+     * @brief Sets rotational velocity of entity (global reference frame).
      *
      * @param[in] rotational_velocity_global of entity.
      */
-    virtual void set_rotational_velocity_global(Vector3d rotational_velocity_global) = 0;
+    virtual void set_rotational_velocity(Vector3d rotational_velocity) = 0;
 
     /**
      * @brief Returns rotational velocity of entity (global reference frame).
      */
-    virtual Vector3d get_rotational_velocity_global() const = 0;
+    virtual Vector3d get_rotational_velocity() const = 0;
 
     /**
-     * @brief Sets rotational acceleration of entity (global frame).
+     * @brief Sets rotational acceleration of entity (global reference frame).
      *
      * @param[in] rotational_acceleration_global of entity.
      */
-    virtual void set_rotational_acceleration_global(Vector3d rotational_acceleration_global) = 0;
+    virtual void set_rotational_acceleration(Vector3d rotational_acceleration) = 0;
 
     /**
      * @brief Returns rotational acceleration of entity (global reference frame).
      */
-    virtual Vector3d get_rotational_acceleration_global() const = 0;
+    virtual Vector3d get_rotational_acceleration() const = 0;
 };
 
+/**
+ * @brief Entity implemented with Eigen types.
+ */
 class EntityEigen : public virtual Entity {
   protected:
     /** @brief Position of entity. */
@@ -120,20 +105,19 @@ class EntityEigen : public virtual Entity {
     virtual Quaternion get_rotation() const override;
 };
 
+/**
+ * @brief Dynamic entity implemented with Eigen types.
+ */
 class EntityDynamicEigen : public EntityDynamic, public EntityEigen {
   protected:
     /** @brief Velocity of entity. */
     Vector3d velocity{0.0, 0.0, 0.0};
     /** @brief Acceleration of entity. */
     Vector3d acceleration{0.0, 0.0, 0.0};
-    /** @brief Rotational velocity of entity (local). */
-    Vector3d rotational_velocity_local{0.0, 0.0, 0.0};
-    /** @brief Rotational acceleration of entity (local). */
-    Vector3d rotational_acceleration_local{0.0, 0.0, 0.0};
-    /** @brief Rotational velocity of entity (global). */
-    Vector3d rotational_velocity_global{0.0, 0.0, 0.0};
-    /** @brief Rotational acceleration of entity (global). */
-    Vector3d rotational_acceleration_global{0.0, 0.0, 0.0};
+    /** @brief Rotational velocity of entity (in global reference frame). */
+    Vector3d rotational_velocity{0.0, 0.0, 0.0};
+    /** @brief Rotational acceleration of entity (in global reference frame). */
+    Vector3d rotational_acceleration{0.0, 0.0, 0.0};
 
   public:
     // need to explicitly declare that some functions come from EntityEigen and not EntityDynamic to disable warnings
@@ -146,14 +130,10 @@ class EntityDynamicEigen : public EntityDynamic, public EntityEigen {
     virtual Vector3d get_velocity() const override;
     virtual void set_acceleration(Vector3d acceleration) override;
     virtual Vector3d get_acceleration() const override;
-    virtual void set_rotational_velocity_local(Vector3d rotational_velocity_local) override;
-    virtual Vector3d get_rotational_velocity_local() const override;
-    virtual void set_rotational_acceleration_local(Vector3d rotational_acceleration_local) override;
-    virtual Vector3d get_rotational_acceleration_local() const override;
-    virtual void set_rotational_velocity_global(Vector3d rotational_velocity_global) override;
-    virtual Vector3d get_rotational_velocity_global() const override;
-    virtual void set_rotational_acceleration_global(Vector3d rotational_acceleration_global) override;
-    virtual Vector3d get_rotational_acceleration_global() const override;
+    virtual void set_rotational_velocity(Vector3d rotational_velocity) override;
+    virtual Vector3d get_rotational_velocity() const override;
+    virtual void set_rotational_acceleration(Vector3d rotational_acceleration) override;
+    virtual Vector3d get_rotational_acceleration() const override;
 };
 
 }  // namespace seahowl

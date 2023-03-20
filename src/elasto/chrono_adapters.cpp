@@ -96,35 +96,19 @@ Vector3d EntityDynamicChrono::get_acceleration() const {
     return ch2vec(chobj->GetPos_dt());
 }
 
-void EntityDynamicChrono::set_rotational_velocity_local(Vector3d rotational_velocity_local) {
-    chobj->SetWvel_loc(vec2ch(rotational_velocity_local));
+void EntityDynamicChrono::set_rotational_velocity(Vector3d rotational_velocity) {
+    chobj->SetWvel_par(vec2ch(rotational_velocity));
 }
 
-Vector3d EntityDynamicChrono::get_rotational_velocity_local() const {
-    return ch2vec(chobj->GetWvel_loc());
-}
-
-void EntityDynamicChrono::set_rotational_acceleration_local(Vector3d rotational_acceleration_local) {
-    chobj->SetWacc_loc(vec2ch(rotational_acceleration_local));
-}
-
-Vector3d EntityDynamicChrono::get_rotational_acceleration_local() const {
-    return ch2vec(chobj->GetWacc_loc());
-}
-
-void EntityDynamicChrono::set_rotational_velocity_global(Vector3d rotational_velocity_global) {
-    chobj->SetWvel_par(vec2ch(rotational_velocity_global));
-}
-
-Vector3d EntityDynamicChrono::get_rotational_velocity_global() const {
+Vector3d EntityDynamicChrono::get_rotational_velocity() const {
     return ch2vec(chobj->GetWvel_par());
 }
 
-void EntityDynamicChrono::set_rotational_acceleration_global(Vector3d rotational_acceleration_global) {
-    chobj->SetWacc_par(vec2ch(rotational_acceleration_global));
+void EntityDynamicChrono::set_rotational_acceleration(Vector3d rotational_acceleration) {
+    chobj->SetWacc_par(vec2ch(rotational_acceleration));
 }
 
-Vector3d EntityDynamicChrono::get_rotational_acceleration_global() const {
+Vector3d EntityDynamicChrono::get_rotational_acceleration() const {
     return ch2vec(chobj->GetWacc_par());
 }
 
@@ -164,35 +148,19 @@ Vector3d BodyElastoChrono::get_acceleration() const {
     return ch2vec(chobj->GetPos_dt());
 }
 
-void BodyElastoChrono::set_rotational_velocity_local(Vector3d rotational_velocity_local) {
-    chobj->SetWvel_loc(vec2ch(rotational_velocity_local));
+void BodyElastoChrono::set_rotational_velocity(Vector3d rotational_velocity) {
+    chobj->SetWvel_par(vec2ch(rotational_velocity));
 }
 
-Vector3d BodyElastoChrono::get_rotational_velocity_local() const {
-    return ch2vec(chobj->GetWvel_loc());
-}
-
-void BodyElastoChrono::set_rotational_acceleration_local(Vector3d rotational_acceleration_local) {
-    chobj->SetWacc_loc(vec2ch(rotational_acceleration_local));
-}
-
-Vector3d BodyElastoChrono::get_rotational_acceleration_local() const {
-    return ch2vec(chobj->GetWacc_loc());
-}
-
-void BodyElastoChrono::set_rotational_velocity_global(Vector3d rotational_velocity_global) {
-    chobj->SetWvel_par(vec2ch(rotational_velocity_global));
-}
-
-Vector3d BodyElastoChrono::get_rotational_velocity_global() const {
+Vector3d BodyElastoChrono::get_rotational_velocity() const {
     return ch2vec(chobj->GetWvel_par());
 }
 
-void BodyElastoChrono::set_rotational_acceleration_global(Vector3d rotational_acceleration_global) {
-    chobj->SetWacc_par(vec2ch(rotational_acceleration_global));
+void BodyElastoChrono::set_rotational_acceleration(Vector3d rotational_acceleration) {
+    chobj->SetWacc_par(vec2ch(rotational_acceleration));
 }
 
-Vector3d BodyElastoChrono::get_rotational_acceleration_global() const {
+Vector3d BodyElastoChrono::get_rotational_acceleration() const {
     return ch2vec(chobj->GetWacc_par());
 }
 
@@ -257,35 +225,19 @@ Vector3d NodeElastoChrono::get_acceleration() const {
     return ch2vec(chobj->GetPos_dt());
 }
 
-void NodeElastoChrono::set_rotational_velocity_local(Vector3d rotational_velocity_local) {
-    chobj->SetWvel_loc(vec2ch(rotational_velocity_local));
+void NodeElastoChrono::set_rotational_velocity(Vector3d rotational_velocity) {
+    chobj->SetWvel_par(vec2ch(rotational_velocity));
 }
 
-Vector3d NodeElastoChrono::get_rotational_velocity_local() const {
-    return ch2vec(chobj->GetWvel_loc());
-}
-
-void NodeElastoChrono::set_rotational_acceleration_local(Vector3d rotational_acceleration_local) {
-    chobj->SetWacc_loc(vec2ch(rotational_acceleration_local));
-}
-
-Vector3d NodeElastoChrono::get_rotational_acceleration_local() const {
-    return ch2vec(chobj->GetWacc_loc());
-}
-
-void NodeElastoChrono::set_rotational_velocity_global(Vector3d rotational_velocity_global) {
-    chobj->SetWvel_par(vec2ch(rotational_velocity_global));
-}
-
-Vector3d NodeElastoChrono::get_rotational_velocity_global() const {
+Vector3d NodeElastoChrono::get_rotational_velocity() const {
     return ch2vec(chobj->GetWvel_par());
 }
 
-void NodeElastoChrono::set_rotational_acceleration_global(Vector3d rotational_acceleration_global) {
-    chobj->SetWacc_par(vec2ch(rotational_acceleration_global));
+void NodeElastoChrono::set_rotational_acceleration(Vector3d rotational_acceleration) {
+    chobj->SetWacc_par(vec2ch(rotational_acceleration));
 }
 
-Vector3d NodeElastoChrono::get_rotational_acceleration_global() const {
+Vector3d NodeElastoChrono::get_rotational_acceleration() const {
     return ch2vec(chobj->GetWacc_par());
 }
 

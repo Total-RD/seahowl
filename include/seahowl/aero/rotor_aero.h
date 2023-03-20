@@ -19,6 +19,8 @@ class RotorAero {
     std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades;
     /** @brief Hub. */
     EntityDynamicEigen body_hub;
+    /** @brief Hub. */
+    EntityDynamicEigen body_nacelle;
     /** @brief Total radius of the rotor (hub + blades). */
     double radius = 0.0;
     /** @brief Radius of hub. */

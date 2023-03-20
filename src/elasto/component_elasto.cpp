@@ -160,7 +160,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_directions() const {
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_velocities() const {
     std::vector<Vector3d> rotational_velocities;
     for (auto& node : nodes) {
-        rotational_velocities.push_back(node->get_rotational_velocity_local());
+        rotational_velocities.push_back(node->get_rotational_velocity());
     }
     return rotational_velocities;
 }
@@ -168,7 +168,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_velocities() cons
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_accelerations() const {
     std::vector<Vector3d> rotational_accelerations;
     for (auto& node : nodes) {
-        rotational_accelerations.push_back(node->get_rotational_acceleration_local());
+        rotational_accelerations.push_back(node->get_rotational_acceleration());
     }
     return rotational_accelerations;
 }

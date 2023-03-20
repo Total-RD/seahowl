@@ -48,14 +48,10 @@ class EntityDynamicChrono : public EntityDynamic {
     virtual Vector3d get_velocity() const override;
     virtual void set_acceleration(Vector3d acceleration) override;
     virtual Vector3d get_acceleration() const override;
-    virtual void set_rotational_velocity_local(Vector3d rotational_velocity_local) override;
-    virtual Vector3d get_rotational_velocity_local() const override;
-    virtual void set_rotational_acceleration_local(Vector3d rotational_acceleration_local) override;
-    virtual Vector3d get_rotational_acceleration_local() const override;
-    virtual void set_rotational_velocity_global(Vector3d rotational_velocity_global) override;
-    virtual Vector3d get_rotational_velocity_global() const override;
-    virtual void set_rotational_acceleration_global(Vector3d rotational_acceleration_global) override;
-    virtual Vector3d get_rotational_acceleration_global() const override;
+    virtual void set_rotational_velocity(Vector3d rotational_velocity) override;
+    virtual Vector3d get_rotational_velocity() const override;
+    virtual void set_rotational_acceleration(Vector3d rotational_acceleration) override;
+    virtual Vector3d get_rotational_acceleration() const override;
 };
 
 /**
@@ -75,14 +71,10 @@ class BodyElastoChrono : public BodyElasto {
     virtual Vector3d get_velocity() const override;
     virtual void set_acceleration(Vector3d acceleration) override;
     virtual Vector3d get_acceleration() const override;
-    virtual void set_rotational_velocity_local(Vector3d rotational_velocity_local) override;
-    virtual Vector3d get_rotational_velocity_local() const override;
-    virtual void set_rotational_acceleration_local(Vector3d rotational_acceleration_local) override;
-    virtual Vector3d get_rotational_acceleration_local() const override;
-    virtual void set_rotational_velocity_global(Vector3d rotational_velocity_global) override;
-    virtual Vector3d get_rotational_velocity_global() const override;
-    virtual void set_rotational_acceleration_global(Vector3d rotational_acceleration_global) override;
-    virtual Vector3d get_rotational_acceleration_global() const override;
+    virtual void set_rotational_velocity(Vector3d rotational_velocity) override;
+    virtual Vector3d get_rotational_velocity() const override;
+    virtual void set_rotational_acceleration(Vector3d rotational_acceleration) override;
+    virtual Vector3d get_rotational_acceleration() const override;
     virtual void set_mass(double mass) override;
     virtual void set_inertia_diagonal(Vector3d inertia) override;
     virtual void reset_forces() override;
@@ -109,14 +101,10 @@ class NodeElastoChrono : public NodeElasto {
     virtual Vector3d get_velocity() const override;
     virtual void set_acceleration(Vector3d acceleration) override;
     virtual Vector3d get_acceleration() const override;
-    virtual void set_rotational_velocity_local(Vector3d rotational_velocity_local) override;
-    virtual Vector3d get_rotational_velocity_local() const override;
-    virtual void set_rotational_acceleration_local(Vector3d rotational_acceleration_local) override;
-    virtual Vector3d get_rotational_acceleration_local() const override;
-    virtual void set_rotational_velocity_global(Vector3d rotational_velocity_global) override;
-    virtual Vector3d get_rotational_velocity_global() const override;
-    virtual void set_rotational_acceleration_global(Vector3d rotational_acceleration_global) override;
-    virtual Vector3d get_rotational_acceleration_global() const override;
+    virtual void set_rotational_velocity(Vector3d rotational_velocity) override;
+    virtual Vector3d get_rotational_velocity() const override;
+    virtual void set_rotational_acceleration(Vector3d rotational_acceleration) override;
+    virtual Vector3d get_rotational_acceleration() const override;
     virtual Vector3d get_direction() const override;
     virtual void set_load(Vector3d force) override;
     virtual Vector3d get_load() const override;

@@ -37,14 +37,20 @@ void Rotor::poststep(double time, double dt) {
 }
 
 void Rotor::update_positions_aero() {
+    // body_hub
     aero.body_hub.set_position(elasto.body_hub->get_position());
     aero.body_hub.set_rotation(elasto.body_hub->get_rotation());
     aero.body_hub.set_velocity(elasto.body_hub->get_velocity());
     aero.body_hub.set_acceleration(elasto.body_hub->get_acceleration());
-    aero.body_hub.set_rotational_velocity_local(elasto.body_hub->get_rotational_velocity_local());
-    aero.body_hub.set_rotational_acceleration_local(elasto.body_hub->get_rotational_acceleration_local());
-    aero.body_hub.set_rotational_velocity_global(elasto.body_hub->get_rotational_velocity_global());
-    aero.body_hub.set_rotational_acceleration_global(elasto.body_hub->get_rotational_acceleration_global());
+    aero.body_hub.set_rotational_velocity(elasto.body_hub->get_rotational_velocity());
+    aero.body_hub.set_rotational_acceleration(elasto.body_hub->get_rotational_acceleration());
+    // body_nacelle
+    aero.body_nacelle.set_position(elasto.body_nacelle->get_position());
+    aero.body_nacelle.set_rotation(elasto.body_nacelle->get_rotation());
+    aero.body_nacelle.set_velocity(elasto.body_nacelle->get_velocity());
+    aero.body_nacelle.set_acceleration(elasto.body_nacelle->get_acceleration());
+    aero.body_nacelle.set_rotational_velocity(elasto.body_nacelle->get_rotational_velocity());
+    aero.body_nacelle.set_rotational_acceleration(elasto.body_nacelle->get_rotational_acceleration());
 }
 
 void Rotor::assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system) {
