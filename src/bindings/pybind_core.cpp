@@ -12,7 +12,9 @@
 #include <seahowl/elasto/turbine_elasto.h>
 #include <seahowl/elasto/chrono_adapters.h>
 
+#include <seahowl/aero/system_aero.h>
 #include <seahowl/aero/blade_aero.h>
+#include <seahowl/aero/rotor_aero.h>
 #include <seahowl/aero/turbine_aero.h>
 
 #include <seahowl/servo/controller.h>
@@ -42,19 +44,26 @@ PYBIND11_MODULE(pyseahowl, m) {
         .def("set_rotation", &seahowl::Entity::set_rotation);
     py::class_<seahowl::EntityDynamic, std::shared_ptr<seahowl::EntityDynamic>, seahowl::Entity>(m, "EntityDynamic")
         .def("get_velocity", &seahowl::EntityDynamic::get_velocity)
+        .def("set_velocity", &seahowl::EntityDynamic::set_velocity)
         .def("get_acceleration", &seahowl::EntityDynamic::get_acceleration)
+        .def("set_acceleration", &seahowl::EntityDynamic::set_acceleration)
         .def("get_rotational_velocity", &seahowl::EntityDynamic::get_rotational_velocity)
-        .def("get_rotational_acceleration", &seahowl::EntityDynamic::get_rotational_acceleration);
+        .def("set_rotational_velocity", &seahowl::EntityDynamic::set_rotational_velocity)
+        .def("get_rotational_acceleration", &seahowl::EntityDynamic::get_rotational_acceleration)
+        .def("set_rotational_acceleration", &seahowl::EntityDynamic::set_rotational_acceleration);
+    py::class_<seahowl::EntityEigen, std::shared_ptr<seahowl::EntityEigen>, seahowl::Entity>(m, "EntityEigen");
+    py::class_<seahowl::EntityDynamicEigen, std::shared_ptr<seahowl::EntityDynamicEigen>, seahowl::EntityDynamic>(
+        m, "EntityDynamicEigen");
 
     // ELASTO
     //
     auto m_elasto = m.def_submodule("elasto", "Elasto submodule.");
     // elasto/entities_elasto.h
     py::class_<seahowl::elasto::BodyElasto, std::shared_ptr<seahowl::elasto::BodyElasto>, seahowl::EntityDynamic>(
-        m_elasto, "BodyElasto")
+        m_elasto, "BodyElasto", pybind11::multiple_inheritance())
         .def("set_fixed", &seahowl::elasto::BodyElasto::set_fixed);
     py::class_<seahowl::elasto::NodeElasto, std::shared_ptr<seahowl::elasto::NodeElasto>, seahowl::EntityDynamic>(
-        m_elasto, "NodeElasto")
+        m_elasto, "NodeElasto", pybind11::multiple_inheritance())
         .def("get_load", &seahowl::elasto::NodeElasto::get_load)
         .def("get_torque", &seahowl::elasto::NodeElasto::get_torque)
         .def("set_fixed", &seahowl::elasto::NodeElasto::set_fixed);
@@ -142,14 +151,34 @@ PYBIND11_MODULE(pyseahowl, m) {
     // AERO
     //
     auto m_aero = m.def_submodule("aero", "Aero submodule.");
+    // aero/system_aero.h
+    py::class_<seahowl::aero::SystemAero, std::shared_ptr<seahowl::aero::SystemAero>>(m_aero, "SystemAero")
+        .def(py::init<>());
+
     // aero/blade_aero.h
+    py::class_<seahowl::aero::BladeNodeAero, std::shared_ptr<seahowl::aero::BladeNodeAero>,
+               seahowl::EntityDynamicEigen>(m_aero, "BladeNodeAero")
+        .def("get_offset_aero_absolute", &seahowl::aero::BladeNodeAero::get_offset_aero_absolute);
+    py::class_<seahowl::aero::BladeElementAero, std::shared_ptr<seahowl::aero::BladeElementAero>>(m_aero,
+                                                                                                  "BladeElementAero")
+        .def("get_position", &seahowl::aero::BladeElementAero::get_position)
+        .def("get_load", &seahowl::aero::BladeElementAero::get_load);
     py::class_<seahowl::aero::BladeAero, std::shared_ptr<seahowl::aero::BladeAero>>(m_aero, "BladeAero")
         .def(py::init<>())
-        .def("get_total_load", &seahowl::aero::BladeAero::get_total_load);
+        .def("get_total_load", &seahowl::aero::BladeAero::get_total_load)
+        .def_readwrite("nodes", &seahowl::aero::BladeAero::nodes);
+
+    // aero/rotor_aero.h
+    py::class_<seahowl::aero::RotorAero, std::shared_ptr<seahowl::aero::RotorAero>>(m_aero, "RotorAero")
+        .def(py::init<>())
+        .def_readwrite("blades", &seahowl::aero::RotorAero::blades)
+        .def_readonly("body_hub", &seahowl::aero::RotorAero::body_hub)
+        .def_readonly("body_nacelle", &seahowl::aero::RotorAero::body_nacelle);
 
     // aero/turbine_aero.h
     py::class_<seahowl::aero::TurbineAero, std::shared_ptr<seahowl::aero::TurbineAero>>(m_aero, "TurbineAero")
-        .def(py::init<>());
+        .def(py::init<>())
+        .def_readonly("rotor", &seahowl::aero::TurbineAero::rotor);
 
     // SERVO
     //
@@ -172,10 +201,12 @@ PYBIND11_MODULE(pyseahowl, m) {
     // core/turbine.h
     py::class_<seahowl::core::Turbine, std::shared_ptr<seahowl::core::Turbine>, seahowl::core::ComponentDynamic>(
         m_core, "Turbine")
+        .def(py::init<seahowl::elasto::TurbineElasto&, seahowl::aero::TurbineAero&>())
         .def("get_generated_power", &seahowl::core::Turbine::get_generated_power)
         .def("get_generator_rpm", &seahowl::core::Turbine::get_generator_rpm)
         .def("build", &seahowl::core::Turbine::build)
         .def_property_readonly("elasto", [](seahowl::core::Turbine& turbine) { return &turbine.elasto; })
+        .def_property_readonly("aero", [](seahowl::core::Turbine& turbine) { return &turbine.aero; })
         .def_readonly("controller", &seahowl::core::Turbine::controller)
         .def_readonly("tower", &seahowl::core::Turbine::tower)
         .def_readonly("rotor", &seahowl::core::Turbine::rotor);
@@ -188,7 +219,8 @@ PYBIND11_MODULE(pyseahowl, m) {
     // core/rotor.h
     py::class_<seahowl::core::Rotor, std::shared_ptr<seahowl::core::Rotor>, seahowl::core::ComponentDynamic>(m_core,
                                                                                                              "Rotor")
-        .def_property_readonly("elasto", [](seahowl::core::Rotor& rotor) { return &rotor.elasto; });
+        .def_property_readonly("elasto", [](seahowl::core::Rotor& rotor) { return &rotor.elasto; })
+        .def_property_readonly("aero", [](seahowl::core::Rotor& rotor) { return &rotor.aero; });
 
     // core/blade.h
     py::class_<seahowl::core::Blade, std::shared_ptr<seahowl::core::Blade>, seahowl::core::ComponentDynamic>(m_core,
@@ -203,5 +235,6 @@ PYBIND11_MODULE(pyseahowl, m) {
         .def(py::init<>())
         .def("step", &seahowl::core::System::step)
         .def_readonly("turbines", &seahowl::core::System::turbines)
-        .def_readwrite("system_elasto", &seahowl::core::System::system_elasto);
+        .def_readwrite("system_elasto", &seahowl::core::System::system_elasto)
+        .def_readwrite("system_aero", &seahowl::core::System::system_aero);
 }
