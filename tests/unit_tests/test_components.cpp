@@ -11,7 +11,6 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/rotor_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
-#include <seahowl/core/utils.h>
 #include <seahowl/core/blade.h>
 #include <seahowl/core/rotor.h>
 #include <seahowl/elasto/tower_elasto.h>

@@ -1,6 +1,6 @@
 #include "seahowl/io/read_json.h"
 
-#include <seahowl/core/utils.h>
+#include <seahowl/commons/utils.h>
 #include <seahowl/core/blade.h>
 #include <seahowl/core/rotor.h>
 #include <seahowl/core/tower.h>

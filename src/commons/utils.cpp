@@ -1,10 +1,8 @@
-#include "seahowl/core/utils.h"
+#include "seahowl/commons/utils.h"
 
 #include <string>
 
-using seahowl::core::DiscretizationPoint;
-
-std::vector<seahowl::core::DiscretizationPoint> seahowl::core::get_indice_and_positions(
+std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
     const std::vector<double>& discretization_fractions,
     const std::vector<double>& reference_fractions) {
     // check for potential errors

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <seahowl/core/reference_point.h>
-#include <seahowl/core/utils.h>
+#include <seahowl/core/component.h>
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/entities_elasto.h>
 #include <seahowl/aero/blade_aero.h>
@@ -30,11 +30,11 @@ class Blade : public ComponentDynamic {
      * @todo  Refactor: Only used for construction to pass to elasto and aero. Use a Builder */
     std::vector<seahowl::core::BladeReferencePoint> reference_points;
     /** @brief Mapping of aero nodes into elasto domain. */
-    std::vector<seahowl::core::DiscretizationPoint> mapping_aero2elasto_nodes;
+    std::vector<seahowl::DiscretizationPoint> mapping_aero2elasto_nodes;
     /** @brief Mapping of aero elements (central point of elements) into elasto domain. */
-    std::vector<seahowl::core::DiscretizationPoint> mapping_aero2elasto_elements;
+    std::vector<seahowl::DiscretizationPoint> mapping_aero2elasto_elements;
     /** @brief Mapping of elasto nodes into aero domain. */
-    std::vector<seahowl::core::DiscretizationPoint> mapping_elasto2aero;
+    std::vector<seahowl::DiscretizationPoint> mapping_elasto2aero;
 
     /**
      * @brief Constructor.

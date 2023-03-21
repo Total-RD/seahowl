@@ -1,5 +1,4 @@
 #include "seahowl/aero/rotor_aero.h"
-#include <seahowl/core/utils.h>
 #include <seahowl/aero/bemt.h>
 #include <cmath>
 

@@ -3,7 +3,6 @@
 #include <seahowl/aero/airfoil.h>
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/aero/tower_aero.h>
-#include <seahowl/core/utils.h>
 
 #include <iostream>
 
@@ -202,7 +201,7 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
         if (coordinates_projected.x() > 0) {
             std::vector<double> fractions{1.0 - (tower_length - coordinates_projected.x()) / tower_length};
             auto tower_radius =
-                seahowl::core::get_discretized_points(fractions, tower_aero.reference_points)[0].diameter / 2.0;
+                seahowl::get_discretized_points(fractions, tower_aero.reference_points)[0].diameter / 2.0;
             auto xx = coordinates_projected.z();
             auto xx2 = pow(xx, 2);
             auto yy = coordinates_projected.y();

@@ -7,6 +7,7 @@
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/core/reference_point.h>
+#include <seahowl/core/component.h>
 
 namespace seahowl {
 namespace core {
@@ -29,9 +30,9 @@ class Tower : public ComponentDynamic {
      * @todo  Refactor: Only used for construction to pass to elasto and aero. Use a Builder */
     std::vector<seahowl::core::TowerReferencePoint> reference_points;
     /** @brief Mapping of aero elements into elasto domain. */
-    std::vector<seahowl::core::DiscretizationPoint> mapping_aero2elasto;
+    std::vector<seahowl::DiscretizationPoint> mapping_aero2elasto;
     /** @brief Mapping of elasto nodes into aero domain. */
-    std::vector<seahowl::core::DiscretizationPoint> mapping_elasto2aero;
+    std::vector<seahowl::DiscretizationPoint> mapping_elasto2aero;
 
     /**
      * @brief Constructor.

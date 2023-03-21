@@ -1,5 +1,5 @@
 #include <seahowl/elasto/mooring_elasto.h>
-#include <seahowl/core/utils.h>
+#include <seahowl/commons/utils.h>
 #include <seahowl/elasto/chrono_adapters.h>
 
 #include <chrono/fea/ChContactSurfaceNodeCloud.h>

@@ -1,7 +1,7 @@
 #include <seahowl/elasto/blade_elasto.h>
 
 #include <seahowl/elasto/chrono_adapters.h>
-#include <seahowl/core/utils.h>  // For DiscretizationPoint
+#include <seahowl/commons/utils.h>  // For DiscretizationPoint
 #include <seahowl/elasto/reference_point_elasto.h>
 
 #include <numeric>
@@ -31,7 +31,7 @@ void BladeElasto::build() {
     }
 
     // build
-    discretized_points = seahowl::core::get_discretized_points(discretization_fractions, reference_points);
+    discretized_points = seahowl::get_discretized_points(discretization_fractions, reference_points);
     ///@todo find better way to build ReferencePointElasto from BladeReferencePointElasto
     std::vector<ReferencePointElasto> discretized_points0;
     for (int ii = 0; ii < discretized_points.size(); ii++) {

@@ -122,10 +122,12 @@ add_library(seahowl_core)
 # commons
 set(SEAHOWL_COMMONS_SOURCES
     src/commons/entities.cpp
+    src/commons/utils.cpp
 )
 set(SEAHOWL_COMMONS_HEADERS
     include/seahowl/commons/numerics.h
     include/seahowl/commons/entities.h
+    include/seahowl/commons/utils.h
 )
 source_group(commons FILES ${SEAHOWL_COMMONS_SOURCES} ${SEAHOWL_COMMONS_HEADERS})
 
@@ -136,16 +138,15 @@ set(SEAHOWL_CORE_SOURCES
     src/core/blade.cpp
     src/core/tower.cpp
     src/core/turbine.cpp
-    src/core/utils.cpp
     src/core/system.cpp
 )
 set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/reference_point.h
+    include/seahowl/core/component.h
     include/seahowl/core/blade.h
     include/seahowl/core/rotor.h
     include/seahowl/core/tower.h
     include/seahowl/core/turbine.h
-    include/seahowl/core/utils.h
     include/seahowl/core/system.h
 )
 source_group(core FILES ${SEAHOWL_CORE_SOURCES} ${SEAHOWL_CORE_HEADERS})

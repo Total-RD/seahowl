@@ -2,7 +2,7 @@
 
 #include <seahowl/aero/reference_point_aero.h>
 #include <seahowl/aero/wind_models.h>
-#include <seahowl/core/utils.h>
+#include <seahowl/commons/utils.h>
 #include <seahowl/commons/numerics.h>
 #include <seahowl/commons/entities.h>
 

@@ -1,5 +1,5 @@
 #include <seahowl/elasto/tower_elasto.h>
-#include <seahowl/core/utils.h>
+#include <seahowl/commons/utils.h>
 #include <seahowl/elasto/chrono_adapters.h>
 
 #include <memory>
@@ -31,7 +31,7 @@ void TowerElasto::build() {
     }
 
     // build
-    discretized_points = seahowl::core::get_discretized_points(discretization_fractions, reference_points);
+    discretized_points = seahowl::get_discretized_points(discretization_fractions, reference_points);
     ///@todo find better way to build ReferencePointElasto from TowerReferencePointElasto
     std::vector<ReferencePointElasto> discretized_points0;
     for (int ii = 0; ii < discretized_points.size(); ii++) {

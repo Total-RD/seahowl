@@ -33,7 +33,7 @@ void TowerAero::build() {
     }
 
     // build
-    discretized_points = seahowl::core::get_discretized_points(discretization_fractions, reference_points);
+    discretized_points = seahowl::get_discretized_points(discretization_fractions, reference_points);
     for (int ii = 0; ii < discretized_points.size() - 1; ii++) {
         // make element
         auto element = TowerElementAero(discretized_points[ii], discretized_points[ii + 1]);

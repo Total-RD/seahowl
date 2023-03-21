@@ -84,7 +84,7 @@ void BladeAero::build() {
     }
 
     // build
-    discretized_points = seahowl::core::get_discretized_points(discretization_fractions, reference_points);
+    discretized_points = seahowl::get_discretized_points(discretization_fractions, reference_points);
     // nodes
     nodes.clear();
     for (int ii = 0; ii < discretized_points.size(); ii++) {
