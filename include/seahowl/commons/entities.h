@@ -1,5 +1,8 @@
 #pragma once
 
+// Disable inherits via dominance warning when there is multiple inheritance
+#pragma warning(disable : 4250)
+
 #include <seahowl/commons/numerics.h>
 
 namespace seahowl {
@@ -120,12 +123,6 @@ class EntityDynamicEigen : public EntityDynamic, public EntityEigen {
     Vector3d rotational_acceleration{0.0, 0.0, 0.0};
 
   public:
-    // need to explicitly declare that some functions come from EntityEigen and not EntityDynamic to disable warnings
-    virtual void set_position(Vector3d position) override { EntityEigen::set_position(position); };
-    virtual Vector3d get_position() const override { return EntityEigen::get_position(); };
-    virtual void set_rotation(Quaternion rotation) override { EntityEigen::set_rotation(rotation); };
-    virtual Quaternion get_rotation() const override { return EntityEigen::get_rotation(); };
-
     virtual void set_velocity(Vector3d velocity) override;
     virtual Vector3d get_velocity() const override;
     virtual void set_acceleration(Vector3d acceleration) override;

@@ -13,7 +13,7 @@ namespace elasto {
 /**
  * @brief Elasto rigid body base class.
  */
-class BodyElasto : public EntityDynamic {
+class BodyElasto : public virtual EntityDynamic {
   public:
     /**
      * @brief Sets mass of body.
@@ -58,7 +58,7 @@ class BodyElasto : public EntityDynamic {
 /**
  * @brief Elasto node base class.
  */
-class NodeElasto : public EntityDynamic {
+class NodeElasto : public virtual EntityDynamic {
   public:
     /**
      * @brief Returns main direction of node.

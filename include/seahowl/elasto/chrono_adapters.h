@@ -1,5 +1,8 @@
 #pragma once
 
+// Disable inherits via dominance warning when there is multiple inheritance
+#pragma warning(disable : 4250)
+
 #include <seahowl/elasto/reference_point_elasto.h>
 #include <seahowl/elasto/entities_elasto.h>
 
@@ -36,7 +39,7 @@ chrono::ChQuaternion<double> quat2ch(Quaternion quaternion_in);
 Quaternion ch2quat(chrono::ChQuaternion<double> quaternion_in);
 
 //
-class EntityDynamicChrono : public EntityDynamic {
+class EntityDynamicChrono : public virtual EntityDynamic {
   public:
     std::shared_ptr<chrono::ChFrameMoving<double>> chobj;
 
@@ -57,24 +60,12 @@ class EntityDynamicChrono : public EntityDynamic {
 /**
  * @brief Chrono rigid body class.
  */
-class BodyElastoChrono : public BodyElasto {
+class BodyElastoChrono : public BodyElasto, public EntityDynamicChrono {
   public:
     /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::ChBody> chobj;
 
     BodyElastoChrono();
-    virtual void set_position(Vector3d position) override;
-    virtual Vector3d get_position() const override;
-    virtual void set_rotation(Quaternion rotation) override;
-    virtual Quaternion get_rotation() const override;
-    virtual void set_velocity(Vector3d velocity) override;
-    virtual Vector3d get_velocity() const override;
-    virtual void set_acceleration(Vector3d acceleration) override;
-    virtual Vector3d get_acceleration() const override;
-    virtual void set_rotational_velocity(Vector3d rotational_velocity) override;
-    virtual Vector3d get_rotational_velocity() const override;
-    virtual void set_rotational_acceleration(Vector3d rotational_acceleration) override;
-    virtual Vector3d get_rotational_acceleration() const override;
     virtual void set_mass(double mass) override;
     virtual void set_inertia_diagonal(Vector3d inertia) override;
     virtual void reset_forces() override;
@@ -86,25 +77,15 @@ class BodyElastoChrono : public BodyElasto {
 /**
  * @brief Chrono elasto node class.
  */
-class NodeElastoChrono : public NodeElasto {
+class NodeElastoChrono : public NodeElasto, public EntityDynamicChrono {
   public:
     /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::fea::ChNodeFEAxyzrot> chobj;
     std::shared_ptr<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric> section;
 
     NodeElastoChrono(Vector3d position, Quaternion rotation);
-    virtual void set_position(Vector3d position) override;
-    virtual Vector3d get_position() const override;
     virtual void set_rotation(Quaternion rotation) override;
     virtual Quaternion get_rotation() const override;
-    virtual void set_velocity(Vector3d velocity) override;
-    virtual Vector3d get_velocity() const override;
-    virtual void set_acceleration(Vector3d acceleration) override;
-    virtual Vector3d get_acceleration() const override;
-    virtual void set_rotational_velocity(Vector3d rotational_velocity) override;
-    virtual Vector3d get_rotational_velocity() const override;
-    virtual void set_rotational_acceleration(Vector3d rotational_acceleration) override;
-    virtual Vector3d get_rotational_acceleration() const override;
     virtual Vector3d get_direction() const override;
     virtual void set_load(Vector3d force) override;
     virtual Vector3d get_load() const override;
@@ -120,7 +101,7 @@ class NodeElastoChrono : public NodeElasto {
  */
 class ElementElastoChrono {
   public:
-    std::shared_ptr<chrono::fea::ChElementBeam> chobj_base;
+    std::shared_ptr<chrono::fea::ChElementBeam> chobj;
 };
 
 /**

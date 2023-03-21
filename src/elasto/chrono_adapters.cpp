@@ -114,54 +114,7 @@ Vector3d EntityDynamicChrono::get_rotational_acceleration() const {
 
 BodyElastoChrono::BodyElastoChrono() {
     chobj = chrono_types::make_shared<chrono::ChBody>();
-}
-
-void BodyElastoChrono::set_position(Vector3d position) {
-    chobj->SetPos(vec2ch(position));
-}
-
-Vector3d BodyElastoChrono::get_position() const {
-    return ch2vec(chobj->GetPos());
-}
-
-void BodyElastoChrono::set_rotation(Quaternion rotation) {
-    chobj->SetRot(quat2ch(rotation));
-}
-
-Quaternion BodyElastoChrono::get_rotation() const {
-    return ch2quat(chobj->GetRot());
-}
-
-void BodyElastoChrono::set_velocity(Vector3d velocity) {
-    chobj->SetPos_dt(vec2ch(velocity));
-}
-
-Vector3d BodyElastoChrono::get_velocity() const {
-    return ch2vec(chobj->GetPos_dt());
-}
-
-void BodyElastoChrono::set_acceleration(Vector3d acceleration) {
-    chobj->SetPos_dtdt(vec2ch(acceleration));
-}
-
-Vector3d BodyElastoChrono::get_acceleration() const {
-    return ch2vec(chobj->GetPos_dt());
-}
-
-void BodyElastoChrono::set_rotational_velocity(Vector3d rotational_velocity) {
-    chobj->SetWvel_par(vec2ch(rotational_velocity));
-}
-
-Vector3d BodyElastoChrono::get_rotational_velocity() const {
-    return ch2vec(chobj->GetWvel_par());
-}
-
-void BodyElastoChrono::set_rotational_acceleration(Vector3d rotational_acceleration) {
-    chobj->SetWacc_par(vec2ch(rotational_acceleration));
-}
-
-Vector3d BodyElastoChrono::get_rotational_acceleration() const {
-    return ch2vec(chobj->GetWacc_par());
+    EntityDynamicChrono::chobj = chobj;
 }
 
 void BodyElastoChrono::set_mass(double mass) {
@@ -191,14 +144,7 @@ double BodyElastoChrono::get_mass() {
 NodeElastoChrono::NodeElastoChrono(Vector3d position, Quaternion rotation) {
     chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(
         chrono::ChFrame<>(vec2ch(position), node_iec2ch(rotation)));
-}
-
-void NodeElastoChrono::set_position(Vector3d position) {
-    chobj->SetPos(vec2ch(position));
-}
-
-Vector3d NodeElastoChrono::get_position() const {
-    return ch2vec(chobj->GetPos());
+    EntityDynamicChrono::chobj = chobj;
 }
 
 void NodeElastoChrono::set_rotation(Quaternion rotation) {
@@ -207,38 +153,6 @@ void NodeElastoChrono::set_rotation(Quaternion rotation) {
 
 Quaternion NodeElastoChrono::get_rotation() const {
     return node_ch2iec(chobj->GetRot());
-}
-
-void NodeElastoChrono::set_velocity(Vector3d velocity) {
-    chobj->SetPos_dt(vec2ch(velocity));
-}
-
-Vector3d NodeElastoChrono::get_velocity() const {
-    return ch2vec(chobj->GetPos_dt());
-}
-
-void NodeElastoChrono::set_acceleration(Vector3d acceleration) {
-    chobj->SetPos_dtdt(vec2ch(acceleration));
-}
-
-Vector3d NodeElastoChrono::get_acceleration() const {
-    return ch2vec(chobj->GetPos_dt());
-}
-
-void NodeElastoChrono::set_rotational_velocity(Vector3d rotational_velocity) {
-    chobj->SetWvel_par(vec2ch(rotational_velocity));
-}
-
-Vector3d NodeElastoChrono::get_rotational_velocity() const {
-    return ch2vec(chobj->GetWvel_par());
-}
-
-void NodeElastoChrono::set_rotational_acceleration(Vector3d rotational_acceleration) {
-    chobj->SetWacc_par(vec2ch(rotational_acceleration));
-}
-
-Vector3d NodeElastoChrono::get_rotational_acceleration() const {
-    return ch2vec(chobj->GetWacc_par());
 }
 
 Vector3d NodeElastoChrono::get_direction() const {
@@ -372,7 +286,7 @@ void NodeElastoChrono::set_properties(const TowerReferencePointElasto& ref) {
 
 ElementBladeElastoChrono::ElementBladeElastoChrono() {
     chobj = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenko>();
-    chobj_base = chobj;
+    ElementElastoChrono::chobj = chobj;
     // create blade section
     auto blade_section = chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGeneric>();
     chobj->SetTaperedSection(blade_section);
@@ -413,7 +327,7 @@ void ElementBladeElastoChrono::evaluate_position_rotation(double eta, Vector3d& 
 
 ElementBladeElastoChronoFPM::ElementBladeElastoChronoFPM() {
     chobj = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenkoFPM>();
-    chobj_base = chobj;
+    ElementElastoChrono::chobj = chobj;
     // create blade section
     auto blade_section = chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGenericFPM>();
     chobj->SetTaperedSection(blade_section);
@@ -458,7 +372,7 @@ void ElementBladeElastoChronoFPM::evaluate_position_rotation(double eta, Vector3
 
 ElementMooringElastoChrono::ElementMooringElastoChrono() {
     chobj = chrono_types::make_shared<chrono::fea::ChElementBeamEuler>();
-    chobj_base = chobj;
+    ElementElastoChrono::chobj = chobj;
 }
 
 void ElementMooringElastoChrono::set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) {
@@ -535,7 +449,7 @@ void MeshElastoChrono::add(std::shared_ptr<NodeElasto> node) {
 }
 
 void MeshElastoChrono::add(std::shared_ptr<ElementElasto> element) {
-    chobj->AddElement(std::dynamic_pointer_cast<ElementElastoChrono>(element)->chobj_base);
+    chobj->AddElement(std::dynamic_pointer_cast<ElementElastoChrono>(element)->chobj);
 }
 
 void MeshElastoChrono::add(std::shared_ptr<chrono::fea::ChElementBeam> element) {
