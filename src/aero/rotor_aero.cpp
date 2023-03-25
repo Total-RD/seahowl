@@ -77,9 +77,9 @@ void RotorAero::compute_wind_loads_bemt(const WindModel& wind_model,
         int count = -1;
         for (auto& node : blade->nodes) {
             count += 1;
-            auto& position = node.get_position();
-            auto& rotation = node.get_rotation();
-            auto& velocity = node.get_velocity();
+            auto position = node.get_position();
+            auto rotation = node.get_rotation();
+            auto velocity = node.get_velocity();
 
             // get fluid relative velocity
             auto wind_velocity0 = wind_model.get_wind_velocity(position, time);
