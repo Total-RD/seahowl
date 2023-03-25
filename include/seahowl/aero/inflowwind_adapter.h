@@ -7,10 +7,6 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/rotor_elasto.h>
 
-#include <chrono/core/ChVector.h>
-#include <chrono/physics/ChBody.h>
-#include <chrono/core/ChMatrix33.h>
-
 #include <seahowl/aero/wind_models.h>
 
 /// <summary>
@@ -99,15 +95,14 @@ struct InflowWindLib {
 
 class InflowWindAdapter : public WindModel {
   public:
-    seahowl::aero::InflowWindLib pImpl;
+    std::unique_ptr<seahowl::aero::InflowWindLib> pImpl;
 
     InflowWindAdapter(std::string InflowInfile, std::string WindWndfile);
     ~InflowWindAdapter();
 
     void init(double dt);
-    chrono::ChVector<double> calcul(double time, chrono::ChVector<double>& position, chrono::ChVector<double>& velocity);
     void end();
-    virtual chrono::ChVector<double> get_wind_velocity(chrono::ChVector<double>& position, double time);
+    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const override;
 };
 
 }  // namespace aero

@@ -24,7 +24,7 @@ class WindModel {
      * @param[in] position Position at which wind velocity is extracted.
      * @param[in] time Time of simulation.
      */
-    virtual Vector3d get_wind_velocity(const Vector3d& position, double time);
+    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const;
 
     /**
      * @brief Returns air density.
@@ -64,7 +64,7 @@ class ConstantWind : public WindModel {
      * @param[in] position Position at which wind velocity is extracted.
      * @param[in] time Time of simulation.
      */
-    virtual Vector3d get_wind_velocity(const Vector3d& position, double time);
+    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const override;
 };
 
 /**@brief Wind ramp model */
@@ -112,7 +112,7 @@ class WindRamp : public WindModel {
      * @param[in] position Position at which wind velocity is extracted.
      * @param[in] time Time of simulation.
      */
-    virtual Vector3d get_wind_velocity(const Vector3d& position, double time);
+    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const override;
 };
 
 }  // namespace aero

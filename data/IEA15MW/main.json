@@ -19,7 +19,9 @@
         "velocity_start": [12, 0, 0],
         "velocity_stop": [25, 0, 0],
         "time_start": 500,
-        "time_stop": 1700
+        "time_stop": 1700,
+        "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat",
+        "file_windwnd": "./aerodyn/long_step_wind.wnd"
       }
     }
   },
@@ -30,7 +32,8 @@
       "file": "./turbine.json",
       "use_aerodyn": false,
       "file_aerodyn": "./aerodyn/IEA-15-240-RWT_AeroDyn15.dat",
-      "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat"
+      "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat",
+      "file_windwnd": "./aerodyn/long_step_wind.wnd"
     }
   ]
 }

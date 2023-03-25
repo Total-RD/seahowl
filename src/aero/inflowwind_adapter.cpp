@@ -8,38 +8,33 @@
 
 seahowl::aero::InflowWindAdapter::InflowWindAdapter(std::string InflowInfile, std::string WindWndfile) {
     std::cout << "Using InflowWind" << std::endl;
-    pImpl.SetIFWINFILE(InflowInfile);
-    pImpl.SetWNDINFILE(WindWndfile);
+    pImpl.reset(new seahowl::aero::InflowWindLib);
+    pImpl->SetIFWINFILE(InflowInfile);
+    pImpl->SetWNDINFILE(WindWndfile);
 }
 
 seahowl::aero::InflowWindAdapter::~InflowWindAdapter() {}
 
 void seahowl::aero::InflowWindAdapter::init(double dt) {
-    pImpl.SetTimeStep(dt);
-    pImpl.Init();
+    pImpl->SetTimeStep(dt);
+    pImpl->Init();
 }
 
-chrono::ChVector<double> seahowl::aero::InflowWindAdapter::calcul(double time, chrono::ChVector<double>& position, chrono::ChVector<double>& velocity) {
+void seahowl::aero::InflowWindAdapter::end() {
+    pImpl->End();
+}
+
+seahowl::Vector3d seahowl::aero::InflowWindAdapter::get_wind_velocity(const seahowl::Vector3d& position, double time) const {
     float* Pos_C = new float[3];
     for (int i = 0; i < 3; i++) {
         Pos_C[i] = position[i];
     } 
 
-    pImpl.SetPos(Pos_C);
-    pImpl.SetTime(time);
-    pImpl.Calcul();
+    pImpl->SetPos(Pos_C);
+    pImpl->SetTime(time);
+    pImpl->Calcul();
 
-    velocity = chrono::ChVector<double>(pImpl.Velocity[0], pImpl.Velocity[1], pImpl.Velocity[2]);
-    return velocity;
-}
-
-void seahowl::aero::InflowWindAdapter::end() {
-    pImpl.End();
-}
-
-chrono::ChVector<double> seahowl::aero::InflowWindAdapter::get_wind_velocity(chrono::ChVector<double>& position, double time)  {
-    auto velocity = chrono::ChVector<double>(0.0, 0.0, 0.0);
-    velocity = calcul(time, position, velocity);
+    auto velocity = seahowl::Vector3d(pImpl->Velocity[0], pImpl->Velocity[1], pImpl->Velocity[2]);
     return velocity;
 }
 
