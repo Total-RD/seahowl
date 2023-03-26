@@ -12,6 +12,11 @@ using seahowl::PI;
 RotorAero::RotorAero() {}
 
 void RotorAero::build() {
+    // build blades
+    for (auto& blade : blades) {
+        blade->build();
+    }
+
     // calculate rotor radius
     radius = 0.0;
     for (int ii = 0; ii < blades.size(); ii++) {
@@ -33,7 +38,6 @@ void RotorAero::compute_chords_solidity() {
         for (auto& node : blade->nodes) {
             auto radius = (node.get_position() - body_hub.get_position()).norm();
             node.chord_solidity = nblades * node.properties.chord / (2 * PI * radius);
-            // std::cout << element.swept_annulus << " " << element.chord_solidity << std::endl;
         }
     }
 }
@@ -81,7 +85,7 @@ void RotorAero::compute_wind_loads_bemt(WindModel& wind_model,
 
             // get fluid relative velocity
             auto wind_velocity0 = wind_model.get_wind_velocity(position, time);
-            auto wind_velocity = wind_velocity0;
+            Vector3d wind_velocity = wind_velocity0;
 
             // correct wind velocity with tower shadow (if activated)
             if (tower_shadow) {
@@ -96,6 +100,7 @@ void RotorAero::compute_wind_loads_bemt(WindModel& wind_model,
             // pointing from hub towards nacelle
             auto local_direction_normal = Vector3d(1.0, 0.0, 0.0);
             auto global_direction_normal = body_hub.get_rotation() * local_direction_normal;
+
             // pointing from hub to node position
             auto global_direction_hub2node = (position - body_hub.get_position()).normalized();
             // pointing in tangential direction

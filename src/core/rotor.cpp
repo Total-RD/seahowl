@@ -19,6 +19,8 @@ Rotor::Rotor() {
 void Rotor::init(double time, double dt) {
     for (auto& blade : blades) {
         blade->init(time, dt);
+        // update initial azimuth of aero blade
+        blade->aero->azimuth0 = blade->elasto->azimuth0;
     }
     update_positions_aero();
     aero.compute_chords_solidity();
@@ -58,34 +60,24 @@ void Rotor::update_positions_aero() {
 }
 
 void Rotor::assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system, std::shared_ptr<MeshElasto> mesh) {
-    for (auto& blade : blades) {
-        blade->assemble(mesh);
-    }
-
-    elasto.assemble(system);
+    elasto.assemble(system, mesh);
 }
 
 void Rotor::build() {
-    // build blades
     for (auto& blade : blades) {
-        blade->build();
+        // push reference points
+        blade->elasto->reference_points.clear();
+        blade->aero->reference_points.clear();
+        for (auto& point : blade->reference_points) {
+            blade->elasto->reference_points.push_back(BladeReferencePointElasto(point));
+            // add aero reference point only if airfoil properties were defined
+            if (point.airfoil_properties.size() > 0) {
+                blade->aero->reference_points.push_back(BladeReferencePointAero(point));
+            }
+        }
     }
-
-    // get elasto and aero blades pointers
-    std::vector<std::shared_ptr<BladeElasto>> blades_elasto;
-    std::vector<std::shared_ptr<BladeAero>> blades_aero;
-    for (auto& blade : blades) {
-        blades_elasto.push_back(blade->elasto);
-        blades_aero.push_back(blade->aero);
-    }
-
     // build elasto
     elasto.build();
-    // update blade aero positions from new elasto positions
-    for (auto& blade : blades) {
-        blade->update_positions_aero();
-        blade->aero->azimuth0 = blade->elasto->azimuth0;
-    }
     // update hub position from elasto
     update_positions_aero();
     // build aero

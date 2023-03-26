@@ -116,8 +116,10 @@ class RotorElasto : public ComponentElasto {
      * @brief Assembles the component (adds all rigid bodies and links to the system).
      *
      * @param[out] system System to which rigid bodies and links are added.
+     * @param[out] mesh Mesh on which to add nodes and elements.
      */
-    void assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system);
+    void assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system,
+                  std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
 
     /**
      * @brief Builds the rotor.

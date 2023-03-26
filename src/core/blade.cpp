@@ -18,6 +18,9 @@ Blade::Blade() {
 }
 
 void Blade::init(double time, double dt) {
+    // mappings
+    compute_mapping_aero2elasto();
+    compute_mapping_elasto2aero();
     // update position of aero points
     update_positions_aero();
 }
@@ -50,10 +53,6 @@ void Blade::build() {
     // build aero & elasto
     elasto->build();
     aero->build();
-
-    // mappings
-    compute_mapping_aero2elasto();
-    compute_mapping_elasto2aero();
 }
 
 void Blade::set_discretization_elasto(std::vector<double> fractions) {

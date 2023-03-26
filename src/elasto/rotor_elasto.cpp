@@ -10,7 +10,10 @@ using seahowl::elasto::RotorElasto;
 
 RotorElasto::RotorElasto() {}
 
-void RotorElasto::assemble(std::shared_ptr<SystemElasto> system) {
+void RotorElasto::assemble(std::shared_ptr<SystemElasto> system, std::shared_ptr<MeshElasto> mesh) {
+    for (auto& blade : blades) {
+        blade->assemble(mesh);
+    }
     system->add(body_hub);
     system->add(body_shaft);
     system->add(link_shaft_hub);
@@ -24,6 +27,11 @@ void RotorElasto::assemble(std::shared_ptr<SystemElasto> system) {
 }
 
 void RotorElasto::build() {
+    // build blades
+    for (auto& blade : blades) {
+        blade->build();
+    }
+
     auto rotation0 = Quaternion(1.0, 0.0, 0.0, 0.0);
 
     // hub
