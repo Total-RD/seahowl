@@ -17,8 +17,9 @@ void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::Syst
         std::ofstream myfile;
         if (time == 0.0) {
             myfile.open(filename);
-            myfile << "time (s),wind x (m/s),wind y (m/s),wind z (m/s),rpm,power (W),pitch (rad),torque elec (Nm),axial thrust (N),axial torque (Nm),rotor azimuth (rad),";
-            for (int idx_blade = 1; idx_blade < ssystem.turbines[idx_turbine].blades.size() + 1; idx_blade++) {
+            myfile << "time (s),wind x (m/s),wind y (m/s),wind z (m/s),rpm,power (W),pitch (rad),torque elec "
+                      "(Nm),axial thrust (N),axial torque (Nm),rotor azimuth (rad),";
+            for (int idx_blade = 1; idx_blade < ssystem.turbines[idx_turbine].rotor.blades.size() + 1; idx_blade++) {
                 myfile << "blade" + std::to_string(idx_blade) + " wind x (m/s),";
                 myfile << "blade" + std::to_string(idx_blade) + " wind y (m/s),";
                 myfile << "blade" + std::to_string(idx_blade) + " wind z (m/s),";
@@ -56,8 +57,8 @@ void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::Syst
         myfile << ",";
         myfile << std::to_string(turbine.rotor.elasto.get_azimuth());
         myfile << ",";
-        for (int ii = 0; ii < turbine.blades.size(); ii++) {
-            auto& blade = turbine.blades[ii];
+        for (int ii = 0; ii < turbine.rotor.blades.size(); ii++) {
+            auto& blade = turbine.rotor.blades[ii];
             auto wind_velocity_blade = blade->aero->get_average_wind_velocity();
             myfile << std::to_string(wind_velocity_blade.x());
             myfile << ",";

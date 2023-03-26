@@ -87,8 +87,8 @@ int main(int argc, char* argv[]) {
              turbine_ptr != system_core.turbines.end(); turbine_ptr++, idx_turbine++) {
             auto& turbine = *turbine_ptr;
             create_directory("./output/vtk");
-            for (auto [blade_ptr, idx_blade] = std::tuple{turbine.blades.begin(), 0}; blade_ptr != turbine.blades.end();
-                 blade_ptr++, idx_blade++) {
+            for (auto [blade_ptr, idx_blade] = std::tuple{turbine.rotor.blades.begin(), 0};
+                 blade_ptr != turbine.rotor.blades.end(); blade_ptr++, idx_blade++) {
                 auto& blade = *blade_ptr;
                 auto& post_blade = vtk_outputs.emplace_back(*blade->elasto.get());
                 post_blade.init(

@@ -18,8 +18,8 @@ Blade::Blade() {
 }
 
 void Blade::init(double time, double dt) {
-    prestep(time, dt);
-    poststep(time, dt);
+    // update position of aero points
+    update_positions_aero();
 }
 
 void Blade::prestep(double time, double dt) {

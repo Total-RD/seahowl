@@ -35,10 +35,8 @@ class RotorAero {
 
     /**
      * @brief Builds the rotor.
-     *
-     * @param[in] blades List of blades in rotor.
      */
-    void build(std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades);
+    void build();
 
     /**
      * @brief Computes chord solidity on all aero nodes of blades.

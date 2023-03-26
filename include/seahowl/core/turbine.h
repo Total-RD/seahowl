@@ -31,8 +31,6 @@ class Turbine : public ComponentDynamic {
   public:
     // components
     //
-    /** @brief Blades of the turbine. */
-    std::vector<std::shared_ptr<Blade>> blades;
     /** @brief Rotor-nacelle assembly of the turbine. */
     Rotor rotor;
     /** @brief Tower of the turbine. */

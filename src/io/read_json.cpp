@@ -281,8 +281,12 @@ seahowl::core::Turbine get_turbine_from_json_files(std::vector<std::string> file
                                                    std::string filepath_rotor,
                                                    std::string filepath_tower) {
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
+    std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades_elasto;
+    std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades_aero;
     for (auto& fpath : filepaths_blades) {
         blades.push_back(std::make_shared<seahowl::core::Blade>(get_blade_from_json(fpath)));
+        blades_elasto.push_back(blades.back()->elasto);
+        blades_aero.push_back(blades.back()->aero);
     }
 
     auto rotor = get_rotor_from_json(filepath_rotor);
@@ -292,7 +296,9 @@ seahowl::core::Turbine get_turbine_from_json_files(std::vector<std::string> file
     auto turbine = seahowl::core::Turbine();
     turbine.rotor = rotor;
     turbine.tower = tower;
-    turbine.blades = blades;
+    turbine.rotor.blades = blades;
+    turbine.rotor.elasto.blades = blades_elasto;
+    turbine.rotor.aero.blades = blades_aero;
 
     // get extra drivetrain info
     std::ifstream json_file(filepath_rotor);
@@ -331,6 +337,8 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
 
     // blades
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
+    std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades_elasto;
+    std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades_aero;
     auto blades_json2 = blades_json.at("blades");
     for (auto& blade_json : blades_json2) {
         auto filepath_blade = (DATADIR / blade_json.at("file").get<std::string>()).generic_string();
@@ -340,6 +348,8 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
         blades_json.at("fpm").get_to(blade->elasto->fpm_mode);
         blade_json.at("initial_pitch").get_to(blade->elasto->pitch);
         blades.push_back(blade);
+        blades_elasto.push_back(blades.back()->elasto);
+        blades_aero.push_back(blades.back()->aero);
     }
 
     // RNA
@@ -356,7 +366,9 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
     auto turbine = seahowl::core::Turbine();
     turbine.rotor = rotor;
     turbine.tower = tower;
-    turbine.blades = blades;
+    turbine.rotor.blades = blades;
+    turbine.rotor.elasto.blades = blades_elasto;
+    turbine.rotor.aero.blades = blades_aero;
 
     // controller
     if (controller_json.at("type").get<std::string>() == "DISCON") {
@@ -500,7 +512,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         turbine.translate(Vector3d(trans[0], trans[1], trans[2]));
 
         // apply initial pitches
-        for (auto blade : turbine.blades) {
+        for (auto blade : turbine.rotor.blades) {
             auto pitch0 = blade->elasto->pitch;
             blade->elasto->apply_pitch_increment(pitch0);
             blade->elasto->pitch = pitch0;

@@ -17,8 +17,11 @@ Rotor::Rotor() {
 }
 
 void Rotor::init(double time, double dt) {
-    prestep(time, dt);
-    poststep(time, dt);
+    for (auto& blade : blades) {
+        blade->init(time, dt);
+    }
+    update_positions_aero();
+    aero.compute_chords_solidity();
 }
 
 void Rotor::prestep(double time, double dt) {
@@ -33,10 +36,11 @@ void Rotor::poststep(double time, double dt) {
     }
     update_positions_aero();
     aero.compute_chords_solidity();
-    aero.azimuth = elasto.get_azimuth();
 }
 
 void Rotor::update_positions_aero() {
+    // azimuth
+    aero.azimuth = elasto.get_azimuth();
     // body_hub
     aero.body_hub.set_position(elasto.body_hub->get_position());
     aero.body_hub.set_rotation(elasto.body_hub->get_rotation());
@@ -53,12 +57,19 @@ void Rotor::update_positions_aero() {
     aero.body_nacelle.set_rotational_acceleration(elasto.body_nacelle->get_rotational_acceleration());
 }
 
-void Rotor::assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system) {
+void Rotor::assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system, std::shared_ptr<MeshElasto> mesh) {
+    for (auto& blade : blades) {
+        blade->assemble(mesh);
+    }
+
     elasto.assemble(system);
 }
 
-void Rotor::build(std::vector<std::shared_ptr<Blade>> blades) {
-    this->blades = blades;
+void Rotor::build() {
+    // build blades
+    for (auto& blade : blades) {
+        blade->build();
+    }
 
     // get elasto and aero blades pointers
     std::vector<std::shared_ptr<BladeElasto>> blades_elasto;
@@ -66,11 +77,10 @@ void Rotor::build(std::vector<std::shared_ptr<Blade>> blades) {
     for (auto& blade : blades) {
         blades_elasto.push_back(blade->elasto);
         blades_aero.push_back(blade->aero);
-        blade->update_positions_aero();
     }
 
     // build elasto
-    elasto.build(blades_elasto);
+    elasto.build();
     // update blade aero positions from new elasto positions
     for (auto& blade : blades) {
         blade->update_positions_aero();
@@ -79,5 +89,5 @@ void Rotor::build(std::vector<std::shared_ptr<Blade>> blades) {
     // update hub position from elasto
     update_positions_aero();
     // build aero
-    aero.build(blades_aero);
+    aero.build();
 }

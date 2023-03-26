@@ -121,10 +121,8 @@ class RotorElasto : public ComponentElasto {
 
     /**
      * @brief Builds the rotor.
-     *
-     * @param[in] blades List of blades in rotor.
      */
-    void build(std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades);
+    void build();
 
     /**
      * @brief Links RNA to tower.

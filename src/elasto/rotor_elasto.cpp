@@ -23,9 +23,7 @@ void RotorElasto::assemble(std::shared_ptr<SystemElasto> system) {
     }
 }
 
-void RotorElasto::build(std::vector<std::shared_ptr<BladeElasto>> blades) {
-    this->blades = blades;
-
+void RotorElasto::build() {
     auto rotation0 = Quaternion(1.0, 0.0, 0.0, 0.0);
 
     // hub

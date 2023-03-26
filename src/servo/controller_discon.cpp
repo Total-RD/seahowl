@@ -84,7 +84,7 @@ void seahowl::servo::ControllerDISCON::init(double time, double dt, const seahow
     auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
     auto pitch_collective = turbine.rotor.elasto.pitch_collective;
     auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
-    auto nblades = turbine.blades.size();
+    auto nblades = turbine.rotor.blades.size();
     this->init(time, dt, omega_rotor, omega_generator, pitch_collective, rotor_azimuth, nblades);
 }
 

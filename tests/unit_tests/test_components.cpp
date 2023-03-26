@@ -109,6 +109,8 @@ TEST(test_rotor, mass) {
     auto blades_mesh = std::make_shared<MeshElastoChrono>();
     system_elasto->add(blades_mesh);
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
+    std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades_elasto;
+    std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades_aero;
     for (int ii = 0; ii < 3; ii++) {
         auto blade_core =
             std::make_shared<seahowl::core::Blade>(get_blade_from_json((DATADIR / "blade.json").generic_string()));
@@ -117,14 +119,17 @@ TEST(test_rotor, mass) {
         for (int ii = 0; ii < 51; ii++) {
             blade_core->elasto->discretization_fractions.push_back(0.02 * ii);
         }
-        blade_core->build();
-        blade_core->assemble(blades_mesh);
         blades.push_back(blade_core);
+        blades_elasto.push_back(blade_core->elasto);
+        blades_aero.push_back(blade_core->aero);
     }
 
     auto rotor = get_rotor_from_json((DATADIR / "rna.json").generic_string());
-    rotor.build(blades);
-    rotor.assemble(system_elasto);
+    rotor.blades = blades;
+    rotor.elasto.blades = blades_elasto;
+    rotor.aero.blades = blades_aero;
+    rotor.build();
+    rotor.assemble(system_elasto, blades_mesh);
     rotor.elasto.body_yaw_bearing->set_fixed(true);
 
     system_elasto->do_statics(true, 0);
