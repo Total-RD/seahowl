@@ -3,6 +3,7 @@
 #include <seahowl/aero/turbine_aero.h>
 
 #include <vector>
+#include <deque>
 
 namespace seahowl {
 namespace aero {
@@ -12,7 +13,8 @@ namespace aero {
  */
 class SystemAero {
   public:
-    std::vector<TurbineAero> turbines;
+    /** @brief Turbines in system. */
+    std::deque<TurbineAero> turbines{};
 };
 
 }  // namespace aero

@@ -623,15 +623,12 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
     }
 
     auto turbines_json = json_obj.at("turbines");
-    // first populate elasto and aero turbines: needed because push_back invalidates references
-    for (int ii = 0; ii < turbines_json.size(); ii++) {
-        system_core.system_elasto->turbines.push_back(seahowl::elasto::TurbineElasto());
-        system_core.system_aero->turbines.push_back(seahowl::aero::TurbineAero());
-    }
     for (int ii = 0; ii < turbines_json.size(); ii++) {
         auto turbine_json = turbines_json[ii];
         auto filepath_turbine = (DATADIR / turbine_json.at("file").get<std::string>()).generic_string();
         // make turbine
+        system_core.system_elasto->turbines.push_back(seahowl::elasto::TurbineElasto());
+        system_core.system_aero->turbines.push_back(seahowl::aero::TurbineAero());
         system_core.turbines.push_back(
             seahowl::core::Turbine(system_core.system_elasto->turbines[ii], system_core.system_aero->turbines[ii]));
         auto& turbine = system_core.turbines.back();

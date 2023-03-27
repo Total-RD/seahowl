@@ -4,6 +4,7 @@
 #include <seahowl/elasto/turbine_elasto.h>
 
 #include <vector>
+#include <deque>
 #include <memory>
 
 namespace seahowl {
@@ -15,7 +16,8 @@ namespace elasto {
  */
 class SystemElasto {
   public:
-    std::vector<TurbineElasto> turbines;
+    /** @brief Turbines in system. */
+    std::deque<TurbineElasto> turbines{};
 
     /**
      * @brief Does an elasto step.
