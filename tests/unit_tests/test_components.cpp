@@ -61,13 +61,10 @@ int main(int argc, char** argv) {
 
 TEST(test_blade, mass_deflection) {
     // system
-    auto system_elasto = std::make_shared<SystemElastoChrono>();
-    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto->chobj;
+    auto system_elasto = SystemElastoChrono();
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto.chobj;
 
-    // mesh for blade
-    auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto->add(blades_mesh);
     // blade
     auto blade = seahowl::elasto::BladeElasto();
     blade.reference_points = get_blade_elasto_reference_points_from_json((DATADIR / "blade.json").generic_string());
@@ -77,10 +74,10 @@ TEST(test_blade, mass_deflection) {
         blade.discretization_fractions.push_back(0.02 * ii);
     }
     blade.build();
-    blade.assemble(blades_mesh);
+    blade.assemble(system_elasto);
     blade.nodes.front()->set_fixed(true);
 
-    system_elasto->do_statics(true, 0);
+    system_elasto.do_statics(true, 0);
 
     // check mass
     double blade_mass = 67051.5;
@@ -101,13 +98,10 @@ TEST(test_blade, mass_deflection) {
 
 TEST(test_rotor, mass) {
     // system
-    auto system_elasto = std::make_shared<SystemElastoChrono>();
-    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto->chobj;
+    auto system_elasto = SystemElastoChrono();
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto.chobj;
 
-    // check mass with blades
-    auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto->add(blades_mesh);
     std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades;
     for (int ii = 0; ii < 3; ii++) {
         auto blade = std::make_shared<seahowl::elasto::BladeElasto>();
@@ -124,10 +118,10 @@ TEST(test_rotor, mass) {
     populate_rotor_elasto_from_json((DATADIR / "rna.json").generic_string(), rotor);
     rotor.blades = blades;
     rotor.build();
-    rotor.assemble(system_elasto, blades_mesh);
+    rotor.assemble(system_elasto);
     rotor.body_yaw_bearing->set_fixed(true);
 
-    system_elasto->do_statics(true, 0);
+    system_elasto.do_statics(true, 0);
     // check mass
     double rotor_total_mass = 945690.92;
     ASSERT_NEAR(rotor_total_mass, rotor.get_mass(), 1.0);
@@ -135,20 +129,17 @@ TEST(test_rotor, mass) {
 
 TEST(test_tower, mass) {
     // system
-    auto system_elasto = std::make_shared<SystemElastoChrono>();
-    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto->chobj;
+    auto system_elasto = SystemElastoChrono();
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto.chobj;
 
-    // mesh for tower
-    auto tower_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto->add(tower_mesh);
     // tower
     auto tower = seahowl::elasto::TowerElasto();
     populate_tower_elasto_from_json((DATADIR / "tower.json").generic_string(), tower);
     tower.build();
-    tower.assemble(tower_mesh);
+    tower.assemble(system_elasto);
 
-    system_elasto->do_statics(true, 0);
+    system_elasto.do_statics(true, 0);
 
     // check mass
     double tower_mass = 870391.59776;
@@ -157,13 +148,10 @@ TEST(test_tower, mass) {
 
 TEST(test_blade, natural_period_dynamic_edge) {
     // system
-    auto system_elasto = std::make_shared<SystemElastoChrono>();
-    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto->chobj;
+    auto system_elasto = SystemElastoChrono();
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto.chobj;
 
-    // mesh for blade
-    auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto->add(blades_mesh);
     // blade
     auto blade = seahowl::elasto::BladeElasto();
     populate_blade_elasto_from_json((DATADIR / "blade.json").generic_string(), blade);
@@ -173,10 +161,10 @@ TEST(test_blade, natural_period_dynamic_edge) {
         blade.discretization_fractions.push_back(0.02 * ii);
     }
     blade.build();
-    blade.assemble(blades_mesh);
+    blade.assemble(system_elasto);
     blade.nodes.front()->set_fixed(true);
 
-    system_elasto->do_statics(true, 0);
+    system_elasto.do_statics(true, 0);
 
     // static position of blade tip
     double pos0 = blade.nodes.back()->get_position().y();
@@ -216,13 +204,10 @@ TEST(test_blade, natural_period_dynamic_edge) {
 
 TEST(test_blade, natural_period_dynamic_flap) {
     // system
-    auto system_elasto = std::make_shared<SystemElastoChrono>();
-    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto->chobj;
+    auto system_elasto = SystemElastoChrono();
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto.chobj;
 
-    // mesh for blade
-    auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto->add(blades_mesh);
     // blade
     auto blade = seahowl::elasto::BladeElasto();
     populate_blade_elasto_from_json((DATADIR / "blade.json").generic_string(), blade);
@@ -232,13 +217,13 @@ TEST(test_blade, natural_period_dynamic_flap) {
         blade.discretization_fractions.push_back(0.02 * ii);
     }
     blade.build();
-    blade.assemble(blades_mesh);
+    blade.assemble(system_elasto);
     blade.nodes.front()->set_fixed(true);
 
     // rotate blade for flap
     blade.rotate(-PI / 2.0, Vector3d(0.0, 0.0, 1.0));
 
-    system_elasto->do_statics(true, 0);
+    system_elasto.do_statics(true, 0);
 
     // static position of blade tip
     double pos0 = blade.nodes.back()->get_position().y();
@@ -292,14 +277,11 @@ TEST(test_turbine, rpm_initial_pitch) {
     double initial_pitch = CH_C_PI / 8.0;
 
     // system
-    auto system_elasto = std::make_shared<SystemElastoChrono>();
-    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto->chobj;
+    auto system_elasto = SystemElastoChrono();
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto.chobj;
 
-    // mesh for blade
-    auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto->add(blades_mesh);
-
+    // turbine
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAero();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
@@ -310,12 +292,12 @@ TEST(test_turbine, rpm_initial_pitch) {
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
-    turbine.assemble(system_elasto, blades_mesh);
+    turbine.elasto.assemble(system_elasto);
     turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {
-        system_elasto->do_statics(true, 10);
+        system_elasto.do_statics(true, 10);
     }
 
     double time = 0.0;
@@ -329,7 +311,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
-        system_elasto->step(dt);
+        system_elasto.step(dt);
         time += system_chrono->GetStep();
 
         // poststep
@@ -356,14 +338,11 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     double initial_pitch = CH_C_PI / 8.0;
 
     // system
-    auto system_elasto = std::make_shared<SystemElastoChrono>();
-    system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto->chobj;
+    auto system_elasto = SystemElastoChrono();
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    auto system_chrono = system_elasto.chobj;
 
-    // mesh for blade
-    auto blades_mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto->add(blades_mesh);
-
+    // turbine
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAero();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
@@ -378,12 +357,12 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         (DATADIR / "aerodyn/IEA-15-240-RWT_InflowWind.dat").generic_string());
 
     turbine.build();
-    turbine.assemble(system_elasto, blades_mesh);
+    turbine.elasto.assemble(system_elasto);
     turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {
-        system_elasto->do_statics(true, 10);
+        system_elasto.do_statics(true, 10);
     }
 
     double time = 0.0;
@@ -397,7 +376,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
-        system_elasto->step(dt);
+        system_elasto.step(dt);
         time += system_chrono->GetStep();
 
         // poststep
@@ -458,7 +437,7 @@ TEST(test_turbine, multiturbines) {
     }
 
     // assemble system
-    system_core.assemble(system_elasto, mesh_elasto);
+    system_core.assemble();
 
     // statics
     if (statics_prestep) {

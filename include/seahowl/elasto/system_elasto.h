@@ -18,6 +18,8 @@ class SystemElasto {
   public:
     /** @brief Turbines in system. */
     std::deque<TurbineElasto> turbines{};
+    /** @brief Mesh used for FEA elements. */
+    std::shared_ptr<MeshElasto> mesh;
 
     /**
      * @brief Does an elasto step.

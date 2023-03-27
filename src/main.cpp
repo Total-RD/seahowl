@@ -55,11 +55,13 @@ int main(int argc, char* argv[]) {
     auto system_elasto = std::make_shared<seahowl::elasto::SystemElastoChrono>();
     auto system_chrono = system_elasto->chobj;
     system_chrono->SetNumThreads(chrono::ChOMP::GetNumProcs(), 0, 1);
-    // mesh elasto
-    auto mesh_elasto = std::make_shared<seahowl::elasto::MeshElastoChrono>();
-    system_elasto->add(mesh_elasto);
+    // system aero
+    auto system_aero = std::make_shared<seahowl::aero::SystemAero>();
     // system core
-    auto system_core = get_system_from_json(filepath_main.generic_string(), system_elasto, mesh_elasto);
+    auto system_core = seahowl::core::System();
+    system_core.system_elasto = system_elasto;
+    system_core.system_aero = system_aero;
+    populate_system_from_json(filepath_main.generic_string(), system_core);
 
     for (auto& turbine : system_core.turbines) {
         // fix foundation of the tower

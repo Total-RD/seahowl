@@ -8,19 +8,19 @@ using seahowl::elasto::RotorElasto;
 
 RotorElasto::RotorElasto() {}
 
-void RotorElasto::assemble(std::shared_ptr<SystemElasto> system, std::shared_ptr<MeshElasto> mesh) {
+void RotorElasto::assemble(SystemElasto& system) {
     for (auto& blade : blades) {
-        blade->assemble(mesh);
+        blade->assemble(system);
     }
-    system->add(body_hub);
-    system->add(body_shaft);
-    system->add(link_shaft_hub);
-    system->add(body_nacelle);
-    system->add(link_shaft_nacelle);
-    system->add(body_yaw_bearing);
-    system->add(link_shaft_yaw_bearing);
+    system.add(body_hub);
+    system.add(body_shaft);
+    system.add(link_shaft_hub);
+    system.add(body_nacelle);
+    system.add(link_shaft_nacelle);
+    system.add(body_yaw_bearing);
+    system.add(link_shaft_yaw_bearing);
     for (auto link_blade : links_blades) {
-        system->add(link_blade);
+        system.add(link_blade);
     }
 }
 

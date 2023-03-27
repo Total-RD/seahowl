@@ -65,8 +65,7 @@ class System : public ComponentDynamic {
      * @param[out] system System on which to add bodies, links, etc.
      * @param[out] mesh Mesh on which to add nodes and elements.
      */
-    void assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system,
-                  std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
+    void assemble();
 
     /**
      * @brief Returns time of simulation.

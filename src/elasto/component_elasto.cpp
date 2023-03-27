@@ -40,12 +40,12 @@ void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& di
     };
 };
 
-void ComponentElastoFEA::assemble(std::shared_ptr<MeshElasto> mesh) const {
+void ComponentElastoFEA::assemble(SystemElasto& system) const {
     for (auto node : nodes) {
-        mesh->add(node);
+        system.mesh->add(node);
     }
     for (auto element : elements) {
-        mesh->add(element);
+        system.mesh->add(element);
     }
 }
 

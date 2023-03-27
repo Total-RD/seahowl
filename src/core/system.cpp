@@ -31,11 +31,9 @@ void System::poststep(double time, double dt) {
     }
 }
 
-void System::assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system,
-                      std::shared_ptr<seahowl::elasto::MeshElasto> mesh) {
-    system_elasto = system;
+void System::assemble() {
     for (auto& turbine : turbines) {
-        turbine.assemble(system, mesh);
+        turbine.elasto.assemble(*(system_elasto.get()));
     }
 }
 

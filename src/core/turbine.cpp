@@ -50,11 +50,6 @@ void Turbine::poststep(double time, double dt) {
     controller->poststep(time, dt, *this);
 }
 
-void Turbine::assemble(std::shared_ptr<SystemElasto> system, std::shared_ptr<MeshElasto> mesh) {
-    // assemble turbine
-    elasto.assemble(system, mesh);
-}
-
 void Turbine::build() {
     elasto.build();
     aero.build();

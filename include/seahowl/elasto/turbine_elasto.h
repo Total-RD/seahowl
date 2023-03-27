@@ -45,10 +45,8 @@ class TurbineElasto {
      * Calls assemble for each of the components of the turbine.
      *
      * @param[out] system System on which to add bodies, links, etc.
-     * @param[out] mesh Mesh on which to add nodes and elements.
      */
-    void assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system,
-                  std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
+    void assemble(seahowl::elasto::SystemElasto& system);
 
     /**
      * @brief Links RNA to tower.
@@ -57,7 +55,7 @@ class TurbineElasto {
      * towertop node and yaw bearing coordinates match each other.
      * The link between towertop node and yaw bearing is fixed.
      */
-    void link_rna_tower(std::shared_ptr<seahowl::elasto::SystemElasto> system);
+    void link_rna_tower(seahowl::elasto::SystemElasto& system);
 
     /**
      * @brief Builds the turbine.

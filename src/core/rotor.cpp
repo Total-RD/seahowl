@@ -55,10 +55,6 @@ void Rotor::update_positions_aero() {
     aero.body_nacelle.set_rotational_acceleration(elasto.body_nacelle->get_rotational_acceleration());
 }
 
-void Rotor::assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system, std::shared_ptr<MeshElasto> mesh) {
-    elasto.assemble(system, mesh);
-}
-
 void Rotor::build() {
     for (auto& blade : blades) {
         // push reference points

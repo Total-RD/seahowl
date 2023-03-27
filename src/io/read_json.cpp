@@ -557,9 +557,7 @@ void populate_turbine_from_json(std::string filepath_turbine, seahowl::core::Tur
     turbine.rotor.elasto.hub.inertia += drivetrain_inertia;
 }
 
-seahowl::core::System get_system_from_json(std::string filepath_main,
-                                           std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto,
-                                           std::shared_ptr<seahowl::elasto::MeshElasto> mesh_elasto) {
+void populate_system_from_json(std::string filepath_main, seahowl::core::System& system_core) {
     auto DATADIR = absolute(path(filepath_main)).parent_path();
 
     // get main info
@@ -572,12 +570,8 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
     auto environment_json = json_obj.at("environment");
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
-    system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
-
-    // system
-    auto system_core = seahowl::core::System();
-    system_core.system_elasto = system_elasto;
-    system_core.system_aero = std::make_shared<seahowl::aero::SystemAero>();
+    system_core.system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
+    // wind
     auto wind_json = environment_json.at("wind");
     if (wind_json.at("type").get<std::string>() == "ramp") {
         system_core.wind_model = std::make_shared<seahowl::aero::WindRamp>();
@@ -587,7 +581,8 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         wind_model->wind_velocity_start = Vector3d(v0[0], v0[1], v0[2]);
         auto v1 = wind_options.at("velocity_stop").get<std::vector<double>>();
         wind_model->wind_velocity_stop = Vector3d(v1[0], v1[1], v1[2]);
-        wind_model->direction_gravity = Vector3d(system_elasto->get_gravitational_acceleration()).normalized();
+        wind_model->direction_gravity =
+            Vector3d(system_core.system_elasto->get_gravitational_acceleration()).normalized();
         wind_model->reference_height = wind_options.at("reference_height").get<double>();
         wind_model->time_start = wind_options.at("time_start").get<double>();
         wind_model->time_stop = wind_options.at("time_stop").get<double>();
@@ -622,6 +617,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
             "The input wind type is unknown. Please use the existing wind types: ramp or inflowwind.");
     }
 
+    // turbines
     auto turbines_json = json_obj.at("turbines");
     for (int ii = 0; ii < turbines_json.size(); ii++) {
         auto turbine_json = turbines_json[ii];
@@ -660,7 +656,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         // build turbine
         turbine.build();
         // rotate turbine to align tower with gravity vector
-        auto v1 = Vector3d(-system_elasto->get_gravitational_acceleration()).normalized();
+        auto v1 = Vector3d(-system_core.system_elasto->get_gravitational_acceleration()).normalized();
         auto v2 = (turbine.tower.elasto.nodes[1]->get_position() - turbine.tower.elasto.nodes[0]->get_position())
                       .normalized();
         auto rot_axis = v2.cross(v1);
@@ -668,7 +664,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         turbine.rotate(rot_angle, rot_axis);
         // rotation around axis opposite to gravity (yaw)
         turbine.rotate(turbine_json.at("rotation").get<double>(),
-                       Vector3d(-system_elasto->get_gravitational_acceleration()).normalized());
+                       Vector3d(-system_core.system_elasto->get_gravitational_acceleration()).normalized());
         // translate turbine
         auto trans = turbine_json.at("translation").get<std::vector<double>>();
         turbine.translate(Vector3d(trans[0], trans[1], trans[2]));
@@ -685,7 +681,5 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
     }
 
     // assemble whole system (Chrono)
-    system_core.assemble(system_elasto, mesh_elasto);
-
-    return system_core;
+    system_core.assemble();
 }

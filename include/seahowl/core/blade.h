@@ -83,13 +83,6 @@ class Blade : public ComponentDynamic {
     void build();
 
     /**
-     * @brief Assembles the blade (elasto part).
-     *
-     * @param[out] mesh Mesh on which to add nodes and elements.
-     */
-    void assemble(std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
-
-    /**
      * @brief Sets the discretization fractions to use when building the elasto part of the blade.
      *
      * @param[in] fractions Normalized discretization fractions within [0, 1].

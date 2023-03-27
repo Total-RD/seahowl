@@ -8,6 +8,12 @@
 #include <seahowl/elasto/reference_point_elasto.h>
 
 namespace seahowl {
+namespace elasto {
+class SystemElasto;
+}  // namespace elasto
+}  // namespace seahowl
+
+namespace seahowl {
 ///@brief Elastodynamic model module
 namespace elasto {
 
@@ -63,9 +69,9 @@ class ComponentElastoFEA : public ComponentElasto {
     /**
      * @brief Assembles the FEA component (adds all nodes and elements to mesh).
      *
-     * @param[out] mesh Mesh on which to add nodes and elements.
+     * @param[out] mesh System on which to add nodes and elements.
      */
-    void assemble(std::shared_ptr<MeshElasto> mesh) const;
+    void assemble(SystemElasto& system) const;
 
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;

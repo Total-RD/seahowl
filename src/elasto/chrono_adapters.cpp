@@ -471,6 +471,10 @@ SystemElastoChrono::SystemElastoChrono() {
     auto mystepper = std::dynamic_pointer_cast<chrono::ChTimestepperHHT>(chobj->GetTimestepper());
     mystepper->SetStepControl(false);
     mystepper->SetModifiedNewton(false);
+
+    // make mesh
+    mesh = std::make_shared<MeshElastoChrono>();
+    add(mesh);
 }
 
 void SystemElastoChrono::step(double dt) {

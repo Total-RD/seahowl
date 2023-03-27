@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     double dt = 0.01;
 
     // system
-    SystemElastoChrono system_elasto;
+    auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
     auto system_chrono = system_elasto.chobj;
 
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     mooring.discretization_fractions = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
     //
     mooring.build();
-    mooring.assemble(mesh);
+    mooring.assemble(system_elasto);
 
     // make fairlead
     auto fairlead = chrono_types::make_shared<ChBody>();

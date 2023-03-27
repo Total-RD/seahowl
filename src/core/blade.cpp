@@ -32,10 +32,6 @@ void Blade::poststep(double time, double dt) {
     update_positions_aero();
 }
 
-void Blade::assemble(std::shared_ptr<MeshElasto> mesh) {
-    elasto.assemble(mesh);
-}
-
 void Blade::build() {
     // build aero & elasto
     elasto.build();

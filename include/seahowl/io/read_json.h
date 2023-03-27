@@ -153,7 +153,6 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
  * @brief Returns System instance given a json file.
  *
  * @param[in] filepath Path of the json file describing the system.
+ * @param[out] system System to populate.
  */
-seahowl::core::System get_system_from_json(std::string filepath_main,
-                                           std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto,
-                                           std::shared_ptr<seahowl::elasto::MeshElasto> mesh);
+void populate_system_from_json(std::string filepath_main, seahowl::core::System& system_core);
