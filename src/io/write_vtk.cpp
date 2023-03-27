@@ -35,7 +35,7 @@ OutputMeshVTK::~OutputMeshVTK() {
         mesh->Delete();
 }
 
-void OutputMeshVTK::init(const char* base_name) {
+void OutputMeshVTK::initialize(const char* base_name) {
     base = base_name;
 
     auto coords = component.get_nodes_positions();

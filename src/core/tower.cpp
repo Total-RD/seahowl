@@ -6,7 +6,7 @@ using namespace seahowl::aero;
 
 Tower::Tower(TowerElasto& elasto, TowerAero& aero) : elasto(elasto), aero(aero) {}
 
-void Tower::init(double time, double dt) {
+void Tower::initialize(double time, double dt) {
     // mappings
     compute_mapping_aero2elasto();
     compute_mapping_elasto2aero();

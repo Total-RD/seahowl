@@ -15,7 +15,7 @@ void TurbineAero::build() {
 void TurbineAero::initialize(double time, double dt) {
 #ifdef HAVE_AERODYN
     if (use_aerodyn) {
-        aerodyn->init(time, dt, *this);
+        aerodyn->initialize(time, dt, *this);
     }
 #endif
 }

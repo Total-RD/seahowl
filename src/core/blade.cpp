@@ -14,7 +14,7 @@ using seahowl::Vector3d;
 
 Blade::Blade(seahowl::elasto::BladeElasto& elasto, seahowl::aero::BladeAero& aero) : elasto(elasto), aero(aero) {}
 
-void Blade::init(double time, double dt) {
+void Blade::initialize(double time, double dt) {
     // mappings
     compute_mapping_aero2elasto();
     compute_mapping_elasto2aero();

@@ -9,7 +9,7 @@ Controller::Controller() {
     has_torque_control = false;
 }
 
-void Controller::init(double time, double dt, const seahowl::core::Turbine& turbine) {}
+void Controller::initialize(double time, double dt, const seahowl::core::Turbine& turbine) {}
 
 void Controller::step(double time, double dt, const seahowl::core::Turbine& turbine) {}
 

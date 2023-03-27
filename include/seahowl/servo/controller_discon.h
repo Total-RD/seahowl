@@ -186,7 +186,7 @@ class ControllerDISCON : public Controller {
      * @param[in] dt Time step legnth.
      * @param[in] turbine Turbine that is controlled by this controller.
      */
-    virtual void init(double time, double dt, const seahowl::core::Turbine& turbine) override;
+    virtual void initialize(double time, double dt, const seahowl::core::Turbine& turbine) override;
     /**
      * @brief Stepping of controller.
      *
@@ -211,13 +211,13 @@ class ControllerDISCON : public Controller {
     std::string libfile;
 
     // init called from other init function
-    void init(double time,
-              double dt,
-              double omega_rotor,
-              double omega_generator,
-              double pitch_collective,
-              double rotor_azimuth,
-              size_t nblades);
+    void initialize(double time,
+                    double dt,
+                    double omega_rotor,
+                    double omega_generator,
+                    double pitch_collective,
+                    double rotor_azimuth,
+                    size_t nblades);
 
     // updates turbine variables of object communicating with DISCON module
     void update_turbine_variables(double time,

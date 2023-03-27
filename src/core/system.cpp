@@ -4,9 +4,9 @@ using namespace seahowl::core;
 
 System::System() {}
 
-void System::init(double time, double dt) {
+void System::initialize(double time, double dt) {
     for (auto& turbine : turbines) {
-        turbine.init(time, dt);
+        turbine.initialize(time, dt);
     }
 }
 

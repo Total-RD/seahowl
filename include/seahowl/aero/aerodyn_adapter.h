@@ -5,13 +5,11 @@
 
 #include <seahowl/commons/numerics.h>
 
-
 namespace seahowl {
 namespace aero {
 class TurbineAero;
 }  // namespace aero
 }  // namespace seahowl
-
 
 /// <summary>
 /// Aerodyn module in OpenFAST
@@ -250,7 +248,7 @@ class AeroDynAdapter {
     AeroDynAdapter(std::string AerodynInfile, std::string InflowInfile);
     ~AeroDynAdapter();
 
-    void init(double time, double dt, seahowl::aero::TurbineAero& turbine);
+    void initialize(double time, double dt, seahowl::aero::TurbineAero& turbine);
     void calcul(double time, seahowl::aero::TurbineAero& turbine);
     void update(double time, double dt, seahowl::aero::TurbineAero& turbine);
     void end(double time, double dt, seahowl::aero::TurbineAero& turbine);

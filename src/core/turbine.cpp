@@ -9,10 +9,10 @@ Turbine::Turbine(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineA
     controller = std::make_shared<Controller>();
 }
 
-void Turbine::init(double time, double dt) {
-    rotor.init(time, dt);
-    tower.init(time, dt);
-    controller->init(time, dt, *this);
+void Turbine::initialize(double time, double dt) {
+    rotor.initialize(time, dt);
+    tower.initialize(time, dt);
+    controller->initialize(time, dt, *this);
 
     aero.initialize(time, dt);
 }

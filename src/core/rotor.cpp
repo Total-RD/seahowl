@@ -11,9 +11,9 @@ using namespace seahowl::aero;
 
 Rotor::Rotor(seahowl::elasto::RotorElasto& elasto, seahowl::aero::RotorAero& aero) : elasto(elasto), aero(aero) {}
 
-void Rotor::init(double time, double dt) {
+void Rotor::initialize(double time, double dt) {
     for (auto& blade : blades) {
-        blade->init(time, dt);
+        blade->initialize(time, dt);
         // update initial azimuth of aero blade
         blade->aero.azimuth0 = blade->elasto.azimuth0;
     }

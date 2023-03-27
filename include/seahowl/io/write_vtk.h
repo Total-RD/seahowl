@@ -21,6 +21,6 @@ struct OutputMeshVTK {
 
     ~OutputMeshVTK();
 
-    void init(const char* base_name);
+    void initialize(const char* base_name);
     void write(double time, int time_step) const;
 };

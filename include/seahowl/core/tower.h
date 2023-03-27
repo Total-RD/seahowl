@@ -50,7 +50,7 @@ class Tower : public ComponentDynamic {
      * @param[in] time Time of the simulation (usually 0 at init).
      * @param[in] dt Time step length.
      */
-    void init(double time, double dt) override;
+    void initialize(double time, double dt) override;
 
     /**
      * @brief Prestep for tower, called before elastodynamic stepping.

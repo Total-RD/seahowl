@@ -93,12 +93,12 @@ int main(int argc, char* argv[]) {
                  blade_ptr != turbine.rotor.blades.end(); blade_ptr++, idx_blade++) {
                 auto& blade = *blade_ptr;
                 auto& post_blade = vtk_outputs.emplace_back(blade->elasto);
-                post_blade.init(
+                post_blade.initialize(
                     ("./output/vtk/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
                         .c_str());
             }
             auto& post_tower = vtk_outputs.emplace_back(turbine.tower.elasto);
-            post_tower.init(("./output/vtk/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
+            post_tower.initialize(("./output/vtk/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
         }
     }
 #endif
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
         system_elasto->do_statics(true, 10);
     }
 
-    system_core.init(system_elasto->get_time(), dt);
+    system_core.initialize(system_elasto->get_time(), dt);
 
     int step = 0;
     output_results(system_core, step);

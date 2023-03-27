@@ -32,7 +32,7 @@ class System : public ComponentDynamic {
      * @param[in] time Time of the simulation (usually 0 at init).
      * @param[in] dt Time step length.
      */
-    virtual void init(double time, double dt) override;
+    virtual void initialize(double time, double dt) override;
 
     /**
      * @brief Prestep for system, called before elastodynamic stepping.

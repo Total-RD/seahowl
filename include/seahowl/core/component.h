@@ -13,12 +13,12 @@ namespace core {
 class ComponentDynamic {
   public:
     /**
-     * @brief Initialize the component, called before starting the simulation.
+     * @brief Initializes the component, called before starting the simulation.
      *
      * @param[in] time Time of the simulation (usually 0 at init).
      * @param[in] dt Time step length.
      */
-    virtual void init(double time, double dt) = 0;
+    virtual void initialize(double time, double dt) = 0;
 
     /**
      * @brief Prestep for component, called before elastodynamic stepping.

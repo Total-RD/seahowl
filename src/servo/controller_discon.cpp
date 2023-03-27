@@ -79,22 +79,22 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
     pImpl.SetGeneratedPower(power);
 }
 
-void seahowl::servo::ControllerDISCON::init(double time, double dt, const seahowl::core::Turbine& turbine) {
+void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const seahowl::core::Turbine& turbine) {
     auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * PI / 60.0);
     auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
     auto pitch_collective = turbine.rotor.elasto.pitch_collective;
     auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
     auto nblades = turbine.rotor.blades.size();
-    this->init(time, dt, omega_rotor, omega_generator, pitch_collective, rotor_azimuth, nblades);
+    this->initialize(time, dt, omega_rotor, omega_generator, pitch_collective, rotor_azimuth, nblades);
 }
 
-void seahowl::servo::ControllerDISCON::init(double time,
-                                            double dt,
-                                            double omega_rotor,
-                                            double omega_generator,
-                                            double pitch_collective,
-                                            double rotor_azimuth,
-                                            size_t nblades) {
+void seahowl::servo::ControllerDISCON::initialize(double time,
+                                                  double dt,
+                                                  double omega_rotor,
+                                                  double omega_generator,
+                                                  double pitch_collective,
+                                                  double rotor_azimuth,
+                                                  size_t nblades) {
     pImpl.SetNumberOfBlades(nblades);
 
     // update variables

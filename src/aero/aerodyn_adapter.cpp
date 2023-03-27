@@ -24,7 +24,7 @@ seahowl::aero::AeroDynAdapter::AeroDynAdapter(std::string AerodynInfile, std::st
 
 seahowl::aero::AeroDynAdapter::~AeroDynAdapter() {}
 
-void seahowl::aero::AeroDynAdapter::init(double time, double dt, seahowl::aero::TurbineAero& turbine) {
+void seahowl::aero::AeroDynAdapter::initialize(double time, double dt, seahowl::aero::TurbineAero& turbine) {
     pImpl.SetTimeStep(dt);
     pImpl.SetTime(time);
     pImpl.SetVTK(turbine.WrVTK, turbine.WrVTK_Type, turbine.WrVTK_dt);

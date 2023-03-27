@@ -302,7 +302,7 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     double time = 0.0;
     turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
-    turbine.init(time, dt);
+    turbine.initialize(time, dt);
     // while (application.GetDevice()->run()) {
     while (time < 50) {
         // prestep
@@ -367,7 +367,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
 
     double time = 0.0;
     turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
-    turbine.init(time, dt);
+    turbine.initialize(time, dt);
     // while (application.GetDevice()->run()) {
     while (time < 50) {
         // prestep
@@ -444,7 +444,7 @@ TEST(test_turbine, multiturbines) {
     for (auto& turbine : system_core.turbines) {
         turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
     }
-    system_core.init(time, dt);
+    system_core.initialize(time, dt);
     while (time < 50) {
         // prestep
         system_core.prestep(time, dt);
@@ -508,7 +508,7 @@ TEST(test_inflowwind, rpm_initial_pitch) {
 
     double time = 0.0;
     turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
-    turbine.init(time, dt);
+    turbine.initialize(time, dt);
     // while (application.GetDevice()->run()) {
     while (time < 50) {
         // prestep
