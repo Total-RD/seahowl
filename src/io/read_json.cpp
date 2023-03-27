@@ -428,6 +428,7 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         wind_model->shear_coefficient = wind_options.at("shear_coefficient").get<double>();
         wind_model->density = environment_json.at("air_density").get<double>();
     } else if (wind_json.at("type").get<std::string>() == "inflowwind") {
+#ifdef HAVE_INFLOWWIND
         std::string inflowwind_filepath;
         std::string windwnd_filepath;
         auto wind_options = wind_json.at("options");
@@ -445,6 +446,9 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         auto wind_model = std::dynamic_pointer_cast<seahowl::aero::InflowWindAdapter>(system_core.wind_model);
         double dt = json_obj.at("numerics").at("dt").get<double>();
         wind_model->init(dt);
+#else
+        throw std::runtime_error("InflowWind module in CMAKE options should be enabled if wind type 'inflowwind' selected.");
+#endif
     } else {
         throw std::runtime_error("The input wind type is unknown. Please use the existing wind types: ramp or inflowwind.");
     }
