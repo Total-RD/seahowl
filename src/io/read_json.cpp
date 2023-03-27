@@ -471,8 +471,8 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
             } else {
                 throw std::runtime_error("Turbine set to use aerodyn but AeroDyn file path not defined.");
             }
-            if (turbine_json.contains("file_inflowwind")) {
-                inflowwind_filepath = (DATADIR / turbine_json.at("file_inflowwind")).generic_string();
+            if (wind_json.at("options").contains("file_inflowwind")) {
+                inflowwind_filepath = (DATADIR / wind_json.at("options").at("file_inflowwind")).generic_string();
             } else {
                 throw std::runtime_error("Turbine set to use aerodyn but InflowWind file not defined.");
             }
