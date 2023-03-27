@@ -71,26 +71,26 @@ class RotorElasto : public ComponentElasto {
     /** @brief List of blades. */
     std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades;
     /** @brief Hub rigid body. */
-    std::shared_ptr<seahowl::elasto::BodyElasto> body_hub;
+    std::unique_ptr<seahowl::elasto::BodyElasto> body_hub;
     /** @brief Shaft rigid body. */
-    std::shared_ptr<seahowl::elasto::BodyElasto> body_shaft;
+    std::unique_ptr<seahowl::elasto::BodyElasto> body_shaft;
     /** @brief Nacelle rigid body. */
-    std::shared_ptr<seahowl::elasto::BodyElasto> body_nacelle;
+    std::unique_ptr<seahowl::elasto::BodyElasto> body_nacelle;
     /** @brief Yaw bearing rigid body. */
-    std::shared_ptr<seahowl::elasto::BodyElasto> body_yaw_bearing;
+    std::unique_ptr<seahowl::elasto::BodyElasto> body_yaw_bearing;
 
     // links
     //
     /** @brief Links between blades and hub. */
-    std::vector<std::shared_ptr<Link>> links_blades;
+    std::vector<std::unique_ptr<Link>> links_blades;
     /** @brief Link between shaft and hub (revolute). */
-    std::shared_ptr<Link> link_shaft_hub;
+    std::unique_ptr<Link> link_shaft_hub;
     /** @brief Link between shaft and nacelle (fixed). */
-    std::shared_ptr<Link> link_shaft_nacelle;
+    std::unique_ptr<Link> link_shaft_nacelle;
     /** @brief Link between shaft and yaw bearing (fixed). */
-    std::shared_ptr<Link> link_shaft_yaw_bearing;
+    std::unique_ptr<Link> link_shaft_yaw_bearing;
     /** @brief Link between towertop (if any) and yaw bearing (fixed). */
-    std::shared_ptr<Link> link_towertop_yaw_bearing;
+    std::unique_ptr<Link> link_towertop_yaw_bearing;
     ///@}
 
     // reference properties
