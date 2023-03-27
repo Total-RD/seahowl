@@ -13,6 +13,8 @@ void Turbine::init(double time, double dt) {
     rotor.init(time, dt);
     tower.init(time, dt);
     controller->init(time, dt, *this);
+
+    aero.initialize(time, dt);
 }
 
 void Turbine::prestep(double time, double dt) {

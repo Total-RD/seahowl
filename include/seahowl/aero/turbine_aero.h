@@ -62,8 +62,11 @@ class TurbineAero : public ComponentAero {
 
     /**
      * @brief Initializes turbine.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
      */
-    void initialize();
+    void initialize(double time, double dt);
 
     /**
      * @brief Computes wind loads on all aero nodes of blades.

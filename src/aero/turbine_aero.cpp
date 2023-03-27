@@ -12,7 +12,7 @@ void TurbineAero::build() {
     tower.build();
 }
 
-void TurbineAero::initialize() {
+void TurbineAero::initialize(double time, double dt) {
 #ifdef HAVE_AERODYN
     if (use_aerodyn) {
         aerodyn->init(time, dt, *this);
@@ -24,9 +24,9 @@ void TurbineAero::compute_aero_loads(seahowl::aero::WindModel& wind_model, doubl
 #ifdef HAVE_AERODYN
     if (use_aerodyn) {
         aerodyn->calcul(time, *this);
-        rotor.compute_wind_loads_aerodyn(aerodyn->pImpl.MeshFrc, wind_model, time, tower.aero, true, true, true);
+        rotor.compute_wind_loads_aerodyn(aerodyn->pImpl.MeshFrc, wind_model, time, tower, true, true, true);
     } else {
-        rotor.compute_aero_loads(wind_model, time, tower.aero, true, true, true);
+        rotor.compute_aero_loads(wind_model, time, tower, true, true, true);
     }
 #else
     rotor.compute_aero_loads(wind_model, time, tower, true, true, true);

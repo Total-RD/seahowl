@@ -3,11 +3,15 @@
 #include <iostream>
 #include <cstring>
 
-#include <seahowl/core/turbine.h>
-#include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/elasto/rotor_elasto.h>
-#include <seahowl/elasto/entities_elasto.h>
 #include <seahowl/commons/numerics.h>
+
+
+namespace seahowl {
+namespace aero {
+class TurbineAero;
+}  // namespace aero
+}  // namespace seahowl
+
 
 /// <summary>
 /// Aerodyn module in OpenFAST
@@ -105,10 +109,6 @@ void AeroDyn_Inflow_C_End(int& ErrStat_C, char* ErrMsg_C);
 }
 
 namespace seahowl {
-
-namespace core {
-class Turbine;
-}
 
 namespace aero {
 
@@ -250,15 +250,15 @@ class AeroDynAdapter {
     AeroDynAdapter(std::string AerodynInfile, std::string InflowInfile);
     ~AeroDynAdapter();
 
-    void init(double time, double dt, seahowl::core::Turbine& turbine);
-    void calcul(double time, seahowl::core::Turbine& turbine);
-    void update(double time, double dt, seahowl::core::Turbine& turbine);
-    void end(double time, double dt, seahowl::core::Turbine& turbine);
-    void update_turbine_variables(seahowl::core::Turbine& turbine);
-    void setMotionHub(seahowl::core::Turbine& turbine);
-    void setMotionNac(seahowl::core::Turbine& turbine);
-    void setMotionRoot(seahowl::core::Turbine& turbine);
-    void setMotionMesh(seahowl::core::Turbine& turbine);
+    void init(double time, double dt, seahowl::aero::TurbineAero& turbine);
+    void calcul(double time, seahowl::aero::TurbineAero& turbine);
+    void update(double time, double dt, seahowl::aero::TurbineAero& turbine);
+    void end(double time, double dt, seahowl::aero::TurbineAero& turbine);
+    void update_turbine_variables(seahowl::aero::TurbineAero& turbine);
+    void setMotionHub(seahowl::aero::TurbineAero& turbine);
+    void setMotionNac(seahowl::aero::TurbineAero& turbine);
+    void setMotionRoot(seahowl::aero::TurbineAero& turbine);
+    void setMotionMesh(seahowl::aero::TurbineAero& turbine);
 };
 
 }  // namespace aero

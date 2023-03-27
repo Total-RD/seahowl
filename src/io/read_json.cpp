@@ -631,13 +631,13 @@ void populate_system_from_json(std::string filepath_main, seahowl::core::System&
         populate_turbine_from_json(filepath_turbine, turbine);
         // aerodyn option
 #ifdef HAVE_AERODYN
-        turbine.use_aerodyn = turbine_json.at("use_aerodyn").get<bool>();
+        turbine.aero.use_aerodyn = turbine_json.at("use_aerodyn").get<bool>();
         bool output_vtk = json_obj.at("outputs").at("VTK").get<bool>();
         if (output_vtk) {
             turbine.aero.WrVTK = 2;
         }
         turbine.aero.WrVTK_dt = json_obj.at("outputs").at("dt").get<double>();
-        if (turbine.use_aerodyn) {
+        if (turbine.aero.use_aerodyn) {
             std::string inflowwind_filepath;
             std::string aerodyn_filepath;
             if (turbine_json.contains("file_aerodyn")) {

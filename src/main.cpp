@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
 #endif
 
 #ifdef HAVE_AERODYN
-    if (system_core.turbines[0].use_aerodyn) {
+    if (system_core.turbines[0].aero.use_aerodyn) {
         remove_all("./output/vtk-ADI");
     }
 #endif
