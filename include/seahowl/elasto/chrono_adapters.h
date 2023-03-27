@@ -160,8 +160,9 @@ class LinkChrono : public Link {
 
     LinkChrono();
     virtual void set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) override;
-    virtual void initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) override;
-    virtual void initialize(std::shared_ptr<NodeElasto> node1, std::shared_ptr<BodyElasto> body2) override;
+    virtual void initialize(BodyElasto& body1, BodyElasto& body2) override;
+    virtual void initialize(NodeElasto& node1, BodyElasto& body2) override;
+    virtual void initialize(NodeElasto& node1, NodeElasto& node2) override;
     Vector3d get_reaction_force() const override;
     Vector3d get_reaction_torque() const override;
 };
@@ -175,9 +176,8 @@ class MeshElastoChrono : public MeshElasto {
     std::shared_ptr<chrono::fea::ChMesh> chobj;
 
     MeshElastoChrono();
-    virtual void add(std::shared_ptr<NodeElasto> node) override;
-    virtual void add(std::shared_ptr<ElementElasto> element) override;
-    void add(std::shared_ptr<chrono::fea::ChElementBeam> element);
+    virtual void add(NodeElasto& node) override;
+    virtual void add(ElementElasto& element) override;
 };
 
 /**
@@ -194,9 +194,9 @@ class SystemElastoChrono : public SystemElasto {
     virtual void do_statics(bool linear, int nonlinear_steps) override;
     virtual Vector3d get_gravitational_acceleration() const override;
     virtual void set_gravitational_acceleration(Vector3d gravitational_acceleration) override;
-    virtual void add(std::shared_ptr<BodyElasto> body) override;
-    virtual void add(std::shared_ptr<MeshElasto> mesh) override;
-    virtual void add(std::shared_ptr<Link> link) override;
+    virtual void add(BodyElasto& body) override;
+    virtual void add(MeshElasto& mesh) override;
+    virtual void add(Link& link) override;
 };
 
 }  // namespace elasto

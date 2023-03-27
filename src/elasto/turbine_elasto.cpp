@@ -23,8 +23,8 @@ void TurbineElasto::link_rna_tower(SystemElasto& system) {
     // translate RNA center of origin to towertop
     rotor.translate(towertop_node->get_position() - rotor.body_yaw_bearing->get_position());
     rotor.link_towertop_yaw_bearing = std::make_shared<LinkChrono>();
-    system.add(rotor.link_towertop_yaw_bearing);
-    rotor.link_towertop_yaw_bearing->initialize(towertop_node, rotor.body_yaw_bearing);
+    system.add(*(rotor.link_towertop_yaw_bearing.get()));
+    rotor.link_towertop_yaw_bearing->initialize(*(towertop_node.get()), *(rotor.body_yaw_bearing.get()));
     rotor.link_towertop_yaw_bearing->set_constraints(true, true, true, true, true, true);
 }
 

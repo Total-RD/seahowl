@@ -42,10 +42,10 @@ void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& di
 
 void ComponentElastoFEA::assemble(SystemElasto& system) const {
     for (auto node : nodes) {
-        system.mesh->add(node);
+        system.mesh->add(*(node.get()));
     }
     for (auto element : elements) {
-        system.mesh->add(element);
+        system.mesh->add(*(element.get()));
     }
 }
 

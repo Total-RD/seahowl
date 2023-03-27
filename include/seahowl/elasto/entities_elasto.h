@@ -161,12 +161,22 @@ class Link {
     /**
      * @brief Initialize link between bodies.
      */
-    virtual void initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) = 0;
+    virtual void initialize(BodyElasto& body1, BodyElasto& body2) = 0;
 
     /**
      * @brief Initialize link between node and body.
      */
-    virtual void initialize(std::shared_ptr<NodeElasto> node1, std::shared_ptr<BodyElasto> body2) = 0;
+    virtual void initialize(NodeElasto& node1, BodyElasto& body2) = 0;
+
+    /**
+     * @brief Initialize link between body and node.
+     */
+    void initialize(BodyElasto& body1, NodeElasto& node2) { initialize(node2, body1); };
+
+    /**
+     * @brief Initialize link between node and node.
+     */
+    virtual void initialize(NodeElasto& node1, NodeElasto& node2) = 0;
 
     /**
      * @brief Sets constraints (true: constrained; false: unconstrained).
@@ -201,14 +211,14 @@ class MeshElasto {
      *
      * @param[in] node Node to add to mesh.
      */
-    virtual void add(std::shared_ptr<NodeElasto> node) = 0;
+    virtual void add(NodeElasto& node) = 0;
 
     /**
      * @brief Adds element to mesh.
      *
      * @param[in] element Element to add to mesh.
      */
-    virtual void add(std::shared_ptr<ElementElasto> element) = 0;
+    virtual void add(ElementElasto& element) = 0;
 };
 
 }  // namespace elasto

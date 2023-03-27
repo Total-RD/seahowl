@@ -58,21 +58,21 @@ class SystemElasto {
      *
      * @param[in] body Body to add to system.
      */
-    virtual void add(std::shared_ptr<BodyElasto> body) = 0;
+    virtual void add(BodyElasto& body) = 0;
 
     /**
      * @brief Adds mesh to system.
      *
      * @param[in] mesh Mesh to add to system.
      */
-    virtual void add(std::shared_ptr<MeshElasto> mesh) = 0;
+    virtual void add(MeshElasto& mesh) = 0;
 
     /**
      * @brief Adds link to system.
      *
      * @param[in] link Link to add to system.
      */
-    virtual void add(std::shared_ptr<Link> link) = 0;
+    virtual void add(Link& link) = 0;
 };
 
 }  // namespace elasto

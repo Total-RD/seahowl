@@ -416,16 +416,19 @@ LinkChrono::LinkChrono() {
     chobj->SetConstrainedCoords(true, true, true, true, true, true);
 }
 
-void LinkChrono::initialize(std::shared_ptr<BodyElasto> body1, std::shared_ptr<BodyElasto> body2) {
-    chobj->Initialize(std::dynamic_pointer_cast<BodyElastoChrono>(body1)->chobj,
-                      std::dynamic_pointer_cast<BodyElastoChrono>(body2)->chobj,
-                      std::dynamic_pointer_cast<BodyElastoChrono>(body2)->chobj->GetFrame_COG_to_abs());
+void LinkChrono::initialize(BodyElasto& body1, BodyElasto& body2) {
+    chobj->Initialize(dynamic_cast<BodyElastoChrono&>(body1).chobj, dynamic_cast<BodyElastoChrono&>(body2).chobj,
+                      dynamic_cast<BodyElastoChrono&>(body2).chobj->GetFrame_COG_to_abs());
 }
 
-void LinkChrono::initialize(std::shared_ptr<NodeElasto> node1, std::shared_ptr<BodyElasto> body2) {
-    chobj->Initialize(std::dynamic_pointer_cast<NodeElastoChrono>(node1)->chobj,
-                      std::dynamic_pointer_cast<BodyElastoChrono>(body2)->chobj,
-                      std::dynamic_pointer_cast<BodyElastoChrono>(body2)->chobj->GetFrame_COG_to_abs());
+void LinkChrono::initialize(NodeElasto& node1, BodyElasto& body2) {
+    chobj->Initialize(dynamic_cast<NodeElastoChrono&>(node1).chobj, dynamic_cast<BodyElastoChrono&>(body2).chobj,
+                      dynamic_cast<BodyElastoChrono&>(body2).chobj->GetFrame_COG_to_abs());
+}
+
+void LinkChrono::initialize(NodeElasto& node1, NodeElasto& node2) {
+    chobj->Initialize(dynamic_cast<NodeElastoChrono&>(node1).chobj, dynamic_cast<NodeElastoChrono&>(node2).chobj,
+                      dynamic_cast<NodeElastoChrono&>(node2).chobj->Frame());
 }
 
 void LinkChrono::set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) {
@@ -444,16 +447,12 @@ MeshElastoChrono::MeshElastoChrono() {
     chobj = chrono_types::make_shared<chrono::fea::ChMesh>();
 }
 
-void MeshElastoChrono::add(std::shared_ptr<NodeElasto> node) {
-    chobj->AddNode(std::dynamic_pointer_cast<NodeElastoChrono>(node)->chobj);
+void MeshElastoChrono::add(NodeElasto& node) {
+    chobj->AddNode(dynamic_cast<NodeElastoChrono&>(node).chobj);
 }
 
-void MeshElastoChrono::add(std::shared_ptr<ElementElasto> element) {
-    chobj->AddElement(std::dynamic_pointer_cast<ElementElastoChrono>(element)->chobj);
-}
-
-void MeshElastoChrono::add(std::shared_ptr<chrono::fea::ChElementBeam> element) {
-    chobj->AddElement(element);
+void MeshElastoChrono::add(ElementElasto& element) {
+    chobj->AddElement(dynamic_cast<ElementElastoChrono&>(element).chobj);
 }
 
 SystemElastoChrono::SystemElastoChrono() {
@@ -474,7 +473,7 @@ SystemElastoChrono::SystemElastoChrono() {
 
     // make mesh
     mesh = std::make_shared<MeshElastoChrono>();
-    add(mesh);
+    add(*(mesh.get()));
 }
 
 void SystemElastoChrono::step(double dt) {
@@ -502,16 +501,16 @@ void SystemElastoChrono::set_gravitational_acceleration(Vector3d gravitational_a
     chobj->Set_G_acc(gravitational_acceleration);
 }
 
-void SystemElastoChrono::add(std::shared_ptr<BodyElasto> body) {
-    chobj->Add(std::dynamic_pointer_cast<BodyElastoChrono>(body)->chobj);
+void SystemElastoChrono::add(BodyElasto& body) {
+    chobj->Add(dynamic_cast<BodyElastoChrono&>(body).chobj);
 }
 
-void SystemElastoChrono::add(std::shared_ptr<MeshElasto> mesh) {
-    chobj->Add(std::dynamic_pointer_cast<MeshElastoChrono>(mesh)->chobj);
+void SystemElastoChrono::add(MeshElasto& mesh) {
+    chobj->Add(dynamic_cast<MeshElastoChrono&>(mesh).chobj);
 }
 
-void SystemElastoChrono::add(std::shared_ptr<Link> link) {
-    chobj->Add(std::dynamic_pointer_cast<LinkChrono>(link)->chobj);
+void SystemElastoChrono::add(Link& link) {
+    chobj->Add(dynamic_cast<LinkChrono&>(link).chobj);
 }
 
 }  // namespace elasto

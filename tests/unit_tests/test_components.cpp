@@ -407,10 +407,6 @@ TEST(test_turbine, multiturbines) {
     system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
     auto system_chrono = system_elasto->chobj;
 
-    // mesh for blade
-    auto mesh_elasto = std::make_shared<MeshElastoChrono>();
-    system_elasto->add(mesh_elasto);
-
     // system core
     seahowl::core::System system_core;
     system_core.wind_model = wind_model;

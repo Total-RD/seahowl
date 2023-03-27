@@ -31,10 +31,6 @@ int main(int argc, char* argv[]) {
         mystepper->SetModifiedNewton(false);
     }
 
-    // mesh
-    auto mesh = std::make_shared<MeshElastoChrono>();
-    system_elasto.add(mesh);
-
     // mooring line
     auto mooring = seahowl::elasto::MooringElasto();
     mooring.fairlead_position = Vector3d(0.0, 200.0, 200.0);
@@ -81,11 +77,11 @@ int main(int argc, char* argv[]) {
     contact_material->SetRestitution(0.2f);
     contact_material->SetAdhesion(0);
     auto contact_cloud = chrono_types::make_shared<chrono::fea::ChContactSurfaceNodeCloud>(
-        contact_material, std::dynamic_pointer_cast<MeshElastoChrono>(mesh)->chobj.get());
+        contact_material, std::dynamic_pointer_cast<MeshElastoChrono>(system_elasto.mesh)->chobj.get());
     for (auto& node : mooring.nodes) {
         contact_cloud->AddNode(std::dynamic_pointer_cast<NodeElastoChrono>(node)->chobj, mooring.diameter);
     }
-    std::dynamic_pointer_cast<MeshElastoChrono>(mesh)->chobj->AddContactSurface(contact_cloud);
+    std::dynamic_pointer_cast<MeshElastoChrono>(system_elasto.mesh)->chobj->AddContactSurface(contact_cloud);
 
     // // make floor
     // // material

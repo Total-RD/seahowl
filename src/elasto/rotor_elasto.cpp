@@ -12,15 +12,15 @@ void RotorElasto::assemble(SystemElasto& system) {
     for (auto& blade : blades) {
         blade->assemble(system);
     }
-    system.add(body_hub);
-    system.add(body_shaft);
-    system.add(link_shaft_hub);
-    system.add(body_nacelle);
-    system.add(link_shaft_nacelle);
-    system.add(body_yaw_bearing);
-    system.add(link_shaft_yaw_bearing);
+    system.add(*(body_hub.get()));
+    system.add(*(body_shaft.get()));
+    system.add(*(link_shaft_hub.get()));
+    system.add(*(body_nacelle.get()));
+    system.add(*(link_shaft_nacelle.get()));
+    system.add(*(body_yaw_bearing.get()));
+    system.add(*(link_shaft_yaw_bearing.get()));
     for (auto link_blade : links_blades) {
-        system.add(link_blade);
+        system.add(*(link_blade.get()));
     }
 }
 
@@ -54,7 +54,7 @@ void RotorElasto::build() {
     body_shaft->set_mass(0.0);
     // link hub to shaft
     link_shaft_hub = std::make_shared<LinkChrono>();
-    link_shaft_hub->initialize(body_hub, body_shaft);
+    link_shaft_hub->initialize(*(body_hub.get()), *(body_shaft.get()));
     link_shaft_hub->set_constraints(true, true, true, false, true, true);
 
     // nacelle
@@ -67,7 +67,7 @@ void RotorElasto::build() {
     body_nacelle->set_inertia_diagonal(Vector3d(0.0, 0.0, nacelle.inertia));
     // link nacelle body to shaft body
     link_shaft_nacelle = std::make_shared<LinkChrono>();
-    link_shaft_nacelle->initialize(body_nacelle, body_shaft);
+    link_shaft_nacelle->initialize(*(body_nacelle.get()), *(body_shaft.get()));
     link_shaft_nacelle->set_constraints(true, true, true, true, true, true);
 
     // yaw bearing
@@ -77,7 +77,7 @@ void RotorElasto::build() {
     body_yaw_bearing->set_mass(nacelle.yaw_bearing_mass);
     // link yaw bearing body to shaft body
     link_shaft_yaw_bearing = std::make_shared<LinkChrono>();
-    link_shaft_yaw_bearing->initialize(body_shaft, body_yaw_bearing);
+    link_shaft_yaw_bearing->initialize(*(body_shaft.get()), *(body_yaw_bearing.get()));
     link_shaft_yaw_bearing->set_constraints(true, true, true, true, true, true);
 
     // blades
@@ -107,7 +107,7 @@ void RotorElasto::build() {
 
         // link root node of blade to rotor center
         auto link_hub_blade = std::make_shared<LinkChrono>();
-        link_hub_blade->initialize(blade->nodes[0], body_hub);
+        link_hub_blade->initialize(*(blade->nodes[0].get()), *(body_hub.get()));
         link_hub_blade->set_constraints(true, true, true, true, true, true);
         links_blades.push_back(link_hub_blade);
     }
@@ -180,7 +180,7 @@ void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
         blade->apply_pitch_increment(pitch_increment);
         // update blade-hub constraint
         auto link = links_blades[ii];
-        link->initialize(blade->nodes.front(), body_hub);
+        link->initialize(*(blade->nodes.front().get()), *(body_hub.get()));
     }
     pitch_collective += pitch_increment;
 }
