@@ -31,6 +31,7 @@ option(SEAHOWL_ENABLE_PYTHON "Enable python binding" OFF)
 option(SEAHOWL_ENABLE_EXAMPLES "Enable examples" ON)
 option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
 option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
+option(SEAHOWL_ENABLE_INFLOWWIND "Enable InflowWind module" OFF)
 ```
 
 
@@ -42,6 +43,7 @@ option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
 - nlohmann-json (v3.10.5): https://github.com/nlohmann/json
 - ROSCO (v2.5.0): https://github.com/NREL/ROSCO
 - AeroDyn: https://github.com/Total-RD/aerodyn4seahowl
+- InflowWind: https://github.com/Total-RD/aerodyn4seahowl
 
 #### Documentation
 
@@ -102,11 +104,10 @@ It is a JSON dictionary containing:
   - **file**: file path of turbine file (relative to this file path).
   - **use_aerodyn**: whether to use AeroDyn or not for this turbine.
   - **file_aerodyn**: path to AeroDyn .dat input file (only used if use_aerodyn is true).
-  - **file_inflowwind**: path to InflowWind .dat input file (only used if use_aerodyn is true).
 
 #### Available Wind Models
 
-- Wind ramp:
+- Wind `ramp`:
 ```json
 {
   "type": "ramp",
@@ -120,6 +121,18 @@ It is a JSON dictionary containing:
   }
 }
 ```
+
+- Wind `inflowwind` (Turbsim binary can be read):
+```json
+{
+  "type": "inflowwind",
+  "options": {
+     "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat",
+     "file_windwnd": "./aerodyn/long_step_wind.wnd"
+  }
+}
+```
+
 
 #### Turbine file (turbine.json)
 
