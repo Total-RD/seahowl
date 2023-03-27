@@ -67,12 +67,12 @@ void RotorAero::compute_radii() {
     }
 }
 
-void RotorAero::compute_wind_loads_bemt(WindModel& wind_model,
-                                        double time,
-                                        const TowerAero& tower_aero,
-                                        bool tower_shadow,
-                                        bool tip_loss,
-                                        bool hub_loss) {
+void RotorAero::compute_aero_loads(const WindModel& wind_model,
+                                   double time,
+                                   const TowerAero& tower_aero,
+                                   bool tower_shadow,
+                                   bool tip_loss,
+                                   bool hub_loss) {
     double density = wind_model.get_density();
     for (auto& blade : blades) {
         auto blade_azimuth = azimuth + blade->azimuth0;

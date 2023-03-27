@@ -5,7 +5,6 @@
 #include <seahowl/core/rotor.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/servo/controller.h>
-#include <seahowl/aero/aerodyn_adapter.h>
 #include <seahowl/commons/numerics.h>
 
 #include <vector>
@@ -42,8 +41,6 @@ class Turbine : public ComponentDynamic {
     Tower tower;
     /** @brief Controller of the turbine. */
     std::shared_ptr<seahowl::servo::Controller> controller;
-    /** @brief AeroDyn adapter (only used if AeroDyn is enabled) (@todo this should not be here, move to aero parts). */
-    std::shared_ptr<seahowl::aero::AeroDynAdapter> aerodyn;
 
     // parameters
     //
@@ -53,15 +50,6 @@ class Turbine : public ComponentDynamic {
     double gearbox_ratio = 1.0;
     /** @brief Efficiency of the gearbox. */
     double gearbox_efficiency = 1.0;
-
-    /** @brief Whether to use AeroDyn or not (@todo move to aero part). */
-    bool use_aerodyn = false;
-    /** @brief Option to save VTK in AeroDyn, 0: none; 1: init only; 2: animation (@todo move to aero part). */
-    int WrVTK = 0;
-    /** @brief VTK save type, 1: surface; 2: lines; 3: both (@todo move to aero part). */
-    int WrVTK_Type = 1;
-    /** @brief VTK save time step (@todo move to aero part). */
-    double WrVTK_dt;
 
     /**
      * @brief Constructor.
@@ -125,14 +113,6 @@ class Turbine : public ComponentDynamic {
      * @param[in] axis The axis of rotation (3D vector).
      */
     void rotate(double angle, Vector3d axis);
-
-    /**
-     * @brief Computes wind loads on blades and tower.
-     *
-     * @param[in] wind_model Wind model to use for retrieving wind velocity.
-     * @param[in] time Time of the simulation.
-     */
-    void compute_wind_loads(seahowl::aero::WindModel& wind_model, double time);
 
     /**
      * @brief Returns generated power.

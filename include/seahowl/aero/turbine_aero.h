@@ -5,6 +5,9 @@
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/commons/numerics.h>
 #include <seahowl/commons/entities.h>
+#ifdef HAVE_AERODYN
+    #include <seahowl/aero/aerodyn_adapter.h>
+#endif
 
 #include <vector>
 
@@ -32,6 +35,19 @@ class TurbineAero : public ComponentAero {
     /** @brief Tower of the turbine. */
     seahowl::aero::TowerAero tower;
 
+    /** @brief Whether to use AeroDyn or not. */
+    bool use_aerodyn = false;
+#ifdef HAVE_AERODYN
+    /** @brief AeroDyn adapter (only used if AeroDyn is enabled). */
+    std::shared_ptr<seahowl::aero::AeroDynAdapter> aerodyn;
+    /** @brief Option to save VTK in AeroDyn, 0: none; 1: init only; 2: animation. */
+    int WrVTK = 0;
+    /** @brief VTK save type, 1: surface; 2: lines; 3: both. */
+    int WrVTK_Type = 1;
+    /** @brief VTK save time step. */
+    double WrVTK_dt;
+#endif
+
     /**
      * @brief Constructor.
      *
@@ -39,7 +55,15 @@ class TurbineAero : public ComponentAero {
      */
     TurbineAero();
 
+    /**
+     * @brief Builds turbine.
+     */
     void build();
+
+    /**
+     * @brief Initializes turbine.
+     */
+    void initialize();
 
     /**
      * @brief Computes wind loads on all aero nodes of blades.
@@ -50,7 +74,7 @@ class TurbineAero : public ComponentAero {
      * @param[in] tip_loss Whether to take tip loss into account or not.
      * @param[in] hub_loss Whether to take hub loss into account or not.
      */
-    // virtual void compute_aero_loads(seahowl::aero::WindModel& wind_model, double time) override;
+    virtual void compute_aero_loads(seahowl::aero::WindModel& wind_model, double time) override;
 };
 
 }  // namespace aero

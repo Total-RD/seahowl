@@ -287,7 +287,7 @@ TEST(test_turbine, rpm_initial_pitch) {
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
     populate_turbine_from_json((DATADIR / "turbine_nocontrol.json").generic_string(), turbine);
 
-    turbine.use_aerodyn = false;
+    turbine.aero.use_aerodyn = false;
 
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
@@ -307,7 +307,7 @@ TEST(test_turbine, rpm_initial_pitch) {
     while (time < 50) {
         // prestep
         // compute forces
-        turbine.compute_wind_loads(wind_model, time);
+        turbine.aero.compute_aero_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -350,7 +350,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
 
-    turbine.use_aerodyn = true;
+    turbine.aero.use_aerodyn = true;
 
     turbine.aerodyn = std::make_shared<seahowl::aero::AeroDynAdapter>(
         (DATADIR / "aerodyn/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
@@ -372,7 +372,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     while (time < 50) {
         // prestep
         // compute forces
-        turbine.compute_wind_loads(wind_model, time);
+        turbine.aero.compute_aero_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 

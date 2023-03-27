@@ -43,7 +43,7 @@ void TowerAero::build() {
     }
 }
 
-void TowerAero::compute_wind_loads_morison(WindModel& wind_model, double time) {
+void TowerAero::compute_aero_loads(WindModel& wind_model, double time) {
     auto density = wind_model.get_density();
     for (int ii = 0; ii < elements.size(); ii++) {
         auto& element = elements[ii];

@@ -53,7 +53,7 @@ class TowerAero {
     /**
      * @brief Compute wind loads on tower using Morison's approach on cylindrical elements.
      */
-    void compute_wind_loads_morison(WindModel& wind_model, double time);
+    void compute_aero_loads(WindModel& wind_model, double time);
 };
 
 }  // namespace aero
