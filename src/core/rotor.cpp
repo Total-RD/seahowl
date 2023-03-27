@@ -2,8 +2,6 @@
 
 #include <seahowl/elasto/blade_elasto.h>
 
-#include <chrono/physics/ChBody.h>
-
 #include <memory>
 #include <vector>
 
@@ -11,19 +9,17 @@ using namespace seahowl::core;
 using namespace seahowl::elasto;
 using namespace seahowl::aero;
 
-Rotor::Rotor() {
-    elasto = RotorElasto();
-    aero = RotorAero();
-}
+Rotor::Rotor(seahowl::elasto::RotorElasto& elasto, seahowl::aero::RotorAero& aero) : elasto(elasto), aero(aero) {}
 
 void Rotor::init(double time, double dt) {
     for (auto& blade : blades) {
         blade->init(time, dt);
         // update initial azimuth of aero blade
-        blade->aero->azimuth0 = blade->elasto->azimuth0;
+        blade->aero.azimuth0 = blade->elasto.azimuth0;
     }
     update_positions_aero();
-    aero.compute_chords_solidity();
+    // initialize aero variables after updating positions
+    aero.initialize();
 }
 
 void Rotor::prestep(double time, double dt) {
@@ -66,13 +62,13 @@ void Rotor::assemble(std::shared_ptr<seahowl::elasto::SystemElasto> system, std:
 void Rotor::build() {
     for (auto& blade : blades) {
         // push reference points
-        blade->elasto->reference_points.clear();
-        blade->aero->reference_points.clear();
+        blade->elasto.reference_points.clear();
+        blade->aero.reference_points.clear();
         for (auto& point : blade->reference_points) {
-            blade->elasto->reference_points.push_back(BladeReferencePointElasto(point));
+            blade->elasto.reference_points.push_back(BladeReferencePointElasto(point));
             // add aero reference point only if airfoil properties were defined
             if (point.airfoil_properties.size() > 0) {
-                blade->aero->reference_points.push_back(BladeReferencePointAero(point));
+                blade->aero.reference_points.push_back(BladeReferencePointAero(point));
             }
         }
     }

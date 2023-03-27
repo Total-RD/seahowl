@@ -167,16 +167,19 @@ set(SEAHOWL_ELASTO_SOURCES
     src/elasto/rotor_elasto.cpp
     src/elasto/tower_elasto.cpp
     src/elasto/mooring_elasto.cpp
+    src/elasto/turbine_elasto.cpp
     src/elasto/chrono_adapters.cpp
 )
 set(SEAHOWL_ELASTO_HEADERS
     include/seahowl/elasto/blade_elasto.h
     include/seahowl/elasto/entities_elasto.h
     include/seahowl/elasto/component_elasto.h
+    include/seahowl/elasto/system_elasto.h
     include/seahowl/elasto/reference_point_elasto.h
     include/seahowl/elasto/rotor_elasto.h
     include/seahowl/elasto/tower_elasto.h
     include/seahowl/elasto/mooring_elasto.h
+    include/seahowl/elasto/turbine_elasto.h
     include/seahowl/elasto/chrono_adapters.h
 )
 source_group(elasto FILES ${SEAHOWL_ELASTO_SOURCES} ${SEAHOWL_ELASTO_HEADERS})
@@ -189,6 +192,7 @@ set(SEAHOWL_AERO_SOURCES
     src/aero/blade_aero.cpp
     src/aero/rotor_aero.cpp
     src/aero/tower_aero.cpp
+    src/aero/turbine_aero.cpp
     src/aero/wind_models.cpp
 )
 set(SEAHOWL_AERO_HEADERS
@@ -196,8 +200,10 @@ set(SEAHOWL_AERO_HEADERS
     include/seahowl/aero/bemt.h
     include/seahowl/aero/blade_aero.h
     include/seahowl/aero/reference_point_aero.h
+    include/seahowl/aero/system_aero.h
     include/seahowl/aero/rotor_aero.h
     include/seahowl/aero/tower_aero.h
+    include/seahowl/aero/turbine_aero.h
     include/seahowl/aero/wind_models.h
 )
 if (SEAHOWL_ENABLE_AERODYN)

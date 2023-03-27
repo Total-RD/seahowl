@@ -59,21 +59,21 @@ void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::Syst
         myfile << ",";
         for (int ii = 0; ii < turbine.rotor.blades.size(); ii++) {
             auto& blade = turbine.rotor.blades[ii];
-            auto wind_velocity_blade = blade->aero->get_average_wind_velocity();
+            auto wind_velocity_blade = blade->aero.get_average_wind_velocity();
             myfile << std::to_string(wind_velocity_blade.x());
             myfile << ",";
             myfile << std::to_string(wind_velocity_blade.y());
             myfile << ",";
             myfile << std::to_string(wind_velocity_blade.z());
             myfile << ",";
-            auto load_blade = blade->aero->get_total_load();
+            auto load_blade = blade->aero.get_total_load();
             myfile << std::to_string(load_blade.x());
             myfile << ",";
             myfile << std::to_string(load_blade.y());
             myfile << ",";
             myfile << std::to_string(load_blade.z());
             myfile << ",";
-            auto blade_azimuth = blade->elasto->azimuth0 + turbine.rotor.elasto.get_azimuth();
+            auto blade_azimuth = blade->elasto.azimuth0 + turbine.rotor.elasto.get_azimuth();
             // check that blade_azimuth is between pi and -pi
             if (blade_azimuth < -PI || blade_azimuth > PI) {
                 blade_azimuth = abs(std::fmod((blade_azimuth + 3 * PI), 2 * PI)) - PI;

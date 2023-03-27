@@ -4,6 +4,8 @@
 #include <seahowl/servo/controller.h>
 #include <seahowl/servo/controller_discon.h>
 #include <seahowl/elasto/entities_elasto.h>
+#include <seahowl/elasto/system_elasto.h>
+#include <seahowl/aero/system_aero.h>
 
 namespace seahowl {
 namespace core {
@@ -20,6 +22,7 @@ class System : public ComponentDynamic {
     /** @brief Wind model. */
     std::shared_ptr<seahowl::aero::WindModel> wind_model;
     std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto;
+    std::shared_ptr<seahowl::aero::SystemAero> system_aero;
 
     System();
 

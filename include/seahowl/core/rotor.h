@@ -16,18 +16,19 @@ namespace core {
 class Rotor : public ComponentDynamic {
   public:
     /** @brief Elastodynamic model of the RNA. */
-    seahowl::elasto::RotorElasto elasto;
+    seahowl::elasto::RotorElasto& elasto;
     /** @brief Aerodynamic model of the RNA. */
-    seahowl::aero::RotorAero aero;
+    seahowl::aero::RotorAero& aero;
     /** @brief Blades of the turbine. */
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
 
     /**
-     * @brief Constructor.
+     * @brief Instantiates rotor for communication between elasto and aero components.
      *
-     * Creates elasto and aero RNA instances.
+     * @param[in] elasto Elastodynamic RNA model.
+     * @param[in] aero Aerodynamic RNA model.
      */
-    Rotor();
+    Rotor(seahowl::elasto::RotorElasto& elasto, seahowl::aero::RotorAero& aero);
 
     /**
      * @brief Initialize RNA, called before starting the simulation.

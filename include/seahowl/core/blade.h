@@ -23,9 +23,9 @@ namespace core {
 class Blade : public ComponentDynamic {
   public:
     /** @brief Elastodynamic model of the blade. */
-    std::shared_ptr<seahowl::elasto::BladeElasto> elasto;
+    seahowl::elasto::BladeElasto& elasto;
     /** @brief Aerodynamic model of the blade. */
-    std::shared_ptr<seahowl::aero::BladeAero> aero;
+    seahowl::aero::BladeAero& aero;
     /** @brief List of reference points describing the blade properties along its longitudinal axis.
      * @todo  Refactor: Only used for construction to pass to elasto and aero. Use a Builder */
     std::vector<seahowl::core::BladeReferencePoint> reference_points;
@@ -37,11 +37,12 @@ class Blade : public ComponentDynamic {
     std::vector<seahowl::DiscretizationPoint> mapping_elasto2aero;
 
     /**
-     * @brief Constructor.
+     * @brief Instantiates blade for communication between elasto and aero components.
      *
-     * Instantiates elasto and aero blade components.
+     * @param[in] elasto Elastodynamic blade model.
+     * @param[in] aero Aerodynamic blade model.
      */
-    Blade();
+    Blade(seahowl::elasto::BladeElasto& elasto, seahowl::aero::BladeAero& aero);
 
     /**
      * @brief Initialize blade, called before starting the simulation.

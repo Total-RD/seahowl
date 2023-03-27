@@ -4,9 +4,8 @@ using namespace seahowl::core;
 using namespace seahowl::servo;
 using namespace seahowl::elasto;
 
-Turbine::Turbine() {
-    rotor = Rotor();
-    tower = Tower();
+Turbine::Turbine(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineAero& aero)
+    : elasto(elasto), aero(aero), rotor(elasto.rotor, aero.rotor), tower(elasto.tower, aero.tower) {
     controller = std::make_shared<Controller>();
 }
 
@@ -52,18 +51,13 @@ void Turbine::poststep(double time, double dt) {
 }
 
 void Turbine::assemble(std::shared_ptr<SystemElasto> system, std::shared_ptr<MeshElasto> mesh) {
-    // assemble rotor & tower
-    rotor.assemble(system, mesh);
-    tower.assemble(mesh);
-
-    // link tower to rotor
-    rotor.elasto.link_tower(tower.elasto, system);
+    // assemble turbine
+    elasto.assemble(system, mesh);
 }
 
 void Turbine::build() {
-    // build rotor & tower
-    rotor.build();
-    tower.build();
+    elasto.build();
+    aero.build();
 }
 
 void Turbine::translate(Vector3d translation_vector) {

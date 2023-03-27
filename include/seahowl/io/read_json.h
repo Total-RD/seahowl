@@ -13,12 +13,63 @@ struct TowerReferencePoint;
 namespace elasto {
 class SystemElasto;
 class MeshElasto;
+class BladeElasto;
+class TowerElasto;
+class RotorElasto;
+struct BladeReferencePointElasto;
+struct TowerReferencePointElasto;
 }  // namespace elasto
+namespace aero {
+class BladeAero;
+class TowerAero;
+class RotorAero;
+struct BladeReferencePointAero;
+struct TowerReferencePointAero;
+}  // namespace aero
 }  // namespace seahowl
 
 #include <vector>
 #include <string>
 #include <memory>
+
+/**
+ * @brief Returns blade elasto reference points given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the blade.
+ */
+std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
+    std::string filepath);
+
+/**
+ * @brief Returns blade aero reference points given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the blade.
+ */
+std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_json(std::string filepath);
+
+/**
+ * @brief Populates blade elasto given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the blade.
+ * @param[out] blade Blade to populate.
+ */
+void populate_blade_elasto_from_json(std::string filepath, seahowl::elasto::BladeElasto& blade);
+
+/**
+ * @brief Populates blade aero given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the blade.
+ * @param[out] blade Blade to populate.
+ */
+void populate_blade_aero_from_json(std::string filepath, seahowl::aero::BladeAero& blade);
+
+/**
+ * @brief Populates blade given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the blade.
+ * @param[out] blade Blade to populate.
+ */
+void populate_blade_from_json(std::string filepath, seahowl::core::Blade& blade);
 
 /**
  * @brief Returns blade reference points given a json file.
@@ -28,50 +79,75 @@ class MeshElasto;
 std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_json(std::string filepath);
 
 /**
- * @brief Returns Blade instance given a json file.
- *
- * @param[in] filepath Path of the json file describing the blade.
- */
-seahowl::core::Blade get_blade_from_json(std::string filepath);
-
-/**
- * @brief Returns tower reference points given a json file.
+ * @brief Returns tower elasto reference points given a json file.
  *
  * @param[in] filepath Path of the json file describing the tower.
  */
-std::vector<seahowl::core::TowerReferencePoint> get_tower_reference_points_from_json(std::string filepath);
+std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points_from_json(
+    std::string filepath);
 
 /**
- * @brief Returns Tower instance given a json file.
+ * @brief Returns tower aero reference points given a json file.
  *
  * @param[in] filepath Path of the json file describing the tower.
  */
-seahowl::core::Tower get_tower_from_json(std::string filepath);
+std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points_from_json(std::string filepath);
 
 /**
- * @brief Returns RotorNacelleAssembly instance given a json file.
+ * @brief Populates tower elasto given a json file.
  *
- * @param[in] filepath Path of the json file describing the RNA.
+ * @param[in] filepath Path of the json file describing the tower.
+ * @param[out] tower Tower to populate.
  */
-seahowl::core::Rotor get_rotor_from_json(std::string filepath);
+void populate_tower_elasto_from_json(std::string filepath, seahowl::elasto::TowerElasto& tower);
 
 /**
- * @brief Returns Turbine instance given json files.
+ * @brief Populates tower aero given a json file.
  *
- * @param[in] filepath_blades Paths of the json file of each blade.
- * @param[in] filepath_rotor Path of the json file of the RNA.
- * @param[in] filepath_tower Path of the json file of the tower.
+ * @param[in] filepath Path of the json file describing the tower.
+ * @param[out] tower Tower aero to populate.
  */
-seahowl::core::Turbine get_turbine_from_json_files(std::vector<std::string> filepaths_blades,
-                                                   std::string filepath_rotor,
-                                                   std::string filepath_tower);
+void populate_tower_aero_from_json(std::string filepath, seahowl::aero::TowerAero& tower);
 
 /**
- * @brief Returns Turbine instance given a json file.
+ * @brief Populates tower given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the tower.
+ * @param[out] tower Tower to populate.
+ */
+void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower);
+
+/**
+ * @brief Populates rotor elasto given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the rotor.
+ * @param[out] rotor Rotor to populate.
+ */
+void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorElasto& rotor);
+
+/**
+ * @brief Populates rotor elasto given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the rotor.
+ * @param[out] rotor Rotor to populate.
+ */
+void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorAero& rotor);
+
+/**
+ * @brief Populates rotor given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the rotor.
+ * @param[out] rotor Rotor to populate.
+ */
+void populate_rotor_from_json(std::string filepath, seahowl::core::Rotor& rotor);
+
+/**
+ * @brief Populates turbine given a json file.
  *
  * @param[in] filepath Path of the json file describing the turbine.
+ * @param[out] turbine Turbine to populate.
  */
-seahowl::core::Turbine get_turbine_from_json(std::string main_filepath);
+void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& turbine);
 
 /**
  * @brief Returns System instance given a json file.

@@ -5,6 +5,7 @@
 #include <seahowl/core/rotor.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/elasto/tower_elasto.h>
+#include <seahowl/elasto/system_elasto.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/servo/controller_discon.h>
@@ -164,20 +165,163 @@ std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_
     return reference_points;
 }
 
-seahowl::core::Blade get_blade_from_json(std::string filepath) {
+std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
+    std::string filepath) {
     std::ifstream json_file(filepath);
 
     // populate json object
     json json_obj;
     json_file >> json_obj;
 
-    seahowl::core::Blade blade{};
-    blade.reference_points = get_blade_reference_points_from_json(filepath);
+    // EXTRACT INFO
+    std::vector<seahowl::elasto::BladeReferencePointElasto> reference_points;
 
-    return blade;
+    auto points = json_obj.at("reference_points").get<json>();
+    auto damping_coefficients = json_obj.at("damping_coefficients").get<std::vector<double>>();
+    if (damping_coefficients.size() != 4) {
+        throw std::runtime_error("Damping coefficients has to be vector of length 4.");
+    }
+
+    double blade_length = points[points.size() - 1]["coordinates"][2];
+    for (size_t ii = 0; ii < points.size(); ii++) {
+        auto& point = points[ii];
+        auto reference_point = seahowl::elasto::BladeReferencePointElasto();
+
+        auto coords = point.at("coordinates").get<std::vector<double>>();
+        if (coords.size() != 3) {
+            throw std::runtime_error("Coordinates has to be vector of length 3.");
+        }
+        reference_point.fraction = coords[2] / blade_length;
+        reference_point.coordinates = Vector3d(coords[0], coords[1], coords[2]);
+        if (point.contains("offset_gravity")) {
+            auto og = point.at("offsets_gravity").get<std::vector<double>>();
+            reference_point.offset_gravity = Vector2d(og[0], og[1]);
+        }
+        if (point.contains("offset_elastic")) {
+            auto oe = point.at("offsets_elastic").get<std::vector<double>>();
+            reference_point.offset_elastic = Vector2d(oe[0], oe[1]);
+        }
+
+        auto sm = point.at("stiffness_matrix").get<std::vector<std::vector<double>>>();
+        auto mm = point.at("mass_matrix").get<std::vector<std::vector<double>>>();
+        if (sm.size() != 6 || mm.size() != 6) {
+            throw std::runtime_error("Mass and stiffness matrices have to be defined as 6x6 matrices.");
+        }
+        for (int irow = 0; irow < 6; irow++) {
+            if (sm[irow].size() != 6 || mm[irow].size() != 6) {
+                throw std::runtime_error("Mass and stiffness matrices have to be defined as 6x6 matrices.");
+            }
+            for (int icol = 0; icol < 6; icol++) {
+                reference_point.mass_matrix(irow, icol) = mm[irow][icol];
+                reference_point.stiffness_matrix(irow, icol) = sm[irow][icol];
+            }
+        }
+        reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
+        reference_point.damping_coefficients[0] = damping_coefficients[0];
+        reference_point.damping_coefficients[1] = damping_coefficients[1];
+        reference_point.damping_coefficients[2] = damping_coefficients[2];
+        reference_point.damping_coefficients[3] = damping_coefficients[3];
+
+        reference_points.push_back(reference_point);
+    }
+
+    return reference_points;
 }
 
-std::vector<seahowl::core::TowerReferencePoint> get_tower_reference_points_from_json(std::string filepath) {
+std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_json(std::string filepath) {
+    std::ifstream json_file(filepath);
+
+    // populate json object
+    json json_obj;
+    json_file >> json_obj;
+
+    // EXTRACT INFO
+    std::vector<seahowl::aero::BladeReferencePointAero> reference_points;
+
+    auto points = json_obj.at("reference_points").get<json>();
+    auto damping_coefficients = json_obj.at("damping_coefficients").get<std::vector<double>>();
+    if (damping_coefficients.size() != 4) {
+        throw std::runtime_error("Damping coefficients has to be vector of length 4.");
+    }
+
+    double blade_length = points[points.size() - 1]["coordinates"][2];
+    for (size_t ii = 0; ii < points.size(); ii++) {
+        auto& point = points[ii];
+        auto reference_point = seahowl::aero::BladeReferencePointAero();
+
+        auto coords = point.at("coordinates").get<std::vector<double>>();
+        if (coords.size() != 3) {
+            throw std::runtime_error("Coordinates has to be vector of length 3.");
+        }
+        reference_point.fraction = coords[2] / blade_length;
+        reference_point.coordinates = Vector3d(coords[0], coords[1], coords[2]);
+        if (point.contains("offset_aero")) {
+            auto oa = point.at("offset_aero").get<std::vector<double>>();
+            reference_point.offset_aero = Vector2d(oa[0], oa[1]);
+        }
+        reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
+
+        if (point.contains("chord")) {
+            reference_point.chord = point["chord"];
+        }
+
+        // populate json object
+        if (point.contains("airfoil_file") && !point["airfoil_file"].get<std::string>().empty()) {
+            auto main_directory = fs::path(filepath).parent_path();
+            auto airfoil_filename = point.at("airfoil_file").get<std::string>();
+            auto airfoil_filepath = main_directory / airfoil_filename;
+            std::ifstream airfoil_file(airfoil_filepath.u8string());
+            json json_airfoil;
+            airfoil_file >> json_airfoil;
+
+            const auto nreynolds = json_airfoil.size();
+            for (int jj = 0; jj < nreynolds; jj++) {
+                auto airfoil_properties = json_airfoil[jj];
+                auto coeffs = airfoil_properties.at("coefficients").get<std::vector<std::vector<double>>>();
+
+                std::vector<seahowl::aero::AirfoilCoefficients> coefficients_list;
+
+                for (int kk = 0; kk < coeffs.size(); kk++) {
+                    if (coeffs[kk].size() != 4) {
+                        throw std::runtime_error("Airfoil coefficients has to be vectors of length 4.");
+                    }
+                    seahowl::aero::AirfoilCoefficients coefficients;
+                    coefficients.alpha = coeffs[kk][0];
+                    coefficients.lift = coeffs[kk][1];
+                    coefficients.drag = coeffs[kk][2];
+                    coefficients.added_mass = coeffs[kk][3];
+                    coefficients_list.push_back(coefficients);
+                }
+                seahowl::aero::AirfoilProperties airfoil;
+                airfoil_properties.at("reynolds_number").get_to(airfoil.reynolds_number);
+                airfoil.coefficients_list = coefficients_list;
+                reference_point.airfoil_properties.push_back(airfoil);
+            }
+
+            // push only if airfoil file present
+            // @todo make it possible to push without airfoil file
+            reference_points.push_back(reference_point);
+        }
+    }
+
+    return reference_points;
+}
+
+void populate_blade_elasto_from_json(std::string filepath, seahowl::elasto::BladeElasto& blade) {
+    blade.reference_points = get_blade_elasto_reference_points_from_json(filepath);
+}
+
+void populate_blade_aero_from_json(std::string filepath, seahowl::aero::BladeAero& blade) {
+    blade.reference_points = get_blade_aero_reference_points_from_json(filepath);
+}
+
+void populate_blade_from_json(std::string filepath, seahowl::core::Blade& blade) {
+    populate_blade_elasto_from_json(filepath, blade.elasto);
+    populate_blade_aero_from_json(filepath, blade.aero);
+}
+
+std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points_from_json(
+    std::string filepath) {
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -190,19 +334,17 @@ std::vector<seahowl::core::TowerReferencePoint> get_tower_reference_points_from_
     auto damping_coefficients = json_obj.at("damping_coefficients").get<std::vector<double>>();
 
     // MAKE TOWER REFERENCE POINTS
-    std::vector<seahowl::core::TowerReferencePoint> reference_points;
+    std::vector<seahowl::elasto::TowerReferencePointElasto> reference_points;
     auto points = json_obj.at("reference_points").get<json>();
     for (int ii = 0; ii < points.size(); ii++) {
         auto& point = points[ii];
-        auto reference_point = seahowl::core::TowerReferencePoint();
+        auto reference_point = seahowl::elasto::TowerReferencePointElasto();
         point.at("fraction").get_to(reference_point.fraction);
         reference_point.coordinates =
             Vector3d(0.0, 0.0, (height - base_height) * reference_point.fraction + base_height);
         point.at("stiffness_sideside").get_to(reference_point.stiffness_sideside);
         point.at("stiffness_foreaft").get_to(reference_point.stiffness_foreaft);
         point.at("density").get_to(reference_point.density);
-        point.at("diameter").get_to(reference_point.diameter);
-        point.at("drag_coefficient").get_to(reference_point.drag_coefficient);
         reference_point.damping_coefficients[0] = damping_coefficients[0];
         reference_point.damping_coefficients[1] = damping_coefficients[1];
         reference_point.damping_coefficients[2] = damping_coefficients[2];
@@ -218,22 +360,58 @@ std::vector<seahowl::core::TowerReferencePoint> get_tower_reference_points_from_
     return reference_points;
 }
 
-seahowl::core::Tower get_tower_from_json(std::string filepath) {
+std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points_from_json(std::string filepath) {
     std::ifstream json_file(filepath);
 
     // populate json object
     json json_obj;
     json_file >> json_obj;
 
-    seahowl::core::Tower tower{};
-    tower.elasto.height = json_obj.at("height").get<double>();
-    tower.elasto.base_height = json_obj.at("base_height").get<double>();
-    tower.reference_points = get_tower_reference_points_from_json(filepath);
+    // EXTRACT INFO
+    double height = json_obj.at("height").get<double>();
+    double base_height = json_obj.at("base_height").get<double>();
+    auto damping_coefficients = json_obj.at("damping_coefficients").get<std::vector<double>>();
 
-    return tower;
+    // MAKE TOWER REFERENCE POINTS
+    std::vector<seahowl::aero::TowerReferencePointAero> reference_points;
+    auto points = json_obj.at("reference_points").get<json>();
+    for (int ii = 0; ii < points.size(); ii++) {
+        auto& point = points[ii];
+        auto reference_point = seahowl::aero::TowerReferencePointAero();
+        point.at("fraction").get_to(reference_point.fraction);
+        reference_point.coordinates =
+            Vector3d(0.0, 0.0, (height - base_height) * reference_point.fraction + base_height);
+        point.at("diameter").get_to(reference_point.diameter);
+        point.at("drag_coefficient").get_to(reference_point.drag_coefficient);
+
+        reference_points.push_back(reference_point);
+    }
+
+    return reference_points;
 }
 
-seahowl::core::Rotor get_rotor_from_json(std::string filepath) {
+void populate_tower_elasto_from_json(std::string filepath, seahowl::elasto::TowerElasto& tower) {
+    std::ifstream json_file(filepath);
+
+    // populate json object
+    json json_obj;
+    json_file >> json_obj;
+
+    tower.reference_points = get_tower_elasto_reference_points_from_json(filepath);
+    tower.height = json_obj.at("height").get<double>();
+    tower.base_height = json_obj.at("base_height").get<double>();
+}
+
+void populate_tower_aero_from_json(std::string filepath, seahowl::aero::TowerAero& tower) {
+    tower.reference_points = get_tower_aero_reference_points_from_json(filepath);
+}
+
+void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower) {
+    populate_tower_elasto_from_json(filepath, tower.elasto);
+    populate_tower_aero_from_json(filepath, tower.aero);
+}
+
+void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorElasto& rotor) {
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -242,86 +420,63 @@ seahowl::core::Rotor get_rotor_from_json(std::string filepath) {
 
     // EXTRACT INFO
     //
-    seahowl::core::Rotor rotor;
     // blades
-    json_obj.at("precones").get_to(rotor.elasto.blade_precones);
-    for (int ii = 0; ii < rotor.elasto.blade_precones.size(); ii++) {
+    json_obj.at("precones").get_to(rotor.blade_precones);
+    for (int ii = 0; ii < rotor.blade_precones.size(); ii++) {
         // convert to radians
-        rotor.elasto.blade_precones[ii] *= PI / 180.0;
+        rotor.blade_precones[ii] *= PI / 180.0;
     }
     // hub
     auto hub = json_obj.at("hub");
-    hub.at("CM").get_to(rotor.elasto.hub.center_of_mass);
-    hub.at("mass").get_to(rotor.elasto.hub.mass);
-    hub.at("inertia").get_to(rotor.elasto.hub.inertia);
-    hub.at("overhang").get_to(rotor.elasto.hub.overhang);
-    hub.at("radius").get_to(rotor.elasto.hub.radius);
-    hub.at("radius").get_to(rotor.aero.hub_radius);
+    hub.at("CM").get_to(rotor.hub.center_of_mass);
+    hub.at("mass").get_to(rotor.hub.mass);
+    hub.at("inertia").get_to(rotor.hub.inertia);
+    hub.at("overhang").get_to(rotor.hub.overhang);
+    hub.at("radius").get_to(rotor.hub.radius);
     // nacelle
     auto nacelle = json_obj.at("nacelle");
     auto cm = nacelle.at("CM").get<std::vector<double>>();
     if (cm.size() != 3) {
         throw std::runtime_error("Center of mass of nacelle has to be vector of length 3.");
     }
-    rotor.elasto.nacelle.center_of_mass = Vector3d(cm[0], cm[1], cm[2]);
-    nacelle.at("mass").get_to(rotor.elasto.nacelle.mass);
-    nacelle.at("inertia").get_to(rotor.elasto.nacelle.inertia);
-    nacelle.at("yaw_bearing_mass").get_to(rotor.elasto.nacelle.yaw_bearing_mass);
+    rotor.nacelle.center_of_mass = Vector3d(cm[0], cm[1], cm[2]);
+    nacelle.at("mass").get_to(rotor.nacelle.mass);
+    nacelle.at("inertia").get_to(rotor.nacelle.inertia);
+    nacelle.at("yaw_bearing_mass").get_to(rotor.nacelle.yaw_bearing_mass);
     // shaft
     auto shaft = json_obj.at("shaft");
-    shaft.at("distance_from_towertop").get_to(rotor.elasto.shaft.distance_from_towertop);
-    shaft.at("tilt").get_to(rotor.elasto.shaft.tilt);
+    shaft.at("distance_from_towertop").get_to(rotor.shaft.distance_from_towertop);
+    shaft.at("tilt").get_to(rotor.shaft.tilt);
     // convert to radians
-    rotor.elasto.shaft.tilt *= PI / 180.0;
-
-    return rotor;
+    rotor.shaft.tilt *= PI / 180.0;
 }
 
-seahowl::core::Turbine get_turbine_from_json_files(std::vector<std::string> filepaths_blades,
-                                                   std::string filepath_rotor,
-                                                   std::string filepath_tower) {
-    std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
-    std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades_elasto;
-    std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades_aero;
-    for (auto& fpath : filepaths_blades) {
-        blades.push_back(std::make_shared<seahowl::core::Blade>(get_blade_from_json(fpath)));
-        blades_elasto.push_back(blades.back()->elasto);
-        blades_aero.push_back(blades.back()->aero);
-    }
+void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorAero& rotor) {
+    std::ifstream json_file(filepath);
 
-    auto rotor = get_rotor_from_json(filepath_rotor);
-
-    auto tower = get_tower_from_json(filepath_tower);
-
-    auto turbine = seahowl::core::Turbine();
-    turbine.rotor = rotor;
-    turbine.tower = tower;
-    turbine.rotor.blades = blades;
-    turbine.rotor.elasto.blades = blades_elasto;
-    turbine.rotor.aero.blades = blades_aero;
-
-    // get extra drivetrain info
-    std::ifstream json_file(filepath_rotor);
     // populate json object
     json json_obj;
     json_file >> json_obj;
-    auto drivetrain = json_obj.at("drivetrain");
-    // gearbox
-    drivetrain.at("gearbox_ratio").get_to(turbine.gearbox_ratio);
-    drivetrain.at("gearbox_efficiency").get_to(turbine.gearbox_efficiency);
-    turbine.gearbox_efficiency /= 100.0;
-    // generator
-    drivetrain.at("generator_efficiency").get_to(turbine.generator_efficiency);
-    turbine.generator_efficiency /= 100.0;
-    // add inertia of generator to hub directly
-    double drivetrain_inertia;
-    drivetrain.at("generator_inertia").get_to(drivetrain_inertia);
-    turbine.rotor.elasto.hub.inertia += drivetrain_inertia;
 
-    return turbine;
+    // EXTRACT INFO
+    //
+    // hub
+    auto hub = json_obj.at("hub");
+    hub.at("radius").get_to(rotor.hub_radius);
 }
 
-seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
+void populate_rotor_from_json(std::string filepath, seahowl::core::Rotor& rotor) {
+    std::ifstream json_file(filepath);
+
+    // populate json object
+    json json_obj;
+    json_file >> json_obj;
+
+    populate_rotor_elasto_from_json(filepath, rotor.elasto);
+    populate_rotor_aero_from_json(filepath, rotor.aero);
+}
+
+void populate_turbine_from_json(std::string filepath_turbine, seahowl::core::Turbine& turbine) {
     // get turbine info
     std::ifstream json_file(filepath_turbine);
     // populate json object
@@ -342,33 +497,32 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
     auto blades_json2 = blades_json.at("blades");
     for (auto& blade_json : blades_json2) {
         auto filepath_blade = (DATADIR / blade_json.at("file").get<std::string>()).generic_string();
-        auto blade = std::make_shared<seahowl::core::Blade>(get_blade_from_json(filepath_blade));
-        blades_json.at("discretization").at("elasto").get_to(blade->elasto->discretization_fractions);
-        blades_json.at("discretization").at("aero").get_to(blade->aero->discretization_fractions);
-        blades_json.at("fpm").get_to(blade->elasto->fpm_mode);
-        blade_json.at("initial_pitch").get_to(blade->elasto->pitch);
+        auto blade_elasto = std::make_shared<seahowl::elasto::BladeElasto>();
+        auto blade_aero = std::make_shared<seahowl::aero::BladeAero>();
+        auto blade = std::make_shared<seahowl::core::Blade>(*blade_elasto, *blade_aero);
+        populate_blade_from_json(filepath_blade, *blade);
+        blades_json.at("discretization").at("elasto").get_to(blade->elasto.discretization_fractions);
+        blades_json.at("discretization").at("aero").get_to(blade->aero.discretization_fractions);
+        blades_json.at("fpm").get_to(blade->elasto.fpm_mode);
+        blade_json.at("initial_pitch").get_to(blade->elasto.pitch);
+        blades_elasto.push_back(blade_elasto);
+        blades_aero.push_back(blade_aero);
         blades.push_back(blade);
-        blades_elasto.push_back(blades.back()->elasto);
-        blades_aero.push_back(blades.back()->aero);
     }
+    turbine.elasto.rotor.blades = blades_elasto;
+    turbine.aero.rotor.blades = blades_aero;
+    turbine.rotor.blades = blades;
 
     // RNA
     auto filepath_rotor = (DATADIR / rna_json.at("file").get<std::string>()).generic_string();
-    auto rotor = get_rotor_from_json(filepath_rotor);
-    rna_json.at("initial_pitch_collective").get_to(rotor.elasto.pitch_collective);
+    populate_rotor_from_json(filepath_rotor, turbine.rotor);
+    rna_json.at("initial_pitch_collective").get_to(turbine.elasto.rotor.pitch_collective);
 
     // tower
     auto filepath_tower = (DATADIR / tower_json.at("file").get<std::string>()).generic_string();
-    auto tower = get_tower_from_json(filepath_tower);
-    tower_json.at("discretization").at("elasto").get_to(tower.elasto.discretization_fractions);
-    tower_json.at("discretization").at("aero").get_to(tower.aero.discretization_fractions);
-
-    auto turbine = seahowl::core::Turbine();
-    turbine.rotor = rotor;
-    turbine.tower = tower;
-    turbine.rotor.blades = blades;
-    turbine.rotor.elasto.blades = blades_elasto;
-    turbine.rotor.aero.blades = blades_aero;
+    populate_tower_from_json(filepath_tower, turbine.tower);
+    tower_json.at("discretization").at("elasto").get_to(turbine.elasto.tower.discretization_fractions);
+    tower_json.at("discretization").at("aero").get_to(turbine.elasto.tower.discretization_fractions);
 
     // controller
     if (controller_json.at("type").get<std::string>() == "DISCON") {
@@ -401,8 +555,6 @@ seahowl::core::Turbine get_turbine_from_json(std::string filepath_turbine) {
     double drivetrain_inertia;
     drivetrain.at("generator_inertia").get_to(drivetrain_inertia);
     turbine.rotor.elasto.hub.inertia += drivetrain_inertia;
-
-    return turbine;
 }
 
 seahowl::core::System get_system_from_json(std::string filepath_main,
@@ -424,6 +576,8 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
 
     // system
     auto system_core = seahowl::core::System();
+    system_core.system_elasto = system_elasto;
+    system_core.system_aero = std::make_shared<seahowl::aero::SystemAero>();
     auto wind_json = environment_json.at("wind");
     if (wind_json.at("type").get<std::string>() == "ramp") {
         system_core.wind_model = std::make_shared<seahowl::aero::WindRamp>();
@@ -454,23 +608,34 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         } else {
             throw std::runtime_error("Wind.wnd file not defined.");
         }
-        system_core.wind_model = std::make_shared<seahowl::aero::InflowWindAdapter>(inflowwind_filepath,windwnd_filepath);
+        system_core.wind_model =
+            std::make_shared<seahowl::aero::InflowWindAdapter>(inflowwind_filepath, windwnd_filepath);
         auto wind_model = std::dynamic_pointer_cast<seahowl::aero::InflowWindAdapter>(system_core.wind_model);
         double dt = json_obj.at("numerics").at("dt").get<double>();
         wind_model->init(dt);
 #else
-        throw std::runtime_error("InflowWind module in CMAKE options should be enabled if wind type 'inflowwind' selected.");
+        throw std::runtime_error(
+            "InflowWind module in CMAKE options should be enabled if wind type 'inflowwind' selected.");
 #endif
     } else {
-        throw std::runtime_error("The input wind type is unknown. Please use the existing wind types: ramp or inflowwind.");
+        throw std::runtime_error(
+            "The input wind type is unknown. Please use the existing wind types: ramp or inflowwind.");
     }
 
     auto turbines_json = json_obj.at("turbines");
+    // first populate elasto and aero turbines: needed because push_back invalidates references
+    for (int ii = 0; ii < turbines_json.size(); ii++) {
+        system_core.system_elasto->turbines.push_back(seahowl::elasto::TurbineElasto());
+        system_core.system_aero->turbines.push_back(seahowl::aero::TurbineAero());
+    }
     for (int ii = 0; ii < turbines_json.size(); ii++) {
         auto turbine_json = turbines_json[ii];
         auto filepath_turbine = (DATADIR / turbine_json.at("file").get<std::string>()).generic_string();
-        system_core.turbines.push_back(seahowl::core::Turbine(get_turbine_from_json(filepath_turbine)));
+        // make turbine
+        system_core.turbines.push_back(
+            seahowl::core::Turbine(system_core.system_elasto->turbines[ii], system_core.system_aero->turbines[ii]));
         auto& turbine = system_core.turbines.back();
+        populate_turbine_from_json(filepath_turbine, turbine);
         // aerodyn option
 #ifdef HAVE_AERODYN
         turbine.use_aerodyn = turbine_json.at("use_aerodyn").get<bool>();
@@ -512,10 +677,10 @@ seahowl::core::System get_system_from_json(std::string filepath_main,
         turbine.translate(Vector3d(trans[0], trans[1], trans[2]));
 
         // apply initial pitches
-        for (auto blade : turbine.rotor.blades) {
-            auto pitch0 = blade->elasto->pitch;
-            blade->elasto->apply_pitch_increment(pitch0);
-            blade->elasto->pitch = pitch0;
+        for (auto& blade : turbine.rotor.blades) {
+            auto pitch0 = blade->elasto.pitch;
+            blade->elasto.apply_pitch_increment(pitch0);
+            blade->elasto.pitch = pitch0;
         }
         auto rotor_pitch0 = turbine.rotor.elasto.pitch_collective;
         turbine.rotor.elasto.apply_collective_pitch_increment(rotor_pitch0);

@@ -1,12 +1,10 @@
 #include <seahowl/elasto/rotor_elasto.h>
 
 #include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/elasto/chrono_adapters.h>
 
 using seahowl::elasto::BladeElasto;
 using seahowl::elasto::RotorElasto;
-// using seahowl::elasto::TowerElasto;
 
 RotorElasto::RotorElasto() {}
 
@@ -113,17 +111,6 @@ void RotorElasto::build() {
         link_hub_blade->set_constraints(true, true, true, true, true, true);
         links_blades.push_back(link_hub_blade);
     }
-}
-
-void RotorElasto::link_tower(const TowerElasto& tower, std::shared_ptr<seahowl::elasto::SystemElasto> system) {
-    auto towertop_node = tower.nodes[tower.nodes.size() - 1];
-    // translate RNA center of origin to towertop
-    this->translate(towertop_node->get_position() - this->body_yaw_bearing->get_position());
-    // link yaw bearing body to towertop
-    link_towertop_yaw_bearing = std::make_shared<LinkChrono>();
-    system->add(link_towertop_yaw_bearing);
-    link_towertop_yaw_bearing->initialize(towertop_node, body_yaw_bearing);
-    link_towertop_yaw_bearing->set_constraints(true, true, true, true, true, true);
 }
 
 void RotorElasto::rotate(double angle, const Vector3d& axis) const {

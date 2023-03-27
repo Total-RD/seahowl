@@ -39,6 +39,11 @@ class RotorAero {
     void build();
 
     /**
+     * @brief Initialize rotor related variables with current configuration.
+     */
+    void initialize();
+
+    /**
      * @brief Computes chord solidity on all aero nodes of blades.
      */
     void compute_chords_solidity();

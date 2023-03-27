@@ -1,6 +1,7 @@
 #pragma once
 
-#include <seahowl/core/blade.h>
+#include <seahowl/elasto/turbine_elasto.h>
+#include <seahowl/aero/turbine_aero.h>
 #include <seahowl/core/rotor.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/servo/controller.h>
@@ -31,6 +32,10 @@ class Turbine : public ComponentDynamic {
   public:
     // components
     //
+    /** @brief Elastodynamic model of the turbine. */
+    seahowl::elasto::TurbineElasto& elasto;
+    /** @brief Aerodynamic model of the turbine. */
+    seahowl::aero::TurbineAero& aero;
     /** @brief Rotor-nacelle assembly of the turbine. */
     Rotor rotor;
     /** @brief Tower of the turbine. */
@@ -61,9 +66,12 @@ class Turbine : public ComponentDynamic {
     /**
      * @brief Constructor.
      *
-     * Instantiates empty blade list, rotor component, tower component, and controller component.
+     * Instantiates turbine for communication between elasto and aero components.
+     *
+     * @param[in] elasto Elastodynamic turbine model.
+     * @param[in] aero Aerodynamic turbine model.
      */
-    Turbine();
+    Turbine(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineAero& aero);
 
     /**
      * @brief Initialize turbine, called before starting the simulation.

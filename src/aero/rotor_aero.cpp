@@ -25,6 +25,10 @@ void RotorAero::build() {
     }
     radius /= blades.size();
 
+    initialize();
+}
+
+void RotorAero::initialize() {
     // compute blade elements related values
     compute_distances_from_tip();
     compute_distances_from_hub();

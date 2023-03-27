@@ -23,9 +23,9 @@ namespace core {
 class Tower : public ComponentDynamic {
   public:
     /** @brief Elastodynamic model of the tower. */
-    seahowl::elasto::TowerElasto elasto;
+    seahowl::elasto::TowerElasto& elasto;
     /** @brief Aerodynamic model of the tower. */
-    seahowl::aero::TowerAero aero;
+    seahowl::aero::TowerAero& aero;
     /** @brief List of reference points describing the tower properties along its longitudinal axis.
      * @todo  Refactor: Only used for construction to pass to elasto and aero. Use a Builder */
     std::vector<seahowl::core::TowerReferencePoint> reference_points;
@@ -35,11 +35,12 @@ class Tower : public ComponentDynamic {
     std::vector<seahowl::DiscretizationPoint> mapping_elasto2aero;
 
     /**
-     * @brief Constructor.
+     * @brief Instantiates tower for communication between elasto and aero components.
      *
-     * Creates elasto and aero tower instances.
+     * @param[in] elasto Elastodynamic tower model.
+     * @param[in] aero Aerodynamic tower model.
      */
-    Tower();
+    Tower(seahowl::elasto::TowerElasto& elasto, seahowl::aero::TowerAero& aero);
 
     /**
      * @brief Initialize tower, called before starting the simulation.

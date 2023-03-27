@@ -4,14 +4,14 @@ using namespace seahowl::core;
 using namespace seahowl::elasto;
 using namespace seahowl::aero;
 
-Tower::Tower() {
-    elasto = TowerElasto();
-    aero = TowerAero();
-}
+Tower::Tower(TowerElasto& elasto, TowerAero& aero) : elasto(elasto), aero(aero) {}
 
 void Tower::init(double time, double dt) {
-    prestep(time, dt);
-    poststep(time, dt);
+    // mappings
+    compute_mapping_aero2elasto();
+    compute_mapping_elasto2aero();
+    // update position of aero points
+    update_positions_aero();
 }
 
 void Tower::prestep(double time, double dt) {
@@ -29,20 +29,9 @@ void Tower::assemble(std::shared_ptr<MeshElasto> mesh) {
 }
 
 void Tower::build() {
-    // push reference points
-    elasto.reference_points.clear();
-    aero.reference_points.clear();
-    for (auto& point : reference_points) {
-        elasto.reference_points.push_back(TowerReferencePointElasto(point));
-        aero.reference_points.push_back(TowerReferencePointAero(point));
-    }
     // build
     elasto.build();
     aero.build();
-
-    // mappings
-    compute_mapping_aero2elasto();
-    compute_mapping_elasto2aero();
 }
 
 void Tower::set_discretization_elasto(std::vector<double> fractions) {

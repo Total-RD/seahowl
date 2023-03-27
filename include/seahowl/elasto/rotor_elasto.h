@@ -11,7 +11,7 @@ namespace seahowl {
 namespace elasto {
 class BodyElasto;
 class BladeElasto;
-class TowerElasto;  ///@todo move out of rotor
+class SystemElasto;
 }  // namespace elasto
 }  // namespace seahowl
 
@@ -125,15 +125,6 @@ class RotorElasto : public ComponentElasto {
      * @brief Builds the rotor.
      */
     void build();
-
-    /**
-     * @brief Links RNA to tower.
-     *
-     * This function links the towertop node to the yaw bearing rigid body by translating the RNA so that the tower
-     * towertop node and yaw bearing coordinates match each other.
-     * The link between towertop node and yaw bearing is fixed.
-     */
-    void link_tower(const TowerElasto& tower, std::shared_ptr<seahowl::elasto::SystemElasto> system);
 
     void rotate(double angle, const Vector3d& axis) const override;     ///< @see ElastoComponent::rotate
     void translate(const Vector3d& translation_vector) const override;  ///< @see ElastoComponent::translate

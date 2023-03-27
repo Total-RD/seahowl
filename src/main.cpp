@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
             for (auto [blade_ptr, idx_blade] = std::tuple{turbine.rotor.blades.begin(), 0};
                  blade_ptr != turbine.rotor.blades.end(); blade_ptr++, idx_blade++) {
                 auto& blade = *blade_ptr;
-                auto& post_blade = vtk_outputs.emplace_back(*blade->elasto.get());
+                auto& post_blade = vtk_outputs.emplace_back(blade->elasto);
                 post_blade.init(
                     ("./output/vtk/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
                         .c_str());
