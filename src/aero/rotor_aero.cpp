@@ -111,7 +111,9 @@ void RotorAero::compute_wind_loads_bemt(WindModel& wind_model,
             double local_velocity_tangent = global_velocity.dot(global_direction_tangent);
             auto local_velocity0 = Vector2d(local_velocity_tangent, local_velocity_normal);
 
-            if (local_velocity0.norm() == 0.0) {
+            double tol = 1e-6;
+            if (local_velocity0.norm() < tol || (node.distance_from_tip < tol && tip_loss) ||
+                (node.distance_from_hub < tol && hub_loss)) {
                 node.load = Vector3d(0.0, 0.0, 0.0);
             } else {
                 // get induced velocity (2D) from blade node

@@ -104,7 +104,7 @@ void BladeAero::build() {
 
 void BladeAero::compute_distances_from_tip() {
     // this is the position of the element at the tip
-    auto& tip_position = discretized_points.back().coordinates;
+    auto tip_position = nodes.back().get_position();
     for (auto& node : nodes) {
         node.distance_from_tip = (node.get_position() - tip_position).norm();
     }
