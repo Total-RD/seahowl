@@ -92,13 +92,13 @@ class RotorAero {
      * @param[in] tip_loss Whether to take tip loss into account or not.
      * @param[in] hub_loss Whether to take hub loss into account or not.
      */
-    void compute_wind_loads_aerodyn(float* LoadAeroDyn,
-                                    WindModel& wind_model,
-                                    double time,
-                                    const TowerAero& tower_aero,
-                                    bool tower_shadow = true,
-                                    bool tip_loss = true,
-                                    bool hub_loss = true);
+    void compute_aero_loads(float* LoadAeroDyn,
+                            WindModel& wind_model,
+                            double time,
+                            const TowerAero& tower_aero,
+                            bool tower_shadow = true,
+                            bool tip_loss = true,
+                            bool hub_loss = true);
 #endif
 };
 

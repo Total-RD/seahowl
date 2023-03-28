@@ -69,13 +69,10 @@ class TurbineAero : public ComponentAero {
     void initialize(double time, double dt);
 
     /**
-     * @brief Computes wind loads on all aero nodes of blades.
+     * @brief Computes aero loads on turbine.
      *
-     * @param[in] wind_model Wind model to use for retrieving uninduced wind velocity at nodes.
+     * @param[in] wind_model Wind model to use for applying aero loads.
      * @param[in] time Time of simulation.
-     * @param[in] tower_shadow Whether to take tower shadow effect into account or not.
-     * @param[in] tip_loss Whether to take tip loss into account or not.
-     * @param[in] hub_loss Whether to take hub loss into account or not.
      */
     virtual void compute_aero_loads(seahowl::aero::WindModel& wind_model, double time) override;
 };
