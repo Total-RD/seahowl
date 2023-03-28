@@ -38,6 +38,7 @@ option(SEAHOWL_ENABLE_EXAMPLES "Enable examples" ON)
 option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
 option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
 option(SEAHOWL_ENABLE_INFLOWWIND "Enable InflowWind module" OFF)
+option(SEAHOWL_ENABLE_HYDROCHRONO "Enable HydroChrono library" OFF)
 
 # =======================
 # External libraries
@@ -90,6 +91,12 @@ if(VTK_FOUND)
     add_definitions("-DHAVE_VTK=1")
 endif()
 
+# HydroChrono
+if(SEAHOWL_ENABLE_HYDROCHRONO)
+    find_package(HydroChrono REQUIRED)
+    add_compile_definitions(SEAHOWL_HAVE_HYDROCHRONO=1)
+    add_definitions("-DHAVE_HYDROCHRONO=1")
+endif(SEAHOWL_ENABLE_HYDROCHRONO)
 
 # python
 if(SEAHOWL_ENABLE_PYTHON)
@@ -236,6 +243,15 @@ set(SEAHOWL_SERVO_HEADERS
 )
 source_group(servo FILES ${SEAHOWL_SERVO_SOURCES} ${SEAHOWL_SERVO_HEADERS})
 
+# hydro
+set(SEAHOWL_HYDRO_SOURCES
+    src/hydro/floater_hydro.cpp
+)
+set(SEAHOWL_HYDRO_HEADERS
+    include/seahowl/hydro/floater_hydro.h
+)
+source_group(hydro FILES ${SEAHOWL_HYDRO_SOURCES} ${SEAHOWL_HYDRO_HEADERS})
+
 # io
 set(SEAHOWL_IO_SOURCES src/io/read_json.cpp src/io/write_csv.cpp src/io/read_rotor_perf.cpp)
 set(SEAHOWL_IO_HEADERS include/seahowl/io/read_json.h include/seahowl/io/write_csv.h include/seahowl/io/read_rotor_perf.h)
@@ -261,6 +277,8 @@ set(SEAHOWL_FILES
     ${SEAHOWL_AERO_HEADERS}
     ${SEAHOWL_SERVO_SOURCES}
     ${SEAHOWL_SERVO_HEADERS}
+    ${SEAHOWL_HYDRO_SOURCES}
+    ${SEAHOWL_HYDRO_HEADERS}
     ${SEAHOWL_IO_SOURCES}
     ${SEAHOWL_IO_HEADERS}
 )
@@ -306,6 +324,11 @@ target_link_libraries(seahowl_core
     PUBLIC Eigen3::Eigen
     PRIVATE nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES}
 )
+
+if (SEAHOWL_ENABLE_HYDROCHRONO)
+    target_link_libraries(seahowl_core PRIVATE HydroChrono::HydroChrono)
+endif (SEAHOWL_ENABLE_HYDROCHRONO)
+
 
 if(SEAHOWL_ENABLE_VTK)
     target_link_libraries(seahowl_core PRIVATE VTK::CommonDataModel VTK::IOXML)
