@@ -26,9 +26,6 @@ class Blade : public ComponentDynamic {
     seahowl::elasto::BladeElasto& elasto;
     /** @brief Aerodynamic model of the blade. */
     seahowl::aero::BladeAero& aero;
-    /** @brief List of reference points describing the blade properties along its longitudinal axis.
-     * @todo  Refactor: Only used for construction to pass to elasto and aero. Use a Builder */
-    std::vector<seahowl::core::BladeReferencePoint> reference_points;
     /** @brief Mapping of aero nodes into elasto domain. */
     std::vector<seahowl::DiscretizationPoint> mapping_aero2elasto_nodes;
     /** @brief Mapping of aero elements (central point of elements) into elasto domain. */

@@ -2,10 +2,7 @@
 
 #include <iostream>
 #include <cstring>
-
-#include <seahowl/core/turbine.h>
-#include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/elasto/rotor_elasto.h>
+#include <memory>
 
 #include <seahowl/aero/wind_models.h>
 
@@ -14,16 +11,16 @@
 /// </summary>
 extern "C" {
 
-void IfW_C_Init(const char** InputFileString_C, 
-                int& InputFileStringLength_C, 
-                const char** InputUniformString_C, 
-                int& InputUniformStringLength_C, 
-                int& NumWindPts_C, 
-                double& DT_C, 
-                int& NumChannels_C, 
-                char* OutputChannelNames_C, 
-                char* OutputChannelUnits_C, 
-                int& ErrStat_C, 
+void IfW_C_Init(const char** InputFileString_C,
+                int& InputFileStringLength_C,
+                const char** InputUniformString_C,
+                int& InputUniformStringLength_C,
+                int& NumWindPts_C,
+                double& DT_C,
+                int& NumChannels_C,
+                char* OutputChannelNames_C,
+                char* OutputChannelUnits_C,
+                int& ErrStat_C,
                 char* ErrMsg_C);
 
 void IfW_C_CalcOutput(double& Time_C,
@@ -48,7 +45,6 @@ namespace aero {
  *
  */
 struct InflowWindLib {
-
     // velocity
     float* Velocity;
 

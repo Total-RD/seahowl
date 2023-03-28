@@ -1,6 +1,6 @@
 #pragma once
 
-#include <seahowl/core/reference_point.h>
+#include <seahowl/aero/airfoil.h>
 #include <seahowl/commons/numerics.h>
 
 namespace seahowl {
@@ -34,13 +34,6 @@ struct BladeReferencePointAero {
      */
     BladeReferencePointAero();
 
-    /**
-     * @brief Constructor.
-     *
-     * @param[in] point General blade reference point holding aero info.
-     */
-    BladeReferencePointAero(seahowl::core::BladeReferencePoint& point);
-
     BladeReferencePointAero operator*(const double factor) const;
     BladeReferencePointAero operator+(const BladeReferencePointAero& other) const;
 };
@@ -64,13 +57,6 @@ struct TowerReferencePointAero {
      * @brief Constructor.
      */
     TowerReferencePointAero();
-
-    /**
-     * @brief Constructor.
-     *
-     * @param[in] point General tower reference point holding aero info.
-     */
-    TowerReferencePointAero(seahowl::core::TowerReferencePoint& point);
 
     TowerReferencePointAero operator*(const double factor) const;
     TowerReferencePointAero operator+(const TowerReferencePointAero& other) const;

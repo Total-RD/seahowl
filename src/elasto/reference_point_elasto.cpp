@@ -4,17 +4,6 @@ using namespace seahowl::elasto;
 
 BladeReferencePointElasto::BladeReferencePointElasto() {}
 
-BladeReferencePointElasto::BladeReferencePointElasto(const seahowl::core::BladeReferencePoint& point) {
-    coordinates = point.coordinates;
-    offset_elastic = point.offset_elastic;
-    offset_gravity = point.offset_gravity;
-    stiffness_matrix = point.stiffness_matrix;
-    mass_matrix = point.mass_matrix;
-    fraction = point.fraction;
-    structural_twist = point.structural_twist;
-    damping_coefficients = point.damping_coefficients;
-}
-
 BladeReferencePointElasto BladeReferencePointElasto::operator*(const double factor) const {
     BladeReferencePointElasto new_point = *this;
     new_point.coordinates *= factor;
@@ -50,17 +39,6 @@ BladeReferencePointElasto BladeReferencePointElasto::operator+(const BladeRefere
 };
 
 TowerReferencePointElasto::TowerReferencePointElasto() {}
-
-TowerReferencePointElasto::TowerReferencePointElasto(const seahowl::core::TowerReferencePoint& point) {
-    coordinates = point.coordinates;
-    fraction = point.fraction;
-    density = point.density;
-    stiffness_axial = point.stiffness_axial;
-    stiffness_foreaft = point.stiffness_foreaft;
-    stiffness_sideside = point.stiffness_sideside;
-    stiffness_torsion = point.stiffness_torsion;
-    damping_coefficients = point.damping_coefficients;
-}
 
 TowerReferencePointElasto TowerReferencePointElasto::operator*(const double factor) const {
     TowerReferencePointElasto new_point = *this;

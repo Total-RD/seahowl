@@ -56,18 +56,6 @@ void Rotor::update_positions_aero() {
 }
 
 void Rotor::build() {
-    for (auto& blade : blades) {
-        // push reference points
-        blade->elasto.reference_points.clear();
-        blade->aero.reference_points.clear();
-        for (auto& point : blade->reference_points) {
-            blade->elasto.reference_points.push_back(BladeReferencePointElasto(point));
-            // add aero reference point only if airfoil properties were defined
-            if (point.airfoil_properties.size() > 0) {
-                blade->aero.reference_points.push_back(BladeReferencePointAero(point));
-            }
-        }
-    }
     // build elasto
     elasto.build();
     // update hub position from elasto

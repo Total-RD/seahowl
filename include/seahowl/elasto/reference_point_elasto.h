@@ -1,7 +1,5 @@
 #pragma once
 
-#include <seahowl/core/reference_point.h>
-
 #include <seahowl/commons/numerics.h>
 
 namespace seahowl {
@@ -55,13 +53,6 @@ struct BladeReferencePointElasto : ReferencePointElasto {
      */
     BladeReferencePointElasto();
 
-    /**
-     * @brief Constructor.
-     *
-     * @param[in] point General blade reference point holding elasto info.
-     */
-    BladeReferencePointElasto(const seahowl::core::BladeReferencePoint& point);
-
     BladeReferencePointElasto operator*(const double factor) const;
     BladeReferencePointElasto operator+(const BladeReferencePointElasto& other) const;
 };
@@ -87,13 +78,6 @@ struct TowerReferencePointElasto : ReferencePointElasto {
      * @brief Constructor.
      */
     TowerReferencePointElasto();
-
-    /**
-     * @brief Constructor.
-     *
-     * @param[in] point General tower reference point holding elasto info.
-     */
-    TowerReferencePointElasto(const seahowl::core::TowerReferencePoint& point);
 
     TowerReferencePointElasto operator*(const double factor) const;
     TowerReferencePointElasto operator+(const TowerReferencePointElasto& other) const;

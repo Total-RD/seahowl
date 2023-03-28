@@ -4,15 +4,6 @@ using namespace seahowl::aero;
 
 BladeReferencePointAero::BladeReferencePointAero() {}
 
-BladeReferencePointAero::BladeReferencePointAero(seahowl::core::BladeReferencePoint& point) {
-    fraction = point.fraction;
-    coordinates = point.coordinates;
-    offset_aero = point.offset_aero;
-    chord = point.chord;
-    structural_twist = point.structural_twist;
-    airfoil_properties = point.airfoil_properties;
-}
-
 BladeReferencePointAero BladeReferencePointAero::operator*(const double factor) const {
     BladeReferencePointAero new_point = *this;
     new_point.fraction *= factor;
@@ -43,15 +34,6 @@ BladeReferencePointAero BladeReferencePointAero::operator+(const BladeReferenceP
 TowerReferencePointAero::TowerReferencePointAero() {
     rotation = Quaternion(1.0, 0.0, 0.0, 0.0);
     velocity = Vector3d(0.0, 0.0, 0.0);
-}
-
-TowerReferencePointAero::TowerReferencePointAero(seahowl::core::TowerReferencePoint& point) {
-    fraction = point.fraction;
-    coordinates = point.coordinates;
-    rotation = Quaternion(1.0, 0.0, 0.0, 0.0);
-    velocity = Vector3d(0.0, 0.0, 0.0);
-    diameter = point.diameter;
-    drag_coefficient = point.drag_coefficient;
 }
 
 TowerReferencePointAero TowerReferencePointAero::operator*(const double factor) const {
