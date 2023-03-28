@@ -371,6 +371,14 @@ endif(SEAHOWL_ENABLE_DOC)
 # PYTHON
 # ====================
 if (SEAHOWL_ENABLE_PYTHON)
-    pybind11_add_module(pyseahowl ${CMAKE_CURRENT_SOURCE_DIR}/src/bindings/pybind_core.cpp)
+    set(PYSEAHOWL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/bindings)
+    pybind11_add_module(
+        pyseahowl
+        ${PYSEAHOWL_DIR}/pyseahowl.cpp
+        ${PYSEAHOWL_DIR}/pyseahowl_elasto.cpp
+        ${PYSEAHOWL_DIR}/pyseahowl_aero.cpp
+        ${PYSEAHOWL_DIR}/pyseahowl_servo.cpp
+        ${PYSEAHOWL_DIR}/pyseahowl_core.cpp
+    )
     target_link_libraries(pyseahowl PRIVATE seahowl_core)
 endif (SEAHOWL_ENABLE_PYTHON)
