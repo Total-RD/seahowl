@@ -3,18 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-SEAHOWL
-########
+SEAHOWL: Servo-Elasto-Aero-Hydro Offshore Wind Lab
+##################################################
 
 Introduction
 ============
 
-Numerical simulation of Horizontal Axis Wind Turbines in Floatting environment
+Numerical simulation of Floating Offshore Wind Turbines (FOWTs).
 
-
-.. image:: ./_static/images/FOWT_temporary.PNG
-  :width: 400
-  :alt: Battery cell schema
 
 Table of Contents
 =================
