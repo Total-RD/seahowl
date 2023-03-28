@@ -9,6 +9,9 @@
 namespace seahowl {
 namespace elasto {
 class SystemElasto;
+#ifdef HAVE_MOORDYN
+class MoorDynAdapter;
+#endif
 }  // namespace elasto
 }  // namespace seahowl
 
@@ -31,6 +34,13 @@ class TurbineElasto {
     seahowl::elasto::RotorElasto rotor;
     /** @brief Tower of the turbine. */
     seahowl::elasto::TowerElasto tower;
+
+    /** @brief Whether to use MoorDyn or not. */
+    bool use_moordyn = false;
+#ifdef HAVE_MOORDYN
+    /** @brief MoorDyn adapter (only used if MoorDyn is enabled). */
+    std::shared_ptr<seahowl::elasto::MoorDynAdapter> moordyn;
+#endif
 
     /**
      * @brief Constructor.
@@ -78,6 +88,14 @@ class TurbineElasto {
      * @param[in] axis The axis of rotation (3D vector).
      */
     void rotate(double angle, seahowl::Vector3d axis);
+
+    /**
+     * @brief Initializes moordyn.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
+    void initialize(double time, double dt);
 };
 
 }  // namespace elasto

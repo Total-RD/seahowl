@@ -15,6 +15,7 @@ void Turbine::initialize(double time, double dt) {
     controller->initialize(time, dt, *this);
 
     aero.initialize(time, dt);
+    elasto.initialize(time, dt);
 }
 
 void Turbine::prestep(double time, double dt) {
