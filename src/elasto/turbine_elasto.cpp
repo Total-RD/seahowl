@@ -3,6 +3,10 @@
 #include "seahowl/elasto/system_elasto.h"
 #include "seahowl/elasto/chrono_adapters.h"
 
+#ifdef HAVE_MOORDYN
+    #include "seahowl/elasto/moordyn_adapter.h"
+#endif
+
 using namespace seahowl::elasto;
 
 TurbineElasto::TurbineElasto() {
@@ -51,4 +55,14 @@ double TurbineElasto::get_mass() const {
     // tower
     total_mass += tower.get_mass();
     return total_mass;
+}
+
+void TurbineElasto::initialize(double time, double dt) {
+#ifdef HAVE_MOORDYN
+    if (use_moordyn) {
+        moordyn->initialize(*this);
+        moordyn->saveVTK("./output/mooring_lines");  // test vtk save here, will be relocated in order to be
+                                                     // consistent with seahowl vtk save
+    }
+#endif
 }

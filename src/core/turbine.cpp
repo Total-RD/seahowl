@@ -23,6 +23,7 @@ void Turbine::initialize(double time, double dt) {
     controller->initialize(time, dt, *this);
 
     aero.initialize(time, dt);
+    elasto.initialize(time, dt);
 
     spdlog::info("Initialized turbine of total mass {:.4}kg.", elasto.get_mass());
 }

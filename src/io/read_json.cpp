@@ -25,6 +25,9 @@
     #include "seahowl/hydro/hydrochrono_adapter.h"
     #include "seahowl/elasto/chrono_adapters.h"
 #endif
+#ifdef HAVE_MOORDYN
+    #include <seahowl/elasto/moordyn_adapter.h>
+#endif
 
 #include <string>
 #include <memory>
@@ -663,6 +666,20 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
             }
             turbine.aero.aerodyn =
                 std::make_shared<seahowl::aero::AeroDynAdapter>(aerodyn_filepath, inflowwind_filepath);
+        }
+#endif
+
+        // moordyn option
+#ifdef HAVE_MOORDYN
+        turbine.elasto.use_moordyn = turbine_json.at("use_moordyn").get<bool>();
+        if (turbine.elasto.use_moordyn) {
+            std::string moordyn_filepath;
+            if (turbine_json.contains("file_moordyn")) {
+                moordyn_filepath = (DATADIR / turbine_json.at("file_moordyn")).generic_string();
+            } else {
+                throw std::runtime_error("Turbine set to use moordyn but MoorDyn file path not defined.");
+            }
+            turbine.elasto.moordyn = std::make_shared<seahowl::elasto::MoorDynAdapter>(moordyn_filepath);
         }
 #endif
 

@@ -39,6 +39,7 @@ option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
 option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
 option(SEAHOWL_ENABLE_INFLOWWIND "Enable InflowWind module" OFF)
 option(SEAHOWL_ENABLE_HYDROCHRONO "Enable HydroChrono library" OFF)
+option(SEAHOWL_ENABLE_MOORDYN "Enable MoorDyn module" OFF)
 
 # =======================
 # External libraries
@@ -80,6 +81,13 @@ if(SEAHOWL_ENABLE_INFLOWWIND)
     add_compile_definitions(SEAHOWL_HAVE_INFLOWWIND=1)
     add_definitions("-DHAVE_INFLOWWIND=1")
 endif(SEAHOWL_ENABLE_INFLOWWIND)
+
+# MoorDyn module
+if(SEAHOWL_ENABLE_MOORDYN)
+    find_package(MoorDyn REQUIRED)
+    add_compile_definitions(SEAHOWL_HAVE_MOORDYN=1)
+    add_definitions("-DHAVE_MOORDYN=1")
+endif(SEAHOWL_ENABLE_MOORDYN)
 
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
 	message(FATAL_ERROR "ONLY 64 BITS SUPPORTED")
@@ -205,6 +213,10 @@ set(SEAHOWL_ELASTO_HEADERS
     include/seahowl/elasto/turbine_floating_elasto.h
     include/seahowl/elasto/chrono_adapters.h
 )
+if (SEAHOWL_ENABLE_MOORDYN)
+    list(APPEND SEAHOWL_ELASTO_SOURCES src/elasto/moordyn_adapter.cpp)
+    list(APPEND SEAHOWL_ELASTO_HEADERS include/seahowl/elasto/moordyn_adapter.h)
+endif(SEAHOWL_ENABLE_MOORDYN)
 source_group(elasto FILES ${SEAHOWL_ELASTO_SOURCES} ${SEAHOWL_ELASTO_HEADERS})
 
 # aero
@@ -308,7 +320,7 @@ set_target_properties(
 target_include_directories(
     seahowl_core
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS}
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS} ${MoorDyn_DIR}/../../include/moordyn
 )
 
 target_compile_features(
@@ -352,6 +364,9 @@ if (SEAHOWL_ENABLE_INFLOWWIND)
     target_link_libraries(seahowl_core PRIVATE INFLOWWIND::INFLOWWIND)
 endif (SEAHOWL_ENABLE_INFLOWWIND)
 
+if (SEAHOWL_ENABLE_MOORDYN)
+    target_link_libraries(seahowl_core PRIVATE MoorDyn::moordyn)
+endif (SEAHOWL_ENABLE_MOORDYN)
 
 # =============
 # DRIVER
@@ -365,7 +380,7 @@ target_sources(
 target_include_directories(
     seahowl_driver
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS}
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS} ${MoorDyn_DIR}/../../include/moordyn
 )
 
 target_compile_features(seahowl_driver PRIVATE cxx_std_17)
