@@ -284,6 +284,38 @@ void NodeElastoChrono::set_properties(const TowerReferencePointElasto& ref) {
     section->SetBeamRaleyghDamping(damping_coefficients);
 }
 
+void ElementElastoChrono::set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) {
+    nodes.clear();
+    nodes.push_back(node1);
+    nodes.push_back(node2);
+}
+
+void ElementElastoChrono::evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) {
+    auto chvec = vec2ch(position);
+    auto chquat = quat2ch(rotation);
+    chobj->EvaluateSectionFrame(eta, chvec, chquat);
+    position[0] = chvec[0];
+    position[1] = chvec[1];
+    position[2] = chvec[2];
+    rotation = node_ch2iec(chquat);
+}
+
+void ElementElastoChrono::evaluate_force_torque(double eta, Vector3d& force, Vector3d& torque) {
+    auto chforce = vec2ch(force);
+    auto chtorque = vec2ch(torque);
+    chobj->EvaluateSectionForceTorque(eta, chforce, chtorque);
+    force[0] = chforce[0];
+    force[1] = chforce[1];
+    force[2] = chforce[2];
+    torque[0] = chtorque[0];
+    torque[1] = chtorque[1];
+    torque[2] = chtorque[2];
+}
+
+double ElementElastoChrono::get_mass() {
+    return chobj->GetMass();
+}
+
 ElementBladeElastoChrono::ElementBladeElastoChrono() {
     chobj = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenko>();
     ElementElastoChrono::chobj = chobj;
@@ -293,9 +325,9 @@ ElementBladeElastoChrono::ElementBladeElastoChrono() {
 }
 
 void ElementBladeElastoChrono::set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) {
-    nodes0.clear();
-    nodes0.push_back(node1);
-    nodes0.push_back(node2);
+    nodes.clear();
+    nodes.push_back(node1);
+    nodes.push_back(node2);
 
     // set nodes
     chobj->SetNodes(std::dynamic_pointer_cast<NodeElastoChrono>(node1)->chobj,
@@ -311,20 +343,6 @@ void ElementBladeElastoChrono::set_prebend(const Quaternion& prebend) {
     chobj->SetNodeBreferenceRot(prebend_ch);
 }
 
-double ElementBladeElastoChrono::get_mass() {
-    return chobj->GetMass();
-}
-
-void ElementBladeElastoChrono::evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) {
-    auto chvec = vec2ch(position);
-    auto chquat = quat2ch(rotation);
-    chobj->EvaluateSectionFrame(eta, chvec, chquat);
-    position[0] = chvec[0];
-    position[1] = chvec[1];
-    position[2] = chvec[2];
-    rotation = node_ch2iec(chquat);
-}
-
 ElementBladeElastoChronoFPM::ElementBladeElastoChronoFPM() {
     chobj = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenkoFPM>();
     ElementElastoChrono::chobj = chobj;
@@ -334,9 +352,9 @@ ElementBladeElastoChronoFPM::ElementBladeElastoChronoFPM() {
 }
 
 void ElementBladeElastoChronoFPM::set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) {
-    nodes0.clear();
-    nodes0.push_back(node1);
-    nodes0.push_back(node2);
+    nodes.clear();
+    nodes.push_back(node1);
+    nodes.push_back(node2);
 
     // set nodes
     chobj->SetNodes(std::dynamic_pointer_cast<NodeElastoChrono>(node1)->chobj,
@@ -356,47 +374,19 @@ void ElementBladeElastoChronoFPM::set_prebend(const Quaternion& prebend) {
     chobj->SetNodeBreferenceRot(prebend_ch);
 }
 
-double ElementBladeElastoChronoFPM::get_mass() {
-    return chobj->GetMass();
-}
-
-void ElementBladeElastoChronoFPM::evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) {
-    auto chvec = vec2ch(position);
-    auto chquat = quat2ch(rotation);
-    chobj->EvaluateSectionFrame(eta, chvec, chquat);
-    position[0] = chvec[0];
-    position[1] = chvec[1];
-    position[2] = chvec[2];
-    rotation = node_ch2iec(chquat);
-}
-
 ElementMooringElastoChrono::ElementMooringElastoChrono() {
     chobj = chrono_types::make_shared<chrono::fea::ChElementBeamEuler>();
     ElementElastoChrono::chobj = chobj;
 }
 
 void ElementMooringElastoChrono::set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) {
-    nodes0.clear();
-    nodes0.push_back(node1);
-    nodes0.push_back(node2);
+    nodes.clear();
+    nodes.push_back(node1);
+    nodes.push_back(node2);
 
     // set nodes
     chobj->SetNodes(std::dynamic_pointer_cast<NodeElastoChrono>(node1)->chobj,
                     std::dynamic_pointer_cast<NodeElastoChrono>(node2)->chobj);
-}
-
-double ElementMooringElastoChrono::get_mass() {
-    return chobj->GetMass();
-}
-
-void ElementMooringElastoChrono::evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) {
-    auto chvec = vec2ch(position);
-    auto chquat = quat2ch(rotation);
-    chobj->EvaluateSectionFrame(eta, chvec, chquat);
-    position[0] = chvec[0];
-    position[1] = chvec[1];
-    position[2] = chvec[2];
-    rotation = node_ch2iec(chquat);
 }
 
 void ElementMooringElastoChrono::set_properties(double density, double diameter, double stiffness_axial) {

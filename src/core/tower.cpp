@@ -63,7 +63,7 @@ void Tower::update_positions_aero() {
 
         // update velocity of aero elements
         aero.elements[ii].properties.velocity =
-            0.5 * (element_elasto->nodes0[0]->get_velocity() + element_elasto->nodes0[1]->get_velocity());
+            0.5 * (element_elasto->nodes[0]->get_velocity() + element_elasto->nodes[1]->get_velocity());
     }
 }
 

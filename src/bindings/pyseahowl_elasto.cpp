@@ -25,6 +25,15 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("get_load", &seahowl::elasto::NodeElasto::get_load)
         .def("get_torque", &seahowl::elasto::NodeElasto::get_torque)
         .def("set_fixed", &seahowl::elasto::NodeElasto::set_fixed);
+    py::class_<seahowl::elasto::ElementElasto, std::shared_ptr<seahowl::elasto::ElementElasto>>(m_elasto,
+                                                                                                "ElementElasto")
+        .def("evaluate_position_rotation", &seahowl::elasto::ElementElasto::evaluate_position_rotation)
+        .def("evaluate_force_torque", &seahowl::elasto::ElementElasto::evaluate_force_torque)
+        .def("get_force", &seahowl::elasto::ElementElasto::get_force)
+        .def("get_torque", &seahowl::elasto::ElementElasto::get_torque)
+        .def("get_mass", &seahowl::elasto::ElementElasto::get_mass);
+    py::class_<seahowl::elasto::ElementBladeElasto, std::shared_ptr<seahowl::elasto::ElementBladeElasto>,
+               seahowl::elasto::ElementElasto>(m_elasto, "ElementBladeElasto");
     py::class_<seahowl::elasto::Link, std::shared_ptr<seahowl::elasto::Link>>(m_elasto, "Link")
         .def("get_reaction_force", &seahowl::elasto::Link::get_reaction_force)
         .def("get_reaction_torque", &seahowl::elasto::Link::get_reaction_torque);
@@ -48,7 +57,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("translate", &seahowl::elasto::ComponentElasto::translate);
     py::class_<seahowl::elasto::ComponentElastoFEA, std::shared_ptr<seahowl::elasto::ComponentElastoFEA>,
                seahowl::elasto::ComponentElasto>(m_elasto, "ComponentElastoFEA")
-        .def_readonly("nodes", &seahowl::elasto::TowerElasto::nodes);
+        .def_readonly("nodes", &seahowl::elasto::ComponentElastoFEA::nodes)
+        .def_readonly("elements", &seahowl::elasto::ComponentElastoFEA::elements);
 
     // elasto/blade_elasto.h
     py::class_<seahowl::elasto::BladeElasto, std::shared_ptr<seahowl::elasto::BladeElasto>,

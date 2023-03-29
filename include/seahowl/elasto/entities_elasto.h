@@ -100,7 +100,7 @@ class NodeElasto : public virtual EntityDynamic {
 class ElementElasto {
   public:
     /** @brief Nodes of elasto element. */
-    std::vector<std::shared_ptr<NodeElasto>> nodes0;
+    std::vector<std::shared_ptr<NodeElasto>> nodes;
 
     /**
      * @brief Sets nodes of element.
@@ -120,6 +120,39 @@ class ElementElasto {
     virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) = 0;
 
     /**
+     * @brief Evaluates force and torque of point within element.
+     *
+     * param[in] eta Normalized abscissa along element within range [-1, +1].
+     * param[out] force Force to evaluate.
+     * param[out] torque Torque to evaluate.
+     */
+    virtual void evaluate_force_torque(double eta, Vector3d& force, Vector3d& torque) = 0;
+
+    /**
+     * @brief Returns force of point within element.
+     *
+     * param[in] eta Normalized abscissa along element within range [-1, +1].
+     */
+    Vector3d get_force(double eta) {
+        auto force = Vector3d(0.0, 0.0, 0.0);
+        auto torque = Vector3d(0.0, 0.0, 0.0);
+        evaluate_force_torque(eta, force, torque);
+        return force;
+    };
+
+    /**
+     * @brief Returns force of point within element.
+     *
+     * param[in] eta Normalized abscissa along element within range [-1, +1].
+     */
+    Vector3d get_torque(double eta) {
+        auto force = Vector3d(0.0, 0.0, 0.0);
+        auto torque = Vector3d(0.0, 0.0, 0.0);
+        evaluate_force_torque(eta, force, torque);
+        return torque;
+    };
+
+    /**
      * @brief Returns mass of elasto element.
      */
     virtual double get_mass() = 0;
@@ -128,7 +161,7 @@ class ElementElasto {
 /**
  * @brief Elasto blade element base class.
  */
-class ElementBladeElasto : public ElementElasto {
+class ElementBladeElasto : public virtual ElementElasto {
   public:
     /**
      * @brief Sets prebend of blade elasto element.
@@ -141,7 +174,7 @@ class ElementBladeElasto : public ElementElasto {
 /**
  * @brief Elasto mooring element base class.
  */
-class ElementMooringElasto : public ElementElasto {
+class ElementMooringElasto : public virtual ElementElasto {
   public:
     /**
      * @brief Sets properties of mooring elasto element.

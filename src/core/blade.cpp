@@ -87,8 +87,8 @@ void Blade::update_positions_aero() {
         // update properties of aero nodes
         double weight1 = 0.5 * fabs(eta - 1.0);
         double weight2 = 0.5 * fabs(eta + 1.0);
-        auto node1 = element_elasto->nodes0[0];
-        auto node2 = element_elasto->nodes0[1];
+        auto node1 = element_elasto->nodes[0];
+        auto node2 = element_elasto->nodes[1];
         node_aero.set_velocity(weight1 * node1->get_velocity() + weight2 * node2->get_velocity());
         node_aero.set_rotational_velocity(weight1 * node1->get_rotational_velocity() +
                                           weight2 * node2->get_rotational_velocity());
