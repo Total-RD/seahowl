@@ -37,11 +37,13 @@ option(SEAHOWL_ENABLE_INFLOWWIND "Enable InflowWind module" OFF)
 
 ### Dependencies
 
-#### Core
+#### Core (necessary)
 
 - Chrono (8.0.0): https://github.com/projectchrono/chrono
 - nlohmann-json (v3.10.5): https://github.com/nlohmann/json
-- ROSCO (v2.5.0): https://github.com/NREL/ROSCO
+
+#### Optional
+
 - AeroDyn: https://github.com/Total-RD/aerodyn4seahowl
 - InflowWind: https://github.com/Total-RD/aerodyn4seahowl
 
@@ -60,6 +62,9 @@ option(SEAHOWL_ENABLE_INFLOWWIND "Enable InflowWind module" OFF)
 
 - GoogleTest (release-1.12.1): https://github.com/google/googletest
 
+#### Python bindings
+
+- pybind11 (Version 2.10.4): https://github.com/pybind/pybind11
 
 
 ## Usage
