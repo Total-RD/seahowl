@@ -297,7 +297,9 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
+        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
+        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
@@ -318,7 +320,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.809, 0.02);
+    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.829, 0.02);
 }
 
 #ifdef HAVE_AERODYN
@@ -362,7 +364,9 @@ TEST(test_aerodyn, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
+        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
+        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
@@ -458,7 +462,7 @@ TEST(test_turbine, multiturbines) {
     }
 
     for (auto& turbine : system_core.turbines) {
-        ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.809, 0.02);
+        ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.829, 0.02);
     }
 }
 
@@ -503,7 +507,9 @@ TEST(test_inflowwind, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
+        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
+        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
@@ -524,6 +530,6 @@ TEST(test_inflowwind, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.809, 0.02);
+    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.829, 0.02);
 }
 #endif

@@ -485,11 +485,21 @@ double SystemElastoChrono::get_time() const {
 }
 
 void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
+    // constrain rotor
+    for (auto& turbine : turbines) {
+        turbine.rotor.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+    }
+    // linear statics
     if (linear) {
         chobj->DoStaticLinear();
     }
+    // nonlinear statics
     if (nonlinear_steps > 0) {
         chobj->DoStaticNonlinear(nonlinear_steps, true);
+    }
+    // unconstrain rotor
+    for (auto& turbine : turbines) {
+        turbine.rotor.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 };
 
