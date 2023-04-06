@@ -59,7 +59,7 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
     // limits
     double aa_max = 1.0;
     double aa_min = 0.0;
-    double ap_max = 1.5;
+    double ap_max = 1.0;
     double ap_min = -1.0;
     // reset induction factors if they were max or min
     if (aa >= aa_max || aa <= aa_min) {
@@ -143,22 +143,22 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
             aa = aa_max;
         }
 
-        // @todo fix tangential induction factor calculation (convergence)
         //// tangential induction
-        // if (fabs(cos_phi) < tol_induction) {
-        //     ap = -1.0;
-        // } else {
-        //     double kp = element.chord_solidity * ct / (4.0 * loss_factor * sin_phi * cos_phi);
-        //     if (local_velocity_rotor.y() < 0.0) {
-        //         kp = -kp;
-        //     }
-        //     if (fabs(kp - 1.0) < tol_induction) {
-        //         ap = copysign(ap_max, 1.0 - kp);
-        //     } else {
-        //         ap = kp / (1.0 - kp);
-        //     }
-        // }
-        ap = 0.0;  // deactivate tangential induction
+        if (fabs(cos_phi) < tol_induction) {
+            ap = ap_min;
+        } else if (fabs(sin_phi) < tol_induction) {
+            ap = ap_max;
+        } else {
+            double kp = node.chord_solidity * ct / (4.0 * loss_factor * sin_phi * cos_phi);
+            if (local_velocity_rotor.y() < 0.0) {
+                kp = -kp;
+            }
+            if (fabs(kp - 1.0) < tol_induction) {
+                ap = copysign(ap_max, 1.0 - kp);
+            } else {
+                ap = kp / (1.0 - kp);
+            }
+        }
 
         // apply limits on induction factors
         if (aa > aa_max) {
