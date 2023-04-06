@@ -197,11 +197,11 @@ double RotorElasto::get_rpm() const {
 double RotorElasto::get_azimuth() const {
     // get angle between quaternions
     auto qq = (body_shaft->get_rotation().conjugate() * body_hub->get_rotation()).normalized();
-    double angle0 = std::atan2(qq.vec().x(), qq.w());
+    double angle0 = 2 * std::atan2(qq.vec().x(), qq.w());
     // get angle between 0 and 2pi
     double angle1 = fmod(angle0, 2 * PI);
-    // get angle between -pi and +pi
-    double angle2 = fmod(angle1 + PI, 2 * PI) - PI;
+    // get strictly positive angle
+    double angle2 = fmod(angle1 + 2 * PI, 2 * PI);
     return angle2;
 }
 
