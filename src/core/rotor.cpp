@@ -33,7 +33,6 @@ void Rotor::poststep(double time, double dt) {
         blade->poststep(time, dt);
     }
     update_positions_aero();
-    aero.compute_chords_solidity();
 }
 
 void Rotor::update_positions_aero() {
