@@ -58,9 +58,16 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
     auto ap = node.induction_factor_tangential;
     // limits
     double aa_max = 1.0;
-    double aa_min = -1.0;
+    double aa_min = 0.0;
     double ap_max = 1.5;
     double ap_min = -1.0;
+    // reset induction factors if they were max or min
+    if (aa >= aa_max || aa <= aa_min) {
+        aa = 0.0;
+    }
+    if (ap >= ap_max || ap <= ap_min) {
+        ap = 0.0;
+    }
     for (int ii = 1; ii <= max_iter; ii++) {
         // store previous alpha
         alpha_previous = alpha;
@@ -85,14 +92,18 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
         double cn = cl * cos_phi + cd * sin_phi;
         double ct = cl * sin_phi - cd * cos_phi;
 
+        double tol_induction = 1e-6;  // tolerance for induction variables to avoid singularities
+
         // losses
         double loss_factor = 1.0;
-        if (tip_loss) {
+        // tip loss (with check that no division by zero will happen => y component of velocity > 0)
+        if (tip_loss && fabs(sin_phi) > tol_induction) {
             // Prandtl's approximation for tip-loss factor=
             loss_factor *=
                 (2.0 / PI) * acos(exp(nblades * (-node.distance_from_tip) / (2.0 * node.radius * fabs(sin_phi))));
         }
-        if (hub_loss) {
+        // hub loss (with check that no division by zero will happen => y component of velocity > 0)
+        if (hub_loss && fabs(sin_phi) > tol_induction) {
             // hub loss
             double hub_radius = (node.radius - node.distance_from_hub);
             loss_factor *=
@@ -101,30 +112,35 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
 
         // update induction factors
 
-        double tol_induction = 1e-6;  // tolerance for induction variables to avoid singularities
-        // axial induction, based on AeroDyn v15 implementation
-        double kk = node.chord_solidity * cn / (4.0 * loss_factor * pow(sin_phi, 2));
-        if (kk <= 2.0 / 3.0) {
-            if (fabs(kk + 1.0) < tol_induction) {
-                aa = copysign(aa_max, -(1.0 + kk));
+        // axial induction, based on and adapted from AeroDyn v15 implementation
+        // first check if no division by zero (y component of velocity > 0)
+        if (fabs(sin_phi) > tol_induction) {
+            double kk = node.chord_solidity * cn / (4.0 * loss_factor * pow(sin_phi, 2));
+            if (kk <= 2.0 / 3.0) {
+                if (fabs(kk + 1.0) < tol_induction) {
+                    aa = copysign(aa_max, -(1.0 + kk));
+                } else {
+                    aa = kk / (1.0 + kk);
+                }
+                if (kk < -1.0) {
+                    // equivalent to aa > 1.0, not possible here => cap it
+                    aa = aa_max;
+                }
             } else {
-                aa = kk / (1.0 + kk);
-            }
-            if (kk < -1.0) {
-                throw std::runtime_error("Not valid BEMT solution for axial induction.");
+                double ff = loss_factor;
+                double temp = 2.0 * ff * kk;
+                double g1 = temp - (10.0 / 9.0 - ff);
+                double g2 = temp - (4.0 / 3.0 - ff) * ff;
+                double g3 = temp - (25.0 / 9.0 - 2.0 * ff);
+
+                if (fabs(g3) < tol_induction) {
+                    aa = 1.0 - 0.5 / sqrt(g2);
+                } else {
+                    aa = (g1 - sqrt(fabs(g2))) / g3;
+                }
             }
         } else {
-            double ff = loss_factor;
-            double temp = 2.0 * ff * kk;
-            double g1 = temp - (10.0 / 9.0 - ff);
-            double g2 = temp - (4.0 / 3.0 - ff) * ff;
-            double g3 = temp - (25.0 / 9.0 - 2.0 * ff);
-
-            if (fabs(g3) < tol_induction) {
-                aa = 1.0 - 0.5 / sqrt(g2);
-            } else {
-                aa = (g1 - sqrt(fabs(g2))) / g3;
-            }
+            aa = aa_max;
         }
 
         // @todo fix tangential induction factor calculation (convergence)
