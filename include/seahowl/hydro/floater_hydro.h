@@ -5,6 +5,9 @@
 #include <hydroc/hydro_forces.h>
 #include <seahowl/elasto/entities_elasto.h>
 
+namespace seahowl {
+namespace hydro {
+
 class FloaterHydroChrono {
   public:
     /** @brief Hydro inputs (from HydroChrono). */
@@ -45,3 +48,6 @@ class FloaterHydroChrono {
     /** @brief HydroChrono logic class. */
     TestHydro hydrochrono_setter;
 };
+
+}  // namespace hydro
+}  // namespace seahowl

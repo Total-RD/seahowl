@@ -4,6 +4,8 @@
 
 #include <chrono/physics/ChBody.h>
 
+using namespace seahowl::hydro;
+
 void FloaterHydroChrono::set_h5filepath(const std::string& filepath) {
     filepath_h5_potential = filepath;
 };
