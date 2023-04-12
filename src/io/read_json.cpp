@@ -20,6 +20,7 @@
 #include "seahowl/aero/rotor_aero.h"
 #include "seahowl/aero/turbine_aero.h"
 #include "seahowl/aero/system_aero.h"
+#include "seahowl/hydro/floater_hydro.h"
 
 #include <string>
 #include <memory>
@@ -541,6 +542,32 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     double drivetrain_inertia;
     drivetrain.at("generator_inertia").get_to(drivetrain_inertia);
     turbine.rna.elasto.rotor->hub.inertia += drivetrain_inertia;
+
+    if (json_obj.contains("floater")) {
+        auto floater_json = json_obj.at("floater");
+        auto floater_type = floater_json.at("type").get<std::string>();
+        if (floater_type == "HydroChrono") {
+#ifdef HAVE_HYDROCHRONO
+            auto floater_options = floater_json.at("options");
+            // make floater
+            auto floater = seahowl::hydro::FloaterHydroChrono();
+            // add h5file path
+            floater.h5_filepath = floater_options.at("file").get<std::string>();
+            // make body
+            auto body_name = floater_options.at("name").get<std::string>();
+            floater.add_body(body_name);
+            // position body
+            auto& body = floater.get_body(body_name);
+            auto body_position = floater_options.at("cog").get<std::vector<double>>();
+            if (body_position.size() != 3) {
+                throw std::runtime_error("COG of floater should be a vector of length 3.");
+            }
+            body.set_position(Vector3d(body_position[0], body_position[1], body_position[2]));
+#endif
+        } else {
+            throw std::runtime_error("Type of floater defined in turbine json file does not exist.");
+        }
+    }
 }
 
 void populate_system_from_json(std::string filepath, seahowl::core::System& system_core) {

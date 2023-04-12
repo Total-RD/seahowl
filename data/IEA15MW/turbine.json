@@ -43,5 +43,13 @@
       "infile": "./controller/DISCON.IN",
       "libfile": "./controller/libdiscon.so"
     }
+  },
+  "floater": {
+    "type": "HydroChrono",
+    "options": {
+      "file": "./data/IEA15MW/VolturnUS.h5",
+      "name": "body1",
+      "cog": [0.0, 0.0, -14.94]
+    }
   }
 }
