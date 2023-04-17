@@ -13,16 +13,16 @@ System::System() {}
 
 void System::initialize(double time, double dt) {
     for (auto& turbine : turbines) {
-        turbine.initialize(time, dt);
+        turbine->initialize(time, dt);
     }
 }
 
 void System::prestep(double time, double dt) {
     for (auto& turbine : turbines) {
         // compute forces on rotor and tower
-        turbine.aero.compute_aero_loads(*wind_model, time);
+        turbine->aero.compute_aero_loads(*wind_model, time);
         // turbine prestep (accumulates loads from aero to elasto)
-        turbine.prestep(time, dt);
+        turbine->prestep(time, dt);
     }
 }
 
@@ -33,13 +33,13 @@ void System::step(double dt) {
 void System::poststep(double time, double dt) {
     for (auto& turbine : turbines) {
         // turbine poststep
-        turbine.poststep(time, dt);
+        turbine->poststep(time, dt);
     }
 }
 
 void System::assemble() {
     for (auto& turbine : turbines) {
-        turbine.elasto.assemble(*(system_elasto.get()));
+        turbine->elasto.assemble(*(system_elasto.get()));
     }
 }
 

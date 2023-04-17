@@ -24,6 +24,7 @@ using json = nlohmann::json;
 #include <seahowl/aero/system_aero.h>
 #include <seahowl/core/blade.h>
 #include <seahowl/elasto/blade_elasto.h>
+#include <seahowl/core/turbine_floating.h>
 
 #include <filesystem>  // C++17
 
@@ -35,7 +36,7 @@ using std::filesystem::remove_all;
 
 void output_results(seahowl::core::System& system_core, int step) {
     // output
-    auto& turbine = system_core.turbines[0];
+    auto& turbine = *system_core.turbines[0];
     std::cout << "time: " << system_core.get_time() << ", step: " << step << ", rpm: " << turbine.rna.elasto.get_rpm();
     int nblades = turbine.rna.blades.size();
     if (nblades <= 3) {
@@ -80,7 +81,7 @@ int main(int argc, char* argv[]) {
 
     for (auto& turbine : system_core.turbines) {
         // fix foundation of the tower
-        turbine.tower.elasto.nodes.front()->set_fixed(true);
+        turbine->tower.elasto.nodes.front()->set_fixed(true);
     }
 
     // get main info
@@ -104,8 +105,8 @@ int main(int argc, char* argv[]) {
              turbine_ptr != system_core.turbines.end(); turbine_ptr++, idx_turbine++) {
             auto& turbine = *turbine_ptr;
             create_directory("./output/vtk");
-            for (auto [blade_ptr, idx_blade] = std::tuple{turbine.rna.blades.begin(), 0};
-                 blade_ptr != turbine.rna.blades.end(); blade_ptr++, idx_blade++) {
+            for (auto [blade_ptr, idx_blade] = std::tuple{turbine->rna.blades.begin(), 0};
+                 blade_ptr != turbine->rna.blades.end(); blade_ptr++, idx_blade++) {
                 auto& blade = *blade_ptr;
                 auto& post_blade =
                     vtk_outputs.emplace_back(dynamic_cast<seahowl::elasto::BladeElastoFEA&>(blade->elasto));
@@ -113,7 +114,7 @@ int main(int argc, char* argv[]) {
                     ("./output/vtk/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
                         .c_str());
             }
-            auto& post_tower = vtk_outputs.emplace_back(turbine.tower.elasto);
+            auto& post_tower = vtk_outputs.emplace_back(turbine->tower.elasto);
             post_tower.initialize(("./output/vtk/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
         }
     }
@@ -140,6 +141,9 @@ int main(int argc, char* argv[]) {
     // statics
     if (statics_prestep) {
         system_elasto->do_statics(true, 10);
+        // for (auto& turbine : system_core.turbines) {
+        //     turbine->tower.elasto.nodes.front()->set_fixed(false);
+        // }
     }
 
     system_core.initialize(system_elasto->get_time(), dt);
@@ -158,6 +162,7 @@ int main(int argc, char* argv[]) {
     while (system_elasto->get_time() < t_end) {
         // prestep
         system_core.prestep(system_core.get_time(), dt);
+
         // step
         system_core.step(dt);
         step += 1;
@@ -181,6 +186,12 @@ int main(int argc, char* argv[]) {
             application->EndScene();
 #endif
             time_outputs += dt_outputs;
+
+            if (system_core.get_time() > 3) {
+                for (auto& turbine : system_core.turbines) {
+                    turbine->tower.elasto.nodes.front()->set_fixed(false);
+                }
+            }
         }
     }
 

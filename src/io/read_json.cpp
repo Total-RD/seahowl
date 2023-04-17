@@ -21,6 +21,11 @@
 #include "seahowl/aero/turbine_aero.h"
 #include "seahowl/aero/system_aero.h"
 #include "seahowl/hydro/floater_hydro.h"
+#include "seahowl/core/turbine_floating.h"
+#ifdef HAVE_HYDROCHRONO
+    #include "seahowl/hydro/hydrochrono_adapter.h"
+    #include "seahowl/elasto/chrono_adapters.h"
+#endif
 
 #include <string>
 #include <memory>
@@ -549,15 +554,19 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
         if (floater_type == "HydroChrono") {
 #ifdef HAVE_HYDROCHRONO
             auto floater_options = floater_json.at("options");
+            // dynamic cast turbine
+            auto& turbine_floating = dynamic_cast<seahowl::core::TurbineFloating&>(turbine);
             // make floater
-            auto floater = seahowl::hydro::FloaterHydroChrono();
+            turbine_floating.floater = std::make_unique<seahowl::hydro::FloaterHydroChrono>();
+            auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine_floating.floater);
             // add h5file path
-            floater.h5_filepath = floater_options.at("file").get<std::string>();
+            floater.h5_filepath = (DATADIR / floater_options.at("file").get<std::string>()).generic_string();
             // make body
             auto body_name = floater_options.at("name").get<std::string>();
             floater.add_body(body_name);
             // position body
             auto& body = floater.get_body(body_name);
+            body.set_mass(floater_options.at("mass").get<double>());
             auto body_position = floater_options.at("cog").get<std::vector<double>>();
             if (body_position.size() != 3) {
                 throw std::runtime_error("COG of floater should be a vector of length 3.");
@@ -639,10 +648,23 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         // make turbine
         system_core.system_elasto->turbines.push_back(seahowl::elasto::TurbineElasto());
         system_core.system_aero->turbines.push_back(seahowl::aero::TurbineAero());
-        system_core.turbines.push_back(
-            seahowl::core::Turbine(system_core.system_elasto->turbines[ii], system_core.system_aero->turbines[ii]));
-        auto& turbine = system_core.turbines.back();
-
+        // check if floater defined
+        std::ifstream json_file_turbine(filepath_turbine);
+        json json_obj_turbine;
+        json_file_turbine >> json_obj_turbine;
+        bool is_floating = false;
+        if (json_obj_turbine.contains("floater")) {
+            // floating turbine if floater is defined
+            is_floating = true;
+            system_core.turbines.push_back(std::move(std::make_shared<seahowl::core::TurbineFloating>(
+                system_core.system_elasto->turbines[ii], system_core.system_aero->turbines[ii])));
+        } else {
+            // simple turbine if floater is not defined
+            system_core.turbines.push_back(std::move(std::make_shared<seahowl::core::Turbine>(
+                system_core.system_elasto->turbines[ii], system_core.system_aero->turbines[ii])));
+        }
+        // get reference to turbine object
+        auto& turbine = *system_core.turbines.back();
         populate_turbine_from_json(filepath_turbine, turbine);
 
         // aerodyn option
@@ -672,6 +694,11 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
 #endif
         // build turbine
         turbine.build();
+        // extra step if turbine is floating (@todo{move to general assemble from system})
+        if (is_floating) {
+            auto& turbine_floating = dynamic_cast<seahowl::core::TurbineFloating&>(*system_core.turbines.back());
+            turbine_floating.assemble(*system_core.system_elasto);
+        }
         // rotate turbine to align tower with gravity vector
         auto v1 = Vector3d(-system_core.system_elasto->get_gravitational_acceleration()).normalized();
         auto v2 = (turbine.tower.elasto.nodes[1]->get_position() - turbine.tower.elasto.nodes[0]->get_position())

@@ -17,7 +17,7 @@ using seahowl::PI;
 
 void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::System& ssystem, double time) {
     for (int idx_turbine = 0; idx_turbine < ssystem.turbines.size(); idx_turbine++) {
-        auto& turbine = ssystem.turbines[idx_turbine];
+        auto& turbine = *ssystem.turbines[idx_turbine];
         std::string filename;
         if (ssystem.turbines.size() == 1) {
             filename = fileprefix + ".csv";

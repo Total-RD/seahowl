@@ -1,0 +1,74 @@
+#include "seahowl/hydro/hydrochrono_adapter.h"
+
+#include "seahowl/elasto/chrono_adapters.h"
+
+#include <chrono/physics/ChBody.h>
+
+using namespace seahowl::hydro;
+
+FloaterHydroChrono::FloaterHydroChrono() {
+    hydro_inputs.mode = WaveMode::noWaveCIC;
+};
+
+void FloaterHydroChrono::add_body(std::string& name) {
+    bodies_map[name] = std::make_unique<seahowl::elasto::BodyElastoChrono>();
+}
+
+seahowl::elasto::BodyElasto& FloaterHydroChrono::get_body(std::string& name) {
+    return *bodies_map[name];
+}
+
+std::vector<std::string> FloaterHydroChrono::get_body_names_list() {
+    std::vector<std::string> names;
+    for (auto& body : bodies_map) {
+        names.push_back(body.first);
+    }
+    return names;
+}
+
+void FloaterHydroChrono::assemble(seahowl::elasto::SystemElasto& system) {
+    for (auto& bodymap : bodies_map) {
+        auto& body = *bodymap.second;
+        system.add(body);
+    }
+}
+
+void FloaterHydroChrono::initialize(double time, double dt) {
+    if (bodies_map.size() < 1) {
+        throw std::runtime_error("List of bodies for floater was not initialized.");
+    } else if (h5_filepath == "") {
+        throw std::runtime_error("Path of h5 file for floater was not defined.");
+    }
+    std::vector<std::shared_ptr<chrono::ChBody>> chbodies = {};
+    for (auto& body : bodies_map) {
+        auto& chbody = dynamic_cast<seahowl::elasto::BodyElastoChrono&>(*body.second);
+        chbody.chobj->SetName(body.first.c_str());
+        chbodies.push_back(chbody.chobj);
+    }
+    hydrochrono_setter = std::make_unique<TestHydro>(chbodies, h5_filepath, hydro_inputs);
+}
+
+seahowl::elasto::BodyElasto& FloaterHydroChrono::get_tower_connection_body() {
+    auto body_names = get_body_names_list();
+    return get_body(body_names[0]);
+}
+
+void FloaterHydroChrono::translate(Vector3d translation_vector) {
+    // translate all bodies
+    for (auto& bodymap : bodies_map) {
+        auto& body = *bodymap.second;
+        body.set_position(body.get_position() + translation_vector);
+    }
+}
+
+void FloaterHydroChrono::rotate(double angle, Vector3d axis) {
+    // rotate all bodies
+    auto rotation = AngleAxisd(angle, axis);
+    for (auto& bodymap : bodies_map) {
+        auto& body = *bodymap.second;
+        auto new_position_body = rotation * body.get_position();
+        auto new_rotation_body = (rotation * body.get_rotation()).normalized();
+        body.set_position(new_position_body);
+        body.set_rotation(new_rotation_body);
+    }
+}

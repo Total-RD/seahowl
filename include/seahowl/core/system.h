@@ -30,7 +30,7 @@ namespace core {
 class System : public ComponentDynamic {
   public:
     /** @brief Wind turbines. */
-    std::deque<Turbine> turbines{};
+    std::deque<std::shared_ptr<Turbine>> turbines{};
     /** @brief Wind model. */
     std::shared_ptr<seahowl::aero::WindModel> wind_model;
     std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto;

@@ -160,6 +160,7 @@ set(SEAHOWL_CORE_SOURCES
     src/core/blade.cpp
     src/core/tower.cpp
     src/core/turbine.cpp
+    src/core/turbine_floating.cpp
     src/core/system.cpp
 )
 set(SEAHOWL_CORE_HEADERS
@@ -169,6 +170,7 @@ set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/rotor.h
     include/seahowl/core/tower.h
     include/seahowl/core/turbine.h
+    include/seahowl/core/turbine_floating.h
     include/seahowl/core/system.h
 )
 source_group(core FILES ${SEAHOWL_CORE_SOURCES} ${SEAHOWL_CORE_HEADERS})
@@ -245,11 +247,14 @@ source_group(servo FILES ${SEAHOWL_SERVO_SOURCES} ${SEAHOWL_SERVO_HEADERS})
 
 # hydro
 set(SEAHOWL_HYDRO_SOURCES
-    src/hydro/floater_hydro.cpp
 )
 set(SEAHOWL_HYDRO_HEADERS
     include/seahowl/hydro/floater_hydro.h
 )
+if(SEAHOWL_ENABLE_HYDROCHRONO)
+    list(APPEND SEAHOWL_HYDRO_SOURCES src/hydro/hydrochrono_adapter.cpp)
+    list(APPEND SEAHOWL_HYDRO_HEADERS include/seahowl/hydro/hydrochrono_adapter.h)
+endif(SEAHOWL_ENABLE_HYDROCHRONO)
 source_group(hydro FILES ${SEAHOWL_HYDRO_SOURCES} ${SEAHOWL_HYDRO_HEADERS})
 
 # io
@@ -363,6 +368,10 @@ target_compile_features(seahowl_driver PRIVATE cxx_std_17)
 target_compile_options(seahowl_driver PRIVATE ${CHRONO_CXX_FLAGS})
 
 target_link_libraries(seahowl_driver PRIVATE seahowl_core nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES})
+
+if (SEAHOWL_ENABLE_HYDROCHRONO)
+    target_link_libraries(seahowl_driver PRIVATE HydroChrono::HydroChrono)
+endif (SEAHOWL_ENABLE_HYDROCHRONO)
 
 # --------------------------------------------------------------
 # === 4 (OPTIONAL) ===

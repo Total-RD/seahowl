@@ -47,8 +47,9 @@
   "floater": {
     "type": "HydroChrono",
     "options": {
-      "file": "./data/IEA15MW/VolturnUS.h5",
+      "file": "./VolturnUS.h5",
       "name": "body1",
+      "mass": 17839000,
       "cog": [0.0, 0.0, -14.94]
     }
   }

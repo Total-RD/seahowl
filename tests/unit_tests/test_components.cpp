@@ -667,9 +667,9 @@ TEST(test_turbine, multiturbines) {
     for (int ii = 0; ii < nturbines; ii++) {
         system_core.system_elasto->turbines.push_back(seahowl::elasto::TurbineElasto());
         system_core.system_aero->turbines.push_back(seahowl::aero::TurbineAero());
-        system_core.turbines.push_back(seahowl::core::Turbine(system_core.system_elasto->turbines.back(),
-                                                              system_core.system_aero->turbines.back()));
-        auto& turbine = system_core.turbines.back();
+        system_core.turbines.push_back(std::make_shared<seahowl::core::Turbine>(
+            system_core.system_elasto->turbines.back(), system_core.system_aero->turbines.back()));
+        auto& turbine = *system_core.turbines.back();
         populate_turbine_from_json(turbine_file, turbine);
         // empty controller
         turbine.controller = std::make_shared<seahowl::servo::Controller>();
@@ -690,7 +690,7 @@ TEST(test_turbine, multiturbines) {
 
     double time = 0.0;
     for (auto& turbine : system_core.turbines) {
-        turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
+        turbine->rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     }
     system_core.initialize(time, dt);
     while (time < 50) {
@@ -706,7 +706,7 @@ TEST(test_turbine, multiturbines) {
     }
 
     for (auto& turbine : system_core.turbines) {
-        ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.829, 0.02);
+        ASSERT_NEAR(turbine->rna.elasto.get_rpm(), 2.829, 0.02);
     }
 }
 
