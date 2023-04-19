@@ -47,13 +47,13 @@ option(SEAHOWL_ENABLE_HYDROCHRONO "Enable HydroChrono library" OFF)
 # Eigen library
 find_package(Eigen3 3.3.0 REQUIRED NO_MODULE)
 
-# IRRLICHT Visualization library
+# Irrlicht Visualization library
 if(SEAHOWL_ENABLE_IRRLICHT)
     set(IRRLICHT_COMP Irrlicht)
     add_definitions("-DHAVE_IRRLICHT=1")
 endif(SEAHOWL_ENABLE_IRRLICHT)
 
-# Multy body dynamic library
+# Chrono multibody dynamics library
 find_package(
     Chrono
     COMPONENTS ${IRRLICHT_COMP}
@@ -91,7 +91,7 @@ if(VTK_FOUND)
     add_definitions("-DHAVE_VTK=1")
 endif()
 
-# HydroChrono
+# HydroChrono potential flow library
 if(SEAHOWL_ENABLE_HYDROCHRONO)
     find_package(HydroChrono REQUIRED)
     add_compile_definitions(SEAHOWL_HAVE_HYDROCHRONO=1)
@@ -331,9 +331,8 @@ target_link_libraries(seahowl_core
 )
 
 if (SEAHOWL_ENABLE_HYDROCHRONO)
-    target_link_libraries(seahowl_core PRIVATE HydroChrono::HydroChrono)
+    target_link_libraries(seahowl_core PUBLIC HydroChrono::HydroChrono)
 endif (SEAHOWL_ENABLE_HYDROCHRONO)
-
 
 if(SEAHOWL_ENABLE_VTK)
     target_link_libraries(seahowl_core PRIVATE VTK::CommonDataModel VTK::IOXML)
