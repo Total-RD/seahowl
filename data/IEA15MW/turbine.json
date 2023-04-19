@@ -45,12 +45,6 @@
     }
   },
   "floater": {
-    "type": "HydroChrono",
-    "options": {
-      "file": "./VolturnUS.h5",
-      "name": "body1",
-      "mass": 17839000,
-      "cog": [0.0, 0.0, -14.94]
-    }
+    "file": "./floater.json"
   }
 }

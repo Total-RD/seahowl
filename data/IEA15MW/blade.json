@@ -1,4 +1,4 @@
- {
+{
   "damping_coefficients": [0.03, 0.03, 0.03, 0.06],
   "reference_points": [{
     "coordinates": [0.0, 0.0, 0.0],

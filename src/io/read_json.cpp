@@ -550,15 +550,20 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
 
     if (json_obj.contains("floater")) {
         auto floater_json = json_obj.at("floater");
-        auto floater_type = floater_json.at("type").get<std::string>();
+        // get extra drivetrain info
+        std::ifstream json_file_floater((DATADIR / floater_json.at("file").get<std::string>()).generic_string());
+        // populate json object
+        json json_obj_floater;
+        json_file_floater >> json_obj_floater;
+        auto floater_type = json_obj_floater.at("type").get<std::string>();
         if (floater_type == "HydroChrono") {
 #ifdef HAVE_HYDROCHRONO
-            auto floater_options = floater_json.at("options");
             // dynamic cast turbine
             auto& turbine_floating = dynamic_cast<seahowl::core::TurbineFloating&>(turbine);
             // make floater
             turbine_floating.floater = std::make_unique<seahowl::hydro::FloaterHydroChrono>();
             auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine_floating.floater);
+            auto floater_options = json_obj_floater.at("options");
             // add h5file path
             floater.h5_filepath = (DATADIR / floater_options.at("file").get<std::string>()).generic_string();
             // make body
@@ -566,12 +571,27 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
             floater.add_body(body_name);
             // position body
             auto& body = floater.get_body(body_name);
-            body.set_mass(floater_options.at("mass").get<double>());
-            auto body_position = floater_options.at("cog").get<std::vector<double>>();
+            body.set_mass(json_obj_floater.at("mass").get<double>());
+            auto body_position = json_obj_floater.at("cog").get<std::vector<double>>();
             if (body_position.size() != 3) {
                 throw std::runtime_error("COG of floater should be a vector of length 3.");
             }
             body.set_position(Vector3d(body_position[0], body_position[1], body_position[2]));
+            // inertia body
+            auto body_inertia = json_obj_floater.at("inertia").get<std::vector<std::vector<double>>>();
+            if (body_inertia.size() != 3) {
+                throw std::runtime_error("Inertia matrix of floater should be 3x3.");
+            }
+            Eigen::Matrix<double, 3, 3> body_inertia_matrix;
+            for (int row = 0; row < 3; row++) {
+                if (body_inertia[row].size() != 3) {
+                    throw std::runtime_error("Inertia matrix of floater should be 3x3.");
+                }
+                for (int col = 0; col < 3; col++) {
+                    body_inertia_matrix(row, col) = body_inertia[row][col];
+                }
+            }
+            body.set_inertia_matrix(body_inertia_matrix);
 #endif
         } else {
             throw std::runtime_error("Type of floater defined in turbine json file does not exist.");
