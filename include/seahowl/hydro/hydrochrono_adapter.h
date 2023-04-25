@@ -24,6 +24,13 @@ class FloaterHydroChrono : public FloaterHydro {
     FloaterHydroChrono();
 
     /**
+     * @brief Adds fairlead to system.
+     *
+     * @param[out] position Position of fairlead.
+     */
+    virtual void add_fairlead(Vector3d& position) override;
+
+    /**
      * @brief Adds body to floater.
      *
      * @param[in] name The name of the body in the hydro file.

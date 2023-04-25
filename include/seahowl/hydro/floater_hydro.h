@@ -4,17 +4,29 @@
 #include "seahowl/elasto/entities_elasto.h"
 #include "seahowl/elasto/system_elasto.h"
 
+#include <deque>
+
 namespace seahowl {
 namespace hydro {
 
 class FloaterHydro {
   public:
+    std::deque<std::unique_ptr<seahowl::elasto::BodyElasto>> fairleads;
+    std::deque<std::unique_ptr<seahowl::elasto::Link>> links_fairlead_floater;
+
     /**
      * @brief Assembles the component (adds all bodies to the system).
      *
      * @param[out] system System to which bodies.
      */
     virtual void assemble(seahowl::elasto::SystemElasto& system) = 0;
+
+    /**
+     * @brief Adds fairlead to system.
+     *
+     * @param[out] position Position of fairlead.
+     */
+    virtual void add_fairlead(Vector3d& position) = 0;
 
     /**
      * @brief Initialize floater, called before starting the simulation.

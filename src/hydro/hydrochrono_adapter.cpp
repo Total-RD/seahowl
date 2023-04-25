@@ -10,6 +10,23 @@ FloaterHydroChrono::FloaterHydroChrono() {
     hydro_inputs.mode = WaveMode::noWaveCIC;
 };
 
+void FloaterHydroChrono::add_fairlead(Vector3d& position) {
+    // fairlead
+    fairleads.push_back(std::unique_ptr<seahowl::elasto::BodyElastoChrono>());
+    auto& fairlead = *(fairleads.back());
+    fairlead.set_position(position);
+
+    // link
+    links_fairlead_floater.push_back(std::unique_ptr<seahowl::elasto::LinkChrono>());
+    auto& link = *(links_fairlead_floater.back().get());
+    link.set_constraints(true, true, true, false, true, true);
+    if (bodies_map.size() > 0) {
+        link.initialize(fairlead, *(bodies_map.begin()->second));
+    } else {
+        throw std::runtime_error("Need to add body to floater before creating fairleads.");
+    }
+}
+
 void FloaterHydroChrono::add_body(std::string& name) {
     bodies_map[name] = std::make_unique<seahowl::elasto::BodyElastoChrono>();
 }
@@ -30,6 +47,12 @@ void FloaterHydroChrono::assemble(seahowl::elasto::SystemElasto& system) {
     for (auto& bodymap : bodies_map) {
         auto& body = *bodymap.second;
         system.add(body);
+    }
+    for (auto& fairlead : fairleads) {
+        system.add(*fairlead);
+    }
+    for (auto& link : links_fairlead_floater) {
+        system.add(*link);
     }
 }
 
