@@ -281,7 +281,7 @@ target_sources(seahowl_core PRIVATE ${SEAHOWL_FILES})
 target_include_directories(
     seahowl_core
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS} ${MoorDyn_DIR}/../../include/moordyn
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS}
 )
 
 target_compile_features(seahowl_core PRIVATE cxx_std_17)
@@ -328,7 +328,7 @@ target_sources(
 target_include_directories(
     seahowl_driver
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS} ${MoorDyn_DIR}/../../include/moordyn
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS}
 )
 
 target_compile_features(seahowl_driver PRIVATE cxx_std_17)
