@@ -7,8 +7,10 @@
 #include <chrono/core/ChMatrix.h>
 #include <chrono/fea/ChBeamSectionTaperedTimoshenkoFPM.h>
 #include <chrono/fea/ChElementBeamTaperedTimoshenkoFPM.h>
-#include <chrono/fea/ChElementBeamEuler.h>
+#include <chrono/fea/ChElementCableANCF.h>
 #include <chrono/physics/ChLinkMate.h>
+#include <chrono/fea/ChLinkPointPoint.h>
+#include <chrono/fea/ChLinkPointFrame.h>
 #include <chrono/physics/ChLinkRevolute.h>
 #include <chrono/fea/ChMesh.h>
 #include <chrono/physics/ChSystemSMC.h>
@@ -236,6 +238,7 @@ NodeElastoChrono::NodeElastoChrono(const Vector3d& position, const Quaternion& r
     chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(
         chrono::ChFrame<>(vec2ch(position), node_iec2ch(rotation)));
     EntityDynamicChrono::chobj = chobj;
+    NodeElastoChronoBase::chobj = chobj;
 }
 
 void NodeElastoChrono::set_rotation(const Quaternion& rotation) {
@@ -404,6 +407,105 @@ void NodeElastoChrono::set_properties(const TowerReferencePointElasto& ref) {
     section->SetBeamRaleyghDamping(damping_coefficients);
 }
 
+NodeElastoChronoD::NodeElastoChronoD(const Vector3d& position, const Vector3d& direction) {
+    chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzD>(vec2ch(position), vec2ch(direction));
+    NodeElastoChronoBase::chobj = chobj;
+}
+
+void NodeElastoChronoD::set_rotation(const Quaternion& rotation) {}
+
+Quaternion NodeElastoChronoD::get_rotation() const {
+    return Quaternion(1.0, 0.0, 0.0, 0.0);
+}
+
+Vector3d NodeElastoChronoD::get_direction() const {
+    return ch2vec(chobj->GetD());
+}
+
+void NodeElastoChronoD::reset_loads() {
+    set_force(Vector3d(0.0, 0.0, 0.0), false);
+    set_torque(Vector3d(0.0, 0.0, 0.0), true);
+}
+
+Vector3d NodeElastoChronoD::get_force(bool is_local) const {
+    if (is_local) {
+        throw std::runtime_error("Cannot get force locally from ChNodeFEAxyzD.");
+    } else {
+        return ch2vec(chobj->GetForce());
+    }
+}
+
+Vector3d NodeElastoChronoD::get_torque(bool is_local) const {
+    // no torque on ChNodeFEAxyzD
+    return Vector3d(0.0, 0.0, 0.0);
+}
+
+void NodeElastoChronoD::set_force(const Vector3d& force, bool is_local) {
+    if (is_local) {
+        chobj->SetForce(vec2ch(get_rotation() * force));
+    } else {
+        chobj->SetForce(vec2ch(force));
+    }
+}
+
+void NodeElastoChronoD::set_torque(const Vector3d& torque, bool is_local) {
+    // no torque on ChNodeFEAxyzD
+}
+
+void NodeElastoChronoD::accumulate_force(const Vector3d& force, bool is_local) {
+    set_force(get_force(is_local) + force, is_local);
+}
+
+void NodeElastoChronoD::accumulate_torque(const Vector3d& torque, bool is_local) {
+    set_torque(get_torque(is_local) + torque, is_local);
+}
+
+void NodeElastoChronoD::set_fixed(bool is_fixed) {
+    chobj->SetFixed(is_fixed);
+}
+
+void NodeElastoChronoD::set_position(const Vector3d& position) {
+    chobj->SetPos(vec2ch(position));
+}
+
+Vector3d NodeElastoChronoD::get_position() const {
+    return ch2vec(chobj->GetPos());
+}
+
+void NodeElastoChronoD::set_velocity(const Vector3d& velocity) {
+    chobj->SetPos_dt(vec2ch(velocity));
+}
+
+Vector3d NodeElastoChronoD::get_velocity() const {
+    return ch2vec(chobj->GetPos_dt());
+}
+
+void NodeElastoChronoD::set_acceleration(const Vector3d& acceleration) {
+    chobj->SetPos_dtdt(vec2ch(acceleration));
+}
+
+Vector3d NodeElastoChronoD::get_acceleration() const {
+    return ch2vec(chobj->GetPos_dt());
+}
+
+void NodeElastoChronoD::set_rotational_velocity(const Vector3d& rotational_velocity, bool is_local) {
+    // no rotational velocity on ChNodeFEAxyzD
+}
+
+Vector3d NodeElastoChronoD::get_rotational_velocity(bool is_local) const {
+    // no rotational velocity on ChNodeFEAxyzD
+    return Vector3d(0.0, 0.0, 0.0);
+}
+
+void NodeElastoChronoD::set_rotational_acceleration(const Vector3d& rotational_acceleration, bool is_local) {
+    // no rotational acceleration on ChNodeFEAxyzD
+}
+
+Vector3d NodeElastoChronoD::get_rotational_acceleration(bool is_local) const {
+    // no rotational acceleration on ChNodeFEAxyzD
+    return Vector3d(0.0, 0.0, 0.0);
+}
+
 void ElementElastoChrono::set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) {
     nodes.clear();
     nodes.push_back(node1);
@@ -492,7 +594,7 @@ void ElementBladeElastoChronoFPM::set_prebend(const Quaternion& prebend) {
 }
 
 ElementMooringElastoChrono::ElementMooringElastoChrono() {
-    chobj = chrono_types::make_shared<chrono::fea::ChElementBeamEuler>();
+    chobj = chrono_types::make_shared<chrono::fea::ChElementCableANCF>();
     ElementElastoChrono::chobj = chobj;
 }
 
@@ -502,25 +604,35 @@ void ElementMooringElastoChrono::set_nodes(std::shared_ptr<NodeElasto> node1, st
     nodes.push_back(node2);
 
     // set nodes
-    chobj->SetNodes(std::dynamic_pointer_cast<NodeElastoChrono>(node1)->chobj,
-                    std::dynamic_pointer_cast<NodeElastoChrono>(node2)->chobj);
+    chobj->SetNodes(std::dynamic_pointer_cast<NodeElastoChronoD>(node1)->chobj,
+                    std::dynamic_pointer_cast<NodeElastoChronoD>(node2)->chobj);
 }
 
 void ElementMooringElastoChrono::set_properties(double density, double diameter, double stiffness_axial) {
     // create mooring section
-    auto section = chrono_types::make_shared<chrono::fea::ChBeamSectionEulerAdvanced>();
+    auto section = chrono_types::make_shared<chrono::fea::ChBeamSectionCable>();
     chobj->SetSection(section);
     section->SetDensity(density);
     double area = chrono::CH_C_PI * pow(diameter, 2) / 4.0;
-    section->SetArea(area);
+    section->SetDiameter(diameter);
     section->SetYoungModulus(stiffness_axial / area);
-    section->SetGshearModulus(0.0);
-    section->SetAsCircularSection(diameter);
+    // section->SetI(1e-10);
+    // section->SetGshearModulus(0.0);
+    // section->SetAsCircularSection(diameter);
+}
+
+void ElementMooringElastoChrono::set_rest_length(double rest_length) {
+    chobj->SetRestLength(rest_length);
+}
+
+double ElementMooringElastoChrono::get_rest_length() {
+    return chobj->GetRestLength();
 }
 
 LinkChrono::LinkChrono() {
     chobj = chrono_types::make_shared<chrono::ChLinkMateGeneric>();
     chobj->SetConstrainedCoords(true, true, true, true, true, true);
+    LinkChronoBase::chobj = chobj;
 }
 
 void LinkChrono::initialize(const BodyElasto& body1, const BodyElasto& body2) {
@@ -553,12 +665,46 @@ Vector3d LinkChrono::get_reaction_torque() const {
     return ch2vec(chobj->Get_react_torque());
 }
 
+LinkChronoCable::LinkChronoCable() {}
+
+void LinkChronoCable::initialize(const BodyElasto& body1, const BodyElasto& body2) {
+    throw std::runtime_error("Cannot link 2 bodies with cable link.");
+}
+
+void LinkChronoCable::initialize(const NodeElasto& node1, const BodyElasto& body2) {
+    auto link = chrono_types::make_shared<chrono::fea::ChLinkPointFrame>();
+    link->Initialize(dynamic_cast<const NodeElastoChronoD&>(node1).chobj,
+                     dynamic_cast<const BodyElastoChrono&>(body2).chobj);
+    chobj = link;
+    LinkChronoBase::chobj = chobj;
+}
+
+void LinkChronoCable::initialize(const NodeElasto& node1, const NodeElasto& node2) {
+    auto link = chrono_types::make_shared<chrono::fea::ChLinkPointPoint>();
+    link->Initialize(dynamic_cast<const NodeElastoChronoD&>(node1).chobj,
+                     dynamic_cast<const NodeElastoChronoD&>(node2).chobj);
+    chobj = link;
+    LinkChronoBase::chobj = chobj;
+}
+
+void LinkChronoCable::set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) {
+    throw std::runtime_error("Cannot set individual constraints on cable link.");
+}
+
+Vector3d LinkChronoCable::get_reaction_force() const {
+    return ch2vec(chobj->Get_react_force());
+}
+
+Vector3d LinkChronoCable::get_reaction_torque() const {
+    return ch2vec(chobj->Get_react_torque());
+}
+
 MeshElastoChrono::MeshElastoChrono() {
     chobj = chrono_types::make_shared<chrono::fea::ChMesh>();
 }
 
 void MeshElastoChrono::add(NodeElasto& node) {
-    chobj->AddNode(dynamic_cast<NodeElastoChrono&>(node).chobj);
+    chobj->AddNode(dynamic_cast<NodeElastoChronoBase&>(node).chobj);
 }
 
 void MeshElastoChrono::add(ElementElasto& element) {

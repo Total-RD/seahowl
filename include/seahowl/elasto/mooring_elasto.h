@@ -25,6 +25,10 @@ class MooringElasto : public ComponentElastoFEA {
     double density = 0.0;
     /** @brief Unstretched length of the mooring line. */
     double length = 0.0;
+    /** @brief Drag coefficient of the mooring line. */
+    double drag_coefficient = 0.5;
+    /** @brief Added mass coefficient of the mooring line. */
+    double added_mass_coefficient = 0.5;
 
     MooringElasto();
 
@@ -32,12 +36,14 @@ class MooringElasto : public ComponentElastoFEA {
      * @brief Builds the mooring (to call before assemble).
      */
     void build();
+    void build_nodes(const std::vector<ReferencePointElasto>& discretized_points);
+    void compute_hydro_loads();
 
   private:
     /**
-     * @brief Builds the mooring with Euler-Bernoulli elements.
+     * @brief Builds the mooring with ANCF cable elements.
      */
-    void build_elements_euler();
+    void build_elements();
 };
 
 }  // namespace elasto

@@ -219,6 +219,18 @@ class ElementMooringElasto : public virtual ElementElasto {
      * @param[in] stiffness_axial Axial stiffness of element.
      */
     virtual void set_properties(double density, double diameter, double stiffness_axial) = 0;
+
+    /**
+     * @brief Sets rest length of mooring elasto element.
+     *
+     * @param[in] rest_length Rest length of element.
+     */
+    virtual void set_rest_length(double rest_length) = 0;
+
+    /**
+     * @brief Returns rest length of mooring elasto element.
+     */
+    virtual double get_rest_length() = 0;
 };
 
 /**
