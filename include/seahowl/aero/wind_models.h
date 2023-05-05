@@ -14,17 +14,12 @@ class WindModel {
     double density = 1.225;
 
     /**
-     * @brief Constructor.
-     */
-    WindModel();
-
-    /**
      * @brief Returns wind velocity at given coordinates.
      *
      * @param[in] position Position at which wind velocity is extracted.
      * @param[in] time Time of simulation.
      */
-    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const;
+    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const = 0;
 
     /**
      * @brief Returns air density.
@@ -32,11 +27,8 @@ class WindModel {
     double get_density() const;
 };
 
-/**@brief Constant wind models */
-class ConstantWind : public WindModel {
+class ShearedWind : public WindModel {
   public:
-    /** @brief Constant wind velocity. */
-    Vector3d wind_velocity;
     /** @brief Wind shear coefficient. */
     double shear_coefficient = 0.0;
     /** @brief Reference height (where constant velocity is defined). */
@@ -44,7 +36,14 @@ class ConstantWind : public WindModel {
     /** @brief Reference length (length of shear). */
     double reference_length = 240.0;
     /** @brief Direction of gravitational acceleration. */
-    Vector3d direction_gravity;
+    Vector3d direction_gravity{0.0, 0.0, -1.0};
+};
+
+/**@brief Constant wind models */
+class ConstantWind : public ShearedWind {
+  public:
+    /** @brief Wind velocity. */
+    Vector3d wind_velocity;
 
     /**
      * @brief Constructor.
@@ -68,7 +67,7 @@ class ConstantWind : public WindModel {
 };
 
 /**@brief Wind ramp model */
-class WindRamp : public WindModel {
+class WindRamp : public ShearedWind {
   public:
     /** @brief Starting time of ramp. */
     double time_start = 0.0;
@@ -78,14 +77,6 @@ class WindRamp : public WindModel {
     Vector3d wind_velocity_start;
     /** @brief Wind velocity at end of ramp. */
     Vector3d wind_velocity_stop;
-    /** @brief Wind shear coefficient. */
-    double shear_coefficient = 0.0;
-    /** @brief Reference height (where constant velocity is defined). */
-    double reference_height = 150.0;
-    /** @brief Reference length (length of shear). */
-    double reference_length = 240.0;
-    /** @brief Direction of gravitational acceleration. */
-    Vector3d direction_gravity;
 
     /**
      * @brief Constructor.

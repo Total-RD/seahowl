@@ -41,4 +41,26 @@ void initialize_pyseahowl_aero(py::module& m) {
     py::class_<seahowl::aero::TurbineAero, std::shared_ptr<seahowl::aero::TurbineAero>>(m_aero, "TurbineAero")
         .def(py::init<>())
         .def_readonly("rotor", &seahowl::aero::TurbineAero::rotor);
+
+    // aero/wind_models.h
+    py::class_<seahowl::aero::WindModel, std::shared_ptr<seahowl::aero::WindModel>>(m_aero, "WindModel")
+        .def("get_wind_velocity", &seahowl::aero::WindModel::get_wind_velocity)
+        .def("get_density", &seahowl::aero::WindModel::get_density);
+    py::class_<seahowl::aero::ShearedWind, std::shared_ptr<seahowl::aero::ShearedWind>, seahowl::aero::WindModel>(
+        m_aero, "ShearedWind")
+        .def_readwrite("shear_coefficient", &seahowl::aero::ShearedWind::shear_coefficient)
+        .def_readwrite("reference_height", &seahowl::aero::ShearedWind::reference_height)
+        .def_readwrite("reference_length", &seahowl::aero::ShearedWind::reference_length)
+        .def_readwrite("direction_gravity", &seahowl::aero::ShearedWind::direction_gravity);
+    py::class_<seahowl::aero::ConstantWind, std::shared_ptr<seahowl::aero::ConstantWind>, seahowl::aero::ShearedWind>(
+        m_aero, "ConstantWind")
+        .def("set_wind_velocity", &seahowl::aero::ConstantWind::set_wind_velocity)
+        .def_readwrite("shear_coefficient", &seahowl::aero::ConstantWind::shear_coefficient);
+    py::class_<seahowl::aero::WindRamp, std::shared_ptr<seahowl::aero::WindRamp>, seahowl::aero::ShearedWind>(
+        m_aero, "WindRamp")
+        .def("set_wind_velocity_start", &seahowl::aero::WindRamp::set_wind_velocity_start)
+        .def("set_wind_velocity_stop", &seahowl::aero::WindRamp::set_wind_velocity_stop)
+        .def_readwrite("time_start", &seahowl::aero::WindRamp::time_start)
+        .def_readwrite("wind_velocity_start", &seahowl::aero::WindRamp::wind_velocity_start)
+        .def_readwrite("wind_velocity_stop", &seahowl::aero::WindRamp::wind_velocity_stop);
 }

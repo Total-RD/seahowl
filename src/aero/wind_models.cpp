@@ -16,12 +16,6 @@ Vector3d get_sheared_wind_velocity(const Vector3d& velocity,
     return velocity * pow(distance / reference_height, shear_coefficient);
 }
 
-WindModel::WindModel() {}
-
-Vector3d WindModel::get_wind_velocity(const Vector3d& position, double time) const {
-    return Vector3d(0.0, 0.0, 0.0);
-};
-
 double WindModel::get_density() const {
     return density;
 }

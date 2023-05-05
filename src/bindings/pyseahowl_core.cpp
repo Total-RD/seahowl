@@ -61,6 +61,7 @@ void initialize_pyseahowl_core(py::module& m) {
         .def(py::init<>())
         .def("step", &seahowl::core::System::step)
         .def_readonly("turbines", &seahowl::core::System::turbines)
+        .def_readonly("wind_model", &seahowl::core::System::wind_model)
         .def_readwrite("system_elasto", &seahowl::core::System::system_elasto)
         .def_readwrite("system_aero", &seahowl::core::System::system_aero);
 }
