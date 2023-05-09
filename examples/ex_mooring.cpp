@@ -20,6 +20,39 @@ using namespace seahowl;
 using namespace seahowl::elasto;
 using namespace chrono;
 
+void setup_cables(seahowl::elasto::SystemElasto& system,
+                  seahowl::elasto::MooringElasto& mooring,
+                  double dt = 0.01,
+                  int nsteps = 1000) {
+    // check that mooring was built properly
+    int nb_elements = mooring.elements.size();
+    if (nb_elements != mooring.discretization_fractions.size() - 1) {
+        throw std::runtime_error(
+            "Number of elements and discretization fractions on mooring do not match (build mooring first?).");
+    }
+
+    // get initial and final lengths of mooring, and length increment to apply
+    std::vector<double> lengths_initial(nb_elements);
+    std::vector<double> lengths_final(nb_elements);
+    std::vector<double> lengths_delta(nb_elements);
+    for (int idx_el = 0; idx_el < nb_elements; idx_el++) {
+        auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring.elements[idx_el]);
+        lengths_final[idx_el] =
+            mooring.length * (mooring.discretization_fractions[idx_el + 1] - mooring.discretization_fractions[idx_el]);
+        lengths_initial[idx_el] = (element.nodes[1]->get_position() - element.nodes[0]->get_position()).norm();
+        lengths_delta[idx_el] = (lengths_final[idx_el] - lengths_initial[idx_el]) / nsteps;
+    }
+
+    // apply length increments dynamically
+    for (int step = 0; step <= nsteps; step++) {
+        for (int idx_el = 0; idx_el < nb_elements; idx_el++) {
+            auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring.elements[idx_el]);
+            element.set_rest_length(lengths_initial[idx_el] + lengths_delta[idx_el] * step);
+        }
+        system.step(dt);
+    }
+}
+
 int main(int argc, char* argv[]) {
     double dt = 0.01;
 
@@ -44,7 +77,7 @@ int main(int argc, char* argv[]) {
     auto mooring = seahowl::elasto::MooringElasto();
     mooring.fairlead_position = Vector3d(0.0, 200.0, 200.0);
     mooring.anchor_position = Vector3d(0.0, 0.0, 0.0);
-    mooring.length = 284;
+    mooring.length = 350.0;
     mooring.diameter = 0.13376;
     mooring.stiffness_axial = 753.6e6;
     mooring.density = 116.6 / (PI * pow(mooring.diameter, 2) / 4.0);
@@ -120,18 +153,12 @@ int main(int argc, char* argv[]) {
     // system_chrono->DoStaticRelaxing();
     // system_chrono->DoStaticLinear();
     mooring.drag_coefficient = 0;
+    setup_cables(system_elasto, mooring, 0.01, 1000);
+    mooring.drag_coefficient = 0.5;
     while (true) {
         time += system_chrono->GetStep();
         mooring.compute_hydro_loads();
         system_chrono->DoStepDynamics(dt);
-        if (time < 10) {
-            for (auto& element : mooring.elements) {
-                auto& element_mooring = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element);
-                element_mooring.set_rest_length(element_mooring.get_rest_length() * 1.0003);
-            }
-        } else if (time > 15) {
-            mooring.drag_coefficient = 0.5;
-        }
         step += 1;
         std::cout << "time: " << time << std::endl;
 #ifdef HAVE_IRRLICHT
