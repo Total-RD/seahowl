@@ -108,7 +108,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
     // elasto/tower_elasto.h
     py::class_<seahowl::elasto::TowerElasto, std::shared_ptr<seahowl::elasto::TowerElasto>,
                seahowl::elasto::ComponentElastoFEA>(m_elasto, "TowerElasto")
-        .def(py::init<>());
+        .def(py::init<>())
+        .def("get_tower_base_moment", &seahowl::elasto::TowerElasto::get_tower_base_moment);
 
     // elasto/turbine_elasto.h
     py::class_<seahowl::elasto::TurbineElasto, std::shared_ptr<seahowl::elasto::TurbineElasto>>(m_elasto,

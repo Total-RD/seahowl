@@ -67,3 +67,7 @@ void TowerElasto::build_elements_tapered_timoshenko() {
         element->set_nodes(nodes[ii - 1], nodes[ii]);
     }
 }
+
+seahowl::Vector3d TowerElasto::get_tower_base_moment() const {
+    return elements[0]->get_torque(-1.0);
+}

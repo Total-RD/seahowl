@@ -32,6 +32,11 @@ class TowerElasto : public ComponentElastoFEA {
      */
     void build();
 
+    /**
+     * @brief Returns tower base moment (first node of first element of tower).
+     */
+    Vector3d get_tower_base_moment() const;
+
   private:
     /**
      * @brief Builds the blade with Timoshenko elements (lineic density, foreaft stiffness, sideside stiffness).
