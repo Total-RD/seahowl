@@ -11,6 +11,14 @@
 #include <chrono/fea/ChElementCableANCF.h>
 #include <chrono/fea/ChLinkPointFrame.h>
 
+#include <filesystem>  // C++17
+
+using std::filesystem::create_directory;
+
+#ifdef HAVE_VTK
+    #include <seahowl/io/write_vtk.h>
+#endif
+
 #ifdef HAVE_IRRLICHT
     #include <chrono_irrlicht/ChVisualSystemIrrlicht.h>
     #include <seahowl/io/viz_insitu.h>
@@ -19,6 +27,27 @@
 using namespace seahowl;
 using namespace seahowl::elasto;
 using namespace chrono;
+
+void seabed_interaction(seahowl::elasto::SystemElasto& system, seahowl::elasto::MooringElasto& mooring) {
+    auto seabed_depth = 0.0;
+    auto seabed_stiffness = 1e6;
+    Vector3d gravity_direction =
+        system.get_gravitational_acceleration() / system.get_gravitational_acceleration().norm();
+    auto seabed_position = (-gravity_direction) * seabed_depth;
+    for (auto& element : mooring.elements) {
+        auto element_length = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_rest_length();
+        for (auto& node : element->nodes) {
+            auto node_position = node->get_position();
+            Vector3d node_z_vector = node_position.cwiseProduct(-gravity_direction);
+            double penetration_depth = (node_z_vector - seabed_position).dot(-gravity_direction);
+            if (penetration_depth < 0) {
+                auto load_up = gravity_direction * seabed_stiffness * penetration_depth * mooring.diameter;
+                auto load_half_element = load_up * 0.5 * element_length;
+                node->set_force(node->get_force() + load_up);
+            }
+        }
+    }
+}
 
 void setup_cables(seahowl::elasto::SystemElasto& system,
                   seahowl::elasto::MooringElasto& mooring,
@@ -49,6 +78,8 @@ void setup_cables(seahowl::elasto::SystemElasto& system,
             auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring.elements[idx_el]);
             element.set_rest_length(lengths_initial[idx_el] + lengths_delta[idx_el] * step);
         }
+        mooring.compute_hydro_loads();
+        seabed_interaction(system, mooring);
         system.step(dt);
     }
 }
@@ -75,13 +106,17 @@ int main(int argc, char* argv[]) {
 
     // mooring line
     auto mooring = seahowl::elasto::MooringElasto();
-    mooring.fairlead_position = Vector3d(0.0, 200.0, 200.0);
+    mooring.fairlead_position = Vector3d(0.0, 837.60 - 40.868, 200.0 - 14.0);
     mooring.anchor_position = Vector3d(0.0, 0.0, 0.0);
-    mooring.length = 350.0;
+    mooring.length = 835.5;
     mooring.diameter = 0.13376;
     mooring.stiffness_axial = 753.6e6;
     mooring.density = 116.6 / (PI * pow(mooring.diameter, 2) / 4.0);
-    mooring.discretization_fractions = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+    mooring.discretization_fractions = {};
+    int nelements = 40;
+    for (int ii = 0; ii < nelements + 1; ii++) {
+        mooring.discretization_fractions.push_back(1.0 / nelements * ii);
+    }
     //
     mooring.build();
     mooring.assemble(system_elasto);
@@ -140,6 +175,16 @@ int main(int argc, char* argv[]) {
     double time = 0;
     double step = 0;
 
+#ifdef HAVE_VTK
+    auto output_vtk = false;
+    std::vector<OutputMeshVTK> vtk_outputs;
+    if (output_vtk) {
+        create_directory("./output");
+        auto& post_mooring = vtk_outputs.emplace_back(mooring);
+        post_mooring.initialize("./output/mooring");
+    }
+#endif
+
 #ifdef HAVE_IRRLICHT
     auto application = chrono_types::make_shared<chrono::irrlicht::ChVisualSystemIrrlicht>();
     application->SetWindowTitle("SEAHOWL");
@@ -153,14 +198,22 @@ int main(int argc, char* argv[]) {
     // system_chrono->DoStaticRelaxing();
     // system_chrono->DoStaticLinear();
     mooring.drag_coefficient = 0;
-    setup_cables(system_elasto, mooring, 0.01, 1000);
+    setup_cables(system_elasto, mooring, dt, 1000);
     mooring.drag_coefficient = 0.5;
     while (true) {
         time += system_chrono->GetStep();
         mooring.compute_hydro_loads();
+        seabed_interaction(system_elasto, mooring);
         system_chrono->DoStepDynamics(dt);
         step += 1;
         std::cout << "time: " << time << std::endl;
+#ifdef HAVE_VTK
+        if (output_vtk) {
+            for (auto const& vtk_output : vtk_outputs) {
+                vtk_output.write(system_elasto.get_time(), step);
+            }
+        }
+#endif
 #ifdef HAVE_IRRLICHT
         application->GetDevice()->run();
         draw_system(system_chrono, application);

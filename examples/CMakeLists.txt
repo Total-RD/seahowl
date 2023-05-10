@@ -62,6 +62,11 @@ target_include_directories(ex_mooring
 	${CHRONO_INCLUDE_DIRS}
 )
 
+target_compile_features(ex_mooring
+    PRIVATE
+    cxx_std_17
+)
+
 target_link_libraries(ex_mooring
     PRIVATE
 	seahowl_core
