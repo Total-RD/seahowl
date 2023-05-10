@@ -616,15 +616,21 @@ void ElementMooringElastoChrono::set_properties(double density, double diameter,
     double area = chrono::CH_C_PI * pow(diameter, 2) / 4.0;
     section->SetDiameter(diameter);
     section->SetYoungModulus(stiffness_axial / area);
-    section->SetI(0);
 }
 
 void ElementMooringElastoChrono::set_rest_length(double rest_length) {
     chobj->SetRestLength(rest_length);
 }
 
-double ElementMooringElastoChrono::get_rest_length() {
+double ElementMooringElastoChrono::get_rest_length() const {
     return chobj->GetRestLength();
+}
+
+void ElementMooringElastoChrono::set_bending_inertia(double bending_inertia) {
+    chobj->GetSection()->SetI(bending_inertia);
+}
+double ElementMooringElastoChrono::get_bending_inertia() const {
+    return chobj->GetSection()->GetI();
 }
 
 LinkChrono::LinkChrono() {

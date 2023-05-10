@@ -230,7 +230,19 @@ class ElementMooringElasto : public virtual ElementElasto {
     /**
      * @brief Returns rest length of mooring elasto element.
      */
-    virtual double get_rest_length() = 0;
+    virtual double get_rest_length() const = 0;
+
+    /**
+     * @brief Sets bending moment of inertia of the element.
+     *
+     * @param[in] bending_inertia Bending moment of inertia of the element.
+     */
+    virtual void set_bending_inertia(double bending_inertia) = 0;
+
+    /**
+     * @brief Returns bending moment of inertia of the element.
+     */
+    virtual double get_bending_inertia() const = 0;
 };
 
 /**

@@ -121,6 +121,11 @@ int main(int argc, char* argv[]) {
     mooring.build();
     mooring.assemble(system_elasto);
 
+    // set bending stiffness to zero
+    for (auto& element : mooring.elements) {
+        dynamic_cast<ElementMooringElastoChrono&>(*element).set_bending_inertia(0);
+    }
+
     // make fairlead
     auto fairlead = chrono_types::make_shared<ChBody>();
     fairlead->SetBodyFixed(true);
