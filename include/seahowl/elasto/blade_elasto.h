@@ -47,6 +47,11 @@ class BladeElasto : public ComponentElastoFEA {
      */
     void apply_pitch_increment(double pitch_increment);
 
+    /**
+     * @brief Returns blade root moment (first node of first element of blade).
+     */
+    Vector3d get_blade_root_moment() const;
+
   private:
     /**
      * @brief Builds the blade with simple Timoshenko elements (lineic density, flap stiffness, edge stiffness).

@@ -65,6 +65,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
                seahowl::elasto::ComponentElastoFEA>(m_elasto, "BladeElasto")
         .def(py::init<>())
         .def("apply_pitch_increment", &seahowl::elasto::BladeElasto::apply_pitch_increment)
+        .def("get_blade_root_moment", &seahowl::elasto::BladeElasto::get_blade_root_moment)
         .def_readonly("pitch", &seahowl::elasto::BladeElasto::pitch)
         .def_readonly("azimuth0", &seahowl::elasto::BladeElasto::azimuth0);
 

@@ -64,6 +64,20 @@ chrono::ChQuaternion<double> node_iec2ch(Quaternion quaternion_in) {
     return quat2ch(quaternion_in * Quaternion(cos(angle / 2), 0, sin(angle / 2), 0));
 }
 
+Vector3d vec_ch2iec(chrono::ChVector<double> vector_in) {
+    // Convert from Chrono standard ro IEC standard.
+    // IEC convention:
+    // x-axis: flapwise pointing towards nacelle,
+    // y-axis : edgewise pointing towards trailing edge,
+    // z-axis : longitudinal pointing towards blade tip.
+    // Chrono convention:
+    // x-axis: longitudinal pointing towards blade tip,
+    // y-axis : edgewise pointing towards trailing edge,
+    // z-axis : flapwise pointing away from nacelle.
+    // ==> need to rotate +90 degrees around Chrono y-axis to transform to IEC convention.
+    return Vector3d(-vector_in[2], vector_in[1], vector_in[0]);
+}
+
 void EntityDynamicChrono::set_position(Vector3d position) {
     chobj->SetPos(vec2ch(position));
 }
@@ -304,12 +318,9 @@ void ElementElastoChrono::evaluate_force_torque(double eta, Vector3d& force, Vec
     auto chforce = vec2ch(force);
     auto chtorque = vec2ch(torque);
     chobj->EvaluateSectionForceTorque(eta, chforce, chtorque);
-    force[0] = chforce[0];
-    force[1] = chforce[1];
-    force[2] = chforce[2];
-    torque[0] = chtorque[0];
-    torque[1] = chtorque[1];
-    torque[2] = chtorque[2];
+    // convert Chrono convention to IEC
+    force = vec_ch2iec(chforce);
+    torque = vec_ch2iec(chtorque);
 }
 
 double ElementElastoChrono::get_mass() {

@@ -144,4 +144,8 @@ void BladeElasto::apply_pitch_increment(double pitch_increment) {
     rotate(-pitch_increment, root_dir);
     translate(root_pos);
     pitch += pitch_increment;
-};
+}
+
+seahowl::Vector3d BladeElasto::get_blade_root_moment() const {
+    return elements[0]->get_torque(-1.0);
+}
