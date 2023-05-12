@@ -21,8 +21,8 @@ class MooringElasto : public ComponentElastoFEA {
     double diameter = 0.0;
     /** @brief Axial stiffness of the mooring line. */
     double stiffness_axial = 0.0;
-    /** @brief Lineic density of the mooring line. */
-    double density = 0.0;
+    /** @brief Linear density of the mooring line. */
+    double density_linear = 0.0;
     /** @brief Unstretched length of the mooring line. */
     double length = 0.0;
     /** @brief Drag coefficient of the mooring line. */
@@ -36,8 +36,16 @@ class MooringElasto : public ComponentElastoFEA {
      * @brief Builds the mooring (to call before assemble).
      */
     void build();
+
     void build_nodes(const std::vector<ReferencePointElasto>& discretized_points);
-    void compute_hydro_loads();
+
+    /**
+     * @brief Computes hydro loads on cable.
+     *
+     * param[in] gravitational_acceleration Gravitational acceleration vector.
+     * param[in] fluid_density Density of fluid.
+     */
+    void compute_hydro_loads(Vector3d& gravitational_acceleration, double fluid_density);
 
   private:
     /**

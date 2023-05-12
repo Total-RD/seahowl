@@ -780,7 +780,7 @@ void SystemElastoChrono::add(MeshElasto& mesh) {
 }
 
 void SystemElastoChrono::add(Link& link) {
-    chobj->Add(dynamic_cast<LinkChrono&>(link).chobj);
+    chobj->Add(dynamic_cast<LinkChronoBase&>(link).chobj);
 }
 
 }  // namespace elasto
