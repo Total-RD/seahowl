@@ -264,7 +264,11 @@ set(SEAHOWL_FILES
     ${SEAHOWL_IO_SOURCES}
     ${SEAHOWL_IO_HEADERS}
 )
-target_sources(seahowl_core PRIVATE ${SEAHOWL_FILES})
+
+target_sources(
+    seahowl_core
+    PRIVATE ${SEAHOWL_FILES}
+)
 
 target_include_directories(
     seahowl_core
@@ -272,21 +276,30 @@ target_include_directories(
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS}
 )
 
-target_compile_features(seahowl_core PRIVATE cxx_std_17)
-
-set_target_properties(
+target_compile_features(
     seahowl_core
-    PROPERTIES LINKER_LANGUAGE CXX
-               CXX_EXTENSIONS OFF
-               COMPILE_FLAGS "${CHRONO_CXX_FLAGS} ${EXTRA_COMPILE_FLAGS}"
-               COMPILE_DEFINITIONS "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\""
-               LINK_FLAGS "${CHRONO_LINKER_FLAGS}"
-               POSITION_INDEPENDENT_CODE ON
+    PRIVATE cxx_std_17
+)
+
+target_compile_definitions(
+    seahowl_core
+    PRIVATE "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\""
+)
+
+target_compile_options(
+    seahowl_core
+    PRIVATE ${CHRONO_CXX_FLAGS}
+)
+
+target_link_options(
+    seahowl_core
+    PRIVATE ${CHRONO_LINKER_FLAGS}
 )
 
 target_link_libraries(seahowl_core
     PUBLIC Eigen3::Eigen
-    PRIVATE nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES})
+    PRIVATE nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES}
+)
 
 if(SEAHOWL_ENABLE_VTK)
     target_link_libraries(seahowl_core PRIVATE VTK::CommonDataModel VTK::IOXML)
@@ -318,14 +331,7 @@ target_include_directories(
 
 target_compile_features(seahowl_driver PRIVATE cxx_std_17)
 
-set_target_properties(
-    seahowl_driver
-    PROPERTIES LINKER_LANGUAGE CXX
-               CXX_EXTENSIONS OFF
-               COMPILE_FLAGS "${CHRONO_CXX_FLAGS} ${EXTRA_COMPILE_FLAGS}"
-               COMPILE_DEFINITIONS "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\""
-               LINK_FLAGS "${CHRONO_LINKER_FLAGS}"
-)
+target_compile_options(seahowl_driver PRIVATE ${CHRONO_CXX_FLAGS})
 
 target_link_libraries(seahowl_driver PRIVATE seahowl_core nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES})
 
@@ -381,4 +387,6 @@ if (SEAHOWL_ENABLE_PYTHON)
         ${PYSEAHOWL_DIR}/pyseahowl_core.cpp
     )
     target_link_libraries(pyseahowl PRIVATE seahowl_core)
+
+    target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
 endif (SEAHOWL_ENABLE_PYTHON)

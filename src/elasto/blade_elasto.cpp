@@ -125,15 +125,7 @@ void BladeElasto::evaluate_position_rotation(Vector3d& position,
                                              Quaternion& rotation,
                                              int element_index,
                                              double eta) const {
-    auto element = std::dynamic_pointer_cast<ElementBladeElastoChrono>(elements[element_index]);
-
-    // // unfortunately line below does not always work (returns nans sometimes when fpm_mode is true)
-    // // @todo fix this (Chrono issue ?)
-    // element->evaluate_position_rotation(eta, position, rotation);
-    auto w1 = std::abs(eta - 1.0) * 0.5;
-    auto w2 = std::abs(eta + 1.0) * 0.5;
-    position = w1 * element->nodes[0]->get_position() + w2 * element->nodes[1]->get_position();
-    rotation = element->nodes[0]->get_rotation();
+    elements[element_index]->evaluate_position_rotation(eta, position, rotation);
 }
 
 void BladeElasto::apply_pitch_increment(double pitch_increment) {
