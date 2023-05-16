@@ -21,6 +21,8 @@ void Turbine::initialize(double time, double dt) {
 void Turbine::prestep(double time, double dt) {
     rotor.prestep(time, dt);
     tower.prestep(time, dt);
+
+    elasto.prestep(time, dt);
 }
 
 void Turbine::poststep(double time, double dt) {

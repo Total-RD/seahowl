@@ -96,6 +96,14 @@ class TurbineElasto {
      * @param[in] dt Time step length.
      */
     void initialize(double time, double dt);
+
+    /**
+     * @brief prestep for moordyn.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
+    void prestep(double time, double dt);
 };
 
 }  // namespace elasto

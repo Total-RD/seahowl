@@ -52,8 +52,21 @@ void TurbineElasto::initialize(double time, double dt) {
 #ifdef HAVE_MOORDYN
     if (use_moordyn) {
         moordyn->initialize(*this);
-        moordyn->saveVTK("./output/mooring_lines");  // test vtk save here, will be relocated in order to be consistent
-                                                     // with seahowl vtk save
+        // moordyn->saveVTK("./output/mooring_lines");  // test vtk save here, will be relocated in order to be
+        // consistent with seahowl vtk save
+    }
+#endif
+}
+
+void TurbineElasto::prestep(double time, double dt) {
+#ifdef HAVE_MOORDYN
+    if (use_moordyn) {
+        moordyn->step(time, dt, *this);
+        char filename[2048];
+        std::sprintf(filename, "./output/vtk/mooring_lines_%03d.vtm", int(time / dt));
+        // std::string filename = "./output/vtk/mooring_line";
+        moordyn->saveVTK(filename, time, dt);  // test vtk save here, will be relocated in order to be consistent
+                                               // with seahowl vtk save
     }
 #endif
 }
