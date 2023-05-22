@@ -27,14 +27,32 @@ void seabed_interaction(seahowl::elasto::SystemElasto& system, seahowl::elasto::
     auto seabed_position = (-gravity_direction) * seabed_depth;
     for (auto& element : mooring.elements) {
         auto element_length = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_rest_length();
+        auto element_mass = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_mass();
         for (auto& node : element->nodes) {
+            // assuming a flat seabed normal to gravitational acceleration direction
+            auto seabed_normal = -gravity_direction;
+
+            // stiffness force
             auto node_position = node->get_position();
-            Vector3d node_z_vector = node_position.cwiseProduct(-gravity_direction);
-            double penetration_depth = (node_z_vector - seabed_position).dot(-gravity_direction);
-            if (penetration_depth < 0) {
-                auto load_up = gravity_direction * seabed_stiffness * penetration_depth * mooring.diameter;
-                auto load_half_element = load_up * 0.5 * element_length;
-                node->set_force(node->get_force() + load_up);
+            Vector3d node_z_vector = node_position.cwiseProduct(seabed_normal);
+            double penetration_depth = (node_z_vector - seabed_position).dot(seabed_normal);
+            if (penetration_depth <= 0) {
+                auto load_stiffness_linear =
+                    gravity_direction * seabed_stiffness * penetration_depth * mooring.diameter;
+                // apply on node for half an element length
+                node->set_force(node->get_force() + 0.5 * element_length * (load_stiffness_linear));
+            }
+
+            // damping force
+            auto node_velocity = node->get_velocity();
+            double penetration_velocity = (node_velocity).dot(-seabed_normal);
+            if (penetration_depth <= 0 && penetration_velocity > 0) {
+                auto lambda = 0.5;  // fraction of critical damping
+                auto load_damping =
+                    2.0 * lambda *
+                    std::sqrt(seabed_stiffness * element_mass * mooring.diameter * (0.5 * element_length)) *
+                    penetration_velocity * seabed_normal;
+                node->set_force(node->get_force() + load_damping);
             }
         }
     }
