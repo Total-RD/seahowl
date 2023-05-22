@@ -22,6 +22,7 @@ using namespace seahowl::elasto;
 void seabed_interaction(seahowl::elasto::SystemElasto& system, seahowl::elasto::MooringElasto& mooring) {
     auto seabed_depth = 0.0;
     auto seabed_stiffness = 1e6;
+    auto seabed_stiffness_shear = 0;
     Vector3d gravity_direction =
         system.get_gravitational_acceleration() / system.get_gravitational_acceleration().norm();
     auto seabed_position = (-gravity_direction) * seabed_depth;
@@ -32,27 +33,35 @@ void seabed_interaction(seahowl::elasto::SystemElasto& system, seahowl::elasto::
             // assuming a flat seabed normal to gravitational acceleration direction
             auto seabed_normal = -gravity_direction;
 
-            // stiffness force
             auto node_position = node->get_position();
             Vector3d node_z_vector = node_position.cwiseProduct(seabed_normal);
-            double penetration_depth = (node_z_vector - seabed_position).dot(seabed_normal);
-            if (penetration_depth <= 0) {
-                auto load_stiffness_linear =
-                    gravity_direction * seabed_stiffness * penetration_depth * mooring.diameter;
+            double penetration_depth = (seabed_position - node_z_vector).dot(seabed_normal);
+            if (penetration_depth >= 0) {
+                // stiffness force
+                auto load_stiffness_linear = seabed_stiffness * penetration_depth * mooring.diameter * seabed_normal;
                 // apply on node for half an element length
                 node->set_force(node->get_force() + 0.5 * element_length * (load_stiffness_linear));
-            }
 
-            // damping force
-            auto node_velocity = node->get_velocity();
-            double penetration_velocity = (node_velocity).dot(-seabed_normal);
-            if (penetration_depth <= 0 && penetration_velocity > 0) {
+                // damping force
                 auto lambda = 0.5;  // fraction of critical damping
-                auto load_damping =
-                    2.0 * lambda *
-                    std::sqrt(seabed_stiffness * element_mass * mooring.diameter * (0.5 * element_length)) *
-                    penetration_velocity * seabed_normal;
-                node->set_force(node->get_force() + load_damping);
+                auto node_velocity = node->get_velocity();
+                double penetration_velocity = (node_velocity).dot(-seabed_normal);
+                if (penetration_depth >= 0 && penetration_velocity > 0) {
+                    auto load_damping_normal =
+                        2.0 * lambda *
+                        std::sqrt(seabed_stiffness * element_mass * mooring.diameter * (0.5 * element_length)) *
+                        penetration_velocity * seabed_normal;
+                    node->set_force(node->get_force() + load_damping_normal);
+                }
+
+                Vector3d tangential_velocity = node_velocity + penetration_velocity * seabed_normal;
+                if (penetration_depth >= 0 && tangential_velocity.norm() > 0) {
+                    auto load_damping_tangential =
+                        -2.0 * lambda *
+                        std::sqrt(seabed_stiffness_shear * element_mass * mooring.diameter * (0.5 * element_length)) *
+                        tangential_velocity;
+                    node->set_force(node->get_force() + load_damping_tangential);
+                }
             }
         }
     }
