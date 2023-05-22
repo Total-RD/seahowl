@@ -89,9 +89,14 @@ int main(int argc, char* argv[]) {
     mooring.fairlead_position = Vector3d(0.0, 837.60 - 58, 200.0 - 14.0);
     mooring.anchor_position = Vector3d(0.0, 0.0, 0.0);
     mooring.length = 850.0;
-    mooring.diameter = 0.33;
+    mooring.diameter = 0.185;
     mooring.stiffness_axial = 3270e6;
     mooring.density_linear = 685.0;
+    mooring.drag_coefficient_normal = 2.0;
+    mooring.drag_coefficient_tangential = 1.15;
+    mooring.added_mass_coefficient_normal = 1.0;
+    mooring.added_mass_coefficient_tangential = 1.0;
+    mooring.diameter = 0.33;
     mooring.discretization_fractions = {};
     int nelements = 40;
     for (int ii = 0; ii < nelements + 1; ii++) {
@@ -149,9 +154,7 @@ int main(int argc, char* argv[]) {
     draw_system_init(system_elasto.chobj, application);
 #endif
 
-    mooring.drag_coefficient = 0;
     setup_cables(system_elasto, mooring, dt, 1000, fluid_density);
-    mooring.drag_coefficient = 0.5;
     while (true) {
         time += system_elasto.get_time();
         mooring.compute_hydro_loads(system_elasto.get_gravitational_acceleration(), fluid_density);

@@ -89,27 +89,24 @@ void MooringElasto::compute_hydro_loads(Vector3d& gravitational_acceleration, do
             // drag
             auto fluid_velocity = Vector3d(0.0, 0.0, 0.0);
             auto velocity_relative = fluid_velocity - element->nodes[ii]->get_velocity();
-            auto velocity_tangent = dir * velocity_relative.dot(dir);
-            auto velocity_normal = velocity_relative - velocity_tangent;
+            auto velocity_tangential = dir * velocity_relative.dot(dir);
+            auto velocity_normal = velocity_relative - velocity_tangential;
 
             // load drag per unit length
-            auto drag_coefficient_axial = drag_coefficient;
-            auto drag_coefficient_normal = drag_coefficient;
-            auto load_drag_axial =
-                0.5 * fluid_density * drag_coefficient * PI * diameter * velocity_tangent.norm() * velocity_tangent;
+            auto load_drag_axial = 0.5 * fluid_density * drag_coefficient_tangential * PI * diameter *
+                                   velocity_tangential.norm() * velocity_tangential;
             auto load_drag_normal =
-                0.5 * fluid_density * drag_coefficient * diameter * velocity_normal.norm() * velocity_normal;
+                0.5 * fluid_density * drag_coefficient_normal * diameter * velocity_normal.norm() * velocity_normal;
             auto load_drag = load_drag_axial + load_drag_normal;
 
             // added mass
             auto fluid_acceleration = Vector3d(0.0, 0.0, 0.0);
             auto acceleration_relative = fluid_acceleration - element->nodes[ii]->get_acceleration();
-            auto acceleration_tangent = dir * acceleration_relative.dot(dir);
-            auto acceleration_normal = acceleration_relative - acceleration_tangent;
+            auto acceleration_tangential = dir * acceleration_relative.dot(dir);
+            auto acceleration_normal = acceleration_relative - acceleration_tangential;
             // load added mass per unit length
-            auto added_mass_coefficient_axial = added_mass_coefficient;
-            auto added_mass_coefficient_normal = added_mass_coefficient;
-            auto load_added_mass_axial = fluid_density * added_mass_coefficient_axial * area * acceleration_tangent;
+            auto load_added_mass_axial =
+                fluid_density * added_mass_coefficient_tangential * area * acceleration_tangential;
             auto load_added_mass_normal = fluid_density * added_mass_coefficient_normal * area * acceleration_normal;
             auto load_added_mass_fluid = fluid_density * area * fluid_acceleration;
             auto load_added_mass = load_added_mass_axial + load_added_mass_normal;

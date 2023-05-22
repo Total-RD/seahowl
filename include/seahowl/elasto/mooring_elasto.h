@@ -25,10 +25,14 @@ class MooringElasto : public ComponentElastoFEA {
     double density_linear = 0.0;
     /** @brief Unstretched length of the mooring line. */
     double length = 0.0;
-    /** @brief Drag coefficient of the mooring line. */
-    double drag_coefficient = 0.5;
-    /** @brief Added mass coefficient of the mooring line. */
-    double added_mass_coefficient = 0.5;
+    /** @brief Drag coefficient (normal) of the mooring line. */
+    double drag_coefficient_normal = 2.0;
+    /** @brief Drag coefficient (tangential) of the mooring line. */
+    double drag_coefficient_tangential = 1.15;
+    /** @brief Added mass coefficient (normal) of the mooring line. */
+    double added_mass_coefficient_normal = 1.0;
+    /** @brief Added mass coefficient (tangential) of the mooring line. */
+    double added_mass_coefficient_tangential = 1.0;
 
     MooringElasto();
 
