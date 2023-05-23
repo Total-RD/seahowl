@@ -205,11 +205,12 @@ class ElementMooringElastoChrono : public ElementElastoChrono, public ElementMoo
 
     ElementMooringElastoChrono();
     virtual void set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) override;
-    virtual void set_properties(double density, double diameter, double stiffness_axial) override;
+    virtual void set_properties(double density,
+                                double diameter,
+                                double stiffness_axial,
+                                double stiffness_bending) override;
     virtual void set_rest_length(double rest_length) override;
     virtual double get_rest_length() const override;
-    virtual void set_bending_inertia(double bending_inertia) override;
-    virtual double get_bending_inertia() const override;
 };
 
 class LinkChronoBase {

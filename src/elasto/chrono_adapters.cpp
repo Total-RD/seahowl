@@ -608,14 +608,19 @@ void ElementMooringElastoChrono::set_nodes(std::shared_ptr<NodeElasto> node1, st
                     std::dynamic_pointer_cast<NodeElastoChronoD>(node2)->chobj);
 }
 
-void ElementMooringElastoChrono::set_properties(double density, double diameter, double stiffness_axial) {
+void ElementMooringElastoChrono::set_properties(double density,
+                                                double diameter,
+                                                double stiffness_axial,
+                                                double stiffness_bending) {
     // create mooring section
     auto section = chrono_types::make_shared<chrono::fea::ChBeamSectionCable>();
     chobj->SetSection(section);
     section->SetDensity(density);
     double area = chrono::CH_C_PI * pow(diameter, 2) / 4.0;
     section->SetDiameter(diameter);
-    section->SetYoungModulus(stiffness_axial / area);
+    double young_modulus = stiffness_axial / area;
+    section->SetYoungModulus(young_modulus);
+    section->SetI(stiffness_bending / young_modulus);
 }
 
 void ElementMooringElastoChrono::set_rest_length(double rest_length) {
@@ -624,13 +629,6 @@ void ElementMooringElastoChrono::set_rest_length(double rest_length) {
 
 double ElementMooringElastoChrono::get_rest_length() const {
     return chobj->GetRestLength();
-}
-
-void ElementMooringElastoChrono::set_bending_inertia(double bending_inertia) {
-    chobj->GetSection()->SetI(bending_inertia);
-}
-double ElementMooringElastoChrono::get_bending_inertia() const {
-    return chobj->GetSection()->GetI();
 }
 
 LinkChrono::LinkChrono() {

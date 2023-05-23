@@ -21,6 +21,8 @@ class MooringElasto : public ComponentElastoFEA {
     double diameter = 0.0;
     /** @brief Axial stiffness of the mooring line. */
     double stiffness_axial = 0.0;
+    /** @brief Bending stiffness of the mooring line. */
+    double stiffness_bending = 0.0;
     /** @brief Linear density of the mooring line. */
     double density_linear = 0.0;
     /** @brief Unstretched length of the mooring line. */

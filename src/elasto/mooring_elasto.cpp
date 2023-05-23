@@ -65,7 +65,7 @@ void MooringElasto::build_elements() {
         // set section
         auto area = PI * pow(diameter, 2) / 4.0;
         auto density = density_linear / area;
-        element->set_properties(density, diameter, stiffness_axial);
+        element->set_properties(density, diameter, stiffness_axial, stiffness_bending);
     }
 }
 

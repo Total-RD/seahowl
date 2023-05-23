@@ -118,12 +118,12 @@ int main(int argc, char* argv[]) {
     mooring.length = 850.0;
     mooring.diameter = 0.185;
     mooring.stiffness_axial = 3270e6;
+    mooring.stiffness_bending = 0.0;
     mooring.density_linear = 685.0;
     mooring.drag_coefficient_normal = 2.0;
     mooring.drag_coefficient_tangential = 1.15;
     mooring.added_mass_coefficient_normal = 1.0;
     mooring.added_mass_coefficient_tangential = 1.0;
-    mooring.diameter = 0.33;
     mooring.discretization_fractions = {};
     int nelements = 40;
     for (int ii = 0; ii < nelements + 1; ii++) {
@@ -132,11 +132,6 @@ int main(int argc, char* argv[]) {
     //
     mooring.build();
     mooring.assemble(system_elasto);
-
-    // set bending stiffness to zero
-    for (auto& element : mooring.elements) {
-        dynamic_cast<ElementMooringElastoChrono&>(*element).set_bending_inertia(0);
-    }
 
     // make fairlead
     auto fairlead = seahowl::elasto::BodyElastoChrono();
