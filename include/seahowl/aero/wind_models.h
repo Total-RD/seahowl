@@ -72,11 +72,11 @@ class WindRamp : public ShearedWind {
     /** @brief Starting time of ramp. */
     double time_start = 0.0;
     /** @brief Ending time of ramp. */
-    double time_stop = 1.0;
-    /** @brief Wind velocity at beginning of ramp. */
-    Vector3d wind_velocity_start;
+    double time_end = 0.0;
+    /** @brief Wind velocity at startning of ramp. */
+    Vector3d wind_velocity_start{0.0, 0.0, 0.0};
     /** @brief Wind velocity at end of ramp. */
-    Vector3d wind_velocity_stop;
+    Vector3d wind_velocity_end{0.0, 0.0, 0.0};
 
     /**
      * @brief Constructor.
@@ -84,18 +84,17 @@ class WindRamp : public ShearedWind {
     WindRamp();
 
     /**
-     * @brief Sets wind velocity at beginning of ramp.
+     * @brief Sets wind ramp.
      *
-     * @param[in] wind_velocity Wind velocity to use.
+     * @param[in] velocity_start Wind velocity at starting of ramp.
+     * @param[in] time_start Time at which the ramp starts.
+     * @param[in] velocity_end Wind velocity at end of ramp.
+     * @param[in] time_end Time at which the ramp ends.
      */
-    void set_wind_velocity_start(Vector3d velocity);
-
-    /**
-     * @brief Sets wind velocity at end of ramp.
-     *
-     * @param[in] wind_velocity Wind velocity to use.
-     */
-    void set_wind_velocity_stop(Vector3d velocity);
+    void set_wind_ramp(const Vector3d& velocity_start,
+                       double time_start,
+                       const Vector3d& velocity_end,
+                       double time_end);
 
     /**
      * @brief Returns wind velocity at given coordinates.

@@ -578,14 +578,12 @@ void populate_system_from_json(std::string filepath_main, seahowl::core::System&
         auto wind_options = wind_json.at("options");
         auto wind_model = std::dynamic_pointer_cast<seahowl::aero::WindRamp>(system_core.wind_model);
         auto v0 = wind_options.at("velocity_start").get<std::vector<double>>();
-        wind_model->wind_velocity_start = Vector3d(v0[0], v0[1], v0[2]);
-        auto v1 = wind_options.at("velocity_stop").get<std::vector<double>>();
-        wind_model->wind_velocity_stop = Vector3d(v1[0], v1[1], v1[2]);
+        auto v1 = wind_options.at("velocity_end").get<std::vector<double>>();
+        wind_model->set_wind_ramp(Vector3d(v0[0], v0[1], v0[2]), wind_options.at("time_start").get<double>(),
+                                  Vector3d(v1[0], v1[1], v1[2]), wind_options.at("time_end").get<double>());
         wind_model->direction_gravity =
             Vector3d(system_core.system_elasto->get_gravitational_acceleration()).normalized();
         wind_model->reference_height = wind_options.at("reference_height").get<double>();
-        wind_model->time_start = wind_options.at("time_start").get<double>();
-        wind_model->time_stop = wind_options.at("time_stop").get<double>();
         wind_model->shear_coefficient = wind_options.at("shear_coefficient").get<double>();
         wind_model->density = environment_json.at("air_density").get<double>();
     } else if (wind_json.at("type").get<std::string>() == "inflowwind") {

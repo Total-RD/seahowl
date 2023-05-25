@@ -35,25 +35,30 @@ Vector3d ConstantWind::get_wind_velocity(const Vector3d& position, double time) 
     return velocity;
 }
 
-WindRamp::WindRamp() {
-    wind_velocity_start = Vector3d(0.0, 0.0, 0.0);
-    wind_velocity_stop = Vector3d(0.0, 0.0, 0.0);
-    direction_gravity = Vector3d(0.0, 0.0, -1.0);
-}
+WindRamp::WindRamp() {}
 
-void WindRamp::set_wind_velocity_start(Vector3d velocity) {
-    wind_velocity_start = velocity;
-}
-void WindRamp::set_wind_velocity_stop(Vector3d velocity) {
-    wind_velocity_stop = velocity;
+void WindRamp::set_wind_ramp(const Vector3d& velocity_start,
+                             double time_start,
+                             const Vector3d& velocity_end,
+                             double time_end) {
+    wind_velocity_start = velocity_start;
+    this->time_start = time_start;
+    wind_velocity_end = velocity_end;
+    this->time_end = time_end;
 }
 
 Vector3d WindRamp::get_wind_velocity(const Vector3d& position, double time) const {
     auto velocity = wind_velocity_start;
     if (time >= time_start) {
-        double w1 = 1.0 - std::min((time - time_start) / (time_stop - time_start), 1.0);
-        double w2 = 1.0 - w1;
-        velocity = w1 * wind_velocity_start + w2 * wind_velocity_stop;
+        if (time_end != time_start) {
+            double w1 = 1.0 - std::min((time - time_start) / (time_end - time_start), 1.0);
+            double w2 = 1.0 - w1;
+            velocity = w1 * wind_velocity_start + w2 * wind_velocity_end;
+        } else if (time_end == time_start) {
+            velocity = wind_velocity_end;
+        } else {
+            std::runtime_error("End time is less than start time for the wind ramp.");
+        }
     }
     velocity = get_sheared_wind_velocity(velocity, position, direction_gravity, shear_coefficient, reference_height,
                                          reference_length);
