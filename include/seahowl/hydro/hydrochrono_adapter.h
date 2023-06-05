@@ -13,8 +13,8 @@ namespace hydro {
 
 class FloaterHydroChrono : public FloaterHydro {
   public:
-    /** @brief Hydro inputs (from HydroChrono). */
-    HydroInputs hydro_inputs;
+    /** @brief Waves (HydroChrono). */
+    std::shared_ptr<WaveBase> waves;
     /** @brief Path to potential flow frequency data file (HDF5 format). */
     std::string h5_filepath = "";
 

@@ -7,7 +7,7 @@
 using namespace seahowl::hydro;
 
 FloaterHydroChrono::FloaterHydroChrono() {
-    hydro_inputs.mode = WaveMode::noWaveCIC;
+    waves = std::make_shared<NoWave>(1);
 };
 
 void FloaterHydroChrono::add_fairlead(Vector3d& position) {
@@ -68,7 +68,8 @@ void FloaterHydroChrono::initialize(double time, double dt) {
         chbody.chobj->SetName(body.first.c_str());
         chbodies.push_back(chbody.chobj);
     }
-    hydrochrono_setter = std::make_unique<TestHydro>(chbodies, h5_filepath, hydro_inputs);
+    hydrochrono_setter = std::make_unique<TestHydro>(chbodies, h5_filepath);
+    hydrochrono_setter->AddWaves(waves);
 }
 
 seahowl::elasto::BodyElasto& FloaterHydroChrono::get_tower_connection_body() {
