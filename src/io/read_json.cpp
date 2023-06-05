@@ -62,6 +62,9 @@ std::string copy_file_and_increment(std::string filepath, std::string destinatio
 }
 
 std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_json(std::string filepath) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -167,6 +170,9 @@ std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_
 
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
     std::string filepath) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -229,6 +235,9 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
 }
 
 std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_json(std::string filepath) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -322,6 +331,9 @@ void populate_blade_from_json(std::string filepath, seahowl::core::Blade& blade)
 
 std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points_from_json(
     std::string filepath) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -361,6 +373,9 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
 }
 
 std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points_from_json(std::string filepath) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -391,6 +406,9 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
 }
 
 void populate_tower_elasto_from_json(std::string filepath, seahowl::elasto::TowerElasto& tower) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -403,15 +421,24 @@ void populate_tower_elasto_from_json(std::string filepath, seahowl::elasto::Towe
 }
 
 void populate_tower_aero_from_json(std::string filepath, seahowl::aero::TowerAero& tower) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     tower.reference_points = get_tower_aero_reference_points_from_json(filepath);
 }
 
 void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     populate_tower_elasto_from_json(filepath, tower.elasto);
     populate_tower_aero_from_json(filepath, tower.aero);
 }
 
 void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorElasto& rotor) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -452,6 +479,9 @@ void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::Roto
 }
 
 void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorAero& rotor) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -466,6 +496,9 @@ void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorAer
 }
 
 void populate_rotor_from_json(std::string filepath, seahowl::core::Rotor& rotor) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
     std::ifstream json_file(filepath);
 
     // populate json object
@@ -476,14 +509,18 @@ void populate_rotor_from_json(std::string filepath, seahowl::core::Rotor& rotor)
     populate_rotor_aero_from_json(filepath, rotor.aero);
 }
 
-void populate_turbine_from_json(std::string filepath_turbine, seahowl::core::Turbine& turbine) {
+void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& turbine) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
+
     // get turbine info
-    std::ifstream json_file(filepath_turbine);
+    std::ifstream json_file(filepath);
     // populate json object
     json json_obj;
     json_file >> json_obj;
 
-    auto DATADIR = absolute(path(filepath_turbine).parent_path());
+    auto DATADIR = absolute(path(filepath).parent_path());
 
     auto blades_json = json_obj.at("blades");
     auto tower_json = json_obj.at("tower");
@@ -557,11 +594,14 @@ void populate_turbine_from_json(std::string filepath_turbine, seahowl::core::Tur
     turbine.rotor.elasto.hub.inertia += drivetrain_inertia;
 }
 
-void populate_system_from_json(std::string filepath_main, seahowl::core::System& system_core) {
-    auto DATADIR = absolute(path(filepath_main)).parent_path();
+void populate_system_from_json(std::string filepath, seahowl::core::System& system_core) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File " + filepath + " does not exist.");
+    }
+    auto DATADIR = absolute(path(filepath)).parent_path();
 
     // get main info
-    std::ifstream json_file(filepath_main);
+    std::ifstream json_file(filepath);
     // populate json object
     json json_obj;
     json_file >> json_obj;
