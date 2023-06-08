@@ -19,22 +19,22 @@
 namespace seahowl {
 namespace elasto {
 
-chrono::ChVector<double> vec2ch(Vector3d vector_in) {
+chrono::ChVector<double> vec2ch(const Vector3d& vector_in) {
     return chrono::ChVector<double>(vector_in[0], vector_in[1], vector_in[2]);
 }
-Vector3d ch2vec(chrono::ChVector<double> vector_in) {
+Vector3d ch2vec(const chrono::ChVector<double>& vector_in) {
     return Vector3d(vector_in[0], vector_in[1], vector_in[2]);
 }
 
-chrono::ChQuaternion<double> quat2ch(Quaternion quaternion_in) {
+chrono::ChQuaternion<double> quat2ch(const Quaternion& quaternion_in) {
     return chrono::ChQuaternion<double>(quaternion_in.w(), quaternion_in.x(), quaternion_in.y(), quaternion_in.z());
 }
 
-Quaternion ch2quat(chrono::ChQuaternion<double> quaternion_in) {
+Quaternion ch2quat(const chrono::ChQuaternion<double>& quaternion_in) {
     return Quaternion(quaternion_in[0], quaternion_in[1], quaternion_in[2], quaternion_in[3]);
 }
 
-Quaternion node_ch2iec(chrono::ChQuaternion<double> quaternion_in) {
+Quaternion node_ch2iec(const chrono::ChQuaternion<double>& quaternion_in) {
     // Convert from Chrono standard ro IEC standard.
     // IEC convention:
     // x-axis: flapwise pointing towards nacelle,
@@ -49,7 +49,7 @@ Quaternion node_ch2iec(chrono::ChQuaternion<double> quaternion_in) {
     return ch2quat(quaternion_in) * Quaternion(cos(angle / 2), 0, sin(angle / 2), 0);
 }
 
-chrono::ChQuaternion<double> node_iec2ch(Quaternion quaternion_in) {
+chrono::ChQuaternion<double> node_iec2ch(const Quaternion& quaternion_in) {
     // Convert from IEC standard to Chrono standard.
     // IEC convention:
     // x-axis: flapwise pointing towards nacelle,
@@ -64,7 +64,7 @@ chrono::ChQuaternion<double> node_iec2ch(Quaternion quaternion_in) {
     return quat2ch(quaternion_in * Quaternion(cos(angle / 2), 0, sin(angle / 2), 0));
 }
 
-Vector3d vec_ch2iec(chrono::ChVector<double> vector_in) {
+Vector3d vec_ch2iec(const chrono::ChVector<double>& vector_in) {
     // Convert from Chrono standard ro IEC standard.
     // IEC convention:
     // x-axis: flapwise pointing towards nacelle,
@@ -78,7 +78,7 @@ Vector3d vec_ch2iec(chrono::ChVector<double> vector_in) {
     return Vector3d(-vector_in[2], vector_in[1], vector_in[0]);
 }
 
-void EntityDynamicChrono::set_position(Vector3d position) {
+void EntityDynamicChrono::set_position(const Vector3d& position) {
     chobj->SetPos(vec2ch(position));
 }
 
@@ -86,7 +86,7 @@ Vector3d EntityDynamicChrono::get_position() const {
     return ch2vec(chobj->GetPos());
 }
 
-void EntityDynamicChrono::set_rotation(Quaternion rotation) {
+void EntityDynamicChrono::set_rotation(const Quaternion& rotation) {
     chobj->SetRot(quat2ch(rotation));
 }
 
@@ -94,7 +94,7 @@ Quaternion EntityDynamicChrono::get_rotation() const {
     return ch2quat(chobj->GetRot());
 }
 
-void EntityDynamicChrono::set_velocity(Vector3d velocity) {
+void EntityDynamicChrono::set_velocity(const Vector3d& velocity) {
     chobj->SetPos_dt(vec2ch(velocity));
 }
 
@@ -102,7 +102,7 @@ Vector3d EntityDynamicChrono::get_velocity() const {
     return ch2vec(chobj->GetPos_dt());
 }
 
-void EntityDynamicChrono::set_acceleration(Vector3d acceleration) {
+void EntityDynamicChrono::set_acceleration(const Vector3d& acceleration) {
     chobj->SetPos_dtdt(vec2ch(acceleration));
 }
 
@@ -110,7 +110,7 @@ Vector3d EntityDynamicChrono::get_acceleration() const {
     return ch2vec(chobj->GetPos_dt());
 }
 
-void EntityDynamicChrono::set_rotational_velocity(Vector3d rotational_velocity) {
+void EntityDynamicChrono::set_rotational_velocity(const Vector3d& rotational_velocity) {
     chobj->SetWvel_par(vec2ch(rotational_velocity));
 }
 
@@ -118,7 +118,7 @@ Vector3d EntityDynamicChrono::get_rotational_velocity() const {
     return ch2vec(chobj->GetWvel_par());
 }
 
-void EntityDynamicChrono::set_rotational_acceleration(Vector3d rotational_acceleration) {
+void EntityDynamicChrono::set_rotational_acceleration(const Vector3d& rotational_acceleration) {
     chobj->SetWacc_par(vec2ch(rotational_acceleration));
 }
 
@@ -135,7 +135,7 @@ void BodyElastoChrono::set_mass(double mass) {
     chobj->SetMass(mass);
 }
 
-void BodyElastoChrono::set_inertia_diagonal(Vector3d inertia) {
+void BodyElastoChrono::set_inertia_diagonal(const Vector3d& inertia) {
     chobj->SetInertiaXX(vec2ch(inertia));
 }
 
@@ -143,7 +143,7 @@ void BodyElastoChrono::reset_forces() {
     chobj->Empty_forces_accumulators();
 }
 
-void BodyElastoChrono::accumulate_torque(Vector3d torque, bool is_local) {
+void BodyElastoChrono::accumulate_torque(const Vector3d& torque, bool is_local) {
     chobj->Accumulate_torque(torque, is_local);
 }
 
@@ -155,13 +155,13 @@ double BodyElastoChrono::get_mass() {
     return chobj->GetMass();
 }
 
-NodeElastoChrono::NodeElastoChrono(Vector3d position, Quaternion rotation) {
+NodeElastoChrono::NodeElastoChrono(const Vector3d& position, const Quaternion& rotation) {
     chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(
         chrono::ChFrame<>(vec2ch(position), node_iec2ch(rotation)));
     EntityDynamicChrono::chobj = chobj;
 }
 
-void NodeElastoChrono::set_rotation(Quaternion rotation) {
+void NodeElastoChrono::set_rotation(const Quaternion& rotation) {
     chobj->SetRot(node_iec2ch(rotation));
 }
 
@@ -173,11 +173,11 @@ Vector3d NodeElastoChrono::get_direction() const {
     return ch2vec(chobj->TransformDirectionLocalToParent(chrono::ChVector<double>(1.0, 0.0, 0.0)));
 }
 
-void NodeElastoChrono::set_load(Vector3d force) {
+void NodeElastoChrono::set_load(const Vector3d& force) {
     chobj->SetForce(vec2ch(force));
 }
 
-void NodeElastoChrono::set_torque(Vector3d torque) {
+void NodeElastoChrono::set_torque(const Vector3d& torque) {
     chobj->SetTorque(vec2ch(torque));
 }
 
@@ -508,7 +508,7 @@ Vector3d SystemElastoChrono::get_gravitational_acceleration() const {
     return ch2vec(chobj->Get_G_acc());
 }
 
-void SystemElastoChrono::set_gravitational_acceleration(Vector3d gravitational_acceleration) {
+void SystemElastoChrono::set_gravitational_acceleration(const Vector3d& gravitational_acceleration) {
     chobj->Set_G_acc(gravitational_acceleration);
 }
 

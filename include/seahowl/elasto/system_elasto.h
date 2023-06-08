@@ -51,7 +51,7 @@ class SystemElasto {
      *
      * @param[in] gravitational_acceleration Gravitational acceleration.
      */
-    virtual void set_gravitational_acceleration(Vector3d gravitational_acceleration) = 0;
+    virtual void set_gravitational_acceleration(const Vector3d& gravitational_acceleration) = 0;
 
     /**
      * @brief Adds body to system.

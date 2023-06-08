@@ -32,7 +32,7 @@ class BodyElasto : public virtual EntityDynamic {
      *
      * @param[in] inertia Diagonal inertia to apply.
      */
-    virtual void set_inertia_diagonal(Vector3d inertia) = 0;
+    virtual void set_inertia_diagonal(const Vector3d& inertia) = 0;
 
     /**
      * @brief Resets forces of body.
@@ -45,7 +45,7 @@ class BodyElasto : public virtual EntityDynamic {
      * @param[in] torque Torque to be accumulated.
      * @param[in] is_local Whether the torque is applied from local or global reference frame.
      */
-    virtual void accumulate_torque(Vector3d torque, bool is_local) = 0;
+    virtual void accumulate_torque(const Vector3d& torque, bool is_local) = 0;
 
     /**
      * @brief Fix body in space.
@@ -69,7 +69,7 @@ class NodeElasto : public virtual EntityDynamic {
      *
      * @param[in] force Load to apply on node.
      */
-    virtual void set_load(Vector3d force) = 0;
+    virtual void set_load(const Vector3d& force) = 0;
 
     /**
      * @brief Returns load applied on node.
@@ -79,7 +79,7 @@ class NodeElasto : public virtual EntityDynamic {
     /**
      * @brief Sets torque on node.
      */
-    virtual void set_torque(Vector3d torque) = 0;
+    virtual void set_torque(const Vector3d& torque) = 0;
 
     /**
      * @brief Returns torque applied on node.
