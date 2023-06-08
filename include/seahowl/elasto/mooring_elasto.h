@@ -51,7 +51,7 @@ class MooringElasto : public ComponentElastoFEA {
      * param[in] gravitational_acceleration Gravitational acceleration vector.
      * param[in] fluid_density Density of fluid.
      */
-    void compute_hydro_loads(Vector3d& gravitational_acceleration, double fluid_density);
+    void compute_hydro_loads(const Vector3d& gravitational_acceleration, double fluid_density);
 
   private:
     /**

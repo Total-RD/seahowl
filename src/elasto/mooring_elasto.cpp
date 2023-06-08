@@ -69,7 +69,7 @@ void MooringElasto::build_elements() {
     }
 }
 
-void MooringElasto::compute_hydro_loads(Vector3d& gravitational_acceleration, double fluid_density) {
+void MooringElasto::compute_hydro_loads(const Vector3d& gravitational_acceleration, double fluid_density) {
     for (int ii = 0; ii < nodes.size(); ii++) {
         nodes[ii]->set_force(Vector3d(0.0, 0.0, 0.0));
     }
