@@ -45,8 +45,8 @@ def merge_interpolate_points(json_points1, json_points2):
         else:
             interp = True
             frange = fractions1[idx1] - fractions1[idx1 - 1]
-            coeff1 = 1.0 - (fractions1[idx1] - fraction) / frange
-            coeff2 = 1.0 - (fraction - fractions1[idx1 - 1]) / frange
+            coeff1 = 1.0 - (fraction - fractions1[idx1 - 1]) / frange
+            coeff2 = 1.0 - (fractions1[idx1] - fraction) / frange
             interp1 = json_points1[idx1 - 1]
             interp2 = json_points1[idx1]
             point1 = copy.deepcopy(json_points1[idx1])
@@ -60,8 +60,8 @@ def merge_interpolate_points(json_points1, json_points2):
         else:
             interp = True
             frange = fractions2[idx2] - fractions2[idx2 - 1]
-            coeff1 = 1.0 - (fractions2[idx2] - fraction) / frange
-            coeff2 = 1.0 - (fraction - fractions2[idx2 - 1]) / frange
+            coeff1 = 1.0 - (fraction - fractions2[idx2 - 1]) / frange
+            coeff2 = 1.0 - (fractions2[idx2] - fraction) / frange
             interp1 = json_points2[idx2 - 1]
             interp2 = json_points2[idx2]
             point2 = copy.deepcopy(json_points2[idx2])
