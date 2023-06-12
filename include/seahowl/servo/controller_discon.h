@@ -70,6 +70,10 @@ struct DisconController {
 
     void SetRootMomentBlade(int index_blade, double flap, double edge);
 
+    void SetTowerTopAcceleration(double foreaft, double sideside);
+
+    void SetNacelleRotationalAcceleration(double roll, double pitch, double yaw);
+
     /// <summary>
     /// Helper to set Inflow wind speed
     /// </summary>

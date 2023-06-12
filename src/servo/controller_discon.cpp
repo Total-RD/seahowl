@@ -59,6 +59,18 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
         pImpl.SetRootMomentBlade(index_blade, root_moment[0], root_moment[1]);
     }
 
+    // nacelle/towertop
+    // consider nacelle COG as towertop (for translational acceleration) as link is rigid
+    auto& nacelle = *turbine.rotor.elasto.body_nacelle;
+    // get local acceleration
+    auto nacelle_acceleration = nacelle.get_rotation().inverse() * nacelle.get_acceleration();
+    pImpl.SetTowerTopAcceleration(nacelle_acceleration[0], nacelle_acceleration[1]);
+    // get local rotational acceleration in shaft (tilted) coordinate system
+    auto& shaft = *turbine.rotor.elasto.body_shaft;
+    auto nacelle_acceleration_rotational = shaft.get_rotation().inverse() * nacelle.get_rotational_acceleration();
+    pImpl.SetNacelleRotationalAcceleration(nacelle_acceleration_rotational[0], nacelle_acceleration_rotational[1],
+                                           nacelle_acceleration_rotational[2]);
+
     // generator
     // speed
     auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
@@ -69,10 +81,6 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
 }
 
 void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const seahowl::core::Turbine& turbine) {
-    auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * PI / 60.0);
-    auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
-    auto pitch_collective = turbine.rotor.elasto.pitch_collective;
-    auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
     auto nblades = turbine.rotor.blades.size();
 
     pImpl.SetNumberOfBlades(nblades);
@@ -228,9 +236,9 @@ static std::vector<discon::ParamDef> ArrayInfo{
     {79, "out", 'I', "Request for loads", "-"},
     {80, "out", 'I', "1 = Variable slip current demand at position 81", "-"},
     {81, "both", 'R', "Variable slip current demand", "A"},
-    {82, "in", 'R', "Nacelle roll acceleration", "rad/s2"},
+    {82, "in", 'R', "Nacelle roll acceleration -- in shaft (tilted) coordinate system", "rad/s2"},
     {83, "in", 'R', "Nacelle nodding acceleration", "rad/s"},
-    {84, "in", 'R', "Nacelle yaw acceleration", "rad/s2"},
+    {84, "in", 'R', "Nacelle yaw acceleration -- in shaft (tilted) coordinate system", "rad/s2"},
     {85, "", 'R', "Reserved", "-"},
     {86, "", 'R', "Reserved", "-"},
     {87, "", 'R', "Reserved", "-"},
@@ -482,6 +490,17 @@ void seahowl::servo::DisconController::SetRootMomentBlade(int index_blade, doubl
             throw std::runtime_error("Index of blade can only be (0, 1, 2).");
     }
 }
+
+void seahowl::servo::DisconController::SetTowerTopAcceleration(double foreaft, double sideside) {
+    SetAvrSWAP(53, static_cast<float>(foreaft));
+    SetAvrSWAP(54, static_cast<float>(sideside));
+};
+
+void seahowl::servo::DisconController::SetNacelleRotationalAcceleration(double roll, double pitch, double yaw) {
+    SetAvrSWAP(82, static_cast<float>(roll));
+    SetAvrSWAP(83, static_cast<float>(pitch));
+    SetAvrSWAP(84, static_cast<float>(yaw));
+};
 
 void seahowl::servo::DisconController::SetWindSpeed(double ws) {
     SetAvrSWAP(27, static_cast<float>(ws));
