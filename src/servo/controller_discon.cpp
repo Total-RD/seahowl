@@ -54,6 +54,9 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
         auto& blade = *turbine.rotor.elasto.blades[index_blade];
         // pitch
         pImpl.SetPitchBlade(index_blade, blade.pitch);
+        // moment
+        auto root_moment = blade.get_blade_root_moment();
+        pImpl.SetRootMomentBlade(index_blade, root_moment[0], root_moment[1]);
     }
 
     // generator
@@ -455,6 +458,25 @@ void seahowl::servo::DisconController::SetPitchBlade(int index_blade, double pit
             break;
         case 2:
             SetAvrSWAP(34, static_cast<float>(pitch_angle));
+            break;
+        default:
+            throw std::runtime_error("Index of blade can only be (0, 1, 2).");
+    }
+}
+
+void seahowl::servo::DisconController::SetRootMomentBlade(int index_blade, double flap, double edge) {
+    switch (index_blade) {
+        case 0:
+            SetAvrSWAP(30, static_cast<float>(flap));
+            SetAvrSWAP(69, static_cast<float>(edge));
+            break;
+        case 1:
+            SetAvrSWAP(31, static_cast<float>(flap));
+            SetAvrSWAP(70, static_cast<float>(edge));
+            break;
+        case 2:
+            SetAvrSWAP(32, static_cast<float>(flap));
+            SetAvrSWAP(71, static_cast<float>(edge));
             break;
         default:
             throw std::runtime_error("Index of blade can only be (0, 1, 2).");

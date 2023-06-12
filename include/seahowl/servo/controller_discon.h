@@ -68,6 +68,8 @@ struct DisconController {
 
     void SetPitchBlade(int index_blade, double pitch_angle);
 
+    void SetRootMomentBlade(int index_blade, double flap, double edge);
+
     /// <summary>
     /// Helper to set Inflow wind speed
     /// </summary>
