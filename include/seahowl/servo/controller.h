@@ -60,6 +60,13 @@ class Controller {
      * @brief Returns collective pitch to apply.
      */
     virtual double get_collective_pitch() const;
+
+    /**
+     * @brief Returns pitch to apply on blade.
+     *
+     * @param[in] index_blade Index of blade (0, 1, or 2).
+     */
+    virtual double get_pitch_blade(int index_blade) const;
 };
 
 /**

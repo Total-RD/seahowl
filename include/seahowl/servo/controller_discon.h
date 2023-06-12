@@ -66,6 +66,8 @@ struct DisconController {
     /// <param name="pitch_angle"></param>
     void SetPitch(double pitch_angle);
 
+    void SetPitchBlade(int index_blade, double pitch_angle);
+
     /// <summary>
     /// Helper to set Inflow wind speed
     /// </summary>
@@ -205,6 +207,13 @@ class ControllerDISCON : public Controller {
      * @brief Returns collective pitch to apply.
      */
     virtual double get_collective_pitch() const override;
+
+    /**
+     * @brief Returns pitch to apply on blade.
+     *
+     * @param[in] index_blade Index of blade (0, 1, or 2).
+     */
+    virtual double get_pitch_blade(int index_blade) const override;
 
   private:
     /** @brief Filepath of dynamic library (for DISCON routine). */

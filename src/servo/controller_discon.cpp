@@ -37,32 +37,31 @@ void seahowl::servo::ControllerDISCON::step(double time, double dt, const seahow
 void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
                                                                 double dt,
                                                                 const seahowl::core::Turbine& turbine) {
-    auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * PI / 60.0);
-    auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
-    auto pitch_collective = turbine.rotor.elasto.pitch_collective;
-    auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
-    auto power = turbine.get_generated_power();
-
-    // rotor speed
-    pImpl.SetRotorSpeed(omega_rotor);
-    // generator speed
-    pImpl.SetGeneratorSpeed(omega_generator);
-
     // time
     pImpl.SetTime(time);
     pImpl.SetDeltaTime(dt);
 
-    // collective pitch
-    pImpl.SetPitch(pitch_collective);
-
+    // rotor
+    // speed
+    auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * PI / 60.0);
+    pImpl.SetRotorSpeed(omega_rotor);
     // azimuth
-    // auto rotor_azimuth = pImpl.GetAvrSWAP(60) + omega * dt;
-    // if (rotor_azimuth > 2 * 3.14) {
-    //    rotor_azimuth -= 2 * 3.14;
-    //}
+    auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
     pImpl.SetRotorAzimuth(rotor_azimuth);
 
+    // blades
+    for (int index_blade = 0; index_blade < turbine.rotor.elasto.blades.size(); index_blade++) {
+        auto& blade = *turbine.rotor.elasto.blades[index_blade];
+        // pitch
+        pImpl.SetPitchBlade(index_blade, blade.pitch);
+    }
+
+    // generator
+    // speed
+    auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
+    pImpl.SetGeneratorSpeed(omega_generator);
     // power
+    auto power = turbine.get_generated_power();
     pImpl.SetGeneratedPower(power);
 }
 
@@ -90,6 +89,24 @@ double seahowl::servo::ControllerDISCON::get_torque_elec() const {
 double seahowl::servo::ControllerDISCON::get_collective_pitch() const {
     double collective_pitch = pImpl.GetAvrSWAP(45);
     return collective_pitch;
+}
+
+double seahowl::servo::ControllerDISCON::get_pitch_blade(int index_blade) const {
+    double pitch;
+    switch (index_blade) {
+        case 0:
+            pitch = pImpl.GetAvrSWAP(42);
+            break;
+        case 1:
+            pitch = pImpl.GetAvrSWAP(43);
+            break;
+        case 2:
+            pitch = pImpl.GetAvrSWAP(44);
+            break;
+        default:
+            throw std::runtime_error("Index of blade can only be (0, 1, 2).");
+    }
+    return pitch;
 }
 
 /**@brief Discon controller */
@@ -426,6 +443,22 @@ void seahowl::servo::DisconController::SetPitch(double pitch_angle) {
     SetAvrSWAP(4, static_cast<float>(pitch_angle));
     SetAvrSWAP(33, static_cast<float>(pitch_angle));
     SetAvrSWAP(34, static_cast<float>(pitch_angle));
+}
+
+void seahowl::servo::DisconController::SetPitchBlade(int index_blade, double pitch_angle) {
+    switch (index_blade) {
+        case 0:
+            SetAvrSWAP(4, static_cast<float>(pitch_angle));
+            break;
+        case 1:
+            SetAvrSWAP(33, static_cast<float>(pitch_angle));
+            break;
+        case 2:
+            SetAvrSWAP(34, static_cast<float>(pitch_angle));
+            break;
+        default:
+            throw std::runtime_error("Index of blade can only be (0, 1, 2).");
+    }
 }
 
 void seahowl::servo::DisconController::SetWindSpeed(double ws) {

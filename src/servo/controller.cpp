@@ -23,6 +23,10 @@ double Controller::get_collective_pitch() const {
     return 0.0;
 }
 
+double Controller::get_pitch_blade(int index_blade) const {
+    return 0.0;
+}
+
 ControllerVariableTorque::ControllerVariableTorque() {
     has_pitch_control = false;
     has_torque_control = true;
