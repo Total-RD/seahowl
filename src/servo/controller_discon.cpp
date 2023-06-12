@@ -27,23 +27,8 @@ seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::stri
 }
 
 void seahowl::servo::ControllerDISCON::step(double time, double dt, const seahowl::core::Turbine& turbine) {
-    auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * PI / 60.0);
-    auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
-    auto pitch_collective = turbine.rotor.elasto.pitch_collective;
-    auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
-    auto power = turbine.get_generated_power();
-    this->step(time, dt, omega_rotor, omega_generator, pitch_collective, rotor_azimuth, power);
-}
-
-void seahowl::servo::ControllerDISCON::step(double time,
-                                            double dt,
-                                            double omega_rotor,
-                                            double omega_generator,
-                                            double pitch_collective,
-                                            double rotor_azimuth,
-                                            double power) {
     // update variables
-    update_turbine_variables(time, dt, omega_rotor, omega_generator, pitch_collective, rotor_azimuth, power);
+    update_turbine_variables(time, dt, turbine);
 
     // call controller
     pImpl.Call();
@@ -51,11 +36,13 @@ void seahowl::servo::ControllerDISCON::step(double time,
 
 void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
                                                                 double dt,
-                                                                double omega_rotor,
-                                                                double omega_generator,
-                                                                double pitch_collective,
-                                                                double rotor_azimuth,
-                                                                double power) {
+                                                                const seahowl::core::Turbine& turbine) {
+    auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * PI / 60.0);
+    auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
+    auto pitch_collective = turbine.rotor.elasto.pitch_collective;
+    auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
+    auto power = turbine.get_generated_power();
+
     // rotor speed
     pImpl.SetRotorSpeed(omega_rotor);
     // generator speed
@@ -85,20 +72,10 @@ void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const 
     auto pitch_collective = turbine.rotor.elasto.pitch_collective;
     auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
     auto nblades = turbine.rotor.blades.size();
-    this->initialize(time, dt, omega_rotor, omega_generator, pitch_collective, rotor_azimuth, nblades);
-}
 
-void seahowl::servo::ControllerDISCON::initialize(double time,
-                                                  double dt,
-                                                  double omega_rotor,
-                                                  double omega_generator,
-                                                  double pitch_collective,
-                                                  double rotor_azimuth,
-                                                  size_t nblades) {
     pImpl.SetNumberOfBlades(nblades);
 
-    // update variables
-    update_turbine_variables(time, dt, omega_rotor, omega_generator, pitch_collective, rotor_azimuth, 0.0);
+    update_turbine_variables(time, dt, turbine);
 
     pImpl.SetAvrSWAP(27, 10.0);  // estimated wind speed (needs to be != 0 at init for it to work in ROSCO!)
 

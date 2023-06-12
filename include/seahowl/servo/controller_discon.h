@@ -210,32 +210,8 @@ class ControllerDISCON : public Controller {
     /** @brief Filepath of dynamic library (for DISCON routine). */
     std::string libfile;
 
-    // init called from other init function
-    void initialize(double time,
-                    double dt,
-                    double omega_rotor,
-                    double omega_generator,
-                    double pitch_collective,
-                    double rotor_azimuth,
-                    size_t nblades);
-
     // updates turbine variables of object communicating with DISCON module
-    void update_turbine_variables(double time,
-                                  double dt,
-                                  double omega_rotor,
-                                  double omega_generator,
-                                  double pitch_collective,
-                                  double rotor_azimuth,
-                                  double power);
-
-    // step called from other step function
-    void step(double time,
-              double dt,
-              double omega_rotor,
-              double omega_generator,
-              double pitch_collective,
-              double rotor_azimuth,
-              double power);
+    void update_turbine_variables(double time, double dt, const seahowl::core::Turbine& turbine);
 };
 
 }  // namespace servo
