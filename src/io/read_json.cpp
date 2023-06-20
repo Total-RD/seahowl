@@ -559,7 +559,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     auto filepath_tower = (DATADIR / tower_json.at("file").get<std::string>()).generic_string();
     populate_tower_from_json(filepath_tower, turbine.tower);
     tower_json.at("discretization").at("elasto").get_to(turbine.elasto.tower.discretization_fractions);
-    tower_json.at("discretization").at("aero").get_to(turbine.elasto.tower.discretization_fractions);
+    tower_json.at("discretization").at("aero").get_to(turbine.aero.tower.discretization_fractions);
 
     // controller
     if (controller_json.at("type").get<std::string>() == "DISCON") {
