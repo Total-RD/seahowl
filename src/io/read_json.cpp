@@ -564,6 +564,9 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     // controller
     if (controller_json.at("type").get<std::string>() == "DISCON") {
         auto OUTPUT_CONTROLLER_DIR = path("./output/dynlib_copies");
+        if (!controller_json.at("options").contains("libfile")) {
+            throw std::invalid_argument("Need to define path to libfile for DISCON routine");
+        }
         auto libfilepath = path(DATADIR / controller_json.at("options").at("libfile"));
         if (!std::filesystem::exists(libfilepath)) {
             throw std::invalid_argument(

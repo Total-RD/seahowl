@@ -412,7 +412,6 @@ def convert_beamdyn_blade_file(filename, save_directory=None):
 
 
 def merge_beamdyn2aerodyn(beamdyn_json, aerodyn_json, save_directory=None):
-
     merged_json = copy.deepcopy(beamdyn_json)
     merged_json.pop("discretization_aero", None)
     merged_json.pop("discretization_elasto", None)
@@ -438,7 +437,6 @@ def merge_beamdyn2aerodyn(beamdyn_json, aerodyn_json, save_directory=None):
 def convert_elastodyn_tower_file(
     filename_elastodyn, filename_elastodyn_tower, save_directory=None
 ):
-
     elastodyn_json = dict()
     elastodyn_json["damping_coefficients"] = [0.02, 0.02, 0.02, 0.02]
 
@@ -545,7 +543,6 @@ def convert_aerodyn_tower_file(filename, save_directory=None):
 
 
 def merge_elastodyn2aerodyn_tower(elastodyn_json, aerodyn_json, save_directory=None):
-
     merged_json = copy.deepcopy(elastodyn_json)
     reference_points = merge_interpolate_points(
         json_points1=elastodyn_json["reference_points"],
@@ -652,7 +649,7 @@ def convert_openfast_fst(filename, save_directory=None):
 
     # main json with default values to overwrite when parsing OpenFAST files
     main_json = {
-        "numerics": {"dt": 0.1, "t_end": 2000.0},
+        "numerics": {"dt": 0.1, "t_end": 2000.0, "statics_prestep": True},
         "outputs": {"dt": 0.1, "VTK": False},
         "environment": {
             "gravity": [0.0, 0.0, -9.81],
@@ -663,9 +660,9 @@ def convert_openfast_fst(filename, save_directory=None):
                     "reference_height": 150,
                     "shear_coefficient": 0.12,
                     "velocity_start": [12, 0, 0],
-                    "velocity_stop": [25, 0, 0],
+                    "velocity_end": [25, 0, 0],
                     "time_start": 500,
-                    "time_stop": 1700,
+                    "time_end": 1700,
                 },
             },
         },
@@ -673,6 +670,7 @@ def convert_openfast_fst(filename, save_directory=None):
             {
                 "translation": [0, 0, 0],
                 "rotation": 0,
+                "use_aerodyn": False,
                 "file": str(Path("./turbine.json")),
             }
         ],
@@ -824,7 +822,13 @@ def convert_openfast_fst(filename, save_directory=None):
                 },
                 "file": str(Path("./tower.json")),
             },
-            "controller": {"type": "ROSCO", "options": {"file": str(path_DISCON_new)}},
+            "controller": {
+                "type": "DISCON",
+                "options": {
+                    "infile": str(path_DISCON_new),
+                    "libfile": "./controller/libdiscon.so",
+                },
+            },
         }
 
         # save turbine json
@@ -839,7 +843,6 @@ def convert_openfast_fst(filename, save_directory=None):
 
 
 if __name__ == "__main__":
-
     # make command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
