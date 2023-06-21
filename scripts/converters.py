@@ -28,7 +28,7 @@ def merge_interpolate_points(json_points1, json_points2):
         fractions1.append(point["fraction"])
     for point in json_points2:
         fractions2.append(point["fraction"])
-    tol = 4
+    tol = 6
     fractions1 = np.round(fractions1, tol)
     fractions2 = np.round(fractions2, tol)
 
@@ -77,7 +77,6 @@ def merge_interpolate_points(json_points1, json_points2):
 
                 # if string
                 if isinstance(val1, str) and isinstance(val2, str):
-                    print(val1, val2)
                     if val1 == val2:
                         # only copy if they are the same
                         interp_point[key] = val1
