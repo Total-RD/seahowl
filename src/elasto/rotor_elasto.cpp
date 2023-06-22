@@ -211,7 +211,12 @@ double RotorElasto::get_axial_thrust() const {
 }
 
 double RotorElasto::get_axial_torque() const {
-    auto react_torque = link_shaft_hub->get_reaction_torque();
+    // get reaction torque from all blades linked to hub
+    // those links are already in the hub body reference frame
+    auto react_torque = Vector3d(0.0, 0.0, 0.0);
+    for (auto& link_blade : links_blades) {
+        react_torque += link_blade->get_reaction_torque();
+    }
     return react_torque.x();
 }
 
