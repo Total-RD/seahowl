@@ -27,7 +27,7 @@ void Turbine::poststep(double time, double dt) {
     controller->step(time, dt, *this);
     // apply torque from comtroller
     if (controller->has_torque_control) {
-        auto torque_elec = controller->get_torque_elec();
+        auto torque_elec = controller->get_torque_elec() * gearbox_ratio * gearbox_efficiency;
         // apply torque elec to hub rigid body
         rotor.elasto.body_hub->reset_forces();
         // torque elec is applied on hub body (locally)
