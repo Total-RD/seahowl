@@ -207,7 +207,7 @@ double RotorElasto::get_azimuth() const {
 
 double RotorElasto::get_axial_thrust() const {
     auto react_force = link_shaft_hub->get_reaction_force();
-    return react_force.z();
+    return react_force.x();
 }
 
 double RotorElasto::get_axial_torque() const {
