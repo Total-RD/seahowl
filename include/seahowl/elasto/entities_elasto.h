@@ -40,6 +40,14 @@ class BodyElasto : public virtual EntityDynamic {
     virtual void reset_forces() = 0;
 
     /**
+     * @brief Accumulates force on body.
+     *
+     * @param[in] force Force to be accumulated.
+     * @param[in] is_local Whether the force is applied from local or global reference frame.
+     */
+    virtual void accumulate_force(const Vector3d& force, bool is_local) = 0;
+
+    /**
      * @brief Accumulates torque on body.
      *
      * @param[in] torque Torque to be accumulated.

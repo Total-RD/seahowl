@@ -70,6 +70,7 @@ class BodyElastoChrono : public BodyElasto, public EntityDynamicChrono {
     virtual void set_mass(double mass) override;
     virtual void set_inertia_diagonal(const Vector3d& inertia) override;
     virtual void reset_forces() override;
+    virtual void accumulate_force(const Vector3d& force, bool is_local) override;
     virtual void accumulate_torque(const Vector3d& torque, bool is_local) override;
     virtual void set_fixed(bool is_fixed) override;
     virtual double get_mass() override;

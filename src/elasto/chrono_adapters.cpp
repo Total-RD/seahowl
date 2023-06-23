@@ -143,6 +143,10 @@ void BodyElastoChrono::reset_forces() {
     chobj->Empty_forces_accumulators();
 }
 
+void BodyElastoChrono::accumulate_force(const Vector3d& force, bool is_local) {
+    chobj->Accumulate_force(force, chobj->GetPos(), is_local);
+}
+
 void BodyElastoChrono::accumulate_torque(const Vector3d& torque, bool is_local) {
     chobj->Accumulate_torque(torque, is_local);
 }
