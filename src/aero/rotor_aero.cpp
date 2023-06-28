@@ -177,6 +177,60 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const WindModel& wind_model,
     }
 }
 
+void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_model,
+                                                       double time,
+                                                       double pitch,
+                                                       double RPM) {
+    double density = wind_model.get_density();
+    for (auto& blade : blades) {
+        auto blade_azimuth = azimuth + blade->azimuth0;
+        // check that blade_azimuth is between pi and -pi
+        if (blade_azimuth < -PI || blade_azimuth > PI) {
+            blade_azimuth = abs(std::fmod((blade_azimuth + 3 * PI), 2 * PI)) - PI;
+        }
+        int count = -1;
+
+        // get fluid relative velocity
+        auto wind_velocity0 = wind_model.get_wind_velocity(position, time);
+        Vector3d wind_velocity = wind_velocity0;
+
+        auto global_velocity = Vector3d(wind_velocity - velocity);
+        // project in disc frame
+        auto local_velocity_disc = body_hub.get_rotation().inverse() * global_velocity;
+
+        double tol = 1e-6;
+        if (local_velocity0.norm() < tol || (node.distance_from_tip < tol && tip_loss) ||
+            (node.distance_from_hub < tol && hub_loss)) {
+            node.load = Vector3d(0.0, 0.0, 0.0);
+        } else {
+            // get induced velocity (2D) from blade node
+            auto local_velocity =
+                node.get_induced_velocity_rotor(local_velocity0, blade->pitch, blades.size(), tip_loss, hub_loss);
+
+            // get coefficients from angle of attack
+            double phi = seahowl::aero::get_phi(local_velocity);
+            double alpha = seahowl::aero::get_alpha_from_phi(phi, (blade->pitch + node.properties.structural_twist));
+            auto coefficients =
+                seahowl::aero::get_aero_coefficients_from_alpha(alpha, node.properties.airfoil_properties);
+
+            // get drag and lift coefficients
+            auto cn = coefficients.thrust;
+            auto cp = coefficients.power;
+
+            // calculate drag and lift force
+            auto vel = local_velocity.norm();
+            auto chord = node.properties.chord;
+            auto load_n = 0.5 * density * vel * vel * chord * cn;
+            auto load_t = 0.5 * density * vel * vel * vel * chord * ct / RPM;
+        }
+
+        // update loads of blade
+        for (int ii = 0; ii < blade->elements.size(); ii++) {
+            blade->loads[ii] = blade->elements[ii].get_load();
+        }
+    }
+}
+
 #ifdef HAVE_AERODYN
 void RotorNacelleAssemblyAero::compute_aero_loads(float* LoadAeroDyn,
                                                   WindModel& wind_model,
