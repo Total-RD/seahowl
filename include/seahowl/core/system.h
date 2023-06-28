@@ -7,6 +7,9 @@
 
 // forward declarations
 namespace seahowl {
+namespace env {
+class WindModel;
+}// namespace env
 namespace servo {
 class Controller;
 }  // namespace servo
@@ -18,6 +21,7 @@ namespace elasto {
 class SystemElasto;
 }  // namespace elasto
 }  // namespace seahowl
+
 
 namespace seahowl {
 namespace core {
@@ -32,7 +36,7 @@ class System : public ComponentDynamic {
     /** @brief Wind turbines. */
     std::deque<std::shared_ptr<Turbine>> turbines{};
     /** @brief Wind model. */
-    std::shared_ptr<seahowl::aero::WindModel> wind_model;
+    std::shared_ptr<seahowl::env::WindModel> wind_model;
     std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto;
     std::shared_ptr<seahowl::aero::SystemAero> system_aero;
 

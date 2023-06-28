@@ -13,7 +13,7 @@
 #include <seahowl/core/system.h>
 #include <seahowl/aero/bemt.h>
 #include <seahowl/aero/system_aero.h>
-#include <seahowl/aero/wind_models.h>
+#include <seahowl/env/wind_models.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/commons/numerics.h>
 
@@ -24,7 +24,7 @@
 #endif
 
 #ifdef HAVE_INFLOWWIND
-    #include "seahowl/aero/inflowwind_adapter.h"
+    #include "seahowl/env/inflowwind_adapter.h"
 #endif
 
 using namespace seahowl::elasto;
@@ -303,7 +303,7 @@ TEST(test_turbine, rpm_initial_pitch) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = seahowl::aero::ConstantWind();
+    auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
@@ -364,7 +364,7 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = seahowl::aero::ConstantWind();
+    auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
@@ -425,7 +425,7 @@ TEST(test_turbine, controller_target_rpm) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = seahowl::aero::ConstantWind();
+    auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
@@ -489,7 +489,7 @@ TEST(test_turbine, actuator_disk) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = seahowl::aero::ConstantWind();
+    auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(11.0, 0.0, 0.0));
     // turbine
     double initial_pitch = 0.0 * seahowl::PI / 1000.0;
@@ -581,7 +581,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = seahowl::aero::ConstantWind();
+    auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
@@ -646,7 +646,7 @@ TEST(test_turbine, multiturbines) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = std::make_shared<seahowl::aero::ConstantWind>();
+    auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
     wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
@@ -721,8 +721,8 @@ TEST(test_inflowwind, rpm_initial_pitch) {
     double dt = 0.1;
     // wind
     auto wind_model =
-        seahowl::aero::InflowWindAdapter((DATADIR / "aerodyn/IEA-15-240-RWT_InflowWind.dat").generic_string(),
-                                         (DATADIR / "aerodyn/long_step_wind.wnd").generic_string());
+        seahowl::env::InflowWindAdapter((DATADIR / "aerodyn/IEA-15-240-RWT_InflowWind.dat").generic_string(),
+                                        (DATADIR / "aerodyn/long_step_wind.wnd").generic_string());
     wind_model.init(dt);
     // turbine
     double initial_pitch = seahowl::PI / 8.0;

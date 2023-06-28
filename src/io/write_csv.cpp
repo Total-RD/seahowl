@@ -4,7 +4,7 @@
 #include "seahowl/elasto/rotor_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/aero/blade_aero.h"
-#include "seahowl/aero/wind_models.h"
+#include "seahowl/env/wind_models.h"
 #include "seahowl/core/blade.h"
 #include "seahowl/core/system.h"
 #include "seahowl/servo/controller.h"

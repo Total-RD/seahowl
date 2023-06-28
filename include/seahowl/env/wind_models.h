@@ -3,7 +3,7 @@
 #include "seahowl/commons/numerics.h"
 
 namespace seahowl {
-namespace aero {
+namespace env {
 
 /**
  * @brief Base class for wind models
@@ -105,5 +105,5 @@ class WindRamp : public ShearedWind {
     virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const override;
 };
 
-}  // namespace aero
+}  // namespace env
 }  // namespace seahowl

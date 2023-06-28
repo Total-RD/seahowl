@@ -10,8 +10,10 @@ namespace seahowl {
 namespace aero {
 class BladeAero;
 class TowerAero;
-class WindModel;
 }  // namespace aero
+namespace env {
+class WindModel;
+}  // namespace env
 }  // namespace seahowl
 
 namespace seahowl {
@@ -102,7 +104,7 @@ class RotorNacelleAssemblyAero {
      * @param[in] tip_loss Whether to take tip loss into account or not.
      * @param[in] hub_loss Whether to take hub loss into account or not.
      */
-    void compute_aero_loads(const WindModel& wind_model,
+    void compute_aero_loads(const env::WindModel& wind_model,
                             double time,
                             const TowerAero& tower_aero,
                             bool tower_shadow = true,
@@ -118,7 +120,7 @@ class RotorNacelleAssemblyAero {
      * @param[in] RPM Rotor speed (for getting performance from table).
      *
      */
-    void compute_aero_loads_disk(const WindModel& wind_model, double time);
+    void compute_aero_loads_disk(const env::WindModel& wind_model, double time);
 
 #ifdef HAVE_AERODYN
     /**
@@ -133,7 +135,7 @@ class RotorNacelleAssemblyAero {
      * @param[in] hub_loss Whether to take hub loss into account or not.
      */
     void compute_aero_loads(float* LoadAeroDyn,
-                            WindModel& wind_model,
+                            env::WindModel& wind_model,
                             double time,
                             const TowerAero& tower_aero,
                             bool tower_shadow = true,

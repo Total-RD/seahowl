@@ -4,7 +4,7 @@
 #include "seahowl/aero/system_aero.h"
 #include "seahowl/elasto/turbine_elasto.h"
 #include "seahowl/aero/turbine_aero.h"
-#include "seahowl/aero/wind_models.h"
+#include "seahowl/env/wind_models.h"
 
 #include <vector>
 #include <spdlog/spdlog.h>

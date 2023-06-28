@@ -4,7 +4,7 @@
 #include <cstring>
 #include <memory>
 
-#include <seahowl/aero/wind_models.h>
+#include <seahowl/env/wind_models.h>
 
 /// <summary>
 /// Inflowwind module in OpenFAST
@@ -39,7 +39,7 @@ namespace core {
 class Turbine;
 }
 
-namespace aero {
+namespace env {
 
 /**@brief InflowWind wrapping inferface
  *
@@ -91,7 +91,7 @@ struct InflowWindLib {
 
 class InflowWindAdapter : public WindModel {
   public:
-    std::unique_ptr<seahowl::aero::InflowWindLib> pImpl;
+    std::unique_ptr<InflowWindLib> pImpl;
 
     InflowWindAdapter(std::string InflowInfile, std::string WindWndfile);
     ~InflowWindAdapter();
@@ -101,5 +101,5 @@ class InflowWindAdapter : public WindModel {
     virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const override;
 };
 
-}  // namespace aero
+}  // namespace env
 }  // namespace seahowl

@@ -1,6 +1,7 @@
 #include "seahowl/aero/turbine_aero.h"
 
 using namespace seahowl::aero;
+using seahowl::env::WindModel;
 
 TurbineAero::TurbineAero() {
     rna = RotorNacelleAssemblyAero();
@@ -20,7 +21,7 @@ void TurbineAero::initialize(double time, double dt) {
 #endif
 }
 
-void TurbineAero::compute_aero_loads(seahowl::aero::WindModel& wind_model, double time) {
+void TurbineAero::compute_aero_loads(WindModel& wind_model, double time) {
 #ifdef HAVE_AERODYN
     if (use_aerodyn) {
         aerodyn->calcul(time, *this);

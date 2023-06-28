@@ -216,7 +216,6 @@ set(SEAHOWL_AERO_SOURCES
     src/aero/rotor_aero.cpp
     src/aero/tower_aero.cpp
     src/aero/turbine_aero.cpp
-    src/aero/wind_models.cpp
 )
 set(SEAHOWL_AERO_HEADERS
     include/seahowl/aero/airfoil.h
@@ -227,16 +226,11 @@ set(SEAHOWL_AERO_HEADERS
     include/seahowl/aero/rotor_aero.h
     include/seahowl/aero/tower_aero.h
     include/seahowl/aero/turbine_aero.h
-    include/seahowl/aero/wind_models.h
 )
 if (SEAHOWL_ENABLE_AERODYN)
     list(APPEND SEAHOWL_AERO_SOURCES src/aero/aerodyn_adapter.cpp)
     list(APPEND SEAHOWL_AERO_HEADERS include/seahowl/aero/aerodyn_adapter.h)
 endif(SEAHOWL_ENABLE_AERODYN)
-if (SEAHOWL_ENABLE_INFLOWWIND)
-    list(APPEND SEAHOWL_AERO_SOURCES src/aero/inflowwind_adapter.cpp)
-    list(APPEND SEAHOWL_AERO_HEADERS include/seahowl/aero/inflowwind_adapter.h)
-endif(SEAHOWL_ENABLE_INFLOWWIND)
 source_group(aero FILES
     ${SEAHOWL_AERO_SOURCES}
     ${SEAHOWL_AERO_HEADERS})
@@ -262,6 +256,19 @@ if(SEAHOWL_ENABLE_HYDROCHRONO)
     list(APPEND SEAHOWL_HYDRO_HEADERS include/seahowl/hydro/hydrochrono_adapter.h)
 endif(SEAHOWL_ENABLE_HYDROCHRONO)
 source_group(hydro FILES ${SEAHOWL_HYDRO_SOURCES} ${SEAHOWL_HYDRO_HEADERS})
+
+# env
+set(SEAHOWL_ENV_SOURCES
+    src/env/wind_models.cpp
+)
+set(SEAHOWL_ENV_HEADERS
+    include/seahowl/env/wind_models.h
+)
+if (SEAHOWL_ENABLE_INFLOWWIND)
+    list(APPEND SEAHOWL_ENV_SOURCES src/env/inflowwind_adapter.cpp)
+    list(APPEND SEAHOWL_ENV_HEADERS include/seahowl/env/inflowwind_adapter.h)
+endif(SEAHOWL_ENABLE_INFLOWWIND)
+source_group(env FILES ${SEAHOWL_ENV_SOURCES} ${SEAHOWL_ENV_HEADERS})
 
 # io
 set(SEAHOWL_IO_SOURCES src/io/read_json.cpp src/io/write_csv.cpp src/io/read_rotor_perf.cpp)
@@ -290,6 +297,8 @@ set(SEAHOWL_FILES
     ${SEAHOWL_SERVO_HEADERS}
     ${SEAHOWL_HYDRO_SOURCES}
     ${SEAHOWL_HYDRO_HEADERS}
+    ${SEAHOWL_ENV_SOURCES}
+    ${SEAHOWL_ENV_HEADERS}
     ${SEAHOWL_IO_SOURCES}
     ${SEAHOWL_IO_HEADERS}
 )

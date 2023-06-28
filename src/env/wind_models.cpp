@@ -1,6 +1,6 @@
-#include "seahowl/aero/wind_models.h"
+#include "seahowl/env/wind_models.h"
 
-using namespace seahowl::aero;
+using namespace seahowl::env;
 using seahowl::Vector3d;
 
 Vector3d get_sheared_wind_velocity(const Vector3d& velocity,

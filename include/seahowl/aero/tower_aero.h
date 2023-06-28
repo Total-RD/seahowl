@@ -6,9 +6,9 @@
 
 // forward declarations
 namespace seahowl {
-namespace aero {
+namespace env {
 class WindModel;
-}  // namespace aero
+}  // namespace env
 }  // namespace seahowl
 
 namespace seahowl {
@@ -57,7 +57,7 @@ class TowerAero {
     /**
      * @brief Compute wind loads on tower using Morison's approach on cylindrical elements.
      */
-    void compute_aero_loads(WindModel& wind_model, double time);
+    void compute_aero_loads(env::WindModel& wind_model, double time);
 };
 
 }  // namespace aero

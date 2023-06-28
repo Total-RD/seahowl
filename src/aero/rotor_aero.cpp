@@ -2,10 +2,10 @@
 
 #include "seahowl/aero/blade_aero.h"
 #include "seahowl/aero/tower_aero.h"
-#include "seahowl/aero/wind_models.h"
 #include "seahowl/aero/airfoil.h"
 #include "seahowl/aero/bemt.h"
 #include "seahowl/commons/utils.h"
+#include "seahowl/env/wind_models.h"
 
 #include <cmath>
 
@@ -13,6 +13,7 @@ using seahowl::aero::BladeAero;
 using seahowl::aero::RotorNacelleAssemblyAero;
 using seahowl::aero::TowerAero;
 using seahowl::aero::DiskCoefficients;
+using seahowl::env::WindModel;
 using seahowl::Vector3d;
 using seahowl::Vector2d;
 using seahowl::PI;

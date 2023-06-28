@@ -1,4 +1,4 @@
-#include "seahowl/aero/inflowwind_adapter.h"
+#include "seahowl/env/inflowwind_adapter.h"
 
 #include <stdexcept>
 #include <vector>
@@ -7,26 +7,27 @@
 #include <fstream>
 #include <spdlog/spdlog.h>
 
-seahowl::aero::InflowWindAdapter::InflowWindAdapter(std::string InflowInfile, std::string WindWndfile) {
+using namespace seahowl::env;
+
+InflowWindAdapter::InflowWindAdapter(std::string InflowInfile, std::string WindWndfile) {
     spdlog::info("Using InflowWind.");
-    pImpl.reset(new seahowl::aero::InflowWindLib);
+    pImpl.reset(new InflowWindLib);
     pImpl->SetIFWINFILE(InflowInfile);
     pImpl->SetWNDINFILE(WindWndfile);
 }
 
-seahowl::aero::InflowWindAdapter::~InflowWindAdapter() {}
+InflowWindAdapter::~InflowWindAdapter() {}
 
-void seahowl::aero::InflowWindAdapter::init(double dt) {
+void InflowWindAdapter::init(double dt) {
     pImpl->SetTimeStep(dt);
     pImpl->Init();
 }
 
-void seahowl::aero::InflowWindAdapter::end() {
+void InflowWindAdapter::end() {
     pImpl->End();
 }
 
-seahowl::Vector3d seahowl::aero::InflowWindAdapter::get_wind_velocity(const seahowl::Vector3d& position,
-                                                                      double time) const {
+seahowl::Vector3d InflowWindAdapter::get_wind_velocity(const seahowl::Vector3d& position, double time) const {
     float* Pos_C = new float[3];
     for (int i = 0; i < 3; i++) {
         Pos_C[i] = position[i];
@@ -40,7 +41,7 @@ seahowl::Vector3d seahowl::aero::InflowWindAdapter::get_wind_velocity(const seah
     return velocity;
 }
 
-void seahowl::aero::InflowWindLib::SetIFWINFILE(std::string name) {
+void InflowWindLib::SetIFWINFILE(std::string name) {
     spdlog::info("Set InflowWind INFILE: {name}.", name);
     std::ifstream file(name);
     if (!file.is_open()) {
@@ -54,7 +55,7 @@ void seahowl::aero::InflowWindLib::SetIFWINFILE(std::string name) {
     file.close();
 }
 
-void seahowl::aero::InflowWindLib::SetWNDINFILE(std::string name) {
+void InflowWindLib::SetWNDINFILE(std::string name) {
     spdlog::info("Set wind.wnd INFILE: {}.", name);
     std::ifstream file(name);
     if (!file.is_open()) {
@@ -68,7 +69,7 @@ void seahowl::aero::InflowWindLib::SetWNDINFILE(std::string name) {
     file.close();
 }
 
-void seahowl::aero::InflowWindLib::CheckError() {
+void InflowWindLib::CheckError() {
     if (ErrStat == 0) {
         return;
     } else if (ErrStat == 1) {
@@ -80,23 +81,23 @@ void seahowl::aero::InflowWindLib::CheckError() {
     }
 }
 
-void seahowl::aero::InflowWindLib::SetTimeStep(double dt) {
+void InflowWindLib::SetTimeStep(double dt) {
     DT = dt;
 }
 
-void seahowl::aero::InflowWindLib::SetTime(double time) {
+void InflowWindLib::SetTime(double time) {
     Time = time;
 }
 
-void seahowl::aero::InflowWindLib::SetPos(float* Position_C) {
+void InflowWindLib::SetPos(float* Position_C) {
     Position = Position_C;
 }
 
-void seahowl::aero::InflowWindLib::SetVel(float* Velocity_C) {
+void InflowWindLib::SetVel(float* Velocity_C) {
     Velocity = Velocity_C;
 }
 
-void seahowl::aero::InflowWindLib::Init() {
+void InflowWindLib::Init() {
     const char* IfWinputFile = IfWinputFileString.c_str();
     const char* IfWUniformFile = InputUniformString.c_str();
 
@@ -105,14 +106,14 @@ void seahowl::aero::InflowWindLib::Init() {
     CheckError();
 }
 
-void seahowl::aero::InflowWindLib::Calcul() {
+void InflowWindLib::Calcul() {
     float* Velocity_C = new float[3];
     IfW_C_CalcOutput(Time, Position, Velocity_C, OutputChannelValues, ErrStat, ErrMsg);
     SetVel(Velocity_C);
     CheckError();
 }
 
-void seahowl::aero::InflowWindLib::End() {
+void InflowWindLib::End() {
     IfW_C_End(ErrStat, ErrMsg);
     CheckError();
 }

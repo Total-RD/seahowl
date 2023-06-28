@@ -14,7 +14,7 @@
 #include <seahowl/core/system.h>
 #include <seahowl/elasto/system_elasto.h>
 #include <seahowl/aero/system_aero.h>
-#include <seahowl/aero/wind_models.h>
+#include <seahowl/env/wind_models.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/io/read_json.h>
 

@@ -10,7 +10,9 @@
 
 // forward declarations
 namespace seahowl {
-namespace aero {}  // namespace aero
+namespace env {
+    class WindModel;
+}  // namespace env
 }  // namespace seahowl
 
 /**@brief Seahowl base namespace */
@@ -20,7 +22,7 @@ namespace seahowl {
 namespace aero {
 
 class ComponentAero {
-    virtual void compute_aero_loads(seahowl::aero::WindModel& wind_model, double time){};
+    virtual void compute_aero_loads(env::WindModel& wind_model, double time){};
 };
 
 /**
@@ -79,7 +81,7 @@ class TurbineAero : public ComponentAero {
      * @param[in] wind_model Wind model to use for applying aero loads.
      * @param[in] time Time of simulation.
      */
-    virtual void compute_aero_loads(seahowl::aero::WindModel& wind_model, double time) override;
+    virtual void compute_aero_loads(env::WindModel& wind_model, double time) override;
 };
 
 }  // namespace aero

@@ -13,8 +13,7 @@
 #include "seahowl/elasto/reference_point_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/servo/controller_discon.h"
-#include <seahowl/commons/numerics.h>
-#include "seahowl/aero/inflowwind_adapter.h"
+#include "seahowl/env/inflowwind_adapter.h"
 #include "seahowl/aero/airfoil.h"
 #include "seahowl/aero/blade_aero.h"
 #include "seahowl/aero/rotor_aero.h"
@@ -569,9 +568,9 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
     auto wind_json = environment_json.at("wind");
     if (wind_json.at("type").get<std::string>() == "ramp") {
         spdlog::info("Inflow model: wind ramp.");
-        system_core.wind_model = std::make_shared<seahowl::aero::WindRamp>();
+        system_core.wind_model = std::make_shared<seahowl::env::WindRamp>();
         auto wind_options = wind_json.at("options");
-        auto wind_model = std::dynamic_pointer_cast<seahowl::aero::WindRamp>(system_core.wind_model);
+        auto wind_model = std::dynamic_pointer_cast<seahowl::env::WindRamp>(system_core.wind_model);
         auto v0 = wind_options.at("velocity_start").get<std::vector<double>>();
         auto v1 = wind_options.at("velocity_end").get<std::vector<double>>();
         wind_model->set_wind_ramp(Vector3d(v0[0], v0[1], v0[2]), wind_options.at("time_start").get<double>(),
@@ -598,8 +597,8 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
             throw std::runtime_error("InflowWind input file (.wnd) not defined.");
         }
         system_core.wind_model =
-            std::make_shared<seahowl::aero::InflowWindAdapter>(inflowwind_filepath, windwnd_filepath);
-        auto wind_model = std::dynamic_pointer_cast<seahowl::aero::InflowWindAdapter>(system_core.wind_model);
+            std::make_shared<seahowl::env::InflowWindAdapter>(inflowwind_filepath, windwnd_filepath);
+        auto wind_model = std::dynamic_pointer_cast<seahowl::env::InflowWindAdapter>(system_core.wind_model);
         double dt = json_obj.at("numerics").at("dt").get<double>();
         wind_model->init(dt);
 #else

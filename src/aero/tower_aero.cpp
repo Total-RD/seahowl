@@ -3,12 +3,13 @@
 #include "seahowl/commons/utils.h"
 #include "seahowl/commons/numerics.h"
 #include "seahowl/aero/reference_point_aero.h"
-#include "seahowl/aero/wind_models.h"
+#include "seahowl/env/wind_models.h"
 
 #include <spdlog/spdlog.h>
 
 using seahowl::aero::TowerElementAero;
 using seahowl::aero::TowerAero;
+using seahowl::env::WindModel;
 using seahowl::Vector3d;
 using seahowl::PI;
 
