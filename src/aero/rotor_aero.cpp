@@ -182,53 +182,46 @@ void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_mod
                                                        double pitch,
                                                        double RPM) {
     double density = wind_model.get_density();
-    for (auto& blade : blades) {
-        auto blade_azimuth = azimuth + blade->azimuth0;
-        // check that blade_azimuth is between pi and -pi
-        if (blade_azimuth < -PI || blade_azimuth > PI) {
-            blade_azimuth = abs(std::fmod((blade_azimuth + 3 * PI), 2 * PI)) - PI;
-        }
-        int count = -1;
 
-        // get fluid relative velocity
-        auto wind_velocity0 = wind_model.get_wind_velocity(position, time);
-        Vector3d wind_velocity = wind_velocity0;
+    auto pos_hub = body_hub.get_position();
+    auto vel_hub = body_hub.get_velocity();
+    // get fluid relative velocity
+    auto wind_velocity = wind_model.get_wind_velocity(pos_hub, time);
 
-        auto global_velocity = Vector3d(wind_velocity - velocity);
-        // project in disc frame
-        auto local_velocity_disc = body_hub.get_rotation().inverse() * global_velocity;
+    auto global_velocity = Vector3d(wind_velocity - vel_hub);
+    // project in disc frame
+    auto local_velocity_disc = body_hub.get_rotation().inverse() * global_velocity;
 
-        double tol = 1e-6;
-        if (local_velocity0.norm() < tol || (node.distance_from_tip < tol && tip_loss) ||
-            (node.distance_from_hub < tol && hub_loss)) {
-            node.load = Vector3d(0.0, 0.0, 0.0);
-        } else {
-            // get induced velocity (2D) from blade node
-            auto local_velocity =
-                node.get_induced_velocity_rotor(local_velocity0, blade->pitch, blades.size(), tip_loss, hub_loss);
+    double pitch = 0.0;
+    double radius = 120.0;
+    double TSR =
+        (body_hub.get_rotation().inverse() * body_hub.get_rotational_velocity() * radius / local_velocity_disc)[0];
+    auto coefficients = seahowl::aero::get_aero_coefficients_from_table(pitch);
 
-            // get coefficients from angle of attack
-            double phi = seahowl::aero::get_phi(local_velocity);
-            double alpha = seahowl::aero::get_alpha_from_phi(phi, (blade->pitch + node.properties.structural_twist));
-            auto coefficients =
-                seahowl::aero::get_aero_coefficients_from_alpha(alpha, node.properties.airfoil_properties);
+    // get drag and lift coefficients
+    auto cn = coefficients.thrust;
+    auto cp = coefficients.power;
 
-            // get drag and lift coefficients
-            auto cn = coefficients.thrust;
-            auto cp = coefficients.power;
+    // calculate drag and lift force
+    auto vel = local_velocity.norm();
+    auto chord = node.properties.chord;
+    auto load_n = 0.5 * density * vel * vel * chord * cn;
+    auto load_t = 0.5 * density * vel * vel * vel * chord * ct / RPM;
 
-            // calculate drag and lift force
-            auto vel = local_velocity.norm();
-            auto chord = node.properties.chord;
-            auto load_n = 0.5 * density * vel * vel * chord * cn;
-            auto load_t = 0.5 * density * vel * vel * vel * chord * ct / RPM;
-        }
+    // get global/local directions
+    // pointing from hub towards nacelle
+    auto local_direction_normal = Vector3d(1.0, 0.0, 0.0);
+    auto global_direction_normal = body_hub.get_rotation() * local_direction_normal;
 
-        // update loads of blade
-        for (int ii = 0; ii < blade->elements.size(); ii++) {
-            blade->loads[ii] = blade->elements[ii].get_load();
-        }
-    }
+    // pointing from hub to node position
+    auto local_direction_tangent = Vector3d(0.0, 1.0, 0.0);
+    auto global_direction_tangent = body_hub.get_rotation() * local_direction_tangent;
+
+    // transform from local to global load
+    auto load_n_global = global_direction_normal * load_n;
+    auto load_t_global = global_direction_tangent * load_t;
+
+    auto load_global = load_n_global + load_t_global;
 }
 
 #ifdef HAVE_AERODYN
