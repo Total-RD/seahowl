@@ -438,6 +438,7 @@ if (SEAHOWL_ENABLE_PYTHON)
     pybind11_add_module(
         pyseahowl
         ${PYSEAHOWL_DIR}/pyseahowl.cpp
+        ${PYSEAHOWL_DIR}/pyseahowl_env.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_elasto.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_aero.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_servo.cpp

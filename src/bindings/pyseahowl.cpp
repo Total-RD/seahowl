@@ -17,6 +17,7 @@
 
 namespace py = pybind11;
 
+void initialize_pyseahowl_env(py::module& m);
 void initialize_pyseahowl_elasto(py::module& m);
 void initialize_pyseahowl_aero(py::module& m);
 void initialize_pyseahowl_servo(py::module& m);
@@ -41,6 +42,9 @@ PYBIND11_MODULE(pyseahowl, m) {
     py::class_<seahowl::EntityEigen, std::shared_ptr<seahowl::EntityEigen>, seahowl::Entity>(m, "EntityEigen");
     py::class_<seahowl::EntityDynamicEigen, std::shared_ptr<seahowl::EntityDynamicEigen>, seahowl::EntityDynamic>(
         m, "EntityDynamicEigen");
+
+    // env
+    initialize_pyseahowl_env(m);
 
     // elasto
     initialize_pyseahowl_elasto(m);
