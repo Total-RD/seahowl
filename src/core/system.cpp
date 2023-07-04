@@ -24,7 +24,7 @@ void System::initialize(double time, double dt) {
 void System::prestep(double time, double dt) {
     for (auto& turbine : turbines) {
         // compute forces on rotor and tower
-        turbine->aero.compute_aero_loads(*wind_model, time);
+        turbine->aero.compute_aero_loads(*fluid_model, time);
         // turbine prestep (accumulates loads from aero to elasto)
         turbine->prestep(time, dt);
     }

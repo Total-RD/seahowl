@@ -3,6 +3,8 @@
 using namespace seahowl::env;
 using seahowl::Vector3d;
 
+StillWater::StillWater() {}
+
 Vector3d StillWater::get_fluid_velocity(const Vector3d& position, double time) const {
     if (is_in_water(position, time)) {
         return Vector3d(0.0, 0.0, 0.0);

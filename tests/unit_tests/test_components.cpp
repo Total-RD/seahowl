@@ -657,7 +657,7 @@ TEST(test_turbine, multiturbines) {
 
     // system core
     seahowl::core::System system_core;
-    system_core.wind_model = wind_model;
+    system_core.fluid_model = wind_model;
     system_core.system_elasto = system_elasto;
     system_core.system_aero = std::make_shared<seahowl::aero::SystemAero>();
 

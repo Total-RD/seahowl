@@ -9,7 +9,7 @@
 
 using seahowl::aero::TowerElementAero;
 using seahowl::aero::TowerAero;
-using seahowl::env::WindModel;
+using seahowl::env::FluidModel;
 using seahowl::Vector3d;
 using seahowl::PI;
 
@@ -52,7 +52,7 @@ void TowerAero::build() {
     }
 }
 
-void TowerAero::compute_aero_loads(WindModel& wind_model, double time) {
+void TowerAero::compute_aero_loads(FluidModel& wind_model, double time) {
     for (int ii = 0; ii < elements.size(); ii++) {
         auto& element = elements[ii];
         auto& properties = element.properties;

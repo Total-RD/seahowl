@@ -13,6 +13,11 @@
 #include "seahowl/elasto/reference_point_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/servo/controller_discon.h"
+#include <seahowl/commons/numerics.h>
+#include "seahowl/env/fluid_models.h"
+#include "seahowl/env/wind_models.h"
+#include "seahowl/env/wave_models.h"
+#include "seahowl/env/combined_fluid_models.h"
 #include "seahowl/env/inflowwind_adapter.h"
 #include "seahowl/aero/airfoil.h"
 #include "seahowl/aero/blade_aero.h"
@@ -564,22 +569,30 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
     system_core.system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
+    // environment
+    system_core.fluid_model = std::make_shared<seahowl::env::WaveWindModel>();
+    auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
+    // waves
+    fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
+    auto& wave_model = dynamic_cast<seahowl::env::StillWater&>(*fluid_model.wave_model);
+    wave_model.density = environment_json.at("water_density").get<double>();
+    wave_model.mean_water_level = environment_json.at("mean_water_level").get<double>();
     // wind
     auto wind_json = environment_json.at("wind");
     if (wind_json.at("type").get<std::string>() == "ramp") {
         spdlog::info("Inflow model: wind ramp.");
-        system_core.wind_model = std::make_shared<seahowl::env::WindRamp>();
+        fluid_model.wind_model = std::make_unique<seahowl::env::WindRamp>();
         auto wind_options = wind_json.at("options");
-        auto wind_model = std::dynamic_pointer_cast<seahowl::env::WindRamp>(system_core.wind_model);
+        auto& wind_model = dynamic_cast<seahowl::env::WindRamp&>(*fluid_model.wind_model);
         auto v0 = wind_options.at("velocity_start").get<std::vector<double>>();
         auto v1 = wind_options.at("velocity_end").get<std::vector<double>>();
-        wind_model->set_wind_ramp(Vector3d(v0[0], v0[1], v0[2]), wind_options.at("time_start").get<double>(),
-                                  Vector3d(v1[0], v1[1], v1[2]), wind_options.at("time_end").get<double>());
-        wind_model->direction_gravity =
+        wind_model.set_wind_ramp(Vector3d(v0[0], v0[1], v0[2]), wind_options.at("time_start").get<double>(),
+                                 Vector3d(v1[0], v1[1], v1[2]), wind_options.at("time_end").get<double>());
+        wind_model.direction_gravity =
             Vector3d(system_core.system_elasto->get_gravitational_acceleration()).normalized();
-        wind_model->reference_height = wind_options.at("reference_height").get<double>();
-        wind_model->shear_coefficient = wind_options.at("shear_coefficient").get<double>();
-        wind_model->density = environment_json.at("air_density").get<double>();
+        wind_model.reference_height = wind_options.at("reference_height").get<double>();
+        wind_model.shear_coefficient = wind_options.at("shear_coefficient").get<double>();
+        wind_model.density = environment_json.at("air_density").get<double>();
     } else if (wind_json.at("type").get<std::string>() == "inflowwind") {
         spdlog::info("Inflow model: InflowWind.");
 #ifdef HAVE_INFLOWWIND
@@ -596,11 +609,11 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         } else {
             throw std::runtime_error("InflowWind input file (.wnd) not defined.");
         }
-        system_core.wind_model =
-            std::make_shared<seahowl::env::InflowWindAdapter>(inflowwind_filepath, windwnd_filepath);
-        auto wind_model = std::dynamic_pointer_cast<seahowl::env::InflowWindAdapter>(system_core.wind_model);
+        fluid_model.wind_model =
+            std::make_unique<seahowl::env::InflowWindAdapter>(inflowwind_filepath, windwnd_filepath);
+        auto& wind_model = dynamic_cast<seahowl::env::InflowWindAdapter&>(*fluid_model.wind_model);
         double dt = json_obj.at("numerics").at("dt").get<double>();
-        wind_model->init(dt);
+        wind_model.init(dt);
 #else
         throw std::runtime_error(
             "InflowWind module in CMAKE options should be enabled if wind type 'inflowwind' selected.");

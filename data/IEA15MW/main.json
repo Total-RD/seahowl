@@ -12,6 +12,8 @@
   "environment": {
     "gravity": [0.0, 0.0, -9.81],
     "air_density": 1.225,
+    "water_density": 1025,
+    "mean_water_level": 0.0,
     "wind": {
       "type": "ramp",
       "options": {

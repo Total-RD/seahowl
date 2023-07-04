@@ -13,7 +13,7 @@ using seahowl::aero::BladeAero;
 using seahowl::aero::RotorNacelleAssemblyAero;
 using seahowl::aero::TowerAero;
 using seahowl::aero::DiskCoefficients;
-using seahowl::env::WindModel;
+using seahowl::env::FluidModel;
 using seahowl::Vector3d;
 using seahowl::Vector2d;
 using seahowl::PI;
@@ -88,7 +88,7 @@ void RotorNacelleAssemblyAero::compute_radii() {
     }
 }
 
-void RotorNacelleAssemblyAero::compute_aero_loads(const WindModel& wind_model,
+void RotorNacelleAssemblyAero::compute_aero_loads(const FluidModel& wind_model,
                                                   double time,
                                                   const TowerAero& tower_aero,
                                                   bool tower_shadow,
@@ -193,7 +193,7 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const WindModel& wind_model,
     }
 }
 
-void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_model, double time) {
+void RotorNacelleAssemblyAero::compute_aero_loads_disk(const FluidModel& wind_model, double time) {
 
     auto pos_hub = body_hub.get_position();
     auto vel_hub = body_hub.get_velocity();
@@ -246,7 +246,7 @@ void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_mod
 
 #ifdef HAVE_AERODYN
 void RotorNacelleAssemblyAero::compute_aero_loads(float* LoadAeroDyn,
-                                                  WindModel& wind_model,
+                                                  FluidModel& wind_model,
                                                   double time,
                                                   const TowerAero& tower_aero,
                                                   bool tower_shadow,
