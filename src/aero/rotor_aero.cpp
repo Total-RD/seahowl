@@ -94,7 +94,6 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const WindModel& wind_model,
                                                   bool tower_shadow,
                                                   bool tip_loss,
                                                   bool hub_loss) {
-    double density = wind_model.get_density();
     for (auto& blade : blades) {
         auto blade_azimuth = azimuth + blade->azimuth0;
         // check that blade_azimuth is between pi and -pi
@@ -108,8 +107,10 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const WindModel& wind_model,
             auto rotation = node.get_rotation();
             auto velocity = node.get_velocity();
 
+            double density = wind_model.get_fluid_density(position, time);
+
             // get fluid relative velocity
-            auto wind_velocity0 = wind_model.get_wind_velocity(position, time);
+            auto wind_velocity0 = wind_model.get_fluid_velocity(position, time);
             Vector3d wind_velocity = wind_velocity0;
 
             // correct wind velocity with tower shadow (if activated)
@@ -193,12 +194,12 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const WindModel& wind_model,
 }
 
 void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_model, double time) {
-    double density = wind_model.get_density();
 
     auto pos_hub = body_hub.get_position();
     auto vel_hub = body_hub.get_velocity();
+    double density = wind_model.get_fluid_density(pos_hub, time);
     // get fluid relative velocity
-    auto wind_velocity = wind_model.get_wind_velocity(pos_hub, time);
+    auto wind_velocity = wind_model.get_fluid_velocity(pos_hub, time);
 
     auto global_velocity = Vector3d(wind_velocity - vel_hub);
     // project in disc frame
@@ -251,7 +252,6 @@ void RotorNacelleAssemblyAero::compute_aero_loads(float* LoadAeroDyn,
                                                   bool tower_shadow,
                                                   bool tip_loss,
                                                   bool hub_loss) {
-    double density = wind_model.get_density();
     int count_blade = -1;
     for (auto& blade : blades) {
         count_blade += 1;

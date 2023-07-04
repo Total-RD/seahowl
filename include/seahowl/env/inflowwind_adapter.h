@@ -98,7 +98,7 @@ class InflowWindAdapter : public WindModel {
 
     void init(double dt);
     void end();
-    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const override;
+    virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
 };
 
 }  // namespace env

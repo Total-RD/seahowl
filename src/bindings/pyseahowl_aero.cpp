@@ -46,8 +46,8 @@ void initialize_pyseahowl_aero(py::module& m) {
 
     // env/wind_models.h
     py::class_<seahowl::env::WindModel, std::shared_ptr<seahowl::env::WindModel>>(m_aero, "WindModel")
-        .def("get_wind_velocity", &seahowl::env::WindModel::get_wind_velocity)
-        .def("get_density", &seahowl::env::WindModel::get_density);
+        .def("get_fluid_velocity", &seahowl::env::WindModel::get_fluid_velocity)
+        .def("get_fluid_density", &seahowl::env::WindModel::get_fluid_density);
     py::class_<seahowl::env::ShearedWind, std::shared_ptr<seahowl::env::ShearedWind>, seahowl::env::WindModel>(
         m_aero, "ShearedWind")
         .def_readwrite("shear_coefficient", &seahowl::env::ShearedWind::shear_coefficient)

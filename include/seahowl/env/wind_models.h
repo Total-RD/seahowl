@@ -1,6 +1,7 @@
 #pragma once
 
 #include "seahowl/commons/numerics.h"
+#include "seahowl/env/fluid_models.h"
 
 namespace seahowl {
 namespace env {
@@ -8,23 +9,15 @@ namespace env {
 /**
  * @brief Base class for wind models
  */
-class WindModel {
+class WindModel : public FluidModel {
   public:
     /** @brief Air density. */
     double density = 1.225;
 
     /**
-     * @brief Returns wind velocity at given coordinates.
-     *
-     * @param[in] position Position at which wind velocity is extracted.
-     * @param[in] time Time of simulation.
-     */
-    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const = 0;
-
-    /**
      * @brief Returns air density.
      */
-    double get_density() const;
+    virtual double get_fluid_density(const Vector3d& position, double time) const override;
 };
 
 class ShearedWind : public WindModel {
@@ -63,7 +56,7 @@ class ConstantWind : public ShearedWind {
      * @param[in] position Position at which wind velocity is extracted.
      * @param[in] time Time of simulation.
      */
-    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const override;
+    virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
 };
 
 /**@brief Wind ramp model */
@@ -102,7 +95,7 @@ class WindRamp : public ShearedWind {
      * @param[in] position Position at which wind velocity is extracted.
      * @param[in] time Time of simulation.
      */
-    virtual Vector3d get_wind_velocity(const Vector3d& position, double time) const override;
+    virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
 };
 
 }  // namespace env

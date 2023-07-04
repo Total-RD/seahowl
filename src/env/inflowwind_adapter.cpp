@@ -27,7 +27,7 @@ void InflowWindAdapter::end() {
     pImpl->End();
 }
 
-seahowl::Vector3d InflowWindAdapter::get_wind_velocity(const seahowl::Vector3d& position, double time) const {
+seahowl::Vector3d InflowWindAdapter::get_fluid_velocity(const seahowl::Vector3d& position, double time) const {
     float* Pos_C = new float[3];
     for (int i = 0; i < 3; i++) {
         Pos_C[i] = position[i];

@@ -53,13 +53,13 @@ void TowerAero::build() {
 }
 
 void TowerAero::compute_aero_loads(WindModel& wind_model, double time) {
-    auto density = wind_model.get_density();
     for (int ii = 0; ii < elements.size(); ii++) {
         auto& element = elements[ii];
         auto& properties = element.properties;
 
+        auto density = wind_model.get_fluid_density(properties.coordinates, time);
         // get fluid relative velocity
-        auto wind_velocity = wind_model.get_wind_velocity(properties.coordinates, time);
+        auto wind_velocity = wind_model.get_fluid_velocity(properties.coordinates, time);
         auto velocity_relative = wind_velocity - properties.velocity;
         auto dir = properties.rotation.vec();  // tangent direction
         auto dot = velocity_relative.dot(dir);
