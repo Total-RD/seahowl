@@ -261,11 +261,13 @@ source_group(hydro FILES ${SEAHOWL_HYDRO_SOURCES} ${SEAHOWL_HYDRO_HEADERS})
 set(SEAHOWL_ENV_SOURCES
     src/env/wind_models.cpp
     src/env/wave_models.cpp
+    src/env/combined_fluid_models.cpp
 )
 set(SEAHOWL_ENV_HEADERS
     include/seahowl/env/fluid_models.h
     include/seahowl/env/wind_models.h
     include/seahowl/env/wave_models.h
+    include/seahowl/env/combined_fluid_models.h
 )
 if (SEAHOWL_ENABLE_INFLOWWIND)
     list(APPEND SEAHOWL_ENV_SOURCES src/env/inflowwind_adapter.cpp)
