@@ -10,6 +10,14 @@ namespace env {
  * @brief Base class for soil models
  */
 class SoilModel {
+  public:
+    /**
+     * @brief Returns true is position is inside soil (false otherwise).
+     *
+     * @param[in] position Position to assess whether inside soil or not.
+     */
+    virtual bool is_in_soil(const Vector3d& position) const = 0;
+
     /**
      * @brief Returns soil penetration load.
      *
@@ -41,6 +49,7 @@ class LinearSoilModel : public SoilModel {
      */
     LinearSoilModel();
 
+    virtual bool is_in_soil(const Vector3d& position) const override;
     virtual Vector3d get_penetration_load(const EntityDynamic& entity,
                                           double contact_area,
                                           double entity_mass) const override;

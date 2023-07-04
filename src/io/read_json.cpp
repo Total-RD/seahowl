@@ -17,7 +17,7 @@
 #include "seahowl/env/fluid_models.h"
 #include "seahowl/env/wind_models.h"
 #include "seahowl/env/wave_models.h"
-#include "seahowl/env/combined_fluid_models.h"
+#include "seahowl/env/combined_models.h"
 #include "seahowl/env/inflowwind_adapter.h"
 #include "seahowl/aero/airfoil.h"
 #include "seahowl/aero/blade_aero.h"

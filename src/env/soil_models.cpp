@@ -5,6 +5,14 @@ using seahowl::Vector3d;
 
 LinearSoilModel::LinearSoilModel() {}
 
+bool LinearSoilModel::is_in_soil(const Vector3d& position) const {
+    double penetration_depth = (soil_position - position.dot(soil_normal));
+    if (penetration_depth >= 0) {
+        return true;
+    }
+    return false;
+}
+
 Vector3d LinearSoilModel::get_penetration_load(const EntityDynamic& entity,
                                                double contact_area,
                                                double entity_mass) const {
