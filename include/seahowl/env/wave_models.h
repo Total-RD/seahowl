@@ -23,10 +23,15 @@ class WaveModel : public FluidModel {
     virtual bool is_in_water(const Vector3d& position, double time) const = 0;
 };
 
+/**
+ * @brief Model for still water (no wave, no current).
+ */
 class StillWater : public WaveModel {
   public:
     /** @brief Mean water level. */
     double mean_water_level = 0.0;
+    /** @brief Free surface normal. */
+    Vector3d surface_normal{0.0, 0.0, 1.0};
 
     /**
      * @brief Constructor.
@@ -38,6 +43,30 @@ class StillWater : public WaveModel {
     virtual double get_fluid_density(const Vector3d& position, double time) const override;
 
     virtual bool is_in_water(const Vector3d& position, double time) const override;
+};
+
+/**
+ * @brief Model for constant current with only horizontal velocity components.
+ */
+class CurrentConstant : public StillWater {
+  public:
+    /** @brief Horizontal velocity of fluid at the free surface. */
+    double velocity_surface = 0.0;
+    /** @brief Horizontal velocity of fluid at the seabed. */
+    double velocity_seabed = 0.0;
+    /** @brief Water depth. */
+    double water_depth = 0.0;
+    /** @brief Current direction. */
+    Vector3d current_direction{1.0, 0.0, 0.0};
+    /** @brief Power factor for for power law exponent (1/power_factor). */
+    double power_factor = 7;
+
+    /**
+     * @brief Constructor.
+     */
+    CurrentConstant();
+
+    virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
 };
 
 }  // namespace env

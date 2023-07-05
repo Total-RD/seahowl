@@ -22,9 +22,23 @@ double StillWater::get_fluid_density(const Vector3d& position, double time) cons
 }
 
 bool StillWater::is_in_water(const Vector3d& position, double time) const {
-    if (position[2] <= mean_water_level) {
+    if (position.dot(surface_normal) <= mean_water_level) {
         return true;
     } else {
         return false;
+    }
+}
+
+CurrentConstant::CurrentConstant() {}
+
+Vector3d CurrentConstant::get_fluid_velocity(const Vector3d& position, double time) const {
+    if (is_in_water(position, time)) {
+        auto position_depth = position.dot(surface_normal) - mean_water_level;
+        auto horizontal_velocity =
+            velocity_seabed + (velocity_surface - velocity_seabed) *
+                                  powf((position_depth + water_depth) / water_depth, 1.0 / power_factor);
+        return current_direction * horizontal_velocity;
+    } else {
+        throw std::runtime_error("Cannot retrieve water velocity above mean water level.");
     }
 }
