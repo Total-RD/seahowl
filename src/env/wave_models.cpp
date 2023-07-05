@@ -37,7 +37,7 @@ Vector3d CurrentConstant::get_fluid_velocity(const Vector3d& position, double ti
         auto horizontal_velocity =
             velocity_seabed + (velocity_surface - velocity_seabed) *
                                   powf((position_depth + water_depth) / water_depth, 1.0 / power_factor);
-        return current_direction * horizontal_velocity;
+        return direction * horizontal_velocity;
     } else {
         throw std::runtime_error("Cannot retrieve water velocity above mean water level.");
     }

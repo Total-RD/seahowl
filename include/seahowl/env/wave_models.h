@@ -13,6 +13,12 @@ class WaveModel : public FluidModel {
   public:
     /** @brief Water density. */
     double density = 1025;
+    /** @brief Mean water level. */
+    double mean_water_level = 0.0;
+    /** @brief Free surface normal. */
+    Vector3d surface_normal{0.0, 0.0, 1.0};
+    /** @brief Water depth. */
+    double water_depth = 0.0;
 
     /**
      * @brief Returns whether position at time t in inside water.
@@ -28,11 +34,6 @@ class WaveModel : public FluidModel {
  */
 class StillWater : public WaveModel {
   public:
-    /** @brief Mean water level. */
-    double mean_water_level = 0.0;
-    /** @brief Free surface normal. */
-    Vector3d surface_normal{0.0, 0.0, 1.0};
-
     /**
      * @brief Constructor.
      */
@@ -54,10 +55,8 @@ class CurrentConstant : public StillWater {
     double velocity_surface = 0.0;
     /** @brief Horizontal velocity of fluid at the seabed. */
     double velocity_seabed = 0.0;
-    /** @brief Water depth. */
-    double water_depth = 0.0;
     /** @brief Current direction. */
-    Vector3d current_direction{1.0, 0.0, 0.0};
+    Vector3d direction{1.0, 0.0, 0.0};
     /** @brief Power factor for for power law exponent (1/power_factor). */
     double power_factor = 7;
 

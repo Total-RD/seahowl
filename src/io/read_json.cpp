@@ -569,14 +569,37 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
     system_core.system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
+    auto gravity_vector = system_core.system_elasto->get_gravitational_acceleration();
+    auto gravity_direction = gravity_vector / gravity_vector.norm();
     // environment
     system_core.fluid_model = std::make_shared<seahowl::env::WaveWindModel>();
     auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
     // waves
-    fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
-    auto& wave_model = dynamic_cast<seahowl::env::StillWater&>(*fluid_model.wave_model);
-    wave_model.density = environment_json.at("water_density").get<double>();
-    wave_model.mean_water_level = environment_json.at("mean_water_level").get<double>();
+    auto water_density = environment_json.at("water_density").get<double>();
+    auto mean_water_level = environment_json.at("mean_water_level").get<double>();
+    if (environment_json.contains("current")) {
+        auto current_json = environment_json.at("current");
+        if (current_json.at("type").get<std::string>() == "constant") {
+            fluid_model.wave_model = std::make_unique<seahowl::env::CurrentConstant>();
+            auto& wave_model = dynamic_cast<seahowl::env::CurrentConstant&>(*fluid_model.wave_model);
+            auto current_options = current_json.at("options");
+            auto current_direction = current_options.at("direction").get<std::vector<double>>();
+            wave_model.direction = Vector3d(current_direction[0], current_direction[1], 0.0);
+            current_options.at("velocity_surface").get_to(wave_model.velocity_surface);
+            current_options.at("velocity_seabed").get_to(wave_model.velocity_seabed);
+        } else {
+            throw std::runtime_error(
+                "The input current type is unknown. Please use the existing current types: constant.");
+        }
+    } else {
+        fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
+        auto& wave_model = dynamic_cast<seahowl::env::StillWater&>(*fluid_model.wave_model);
+    }
+    // general wave options
+    environment_json.at("water_density").get_to(fluid_model.wave_model->density);
+    environment_json.at("mean_water_level").get_to(fluid_model.wave_model->mean_water_level);
+    environment_json.at("water_depth").get_to(fluid_model.wave_model->water_depth);
+    fluid_model.wave_model->surface_normal = -gravity_direction;
     // wind
     auto wind_json = environment_json.at("wind");
     if (wind_json.at("type").get<std::string>() == "ramp") {

@@ -14,6 +14,7 @@
     "air_density": 1.225,
     "water_density": 1025,
     "mean_water_level": 0.0,
+    "water_depth": 200.0,
     "wind": {
       "type": "ramp",
       "options": {
@@ -25,6 +26,14 @@
         "time_end": 1700,
         "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat",
         "file_windwnd": "./aerodyn/long_step_wind.wnd"
+      }
+    },
+    "current": {
+      "type": "constant",
+      "options": {
+        "direction": [1.0, 0.0],
+        "velocity_surface": 0.0,
+        "velocity_seabed": 0.0
       }
     }
   },
