@@ -6,32 +6,18 @@ find_package(GTest CONFIG REQUIRED)
 
 add_executable(test_01 unit_tests/test_components.cpp )
 
-set_target_properties(test_01
-
-	PROPERTIES
-
-		CXX_EXTENSIONS OFF
-		COMPILE_FLAGS "${CHRONO_CXX_FLAGS} ${EXTRA_COMPILE_FLAGS}"
-		COMPILE_DEFINITIONS "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\""
-		LINK_FLAGS "${CHRONO_LINKER_FLAGS}"
-)
-
-target_compile_features(
-	test_01
-
-	PRIVATE
-	cxx_std_17
-)
-
-
-# target_link_libraries(test_01 seahowl_core ${CHRONO_LIBRARIES} -lgtest)
-
-target_link_libraries(test_01 seahowl_core ${CHRONO_LIBRARIES} GTest::gtest GTest::gtest_main GTest::gmock_main GTest::gmock Threads::Threads)
-
 target_include_directories(test_01
-	PRIVATE
-	${PROJECT_SOURCE_DIR}
-	$<TARGET_PROPERTY:seahowl_core,INCLUDE_DIRECTORIES>)
+    PRIVATE
+	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+	${CMAKE_CURRENT_SOURCE_DIR}/
+	${CHRONO_INCLUDE_DIRS}
+)
+
+target_link_libraries(test_01
+    PRIVATE
+	seahowl_core
+	GTest::gtest GTest::gtest_main GTest::gmock_main GTest::gmock Threads::Threads
+)
 
 add_test(
 	NAME test_01
