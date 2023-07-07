@@ -13,6 +13,16 @@ target_include_directories(test_01
 	${CHRONO_INCLUDE_DIRS}
 )
 
+target_compile_features(
+    test_01
+    PRIVATE cxx_std_17
+)
+
+target_compile_options(
+    test_01
+    PRIVATE ${CHRONO_CXX_FLAGS}
+)
+
 target_link_libraries(test_01
     PRIVATE
 	seahowl_core

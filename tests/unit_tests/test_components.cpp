@@ -3,11 +3,6 @@
 #include <cmath>
 #include <memory>
 
-#include <chrono/physics/ChSystemSMC.h>
-#include <chrono/solver/ChDirectSolverLS.h>
-#include <chrono/solver/ChIterativeSolverLS.h>
-#include <chrono/fea/ChNodeFEAxyzrot.h>
-
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/rotor_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
@@ -29,7 +24,6 @@
     #include "seahowl/aero/inflowwind_adapter.h"
 #endif
 
-using namespace chrono;
 using namespace seahowl::elasto;
 using namespace seahowl;
 
@@ -63,7 +57,6 @@ TEST(test_blade, mass_deflection) {
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
 
     // blade
     auto blade = seahowl::elasto::BladeElasto();
@@ -86,13 +79,13 @@ TEST(test_blade, mass_deflection) {
     // check deflection from gravity (edge)
     double deflection_edge = -0.8580;
     blade.rotate(PI, Vector3d(0.0, 0.0, 1.0));
-    system_chrono->DoStaticLinear();
+    system_elasto.do_statics(true, 0);
     ASSERT_NEAR(deflection_edge, blade.nodes.back()->get_position().y(), 0.001);
 
     // check deflection from gravity (flap)
     double deflection_flap = 2.91411;
     blade.rotate(PI / 2.0, Vector3d(0.0, 0.0, 1.0));
-    system_chrono->DoStaticLinear();
+    system_elasto.do_statics(true, 0);
     ASSERT_NEAR(deflection_flap, blade.nodes.back()->get_position().y(), 0.001);
 }
 
@@ -100,7 +93,6 @@ TEST(test_rotor, mass) {
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
 
     std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades;
     for (int ii = 0; ii < 3; ii++) {
@@ -131,7 +123,6 @@ TEST(test_tower, mass) {
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
 
     // tower
     auto tower = seahowl::elasto::TowerElasto();
@@ -150,7 +141,6 @@ TEST(test_blade, natural_period_dynamic_edge) {
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
 
     // blade
     auto blade = seahowl::elasto::BladeElasto();
@@ -192,7 +182,7 @@ TEST(test_blade, natural_period_dynamic_edge) {
             }
         }
         pos_y = blade.nodes.back()->get_position().y();
-        system_chrono->DoStepDynamics(dt);
+        system_elasto.step(dt);
         time += dt;
         step += 1;
     }
@@ -206,7 +196,6 @@ TEST(test_blade, natural_period_dynamic_flap) {
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
 
     // blade
     auto blade = seahowl::elasto::BladeElasto();
@@ -251,7 +240,7 @@ TEST(test_blade, natural_period_dynamic_flap) {
             }
         }
         pos_y = blade.nodes.back()->get_position().y();
-        system_chrono->DoStepDynamics(dt);
+        system_elasto.step(dt);
         time += dt;
         step += 1;
     }
@@ -268,13 +257,12 @@ TEST(test_turbine, rpm_initial_pitch) {
     // solver
     auto verbose = false;
     // timestepping
-    auto timestepper_type = ChTimestepper::Type::HHT;
     double dt = 0.1;
     // wind
     auto wind_model = seahowl::aero::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
-    double initial_pitch = CH_C_PI / 8.0;
+    double initial_pitch = seahowl::PI / 8.0;
 
     // system
     auto system_elasto = SystemElastoChrono();
@@ -314,7 +302,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.prestep(time, dt);
 
         system_elasto.step(dt);
-        time += system_chrono->GetStep();
+        time += dt;
 
         // poststep
         turbine.poststep(time, dt);
@@ -331,18 +319,16 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     // solver
     auto verbose = false;
     // timestepping
-    auto timestepper_type = ChTimestepper::Type::HHT;
     double dt = 0.1;
     // wind
     auto wind_model = seahowl::aero::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
-    double initial_pitch = CH_C_PI / 8.0;
+    double initial_pitch = seahowl::PI / 8.0;
 
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
 
     // turbine
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
@@ -381,7 +367,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         turbine.prestep(time, dt);
 
         system_elasto.step(dt);
-        time += system_chrono->GetStep();
+        time += dt;
 
         // poststep
         turbine.poststep(time, dt);
@@ -398,18 +384,16 @@ TEST(test_turbine, multiturbines) {
     // solver
     auto verbose = false;
     // timestepping
-    auto timestepper_type = ChTimestepper::Type::HHT;
     double dt = 0.1;
     // wind
     auto wind_model = std::make_shared<seahowl::aero::ConstantWind>();
     wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     // turbine
-    double initial_pitch = CH_C_PI / 8.0;
+    double initial_pitch = seahowl::PI / 8.0;
 
     // system
     auto system_elasto = std::make_shared<SystemElastoChrono>();
     system_elasto->set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto->chobj;
 
     // system core
     seahowl::core::System system_core;
@@ -455,7 +439,7 @@ TEST(test_turbine, multiturbines) {
 
         // step
         system_core.step(dt);
-        time += system_chrono->GetStep();
+        time += dt;
 
         // poststep
         system_core.poststep(time, dt);
@@ -474,7 +458,6 @@ TEST(test_inflowwind, rpm_initial_pitch) {
     // solver
     auto verbose = false;
     // timestepping
-    auto timestepper_type = ChTimestepper::Type::HHT;
     double dt = 0.1;
     // wind
     auto wind_model =
@@ -482,12 +465,11 @@ TEST(test_inflowwind, rpm_initial_pitch) {
                                          (DATADIR / "aerodyn/long_step_wind.wnd").generic_string());
     wind_model.init(dt);
     // turbine
-    double initial_pitch = CH_C_PI / 8.0;
+    double initial_pitch = seahowl::PI / 8.0;
 
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
-    auto system_chrono = system_elasto.chobj;
 
     // turbine
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
@@ -524,7 +506,7 @@ TEST(test_inflowwind, rpm_initial_pitch) {
         turbine.prestep(time, dt);
 
         system_elasto.step(dt);
-        time += system_chrono->GetStep();
+        time += dt;
 
         // poststep
         turbine.poststep(time, dt);
