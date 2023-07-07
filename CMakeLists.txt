@@ -270,6 +270,12 @@ target_sources(
     PRIVATE ${SEAHOWL_FILES}
 )
 
+set_target_properties(
+    seahowl_core
+    PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+	)
+
 target_include_directories(
     seahowl_core
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
@@ -387,6 +393,4 @@ if (SEAHOWL_ENABLE_PYTHON)
         ${PYSEAHOWL_DIR}/pyseahowl_core.cpp
     )
     target_link_libraries(pyseahowl PRIVATE seahowl_core)
-
-    target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
 endif (SEAHOWL_ENABLE_PYTHON)
