@@ -50,13 +50,19 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
     pImpl.SetRotorAzimuth(rotor_azimuth);
 
     // blades
-    for (int index_blade = 0; index_blade < turbine.rotor.elasto.blades.size(); index_blade++) {
-        auto& blade = *turbine.rotor.elasto.blades[index_blade];
-        // pitch
-        pImpl.SetPitchBlade(index_blade, blade.pitch);
-        // moment
-        auto root_moment = blade.get_blade_root_moment();
-        pImpl.SetRootMomentBlade(index_blade, root_moment[0], root_moment[1]);
+    int nblades = turbine.rotor.elasto.blades.size();
+    if (nblades <= 3) {
+        // individual pitch only works with up to 3 blades
+        for (int index_blade = 0; index_blade < nblades; index_blade++) {
+            auto& blade = *turbine.rotor.elasto.blades[index_blade];
+            // pitch
+            pImpl.SetPitchBlade(index_blade, blade.pitch);
+            // moment
+            auto root_moment = blade.get_blade_root_moment();
+            pImpl.SetRootMomentBlade(index_blade, root_moment[0], root_moment[1]);
+        }
+    } else {
+        pImpl.SetPitch(turbine.rotor.elasto.pitch_collective);
     }
 
     // nacelle/towertop

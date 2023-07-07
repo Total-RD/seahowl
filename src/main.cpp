@@ -29,9 +29,18 @@ using std::filesystem::remove_all;
 
 void output_results(seahowl::core::System& system_core, int step) {
     // output
+    auto& turbine = system_core.turbines[0];
     std::cout << "time: " << system_core.get_time() << ", step: " << step
-              << ", rpm: " << system_core.turbines[0].rotor.elasto.get_rpm()
-              << ", pitch: " << system_core.turbines[0].rotor.elasto.pitch_collective << std::endl;
+              << ", rpm: " << turbine.rotor.elasto.get_rpm();
+    int nblades = turbine.rotor.blades.size();
+    if (nblades <= 3) {
+        for (int ii = 0; ii < turbine.rotor.blades.size(); ii++) {
+            std::cout << ", pitch" << ii << ": " << turbine.rotor.blades[ii]->elasto.pitch;
+        }
+    } else {
+        std::cout << ", pitch: " << turbine.rotor.elasto.pitch_collective;
+    }
+    std::cout << std::endl;
     write_turbine_info_to_csv("./output/output", system_core, system_core.get_time());
 }
 

@@ -37,6 +37,16 @@ void Turbine::poststep(double time, double dt) {
     if (controller->has_pitch_control) {
         auto collective_pitch_increment = controller->get_collective_pitch() - rotor.elasto.pitch_collective;
         rotor.elasto.apply_collective_pitch_increment(collective_pitch_increment);
+        if (rotor.blades.size() <= 3) {
+            // individual pitch only works with up to 3 blades
+            for (int idx_blade = 0; idx_blade < rotor.blades.size(); idx_blade++) {
+                auto& blade = rotor.blades[idx_blade]->elasto;
+                // individual pitch increment difference with collective pitch increment that was already applied
+                auto blade_pitch_increment =
+                    (controller->get_pitch_blade(idx_blade) - collective_pitch_increment) - blade.pitch;
+                blade.apply_pitch_increment(blade_pitch_increment);
+            }
+        }
     }
 
     // poststeps
