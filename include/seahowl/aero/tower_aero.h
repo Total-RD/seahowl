@@ -1,11 +1,15 @@
 #pragma once
 
+#include "seahowl/aero/reference_point_aero.h"
+
 #include <vector>
 
-#include <seahowl/aero/reference_point_aero.h>
-#include <seahowl/aero/wind_models.h>
-#include <seahowl/commons/utils.h>
-#include <seahowl/commons/numerics.h>
+// forward declarations
+namespace seahowl {
+namespace aero {
+class WindModel;
+}  // namespace aero
+}  // namespace seahowl
 
 namespace seahowl {
 

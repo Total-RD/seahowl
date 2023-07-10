@@ -1,4 +1,4 @@
-#include <seahowl/elasto/reference_point_elasto.h>
+#include "seahowl/elasto/reference_point_elasto.h"
 
 using namespace seahowl::elasto;
 

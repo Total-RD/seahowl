@@ -1,5 +1,8 @@
-#include <seahowl/elasto/component_elasto.h>
-#include <seahowl/elasto/chrono_adapters.h>
+#include "seahowl/elasto/component_elasto.h"
+
+#include "seahowl/elasto/reference_point_elasto.h"
+#include "seahowl/elasto/system_elasto.h"
+#include "seahowl/elasto/chrono_adapters.h"
 
 #include <vector>
 #include <numeric>

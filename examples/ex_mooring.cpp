@@ -5,6 +5,8 @@
 #include <chrono/physics/ChSystemSMC.h>
 #include <chrono/solver/ChDirectSolverLS.h>
 #include <chrono/physics/ChLinkMate.h>
+#include <chrono/fea/ChNodeFEAxyzrot.h>
+#include <chrono/fea/ChContactSurfaceNodeCloud.h>
 #include <chrono/physics/ChBodyEasy.h>
 
 using namespace seahowl;

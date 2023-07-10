@@ -1,4 +1,8 @@
-#include <seahowl/core/tower.h>
+#include "seahowl/core/tower.h"
+
+#include "seahowl/commons/utils.h"
+#include "seahowl/elasto/tower_elasto.h"
+#include "seahowl/aero/tower_aero.h"
 
 using namespace seahowl::core;
 using namespace seahowl::elasto;

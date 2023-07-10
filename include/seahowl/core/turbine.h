@@ -1,23 +1,26 @@
 #pragma once
 
-#include <seahowl/elasto/turbine_elasto.h>
-#include <seahowl/aero/turbine_aero.h>
-#include <seahowl/core/rotor.h>
-#include <seahowl/core/tower.h>
-#include <seahowl/servo/controller.h>
-#include <seahowl/commons/numerics.h>
+#include "seahowl/core/component.h"
+#include "seahowl/core/rotor.h"
+#include "seahowl/core/tower.h"
 
 #include <vector>
 
-/**@brief Seahowl base namespace */
+// forward declarations
 namespace seahowl {
 namespace servo {
 class Controller;
-}
-
+}  // namespace servo
 namespace aero {
-class AeroDynAdapter;
-}
+class TurbineAero;
+}  // namespace aero
+namespace elasto {
+class TurbineElasto;
+}  // namespace elasto
+}  // namespace seahowl
+
+/**@brief Seahowl base namespace */
+namespace seahowl {
 
 /**@brief Seahowl core module */
 namespace core {

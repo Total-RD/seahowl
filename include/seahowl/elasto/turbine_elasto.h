@@ -1,8 +1,7 @@
 #pragma once
 
-#include <seahowl/elasto/rotor_elasto.h>
-#include <seahowl/elasto/tower_elasto.h>
-#include <seahowl/commons/numerics.h>
+#include "seahowl/elasto/rotor_elasto.h"
+#include "seahowl/elasto/tower_elasto.h"
 
 #include <vector>
 

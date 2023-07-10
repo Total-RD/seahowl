@@ -20,6 +20,9 @@ using json = nlohmann::json;
 #include <seahowl/elasto/chrono_adapters.h>
 
 #include <seahowl/core/system.h>
+#include <seahowl/aero/system_aero.h>
+#include <seahowl/core/blade.h>
+#include "seahowl/elasto/blade_elasto.h"
 
 #include <filesystem>  // C++17
 

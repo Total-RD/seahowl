@@ -1,6 +1,11 @@
 #include <string>
 
-#include <seahowl/core/system.h>
+// forward declarations
+namespace seahowl {
+namespace core {
+class System;
+}  // namespace core
+}  // namespace seahowl
 
 /**
  * @brief Writes general CSV info to file.

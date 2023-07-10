@@ -1,5 +1,8 @@
 #include "seahowl/servo/controller.h"
 
+#include "seahowl/core/turbine.h"
+#include "seahowl/elasto/rotor_elasto.h"
+
 #include <cmath>
 
 using namespace seahowl::servo;

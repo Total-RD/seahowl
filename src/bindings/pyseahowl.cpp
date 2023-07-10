@@ -3,7 +3,6 @@
 #include <pybind11/eigen.h>
 
 #include <seahowl/commons/entities.h>
-
 #include <seahowl/io/read_json.h>
 #include <seahowl/core/blade.h>
 #include <seahowl/core/rotor.h>

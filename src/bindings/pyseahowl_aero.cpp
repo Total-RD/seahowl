@@ -6,6 +6,7 @@
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/aero/rotor_aero.h>
 #include <seahowl/aero/turbine_aero.h>
+#include <seahowl/aero/wind_models.h>
 
 namespace py = pybind11;
 

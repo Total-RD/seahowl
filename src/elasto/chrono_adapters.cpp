@@ -1,6 +1,7 @@
-#include <seahowl/elasto/chrono_adapters.h>
-#include <seahowl/elasto/reference_point_elasto.h>
-#include <seahowl/elasto/entities_elasto.h>
+#include "seahowl/elasto/chrono_adapters.h"
+
+#include "seahowl/elasto/reference_point_elasto.h"
+#include "seahowl/elasto/entities_elasto.h"
 
 #include <chrono/core/ChVector.h>
 #include <chrono/core/ChMatrix.h>

@@ -1,6 +1,8 @@
-#include <seahowl/elasto/tower_elasto.h>
-#include <seahowl/commons/utils.h>
-#include <seahowl/elasto/chrono_adapters.h>
+#include "seahowl/elasto/tower_elasto.h"
+
+#include "seahowl/commons/utils.h"
+#include "seahowl/elasto/reference_point_elasto.h"
+#include "seahowl/elasto/chrono_adapters.h"
 
 #include <memory>
 #include <vector>

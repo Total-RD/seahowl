@@ -1,15 +1,16 @@
 #pragma once
 
+#include "seahowl/commons/numerics.h"
+#include "seahowl/elasto/entities_elasto.h"
+
 #include <vector>
 #include <memory>
 
-#include <seahowl/commons/numerics.h>
-#include <seahowl/elasto/entities_elasto.h>
-#include <seahowl/elasto/reference_point_elasto.h>
-
+// forward declarations
 namespace seahowl {
 namespace elasto {
 class SystemElasto;
+struct ReferencePointElasto;
 }  // namespace elasto
 }  // namespace seahowl
 

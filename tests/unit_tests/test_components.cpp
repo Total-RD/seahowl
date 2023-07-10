@@ -6,12 +6,14 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/rotor_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
+#include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/core/blade.h>
 #include <seahowl/core/rotor.h>
-#include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/core/system.h>
-#include <seahowl/elasto/chrono_adapters.h>
+#include <seahowl/aero/system_aero.h>
+#include <seahowl/aero/wind_models.h>
+#include <seahowl/servo/controller.h>
 #include <seahowl/commons/numerics.h>
 
 #include <seahowl/io/read_json.h>

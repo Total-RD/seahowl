@@ -3,11 +3,21 @@
 #include <memory>
 #include <vector>
 
-#include <seahowl/elasto/entities_elasto.h>
-#include <seahowl/elasto/tower_elasto.h>
-#include <seahowl/aero/tower_aero.h>
-#include <seahowl/core/reference_point.h>
-#include <seahowl/core/component.h>
+#include "seahowl/commons/utils.h"  // for DiscretizationPoint
+#include "seahowl/core/component.h"
+
+// forward declarations
+namespace seahowl {
+namespace core {
+struct TowerReferencePoint;
+}  // namespace core
+namespace elasto {
+class TowerElasto;
+}  // namespace elasto
+namespace aero {
+class TowerAero;
+}  // namespace aero
+}  // namespace seahowl
 
 namespace seahowl {
 namespace core {
@@ -26,9 +36,6 @@ class Tower : public ComponentDynamic {
     seahowl::elasto::TowerElasto& elasto;
     /** @brief Aerodynamic model of the tower. */
     seahowl::aero::TowerAero& aero;
-    /** @brief List of reference points describing the tower properties along its longitudinal axis.
-     * @todo  Refactor: Only used for construction to pass to elasto and aero. Use a Builder */
-    std::vector<seahowl::core::TowerReferencePoint> reference_points;
     /** @brief Mapping of aero elements into elasto domain. */
     std::vector<seahowl::DiscretizationPoint> mapping_aero2elasto;
     /** @brief Mapping of elasto nodes into aero domain. */

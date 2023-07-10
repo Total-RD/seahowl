@@ -1,17 +1,24 @@
 #include "seahowl/io/read_json.h"
 
-#include <seahowl/commons/utils.h>
-#include <seahowl/core/blade.h>
-#include <seahowl/core/rotor.h>
-#include <seahowl/core/tower.h>
-#include <seahowl/elasto/tower_elasto.h>
-#include <seahowl/elasto/system_elasto.h>
-#include <seahowl/core/turbine.h>
-#include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/servo/controller_discon.h>
-#include <seahowl/core/system.h>
+#include "seahowl/commons/utils.h"
+#include "seahowl/core/blade.h"
+#include "seahowl/core/rotor.h"
+#include "seahowl/core/tower.h"
+#include "seahowl/core/turbine.h"
+#include "seahowl/core/system.h"
+#include "seahowl/elasto/tower_elasto.h"
+#include "seahowl/elasto/system_elasto.h"
+#include "seahowl/elasto/system_elasto.h"
+#include "seahowl/elasto/reference_point_elasto.h"
+#include "seahowl/elasto/blade_elasto.h"
+#include "seahowl/servo/controller_discon.h"
 #include <seahowl/commons/numerics.h>
 #include "seahowl/aero/inflowwind_adapter.h"
+#include "seahowl/aero/airfoil.h"
+#include "seahowl/aero/blade_aero.h"
+#include "seahowl/aero/rotor_aero.h"
+#include "seahowl/aero/turbine_aero.h"
+#include "seahowl/aero/system_aero.h"
 
 #include <string>
 #include <memory>
@@ -59,113 +66,6 @@ std::string copy_file_and_increment(std::string filepath, std::string destinatio
         fs::copy(pfilepath, filecopypath);
     }
     return filecopypath.generic_string();
-}
-
-std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_json(std::string filepath) {
-    if (!fs::exists(filepath)) {
-        throw std::runtime_error("File " + filepath + " does not exist.");
-    }
-    std::ifstream json_file(filepath);
-
-    // populate json object
-    json json_obj;
-    json_file >> json_obj;
-
-    // EXTRACT INFO
-    std::vector<seahowl::core::BladeReferencePoint> reference_points;
-
-    auto points = json_obj.at("reference_points").get<json>();
-    auto damping_coefficients = json_obj.at("damping_coefficients").get<std::vector<double>>();
-    if (damping_coefficients.size() != 4) {
-        throw std::runtime_error("Damping coefficients has to be vector of length 4.");
-    }
-
-    double blade_length = points[points.size() - 1]["coordinates"][2];
-    for (size_t ii = 0; ii < points.size(); ii++) {
-        auto& point = points[ii];
-        auto reference_point = seahowl::core::BladeReferencePoint();
-
-        auto coords = point.at("coordinates").get<std::vector<double>>();
-        if (coords.size() != 3) {
-            throw std::runtime_error("Coordinates has to be vector of length 3.");
-        }
-        reference_point.fraction = coords[2] / blade_length;
-        reference_point.coordinates = Vector3d(coords[0], coords[1], coords[2]);
-        if (point.contains("offset_gravity")) {
-            auto og = point.at("offsets_gravity").get<std::vector<double>>();
-            reference_point.offset_gravity = Vector2d(og[0], og[1]);
-        }
-        if (point.contains("offset_elastic")) {
-            auto oe = point.at("offsets_elastic").get<std::vector<double>>();
-            reference_point.offset_elastic = Vector2d(oe[0], oe[1]);
-        }
-        if (point.contains("offset_aero")) {
-            auto oa = point.at("offset_aero").get<std::vector<double>>();
-            reference_point.offset_aero = Vector2d(oa[0], oa[1]);
-        }
-
-        auto sm = point.at("stiffness_matrix").get<std::vector<std::vector<double>>>();
-        auto mm = point.at("mass_matrix").get<std::vector<std::vector<double>>>();
-        if (sm.size() != 6 || mm.size() != 6) {
-            throw std::runtime_error("Mass and stiffness matrices have to be defined as 6x6 matrices.");
-        }
-        for (int irow = 0; irow < 6; irow++) {
-            if (sm[irow].size() != 6 || mm[irow].size() != 6) {
-                throw std::runtime_error("Mass and stiffness matrices have to be defined as 6x6 matrices.");
-            }
-            for (int icol = 0; icol < 6; icol++) {
-                reference_point.mass_matrix(irow, icol) = mm[irow][icol];
-                reference_point.stiffness_matrix(irow, icol) = sm[irow][icol];
-            }
-        }
-        reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
-        reference_point.damping_coefficients[0] = damping_coefficients[0];
-        reference_point.damping_coefficients[1] = damping_coefficients[1];
-        reference_point.damping_coefficients[2] = damping_coefficients[2];
-        reference_point.damping_coefficients[3] = damping_coefficients[3];
-
-        if (point.contains("chord")) {
-            reference_point.chord = point["chord"];
-        }
-
-        // populate json object
-        if (point.contains("airfoil_file") && !point["airfoil_file"].get<std::string>().empty()) {
-            auto main_directory = fs::path(filepath).parent_path();
-            auto airfoil_filename = point.at("airfoil_file").get<std::string>();
-            auto airfoil_filepath = main_directory / airfoil_filename;
-            std::ifstream airfoil_file(airfoil_filepath.u8string());
-            json json_airfoil;
-            airfoil_file >> json_airfoil;
-
-            const auto nreynolds = json_airfoil.size();
-            for (int jj = 0; jj < nreynolds; jj++) {
-                auto airfoil_properties = json_airfoil[jj];
-                auto coeffs = airfoil_properties.at("coefficients").get<std::vector<std::vector<double>>>();
-
-                std::vector<seahowl::aero::AirfoilCoefficients> coefficients_list;
-
-                for (int kk = 0; kk < coeffs.size(); kk++) {
-                    if (coeffs[kk].size() != 4) {
-                        throw std::runtime_error("Airfoil coefficients has to be vectors of length 4.");
-                    }
-                    seahowl::aero::AirfoilCoefficients coefficients;
-                    coefficients.alpha = coeffs[kk][0];
-                    coefficients.lift = coeffs[kk][1];
-                    coefficients.drag = coeffs[kk][2];
-                    coefficients.added_mass = coeffs[kk][3];
-                    coefficients_list.push_back(coefficients);
-                }
-                seahowl::aero::AirfoilProperties airfoil;
-                airfoil_properties.at("reynolds_number").get_to(airfoil.reynolds_number);
-                airfoil.coefficients_list = coefficients_list;
-                reference_point.airfoil_properties.push_back(airfoil);
-            }
-        }
-
-        reference_points.push_back(reference_point);
-    }
-
-    return reference_points;
 }
 
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(

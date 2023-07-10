@@ -1,11 +1,7 @@
 #pragma once
 
-#include <seahowl/elasto/component_elasto.h>
-#include <seahowl/commons/numerics.h>
-
-#include <chrono/fea/ChElementBeamEuler.h>
-#include <chrono/fea/ChContactSurfaceNodeCloud.h>
-#include <chrono/physics/ChMaterialSurfaceSMC.h>
+#include "seahowl/elasto/component_elasto.h"
+#include "seahowl/commons/numerics.h"
 
 namespace seahowl {
 namespace elasto {

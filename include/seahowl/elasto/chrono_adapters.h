@@ -3,13 +3,21 @@
 // Disable inherits via dominance warning when there is multiple inheritance
 #pragma warning(disable : 4250)
 
-#include <seahowl/elasto/reference_point_elasto.h>
-#include <seahowl/elasto/entities_elasto.h>
-#include <seahowl/elasto/system_elasto.h>
+#include "seahowl/elasto/entities_elasto.h"
+#include "seahowl/elasto/system_elasto.h"
 
 #include <vector>
 #include <memory>
 
+// forward declarations
+namespace seahowl {
+namespace elasto {
+struct BladeReferencePointElasto;
+struct TowerReferencePointElasto;
+}  // namespace elasto
+}  // namespace seahowl
+
+// forward declarations chrono
 namespace chrono {
 template <class Real>
 class ChVector;

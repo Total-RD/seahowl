@@ -4,10 +4,18 @@
 
 #include <seahowl/core/component.h>
 #include <seahowl/core/turbine.h>
+#include <seahowl/elasto/turbine_elasto.h>
+#include <seahowl/aero/turbine_aero.h>
 #include <seahowl/core/rotor.h>
 #include <seahowl/core/blade.h>
+#include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/core/tower.h>
+#include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/core/system.h>
+#include <seahowl/elasto/system_elasto.h>
+#include <seahowl/aero/system_aero.h>
+#include <seahowl/aero/wind_models.h>
+#include <seahowl/servo/controller.h>
 #include <seahowl/io/read_json.h>
 
 namespace py = pybind11;

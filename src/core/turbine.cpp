@@ -1,5 +1,11 @@
 #include "seahowl/core/turbine.h"
 
+#include "seahowl/elasto/turbine_elasto.h"
+#include "seahowl/aero/turbine_aero.h"
+#include "seahowl/core/blade.h"
+#include "seahowl/elasto/blade_elasto.h"
+#include "seahowl/servo/controller.h"
+
 using namespace seahowl::core;
 using namespace seahowl::servo;
 using namespace seahowl::elasto;

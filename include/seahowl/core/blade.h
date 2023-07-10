@@ -1,13 +1,23 @@
 #pragma once
 
+#include "seahowl/core/component.h"
+
 #include <memory>
 #include <vector>
 
-#include <seahowl/core/reference_point.h>
-#include <seahowl/core/component.h>
-#include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/elasto/entities_elasto.h>
-#include <seahowl/aero/blade_aero.h>
+// forward declarations
+namespace seahowl {
+struct DiscretizationPoint;
+namespace core {
+class Blade;
+}  // namespace core
+namespace elasto {
+class BladeElasto;
+}  // namespace elasto
+namespace aero {
+class BladeAero;
+}  // namespace aero
+}  // namespace seahowl
 
 namespace seahowl {
 namespace core {

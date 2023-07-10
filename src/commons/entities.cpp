@@ -1,5 +1,7 @@
 #include "seahowl/commons/entities.h"
 
+#include "seahowl/commons/numerics.h"
+
 using namespace seahowl;
 
 void EntityEigen::set_position(const Vector3d& position) {

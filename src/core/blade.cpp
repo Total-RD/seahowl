@@ -1,9 +1,8 @@
 #include "seahowl/core/blade.h"
 
-#include <seahowl/elasto/reference_point_elasto.h>
-#include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/aero/blade_aero.h>
-#include <seahowl/commons/utils.h>
+#include "seahowl/commons/utils.h"
+#include "seahowl/elasto/blade_elasto.h"
+#include "seahowl/aero/blade_aero.h"
 
 #include <memory>
 

@@ -1,5 +1,8 @@
 #include "seahowl/aero/blade_aero.h"
-#include <seahowl/aero/bemt.h>
+
+#include "seahowl/commons/utils.h"
+#include "seahowl/aero/reference_point_aero.h"
+#include "seahowl/aero/bemt.h"
 
 using seahowl::aero::BladeNodeAero;
 using seahowl::aero::BladeElementAero;

@@ -1,6 +1,7 @@
 #include "seahowl/aero/aerodyn_adapter.h"
 
 #include "seahowl/aero/turbine_aero.h"
+#include "seahowl/aero/blade_aero.h"
 
 #include <stdexcept>
 #include <vector>

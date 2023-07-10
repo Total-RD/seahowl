@@ -1,15 +1,17 @@
 #pragma once
 
-#include <seahowl/aero/blade_aero.h>
-#include <seahowl/aero/rotor_aero.h>
-#include <seahowl/aero/tower_aero.h>
-#include <seahowl/commons/numerics.h>
-#include <seahowl/commons/entities.h>
+#include "seahowl/aero/rotor_aero.h"
+#include "seahowl/aero/tower_aero.h"
 #ifdef HAVE_AERODYN
-    #include <seahowl/aero/aerodyn_adapter.h>
+    #include "seahowl/aero/aerodyn_adapter.h"
 #endif
 
 #include <vector>
+
+// forward declarations
+namespace seahowl {
+namespace aero {}  // namespace aero
+}  // namespace seahowl
 
 /**@brief Seahowl base namespace */
 namespace seahowl {

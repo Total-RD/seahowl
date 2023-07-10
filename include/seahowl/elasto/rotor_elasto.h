@@ -1,12 +1,12 @@
 #pragma once
 
-#include <seahowl/elasto/component_elasto.h>
+#include "seahowl/elasto/component_elasto.h"
+#include "seahowl/commons/numerics.h"
 
 #include <vector>
 #include <memory>
 
-#include <seahowl/commons/numerics.h>
-
+// forward declarations
 namespace seahowl {
 namespace elasto {
 class BodyElasto;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <seahowl/aero/turbine_aero.h>
+#include "seahowl/aero/turbine_aero.h"  // @todo forward declare
 
 #include <vector>
 #include <deque>

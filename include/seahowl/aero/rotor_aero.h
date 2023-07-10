@@ -1,11 +1,18 @@
 #pragma once
 
-#include <seahowl/aero/blade_aero.h>
-#include <seahowl/aero/tower_aero.h>
-#include <seahowl/aero/wind_models.h>
-#include <seahowl/commons/numerics.h>
+#include "seahowl/commons/entities.h"
+#include "seahowl/commons/numerics.h"
 
 #include <memory>
+
+// forward declarations
+namespace seahowl {
+namespace aero {
+class BladeAero;
+class TowerAero;
+class WindModel;
+}  // namespace aero
+}  // namespace seahowl
 
 namespace seahowl {
 namespace aero {

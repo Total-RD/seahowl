@@ -1,11 +1,23 @@
 #pragma once
-#include <seahowl/core/turbine.h>
-#include <seahowl/aero/wind_models.h>
-#include <seahowl/servo/controller.h>
-#include <seahowl/servo/controller_discon.h>
-#include <seahowl/elasto/entities_elasto.h>
-#include <seahowl/elasto/system_elasto.h>
-#include <seahowl/aero/system_aero.h>
+
+#include "seahowl/core/component.h"
+#include "seahowl/core/turbine.h"  // @todo forward declare Turbine
+
+#include <deque>
+
+// forward declarations
+namespace seahowl {
+namespace servo {
+class Controller;
+}  // namespace servo
+namespace aero {
+class WindModel;
+class SystemAero;
+}  // namespace aero
+namespace elasto {
+class SystemElasto;
+}  // namespace elasto
+}  // namespace seahowl
 
 namespace seahowl {
 namespace core {

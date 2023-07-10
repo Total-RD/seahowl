@@ -72,13 +72,6 @@ void populate_blade_aero_from_json(std::string filepath, seahowl::aero::BladeAer
 void populate_blade_from_json(std::string filepath, seahowl::core::Blade& blade);
 
 /**
- * @brief Returns blade reference points given a json file.
- *
- * @param[in] filepath Path of the json file describing the blade.
- */
-std::vector<seahowl::core::BladeReferencePoint> get_blade_reference_points_from_json(std::string filepath);
-
-/**
  * @brief Returns tower elasto reference points given a json file.
  *
  * @param[in] filepath Path of the json file describing the tower.

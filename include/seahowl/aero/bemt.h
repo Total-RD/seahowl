@@ -1,9 +1,16 @@
 #pragma once
 
-#include <seahowl/aero/airfoil.h>
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/commons/numerics.h>
+
+// forward declarations
+namespace seahowl {
+namespace aero {
+struct AirfoilProperties;
+struct AirfoilCoefficients;
+}  // namespace aero
+}  // namespace seahowl
 
 namespace seahowl {
 namespace aero {

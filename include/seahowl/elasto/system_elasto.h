@@ -1,7 +1,6 @@
 #pragma once
 
-#include <seahowl/commons/numerics.h>
-#include <seahowl/elasto/turbine_elasto.h>
+#include "seahowl/elasto/turbine_elasto.h"  // @todo forward declare Turbine
 
 #include <vector>
 #include <deque>

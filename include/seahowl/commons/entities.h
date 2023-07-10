@@ -3,7 +3,7 @@
 // Disable inherits via dominance warning when there is multiple inheritance
 #pragma warning(disable : 4250)
 
-#include <seahowl/commons/numerics.h>
+#include "seahowl/commons/numerics.h"
 
 namespace seahowl {
 

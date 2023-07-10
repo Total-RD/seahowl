@@ -1,5 +1,9 @@
 #include "seahowl/servo/controller_discon.h"
 
+#include "seahowl/core/turbine.h"
+#include "seahowl/elasto/rotor_elasto.h"
+#include "seahowl/elasto/blade_elasto.h"
+
 #include <stdexcept>
 #include <vector>
 #include <string>

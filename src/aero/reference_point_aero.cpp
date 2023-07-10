@@ -1,4 +1,6 @@
-#include <seahowl/aero/reference_point_aero.h>
+#include "seahowl/aero/reference_point_aero.h"
+
+#include "seahowl/aero/airfoil.h"
 
 using namespace seahowl::aero;
 

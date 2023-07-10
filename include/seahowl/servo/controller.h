@@ -1,11 +1,13 @@
 #pragma once
 
-#include <seahowl/core/turbine.h>
-
+// forward declarations
 namespace seahowl {
 namespace core {
 class Turbine;
-}
+}  // namespace core
+}  // namespace seahowl
+
+namespace seahowl {
 /**@brief Servo controller module */
 namespace servo {
 
@@ -72,7 +74,7 @@ class Controller {
 /**
  * @brief Controller using electrical torque to reach a target (max) RPM.
  */
-class ControllerVariableTorque : public seahowl::servo::Controller {
+class ControllerVariableTorque : public Controller {
   private:
     /** @brief Current electrical torque. */
     double torque_elec = 0.0;

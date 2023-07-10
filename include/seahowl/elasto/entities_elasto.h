@@ -1,10 +1,9 @@
 #pragma once
 
+#include "seahowl/commons/entities.h"
+
 #include <vector>
 #include <memory>
-
-#include <seahowl/commons/entities.h>
-#include <seahowl/elasto/reference_point_elasto.h>
 
 namespace seahowl {
 ///@brief Elastodynamic model module

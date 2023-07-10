@@ -1,8 +1,23 @@
 #pragma once
 
-#include <seahowl/core/blade.h>
-#include <seahowl/elasto/rotor_elasto.h>
-#include <seahowl/aero/rotor_aero.h>
+#include "seahowl/core/component.h"
+#include "seahowl/commons/numerics.h"
+
+#include <vector>
+#include <memory>
+
+// forward declarations
+namespace seahowl {
+namespace core {
+class Blade;
+}  // namespace core
+namespace elasto {
+class RotorElasto;
+}  // namespace elasto
+namespace aero {
+class RotorAero;
+}  // namespace aero
+}  // namespace seahowl
 
 namespace seahowl {
 namespace core {

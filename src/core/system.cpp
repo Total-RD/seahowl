@@ -1,4 +1,10 @@
-#include <seahowl/core/system.h>
+#include "seahowl/core/system.h"
+
+#include "seahowl/elasto/system_elasto.h"
+#include "seahowl/aero/system_aero.h"
+#include "seahowl/elasto/turbine_elasto.h"
+#include "seahowl/aero/turbine_aero.h"
+#include "seahowl/aero/wind_models.h"
 
 using namespace seahowl::core;
 
