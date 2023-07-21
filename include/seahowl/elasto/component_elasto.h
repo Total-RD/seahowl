@@ -26,6 +26,23 @@ namespace elasto {
 class ComponentElasto {
   public:
     /**
+     * @brief Builds the component (to call before assemble).
+     */
+    virtual void build(){};
+
+    /**
+     * @brief Assembles the component.
+     *
+     * @param[out] mesh System on which to assemble component.
+     */
+    virtual void assemble(SystemElasto& system) const {};
+
+    /**
+     * @brief Resets accumulated loads of component.
+     */
+    virtual void reset_loads(){};
+
+    /**
      * @brief Rotates the component.
      *
      * @param[in] translation_vector The angle of rotation (in radians).
@@ -51,7 +68,7 @@ class ComponentElasto {
  *
  * All FEA elasto component classes are derived from this class.
  */
-class ComponentElastoFEA : public ComponentElasto {
+class ComponentElastoFEA : public virtual ComponentElasto {
   public:
     /** @brief Finite element nodes. */
     std::vector<std::shared_ptr<NodeElasto>> nodes;
@@ -72,7 +89,7 @@ class ComponentElastoFEA : public ComponentElasto {
      *
      * @param[out] mesh System on which to add nodes and elements.
      */
-    void assemble(SystemElasto& system) const;
+    virtual void assemble(SystemElasto& system) const override;
 
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;
@@ -81,7 +98,7 @@ class ComponentElastoFEA : public ComponentElasto {
     /**
      * @brief Resets accumulated loads at nodes of FEA component.
      */
-    void reset_loads();
+    virtual void reset_loads() override;
 
     /**
      * @brief Evaluates the position and rotation given the abscissa of an element.

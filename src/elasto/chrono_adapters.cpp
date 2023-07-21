@@ -523,19 +523,22 @@ LinkChrono::LinkChrono() {
     chobj->SetConstrainedCoords(true, true, true, true, true, true);
 }
 
-void LinkChrono::initialize(BodyElasto& body1, BodyElasto& body2) {
-    chobj->Initialize(dynamic_cast<BodyElastoChrono&>(body1).chobj, dynamic_cast<BodyElastoChrono&>(body2).chobj,
-                      dynamic_cast<BodyElastoChrono&>(body2).chobj->GetFrame_COG_to_abs());
+void LinkChrono::initialize(const BodyElasto& body1, const BodyElasto& body2) {
+    chobj->Initialize(dynamic_cast<const BodyElastoChrono&>(body1).chobj,
+                      dynamic_cast<const BodyElastoChrono&>(body2).chobj,
+                      dynamic_cast<const BodyElastoChrono&>(body2).chobj->GetFrame_COG_to_abs());
 }
 
-void LinkChrono::initialize(NodeElasto& node1, BodyElasto& body2) {
-    chobj->Initialize(dynamic_cast<NodeElastoChrono&>(node1).chobj, dynamic_cast<BodyElastoChrono&>(body2).chobj,
-                      dynamic_cast<BodyElastoChrono&>(body2).chobj->GetFrame_COG_to_abs());
+void LinkChrono::initialize(const NodeElasto& node1, const BodyElasto& body2) {
+    chobj->Initialize(dynamic_cast<const NodeElastoChrono&>(node1).chobj,
+                      dynamic_cast<const BodyElastoChrono&>(body2).chobj,
+                      dynamic_cast<const BodyElastoChrono&>(body2).chobj->GetFrame_COG_to_abs());
 }
 
-void LinkChrono::initialize(NodeElasto& node1, NodeElasto& node2) {
-    chobj->Initialize(dynamic_cast<NodeElastoChrono&>(node1).chobj, dynamic_cast<NodeElastoChrono&>(node2).chobj,
-                      dynamic_cast<NodeElastoChrono&>(node2).chobj->Frame());
+void LinkChrono::initialize(const NodeElasto& node1, const NodeElasto& node2) {
+    chobj->Initialize(dynamic_cast<const NodeElastoChrono&>(node1).chobj,
+                      dynamic_cast<const NodeElastoChrono&>(node2).chobj,
+                      dynamic_cast<const NodeElastoChrono&>(node2).chobj->Frame());
 }
 
 void LinkChrono::set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) {

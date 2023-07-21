@@ -176,9 +176,9 @@ class LinkChrono : public Link {
 
     LinkChrono();
     virtual void set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) override;
-    virtual void initialize(BodyElasto& body1, BodyElasto& body2) override;
-    virtual void initialize(NodeElasto& node1, BodyElasto& body2) override;
-    virtual void initialize(NodeElasto& node1, NodeElasto& node2) override;
+    virtual void initialize(const BodyElasto& body1, const BodyElasto& body2) override;
+    virtual void initialize(const NodeElasto& node1, const BodyElasto& body2) override;
+    virtual void initialize(const NodeElasto& node1, const NodeElasto& node2) override;
     Vector3d get_reaction_force() const override;
     Vector3d get_reaction_torque() const override;
 };

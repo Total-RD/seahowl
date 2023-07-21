@@ -15,9 +15,6 @@ void RotorElasto::assemble(SystemElasto& system) {
         blade->assemble(system);
     }
     system.add(*(body_hub.get()));
-    for (auto& link_blade : links_blades) {
-        system.add(*(link_blade.get()));
-    }
 }
 
 void RotorElasto::build() {
@@ -37,7 +34,6 @@ void RotorElasto::build() {
     body_hub->set_rotation(rotation0);
 
     // blades
-    links_blades.clear();
     auto nblades = blades.size();
     for (int ii = 0; ii < nblades; ii++) {
         auto blade = blades[ii];
@@ -56,10 +52,7 @@ void RotorElasto::build() {
                       Vector3d(1.0, 0.0, 0.0));  // X is the axis pointing towards nacelle for blade (IEC standard)
 
         // link root node of blade to rotor center
-        links_blades.push_back(std::make_unique<LinkChrono>());
-        auto& link_hub_blade = links_blades.back();
-        link_hub_blade->initialize(*(blade->nodes[0].get()), *(body_hub.get()));
-        link_hub_blade->set_constraints(true, true, true, true, true, true);
+        blade->attach_root_to_body(*body_hub);
     }
 }
 
@@ -69,8 +62,7 @@ void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
         auto blade = blades[ii];
         blade->apply_pitch_increment(pitch_increment);
         // update blade-hub constraint
-        auto& link = links_blades[ii];
-        link->initialize(*(blade->nodes.front().get()), *(body_hub.get()));
+        blade->attach_root_to_body(*body_hub);
     }
     pitch_collective += pitch_increment;
 }
@@ -242,8 +234,8 @@ double RotorNacelleAssemblyElasto::get_axial_torque() const {
     // get reaction torque from all blades linked to hub
     // those links are already in the hub body reference frame
     auto react_torque = Vector3d(0.0, 0.0, 0.0);
-    for (auto& link_blade : rotor->links_blades) {
-        react_torque += link_blade->get_reaction_torque();
+    for (auto& blade : rotor->blades) {
+        react_torque += blade->link_root->get_reaction_torque();
     }
     return react_torque.x();
 }

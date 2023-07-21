@@ -64,8 +64,6 @@ class RotorElasto : public ComponentElasto {
     std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades{};
     /** @brief Hub rigid body. */
     std::unique_ptr<seahowl::elasto::BodyElasto> body_hub;
-    /** @brief Links between blades and hub. */
-    std::vector<std::unique_ptr<Link>> links_blades{};
 
     /** @brief Hub reference properties. */
     HubProperties hub;

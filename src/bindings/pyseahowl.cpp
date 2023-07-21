@@ -50,7 +50,7 @@ PYBIND11_MODULE(pyseahowl, m) {
 
     // io/read_json.h
     m.def("populate_blade_from_json", &populate_blade_from_json);
-    m.def("populate_rotor_from_json", &populate_rotor_from_json);
+    m.def("populate_rna_from_json", &populate_rna_from_json);
     m.def("populate_turbine_from_json", &populate_turbine_from_json);
     m.def("populate_system_from_json", &populate_system_from_json);
 }

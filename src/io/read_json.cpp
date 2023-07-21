@@ -395,7 +395,7 @@ void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorNac
     hub.at("radius").get_to(rna.hub_radius);
 }
 
-void populate_rotor_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rna) {
+void populate_rna_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rna) {
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -422,7 +422,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
 
     auto DATADIR = absolute(path(filepath).parent_path());
 
-    auto blades_json = json_obj.at("blades");
+    auto rotor_json = json_obj.at("rotor");
     auto tower_json = json_obj.at("tower");
     auto rna_json = json_obj.at("rna");
     auto controller_json = json_obj.at("controller");
@@ -431,29 +431,52 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
     std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades_elasto;
     std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades_aero;
-    auto blades_json2 = blades_json.at("blades");
-    for (auto& blade_json : blades_json2) {
+    auto blades_json = rotor_json.at("blades");
+    for (auto& blade_json : blades_json) {
         auto filepath_blade = (DATADIR / blade_json.at("file").get<std::string>()).generic_string();
-        auto blade_elasto = std::make_shared<seahowl::elasto::BladeElasto>();
+        std::shared_ptr<seahowl::elasto::BladeElasto> blade_elasto;
+        if (rotor_json.at("type").get<std::string>() == "fea") {
+            blade_elasto = std::make_shared<seahowl::elasto::BladeElastoFEA>();
+            auto& blade_elasto_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade_elasto);
+            rotor_json.at("discretization").at("elasto").get_to(blade_elasto_fea.discretization_fractions);
+            rotor_json.at("fpm").get_to(blade_elasto_fea.fpm_mode);
+        } else if (rotor_json.at("type").get<std::string>() == "rigid") {
+            blade_elasto = std::make_shared<seahowl::elasto::BladeElastoRigid>();
+        } else {
+            throw std::invalid_argument("Wrong blade type: try \"fea\" or \"rigid\".");
+        }
         auto blade_aero = std::make_shared<seahowl::aero::BladeAero>();
         auto blade = std::make_shared<seahowl::core::Blade>(*blade_elasto, *blade_aero);
         populate_blade_from_json(filepath_blade, *blade);
-        blades_json.at("discretization").at("elasto").get_to(blade->elasto.discretization_fractions);
-        blades_json.at("discretization").at("aero").get_to(blade->aero.discretization_fractions);
-        blades_json.at("fpm").get_to(blade->elasto.fpm_mode);
+        rotor_json.at("discretization").at("aero").get_to(blade->aero.discretization_fractions);
         blade_json.at("initial_pitch").get_to(blade->elasto.pitch);
         blades_elasto.push_back(blade_elasto);
         blades_aero.push_back(blade_aero);
         blades.push_back(blade);
     }
+
     turbine.elasto.rna.rotor->blades = blades_elasto;
     turbine.aero.rna.blades = blades_aero;
     turbine.rna.blades = blades;
 
     // RNA
-    auto filepath_rotor = (DATADIR / rna_json.at("file").get<std::string>()).generic_string();
-    populate_rotor_from_json(filepath_rotor, turbine.rna);
+    auto filepath_rna = (DATADIR / rna_json.at("file").get<std::string>()).generic_string();
+    populate_rna_from_json(filepath_rna, turbine.rna);
     rna_json.at("initial_pitch_collective").get_to(turbine.elasto.rna.rotor->pitch_collective);
+
+    // update info if rotor is rigid
+    if (rotor_json.at("type").get<std::string>() == "rigid") {
+        if (!rotor_json.contains("inertia_total")) {
+            throw std::runtime_error("The \"inertia_total\" key must be given for rigid rotors.");
+        }
+        if (!rotor_json.contains("mass_blades_total")) {
+            throw std::runtime_error("The \"mass_blades_total\" key must be given for rigid rotors.");
+        }
+        auto rotor_inertia = rotor_json.at("inertia_total").get<double>();
+        turbine.rna.elasto.rotor->hub.inertia = rotor_inertia;
+        auto blades_mass = rotor_json.at("mass_blades_total").get<double>();
+        turbine.rna.elasto.rotor->hub.mass += blades_mass;
+    }
 
     // tower
     auto filepath_tower = (DATADIR / tower_json.at("file").get<std::string>()).generic_string();
@@ -479,7 +502,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     }
 
     // get extra drivetrain info
-    std::ifstream json_file2(filepath_rotor);
+    std::ifstream json_file2(filepath_rna);
     // populate json object
     json json_obj2;
     json_file2 >> json_obj2;

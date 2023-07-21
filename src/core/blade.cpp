@@ -67,33 +67,18 @@ void Blade::compute_mapping_elasto2aero() {
 
 void Blade::update_positions_aero() {
     for (int ii = 0; ii < aero.nodes.size(); ii++) {
+        auto& node_aero = aero.nodes[ii];
+
         // update position and rotation of aero elements
         int elasto_element_index = mapping_aero2elasto_nodes[ii].index;
-        auto element_elasto = elasto.elements[elasto_element_index];
         double eta = mapping_aero2elasto_nodes[ii].eta;
-        auto& node_aero = aero.nodes[ii];
-        Vector3d new_position;
-        Quaternion new_rotation;
-        elasto.evaluate_position_rotation(new_position, new_rotation, elasto_element_index, eta);
-        node_aero.set_position(new_position);
-        node_aero.set_rotation(new_rotation);
-
-        // add offset
-        auto& offset = node_aero.properties.offset_aero;
-        auto offset3D = Vector3d(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
-        node_aero.set_position(node_aero.get_position() + node_aero.get_rotation() * offset3D);
-
-        // update properties of aero nodes
-        double weight1 = 0.5 * fabs(eta - 1.0);
-        double weight2 = 0.5 * fabs(eta + 1.0);
-        auto node1 = element_elasto->nodes[0];
-        auto node2 = element_elasto->nodes[1];
-        node_aero.set_velocity(weight1 * node1->get_velocity() + weight2 * node2->get_velocity());
-        node_aero.set_rotational_velocity(weight1 * node1->get_rotational_velocity() +
-                                          weight2 * node2->get_rotational_velocity());
-        node_aero.set_acceleration(weight1 * node1->get_acceleration() + weight2 * node2->get_acceleration());
-        node_aero.set_rotational_acceleration(weight1 * node1->get_rotational_acceleration() +
-                                              weight2 * node2->get_rotational_acceleration());
+        auto entity = elasto.get_entity_along_blade(eta, elasto_element_index);
+        node_aero.set_position(entity.get_position());
+        node_aero.set_rotation(entity.get_rotation());
+        node_aero.set_velocity(entity.get_velocity());
+        node_aero.set_rotational_velocity(entity.get_rotational_velocity());
+        node_aero.set_acceleration(entity.get_acceleration());
+        node_aero.set_rotational_acceleration(entity.get_rotational_acceleration());
     }
 
     // update pitch of blade for aero
@@ -106,8 +91,8 @@ void Blade::update_loads_elasto() {
         throw std::runtime_error("length of vector of loads and aero to elasto mapping do not match.");
     }
     for (int ii = 0; ii < aero.loads.size(); ii++) {
-        elasto.accumulate_element_load(aero.loads[ii], mapping_aero2elasto_elements[ii].index,
-                                       mapping_aero2elasto_elements[ii].eta,
-                                       aero.elements[ii].get_offset_aero_absolute());
+        elasto.accumulate_load_along_blade(aero.loads[ii], mapping_aero2elasto_elements[ii].index,
+                                           mapping_aero2elasto_elements[ii].eta,
+                                           aero.elements[ii].get_offset_aero_absolute());
     }
 }

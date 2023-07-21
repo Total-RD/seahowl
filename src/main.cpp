@@ -103,7 +103,8 @@ int main(int argc, char* argv[]) {
             for (auto [blade_ptr, idx_blade] = std::tuple{turbine.rna.blades.begin(), 0};
                  blade_ptr != turbine.rna.blades.end(); blade_ptr++, idx_blade++) {
                 auto& blade = *blade_ptr;
-                auto& post_blade = vtk_outputs.emplace_back(blade->elasto);
+                auto& post_blade =
+                    vtk_outputs.emplace_back(dynamic_cast<seahowl::elasto::BladeElastoFEA&>(blade->elasto));
                 post_blade.initialize(
                     ("./output/vtk/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
                         .c_str());

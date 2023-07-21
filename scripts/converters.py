@@ -797,8 +797,11 @@ def convert_openfast_fst(filename, save_directory=None):
                             f3.writelines(lines2)
 
         turbine_json = {
-            "blades": {
+            "rotor": {
                 "fpm": False,
+                "type": "fea",
+                "inertia_total": 3.524605e8,
+                "mass_total": 1.017e6,
                 "discretization": {
                     "elasto": blade_elasto_json["discretization_elasto"],
                     "aero": blade_aero_json["discretization_aero"],
