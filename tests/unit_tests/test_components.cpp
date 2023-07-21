@@ -109,17 +109,17 @@ TEST(test_rotor, mass) {
         blades.push_back(blade);
     }
 
-    auto rotor = seahowl::elasto::RotorNacelleAssemblyElasto();
-    populate_rotor_elasto_from_json((DATADIR / "rna.json").generic_string(), rotor);
-    rotor.blades = blades;
-    rotor.build();
-    rotor.assemble(system_elasto);
-    rotor.body_yaw_bearing->set_fixed(true);
+    auto rna = seahowl::elasto::RotorNacelleAssemblyElasto();
+    populate_rotor_elasto_from_json((DATADIR / "rna.json").generic_string(), rna);
+    rna.rotor->blades = blades;
+    rna.build();
+    rna.assemble(system_elasto);
+    rna.body_yaw_bearing->set_fixed(true);
 
     system_elasto.do_statics(true, 0);
     // check mass
     double rotor_total_mass = 945690.92;
-    ASSERT_NEAR(rotor_total_mass, rotor.get_mass(), 1.0);
+    ASSERT_NEAR(rotor_total_mass, rna.get_mass(), 1.0);
 }
 
 TEST(test_tower, mass) {
@@ -329,13 +329,13 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
-        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
-    turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
     // while (application.GetDevice()->run()) {
     while (time < 50) {
@@ -352,7 +352,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.829, 0.02);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.829, 0.02);
 }
 
 #ifdef HAVE_AERODYN
@@ -394,13 +394,13 @@ TEST(test_aerodyn, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
-        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
-    turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
+    turbine.rna.elasto.apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
     // while (application.GetDevice()->run()) {
     while (time < 50) {
@@ -417,7 +417,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.77, 0.02);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.77, 0.02);
 }
 #endif
 
@@ -474,7 +474,7 @@ TEST(test_turbine, multiturbines) {
 
     double time = 0.0;
     for (auto& turbine : system_core.turbines) {
-        turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
+        turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     }
     system_core.initialize(time, dt);
     while (time < 50) {
@@ -490,7 +490,7 @@ TEST(test_turbine, multiturbines) {
     }
 
     for (auto& turbine : system_core.turbines) {
-        ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.829, 0.02);
+        ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.829, 0.02);
     }
 }
 
@@ -533,13 +533,13 @@ TEST(test_inflowwind, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
-        turbine.rotor.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
-    turbine.rotor.elasto.apply_collective_pitch_increment(initial_pitch);
+    turbine.rna.elasto.apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
     // while (application.GetDevice()->run()) {
     while (time < 50) {
@@ -556,6 +556,6 @@ TEST(test_inflowwind, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rotor.elasto.get_rpm(), 2.829, 0.02);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.829, 0.02);
 }
 #endif

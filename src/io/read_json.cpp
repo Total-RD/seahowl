@@ -335,7 +335,7 @@ void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower)
     populate_tower_aero_from_json(filepath, tower.aero);
 }
 
-void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rotor) {
+void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -348,37 +348,37 @@ void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::Roto
     // EXTRACT INFO
     //
     // blades
-    json_obj.at("precones").get_to(rotor.blade_precones);
-    for (int ii = 0; ii < rotor.blade_precones.size(); ii++) {
+    json_obj.at("precones").get_to(rna.rotor->blade_precones);
+    for (int ii = 0; ii < rna.rotor->blade_precones.size(); ii++) {
         // convert to radians
-        rotor.blade_precones[ii] *= PI / 180.0;
+        rna.rotor->blade_precones[ii] *= PI / 180.0;
     }
     // hub
     auto hub = json_obj.at("hub");
-    hub.at("CM").get_to(rotor.hub.center_of_mass);
-    hub.at("mass").get_to(rotor.hub.mass);
-    hub.at("inertia").get_to(rotor.hub.inertia);
-    hub.at("overhang").get_to(rotor.hub.overhang);
-    hub.at("radius").get_to(rotor.hub.radius);
+    hub.at("CM").get_to(rna.rotor->hub.center_of_mass);
+    hub.at("mass").get_to(rna.rotor->hub.mass);
+    hub.at("inertia").get_to(rna.rotor->hub.inertia);
+    hub.at("overhang").get_to(rna.rotor->hub.overhang);
+    hub.at("radius").get_to(rna.rotor->hub.radius);
     // nacelle
     auto nacelle = json_obj.at("nacelle");
     auto cm = nacelle.at("CM").get<std::vector<double>>();
     if (cm.size() != 3) {
         throw std::runtime_error("Center of mass of nacelle has to be vector of length 3.");
     }
-    rotor.nacelle.center_of_mass = Vector3d(cm[0], cm[1], cm[2]);
-    nacelle.at("mass").get_to(rotor.nacelle.mass);
-    nacelle.at("inertia").get_to(rotor.nacelle.inertia);
-    nacelle.at("yaw_bearing_mass").get_to(rotor.nacelle.yaw_bearing_mass);
+    rna.nacelle.center_of_mass = Vector3d(cm[0], cm[1], cm[2]);
+    nacelle.at("mass").get_to(rna.nacelle.mass);
+    nacelle.at("inertia").get_to(rna.nacelle.inertia);
+    nacelle.at("yaw_bearing_mass").get_to(rna.nacelle.yaw_bearing_mass);
     // shaft
     auto shaft = json_obj.at("shaft");
-    shaft.at("distance_from_towertop").get_to(rotor.shaft.distance_from_towertop);
-    shaft.at("tilt").get_to(rotor.shaft.tilt);
+    shaft.at("distance_from_towertop").get_to(rna.shaft.distance_from_towertop);
+    shaft.at("tilt").get_to(rna.shaft.tilt);
     // convert to radians
-    rotor.shaft.tilt *= PI / 180.0;
+    rna.shaft.tilt *= PI / 180.0;
 }
 
-void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& rotor) {
+void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -392,10 +392,10 @@ void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorNac
     //
     // hub
     auto hub = json_obj.at("hub");
-    hub.at("radius").get_to(rotor.hub_radius);
+    hub.at("radius").get_to(rna.hub_radius);
 }
 
-void populate_rotor_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rotor) {
+void populate_rotor_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rna) {
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -405,8 +405,8 @@ void populate_rotor_from_json(std::string filepath, seahowl::core::RotorNacelleA
     json json_obj;
     json_file >> json_obj;
 
-    populate_rotor_elasto_from_json(filepath, rotor.elasto);
-    populate_rotor_aero_from_json(filepath, rotor.aero);
+    populate_rotor_elasto_from_json(filepath, rna.elasto);
+    populate_rotor_aero_from_json(filepath, rna.aero);
 }
 
 void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& turbine) {
@@ -446,14 +446,14 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
         blades_aero.push_back(blade_aero);
         blades.push_back(blade);
     }
-    turbine.elasto.rotor.blades = blades_elasto;
-    turbine.aero.rotor.blades = blades_aero;
-    turbine.rotor.blades = blades;
+    turbine.elasto.rna.rotor->blades = blades_elasto;
+    turbine.aero.rna.blades = blades_aero;
+    turbine.rna.blades = blades;
 
     // RNA
     auto filepath_rotor = (DATADIR / rna_json.at("file").get<std::string>()).generic_string();
-    populate_rotor_from_json(filepath_rotor, turbine.rotor);
-    rna_json.at("initial_pitch_collective").get_to(turbine.elasto.rotor.pitch_collective);
+    populate_rotor_from_json(filepath_rotor, turbine.rna);
+    rna_json.at("initial_pitch_collective").get_to(turbine.elasto.rna.rotor->pitch_collective);
 
     // tower
     auto filepath_tower = (DATADIR / tower_json.at("file").get<std::string>()).generic_string();
@@ -494,7 +494,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     // add inertia of generator to hub directly
     double drivetrain_inertia;
     drivetrain.at("generator_inertia").get_to(drivetrain_inertia);
-    turbine.rotor.elasto.hub.inertia += drivetrain_inertia;
+    turbine.rna.elasto.rotor->hub.inertia += drivetrain_inertia;
 }
 
 void populate_system_from_json(std::string filepath, seahowl::core::System& system_core) {
@@ -612,14 +612,14 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         turbine.translate(Vector3d(trans[0], trans[1], trans[2]));
 
         // apply initial pitches
-        for (auto& blade : turbine.rotor.blades) {
+        for (auto& blade : turbine.rna.blades) {
             auto pitch0 = blade->elasto.pitch;
             blade->elasto.apply_pitch_increment(pitch0);
             blade->elasto.pitch = pitch0;
         }
-        auto rotor_pitch0 = turbine.rotor.elasto.pitch_collective;
-        turbine.rotor.elasto.apply_collective_pitch_increment(rotor_pitch0);
-        turbine.rotor.elasto.pitch_collective = rotor_pitch0;
+        auto rotor_pitch0 = turbine.rna.elasto.rotor->pitch_collective;
+        turbine.rna.elasto.rotor->apply_collective_pitch_increment(rotor_pitch0);
+        turbine.rna.elasto.rotor->pitch_collective = rotor_pitch0;
     }
 
     // assemble whole system (Chrono)

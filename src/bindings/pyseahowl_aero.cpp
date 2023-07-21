@@ -42,7 +42,7 @@ void initialize_pyseahowl_aero(py::module& m) {
     // aero/turbine_aero.h
     py::class_<seahowl::aero::TurbineAero, std::shared_ptr<seahowl::aero::TurbineAero>>(m_aero, "TurbineAero")
         .def(py::init<>())
-        .def_readonly("rotor", &seahowl::aero::TurbineAero::rotor);
+        .def_readonly("rna", &seahowl::aero::TurbineAero::rna);
 
     // aero/wind_models.h
     py::class_<seahowl::aero::WindModel, std::shared_ptr<seahowl::aero::WindModel>>(m_aero, "WindModel")

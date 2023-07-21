@@ -58,6 +58,56 @@ struct ShaftProperties {
     double distance_from_towertop = 0.0;
 };
 
+class RotorElasto : public ComponentElasto {
+  public:
+    /** @brief List of blades. */
+    std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades{};
+    /** @brief Hub rigid body. */
+    std::unique_ptr<seahowl::elasto::BodyElasto> body_hub;
+    /** @brief Links between blades and hub. */
+    std::vector<std::unique_ptr<Link>> links_blades{};
+
+    /** @brief Hub reference properties. */
+    HubProperties hub;
+    /** @brief Blades precones (in radians). */
+    std::vector<double> blade_precones;
+
+    /** @brief Collective pitch of blades (in radians). */
+    double pitch_collective = 0;
+
+    /**
+     * @brief Constructor.
+     */
+    RotorElasto();
+
+    /**
+     * @brief Assembles the component (adds all rigid bodies and links to the system).
+     *
+     * @param[out] system System to which rigid bodies and links are added.
+     */
+    void assemble(seahowl::elasto::SystemElasto& system);
+
+    /**
+     * @brief Builds the rotor.
+     */
+    void build();
+
+    virtual void rotate(double angle, const Vector3d& axis) const override;
+    virtual void translate(const Vector3d& translation_vector) const override;
+    virtual double get_mass() const override;
+
+    /**
+     * @brief Applies pitch increment to all blades (i.e. rotates blades around their respective longitudinal axis).
+     *
+     * This function links the towertop node to the yaw bearing rigid body by translating the RNA so that the tower
+     * towertop node and yaw bearing coordinates match each other.
+     * The link between towertop node and yaw bearing is fixed.
+     *
+     * @param[in] pitch_increment Pitch increment to apply (in radians).
+     */
+    void apply_collective_pitch_increment(double pitch_increment);
+};
+
 /**
  * @brief Rotor Nacelle Assembly (RNA) of wind turbine as an elasto component.
  *
@@ -68,10 +118,8 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
   public:
     // RNA components
     //
-    /** @brief List of blades. */
-    std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades;
-    /** @brief Hub rigid body. */
-    std::unique_ptr<seahowl::elasto::BodyElasto> body_hub;
+    /** @brief Rotor. */
+    std::unique_ptr<seahowl::elasto::RotorElasto> rotor;
     /** @brief Shaft rigid body. */
     std::unique_ptr<seahowl::elasto::BodyElasto> body_shaft;
     /** @brief Nacelle rigid body. */
@@ -81,8 +129,6 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
 
     // links
     //
-    /** @brief Links between blades and hub. */
-    std::vector<std::unique_ptr<Link>> links_blades;
     /** @brief Link between shaft and hub (revolute). */
     std::unique_ptr<Link> link_shaft_hub;
     /** @brief Link between shaft and nacelle (fixed). */
@@ -99,13 +145,6 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     ShaftProperties shaft;
     /** @brief Nacelle reference properties. */
     NacelleProperties nacelle;
-    /** @brief Hub reference properties. */
-    HubProperties hub;
-    /** @brief Blades precones (in radians). */
-    std::vector<double> blade_precones;
-
-    /** @brief Collective pitch of blades (in radians). */
-    double pitch_collective = 0;
 
     /**
      * @brief Constructor.
@@ -127,17 +166,6 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     void rotate(double angle, const Vector3d& axis) const override;     ///< @see ElastoComponent::rotate
     void translate(const Vector3d& translation_vector) const override;  ///< @see ElastoComponent::translate
     double get_mass() const override;                                   ///< @see ElastoComponent::get_mass
-
-    /**
-     * @brief Applies pitch increment to all blades (i.e. rotates blades around their respective longitudinal axis).
-     *
-     * This function links the towertop node to the yaw bearing rigid body by translating the RNA so that the tower
-     * towertop node and yaw bearing coordinates match each other.
-     * The link between towertop node and yaw bearing is fixed.
-     *
-     * @param[in] pitch_increment Pitch increment to apply (in radians).
-     */
-    void apply_collective_pitch_increment(double pitch_increment);
 
     /**
      * @brief Returns the RPM of the rotor.

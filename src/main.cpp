@@ -33,15 +33,14 @@ using std::filesystem::remove_all;
 void output_results(seahowl::core::System& system_core, int step) {
     // output
     auto& turbine = system_core.turbines[0];
-    std::cout << "time: " << system_core.get_time() << ", step: " << step
-              << ", rpm: " << turbine.rotor.elasto.get_rpm();
-    int nblades = turbine.rotor.blades.size();
+    std::cout << "time: " << system_core.get_time() << ", step: " << step << ", rpm: " << turbine.rna.elasto.get_rpm();
+    int nblades = turbine.rna.blades.size();
     if (nblades <= 3) {
-        for (int ii = 0; ii < turbine.rotor.blades.size(); ii++) {
-            std::cout << ", pitch" << ii << ": " << turbine.rotor.blades[ii]->elasto.pitch;
+        for (int ii = 0; ii < turbine.rna.blades.size(); ii++) {
+            std::cout << ", pitch" << ii << ": " << turbine.rna.blades[ii]->elasto.pitch;
         }
     } else {
-        std::cout << ", pitch: " << turbine.rotor.elasto.pitch_collective;
+        std::cout << ", pitch: " << turbine.rna.elasto.rotor->pitch_collective;
     }
     std::cout << std::endl;
     write_turbine_info_to_csv("./output/output", system_core, system_core.get_time());
@@ -101,8 +100,8 @@ int main(int argc, char* argv[]) {
              turbine_ptr != system_core.turbines.end(); turbine_ptr++, idx_turbine++) {
             auto& turbine = *turbine_ptr;
             create_directory("./output/vtk");
-            for (auto [blade_ptr, idx_blade] = std::tuple{turbine.rotor.blades.begin(), 0};
-                 blade_ptr != turbine.rotor.blades.end(); blade_ptr++, idx_blade++) {
+            for (auto [blade_ptr, idx_blade] = std::tuple{turbine.rna.blades.begin(), 0};
+                 blade_ptr != turbine.rna.blades.end(); blade_ptr++, idx_blade++) {
                 auto& blade = *blade_ptr;
                 auto& post_blade = vtk_outputs.emplace_back(blade->elasto);
                 post_blade.initialize(

@@ -11,12 +11,12 @@ using namespace seahowl::servo;
 using namespace seahowl::elasto;
 
 Turbine::Turbine(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineAero& aero)
-    : elasto(elasto), aero(aero), rotor(elasto.rotor, aero.rotor), tower(elasto.tower, aero.tower) {
+    : elasto(elasto), aero(aero), rna(elasto.rna, aero.rna), tower(elasto.tower, aero.tower) {
     controller = std::make_shared<Controller>();
 }
 
 void Turbine::initialize(double time, double dt) {
-    rotor.initialize(time, dt);
+    rna.initialize(time, dt);
     tower.initialize(time, dt);
     controller->initialize(time, dt, *this);
 
@@ -24,7 +24,7 @@ void Turbine::initialize(double time, double dt) {
 }
 
 void Turbine::prestep(double time, double dt) {
-    rotor.prestep(time, dt);
+    rna.prestep(time, dt);
     tower.prestep(time, dt);
 }
 
@@ -35,18 +35,18 @@ void Turbine::poststep(double time, double dt) {
     if (controller->has_torque_control) {
         auto torque_elec = controller->get_torque_elec() * gearbox_ratio * gearbox_efficiency;
         // apply torque elec to hub rigid body
-        rotor.elasto.body_hub->reset_loads();
+        rna.elasto.rotor->body_hub->reset_loads();
         // torque elec is applied on hub body (locally)
-        rotor.elasto.accumulate_axial_torque(-torque_elec);
+        rna.elasto.accumulate_axial_torque(-torque_elec);
     }
     // apply pitch from controller
     if (controller->has_pitch_control) {
-        auto collective_pitch_increment = controller->get_collective_pitch() - rotor.elasto.pitch_collective;
-        rotor.elasto.apply_collective_pitch_increment(collective_pitch_increment);
-        if (rotor.blades.size() <= 3) {
+        auto collective_pitch_increment = controller->get_collective_pitch() - rna.elasto.rotor->pitch_collective;
+        rna.elasto.rotor->apply_collective_pitch_increment(collective_pitch_increment);
+        if (rna.blades.size() <= 3) {
             // individual pitch only works with up to 3 blades
-            for (int idx_blade = 0; idx_blade < rotor.blades.size(); idx_blade++) {
-                auto& blade = rotor.blades[idx_blade]->elasto;
+            for (int idx_blade = 0; idx_blade < rna.blades.size(); idx_blade++) {
+                auto& blade = rna.blades[idx_blade]->elasto;
                 // individual pitch increment difference with collective pitch increment that was already applied
                 auto blade_pitch_increment =
                     (controller->get_pitch_blade(idx_blade) - collective_pitch_increment) - blade.pitch;
@@ -56,7 +56,7 @@ void Turbine::poststep(double time, double dt) {
     }
 
     // poststeps
-    rotor.poststep(time, dt);
+    rna.poststep(time, dt);
     tower.poststep(time, dt);
 
     // controller poststep
@@ -69,18 +69,18 @@ void Turbine::build() {
 }
 
 void Turbine::translate(Vector3d translation_vector) {
-    rotor.elasto.translate(translation_vector);
+    rna.elasto.translate(translation_vector);
     tower.elasto.translate(translation_vector);
 }
 
 void Turbine::rotate(double angle, Vector3d axis) {
-    rotor.elasto.rotate(angle, axis);
+    rna.elasto.rotate(angle, axis);
     tower.elasto.rotate(angle, axis);
 }
 
 double Turbine::get_generated_power() const {
     // get generator rotation in rad/s scaled by gearbox ratio and efficiency
-    auto rot_rads = rotor.elasto.get_rpm() * (2.0 * PI / 60.0) * gearbox_ratio * gearbox_efficiency;
+    auto rot_rads = rna.elasto.get_rpm() * (2.0 * PI / 60.0) * gearbox_ratio * gearbox_efficiency;
     // get torque elec from rotor
     auto torque_elec = controller->get_torque_elec();
 
@@ -91,6 +91,6 @@ double Turbine::get_generated_power() const {
 
 double Turbine::get_generator_rpm() const {
     // get generator rotation in rad/s scaled by gearbox ratio and efficiency
-    auto rpm = rotor.elasto.get_rpm() * gearbox_ratio * gearbox_efficiency;
+    auto rpm = rna.elasto.get_rpm() * gearbox_ratio * gearbox_efficiency;
     return rpm;
 }

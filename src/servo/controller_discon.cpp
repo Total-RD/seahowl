@@ -47,18 +47,19 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
 
     // rotor
     // speed
-    auto omega_rotor = turbine.rotor.elasto.get_rpm() * (2 * PI / 60.0);
+    auto omega_rotor = turbine.rna.elasto.get_rpm() * (2 * PI / 60.0);
     pImpl.SetRotorSpeed(omega_rotor);
     // azimuth
-    auto rotor_azimuth = turbine.rotor.elasto.get_azimuth();
+    auto rotor_azimuth = turbine.rna.elasto.get_azimuth();
     pImpl.SetRotorAzimuth(rotor_azimuth);
 
     // blades
-    int nblades = turbine.rotor.elasto.blades.size();
+    auto& rotor_elasto = *(turbine.rna.elasto.rotor);
+    int nblades = turbine.rna.elasto.rotor->blades.size();
     if (nblades <= 3) {
         // individual pitch only works with up to 3 blades
         for (int index_blade = 0; index_blade < nblades; index_blade++) {
-            auto& blade = *turbine.rotor.elasto.blades[index_blade];
+            auto& blade = *turbine.rna.elasto.rotor->blades[index_blade];
             // pitch
             pImpl.SetPitchBlade(index_blade, blade.pitch);
             // moment
@@ -66,17 +67,17 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
             pImpl.SetRootMomentBlade(index_blade, root_moment[0], root_moment[1]);
         }
     } else {
-        pImpl.SetPitch(turbine.rotor.elasto.pitch_collective);
+        pImpl.SetPitch(turbine.rna.elasto.rotor->pitch_collective);
     }
 
     // nacelle/towertop
     // consider nacelle COG as towertop (for translational acceleration) as link is rigid
-    auto& nacelle = *turbine.rotor.elasto.body_nacelle;
+    auto& nacelle = *turbine.rna.elasto.body_nacelle;
     // get local acceleration
     auto nacelle_acceleration = nacelle.get_rotation().inverse() * nacelle.get_acceleration();
     pImpl.SetTowerTopAcceleration(nacelle_acceleration[0], nacelle_acceleration[1]);
     // get local rotational acceleration in shaft (tilted) coordinate system
-    auto& shaft = *turbine.rotor.elasto.body_shaft;
+    auto& shaft = *turbine.rna.elasto.body_shaft;
     auto nacelle_acceleration_rotational = shaft.get_rotation().inverse() * nacelle.get_rotational_acceleration(false);
     pImpl.SetNacelleRotationalAcceleration(nacelle_acceleration_rotational[0], nacelle_acceleration_rotational[1],
                                            nacelle_acceleration_rotational[2]);
@@ -91,7 +92,7 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
 }
 
 void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const seahowl::core::Turbine& turbine) {
-    auto nblades = turbine.rotor.blades.size();
+    auto nblades = turbine.rna.blades.size();
 
     pImpl.SetNumberOfBlades(nblades);
 

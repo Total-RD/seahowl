@@ -116,7 +116,7 @@ void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower)
  * @param[in] filepath Path of the json file describing the rotor.
  * @param[out] rotor Rotor to populate.
  */
-void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rotor);
+void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna);
 
 /**
  * @brief Populates rotor elasto given a json file.
@@ -124,7 +124,7 @@ void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::Roto
  * @param[in] filepath Path of the json file describing the rotor.
  * @param[out] rotor Rotor to populate.
  */
-void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& rotor);
+void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& rna);
 
 /**
  * @brief Populates rotor given a json file.
@@ -132,7 +132,7 @@ void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorNac
  * @param[in] filepath Path of the json file describing the rotor.
  * @param[out] rotor Rotor to populate.
  */
-void populate_rotor_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rotor);
+void populate_rotor_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rna);
 
 /**
  * @brief Populates turbine given a json file.

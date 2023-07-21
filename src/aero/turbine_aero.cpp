@@ -3,12 +3,12 @@
 using namespace seahowl::aero;
 
 TurbineAero::TurbineAero() {
-    rotor = RotorNacelleAssemblyAero();
+    rna = RotorNacelleAssemblyAero();
     tower = TowerAero();
 }
 
 void TurbineAero::build() {
-    rotor.build();
+    rna.build();
     tower.build();
 }
 
@@ -24,12 +24,12 @@ void TurbineAero::compute_aero_loads(seahowl::aero::WindModel& wind_model, doubl
 #ifdef HAVE_AERODYN
     if (use_aerodyn) {
         aerodyn->calcul(time, *this);
-        rotor.compute_aero_loads(aerodyn->pImpl.MeshFrc, wind_model, time, tower, true, true, true);
+        rna.compute_aero_loads(aerodyn->pImpl.MeshFrc, wind_model, time, tower, true, true, true);
     } else {
-        rotor.compute_aero_loads(wind_model, time, tower, true, true, true);
+        rna.compute_aero_loads(wind_model, time, tower, true, true, true);
     }
 #else
-    rotor.compute_aero_loads(wind_model, time, tower, true, true, true);
+    rna.compute_aero_loads(wind_model, time, tower, true, true, true);
 #endif
     tower.compute_aero_loads(wind_model, time);
 }

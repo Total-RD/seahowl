@@ -39,7 +39,7 @@ class Turbine : public ComponentDynamic {
     /** @brief Aerodynamic model of the turbine. */
     seahowl::aero::TurbineAero& aero;
     /** @brief Rotor-nacelle assembly of the turbine. */
-    RotorNacelleAssembly rotor;
+    RotorNacelleAssembly rna;
     /** @brief Tower of the turbine. */
     Tower tower;
     /** @brief Controller of the turbine. */
