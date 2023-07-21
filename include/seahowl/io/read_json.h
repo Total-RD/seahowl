@@ -3,7 +3,7 @@
 namespace seahowl {
 namespace core {
 class Blade;
-class Rotor;
+class RotorNacelleAssembly;
 class Tower;
 class Turbine;
 class System;
@@ -15,14 +15,14 @@ class SystemElasto;
 class MeshElasto;
 class BladeElasto;
 class TowerElasto;
-class RotorElasto;
+class RotorNacelleAssemblyElasto;
 struct BladeReferencePointElasto;
 struct TowerReferencePointElasto;
 }  // namespace elasto
 namespace aero {
 class BladeAero;
 class TowerAero;
-class RotorAero;
+class RotorNacelleAssemblyAero;
 struct BladeReferencePointAero;
 struct TowerReferencePointAero;
 }  // namespace aero
@@ -116,7 +116,7 @@ void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower)
  * @param[in] filepath Path of the json file describing the rotor.
  * @param[out] rotor Rotor to populate.
  */
-void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorElasto& rotor);
+void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rotor);
 
 /**
  * @brief Populates rotor elasto given a json file.
@@ -124,7 +124,7 @@ void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::Roto
  * @param[in] filepath Path of the json file describing the rotor.
  * @param[out] rotor Rotor to populate.
  */
-void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorAero& rotor);
+void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& rotor);
 
 /**
  * @brief Populates rotor given a json file.
@@ -132,7 +132,7 @@ void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorAer
  * @param[in] filepath Path of the json file describing the rotor.
  * @param[out] rotor Rotor to populate.
  */
-void populate_rotor_from_json(std::string filepath, seahowl::core::Rotor& rotor);
+void populate_rotor_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rotor);
 
 /**
  * @brief Populates turbine given a json file.

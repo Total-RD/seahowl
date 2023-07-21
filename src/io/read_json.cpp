@@ -335,7 +335,7 @@ void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower)
     populate_tower_aero_from_json(filepath, tower.aero);
 }
 
-void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorElasto& rotor) {
+void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rotor) {
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -378,7 +378,7 @@ void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::Roto
     rotor.shaft.tilt *= PI / 180.0;
 }
 
-void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorAero& rotor) {
+void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& rotor) {
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -395,7 +395,7 @@ void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorAer
     hub.at("radius").get_to(rotor.hub_radius);
 }
 
-void populate_rotor_from_json(std::string filepath, seahowl::core::Rotor& rotor) {
+void populate_rotor_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rotor) {
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }

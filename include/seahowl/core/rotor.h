@@ -12,10 +12,10 @@ namespace core {
 class Blade;
 }  // namespace core
 namespace elasto {
-class RotorElasto;
+class RotorNacelleAssemblyElasto;
 }  // namespace elasto
 namespace aero {
-class RotorAero;
+class RotorNacelleAssemblyAero;
 }  // namespace aero
 }  // namespace seahowl
 
@@ -28,12 +28,12 @@ namespace core {
  * This class acts as a "mediator" between the elasto and aero components.
  * The aero position of the RNA is updated using the elasto position.
  */
-class Rotor : public ComponentDynamic {
+class RotorNacelleAssembly : public ComponentDynamic {
   public:
     /** @brief Elastodynamic model of the RNA. */
-    seahowl::elasto::RotorElasto& elasto;
+    seahowl::elasto::RotorNacelleAssemblyElasto& elasto;
     /** @brief Aerodynamic model of the RNA. */
-    seahowl::aero::RotorAero& aero;
+    seahowl::aero::RotorNacelleAssemblyAero& aero;
     /** @brief Blades of the turbine. */
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
 
@@ -43,7 +43,8 @@ class Rotor : public ComponentDynamic {
      * @param[in] elasto Elastodynamic RNA model.
      * @param[in] aero Aerodynamic RNA model.
      */
-    Rotor(seahowl::elasto::RotorElasto& elasto, seahowl::aero::RotorAero& aero);
+    RotorNacelleAssembly(seahowl::elasto::RotorNacelleAssemblyElasto& elasto,
+                         seahowl::aero::RotorNacelleAssemblyAero& aero);
 
     /**
      * @brief Initialize RNA, called before starting the simulation.

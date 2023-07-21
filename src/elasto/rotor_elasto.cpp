@@ -5,11 +5,11 @@
 #include <seahowl/elasto/chrono_adapters.h>
 
 using seahowl::elasto::BladeElasto;
-using seahowl::elasto::RotorElasto;
+using seahowl::elasto::RotorNacelleAssemblyElasto;
 
-RotorElasto::RotorElasto() {}
+RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {}
 
-void RotorElasto::assemble(SystemElasto& system) {
+void RotorNacelleAssemblyElasto::assemble(SystemElasto& system) {
     for (auto& blade : blades) {
         blade->assemble(system);
     }
@@ -25,7 +25,7 @@ void RotorElasto::assemble(SystemElasto& system) {
     }
 }
 
-void RotorElasto::build() {
+void RotorNacelleAssemblyElasto::build() {
     // build blades
     for (auto& blade : blades) {
         blade->build();
@@ -114,7 +114,7 @@ void RotorElasto::build() {
     }
 }
 
-void RotorElasto::rotate(double angle, const Vector3d& axis) const {
+void RotorNacelleAssemblyElasto::rotate(double angle, const Vector3d& axis) const {
     // blades
     for (auto& blade : blades) {
         blade->rotate(angle, axis);
@@ -142,7 +142,7 @@ void RotorElasto::rotate(double angle, const Vector3d& axis) const {
     body_yaw_bearing->set_rotation(new_rotation_yaw_bearing);
 }
 
-void RotorElasto::translate(const Vector3d& translation_vector) const {
+void RotorNacelleAssemblyElasto::translate(const Vector3d& translation_vector) const {
     // blades
     for (auto& blade : blades) {
         blade->translate(translation_vector);
@@ -157,7 +157,7 @@ void RotorElasto::translate(const Vector3d& translation_vector) const {
     body_yaw_bearing->set_position(body_yaw_bearing->get_position() + translation_vector);
 }
 
-double RotorElasto::get_mass() const {
+double RotorNacelleAssemblyElasto::get_mass() const {
     double total_mass = 0.0;
     // blades
     for (auto& blade : blades) {
@@ -174,7 +174,7 @@ double RotorElasto::get_mass() const {
     return total_mass;
 }
 
-void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
+void RotorNacelleAssemblyElasto::apply_collective_pitch_increment(double pitch_increment) {
     for (int ii = 0; ii < blades.size(); ii++) {
         // apply pitch on blade
         auto blade = blades[ii];
@@ -186,7 +186,7 @@ void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
     pitch_collective += pitch_increment;
 }
 
-double RotorElasto::get_rpm() const {
+double RotorNacelleAssemblyElasto::get_rpm() const {
     // relative rotational velocity between hub and shaft (in local reference frame of the hub)
     auto rotational_velocity = (body_hub->get_rotational_velocity(true) - body_shaft->get_rotational_velocity(true));
     // convert to rpm
@@ -194,7 +194,7 @@ double RotorElasto::get_rpm() const {
     return rpm;
 }
 
-double RotorElasto::get_azimuth() const {
+double RotorNacelleAssemblyElasto::get_azimuth() const {
     // get angle between quaternions
     auto qq = (body_shaft->get_rotation().conjugate() * body_hub->get_rotation()).normalized();
     double angle0 = 2 * std::atan2(qq.vec().x(), qq.w());
@@ -205,12 +205,12 @@ double RotorElasto::get_azimuth() const {
     return angle2;
 }
 
-double RotorElasto::get_axial_thrust() const {
+double RotorNacelleAssemblyElasto::get_axial_thrust() const {
     auto react_force = link_shaft_hub->get_reaction_force();
     return react_force.x();
 }
 
-double RotorElasto::get_axial_torque() const {
+double RotorNacelleAssemblyElasto::get_axial_torque() const {
     // get reaction torque from all blades linked to hub
     // those links are already in the hub body reference frame
     auto react_torque = Vector3d(0.0, 0.0, 0.0);
@@ -220,6 +220,6 @@ double RotorElasto::get_axial_torque() const {
     return react_torque.x();
 }
 
-void RotorElasto::accumulate_axial_torque(double torque) {
+void RotorNacelleAssemblyElasto::accumulate_axial_torque(double torque) {
     body_hub->accumulate_torque(Vector3d(torque, 0.0, 0.0), true);
 }

@@ -13,9 +13,11 @@ using namespace seahowl::core;
 using namespace seahowl::elasto;
 using namespace seahowl::aero;
 
-Rotor::Rotor(seahowl::elasto::RotorElasto& elasto, seahowl::aero::RotorAero& aero) : elasto(elasto), aero(aero) {}
+RotorNacelleAssembly::RotorNacelleAssembly(seahowl::elasto::RotorNacelleAssemblyElasto& elasto,
+                                           seahowl::aero::RotorNacelleAssemblyAero& aero)
+    : elasto(elasto), aero(aero) {}
 
-void Rotor::initialize(double time, double dt) {
+void RotorNacelleAssembly::initialize(double time, double dt) {
     for (auto& blade : blades) {
         blade->initialize(time, dt);
         // update initial azimuth of aero blade
@@ -26,20 +28,20 @@ void Rotor::initialize(double time, double dt) {
     aero.initialize();
 }
 
-void Rotor::prestep(double time, double dt) {
+void RotorNacelleAssembly::prestep(double time, double dt) {
     for (auto& blade : blades) {
         blade->prestep(time, dt);
     }
 }
 
-void Rotor::poststep(double time, double dt) {
+void RotorNacelleAssembly::poststep(double time, double dt) {
     for (auto& blade : blades) {
         blade->poststep(time, dt);
     }
     update_positions_aero();
 }
 
-void Rotor::update_positions_aero() {
+void RotorNacelleAssembly::update_positions_aero() {
     // azimuth
     aero.azimuth = elasto.get_azimuth();
     // body_hub
@@ -58,7 +60,7 @@ void Rotor::update_positions_aero() {
     aero.body_nacelle.set_rotational_acceleration(elasto.body_nacelle->get_rotational_acceleration());
 }
 
-void Rotor::build() {
+void RotorNacelleAssembly::build() {
     // build elasto
     elasto.build();
     // update hub position from elasto

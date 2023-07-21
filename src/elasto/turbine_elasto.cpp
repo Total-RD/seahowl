@@ -6,7 +6,7 @@
 using namespace seahowl::elasto;
 
 TurbineElasto::TurbineElasto() {
-    rotor = RotorElasto();
+    rotor = RotorNacelleAssemblyElasto();
     tower = TowerElasto();
 }
 

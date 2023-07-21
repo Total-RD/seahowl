@@ -32,11 +32,12 @@ void initialize_pyseahowl_aero(py::module& m) {
         .def_readwrite("nodes", &seahowl::aero::BladeAero::nodes);
 
     // aero/rotor_aero.h
-    py::class_<seahowl::aero::RotorAero, std::shared_ptr<seahowl::aero::RotorAero>>(m_aero, "RotorAero")
+    py::class_<seahowl::aero::RotorNacelleAssemblyAero, std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero>>(
+        m_aero, "RotorNacelleAssemblyAero")
         .def(py::init<>())
-        .def_readwrite("blades", &seahowl::aero::RotorAero::blades)
-        .def_readonly("body_hub", &seahowl::aero::RotorAero::body_hub)
-        .def_readonly("body_nacelle", &seahowl::aero::RotorAero::body_nacelle);
+        .def_readwrite("blades", &seahowl::aero::RotorNacelleAssemblyAero::blades)
+        .def_readonly("body_hub", &seahowl::aero::RotorNacelleAssemblyAero::body_hub)
+        .def_readonly("body_nacelle", &seahowl::aero::RotorNacelleAssemblyAero::body_nacelle);
 
     // aero/turbine_aero.h
     py::class_<seahowl::aero::TurbineAero, std::shared_ptr<seahowl::aero::TurbineAero>>(m_aero, "TurbineAero")

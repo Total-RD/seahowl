@@ -64,7 +64,7 @@ struct ShaftProperties {
  * The RNA is composed of rigid bodies (hub, shaft, nacelle, yaw bearing), links (hub-shaft, shaft-nacelle, shaft-yaw
  * bearing, yaw bearing-towertop), and blades (FEA components).
  */
-class RotorElasto : public ComponentElasto {
+class RotorNacelleAssemblyElasto : public ComponentElasto {
   public:
     // RNA components
     //
@@ -110,7 +110,7 @@ class RotorElasto : public ComponentElasto {
     /**
      * @brief Constructor.
      */
-    RotorElasto();
+    RotorNacelleAssemblyElasto();
 
     /**
      * @brief Assembles the component (adds all rigid bodies and links to the system).

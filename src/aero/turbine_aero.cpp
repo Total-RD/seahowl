@@ -3,7 +3,7 @@
 using namespace seahowl::aero;
 
 TurbineAero::TurbineAero() {
-    rotor = RotorAero();
+    rotor = RotorNacelleAssemblyAero();
     tower = TowerAero();
 }
 

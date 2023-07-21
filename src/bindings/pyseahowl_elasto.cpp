@@ -84,40 +84,46 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readonly("azimuth0", &seahowl::elasto::BladeElasto::azimuth0);
 
     // elasto/rotor_elasto.h
-    py::class_<seahowl::elasto::RotorElasto, std::shared_ptr<seahowl::elasto::RotorElasto>,
-               seahowl::elasto::ComponentElasto>(m_elasto, "RotorElasto")
+    py::class_<seahowl::elasto::RotorNacelleAssemblyElasto,
+               std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto>, seahowl::elasto::ComponentElasto>(
+        m_elasto, "RotorNacelleAssemblyElasto")
         .def(py::init<>())
-        .def("apply_collective_pitch_increment", &seahowl::elasto::RotorElasto::apply_collective_pitch_increment)
-        .def("get_rpm", &seahowl::elasto::RotorElasto::get_rpm)
-        .def("get_axial_thrust", &seahowl::elasto::RotorElasto::get_axial_thrust)
-        .def("get_axial_torque", &seahowl::elasto::RotorElasto::get_axial_torque)
-        .def("get_azimuth", &seahowl::elasto::RotorElasto::get_azimuth)
-        .def_readonly("blades", &seahowl::elasto::RotorElasto::blades)
-        .def_property_readonly("body_hub", [](seahowl::elasto::RotorElasto& rotor) { return rotor.body_hub.get(); })
+        .def("apply_collective_pitch_increment",
+             &seahowl::elasto::RotorNacelleAssemblyElasto::apply_collective_pitch_increment)
+        .def("get_rpm", &seahowl::elasto::RotorNacelleAssemblyElasto::get_rpm)
+        .def("get_axial_thrust", &seahowl::elasto::RotorNacelleAssemblyElasto::get_axial_thrust)
+        .def("get_axial_torque", &seahowl::elasto::RotorNacelleAssemblyElasto::get_axial_torque)
+        .def("get_azimuth", &seahowl::elasto::RotorNacelleAssemblyElasto::get_azimuth)
+        .def_readonly("blades", &seahowl::elasto::RotorNacelleAssemblyElasto::blades)
+        .def_property_readonly("body_hub",
+                               [](seahowl::elasto::RotorNacelleAssemblyElasto& rotor) { return rotor.body_hub.get(); })
         .def_property_readonly(
-            "body_shaft", [](seahowl::elasto::RotorElasto& rotor) { return rotor.body_shaft.get(); },
+            "body_shaft", [](seahowl::elasto::RotorNacelleAssemblyElasto& rotor) { return rotor.body_shaft.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
-            "body_nacelle", [](seahowl::elasto::RotorElasto& rotor) { return rotor.body_nacelle.get(); },
+            "body_nacelle", [](seahowl::elasto::RotorNacelleAssemblyElasto& rotor) { return rotor.body_nacelle.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
-            "body_yaw_bearing", [](seahowl::elasto::RotorElasto& rotor) { return rotor.body_yaw_bearing.get(); },
+            "body_yaw_bearing",
+            [](seahowl::elasto::RotorNacelleAssemblyElasto& rotor) { return rotor.body_yaw_bearing.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
-            "link_shaft_hub", [](seahowl::elasto::RotorElasto& rotor) { return rotor.link_shaft_hub.get(); },
+            "link_shaft_hub",
+            [](seahowl::elasto::RotorNacelleAssemblyElasto& rotor) { return rotor.link_shaft_hub.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
-            "link_shaft_nacelle", [](seahowl::elasto::RotorElasto& rotor) { return rotor.link_shaft_nacelle.get(); },
+            "link_shaft_nacelle",
+            [](seahowl::elasto::RotorNacelleAssemblyElasto& rotor) { return rotor.link_shaft_nacelle.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
             "link_shaft_yaw_bearing",
-            [](seahowl::elasto::RotorElasto& rotor) { return rotor.link_shaft_yaw_bearing.get(); },
+            [](seahowl::elasto::RotorNacelleAssemblyElasto& rotor) { return rotor.link_shaft_yaw_bearing.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
             "link_shaft_yaw_bearing",
-            [](seahowl::elasto::RotorElasto& rotor) { return rotor.link_towertop_yaw_bearing.get(); },
+            [](seahowl::elasto::RotorNacelleAssemblyElasto& rotor) { return rotor.link_towertop_yaw_bearing.get(); },
             py::return_value_policy::reference_internal)
-        .def_readonly("pitch_collective", &seahowl::elasto::RotorElasto::pitch_collective);
+        .def_readonly("pitch_collective", &seahowl::elasto::RotorNacelleAssemblyElasto::pitch_collective);
 
     // elasto/tower_elasto.h
     py::class_<seahowl::elasto::TowerElasto, std::shared_ptr<seahowl::elasto::TowerElasto>,

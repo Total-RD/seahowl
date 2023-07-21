@@ -20,7 +20,7 @@ namespace aero {
 /**
  * @brief Rotor-Nacelle Assembly (RNA) of wind turbine as an aero component.
  */
-class RotorAero {
+class RotorNacelleAssemblyAero {
   public:
     /** @brief List of blades. */
     std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades;
@@ -38,7 +38,7 @@ class RotorAero {
     /**
      * @brief Constructor.
      */
-    RotorAero();
+    RotorNacelleAssemblyAero();
 
     /**
      * @brief Builds the rotor.

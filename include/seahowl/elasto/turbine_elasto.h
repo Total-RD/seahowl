@@ -27,7 +27,7 @@ class TurbineElasto {
     // components
     //
     /** @brief Rotor-nacelle assembly of the turbine. */
-    seahowl::elasto::RotorElasto rotor;
+    seahowl::elasto::RotorNacelleAssemblyElasto rotor;
     /** @brief Tower of the turbine. */
     seahowl::elasto::TowerElasto tower;
 

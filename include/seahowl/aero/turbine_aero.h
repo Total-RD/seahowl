@@ -33,7 +33,7 @@ class TurbineAero : public ComponentAero {
     // components
     //
     /** @brief Rotor-nacelle assembly of the turbine. */
-    seahowl::aero::RotorAero rotor;
+    seahowl::aero::RotorNacelleAssemblyAero rotor;
     /** @brief Tower of the turbine. */
     seahowl::aero::TowerAero tower;
 

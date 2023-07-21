@@ -9,15 +9,15 @@
 #include <cmath>
 
 using seahowl::aero::BladeAero;
-using seahowl::aero::RotorAero;
+using seahowl::aero::RotorNacelleAssemblyAero;
 using seahowl::aero::TowerAero;
 using seahowl::Vector3d;
 using seahowl::Vector2d;
 using seahowl::PI;
 
-RotorAero::RotorAero() {}
+RotorNacelleAssemblyAero::RotorNacelleAssemblyAero() {}
 
-void RotorAero::build() {
+void RotorNacelleAssemblyAero::build() {
     // build blades
     for (auto& blade : blades) {
         blade->build();
@@ -34,7 +34,7 @@ void RotorAero::build() {
     initialize();
 }
 
-void RotorAero::initialize() {
+void RotorNacelleAssemblyAero::initialize() {
     // compute blade elements related values
     compute_distances_from_tip();
     compute_distances_from_hub();
@@ -42,7 +42,7 @@ void RotorAero::initialize() {
     compute_chords_solidity();
 }
 
-void RotorAero::compute_chords_solidity() {
+void RotorNacelleAssemblyAero::compute_chords_solidity() {
     auto nblades = blades.size();
     for (auto& blade : blades) {
         for (auto& node : blade->nodes) {
@@ -52,33 +52,33 @@ void RotorAero::compute_chords_solidity() {
     }
 }
 
-void RotorAero::compute_distances_from_hub() {
+void RotorNacelleAssemblyAero::compute_distances_from_hub() {
     for (int ii = 0; ii < blades.size(); ii++) {
         auto& blade = blades[ii];
         blade->compute_distances_from_hub(body_hub.get_position(), hub_radius);
     }
 }
 
-void RotorAero::compute_distances_from_tip() {
+void RotorNacelleAssemblyAero::compute_distances_from_tip() {
     for (int ii = 0; ii < blades.size(); ii++) {
         auto& blade = blades[ii];
         blade->compute_distances_from_tip();
     }
 }
 
-void RotorAero::compute_radii() {
+void RotorNacelleAssemblyAero::compute_radii() {
     for (int ii = 0; ii < blades.size(); ii++) {
         auto& blade = blades[ii];
         blade->compute_radii(body_hub.get_position());
     }
 }
 
-void RotorAero::compute_aero_loads(const WindModel& wind_model,
-                                   double time,
-                                   const TowerAero& tower_aero,
-                                   bool tower_shadow,
-                                   bool tip_loss,
-                                   bool hub_loss) {
+void RotorNacelleAssemblyAero::compute_aero_loads(const WindModel& wind_model,
+                                                  double time,
+                                                  const TowerAero& tower_aero,
+                                                  bool tower_shadow,
+                                                  bool tip_loss,
+                                                  bool hub_loss) {
     double density = wind_model.get_density();
     for (auto& blade : blades) {
         auto blade_azimuth = azimuth + blade->azimuth0;
@@ -178,13 +178,13 @@ void RotorAero::compute_aero_loads(const WindModel& wind_model,
 }
 
 #ifdef HAVE_AERODYN
-void RotorAero::compute_aero_loads(float* LoadAeroDyn,
-                                   WindModel& wind_model,
-                                   double time,
-                                   const TowerAero& tower_aero,
-                                   bool tower_shadow,
-                                   bool tip_loss,
-                                   bool hub_loss) {
+void RotorNacelleAssemblyAero::compute_aero_loads(float* LoadAeroDyn,
+                                                  WindModel& wind_model,
+                                                  double time,
+                                                  const TowerAero& tower_aero,
+                                                  bool tower_shadow,
+                                                  bool tip_loss,
+                                                  bool hub_loss) {
     double density = wind_model.get_density();
     int count_blade = -1;
     for (auto& blade : blades) {
