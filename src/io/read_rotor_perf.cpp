@@ -35,6 +35,8 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
             idLine += 1;
             stringVector.push_back(line);
 
+            // std::cout<<line<<std::endl;
+
             std::size_t check1 = line.find("Pitch");
             std::size_t check2 = line.find("TSR");
             std::size_t check3 = line.find("Wind");
@@ -67,6 +69,7 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
         while (iss >> number) {
             pitch.push_back(number);
         }
+        Eigen::VectorXd PitchOut = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(pitch.data(), pitch.size());
 
         const std::string& lineX2 = stringVector[ind2 + 1];
         if (lineX2.empty()) {
@@ -76,24 +79,48 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
         while (iss2 >> number) {
             TSR.push_back(number);
         }
+        Eigen::VectorXd TSROut = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(TSR.data(), TSR.size());
 
-        // Eigen::MatrixXd power_coeff;
-        // power_coeff.resize(pitch.size(),TSR.size());
-        // power_coeff.set_Zero();
-        // for (unsigned ii=0;ii<10;ii++){
-        //     std::istringstream iss(stringVector[ind4+2+ii]);
-        //     double number;
-        //     int jj = 0;
-        //     while (iss >> number) {
-        //         power_coeff(ii,jj) = number;
-        //     }
-        //     jj+=1;
-        // }
+        Eigen::MatrixXd power_coeff;
+        power_coeff.resize(TSR.size(), pitch.size());
+        power_coeff.setZero();
+        for (unsigned ii = 0; ii < TSR.size(); ii++) {
+            const std::string& lineX4 = stringVector[ind4 + 2 + ii];
+            if (lineX4.empty()) {
+                std::cerr << "Error: Empty string at index " << ind1 + 1 << std::endl;
+            }
+            std::istringstream iss4(lineX4);
+            double numberX;
+            int jj = 0;
+            while (iss4 >> numberX) {
+                power_coeff(ii, jj) = numberX;
+                jj += 1;
+            }
+        }
 
         // aero.coefficients
 
-        // std::cout<<power_coeff[1][1]<<std::endl;
+        Eigen::MatrixXd thrust_coeff;
+        thrust_coeff.resize(TSR.size(), pitch.size());
+        thrust_coeff.setZero();
+        for (unsigned ii = 0; ii < TSR.size(); ii++) {
+            const std::string& lineX5 = stringVector[ind5 + 2 + ii];
+            if (lineX5.empty()) {
+                std::cerr << "Error: Empty string at index " << ind1 + 1 << std::endl;
+            }
+            std::istringstream iss5(lineX5);
+            double numberX;
+            int jj = 0;
+            while (iss5 >> numberX) {
+                thrust_coeff(ii, jj) = numberX;
+                jj += 1;
+            }
+        }
 
-        // std::cout<<appo<<std::endl;
+        // aero.coefficients
+        // std::cout<<ind4<<std::endl;
+        // std::cout<<power_coeff(1,1)<<std::endl;
+
+        // std::cout<<TSROut<<std::endl;
     }
 }
