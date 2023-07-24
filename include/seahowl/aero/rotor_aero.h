@@ -87,6 +87,17 @@ class RotorNacelleAssemblyAero {
                             bool tip_loss = true,
                             bool hub_loss = true);
 
+    /**
+     * @brief Computes wind loads on rotor.
+     *
+     * @param[in] wind_model Wind model to use for retrieving uninduced wind velocity at nodes.
+     * @param[in] time Time of simulation.
+     * @param[in] pitch collective pitch rotor (for getting performance from table).
+     * @param[in] RPM Rotor speed (for getting performance from table).
+     *
+     */
+    void compute_aero_loads_disk(const WindModel& wind_model, double time, double pitch, double RPM);
+
 #ifdef HAVE_AERODYN
     /**
      * @brief Computes wind loads on all aero nodes of blades using AeroDyn.

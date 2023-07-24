@@ -237,8 +237,8 @@ set(SEAHOWL_SERVO_HEADERS
 source_group(servo FILES ${SEAHOWL_SERVO_SOURCES} ${SEAHOWL_SERVO_HEADERS})
 
 # io
-set(SEAHOWL_IO_SOURCES src/io/read_json.cpp src/io/write_csv.cpp)
-set(SEAHOWL_IO_HEADERS include/seahowl/io/read_json.h include/seahowl/io/write_csv.h)
+set(SEAHOWL_IO_SOURCES src/io/read_json.cpp src/io/write_csv.cpp src/io/read_rotor_perf.cpp)
+set(SEAHOWL_IO_HEADERS include/seahowl/io/read_json.h include/seahowl/io/write_csv.h include/seahowl/io/read_rotor_perf.h)
 if(SEAHOWL_ENABLE_VTK)
     list(APPEND SEAHOWL_IO_SOURCES src/io/write_vtk.cpp)
     list(APPEND SEAHOWL_IO_HEADERS include/seahowl/io/write_vtk.h)

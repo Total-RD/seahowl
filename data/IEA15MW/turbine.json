@@ -43,5 +43,8 @@
       "infile": "./controller/DISCON.IN",
       "libfile": "./controller/libdiscon.so"
     }
+  },
+  "performance":{
+    "infile": "./controller/Cp_Ct_Cq.IEA15MW.txt"
   }
 }

@@ -16,6 +16,7 @@ using json = nlohmann::json;
 #include <cmath>
 
 #include <seahowl/io/read_json.h>
+#include "seahowl/io/read_rotor_perf.h"
 #include <seahowl/io/write_csv.h>
 #include <seahowl/elasto/chrono_adapters.h>
 

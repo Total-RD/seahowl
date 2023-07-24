@@ -1,4 +1,5 @@
 #include "seahowl/io/read_json.h"
+#include "seahowl/io/read_rotor_perf.h"
 
 #include "seahowl/commons/utils.h"
 #include "seahowl/core/blade.h"
@@ -420,6 +421,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     auto tower_json = json_obj.at("tower");
     auto rna_json = json_obj.at("rna");
     auto controller_json = json_obj.at("controller");
+    auto perf_json = json_obj.at("performance");
 
     // blades
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
@@ -525,6 +527,10 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     double drivetrain_inertia;
     drivetrain.at("generator_inertia").get_to(drivetrain_inertia);
     turbine.rna.elasto.rotor->hub.inertia += drivetrain_inertia;
+
+    std::cout << perf_json.at("infile") << std::endl;
+    // get performance from table
+    get_disk_perf_from_table(perf_json.at("infile"), turbine.rna.aero);
 }
 
 void populate_system_from_json(std::string filepath, seahowl::core::System& system_core) {

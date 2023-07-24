@@ -192,36 +192,39 @@ void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_mod
     // project in disc frame
     auto local_velocity_disc = body_hub.get_rotation().inverse() * global_velocity;
 
-    double pitch = 0.0;
-    double radius = 120.0;
-    double TSR =
-        (body_hub.get_rotation().inverse() * body_hub.get_rotational_velocity() * radius / local_velocity_disc)[0];
-    auto coefficients = seahowl::aero::get_aero_coefficients_from_table(pitch);
+    pitch = 0.0;
+    double radius = 120.0; // to be recovered by rotor
+    // double TSR = (body_hub.get_rotation().inverse() * body_hub.get_rotational_velocity() * radius / local_velocity_disc)[0];
+    
+    // auto coefficients =
+    //     seahowl::aero::get_aero_coefficients_from_table(pitch,TSR);
 
-    // get drag and lift coefficients
-    auto cn = coefficients.thrust;
-    auto cp = coefficients.power;
+    // // get drag and lift coefficients
+    // auto cn = coefficients.thrust;
+    // auto cp = coefficients.power;
 
-    // calculate drag and lift force
-    auto vel = local_velocity.norm();
-    auto chord = node.properties.chord;
-    auto load_n = 0.5 * density * vel * vel * chord * cn;
-    auto load_t = 0.5 * density * vel * vel * vel * chord * ct / RPM;
+    // // calculate drag and lift force
+    // auto vel = local_velocity.norm();
+    // auto chord = node.properties.chord;
+    // auto load_n = 0.5 * density * vel * vel * chord * cn;
+    // auto load_t = 0.5 * density * vel * vel * vel * chord * ct / RPM;
 
-    // get global/local directions
-    // pointing from hub towards nacelle
-    auto local_direction_normal = Vector3d(1.0, 0.0, 0.0);
-    auto global_direction_normal = body_hub.get_rotation() * local_direction_normal;
+    // // get global/local directions
+    // // pointing from hub towards nacelle
+    // auto local_direction_normal = Vector3d(1.0, 0.0, 0.0);
+    // auto global_direction_normal = body_hub.get_rotation() * local_direction_normal;
 
-    // pointing from hub to node position
-    auto local_direction_tangent = Vector3d(0.0, 1.0, 0.0);
-    auto global_direction_tangent = body_hub.get_rotation() * local_direction_tangent;
+    // // pointing from hub to node position
+    // auto local_direction_tangent = Vector3d(0.0, 1.0, 0.0);
+    // auto global_direction_tangent = body_hub.get_rotation() * local_direction_tangent;
 
-    // transform from local to global load
-    auto load_n_global = global_direction_normal * load_n;
-    auto load_t_global = global_direction_tangent * load_t;
+    // // transform from local to global load
+    // auto load_n_global = global_direction_normal * load_n;
+    // auto load_t_global = global_direction_tangent * load_t;
 
-    auto load_global = load_n_global + load_t_global;
+    // auto load_global = load_n_global + load_t_global;
+
+
 }
 
 #ifdef HAVE_AERODYN
