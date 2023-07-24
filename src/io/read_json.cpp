@@ -528,9 +528,9 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     drivetrain.at("generator_inertia").get_to(drivetrain_inertia);
     turbine.rna.elasto.rotor->hub.inertia += drivetrain_inertia;
 
-    std::cout << perf_json.at("infile") << std::endl;
+    // std::cout<<perf_json.at("infile")<<std::endl;
     // get performance from table
-    get_disk_perf_from_table(perf_json.at("infile"), turbine.rna.aero);
+    get_disk_perf_from_table((DATADIR / perf_json.at("infile")).generic_string(), turbine.rna.aero);
 }
 
 void populate_system_from_json(std::string filepath, seahowl::core::System& system_core) {
