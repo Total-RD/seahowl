@@ -392,5 +392,7 @@ if (SEAHOWL_ENABLE_PYTHON)
         ${PYSEAHOWL_DIR}/pyseahowl_servo.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_core.cpp
     )
+	target_compile_features(pyseahowl PRIVATE cxx_std_17)
     target_link_libraries(pyseahowl PRIVATE seahowl_core)
+    target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
 endif (SEAHOWL_ENABLE_PYTHON)
