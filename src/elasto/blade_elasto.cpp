@@ -233,20 +233,21 @@ seahowl::EntityDynamicEigen BladeElastoRigid::get_entity_along_blade(double eta,
     auto z_position = (0.5 * fabs(eta + 1.0)) * length;
 
     // position
-    auto position = body_root->get_position() + body_root->get_rotation() * Vector3d(0.0, 0.0, z_position);
+    Vector3d position = body_root->get_position() + body_root->get_rotation() * Vector3d(0.0, 0.0, z_position);
     entity.set_position(position);
     entity.set_rotation(body_root->get_rotation());
 
     // below has to be explicitly declared as Vector3d or there is an issue;
-    Vector3d radius_vector = (entity.get_position() - body_root->get_position());
+    Vector3d pos1 = entity.get_position();
+    Vector3d radius_vector = (pos1 - body_root->get_position());
 
     // velocity
-    auto velocity = body_root->get_velocity() + (body_root->get_rotational_velocity(false)).cross(radius_vector);
+    Vector3d velocity = body_root->get_velocity() + (body_root->get_rotational_velocity(false)).cross(radius_vector);
     entity.set_velocity(velocity);
     entity.set_rotational_velocity(body_root->get_rotational_velocity());
 
     // acceleration
-    auto acceleration =
+    Vector3d acceleration =
         body_root->get_acceleration() + (body_root->get_rotational_acceleration(false)).cross(radius_vector);
     entity.set_acceleration(acceleration);
     entity.set_rotational_acceleration(body_root->get_rotational_acceleration());
