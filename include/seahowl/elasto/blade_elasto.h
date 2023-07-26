@@ -27,6 +27,8 @@ class BladeElasto : public virtual ComponentElasto {
 
     BladeElasto();
 
+    virtual void assemble(SystemElasto& system) const override;
+
     /**
      * @brief Applies pitch increment to the blade (i.e. rotates the blade around its longitudinal axis).
      *
@@ -47,6 +49,10 @@ class BladeElasto : public virtual ComponentElasto {
                                              const Vector3d& offset) = 0;
 
     virtual void attach_root_to_body(const BodyElasto& body) = 0;
+
+  protected:
+    /** @brief Whether the blade is mounted (e.g. on a rotor) or not. */
+    bool is_mounted = false;
 };
 
 /**

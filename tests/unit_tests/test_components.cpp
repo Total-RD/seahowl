@@ -62,7 +62,7 @@ TEST(test_blade, mass_deflection) {
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
 
     // blade
-    auto blade = seahowl::elasto::BladeElasto();
+    auto blade = seahowl::elasto::BladeElastoFEA();
     blade.reference_points = get_blade_elasto_reference_points_from_json((DATADIR / "blade.json").generic_string());
     // make 50 elements
     blade.discretization_fractions.clear();
@@ -99,7 +99,7 @@ TEST(test_rotor, mass) {
 
     std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades;
     for (int ii = 0; ii < 3; ii++) {
-        auto blade = std::make_shared<seahowl::elasto::BladeElasto>();
+        auto blade = std::make_shared<seahowl::elasto::BladeElastoFEA>();
         populate_blade_elasto_from_json((DATADIR / "blade.json").generic_string(), *blade.get());
         // make 50 elements
         blade->discretization_fractions.clear();
@@ -146,7 +146,7 @@ TEST(test_blade, natural_period_dynamic_edge) {
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
 
     // blade
-    auto blade = seahowl::elasto::BladeElasto();
+    auto blade = seahowl::elasto::BladeElastoFEA();
     populate_blade_elasto_from_json((DATADIR / "blade.json").generic_string(), blade);
     // make 50 elements
     blade.discretization_fractions.clear();
@@ -201,7 +201,7 @@ TEST(test_blade, natural_period_dynamic_flap) {
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
 
     // blade
-    auto blade = seahowl::elasto::BladeElasto();
+    auto blade = seahowl::elasto::BladeElastoFEA();
     populate_blade_elasto_from_json((DATADIR / "blade.json").generic_string(), blade);
     // make 50 elements
     blade.discretization_fractions.clear();

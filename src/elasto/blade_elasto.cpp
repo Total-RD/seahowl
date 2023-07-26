@@ -14,10 +14,16 @@ BladeElasto::BladeElasto() {
     link_root->set_constraints(true, true, true, true, true, true);
 }
 
+void BladeElasto::assemble(SystemElasto& system) const {
+    if (is_mounted) {
+        system.add(*(link_root.get()));
+    }
+}
+
 BladeElastoFEA::BladeElastoFEA() {}
 
 void BladeElastoFEA::assemble(SystemElasto& system) const {
-    system.add(*(link_root.get()));
+    BladeElasto::assemble(system);
     ComponentElastoFEA::assemble(system);
 }
 
@@ -171,6 +177,7 @@ void BladeElastoFEA::accumulate_load_along_blade(const seahowl::Vector3d& load,
 }
 
 void BladeElastoFEA::attach_root_to_body(const BodyElasto& body) {
+    is_mounted = true;
     link_root->initialize(*(nodes.front().get()), body);
 };
 
@@ -183,7 +190,7 @@ void BladeElastoRigid::build() {
 }
 
 void BladeElastoRigid::assemble(SystemElasto& system) const {
-    system.add(*(link_root.get()));
+    BladeElasto::assemble(system);
     system.add(*(body_root.get()));
 }
 
@@ -266,5 +273,6 @@ void BladeElastoRigid::accumulate_load_along_blade(const seahowl::Vector3d& load
 }
 
 void BladeElastoRigid::attach_root_to_body(const BodyElasto& body) {
+    is_mounted = true;
     link_root->initialize(*body_root, body);
 };
