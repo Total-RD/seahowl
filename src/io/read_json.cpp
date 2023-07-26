@@ -347,12 +347,6 @@ void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::Roto
 
     // EXTRACT INFO
     //
-    // blades
-    json_obj.at("precones").get_to(rna.rotor->blade_precones);
-    for (int ii = 0; ii < rna.rotor->blade_precones.size(); ii++) {
-        // convert to radians
-        rna.rotor->blade_precones[ii] *= PI / 180.0;
-    }
     // hub
     auto hub = json_obj.at("hub");
     hub.at("CM").get_to(rna.rotor->hub.center_of_mass);
@@ -450,6 +444,11 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
         populate_blade_from_json(filepath_blade, *blade);
         rotor_json.at("discretization").at("aero").get_to(blade->aero.discretization_fractions);
         blade_json.at("initial_pitch").get_to(blade->elasto.pitch);
+        blade_elasto->precone = blade_json.at("precone").get<double>() * PI / 180.0;
+        // no precone if blade is rigid (assumed that blade is on rotor disc)
+        if (rotor_json.at("type").get<std::string>() == "rigid") {
+            blade_elasto->precone = 0.0;
+        }
         blades_elasto.push_back(blade_elasto);
         blades_aero.push_back(blade_aero);
         blades.push_back(blade);

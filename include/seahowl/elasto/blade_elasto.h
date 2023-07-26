@@ -18,6 +18,8 @@ class BladeElasto : public virtual ComponentElasto {
     double pitch = 0.0;
     /** @brief Initial azimuth of the blade relative to rotor azimuth (in radians). */
     double azimuth0 = 0.0;
+    /** @brief Precone of the blade (in radians). */
+    double precone = 0.0;
     /** @brief List of reference points describing the blade properties along its longitudinal axis. */
     std::vector<BladeReferencePointElasto> reference_points;
     /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the FEA component. */

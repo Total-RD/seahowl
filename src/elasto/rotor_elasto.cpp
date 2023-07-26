@@ -37,14 +37,13 @@ void RotorElasto::build() {
     auto nblades = blades.size();
     for (int ii = 0; ii < nblades; ii++) {
         auto blade = blades[ii];
-        double precone = blade_precones[ii];
 
         // rotations + translations
         // blade root node is assumed to be originally at (0,0,0) and using IEC standard for coordinate system
         // offset blade from hub apex
         blade->translate(Vector3d(0.0, 0.0, hub.radius));
         // apply precone
-        blade->rotate(precone, Vector3d(0.0, 1.0, 0.0));  // Y is the edge-wise axis for blade (IEC standard)
+        blade->rotate(blade->precone, Vector3d(0.0, 1.0, 0.0));  // Y is the edge-wise axis for blade (IEC standard)
         double azimuth0 = ii * 2 * PI / nblades;
         blade->azimuth0 = azimuth0;
         // rotate blade around hub

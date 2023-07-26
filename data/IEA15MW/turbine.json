@@ -11,15 +11,18 @@
     "blades": [
       {
         "file": "./blade.json",
-        "initial_pitch": 0
+        "initial_pitch": 0,
+        "precone": -4.0
       },
       {
         "file": "./blade.json",
-        "initial_pitch": 0
+        "initial_pitch": 0,
+        "precone": -4.0
       },
       {
         "file": "./blade.json",
-        "initial_pitch": 0
+        "initial_pitch": 0,
+        "precone": -4.0
       }
     ]
   },
