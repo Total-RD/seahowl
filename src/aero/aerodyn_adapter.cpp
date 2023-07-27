@@ -69,12 +69,12 @@ void seahowl::aero::AeroDynAdapter::setMotionHub(seahowl::aero::TurbineAero& tur
     float* hubAcc_C = new float[6];
 
     // Get the information about hub
-    auto hubPos = turbine.rotor.body_hub.get_position();
-    auto hubOri = turbine.rotor.body_hub.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
-    auto hubTranVel = turbine.rotor.body_hub.get_velocity();
-    auto hubRotVel = turbine.rotor.body_hub.get_rotational_velocity(false);  // in global frame
-    auto hubTranAcc = turbine.rotor.body_hub.get_acceleration();
-    auto hubRotAcc = turbine.rotor.body_hub.get_rotational_acceleration(false);  // in global frame
+    auto hubPos = turbine.rna.body_hub.get_position();
+    auto hubOri = turbine.rna.body_hub.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+    auto hubTranVel = turbine.rna.body_hub.get_velocity();
+    auto hubRotVel = turbine.rna.body_hub.get_rotational_velocity(false);  // in global frame
+    auto hubTranAcc = turbine.rna.body_hub.get_acceleration();
+    auto hubRotAcc = turbine.rna.body_hub.get_rotational_acceleration(false);  // in global frame
 
     for (int i = 0; i < 3; i++) {
         hubPos_C[i] = hubPos[i];
@@ -107,12 +107,12 @@ void seahowl::aero::AeroDynAdapter::setMotionNac(seahowl::aero::TurbineAero& tur
     float* nacAcc_C = new float[6];
 
     // Get the information about nacelle
-    auto nacPos = turbine.rotor.body_nacelle.get_position();
-    auto nacOri = turbine.rotor.body_nacelle.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
-    auto nacTranVel = turbine.rotor.body_nacelle.get_velocity();
-    auto nacRotVel = turbine.rotor.body_nacelle.get_rotational_velocity(false);  // in global frame
-    auto nacTranAcc = turbine.rotor.body_nacelle.get_acceleration();
-    auto nacRotAcc = turbine.rotor.body_nacelle.get_rotational_acceleration(false);  // in global frame
+    auto nacPos = turbine.rna.body_nacelle.get_position();
+    auto nacOri = turbine.rna.body_nacelle.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+    auto nacTranVel = turbine.rna.body_nacelle.get_velocity();
+    auto nacRotVel = turbine.rna.body_nacelle.get_rotational_velocity(false);  // in global frame
+    auto nacTranAcc = turbine.rna.body_nacelle.get_acceleration();
+    auto nacRotAcc = turbine.rna.body_nacelle.get_rotational_acceleration(false);  // in global frame
 
     for (int i = 0; i < 3; i++) {
         nacPos_C[i] = nacPos[i];
@@ -139,19 +139,19 @@ void seahowl::aero::AeroDynAdapter::setMotionNac(seahowl::aero::TurbineAero& tur
 }
 
 void seahowl::aero::AeroDynAdapter::setMotionRoot(seahowl::aero::TurbineAero& turbine) {
-    auto nblades = turbine.rotor.blades.size();
+    auto nblades = turbine.rna.blades.size();
     float* bldRootPos_C = new float[3 * nblades];
     double* bldRootOri_C = new double[9 * nblades];
     float* bldRootVel_C = new float[6 * nblades];
     float* bldRootAcc_C = new float[6 * nblades];
 
     for (int i = 0; i < nblades; i++) {
-        auto bldRootPos = turbine.rotor.blades[i]->nodes[0].get_position();
-        auto bldRootOri = turbine.rotor.blades[i]->nodes[0].get_rotation().toRotationMatrix();
-        auto bldRootTranVel = turbine.rotor.blades[i]->nodes[0].get_velocity();
-        auto bldRootRotVel = turbine.rotor.blades[i]->nodes[0].get_rotational_velocity(false);  // in global frame
-        auto bldRootTranAcc = turbine.rotor.blades[i]->nodes[0].get_acceleration();
-        auto bldRootRotAcc = turbine.rotor.blades[i]->nodes[0].get_rotational_acceleration(false);  // in global frame
+        auto bldRootPos = turbine.rna.blades[i]->nodes[0].get_position();
+        auto bldRootOri = turbine.rna.blades[i]->nodes[0].get_rotation().toRotationMatrix();
+        auto bldRootTranVel = turbine.rna.blades[i]->nodes[0].get_velocity();
+        auto bldRootRotVel = turbine.rna.blades[i]->nodes[0].get_rotational_velocity(false);  // in global frame
+        auto bldRootTranAcc = turbine.rna.blades[i]->nodes[0].get_acceleration();
+        auto bldRootRotAcc = turbine.rna.blades[i]->nodes[0].get_rotational_acceleration(false);  // in global frame
         for (int j = 0; j < 3; j++) {
             int p = i * 3 + j;
             int q = i * 6 + j;
@@ -181,8 +181,8 @@ void seahowl::aero::AeroDynAdapter::setMotionRoot(seahowl::aero::TurbineAero& tu
 }
 
 void seahowl::aero::AeroDynAdapter::setMotionMesh(seahowl::aero::TurbineAero& turbine) {
-    auto nblades = turbine.rotor.blades.size();
-    auto nMeshPerBlade = turbine.rotor.blades[0]->nodes.size();
+    auto nblades = turbine.rna.blades.size();
+    auto nMeshPerBlade = turbine.rna.blades[0]->nodes.size();
     auto nMesh = nMeshPerBlade * nblades;
     float* meshPos_C = new float[3 * nMesh];
     double* meshOri_C = new double[9 * nMesh];
@@ -191,12 +191,12 @@ void seahowl::aero::AeroDynAdapter::setMotionMesh(seahowl::aero::TurbineAero& tu
 
     for (int i = 0; i < nblades; i++) {
         for (int j = 0; j < nMeshPerBlade; j++) {
-            auto meshPos = turbine.rotor.blades[i]->nodes[j].get_position();
-            auto meshOri = turbine.rotor.blades[i]->nodes[j].get_rotation().toRotationMatrix();
-            auto meshTranVel = turbine.rotor.blades[i]->nodes[j].get_velocity();
-            auto meshRotVel = turbine.rotor.blades[i]->nodes[j].get_rotational_velocity(false);  // in global frame
-            auto meshTranAcc = turbine.rotor.blades[i]->nodes[j].get_acceleration();
-            auto meshRotAcc = turbine.rotor.blades[i]->nodes[j].get_rotational_acceleration(false);  // in global frame
+            auto meshPos = turbine.rna.blades[i]->nodes[j].get_position();
+            auto meshOri = turbine.rna.blades[i]->nodes[j].get_rotation().toRotationMatrix();
+            auto meshTranVel = turbine.rna.blades[i]->nodes[j].get_velocity();
+            auto meshRotVel = turbine.rna.blades[i]->nodes[j].get_rotational_velocity(false);  // in global frame
+            auto meshTranAcc = turbine.rna.blades[i]->nodes[j].get_acceleration();
+            auto meshRotAcc = turbine.rna.blades[i]->nodes[j].get_rotational_acceleration(false);  // in global frame
 
             auto ii = i * nMeshPerBlade + j;
             for (int k = 0; k < 3; k++) {

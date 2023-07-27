@@ -461,7 +461,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     }
 
     double time = 0.0;
-    turbine.rna.elasto.apply_collective_pitch_increment(initial_pitch);
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
     // while (application.GetDevice()->run()) {
     while (time < 50) {
@@ -600,7 +600,7 @@ TEST(test_inflowwind, rpm_initial_pitch) {
     }
 
     double time = 0.0;
-    turbine.rna.elasto.apply_collective_pitch_increment(initial_pitch);
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
     // while (application.GetDevice()->run()) {
     while (time < 50) {
