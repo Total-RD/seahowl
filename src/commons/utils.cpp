@@ -2,6 +2,26 @@
 
 #include <string>
 
+using namespace seahowl;
+
+Grid1D::Grid1D(){};
+
+Grid1D::Grid1D(std::vector<double> ticks) {
+    set_ticks(ticks);
+}
+
+void Grid1D::set_ticks(std::vector<double> ticks) {
+    this->ticks = ticks;
+}
+
+int Grid1D::get_index(double value) {
+    // get nearest-above
+    auto idx0 = lower_bound(ticks.begin(), ticks.end(), value);
+    // get nearest-above index
+    int idx_below = int(idx0 - ticks.begin()) - 1;  // Nearest index
+    return idx_below;
+}
+
 std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
     const std::vector<double>& discretization_fractions,
     const std::vector<double>& reference_fractions) {

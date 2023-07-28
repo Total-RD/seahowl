@@ -91,21 +91,20 @@ AirfoilProperties AirfoilProperties::operator+(const AirfoilProperties& other) c
 };
 
 AirfoilCoefficients AirfoilProperties::find_coefficients(double alpha) {
-    for (auto ii = 0; ii < coefficients_list.size() - 1; ii++) {
-        double alpha1 = coefficients_list[ii].alpha;
-        double alpha2 = coefficients_list[ii + 1].alpha;
-        if (alpha1 <= alpha && alpha <= alpha2) {
-            double alpha_range = alpha2 - alpha1;
-            double weight1 = 1.0 - (alpha - alpha1) / alpha_range;
-            double weight2 = 1.0 - (alpha2 - alpha) / alpha_range;
-            AirfoilCoefficients coefficients;
-            coefficients.alpha = coefficients_list[ii].alpha * weight1 + coefficients_list[ii + 1].alpha * weight2;
-            coefficients.lift = coefficients_list[ii].lift * weight1 + coefficients_list[ii + 1].lift * weight2;
-            coefficients.drag = coefficients_list[ii].drag * weight1 + coefficients_list[ii + 1].drag * weight2;
-            coefficients.added_mass =
-                coefficients_list[ii].added_mass * weight1 + coefficients_list[ii + 1].added_mass * weight2;
-            return coefficients;
-        }
+    int idx = grid.get_index(alpha);
+    double alpha1 = coefficients_list[idx].alpha;
+    double alpha2 = coefficients_list[idx + 1].alpha;
+    if (alpha1 <= alpha && alpha <= alpha2) {
+        double alpha_range = alpha2 - alpha1;
+        double weight1 = 1.0 - (alpha - alpha1) / alpha_range;
+        double weight2 = 1.0 - (alpha2 - alpha) / alpha_range;
+        AirfoilCoefficients coefficients;
+        coefficients.alpha = coefficients_list[idx].alpha * weight1 + coefficients_list[idx + 1].alpha * weight2;
+        coefficients.lift = coefficients_list[idx].lift * weight1 + coefficients_list[idx + 1].lift * weight2;
+        coefficients.drag = coefficients_list[idx].drag * weight1 + coefficients_list[idx + 1].drag * weight2;
+        coefficients.added_mass =
+            coefficients_list[idx].added_mass * weight1 + coefficients_list[idx + 1].added_mass * weight2;
+        return coefficients;
     }
     throw std::runtime_error("Could not find alpha value (" + std::to_string(alpha) + ") for airfoil.");
 }

@@ -6,6 +6,17 @@
 
 namespace seahowl {
 
+class Grid1D {
+  public:
+    Grid1D();
+    Grid1D(std::vector<double> ticks);
+    void set_ticks(std::vector<double> ticks);
+    int get_index(double value);
+
+  private:
+    std::vector<double> ticks{};
+};
+
 /**
  * @brief Parametric discretization point.
  */

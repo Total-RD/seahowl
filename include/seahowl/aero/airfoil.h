@@ -1,5 +1,7 @@
 #pragma once
 
+#include "seahowl/commons/utils.h"
+
 #include <vector>
 
 namespace seahowl {
@@ -39,6 +41,7 @@ struct AirfoilProperties {
     double reynolds_number = 0.0;
     /** @brief Tabulated list of airfoil coefficients (each with a different angle of attack). */
     std::vector<AirfoilCoefficients> coefficients_list{};
+    Grid1D grid;
 
     /**
      * @brief Constructor.

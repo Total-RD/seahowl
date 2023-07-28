@@ -189,6 +189,7 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
                 auto coeffs = airfoil_properties.at("coefficients").get<std::vector<std::vector<double>>>();
 
                 std::vector<seahowl::aero::AirfoilCoefficients> coefficients_list;
+                std::vector<double> alphas;
 
                 for (int kk = 0; kk < coeffs.size(); kk++) {
                     if (coeffs[kk].size() != 4) {
@@ -196,6 +197,7 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
                     }
                     seahowl::aero::AirfoilCoefficients coefficients;
                     coefficients.alpha = coeffs[kk][0];
+                    alphas.push_back(coefficients.alpha);
                     coefficients.lift = coeffs[kk][1];
                     coefficients.drag = coeffs[kk][2];
                     coefficients.added_mass = coeffs[kk][3];
@@ -204,6 +206,7 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
                 seahowl::aero::AirfoilProperties airfoil;
                 airfoil_properties.at("reynolds_number").get_to(airfoil.reynolds_number);
                 airfoil.coefficients_list = coefficients_list;
+                airfoil.grid = seahowl::Grid1D(alphas);
                 reference_point.airfoil_properties.push_back(airfoil);
             }
 
