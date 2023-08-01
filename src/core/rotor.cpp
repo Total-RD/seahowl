@@ -42,6 +42,8 @@ void RotorNacelleAssembly::poststep(double time, double dt) {
 }
 
 void RotorNacelleAssembly::update_positions_aero() {
+    // pitch collective
+    aero.pitch_collective = elasto.rotor->pitch_collective;
     // azimuth
     aero.azimuth = elasto.get_azimuth();
     // body_hub

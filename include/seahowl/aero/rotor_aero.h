@@ -35,6 +35,9 @@ class RotorNacelleAssemblyAero {
     /** @brief Azimuth of rotor. */
     double azimuth = 0.0;
 
+    /** @brief Collective pitch of blades (in radians). */
+    double pitch_collective = 0;
+
     /**
      * @brief Constructor.
      */
