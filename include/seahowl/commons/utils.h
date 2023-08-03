@@ -3,6 +3,7 @@
 #include <vector>
 #include <stdexcept>
 #include <algorithm>
+#include <Eigen/Dense>
 
 namespace seahowl {
 
@@ -73,5 +74,14 @@ std::vector<T> get_discretized_points(const std::vector<double>& discretization_
         return discretized_points;
     }
 }
+
+/**
+ * @brief Bilinear interpolation.
+ */
+double bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
+                              const Eigen::VectorXd& x_list,
+                              const Eigen::VectorXd& y_list,
+                              double x,
+                              double y);
 
 }  // namespace seahowl

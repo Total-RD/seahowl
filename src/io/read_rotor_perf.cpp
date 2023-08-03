@@ -10,7 +10,7 @@
 namespace fs = std::filesystem;
 using std::filesystem::path;
 
-void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero aero) {
+void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& aero) {
     // std::cout<<filepath<<std::endl;
 
     std::string appo;
@@ -117,10 +117,13 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
             }
         }
 
-        // aero.coefficients
+        aero.disk_coefficients.thrust_coeff = thrust_coeff;
+        aero.disk_coefficients.power_coeff = power_coeff;
+        aero.disk_coefficients.tsr_list = TSROut;
+        aero.disk_coefficients.pitch_list = PitchOut;
+
         // std::cout<<ind4<<std::endl;
         // std::cout<<power_coeff(1,1)<<std::endl;
-
         // std::cout<<TSROut<<std::endl;
     }
 }

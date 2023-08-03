@@ -1,6 +1,7 @@
 #include "seahowl/commons/utils.h"
 
 #include <string>
+#include <iostream>
 
 std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
     const std::vector<double>& discretization_fractions,
@@ -44,4 +45,44 @@ std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
         }
     }
     return points;
+}
+
+double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
+                                       const Eigen::VectorXd& x_list,
+                                       const Eigen::VectorXd& y_list,
+                                       double x,
+                                       double y) {
+    // Find the four surrounding data points
+    int x0, y0 = -99;
+    for (unsigned ii = 0; ii < x_list.size() - 1; ii++) {
+        if (x >= x_list[ii] && x <= x_list[ii + 1])
+            x0 = ii;
+    }
+    for (unsigned ii = 0; ii < y_list.size() - 1; ii++) {
+        if (y >= y_list[ii] && y <= y_list[ii + 1])
+            y0 = ii;
+    }
+    if (y0 == -99 || x0 == -99) {
+        std::cout << "x = " << x << ",  y = " << y << " , " << std::endl;
+        std::cout << "x list = " << x_list << ",  y list = " << y_list << " , " << std::endl;
+        throw std::runtime_error("x or y not found in the coefficients list.");
+    };
+
+    int x1 = x0 + 1;
+    int y1 = y0 + 1;
+
+    double x_interp = x0 + (x - x_list[x0]) / (x_list[x1] - x_list[x0]);
+    double y_interp = y0 + (y - y_list[y0]) / (y_list[y1] - y_list[y0]);
+
+    double fQ11 = dataMatrix(y0, x0);
+    double fQ21 = dataMatrix(y0, x1);
+    double fQ12 = dataMatrix(y1, x0);
+    double fQ22 = dataMatrix(y1, x1);
+
+    double fR1 = (x1 - x_interp) / (x1 - x0) * fQ11 + (x_interp - x0) / (x1 - x0) * fQ21;
+    double fR2 = (x1 - x_interp) / (x1 - x0) * fQ12 + (x_interp - x0) / (x1 - x0) * fQ22;
+
+    double fP = (y1 - y_interp) / (y1 - y0) * fR1 + (y_interp - y0) / (y1 - y0) * fR2;
+
+    return fP;
 }

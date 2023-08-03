@@ -17,6 +17,16 @@ class WindModel;
 namespace seahowl {
 namespace aero {
 
+// The structure containing the coefficients for the rotor disk
+struct DiskCoefficients {
+    // Member variables
+    Eigen::MatrixXd thrust_coeff;
+    Eigen::MatrixXd power_coeff;
+    Eigen::VectorXd tsr_list;
+    Eigen::VectorXd pitch_list;
+    seahowl::Vector2d get_disk_coefficients_from_table(double TSR, double pitch);
+};
+
 /**
  * @brief Rotor-Nacelle Assembly (RNA) of wind turbine as an aero component.
  */
@@ -37,6 +47,9 @@ class RotorNacelleAssemblyAero {
 
     /** @brief Collective pitch of blades (in radians). */
     double pitch_collective = 0;
+
+    /** @brief The tables of actuator disk coefficients. */
+    DiskCoefficients disk_coefficients;
 
     /**
      * @brief Constructor.
@@ -99,7 +112,7 @@ class RotorNacelleAssemblyAero {
      * @param[in] RPM Rotor speed (for getting performance from table).
      *
      */
-    void compute_aero_loads_disk(const WindModel& wind_model, double time, double pitch, double RPM);
+    void compute_aero_loads_disk(const WindModel& wind_model, double time);
 
 #ifdef HAVE_AERODYN
     /**
