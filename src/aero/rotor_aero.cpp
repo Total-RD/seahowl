@@ -233,7 +233,10 @@ void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_mod
     auto load_n_global = global_direction_normal * load_n;
     auto load_t_global = global_direction_tangent * load_t;
 
-    auto load_global = load_n_global + load_t_global;
+    // auto load_global = load_n_global + load_t_global;
+
+    torque_aero = load_t;
+    thrust_aero = load_n;
 }
 
 #ifdef HAVE_AERODYN

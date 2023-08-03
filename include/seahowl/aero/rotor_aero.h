@@ -51,6 +51,12 @@ class RotorNacelleAssemblyAero {
     /** @brief The tables of actuator disk coefficients. */
     DiskCoefficients disk_coefficients;
 
+    /** @brief Aerodynamic torque from disk coeffs. */
+    double torque_aero = 0;
+
+    /** @brief Aerodynamic thrust from disk coeffs. */
+    double thrust_aero = 0;
+
     /**
      * @brief Constructor.
      */

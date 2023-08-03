@@ -32,6 +32,8 @@ void RotorNacelleAssembly::prestep(double time, double dt) {
     for (auto& blade : blades) {
         blade->prestep(time, dt);
     }
+    elasto.rotor->body_hub->accumulate_torque(Vector3d(aero.torque_aero, 0, 0), true);
+    elasto.rotor->body_hub->accumulate_force(Vector3d(aero.thrust_aero, 0, 0), true);
 }
 
 void RotorNacelleAssembly::poststep(double time, double dt) {
