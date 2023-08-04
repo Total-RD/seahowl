@@ -52,6 +52,14 @@ double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
                                        const Eigen::VectorXd& y_list,
                                        double x,
                                        double y) {
+    // test the interp2D
+    // Eigen::Vector2d x_list; x_list(0) = 2.0; x_list(1) = 3.0;
+    // Eigen::Vector2d y_list; y_list(0) = 2.0; y_list(1) = 3.0;
+    // double x = 2.5;
+    // double y = 2.5;
+    // Eigen::Matrix2d dataMatrix;
+    // dataMatrix << 0.0 , 5.0 , 0.0 , 5.0;
+
     // Find the four surrounding data points
     int x0, y0 = -99;
     for (unsigned ii = 0; ii < x_list.size() - 1; ii++) {
@@ -64,25 +72,23 @@ double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
     }
     if (y0 == -99 || x0 == -99) {
         std::cout << "x = " << x << ",  y = " << y << " , " << std::endl;
-        std::cout << "x list = " << x_list << ",  y list = " << y_list << " , " << std::endl;
+        std::cout << "x list = " << x_list.transpose() << ",  \n"
+                  << "y list = " << y_list.transpose() << " , " << std::endl;
         throw std::runtime_error("x or y not found in the coefficients list.");
     };
 
-    int x1 = x0 + 1;
-    int y1 = y0 + 1;
+    double x_frac = x - x_list[x0];
+    double y_frac = y - y_list[y0];
 
-    double x_interp = x0 + (x - x_list[x0]) / (x_list[x1] - x_list[x0]);
-    double y_interp = y0 + (y - y_list[y0]) / (y_list[y1] - y_list[y0]);
+    double q11 = dataMatrix(y0, x0);
+    double q12 = dataMatrix(y0, x0 + 1);
+    double q21 = dataMatrix(y0 + 1, x0);
+    double q22 = dataMatrix(y0 + 1, x0 + 1);
 
-    double fQ11 = dataMatrix(y0, x0);
-    double fQ21 = dataMatrix(y0, x1);
-    double fQ12 = dataMatrix(y1, x0);
-    double fQ22 = dataMatrix(y1, x1);
+    double fP = (1 - x_frac) * (1 - y_frac) * q11 + x_frac * (1 - y_frac) * q21 + (1 - x_frac) * y_frac * q12 +
+                x_frac * y_frac * q22;
 
-    double fR1 = (x1 - x_interp) / (x1 - x0) * fQ11 + (x_interp - x0) / (x1 - x0) * fQ21;
-    double fR2 = (x1 - x_interp) / (x1 - x0) * fQ12 + (x_interp - x0) / (x1 - x0) * fQ22;
-
-    double fP = (y1 - y_interp) / (y1 - y0) * fR1 + (y_interp - y0) / (y1 - y0) * fR2;
+    std::cout << " interp :  " << fP << std::endl;
 
     return fP;
 }
