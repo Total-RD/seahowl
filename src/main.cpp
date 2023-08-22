@@ -27,6 +27,8 @@ using json = nlohmann::json;
 
 #include <filesystem>  // C++17
 
+#include <seahowl/servo/controller.h>
+
 using std::filesystem::path;
 using std::filesystem::create_directory;
 using std::filesystem::remove_all;
@@ -43,6 +45,7 @@ void output_results(seahowl::core::System& system_core, int step) {
     } else {
         std::cout << ", pitch: " << turbine.rna.elasto.rotor->pitch_collective;
     }
+    std::cout << "Power : " << turbine.get_generated_power();
     std::cout << std::endl;
     write_turbine_info_to_csv("./output/output", system_core, system_core.get_time());
 }
@@ -150,6 +153,12 @@ int main(int argc, char* argv[]) {
         }
     }
 #endif
+
+    // auto mycontroller = std::make_shared<seahowl::servo::ControllerVariableTorque>();
+    // mycontroller->target_rpm = 7.56;
+    // system_core.turbines[0].controller = mycontroller;
+    // system_core.turbines[0].rna.elasto.rotor->body_hub->set_rotational_velocity(Eigen::Vector3d(0.7,0.0,0.0),true);
+
     double time_outputs = dt_outputs;
     while (system_elasto->get_time() < t_end) {
         // prestep

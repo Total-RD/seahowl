@@ -211,18 +211,21 @@ void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_mod
     double RPM = (body_hub.get_rotation().inverse() * body_hub.get_rotational_velocity()).x();
     double TSR = RPM * radius / local_velocity_disc;
 
-    auto coefficients = disk_coefficients.get_disk_coefficients_from_table(pitch_collective, TSR);
+    auto coefficients = disk_coefficients.get_disk_coefficients_from_table(pitch_collective * 180.0 / seahowl::PI, TSR);
     // get thrust and power coefficients
     auto ct = coefficients[1];
     auto cp = coefficients[0];
+
+    std::cout << " interp cp :  " << cp << std::endl;
+    // std::cout << " interp ct :  " << ct << std::endl;
 
     // calculate drag and lift force
     auto vel = local_velocity_disc;
     auto load_n = 0.5 * density * vel * vel * seahowl::PI * radius * radius * ct;
     auto load_t = 0.0;
 
-    std::cout << "RPM : " << RPM << "\n";
-    if (RPM < 0.1 && RPM >= 0.0)
+    // std::cout << "RPM : " << RPM << "\n";
+    if (RPM < 0.05 && RPM >= 0.0)
         load_t = 0.5 * density * vel * vel * vel * seahowl::PI * radius * radius * cp;
     else if (RPM < 0.0)
         load_t = 0.0;

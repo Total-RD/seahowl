@@ -50,8 +50,8 @@ std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
 double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
                                        const Eigen::VectorXd& x_list,
                                        const Eigen::VectorXd& y_list,
-                                       double x,
-                                       double y) {
+                                       double y,
+                                       double x) {
     // test the interp2D
     // Eigen::Vector2d x_list; x_list(0) = 2.0; x_list(1) = 3.0;
     // Eigen::Vector2d y_list; y_list(0) = 2.0; y_list(1) = 3.0;
@@ -87,8 +87,6 @@ double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
 
     double fP = (1 - x_frac) * (1 - y_frac) * q11 + x_frac * (1 - y_frac) * q21 + (1 - x_frac) * y_frac * q12 +
                 x_frac * y_frac * q22;
-
-    std::cout << " interp :  " << fP << std::endl;
 
     return fP;
 }
