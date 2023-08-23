@@ -3,7 +3,7 @@
 #include "seahowl/core/turbine.h"
 #include "seahowl/elasto/rotor_elasto.h"
 
-#include <cmath>
+#include <iostream>
 
 using namespace seahowl::servo;
 
@@ -40,13 +40,16 @@ void ControllerVariableTorque::poststep(double time, double dt, const seahowl::c
 }
 
 void ControllerVariableTorque::step(double time, double dt, const seahowl::core::Turbine& turbine) {
-    double rpm = turbine.rna.elasto.get_rpm();
-    double torque_total = turbine.rna.elasto.get_axial_torque();
-    // total_torque includes aero torque + previous elec torque
-    double torque_aero = torque_total + torque_elec_previous;
-    double torque_elec = torque_aero * std::pow(rpm / target_rpm, 2);
-    if (rpm / target_rpm < 0.0) {
-        torque_elec = 0.0;
+    if (fabs(target_rpm) > 1e-6) {
+        double rpm = turbine.rna.elasto.get_rpm();
+        double torque_aero = turbine.rna.elasto.get_axial_torque();
+        torque_elec = torque_aero * std::pow(rpm / target_rpm, 2);
+        if (rpm / target_rpm < 0.0) {
+            torque_elec = 0.0;
+        }
+    } else {
+        std::cout << "Warning: target RPM of controller is too low (" + std::to_string(target_rpm) + "), not applied."
+                  << std::endl;
     }
 }
 
