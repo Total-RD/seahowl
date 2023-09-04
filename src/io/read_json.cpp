@@ -498,6 +498,14 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
             copy_file_and_increment(libfilepath.generic_string(), OUTPUT_CONTROLLER_DIR.generic_string());
         turbine.controller = std::make_shared<seahowl::servo::ControllerDISCON>(
             (DATADIR / controller_json.at("options").at("infile")).generic_string(), copyfilepath);
+    } else if (controller_json.at("type").get<std::string>() == "RPM") {
+        if (!controller_json.at("options").contains("target_rpm")) {
+            throw std::invalid_argument("Need to define target RPM for RPM controller (target_rpm).");
+        } else {
+            auto controller = std::make_shared<seahowl::servo::ControllerVariableTorque>();
+            controller_json.at("options").at("target_rpm").get_to(controller->target_rpm);
+            turbine.controller = controller;
+        }
     }
 
     // get extra drivetrain info

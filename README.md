@@ -164,6 +164,37 @@ It is a JSON dictionary containing:
   - **type**: (string) type of controller.
   - **options**: (dict) options of controller.
 
+#### Available controller models
+
+- No Controller
+```json
+{
+  "type": ""
+}
+```
+
+- Controller `DISCON`:
+The controller for DISCON routine (e.g. ROSCO controller), where the path to the controller options file (DISCON.IN) and path to library (libdiscon.so for Linux, or dll for Windows) must be provided.
+```json
+{
+  "type": "DISCON",
+    "options": {
+      "infile": "path/to/DISCON.IN",
+      "libfile": "path/to/libdiscon.so"
+    }
+}
+```
+
+- Controller `RPM`:
+For this controller, only variable torque is applied and a target RPM is set as the maximum RPM allowed for the rotor.
+```json
+{
+  "type": "RPM",
+  "options": {
+     "target_rpm": 5.0
+  }
+}
+```
 
  #### Rotor-Nacelle Assembly file (rna.json)
 
