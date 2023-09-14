@@ -16,10 +16,10 @@
       "options": {
         "reference_height": 150,
         "shear_coefficient": 0.12,
-        "velocity_start": [13.0, 0, 0],
+        "velocity_start": [6.0, 0, 0],
         "velocity_end": [13.0, 0, 0],
         "time_start": 0,
-        "time_end": 100,
+        "time_end": 300,
         "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat",
         "file_windwnd": "./aerodyn/long_step_wind.wnd"
       }

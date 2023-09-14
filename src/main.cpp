@@ -45,7 +45,7 @@ void output_results(seahowl::core::System& system_core, int step) {
     } else {
         std::cout << ", pitch: " << turbine.rna.elasto.rotor->pitch_collective;
     }
-    std::cout << "Power : " << turbine.get_generated_power();
+    std::cout << ", Power: " << turbine.get_generated_power();
     std::cout << std::endl;
     write_turbine_info_to_csv("./output/output", system_core, system_core.get_time());
 }
