@@ -606,7 +606,14 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
             seahowl::core::Turbine(system_core.system_elasto->turbines[ii], system_core.system_aero->turbines[ii]));
         auto& turbine = system_core.turbines.back();
         populate_turbine_from_json(filepath_turbine, turbine);
-        // aerodyn option
+
+        turbine.aero.use_disktheory = turbine_json.at("use_disktheory").get<bool>();
+        if (turbine.aero.use_disktheory)
+            std::cout << "Aerodynamic model : DISK THEORY" << std::endl;
+        else
+            std::cout << "Aerodynamic model : BEM THEORY" << std::endl;
+
+            // aerodyn option
 #ifdef HAVE_AERODYN
         turbine.aero.use_aerodyn = turbine_json.at("use_aerodyn").get<bool>();
         bool output_vtk = json_obj.at("outputs").at("VTK").get<bool>();

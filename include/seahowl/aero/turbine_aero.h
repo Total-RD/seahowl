@@ -39,6 +39,9 @@ class TurbineAero : public ComponentAero {
 
     /** @brief Whether to use AeroDyn or not. */
     bool use_aerodyn = false;
+
+    /** @brief Whether to use DiskTheory or not. */
+    bool use_disktheory = false;
 #ifdef HAVE_AERODYN
     /** @brief AeroDyn adapter (only used if AeroDyn is enabled). */
     std::shared_ptr<seahowl::aero::AeroDynAdapter> aerodyn;

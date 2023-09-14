@@ -26,12 +26,17 @@ void TurbineAero::compute_aero_loads(seahowl::aero::WindModel& wind_model, doubl
         aerodyn->calcul(time, *this);
         rna.compute_aero_loads(aerodyn->pImpl.MeshFrc, wind_model, time, tower, true, true, true);
     } else {
-        // rna.compute_aero_loads(wind_model, time, tower, true, true, true);
-        rna.compute_aero_loads_disk(wind_model, time);
+        if (use_disktheory)
+            rna.compute_aero_loads_disk(wind_model, time);
+        else
+            rna.compute_aero_loads(wind_model, time, tower, true, true, true);
     }
 #else
-    // rna.compute_aero_loads(wind_model, time, tower, true, true, true);
-    rna.compute_aero_loads_disk(wind_model, time);
+
+    if (use_disktheory)
+        rna.compute_aero_loads_disk(wind_model, time);
+    else
+        rna.compute_aero_loads(wind_model, time, tower, true, true, true);
 #endif
     tower.compute_aero_loads(wind_model, time);
 }

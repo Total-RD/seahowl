@@ -216,8 +216,8 @@ void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_mod
     auto ct = coefficients[1];
     auto cp = coefficients[0];
 
-    std::cout << " interp cp :  " << cp << ",   pitch :  " << pitch_collective * 180.0 / seahowl::PI
-              << ",   TSR :  " << TSR << std::endl;
+    // std::cout << " interp cp :  " << cp << ",   pitch :  " << pitch_collective * 180.0 / seahowl::PI
+    //           << ",   TSR :  " << TSR << std::endl;
     // std::cout << " interp ct :  " << ct << std::endl;
 
     // calculate drag and lift force
