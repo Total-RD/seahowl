@@ -118,6 +118,11 @@ class Turbine : public ComponentDynamic {
     void rotate(double angle, Vector3d axis);
 
     /**
+     * @brief Returns shaft power.
+     */
+    double get_shaft_power() const;
+
+    /**
      * @brief Returns generated power.
      */
     double get_generated_power() const;

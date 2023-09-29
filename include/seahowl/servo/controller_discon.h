@@ -117,6 +117,12 @@ struct DisconController {
     void SetGeneratedPower(double power);
 
     /// <summary>
+    /// Helper to set the shaft power
+    /// </summary>
+    /// <param name="power">The shaft power. W</param>
+    void SetShaftPower(double power);
+
+    /// <summary>
     /// Helper to set number of blades
     /// </summary>
     /// <param name="nblades">The number of blades.</param>

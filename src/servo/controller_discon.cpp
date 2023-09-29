@@ -87,8 +87,10 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
     auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
     pImpl.SetGeneratorSpeed(omega_generator);
     // power
-    auto power = turbine.get_generated_power();
-    pImpl.SetGeneratedPower(power);
+    // generator
+    pImpl.SetGeneratedPower(turbine.get_generated_power());
+    // shaft
+    pImpl.SetShaftPower(turbine.get_shaft_power());
 }
 
 void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const seahowl::core::Turbine& turbine) {
@@ -539,6 +541,10 @@ void seahowl::servo::DisconController::SetRotorAzimuth(double azimuth) {
 
 void seahowl::servo::DisconController::SetGeneratedPower(double power) {
     SetAvrSWAP(15, power);
+}
+
+void seahowl::servo::DisconController::SetShaftPower(double power) {
+    SetAvrSWAP(14, power);
 }
 
 void seahowl::servo::DisconController::SetNumberOfBlades(size_t nblades) {
