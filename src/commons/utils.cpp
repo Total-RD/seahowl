@@ -52,14 +52,6 @@ double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
                                        const Eigen::VectorXd& y_list,
                                        double y,
                                        double x) {
-    // // //test the interp2D
-    // // Eigen::Vector2d x_list; x_list(0) = 2.0; x_list(1) = 3.0;
-    // // Eigen::Vector2d y_list; y_list(0) = 2.0; y_list(1) = 3.0;
-    // // double x = 2.5;
-    // // double y = 2.5;
-    // // Eigen::Matrix2d dataMatrix;
-    // // dataMatrix << 0.0 , 5.0 , 0.0 , 5.0;
-
     // Find the four surrounding data points
     int x0, y0 = -99;
     for (unsigned ii = 0; ii < x_list.size() - 1; ii++) {
@@ -80,12 +72,6 @@ double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
 
     double x_frac = (x - x_list[x0]) / (std::fabs(x_list[x0] - x_list[x0 + 1]));
     double y_frac = (y - y_list[y0]) / (std::fabs(y_list[y0] - y_list[y0 + 1]));
-
-    // std::cout << "x_frac: "<< x_frac << std::endl;
-    // std::cout << "y_frac: "<< y_frac << std::endl;
-
-    // std::cout << "indx: " << x0 << std::endl;
-    // std::cout << "indy: " << y0 << std::endl;
 
     double q11 = dataMatrix(y0, x0);
     double q21 = dataMatrix(y0, x0 + 1);

@@ -19,11 +19,7 @@ using seahowl::Vector2d;
 using seahowl::PI;
 
 seahowl::Vector2d DiskCoefficients::get_disk_coefficients_from_table(double TSR, double pitch) {
-    // Eigen::MatrixXd thrust_coeff;
-    // Eigen::MatrixXd power_coeff;
-    // Eigen::VectorXd tsr_list;
-    // Eigen::VectorXd pitch_list;
-
+    // interpolate rotor performance for the current TSR and pitch
     double Cp = bilinear_interpolation(power_coeff, pitch_list, tsr_list, pitch, TSR);
     double Ct = bilinear_interpolation(thrust_coeff, pitch_list, tsr_list, pitch, TSR);
 
@@ -215,10 +211,6 @@ void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_mod
     // get thrust and power coefficients
     auto ct = coefficients[1];
     auto cp = coefficients[0];
-
-    // std::cout << " interp cp :  " << cp << ",   pitch :  " << pitch_collective * 180.0 / seahowl::PI
-    //           << ",   TSR :  " << TSR << std::endl;
-    // std::cout << " interp ct :  " << ct << std::endl;
 
     // calculate drag and lift force
     auto vel = local_velocity_disc;
