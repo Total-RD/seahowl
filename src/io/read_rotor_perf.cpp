@@ -17,7 +17,6 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
 
-    //	const double PI = 4.0 * atan(1.0);
     std::ifstream myfile(filepath.c_str());
 
     std::vector<double> pitch;
@@ -32,8 +31,6 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
         while (std::getline(myfile, line)) {  // getline (myfile,line);
             idLine += 1;
             stringVector.push_back(line);
-
-            // std::cout<<line<<std::endl;
 
             std::size_t check1 = line.find("Pitch");
             std::size_t check2 = line.find("TSR");
@@ -97,7 +94,6 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
         }
 
         // aero.coefficients
-
         Eigen::MatrixXd thrust_coeff;
         thrust_coeff.resize(TSR.size(), pitch.size());
         thrust_coeff.setZero();

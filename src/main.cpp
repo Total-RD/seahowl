@@ -154,11 +154,6 @@ int main(int argc, char* argv[]) {
     }
 #endif
 
-    // auto mycontroller = std::make_shared<seahowl::servo::ControllerVariableTorque>();
-    // mycontroller->target_rpm = 7.56;
-    // system_core.turbines[0].controller = mycontroller;
-    // system_core.turbines[0].rna.elasto.rotor->body_hub->set_rotational_velocity(Eigen::Vector3d(0.7,0.0,0.0),true);
-
     double time_outputs = dt_outputs;
     while (system_elasto->get_time() < t_end) {
         // prestep
