@@ -1,6 +1,6 @@
 ﻿{
   "rotor": {
-    "type": "rigid",
+    "type": "fea",
     "fpm": false,
     "inertia_total": 3.524605e8,
     "mass_blades_total": 195e3,
