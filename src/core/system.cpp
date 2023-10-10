@@ -23,10 +23,6 @@ void System::prestep(double time, double dt) {
         turbine.aero.compute_aero_loads(*wind_model, time);
         // turbine prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
-        if (turbine.aero.use_disktheory) {
-            turbine.rna.elasto.rotor->body_hub->accumulate_torque(Vector3d(turbine.rna.aero.torque_aero, 0, 0), true);
-            turbine.rna.elasto.rotor->body_hub->accumulate_force(Vector3d(turbine.rna.aero.thrust_aero, 0, 0), true);
-        }
     }
 }
 

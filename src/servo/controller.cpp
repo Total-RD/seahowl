@@ -2,6 +2,7 @@
 
 #include "seahowl/core/turbine.h"
 #include "seahowl/elasto/rotor_elasto.h"
+#include "seahowl/aero/rotor_aero.h"
 
 #include <iostream>
 
@@ -43,6 +44,11 @@ void ControllerVariableTorque::step(double time, double dt, const seahowl::core:
     if (fabs(target_rpm) > 1e-6) {
         double rpm = turbine.rna.elasto.get_rpm();
         double torque_aero = turbine.rna.elasto.get_axial_torque();
+
+        // @todo Line below is specific to actuator disk (otherwise torque_aero is zero), need to move it
+        // inside turbine.rna.elasto.get_axial_torque()
+        torque_aero += turbine.rna.aero.torque_aero;
+
         torque_elec = torque_aero * std::pow(rpm / target_rpm, 2);
         if (rpm / target_rpm < 0.0) {
             torque_elec = 0.0;
