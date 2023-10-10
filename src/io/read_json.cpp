@@ -421,13 +421,15 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     auto tower_json = json_obj.at("tower");
     auto rna_json = json_obj.at("rna");
     auto controller_json = json_obj.at("controller");
-    auto perf_json = json_obj.at("performance");
 
     if (rotor_json.at("type").get<std::string>() == "disk") {
         turbine.aero.use_disktheory = true;
         std::cout << "Aerodynamic model : DISK THEORY" << std::endl;
         // get rotor performance from table
-        get_disk_perf_from_table((DATADIR / perf_json.at("infile")).generic_string(), turbine.rna.aero);
+        if (!rotor_json.contains("performance_file")) {
+            throw std::runtime_error("The \"performance_file\" key must be given for actuator disk rotor.");
+        }
+        get_disk_perf_from_table((DATADIR / rotor_json.at("performance_file")).generic_string(), turbine.rna.aero);
         if (turbine.aero.use_aerodyn == true)
             throw std::runtime_error("When Disk Theory is activated, you can't ask for AeroDyn module.");
     } else

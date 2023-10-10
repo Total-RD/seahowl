@@ -1,9 +1,10 @@
 ﻿{
   "rotor": {
-    "type": "rigid",
+    "type": "disk",
     "fpm": false,
     "inertia_total": 3.524605e8,
     "mass_blades_total": 195e3,
+    "performance_file": "./controller/Cp_Ct_Cq.IEA15MW_modified.txt",
     "discretization": {
       "elasto": [49],
       "aero": [49]
@@ -43,8 +44,5 @@
       "infile": "./controller/DISCON.IN",
       "libfile": "./controller/libdiscon.so"
     }
-  },
-  "performance":{
-    "infile": "./controller/Cp_Ct_Cq.IEA15MW.txt"
   }
 }
