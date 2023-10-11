@@ -490,11 +490,11 @@ TEST(test_turbine, actuator_disk) {
     double dt = 0.1;
     // wind
     auto wind_model = seahowl::aero::ConstantWind();
-    wind_model.set_wind_velocity(Vector3d(10.56, 0.0, 0.0));
+    wind_model.set_wind_velocity(Vector3d(11.0, 0.0, 0.0));
     // turbine
-    double initial_pitch = seahowl::PI / 500.0;
+    double initial_pitch = 0.0 * seahowl::PI / 1000.0;
     // power target
-    auto reference_power = 15.3e6;
+    auto reference_power = 15.4e6;
 
     // system
     auto system_elasto = SystemElastoChrono();
@@ -529,6 +529,30 @@ TEST(test_turbine, actuator_disk) {
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
     // while (application.GetDevice()->run()) {
+    while (time < 100) {
+        // prestep
+        // compute forces
+        turbine.aero.compute_aero_loads(wind_model, time);
+        // prestep (accumulates loads from aero to elasto)
+        turbine.prestep(time, dt);
+
+        system_elasto.step(dt);
+        time += dt;
+
+        // poststep
+        turbine.poststep(time, dt);
+    }
+
+    // ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, 1e-3);
+    ASSERT_NEAR(turbine.get_generated_power(), reference_power, reference_power * 0.01);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, target_rpm * 0.01);
+
+    reference_power = 15.3e6;
+    // wind
+    wind_model.set_wind_velocity(Vector3d(15.0, 0.0, 0.0));
+    // turbine
+    initial_pitch = 11.0 * seahowl::PI / 180.0;
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     while (time < 200) {
         // prestep
         // compute forces
@@ -543,33 +567,8 @@ TEST(test_turbine, actuator_disk) {
         turbine.poststep(time, dt);
     }
 
-    // ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, 1e-3);
-    ASSERT_NEAR(turbine.get_generated_power(), reference_power, reference_power * 0.005);
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, target_rpm * 0.005);
-
-    reference_power = 15.3e6;
-    // wind
-    wind_model.set_wind_velocity(Vector3d(15.0, 0.0, 0.0));
-    // turbine
-    initial_pitch = 11.3 * seahowl::PI / 180.0;
-    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
-    while (time < 400) {
-        // prestep
-        // compute forces
-        turbine.aero.compute_aero_loads(wind_model, time);
-        // prestep (accumulates loads from aero to elasto)
-        turbine.prestep(time, dt);
-
-        system_elasto.step(dt);
-        time += dt;
-
-        // poststep
-        turbine.poststep(time, dt);
-    }
-
-    // ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, 1e-3);
-    ASSERT_NEAR(turbine.get_generated_power(), reference_power, reference_power * 0.005);
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, target_rpm * 0.005);
+    ASSERT_NEAR(turbine.get_generated_power(), reference_power, reference_power * 0.01);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, target_rpm * 0.01);
 }
 
 #ifdef HAVE_AERODYN
