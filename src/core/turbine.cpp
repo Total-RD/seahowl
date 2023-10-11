@@ -29,18 +29,22 @@ void Turbine::prestep(double time, double dt) {
 }
 
 void Turbine::poststep(double time, double dt) {
-    auto torque_elec_previous = controller->get_torque_elec() * gearbox_ratio * gearbox_efficiency;
+    // hub loads
+    // reset external loads applied on rotor hub
+    rna.elasto.rotor->body_hub->reset_loads();
+    // apply aero torque losses from gearbox efficiency for next step
+    auto aero_torque = rna.elasto.get_axial_torque();
+    if (controller->has_torque_control) {
+        // remove previously applied electrical torque from total rotor torque
+        aero_torque += controller->get_torque_elec() * gearbox_ratio * gearbox_efficiency;
+    }
+    rna.elasto.accumulate_axial_torque(-aero_torque * (1.0 - gearbox_efficiency));
 
     // controller step
     controller->step(time, dt, *this);
-    // apply torque from comtroller
+    // apply torque from controller
     if (controller->has_torque_control) {
         auto torque_elec = controller->get_torque_elec() * gearbox_ratio * gearbox_efficiency;
-        // apply torque elec to hub rigid body
-        rna.elasto.rotor->body_hub->reset_loads();
-        // apply aero torque losses from gearbox efficiency
-        rna.elasto.accumulate_axial_torque(-(rna.elasto.get_axial_torque() + torque_elec_previous) *
-                                           (1.0 - gearbox_efficiency));
         // torque elec is applied on hub body (locally)
         rna.elasto.accumulate_axial_torque(-torque_elec);
     }
