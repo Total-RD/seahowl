@@ -17,7 +17,8 @@ seahowl::elasto::BodyElasto& FloaterElasto::get_body(std::string& name) {
 
 void FloaterElasto::add_fairlead(Vector3d& position, std::string connected_body_name) {
     if (floater_bodies.count(connected_body_name) == 0) {
-        throw std::runtime_error("Trying to add a fairlead to a non-existing floater body " + connected_body_name);
+        throw std::runtime_error("Trying to add a fairlead to a non-existing floater body " + connected_body_name +
+                                 ".");
     }
 
     // fairlead
@@ -30,6 +31,34 @@ void FloaterElasto::add_fairlead(Vector3d& position, std::string connected_body_
     auto& link = *(fairlead_links[connected_body_name].back().get());
     link.set_constraints(true, true, true, false, false, false);
     link.initialize(fairlead, *floater_bodies[connected_body_name]);
+}
+
+seahowl::elasto::BodyElasto& FloaterElasto::get_fairlead_body(std::string body_name, int index) {
+    if (floater_bodies.count(body_name) == 0) {
+        throw std::runtime_error("Trying to get fairlead body from a non-existing floater body " + body_name + ".");
+    }
+
+    auto& fairleads_vector = fairlead_bodies.at(body_name);
+    if (fairleads_vector.size() <= index) {
+        throw std::runtime_error("Trying to access fairlead body " + std::to_string(index) + " of " + body_name +
+                                 " but it has only " + std::to_string(fairleads_vector.size()) + " fairleads.");
+    } else {
+        return *fairleads_vector[index];
+    }
+}
+
+seahowl::elasto::Link& FloaterElasto::get_fairlead_link(std::string body_name, int index) {
+    if (floater_bodies.count(body_name) == 0) {
+        throw std::runtime_error("Trying to get fairlead link from a non-existing floater body " + body_name + ".");
+    }
+
+    auto& fairleads_vector = fairlead_links.at(body_name);
+    if (fairleads_vector.size() <= index) {
+        throw std::runtime_error("Trying to access fairlead link " + std::to_string(index) + " of " + body_name +
+                                 " but it has only " + std::to_string(fairleads_vector.size()) + " fairleads.");
+    } else {
+        return *fairleads_vector[index];
+    }
 }
 
 void FloaterElasto::assemble(seahowl::elasto::SystemElasto& system) {

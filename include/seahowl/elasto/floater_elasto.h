@@ -47,6 +47,22 @@ class FloaterElasto : public ComponentElasto {
     virtual void add_fairlead(Vector3d& position, std::string connected_body_name);
 
     /**
+     * @brief Returns fairlead body.
+     *
+     * @param[in] body_name Name of body on which fairlead is connected.
+     * @param[in] index Index of fairlead.
+     */
+    virtual seahowl::elasto::BodyElasto& get_fairlead_body(std::string body_name, int index);
+
+    /**
+     * @brief Returns fairlead link.
+     *
+     * @param[in] body_name Name of body on which fairlead is connected.
+     * @param[in] index Index of fairlead.
+     */
+    virtual seahowl::elasto::Link& get_fairlead_link(std::string body_name, int index);
+
+    /**
      * @brief Sets name of body that will be used for tower connection.
      *
      * @param[in] connected_body_name Name of the body to connect to the tower.
