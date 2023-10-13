@@ -564,7 +564,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
             auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine_floating.floater);
             auto floater_options = json_obj_floater.at("options");
             // add h5file path
-            floater.h5_filepath = (DATADIR / floater_options.at("file").get<std::string>()).generic_string();
+            floater.set_h5_filepath((DATADIR / floater_options.at("file").get<std::string>()).generic_string());
             // make body
             auto body_name = floater_options.at("name").get<std::string>();
             floater.add_body(body_name);
