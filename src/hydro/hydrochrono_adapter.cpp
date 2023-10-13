@@ -6,6 +6,33 @@
 
 using namespace seahowl::hydro;
 
+FloaterHydroChronoRigid::FloaterHydroChronoRigid() {
+    waves = std::make_shared<NoWave>(1);
+};
+
+void FloaterHydroChronoRigid::initialize(double time, double dt) {
+    if (h5_filepath == "") {
+        throw std::runtime_error("Path of h5 file for HydroChrono floater was not defined.");
+    } else if (floater_body_name == "") {
+        throw std::runtime_error("Must provide name of floater for HydroChrono.");
+    }
+    auto& chbody = dynamic_cast<seahowl::elasto::BodyElastoChrono&>(*floater_body);
+    chbody.chobj->SetName(floater_body_name.c_str());
+
+    std::vector<std::shared_ptr<chrono::ChBody>> chbodies;
+    chbodies.push_back(chbody.chobj);
+    hydrochrono_setter = std::make_unique<TestHydro>(chbodies, h5_filepath);
+    hydrochrono_setter->AddWaves(waves);
+}
+
+void FloaterHydroChronoRigid::set_name(std::string& name) {
+    floater_body_name = name;
+}
+
+void FloaterHydroChronoRigid::set_h5_filepath(std::string& h5_filepath) {
+    h5_filepath = h5_filepath;
+}
+
 FloaterHydroChrono::FloaterHydroChrono() {
     waves = std::make_shared<NoWave>(1);
 };

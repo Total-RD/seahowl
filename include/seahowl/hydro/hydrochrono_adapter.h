@@ -12,6 +12,47 @@
 namespace seahowl {
 namespace hydro {
 
+class FloaterHydroChronoRigid : public elasto::FloaterElastoRigid {
+  public:
+    /** @brief Waves (HydroChrono). */
+    std::shared_ptr<WaveBase> waves;
+
+    /**
+     * @brief Constructor.
+     */
+    FloaterHydroChronoRigid();
+
+    /**
+     * @brief Initialize floater, called before starting the simulation.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
+    virtual void initialize(double time, double dt) override;
+
+    /**
+     * @brief Sets name of floater.
+     *
+     * @param[in] name Name of the body in the hydro file.
+     */
+    void set_name(std::string& name);
+
+    /**
+     * @brief Sets path to .h5 file containing hydro data.
+     *
+     * @param[in] h5_filepath Path to .h5 file.
+     */
+    void set_h5_filepath(std::string& h5_filepath);
+
+  private:
+    /** @brief HydroChrono logic class. */
+    std::unique_ptr<TestHydro> hydrochrono_setter;
+    /** @brief Path to potential flow frequency data file (HDF5 format). */
+    std::string h5_filepath = "";
+    /** @brief Name of HydroChrono/BEM body. */
+    std::string floater_body_name = "";
+};
+
 class FloaterHydroChrono : public elasto::FloaterElasto {
   public:
     /** @brief Waves (HydroChrono). */
