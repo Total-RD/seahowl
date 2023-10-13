@@ -35,7 +35,7 @@ class FloaterHydroChrono : public elasto::FloaterElasto {
      *
      * @param[in] filepath Path to .h5 file.
      */
-    void set_h5_filepath(std::string& filepath);
+    void set_h5_filepath(std::string filepath);
 
   private:
     /** @brief HydroChrono logic class. */

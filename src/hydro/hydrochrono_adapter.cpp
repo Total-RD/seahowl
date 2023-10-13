@@ -30,6 +30,6 @@ void FloaterHydroChrono::initialize() {
     hydrochrono_setter->AddWaves(waves);
 }
 
-void FloaterHydroChrono::set_h5_filepath(std::string& filepath) {
+void FloaterHydroChrono::set_h5_filepath(std::string filepath) {
     h5_filepath = filepath;
 }

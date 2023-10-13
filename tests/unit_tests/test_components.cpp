@@ -665,10 +665,10 @@ TEST(test_turbine, multiturbines) {
     auto turbine_file = (DATADIR / "turbine_nocontrol_rigid.json").generic_string();
     auto nturbines = 3;
     for (int ii = 0; ii < nturbines; ii++) {
-        system_core.system_elasto->turbines.push_back(seahowl::elasto::TurbineElasto());
+        system_core.system_elasto->turbines.push_back(std::make_shared<seahowl::elasto::TurbineElasto>());
         system_core.system_aero->turbines.push_back(seahowl::aero::TurbineAero());
         system_core.turbines.push_back(std::make_shared<seahowl::core::Turbine>(
-            system_core.system_elasto->turbines.back(), system_core.system_aero->turbines.back()));
+            *system_core.system_elasto->turbines.back(), system_core.system_aero->turbines.back()));
         auto& turbine = *system_core.turbines.back();
         populate_turbine_from_json(turbine_file, turbine);
         // empty controller
