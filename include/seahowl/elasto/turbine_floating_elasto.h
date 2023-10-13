@@ -1,7 +1,7 @@
 #pragma once
 
-#include "seahowl/elasto/rotor_elasto.h"
-#include "seahowl/elasto/tower_elasto.h"
+#include "seahowl/elasto/turbine_elasto.h"
+#include "seahowl/elasto/floater_elasto.h"
 
 #include <vector>
 
@@ -22,21 +22,21 @@ namespace elasto {
  *
  * This class controls each component, ensuring proper workflow for the elasto part.
  */
-class TurbineElasto : public ComponentElasto {
+class TurbineFloatingElasto : public TurbineElasto {
   public:
     // components
     //
-    /** @brief Rotor-nacelle assembly of the turbine. */
-    seahowl::elasto::RotorNacelleAssemblyElasto rna;
-    /** @brief Tower of the turbine. */
-    seahowl::elasto::TowerElasto tower;
+    /** @brief Floater of the turbine. */
+    std::unique_ptr<seahowl::elasto::FloaterElasto> floater;
+    /** @brief Link between floater and tower of the turbine. */
+    std::unique_ptr<seahowl::elasto::Link> link_floater_tower;
 
     /**
      * @brief Constructor.
      *
      * Instantiates rotor component and tower component.
      */
-    TurbineElasto();
+    TurbineFloatingElasto();
 
     /**
      * @brief Assembles the turbine (elasto part).*
@@ -45,16 +45,7 @@ class TurbineElasto : public ComponentElasto {
      *
      * @param[out] system System on which to add bodies, links, etc.
      */
-    virtual void assemble(seahowl::elasto::SystemElasto& system) override;
-
-    /**
-     * @brief Links RNA to tower.
-     *
-     * This function links the towertop node to the yaw bearing rigid body by translating the RNA so that the tower
-     * towertop node and yaw bearing coordinates match each other.
-     * The link between towertop node and yaw bearing is fixed.
-     */
-    void link_rna_tower(seahowl::elasto::SystemElasto& system);
+    void assemble(seahowl::elasto::SystemElasto& system) override;
 
     /**
      * @brief Builds the turbine.

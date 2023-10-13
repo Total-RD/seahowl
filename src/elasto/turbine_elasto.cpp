@@ -34,12 +34,21 @@ void TurbineElasto::build() {
     tower.build();
 }
 
-void TurbineElasto::translate(Vector3d translation_vector) {
+void TurbineElasto::translate(const Vector3d& translation_vector) const {
     rna.translate(translation_vector);
     tower.translate(translation_vector);
 }
 
-void TurbineElasto::rotate(double angle, Vector3d axis) {
+void TurbineElasto::rotate(double angle, const Vector3d& axis) const {
     rna.rotate(angle, axis);
     tower.rotate(angle, axis);
+}
+
+double TurbineElasto::get_mass() const {
+    double total_mass = 0.0;
+    // RNA
+    total_mass += rna.get_mass();
+    // tower
+    total_mass += tower.get_mass();
+    return total_mass;
 }

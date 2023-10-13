@@ -35,7 +35,12 @@ class ComponentElasto {
      *
      * @param[out] mesh System on which to assemble component.
      */
-    virtual void assemble(SystemElasto& system) const {};
+    virtual void assemble(SystemElasto& system){};
+
+    /**
+     * @brief Initializes component.
+     */
+    virtual void initialize(){};
 
     /**
      * @brief Resets accumulated loads of component.
@@ -89,7 +94,7 @@ class ComponentElastoFEA : public virtual ComponentElasto {
      *
      * @param[out] mesh System on which to add nodes and elements.
      */
-    virtual void assemble(SystemElasto& system) const override;
+    virtual void assemble(SystemElasto& system) override;
 
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;

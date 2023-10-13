@@ -14,7 +14,7 @@ BladeElasto::BladeElasto() {
     link_root->set_constraints(true, true, true, true, true, true);
 }
 
-void BladeElasto::assemble(SystemElasto& system) const {
+void BladeElasto::assemble(SystemElasto& system) {
     if (is_mounted) {
         system.add(*(link_root.get()));
     }
@@ -22,7 +22,7 @@ void BladeElasto::assemble(SystemElasto& system) const {
 
 BladeElastoFEA::BladeElastoFEA() {}
 
-void BladeElastoFEA::assemble(SystemElasto& system) const {
+void BladeElastoFEA::assemble(SystemElasto& system) {
     BladeElasto::assemble(system);
     ComponentElastoFEA::assemble(system);
 }
@@ -189,7 +189,7 @@ void BladeElastoRigid::build() {
     length = reference_points.back().coordinates.z();
 }
 
-void BladeElastoRigid::assemble(SystemElasto& system) const {
+void BladeElastoRigid::assemble(SystemElasto& system) {
     BladeElasto::assemble(system);
     system.add(*(body_root.get()));
 }

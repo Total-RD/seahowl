@@ -83,7 +83,7 @@ class RotorElasto : public ComponentElasto {
      *
      * @param[out] system System to which rigid bodies and links are added.
      */
-    void assemble(seahowl::elasto::SystemElasto& system);
+    virtual void assemble(seahowl::elasto::SystemElasto& system) override;
 
     /**
      * @brief Builds the rotor.
@@ -154,7 +154,7 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
      *
      * @param[out] system System to which rigid bodies and links are added.
      */
-    void assemble(seahowl::elasto::SystemElasto& system);
+    virtual void assemble(seahowl::elasto::SystemElasto& system) override;
 
     /**
      * @brief Builds the rotor.

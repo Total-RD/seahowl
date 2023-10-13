@@ -16,7 +16,7 @@ namespace elasto {
 class SystemElasto {
   public:
     /** @brief Turbines in system. */
-    std::deque<TurbineElasto> turbines{};
+    std::deque<std::shared_ptr<TurbineElasto>> turbines{};
     /** @brief Mesh used for FEA elements. */
     std::shared_ptr<MeshElasto> mesh;
 

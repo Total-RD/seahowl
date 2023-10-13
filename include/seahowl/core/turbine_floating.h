@@ -1,6 +1,7 @@
 #pragma once
 
 #include "seahowl/core/turbine.h"
+#include "seahowl/elasto/turbine_floating_elasto.h"
 #include "seahowl/elasto/floater_elasto.h"
 #include "seahowl/elasto/entities_elasto.h"
 
@@ -17,12 +18,8 @@ namespace core {
  */
 class TurbineFloating : public Turbine {
   public:
-    // components
-    //
-    /** @brief Floater of the turbine. */
-    std::unique_ptr<seahowl::elasto::FloaterElasto> floater;
-    /** @brief Link between floater and tower of the turbine. */
-    std::unique_ptr<seahowl::elasto::Link> link_floater_tower;
+    /** @brief Elastodynamic model of the turbine. */
+    seahowl::elasto::TurbineFloatingElasto& elasto;
 
     /**
      * @brief Constructor.
@@ -32,15 +29,7 @@ class TurbineFloating : public Turbine {
      * @param[in] elasto Elastodynamic turbine model.
      * @param[in] aero Aerodynamic turbine model.
      */
-    TurbineFloating(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineAero& aero);
-
-    /**
-     * @brief Links floater to tower.
-     *
-     * This function links the towerbottom node to the floater rigid body.
-     * The link between towertop node and yaw bearing is fixed.
-     */
-    void assemble(seahowl::elasto::SystemElasto& system);
+    TurbineFloating(seahowl::elasto::TurbineFloatingElasto& elasto, seahowl::aero::TurbineAero& aero);
 
     /**
      * @brief Initialize turbine, called before starting the simulation.
@@ -79,21 +68,6 @@ class TurbineFloating : public Turbine {
      * Calls build for each of the components of the turbine.
      */
     void build();
-
-    /**
-     * @brief Translates the turbine.
-     *
-     * @param[in] translation_vector The 3D translation vector.
-     */
-    void translate(Vector3d translation_vector);
-
-    /**
-     * @brief Rotates the turbine.
-     *
-     * @param[in] translation_vector The angle of rotation (in radians).
-     * @param[in] axis The axis of rotation (3D vector).
-     */
-    void rotate(double angle, Vector3d axis);
 };
 
 }  // namespace core

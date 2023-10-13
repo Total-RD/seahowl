@@ -185,6 +185,7 @@ set(SEAHOWL_ELASTO_SOURCES
     src/elasto/floater_elasto.cpp
     src/elasto/mooring_elasto.cpp
     src/elasto/turbine_elasto.cpp
+    src/elasto/turbine_floating_elasto.cpp
     src/elasto/chrono_adapters.cpp
 )
 set(SEAHOWL_ELASTO_HEADERS
@@ -198,6 +199,7 @@ set(SEAHOWL_ELASTO_HEADERS
     include/seahowl/elasto/floater_elasto.h
     include/seahowl/elasto/mooring_elasto.h
     include/seahowl/elasto/turbine_elasto.h
+    include/seahowl/elasto/turbine_floating_elasto.h
     include/seahowl/elasto/chrono_adapters.h
 )
 source_group(elasto FILES ${SEAHOWL_ELASTO_SOURCES} ${SEAHOWL_ELASTO_HEADERS})

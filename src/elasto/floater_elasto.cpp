@@ -25,21 +25,23 @@ void FloaterElastoRigid::assemble(seahowl::elasto::SystemElasto& system) {
     system.add(*floater_body);
 }
 
-void FloaterElastoRigid::initialize(double time, double dt) {}
-
 seahowl::elasto::BodyElasto& FloaterElastoRigid::get_tower_connection_body() {
     return *floater_body;
 }
 
-void FloaterElastoRigid::translate(Vector3d translation_vector) {
+void FloaterElastoRigid::translate(const Vector3d& translation_vector) const {
     floater_body->set_position(floater_body->get_position() + translation_vector);
 }
 
-void FloaterElastoRigid::rotate(double angle, Vector3d axis) {
+void FloaterElastoRigid::rotate(double angle, const Vector3d& axis) const {
     auto rotation = AngleAxisd(angle, axis);
     // rotate body
     auto new_position_body = rotation * floater_body->get_position();
     auto new_rotation_body = (rotation * floater_body->get_rotation()).normalized();
     floater_body->set_position(new_position_body);
     floater_body->set_rotation(new_rotation_body);
+}
+
+double FloaterElastoRigid::get_mass() const {
+    return floater_body->get_mass();
 }

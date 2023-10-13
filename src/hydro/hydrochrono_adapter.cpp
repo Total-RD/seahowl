@@ -10,7 +10,7 @@ FloaterHydroChronoRigid::FloaterHydroChronoRigid() {
     waves = std::make_shared<NoWave>(1);
 };
 
-void FloaterHydroChronoRigid::initialize(double time, double dt) {
+void FloaterHydroChronoRigid::initialize() {
     if (h5_filepath == "") {
         throw std::runtime_error("Path of h5 file for HydroChrono floater was not defined.");
     } else if (floater_body_name == "") {
@@ -83,7 +83,7 @@ void FloaterHydroChrono::assemble(seahowl::elasto::SystemElasto& system) {
     }
 }
 
-void FloaterHydroChrono::initialize(double time, double dt) {
+void FloaterHydroChrono::initialize() {
     if (bodies_map.size() < 1) {
         throw std::runtime_error("List of bodies for HydroChrono floater was not initialized.");
     } else if (h5_filepath == "") {
@@ -101,10 +101,14 @@ void FloaterHydroChrono::initialize(double time, double dt) {
 
 seahowl::elasto::BodyElasto& FloaterHydroChrono::get_tower_connection_body() {
     auto body_names = get_body_names_list();
+    if (body_names.size() < 1) {
+        throw std::runtime_error(
+            "Trying to connect tower to floater but list of bodies for HydroChrono floater was not initialized.");
+    }
     return get_body(body_names[0]);
 }
 
-void FloaterHydroChrono::translate(Vector3d translation_vector) {
+void FloaterHydroChrono::translate(const Vector3d& translation_vector) const {
     // translate all bodies
     for (auto& bodymap : bodies_map) {
         auto& body = *bodymap.second;
@@ -112,7 +116,7 @@ void FloaterHydroChrono::translate(Vector3d translation_vector) {
     }
 }
 
-void FloaterHydroChrono::rotate(double angle, Vector3d axis) {
+void FloaterHydroChrono::rotate(double angle, const Vector3d& axis) const {
     // rotate all bodies
     auto rotation = AngleAxisd(angle, axis);
     for (auto& bodymap : bodies_map) {
@@ -122,4 +126,13 @@ void FloaterHydroChrono::rotate(double angle, Vector3d axis) {
         body.set_position(new_position_body);
         body.set_rotation(new_rotation_body);
     }
+}
+
+double FloaterHydroChrono::get_mass() const {
+    double total_mass = 0;
+    for (auto& bodymap : bodies_map) {
+        auto& body = *bodymap.second;
+        total_mass += body.get_mass();
+    }
+    return total_mass;
 }

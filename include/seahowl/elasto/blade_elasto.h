@@ -27,7 +27,7 @@ class BladeElasto : public virtual ComponentElasto {
 
     BladeElasto();
 
-    virtual void assemble(SystemElasto& system) const override;
+    virtual void assemble(SystemElasto& system) override;
 
     /**
      * @brief Applies pitch increment to the blade (i.e. rotates the blade around its longitudinal axis).
@@ -76,7 +76,7 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
     BladeElastoFEA();
 
     virtual void build() override;
-    virtual void assemble(SystemElasto& system) const override;
+    virtual void assemble(SystemElasto& system) override;
     using ComponentElastoFEA::rotate;
     using ComponentElastoFEA::translate;
     using ComponentElastoFEA::get_mass;
@@ -127,7 +127,7 @@ class BladeElastoRigid : public BladeElasto {
     BladeElastoRigid();
 
     virtual void build() override;
-    virtual void assemble(SystemElasto& system) const override;
+    virtual void assemble(SystemElasto& system) override;
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;
     virtual double get_mass() const override;

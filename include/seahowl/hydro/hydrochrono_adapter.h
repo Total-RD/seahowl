@@ -28,7 +28,7 @@ class FloaterHydroChronoRigid : public elasto::FloaterElastoRigid {
      * @param[in] time Time of the simulation (usually 0 at init).
      * @param[in] dt Time step length.
      */
-    virtual void initialize(double time, double dt) override;
+    virtual void initialize() override;
 
     /**
      * @brief Sets name of floater.
@@ -104,7 +104,7 @@ class FloaterHydroChrono : public elasto::FloaterElasto {
      * @param[in] time Time of the simulation (usually 0 at init).
      * @param[in] dt Time step length.
      */
-    virtual void initialize(double time, double dt) override;
+    virtual void initialize() override;
 
     /**
      * @brief Returns body to connect to tower.
@@ -116,7 +116,7 @@ class FloaterHydroChrono : public elasto::FloaterElasto {
      *
      * @param[in] translation_vector The 3D translation vector.
      */
-    virtual void translate(Vector3d translation_vector) override;
+    virtual void translate(const Vector3d& translation_vector) const override;
 
     /**
      * @brief Rotates the floater.
@@ -124,7 +124,12 @@ class FloaterHydroChrono : public elasto::FloaterElasto {
      * @param[in] translation_vector The angle of rotation (in radians).
      * @param[in] axis The axis of rotation (3D vector).
      */
-    virtual void rotate(double angle, Vector3d axis) override;
+    virtual void rotate(double angle, const Vector3d& axis) const override;
+
+    /**
+     * @brief Returns the mass of the floater.
+     */
+    virtual double get_mass() const override;
 
   private:
     /** @brief List of bodies and their names. */
