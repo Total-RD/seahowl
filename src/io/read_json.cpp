@@ -20,7 +20,6 @@
 #include "seahowl/aero/rotor_aero.h"
 #include "seahowl/aero/turbine_aero.h"
 #include "seahowl/aero/system_aero.h"
-#include "seahowl/hydro/floater_hydro.h"
 #include "seahowl/core/turbine_floating.h"
 #ifdef HAVE_HYDROCHRONO
     #include "seahowl/hydro/hydrochrono_adapter.h"

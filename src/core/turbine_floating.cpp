@@ -4,7 +4,6 @@
 using namespace seahowl::core;
 using namespace seahowl::servo;
 using namespace seahowl::elasto;
-using namespace seahowl::hydro;
 
 TurbineFloating::TurbineFloating(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineAero& aero)
     : Turbine(elasto, aero) {

@@ -690,7 +690,9 @@ void LinkChronoCable::initialize(const NodeElasto& node1, const NodeElasto& node
 }
 
 void LinkChronoCable::set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) {
-    throw std::runtime_error("Cannot set individual constraints on cable link.");
+    if (surge != false || sway != false || heave != false || roll != true || pitch != true || yaw != true) {
+        throw std::runtime_error("Cable links can only have spherical joint constraints.");
+    }
 }
 
 Vector3d LinkChronoCable::get_reaction_force() const {

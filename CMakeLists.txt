@@ -194,6 +194,7 @@ set(SEAHOWL_ELASTO_HEADERS
     include/seahowl/elasto/reference_point_elasto.h
     include/seahowl/elasto/rotor_elasto.h
     include/seahowl/elasto/tower_elasto.h
+    include/seahowl/elasto/floater_elasto.h
     include/seahowl/elasto/mooring_elasto.h
     include/seahowl/elasto/turbine_elasto.h
     include/seahowl/elasto/chrono_adapters.h
@@ -249,7 +250,6 @@ source_group(servo FILES ${SEAHOWL_SERVO_SOURCES} ${SEAHOWL_SERVO_HEADERS})
 set(SEAHOWL_HYDRO_SOURCES
 )
 set(SEAHOWL_HYDRO_HEADERS
-    include/seahowl/hydro/floater_hydro.h
 )
 if(SEAHOWL_ENABLE_HYDROCHRONO)
     list(APPEND SEAHOWL_HYDRO_SOURCES src/hydro/hydrochrono_adapter.cpp)

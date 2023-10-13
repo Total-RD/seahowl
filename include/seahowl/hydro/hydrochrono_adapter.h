@@ -1,8 +1,9 @@
 #pragma once
 
-#include "seahowl/hydro/floater_hydro.h"
+#include "seahowl/elasto/floater_elasto.h"
 #include "seahowl/elasto/entities_elasto.h"
 #include "seahowl/elasto/chrono_adapters.h"
+#include "seahowl/elasto/floater_elasto.h"
 
 #include <string>
 
@@ -11,7 +12,7 @@
 namespace seahowl {
 namespace hydro {
 
-class FloaterHydroChrono : public FloaterHydro {
+class FloaterHydroChrono : public elasto::FloaterElasto {
   public:
     /** @brief Waves (HydroChrono). */
     std::shared_ptr<WaveBase> waves;
@@ -83,12 +84,12 @@ class FloaterHydroChrono : public FloaterHydro {
      * @param[in] axis The axis of rotation (3D vector).
      */
     virtual void rotate(double angle, Vector3d axis) override;
-    /** @brief HydroChrono logic class. */
-    std::unique_ptr<TestHydro> hydrochrono_setter;
 
   private:
     /** @brief List of bodies and their names. */
     std::map<std::string, std::unique_ptr<seahowl::elasto::BodyElasto>> bodies_map;
+    /** @brief HydroChrono logic class. */
+    std::unique_ptr<TestHydro> hydrochrono_setter;
 };
 
 }  // namespace hydro

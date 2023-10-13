@@ -7,9 +7,9 @@
 #include <deque>
 
 namespace seahowl {
-namespace hydro {
+namespace elasto {
 
-class FloaterHydro {
+class FloaterElasto {
   public:
     std::deque<std::unique_ptr<seahowl::elasto::BodyElasto>> fairleads;
     std::deque<std::unique_ptr<seahowl::elasto::Link>> links_fairlead_floater;
@@ -57,5 +57,57 @@ class FloaterHydro {
     virtual void rotate(double angle, Vector3d axis) = 0;
 };
 
-}  // namespace hydro
+class FloaterElastoRigid : public FloaterElasto {
+  public:
+    std::unique_ptr<seahowl::elasto::BodyElasto> floater_body;
+
+    /**
+     * @brief Constructor.
+     */
+    FloaterElastoRigid();
+
+    /**
+     * @brief Assembles the component (adds all bodies to the system).
+     *
+     * @param[out] system System to which bodies.
+     */
+    virtual void assemble(seahowl::elasto::SystemElasto& system) override;
+
+    /**
+     * @brief Adds fairlead to system.
+     *
+     * @param[out] position Position of fairlead.
+     */
+    virtual void add_fairlead(Vector3d& position) override;
+
+    /**
+     * @brief Initialize floater, called before starting the simulation.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
+    virtual void initialize(double time, double dt) override;
+
+    /**
+     * @brief Returns body to connect to tower.
+     */
+    virtual seahowl::elasto::BodyElasto& get_tower_connection_body() override;
+
+    /**
+     * @brief Translates the floater.
+     *
+     * @param[in] translation_vector The 3D translation vector.
+     */
+    virtual void translate(Vector3d translation_vector) override;
+
+    /**
+     * @brief Rotates the floater.
+     *
+     * @param[in] translation_vector The angle of rotation (in radians).
+     * @param[in] axis The axis of rotation (3D vector).
+     */
+    virtual void rotate(double angle, Vector3d axis) override;
+};
+
+}  // namespace elasto
 }  // namespace seahowl

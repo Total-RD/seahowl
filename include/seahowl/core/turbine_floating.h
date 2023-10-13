@@ -1,7 +1,7 @@
 #pragma once
 
 #include "seahowl/core/turbine.h"
-#include "seahowl/hydro/floater_hydro.h"
+#include "seahowl/elasto/floater_elasto.h"
 #include "seahowl/elasto/entities_elasto.h"
 
 /**@brief Seahowl base namespace */
@@ -20,7 +20,7 @@ class TurbineFloating : public Turbine {
     // components
     //
     /** @brief Floater of the turbine. */
-    std::unique_ptr<seahowl::hydro::FloaterHydro> floater;
+    std::unique_ptr<seahowl::elasto::FloaterElasto> floater;
     /** @brief Link between floater and tower of the turbine. */
     std::unique_ptr<seahowl::elasto::Link> link_floater_tower;
 

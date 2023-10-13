@@ -58,9 +58,9 @@ void FloaterHydroChrono::assemble(seahowl::elasto::SystemElasto& system) {
 
 void FloaterHydroChrono::initialize(double time, double dt) {
     if (bodies_map.size() < 1) {
-        throw std::runtime_error("List of bodies for floater was not initialized.");
+        throw std::runtime_error("List of bodies for HydroChrono floater was not initialized.");
     } else if (h5_filepath == "") {
-        throw std::runtime_error("Path of h5 file for floater was not defined.");
+        throw std::runtime_error("Path of h5 file for HydroChrono floater was not defined.");
     }
     std::vector<std::shared_ptr<chrono::ChBody>> chbodies = {};
     for (auto& body : bodies_map) {
