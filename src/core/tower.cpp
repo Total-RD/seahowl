@@ -4,6 +4,8 @@
 #include "seahowl/elasto/tower_elasto.h"
 #include "seahowl/aero/tower_aero.h"
 
+#include <spdlog/spdlog.h>
+
 using namespace seahowl::core;
 using namespace seahowl::elasto;
 using namespace seahowl::aero;
@@ -11,11 +13,15 @@ using namespace seahowl::aero;
 Tower::Tower(TowerElasto& elasto, TowerAero& aero) : elasto(elasto), aero(aero) {}
 
 void Tower::initialize(double time, double dt) {
+    spdlog::info("Initializing tower.");
+
     // mappings
     compute_mapping_aero2elasto();
     compute_mapping_elasto2aero();
     // update position of aero points
     update_positions_aero();
+
+    spdlog::info("Initializing tower finished.");
 }
 
 void Tower::prestep(double time, double dt) {
@@ -29,9 +35,13 @@ void Tower::poststep(double time, double dt) {
 }
 
 void Tower::build() {
+    spdlog::info("Building tower.");
+
     // build
     elasto.build();
     aero.build();
+
+    spdlog::info("Bilding tower finished.");
 }
 
 void Tower::set_discretization_elasto(std::vector<double> fractions) {

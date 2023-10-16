@@ -4,7 +4,7 @@
 #include "seahowl/elasto/rotor_elasto.h"
 #include "seahowl/aero/rotor_aero.h"
 
-#include <iostream>
+#include <spdlog/spdlog.h>
 
 using namespace seahowl::servo;
 
@@ -57,8 +57,7 @@ void ControllerVariableTorque::step(double time, double dt, const seahowl::core:
             torque_elec = 0.0;
         }
     } else {
-        std::cout << "Warning: target RPM of controller is too low (" + std::to_string(target_rpm) + "), not applied."
-                  << std::endl;
+        spdlog::warn("Warning: target RPM of controller is too low (" + std::to_string(target_rpm) + "), not applied.");
     }
 }
 

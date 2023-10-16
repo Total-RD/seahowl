@@ -64,6 +64,9 @@ find_package(
 # JSON Parser library
 find_package(nlohmann_json REQUIRED)
 
+# Logging library
+find_package(spdlog REQUIRED)
+
 # AeroDyn module
 if(SEAHOWL_ENABLE_AERODYN)
     find_package(AERODYN REQUIRED)
@@ -330,7 +333,7 @@ target_link_options(
 
 target_link_libraries(seahowl_core
     PUBLIC Eigen3::Eigen
-    PRIVATE nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES}
+    PRIVATE nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES} spdlog::spdlog
 )
 
 if (SEAHOWL_ENABLE_HYDROCHRONO)
@@ -369,7 +372,7 @@ target_compile_features(seahowl_driver PRIVATE cxx_std_17)
 
 target_compile_options(seahowl_driver PRIVATE ${CHRONO_CXX_FLAGS})
 
-target_link_libraries(seahowl_driver PRIVATE seahowl_core nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES})
+target_link_libraries(seahowl_driver PRIVATE seahowl_core nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES} spdlog::spdlog)
 
 if (SEAHOWL_ENABLE_HYDROCHRONO)
     target_link_libraries(seahowl_driver PRIVATE HydroChrono::HydroChrono)

@@ -5,7 +5,7 @@
 #include "seahowl/aero/blade_aero.h"
 #include "seahowl/aero/tower_aero.h"
 
-#include <iostream>
+#include <spdlog/spdlog.h>
 
 using seahowl::Vector2d;
 using seahowl::Vector3d;
@@ -177,14 +177,12 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
             (fabs(alpha - alpha_previous) <= tol_abs)) {
             break;
         } else if (ii >= max_iter) {
-            std::cout << "Warning: could not converge to new induction factor after " + std::to_string(ii) +
-                             " iterations. Axial: " + std::to_string(aa) +
-                             ", previous: " + std::to_string(aa_previous) + ". Tangential: " + std::to_string(ap) +
-                             ", previous: " + std::to_string(ap_previous) + ". Alpha: " + std::to_string(alpha) +
-                             ", previous: " + std::to_string(alpha_previous) + ". Local velocity in: (" +
-                             std::to_string(local_velocity_rotor0.x()) + ", " +
-                             std::to_string(local_velocity_rotor0.y()) + ")."
-                      << std::endl;
+            spdlog::warn("Warning: could not converge to new induction factor after " + std::to_string(ii) +
+                         " iterations. Axial: " + std::to_string(aa) + ", previous: " + std::to_string(aa_previous) +
+                         ". Tangential: " + std::to_string(ap) + ", previous: " + std::to_string(ap_previous) +
+                         ". Alpha: " + std::to_string(alpha) + ", previous: " + std::to_string(alpha_previous) +
+                         ". Local velocity in: (" + std::to_string(local_velocity_rotor0.x()) + ", " +
+                         std::to_string(local_velocity_rotor0.y()) + ").");
         }
     }
 

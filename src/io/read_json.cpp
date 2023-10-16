@@ -30,9 +30,9 @@
 #include <memory>
 #include <vector>
 #include <fstream>
-#include <iostream>
 #include <typeinfo>
 #include <filesystem>
+#include <spdlog/spdlog.h>
 namespace fs = std::filesystem;
 using std::filesystem::path;
 using std::filesystem::absolute;
@@ -231,8 +231,10 @@ void populate_blade_aero_from_json(std::string filepath, seahowl::aero::BladeAer
 }
 
 void populate_blade_from_json(std::string filepath, seahowl::core::Blade& blade) {
+    spdlog::info("Populating blade from " + filepath + " file.");
     populate_blade_elasto_from_json(filepath, blade.elasto);
     populate_blade_aero_from_json(filepath, blade.aero);
+    spdlog::info("Populating blade finished.");
 }
 
 std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points_from_json(
@@ -334,11 +336,13 @@ void populate_tower_aero_from_json(std::string filepath, seahowl::aero::TowerAer
 }
 
 void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower) {
+    spdlog::info("Populating tower from " + filepath + " file.");
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
     populate_tower_elasto_from_json(filepath, tower.elasto);
     populate_tower_aero_from_json(filepath, tower.aero);
+    spdlog::info("Populating tower finished.");
 }
 
 void populate_rna_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
@@ -396,6 +400,7 @@ void populate_rna_aero_from_json(std::string filepath, seahowl::aero::RotorNacel
 }
 
 void populate_rna_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rna) {
+    spdlog::info("Populating RNA from " + filepath + " file.");
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -407,9 +412,11 @@ void populate_rna_from_json(std::string filepath, seahowl::core::RotorNacelleAss
 
     populate_rna_elasto_from_json(filepath, rna.elasto);
     populate_rna_aero_from_json(filepath, rna.aero);
+    spdlog::info("Populating RNA finished.");
 }
 
 void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& turbine) {
+    spdlog::info("Populating turbine from " + filepath + " file.");
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -429,7 +436,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
 
     if (rotor_json.at("type").get<std::string>() == "disk") {
         turbine.aero.use_disktheory = true;
-        std::cout << "Aerodynamic model : DISK THEORY" << std::endl;
+        spdlog::info("Aerodynamic model: Actuator Disk Theory");
         // get rotor performance from table
         if (!rotor_json.contains("performance_file")) {
             throw std::runtime_error("The \"performance_file\" key must be given for actuator disk rotor.");
@@ -438,7 +445,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
         if (turbine.aero.use_aerodyn == true)
             throw std::runtime_error("When Disk Theory is activated, you can't ask for AeroDyn module.");
     } else
-        std::cout << "Aerodynamic model : BEM THEORY" << std::endl;
+        spdlog::info("Aerodynamic model: Blade Element Momentum Theory");
 
     // blades
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
@@ -596,9 +603,11 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
             throw std::runtime_error("Type of floater defined in turbine json file does not exist.");
         }
     }
+    spdlog::info("Populating turbine finished.");
 }
 
 void populate_system_from_json(std::string filepath, seahowl::core::System& system_core) {
+    spdlog::info("Populating system from " + filepath + " file.");
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -713,6 +722,7 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
                 std::make_shared<seahowl::aero::AeroDynAdapter>(aerodyn_filepath, inflowwind_filepath);
         }
 #endif
+
         // build turbine
         turbine.build();
         // rotate turbine to align tower with gravity vector
@@ -748,4 +758,6 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
 
     // assemble whole system (Chrono)
     system_core.assemble();
+
+    spdlog::info("Populating system finished.");
 }

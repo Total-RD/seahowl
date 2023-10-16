@@ -5,6 +5,7 @@
 #include "seahowl/aero/blade_aero.h"
 
 #include <memory>
+#include <spdlog/spdlog.h>
 
 using namespace seahowl::core;
 using namespace seahowl::elasto;
@@ -14,11 +15,15 @@ using seahowl::Vector3d;
 Blade::Blade(seahowl::elasto::BladeElasto& elasto, seahowl::aero::BladeAero& aero) : elasto(elasto), aero(aero) {}
 
 void Blade::initialize(double time, double dt) {
+    spdlog::info("Initializing blade.");
+
     // mappings
     compute_mapping_aero2elasto();
     compute_mapping_elasto2aero();
     // update position of aero points
     update_positions_aero();
+
+    spdlog::info("Initializing blade finished.");
 }
 
 void Blade::prestep(double time, double dt) {
@@ -32,9 +37,13 @@ void Blade::poststep(double time, double dt) {
 }
 
 void Blade::build() {
+    spdlog::info("Building blade.");
+
     // build aero & elasto
     elasto.build();
     aero.build();
+
+    spdlog::info("Building blade finished.");
 }
 
 void Blade::set_discretization_elasto(std::vector<double> fractions) {

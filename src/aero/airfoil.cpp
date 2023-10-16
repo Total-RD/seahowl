@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 #include <string>
-#include <iostream>
 
 using seahowl::aero::AirfoilCoefficients;
 using seahowl::aero::AirfoilProperties;

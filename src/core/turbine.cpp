@@ -6,6 +6,8 @@
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/servo/controller.h"
 
+#include <spdlog/spdlog.h>
+
 using namespace seahowl::core;
 using namespace seahowl::servo;
 using namespace seahowl::elasto;
@@ -16,11 +18,15 @@ Turbine::Turbine(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineA
 }
 
 void Turbine::initialize(double time, double dt) {
+    spdlog::info("Initializing turbine.");
+
     rna.initialize(time, dt);
     tower.initialize(time, dt);
     controller->initialize(time, dt, *this);
 
     aero.initialize(time, dt);
+
+    spdlog::info("Initializing turbine finished.");
 }
 
 void Turbine::prestep(double time, double dt) {
@@ -78,8 +84,12 @@ void Turbine::poststep(double time, double dt) {
 }
 
 void Turbine::build() {
+    spdlog::info("Building turbine.");
+
     elasto.build();
     aero.build();
+
+    spdlog::info("Building turbine finished.");
 }
 
 void Turbine::translate(Vector3d translation_vector) {

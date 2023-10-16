@@ -8,7 +8,6 @@
 #include "seahowl/commons/utils.h"
 
 #include <cmath>
-#include <iostream>
 
 using seahowl::aero::BladeAero;
 using seahowl::aero::RotorNacelleAssemblyAero;
@@ -217,7 +216,6 @@ void RotorNacelleAssemblyAero::compute_aero_loads_disk(const WindModel& wind_mod
     auto load_n = 0.5 * density * vel * vel * seahowl::PI * radius * radius * ct;
     auto load_t = 0.0;
 
-    // std::cout << "RPM : " << RPM << "\n";
     if (RPM < 0.05 && RPM >= 0.0)
         load_t = 0.5 * density * vel * vel * vel * seahowl::PI * radius * radius * cp;
     else if (RPM < 0.0)

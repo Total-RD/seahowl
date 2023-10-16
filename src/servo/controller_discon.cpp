@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
-#include <iostream>
+#include <spdlog/spdlog.h>
 #include <filesystem>
 #ifdef __unix__
     #include <dlfcn.h>
@@ -452,13 +452,13 @@ void seahowl::servo::DisconController::PrintAllOut(std::ostream& ssout) const {
 }
 
 void seahowl::servo::DisconController::SetINFILE(std::string name) {
-    std::cout << "Set INFILE: '" << name << "'\n";
+    spdlog::info("Set DISCON INFILE: '" + name + "'\n");
     strcpy(accINFILE, name.c_str());
     SetAvrSWAP(50, name.length());
 }
 
 void seahowl::servo::DisconController::SetOUTNAME(std::string name) {
-    std::cout << "Set OUTNAME:'" << name << "'\n";
+    spdlog::info("Set DISCON OUTNAME:'" + name + "'\n");
     strcpy(avcOUTNAME, name.c_str());
     SetAvrSWAP(51, name.length());
 }
@@ -557,14 +557,14 @@ void seahowl::servo::DisconController::SetAvrSWAP(size_t index, float value, boo
 
     auto& ap = discon::ArrayInfo.at(index);
     if (ap.index != index) {
-        std::cerr << "WARNING: mismatch array index " << index << " and record number " << ap.index << "\n";
+        spdlog::warn("WARNING: mismatch array index {} and record number {}.\n", index, ap.index);
     }
     if (ap.inout != "in" && ap.inout != "both") {
-        std::cerr << "ERROR: avrSWAP[" << index << "] " << ap.inout << "not an input parameter!\n";
+        spdlog::warn("ERROR: avrSWAP[{}] {} not an input parameter!\n", index, ap.inout);
     }
 
     if (log)
-        std::cout << "Set: " << ap.description << ": " << value << " " << ap.unit << "\n";
+        spdlog::info("Set: {}: {} {}.\n", ap.description, value, ap.unit);
 
     avrSWAP[ap.index - 1] = value;
 }
@@ -582,15 +582,15 @@ float seahowl::servo::DisconController::GetAvrSWAP(size_t index, bool log) const
 
     auto& ap = discon::ArrayInfo.at(index);
     if (ap.index != index) {
-        std::cerr << "WARNING: mismatch array index " << index << " and record number " << ap.index << "\n";
+        spdlog::warn("WARNING: mismatch array index {} and record number {}.\n", index, ap.index);
     }
     if (ap.inout != "out" && ap.inout != "both") {
-        std::cerr << "ERROR: avrSWAP[" << index << "] " << ap.inout << "not an output parameter!\n";
+        spdlog::warn("ERROR: avrSWAP[{}] {} not an input parameter!\n", index, ap.inout);
     }
 
     auto& value = avrSWAP[index - 1];
     if (log)
-        std::cout << "Get: " << ap.description << ": " << value << " " << ap.unit << "\n";
+        spdlog::info("Get: {}: {} {}.\n", ap.description, value, ap.unit);
 
     return value;
 }

@@ -9,7 +9,6 @@
 #include "seahowl/core/system.h"
 #include "seahowl/servo/controller.h"
 
-#include <iostream>
 #include <fstream>
 #include <string>
 

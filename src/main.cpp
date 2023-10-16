@@ -27,6 +27,9 @@ using json = nlohmann::json;
 #include <seahowl/core/turbine_floating.h>
 
 #include <filesystem>  // C++17
+#include <sstream>
+#include <spdlog/spdlog.h>
+#include <spdlog/stopwatch.h>
 
 #include <seahowl/servo/controller.h>
 
@@ -34,26 +37,37 @@ using std::filesystem::path;
 using std::filesystem::create_directory;
 using std::filesystem::remove_all;
 
-void output_results(seahowl::core::System& system_core, int step) {
+void output_results(seahowl::core::System& system_core) {
     // output
     auto& turbine = *system_core.turbines[0];
-    std::cout << "time: " << system_core.get_time() << ", step: " << step << ", rpm: " << turbine.rna.elasto.get_rpm();
+
+    // send info to logger
+    std::stringstream output_sstring;
+    output_sstring << "turbine info -> rpm: " << std::setprecision(3) << turbine.rna.elasto.get_rpm()
+                   << ", power: " << turbine.get_generated_power();
     int nblades = turbine.rna.blades.size();
     if (nblades <= 3) {
         for (int ii = 0; ii < turbine.rna.blades.size(); ii++) {
-            std::cout << ", pitch" << ii << ": " << turbine.rna.blades[ii]->elasto.pitch;
+            output_sstring << ", pitch" << ii + 1 << ": " << turbine.rna.elasto.rotor->pitch_collective;
         }
     } else {
-        std::cout << ", pitch: " << turbine.rna.elasto.rotor->pitch_collective;
+        output_sstring << ", pitch: " << turbine.rna.elasto.rotor->pitch_collective;
     }
-    std::cout << ", Power: " << turbine.get_generated_power();
-    std::cout << std::endl;
+    spdlog::info(output_sstring.str());
+
+    // output info in file
     write_turbine_info_to_csv("./output/output", system_core, system_core.get_time());
 }
 
 /**@brief Driver main function */
 int main(int argc, char* argv[]) {
+    // stopwatch before doing anything
+    spdlog::stopwatch sw0;
+
     // SETUP
+    spdlog::info("**************************************************************");
+    spdlog::info("START INITIAL SETUP.");
+    spdlog::info("**************************************************************");
 
     auto DATADIR = absolute(path(u8"../data"));
     auto logoname = (DATADIR / ".." / "doc" / "source" / "totalenergies_alpha.png").generic_string();
@@ -141,7 +155,7 @@ int main(int argc, char* argv[]) {
     system_core.initialize(system_elasto->get_time(), dt);
 
     int step = 0;
-    output_results(system_core, step);
+    output_results(system_core);
 #ifdef HAVE_VTK
     if (output_vtk) {
         for (auto const& vtk_output : vtk_outputs) {
@@ -151,6 +165,12 @@ int main(int argc, char* argv[]) {
 #endif
 
     double time_outputs = dt_outputs;
+    spdlog::info("**************************************************************");
+    spdlog::info("START MAIN SIMULATION LOOP.");
+    spdlog::info("Initial setup time: {:.3}s.", sw0);
+    spdlog::info("Resetting simulation stopwatch to 0s.");
+    spdlog::info("**************************************************************");
+    spdlog::stopwatch sw_total;
     while (system_elasto->get_time() < t_end) {
         // prestep
         system_core.prestep(system_core.get_time(), dt);
@@ -164,7 +184,8 @@ int main(int argc, char* argv[]) {
 
         // output
         if (system_core.get_time() >= (time_outputs - 1e-6)) {
-            output_results(system_core, step);
+            spdlog::info("time: {:.3}s, step: {}, stopwatch: {:.3}s", system_elasto->get_time(), step, sw_total);
+            output_results(system_core);
 #ifdef HAVE_VTK
             if (output_vtk) {
                 for (auto const& vtk_output : vtk_outputs) {
