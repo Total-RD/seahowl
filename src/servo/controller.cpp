@@ -50,6 +50,9 @@ void ControllerVariableTorque::step(double time, double dt, const seahowl::core:
         torque_aero += turbine.rna.aero.torque_aero;
 
         torque_elec = torque_aero * std::pow(rpm / target_rpm, 2);
+        // torque_elec must be the torque at the generator --> scaled by gearbox ratio and efficiency
+        torque_elec *= turbine.gearbox_efficiency / turbine.gearbox_ratio;
+        // check if rpm and target_rpm have the same sign
         if (rpm / target_rpm < 0.0) {
             torque_elec = 0.0;
         }
