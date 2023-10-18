@@ -110,7 +110,7 @@ TEST(test_rotor, mass) {
     }
 
     auto rna = seahowl::elasto::RotorNacelleAssemblyElasto();
-    populate_rotor_elasto_from_json((DATADIR / "rna.json").generic_string(), rna);
+    populate_rna_elasto_from_json((DATADIR / "rna.json").generic_string(), rna);
     rna.rotor->blades = blades;
     rna.build();
     rna.assemble(system_elasto);

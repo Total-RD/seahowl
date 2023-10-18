@@ -341,7 +341,7 @@ void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower)
     populate_tower_aero_from_json(filepath, tower.aero);
 }
 
-void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
+void populate_rna_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -378,7 +378,7 @@ void populate_rotor_elasto_from_json(std::string filepath, seahowl::elasto::Roto
     rna.shaft.tilt *= PI / 180.0;
 }
 
-void populate_rotor_aero_from_json(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
+void populate_rna_aero_from_json(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
     if (!fs::exists(filepath)) {
         throw std::runtime_error("File " + filepath + " does not exist.");
     }
@@ -405,8 +405,8 @@ void populate_rna_from_json(std::string filepath, seahowl::core::RotorNacelleAss
     json json_obj;
     json_file >> json_obj;
 
-    populate_rotor_elasto_from_json(filepath, rna.elasto);
-    populate_rotor_aero_from_json(filepath, rna.aero);
+    populate_rna_elasto_from_json(filepath, rna.elasto);
+    populate_rna_aero_from_json(filepath, rna.aero);
 }
 
 void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& turbine) {

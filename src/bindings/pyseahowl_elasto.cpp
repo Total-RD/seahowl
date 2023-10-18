@@ -8,6 +8,7 @@
 #include <seahowl/elasto/rotor_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/elasto/turbine_elasto.h>
+#include <seahowl/elasto/system_elasto.h>
 #include <seahowl/elasto/chrono_adapters.h>
 
 namespace py = pybind11;
@@ -53,6 +54,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("get_reaction_torque", &seahowl::elasto::Link::get_reaction_torque);
     py::class_<seahowl::elasto::MeshElasto, std::shared_ptr<seahowl::elasto::MeshElasto>>(m_elasto, "MeshElasto");
     py::class_<seahowl::elasto::SystemElasto, std::shared_ptr<seahowl::elasto::SystemElasto>>(m_elasto, "SystemElasto")
+        .def("step", &seahowl::elasto::SystemElasto::step)
         .def("get_time", &seahowl::elasto::SystemElasto::get_time)
         .def("do_statics", &seahowl::elasto::SystemElasto::do_statics);
 
@@ -128,6 +130,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
     py::class_<seahowl::elasto::TowerElasto, std::shared_ptr<seahowl::elasto::TowerElasto>,
                seahowl::elasto::ComponentElastoFEA>(m_elasto, "TowerElasto")
         .def(py::init<>())
+        .def("build", &seahowl::elasto::TowerElasto::build)
+        .def("assemble", &seahowl::elasto::TowerElasto::assemble)
         .def("get_tower_base_moment", &seahowl::elasto::TowerElasto::get_tower_base_moment);
 
     // elasto/turbine_elasto.h
