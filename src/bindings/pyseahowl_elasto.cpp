@@ -56,6 +56,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
     py::class_<seahowl::elasto::SystemElasto, std::shared_ptr<seahowl::elasto::SystemElasto>>(m_elasto, "SystemElasto")
         .def("step", &seahowl::elasto::SystemElasto::step)
         .def("get_time", &seahowl::elasto::SystemElasto::get_time)
+        .def("set_gravitational_acceleration", &seahowl::elasto::SystemElasto::set_gravitational_acceleration)
+        .def("get_gravitational_acceleration", &seahowl::elasto::SystemElasto::get_gravitational_acceleration)
         .def("do_statics", &seahowl::elasto::SystemElasto::do_statics);
 
     // elasto/chrono_adapters.h
