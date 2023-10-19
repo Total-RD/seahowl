@@ -15,15 +15,14 @@ using seahowl::Vector3d;
 Blade::Blade(seahowl::elasto::BladeElasto& elasto, seahowl::aero::BladeAero& aero) : elasto(elasto), aero(aero) {}
 
 void Blade::initialize(double time, double dt) {
-    spdlog::info("Initializing blade.");
-
     // mappings
     compute_mapping_aero2elasto();
     compute_mapping_elasto2aero();
     // update position of aero points
     update_positions_aero();
 
-    spdlog::info("Initializing blade finished.");
+    spdlog::info("Initialized blade of total mass {:.4}kg with {} elasto and {} aero elements.", elasto.get_mass(),
+                 elasto.discretization_fractions.size() - 1, aero.elements.size());
 }
 
 void Blade::prestep(double time, double dt) {
@@ -37,13 +36,9 @@ void Blade::poststep(double time, double dt) {
 }
 
 void Blade::build() {
-    spdlog::info("Building blade.");
-
     // build aero & elasto
     elasto.build();
     aero.build();
-
-    spdlog::info("Building blade finished.");
 }
 
 void Blade::set_discretization_elasto(std::vector<double> fractions) {
@@ -97,7 +92,9 @@ void Blade::update_positions_aero() {
 void Blade::update_loads_elasto() {
     elasto.reset_loads();
     if (aero.loads.size() != mapping_aero2elasto_elements.size()) {
-        throw std::runtime_error("length of vector of loads and aero to elasto mapping do not match.");
+        spdlog::error("Blade: length of vector of loads ({}) and length of aero to elasto mapping ({}) do not match.",
+                      aero.loads.size(), mapping_aero2elasto_elements.size());
+        exit(1);
     }
     for (int ii = 0; ii < aero.loads.size(); ii++) {
         elasto.accumulate_load_along_blade(aero.loads[ii], mapping_aero2elasto_elements[ii].index,

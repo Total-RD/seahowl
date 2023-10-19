@@ -2,6 +2,8 @@
 
 #include "seahowl/aero/airfoil.h"
 
+#include <spdlog/spdlog.h>
+
 using namespace seahowl::aero;
 
 BladeReferencePointAero::BladeReferencePointAero() {}
@@ -26,7 +28,8 @@ BladeReferencePointAero BladeReferencePointAero::operator+(const BladeReferenceP
     new_point.structural_twist += other.structural_twist;
     for (int ii = 0; ii < airfoil_properties.size(); ii++) {
         if (airfoil_properties[ii].reynolds_number != other.airfoil_properties[ii].reynolds_number) {
-            throw std::runtime_error("Trying to add airfoil properties with different Reynolds number.");
+            spdlog::error("Trying to add airfoil properties with different Reynolds number.");
+            exit(1);
         }
         new_point.airfoil_properties[ii] = airfoil_properties[ii] + other.airfoil_properties[ii];
     }

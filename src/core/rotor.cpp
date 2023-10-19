@@ -19,8 +19,6 @@ RotorNacelleAssembly::RotorNacelleAssembly(seahowl::elasto::RotorNacelleAssembly
     : elasto(elasto), aero(aero) {}
 
 void RotorNacelleAssembly::initialize(double time, double dt) {
-    spdlog::info("Initializing RNA.");
-
     for (auto& blade : blades) {
         blade->initialize(time, dt);
         // update initial azimuth of aero blade
@@ -30,7 +28,7 @@ void RotorNacelleAssembly::initialize(double time, double dt) {
     // initialize aero variables after updating positions
     aero.initialize();
 
-    spdlog::info("Initializing RNA finished.");
+    spdlog::info("Initialized RNA of total mass {:.4}kg.", elasto.get_mass());
 }
 
 void RotorNacelleAssembly::prestep(double time, double dt) {
@@ -68,14 +66,10 @@ void RotorNacelleAssembly::update_positions_aero() {
 }
 
 void RotorNacelleAssembly::build() {
-    spdlog::info("Building RNA.");
-
     // build elasto
     elasto.build();
     // update hub position from elasto
     update_positions_aero();
     // build aero
     aero.build();
-
-    spdlog::info("Building RNA finished.");
 }

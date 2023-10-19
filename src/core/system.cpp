@@ -5,8 +5,8 @@
 #include "seahowl/elasto/turbine_elasto.h"
 #include "seahowl/aero/turbine_aero.h"
 #include "seahowl/aero/wind_models.h"
-#include <vector>
 
+#include <vector>
 #include <spdlog/spdlog.h>
 
 using namespace seahowl::core;
@@ -14,13 +14,11 @@ using namespace seahowl::core;
 System::System() {}
 
 void System::initialize(double time, double dt) {
-    spdlog::info("Initializing system.");
-
     for (auto& turbine : turbines) {
         turbine->initialize(time, dt);
     }
 
-    spdlog::info("Initializing system finished.");
+    spdlog::info("Initialized system with number of turbines: {}.", turbines.size());
 }
 
 void System::prestep(double time, double dt) {
@@ -44,13 +42,9 @@ void System::poststep(double time, double dt) {
 }
 
 void System::assemble() {
-    spdlog::info("Assembling system.");
-
     for (auto& turbine : turbines) {
         turbine->elasto.assemble(*(system_elasto.get()));
     }
-
-    spdlog::info("Assembling system finished.");
 }
 
 double System::get_time() {

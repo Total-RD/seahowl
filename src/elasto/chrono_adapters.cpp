@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <memory>
+#include <spdlog/spdlog.h>
 
 namespace seahowl {
 namespace elasto {
@@ -437,7 +438,8 @@ void NodeElastoChronoD::reset_loads() {
 
 Vector3d NodeElastoChronoD::get_force(bool is_local) const {
     if (is_local) {
-        throw std::runtime_error("Cannot get force locally from ChNodeFEAxyzD.");
+        spdlog::error("Cannot get force locally from ChNodeFEAxyzD.");
+        exit(1);
     } else {
         return ch2vec(chobj->GetForce());
     }
@@ -682,7 +684,8 @@ Vector3d LinkChrono::get_reaction_torque() const {
 LinkChronoCable::LinkChronoCable() {}
 
 void LinkChronoCable::initialize(const BodyElasto& body1, const BodyElasto& body2) {
-    throw std::runtime_error("Cannot link 2 bodies with cable link.");
+    spdlog::error("Cannot link 2 bodies with cable link.");
+    exit(1);
 }
 
 void LinkChronoCable::initialize(const NodeElasto& node1, const BodyElasto& body2) {
@@ -703,7 +706,8 @@ void LinkChronoCable::initialize(const NodeElasto& node1, const NodeElasto& node
 
 void LinkChronoCable::set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) {
     if (surge != false || sway != false || heave != false || roll != true || pitch != true || yaw != true) {
-        throw std::runtime_error("Cable links can only have spherical joint constraints.");
+        spdlog::error("Cable links can only have spherical joint constraints.");
+        exit(1);
     }
 }
 

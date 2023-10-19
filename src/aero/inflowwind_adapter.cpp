@@ -5,9 +5,10 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <spdlog/spdlog.h>
 
 seahowl::aero::InflowWindAdapter::InflowWindAdapter(std::string InflowInfile, std::string WindWndfile) {
-    std::cout << "Using InflowWind" << std::endl;
+    spdlog::info("Using InflowWind.");
     pImpl.reset(new seahowl::aero::InflowWindLib);
     pImpl->SetIFWINFILE(InflowInfile);
     pImpl->SetWNDINFILE(WindWndfile);
@@ -24,11 +25,12 @@ void seahowl::aero::InflowWindAdapter::end() {
     pImpl->End();
 }
 
-seahowl::Vector3d seahowl::aero::InflowWindAdapter::get_wind_velocity(const seahowl::Vector3d& position, double time) const {
+seahowl::Vector3d seahowl::aero::InflowWindAdapter::get_wind_velocity(const seahowl::Vector3d& position,
+                                                                      double time) const {
     float* Pos_C = new float[3];
     for (int i = 0; i < 3; i++) {
         Pos_C[i] = position[i];
-    } 
+    }
 
     pImpl->SetPos(Pos_C);
     pImpl->SetTime(time);
@@ -39,13 +41,14 @@ seahowl::Vector3d seahowl::aero::InflowWindAdapter::get_wind_velocity(const seah
 }
 
 void seahowl::aero::InflowWindLib::SetIFWINFILE(std::string name) {
-    std::cout << "Set InflowWind INFILE: '" << name << "'\n";
+    spdlog::info("Set InflowWind INFILE: {name}.", name);
     std::ifstream file(name);
     if (!file.is_open()) {
-        throw std::runtime_error("Failed to open inflowwind input file.");
+        spdlog::error("Failed to open inflowwind input file.");
+        exit(1);
     }
     std::string line;
-    while (std::getline(file,line)) {
+    while (std::getline(file, line)) {
         IfWinputFileString += line + '\0';
     }
     IfWinputFileStringLength = IfWinputFileString.length();
@@ -53,13 +56,14 @@ void seahowl::aero::InflowWindLib::SetIFWINFILE(std::string name) {
 }
 
 void seahowl::aero::InflowWindLib::SetWNDINFILE(std::string name) {
-    std::cout << "Set wind.wnd INFILE: '" << name << "'\n";
+    spdlog::info("Set wind.wnd INFILE: {}.", name);
     std::ifstream file(name);
     if (!file.is_open()) {
-        throw std::runtime_error("Failed to open wind.wnd input file.");
+        spdlog::error("Failed to open wind.wnd input file.");
+        exit(1);
     }
     std::string line;
-    while (std::getline(file,line)) {
+    while (std::getline(file, line)) {
         InputUniformString += line + '\0';
     }
     InputUniformStringLength = InputUniformString.length();
@@ -98,8 +102,8 @@ void seahowl::aero::InflowWindLib::Init() {
     const char* IfWinputFile = IfWinputFileString.c_str();
     const char* IfWUniformFile = InputUniformString.c_str();
 
-    IfW_C_Init(&IfWinputFile, IfWinputFileStringLength, &IfWUniformFile, InputUniformStringLength, 
-               NumWindPts, DT, NumChannels, OutputChannelNames, OutputChannelUnits, ErrStat, ErrMsg);
+    IfW_C_Init(&IfWinputFile, IfWinputFileStringLength, &IfWUniformFile, InputUniformStringLength, NumWindPts, DT,
+               NumChannels, OutputChannelNames, OutputChannelUnits, ErrStat, ErrMsg);
     CheckError();
 }
 
@@ -111,6 +115,6 @@ void seahowl::aero::InflowWindLib::Calcul() {
 }
 
 void seahowl::aero::InflowWindLib::End() {
-    IfW_C_End(ErrStat, ErrMsg); 
+    IfW_C_End(ErrStat, ErrMsg);
     CheckError();
 }

@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <numeric>
+#include <spdlog/spdlog.h>
 
 using namespace seahowl::elasto;
 using namespace seahowl;
@@ -94,8 +95,8 @@ void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
                                                  const Vector3d& offset) {
     // sanity check
     if (element_index >= elements.size() || element_index < 0) {
-        throw std::runtime_error("Element index " + std::to_string(element_index) + " does not exist (max " +
-                                 std::to_string(elements.size()) + ").");
+        spdlog::error("Element index {} does not exist (number of elements: {}).", element_index, elements.size());
+        exit(1);
     }
 
     // get position and rotation

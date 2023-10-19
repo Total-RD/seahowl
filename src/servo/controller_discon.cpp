@@ -4,7 +4,6 @@
 #include "seahowl/elasto/rotor_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 
-#include <stdexcept>
 #include <vector>
 #include <string>
 #include <spdlog/spdlog.h>
@@ -21,7 +20,8 @@ seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::stri
     has_torque_control = true;
 
     if (!std::filesystem::exists(std::filesystem::path(libfile_in))) {
-        throw std::runtime_error("Dynamic library path for DISCON routine does not exist: " + libfile_in + ".");
+        spdlog::critical("Dynamic library path for DISCON routine does not exist: {}.", libfile_in);
+        exit(1);
     }
 
     libfile = libfile_in;
@@ -128,7 +128,8 @@ double seahowl::servo::ControllerDISCON::get_pitch_blade(int index_blade) const 
             pitch = pImpl.GetAvrSWAP(44);
             break;
         default:
-            throw std::runtime_error("Index of blade can only be (0, 1, 2).");
+            spdlog::error("DISCON: index of blade can only be (0, 1, 2).");
+            exit(1);
     }
     return pitch;
 }
@@ -452,13 +453,13 @@ void seahowl::servo::DisconController::PrintAllOut(std::ostream& ssout) const {
 }
 
 void seahowl::servo::DisconController::SetINFILE(std::string name) {
-    spdlog::info("Set DISCON INFILE: '" + name + "'\n");
+    spdlog::debug("Set DISCON INFILE: '" + name + "'\n");
     strcpy(accINFILE, name.c_str());
     SetAvrSWAP(50, name.length());
 }
 
 void seahowl::servo::DisconController::SetOUTNAME(std::string name) {
-    spdlog::info("Set DISCON OUTNAME:'" + name + "'\n");
+    spdlog::debug("Set DISCON OUTNAME:'" + name + "'\n");
     strcpy(avcOUTNAME, name.c_str());
     SetAvrSWAP(51, name.length());
 }
@@ -481,7 +482,8 @@ void seahowl::servo::DisconController::SetPitchBlade(int index_blade, double pit
             SetAvrSWAP(34, static_cast<float>(pitch_angle));
             break;
         default:
-            throw std::runtime_error("Index of blade can only be (0, 1, 2).");
+            spdlog::error("DISCON: index of blade can only be (0, 1, 2).");
+            exit(1);
     }
 }
 
@@ -500,7 +502,8 @@ void seahowl::servo::DisconController::SetRootMomentBlade(int index_blade, doubl
             SetAvrSWAP(71, static_cast<float>(edge));
             break;
         default:
-            throw std::runtime_error("Index of blade can only be (0, 1, 2).");
+            spdlog::error("DISCON: index of blade can only be (0, 1, 2).");
+            exit(1);
     }
 }
 
@@ -551,46 +554,50 @@ void seahowl::servo::DisconController::SetNumberOfBlades(size_t nblades) {
     SetAvrSWAP(61, nblades);
 }
 
-void seahowl::servo::DisconController::SetAvrSWAP(size_t index, float value, bool log) {
-    if (index < 1 || index > MAX_SWAP)
-        throw std::runtime_error("avrSWAP index out of bounds");
+void seahowl::servo::DisconController::SetAvrSWAP(size_t index, float value) {
+    if (index < 1 || index > MAX_SWAP) {
+        spdlog::error("DISCON: avrSWAP index out of bounds");
+        exit(1);
+    }
 
     auto& ap = discon::ArrayInfo.at(index);
     if (ap.index != index) {
-        spdlog::warn("WARNING: mismatch array index {} and record number {}.\n", index, ap.index);
+        spdlog::warn("DISCON: mismatch array index {} and record number {}.", index, ap.index);
     }
     if (ap.inout != "in" && ap.inout != "both") {
-        spdlog::warn("ERROR: avrSWAP[{}] {} not an input parameter!\n", index, ap.inout);
+        spdlog::error("DISCON: avrSWAP[{}] {} not an input parameter!", index, ap.inout);
+        exit(1);
     }
 
-    if (log)
-        spdlog::info("Set: {}: {} {}.\n", ap.description, value, ap.unit);
+    spdlog::trace("DISCON: set {}: {} {}.\n", ap.description, value, ap.unit);
 
     avrSWAP[ap.index - 1] = value;
 }
 
-void seahowl::servo::DisconController::SetAvrSWAP(size_t index, size_t value, bool log) {
+void seahowl::servo::DisconController::SetAvrSWAP(size_t index, size_t value) {
     SetAvrSWAP(index, static_cast<float>(value));
 }
-void seahowl::servo::DisconController::SetAvrSWAP(size_t index, double value, bool log) {
+void seahowl::servo::DisconController::SetAvrSWAP(size_t index, double value) {
     SetAvrSWAP(index, static_cast<float>(value));
 }
 
-float seahowl::servo::DisconController::GetAvrSWAP(size_t index, bool log) const {
-    if (index < 1 || index > MAX_SWAP)
-        throw std::runtime_error("avrSWAP index out of bounds");
+float seahowl::servo::DisconController::GetAvrSWAP(size_t index) const {
+    if (index < 1 || index > MAX_SWAP) {
+        spdlog::error("DISCON: avrSWAP index out of bounds");
+        exit(1);
+    }
 
     auto& ap = discon::ArrayInfo.at(index);
     if (ap.index != index) {
-        spdlog::warn("WARNING: mismatch array index {} and record number {}.\n", index, ap.index);
+        spdlog::warn("DISCON: mismatch array index {} and record number {}.", index, ap.index);
     }
     if (ap.inout != "out" && ap.inout != "both") {
-        spdlog::warn("ERROR: avrSWAP[{}] {} not an input parameter!\n", index, ap.inout);
+        spdlog::error("DISCON: avrSWAP[{}] {} not an input parameter!", index, ap.inout);
+        exit(1);
     }
 
     auto& value = avrSWAP[index - 1];
-    if (log)
-        spdlog::info("Get: {}: {} {}.\n", ap.description, value, ap.unit);
+    spdlog::trace("DISCON: get {}: {} {}.", ap.description, value, ap.unit);
 
     return value;
 }

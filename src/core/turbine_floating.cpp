@@ -2,6 +2,8 @@
 #include "seahowl/elasto/chrono_adapters.h"
 #include "seahowl/aero/turbine_aero.h"
 
+#include <spdlog/spdlog.h>
+
 using namespace seahowl::core;
 using namespace seahowl::servo;
 using namespace seahowl::elasto;
@@ -16,6 +18,8 @@ void TurbineFloating::initialize(double time, double dt) {
     if (elasto.floater) {
         elasto.floater->initialize();
     }
+
+    spdlog::info("Initialized turbine of total mass {:.4}kg.", elasto.get_mass());
 }
 
 void TurbineFloating::prestep(double time, double dt) {

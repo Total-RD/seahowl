@@ -177,12 +177,11 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
             (fabs(alpha - alpha_previous) <= tol_abs)) {
             break;
         } else if (ii >= max_iter) {
-            spdlog::warn("Warning: could not converge to new induction factor after " + std::to_string(ii) +
-                         " iterations. Axial: " + std::to_string(aa) + ", previous: " + std::to_string(aa_previous) +
-                         ". Tangential: " + std::to_string(ap) + ", previous: " + std::to_string(ap_previous) +
-                         ". Alpha: " + std::to_string(alpha) + ", previous: " + std::to_string(alpha_previous) +
-                         ". Local velocity in: (" + std::to_string(local_velocity_rotor0.x()) + ", " +
-                         std::to_string(local_velocity_rotor0.y()) + ").");
+            spdlog::warn("Could not converge to new induction factor after {} iterations.", ii);
+            spdlog::warn("    Local velocity: ({:.4}, {:.4}).", local_velocity_rotor0.x(), local_velocity_rotor0.y());
+            spdlog::warn("    Alpha: {:.4} (previous: {:.4})", alpha, alpha_previous);
+            spdlog::warn("    Axial: {:.4} (previous: {:.4})", aa, aa_previous);
+            spdlog::warn("    Tangential: {:.4} (previous: {:.4})", ap, ap_previous);
         }
     }
 

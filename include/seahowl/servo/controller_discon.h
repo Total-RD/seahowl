@@ -133,20 +133,18 @@ struct DisconController {
     /// </summary>
     /// <param name="index">Index Fortran. (eg +1 compared to C)</param>
     /// <param name="value">The value to set</param>
-    /// <param name="log">If true print the value on standard output</param>
-    void SetAvrSWAP(size_t index, float value, bool log = false);
+    void SetAvrSWAP(size_t index, float value);
 
     // Helper to force the cast of value to float
-    void SetAvrSWAP(size_t index, size_t value, bool log = false);
+    void SetAvrSWAP(size_t index, size_t value);
     // Helper to force the cast of value to float
-    void SetAvrSWAP(size_t index, double value, bool log = false);
+    void SetAvrSWAP(size_t index, double value);
 
     /// <summary>
     /// Get Value from avrSWAP array of DISCON
     /// </summary>
     /// <param name="index">Index Fortran. (eg +1 compared to C)</param>
-    /// <param name="log">If true print the value on standard output</param>
-    float GetAvrSWAP(size_t index, bool log = false) const;
+    float GetAvrSWAP(size_t index) const;
 
     /// <summary>
     /// Set input filename with path relative to working directory.

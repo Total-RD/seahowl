@@ -1,16 +1,19 @@
 #include "seahowl/commons/utils.h"
 
 #include <string>
-#include <iostream>
+#include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
 
 std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
     const std::vector<double>& discretization_fractions,
     const std::vector<double>& reference_fractions) {
     // check for potential errors
     if (discretization_fractions.size() == 0) {
-        throw std::runtime_error("Cannot get discretization with empty array.");
+        spdlog::error("Cannot get discretization with empty array.");
+        exit(1);
     } else if (reference_fractions.size() < 2) {
-        throw std::runtime_error("Cannot get discretization with reference array with less than 2 elements.");
+        spdlog::error("Cannot get discretization with reference array with less than 2 elements.");
+        exit(1);
     }
 
     std::vector<DiscretizationPoint> points;
@@ -18,8 +21,8 @@ std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
         double fraction = discretization_fractions[ii];
         // check bounds
         if (fraction < 0.0 || fraction > 1.0) {
-            throw std::runtime_error("Discretization fraction must be between 0 and 1 but was " +
-                                     std::to_string(fraction) + ".");
+            spdlog::error("Discretization fraction must be between 0 and 1 but was {}.", fraction);
+            exit(1);
         }
         if (fraction == 0) {
             DiscretizationPoint point{};
@@ -64,10 +67,11 @@ double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
     }
 
     if (y0 == -99 || x0 == -99) {
-        std::cout << "x = " << x << ",  y = " << y << " , " << std::endl;
-        std::cout << "x list = " << x_list.transpose() << ",  \n"
-                  << "y list = " << y_list.transpose() << " , " << std::endl;
-        throw std::runtime_error("x or y not found in the coefficients list.");
+        spdlog::error("Bilinear interpolation failed: x or y not found in the coefficients list.");
+        spdlog::error("    x = {}, y = {},", x, y);
+        spdlog::error("    x_list = {},", x_list.transpose());
+        spdlog::error("    y_list = {}.", y_list.transpose());
+        exit(1);
     };
 
     double x_frac = (x - x_list[x0]) / (std::fabs(x_list[x0] - x_list[x0 + 1]));

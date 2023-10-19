@@ -43,7 +43,7 @@ void output_results(seahowl::core::System& system_core) {
 
     // send info to logger
     std::stringstream output_sstring;
-    output_sstring << "turbine info -> rpm: " << std::setprecision(3) << turbine.rna.elasto.get_rpm()
+    output_sstring << "    turbine info -> rpm: " << std::setprecision(3) << turbine.rna.elasto.get_rpm()
                    << ", power: " << turbine.get_generated_power();
     int nblades = turbine.rna.blades.size();
     if (nblades <= 3) {
@@ -61,6 +61,7 @@ void output_results(seahowl::core::System& system_core) {
 
 /**@brief Driver main function */
 int main(int argc, char* argv[]) {
+    spdlog::set_level(spdlog::level::info);
     // stopwatch before doing anything
     spdlog::stopwatch sw0;
 
@@ -149,9 +150,12 @@ int main(int argc, char* argv[]) {
     // initialization
     // statics
     if (statics_prestep) {
+        spdlog::info("Performing statics prestep with {} nonlinear steps.", 10);
         system_elasto->do_statics(true, 10);
+        spdlog::info("Finished statics prestep.");
     }
 
+    spdlog::info("Initializing system.");
     system_core.initialize(system_elasto->get_time(), dt);
 
     int step = 0;
@@ -184,7 +188,7 @@ int main(int argc, char* argv[]) {
 
         // output
         if (system_core.get_time() >= (time_outputs - 1e-6)) {
-            spdlog::info("time: {:.3}s, step: {}, stopwatch: {:.3}s", system_elasto->get_time(), step, sw_total);
+            spdlog::info("time: {:.6}s, step: {}, stopwatch: {:.3}s", system_elasto->get_time(), step, sw_total);
             output_results(system_core);
 #ifdef HAVE_VTK
             if (output_vtk) {

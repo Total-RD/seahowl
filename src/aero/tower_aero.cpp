@@ -5,6 +5,8 @@
 #include "seahowl/aero/reference_point_aero.h"
 #include "seahowl/aero/wind_models.h"
 
+#include <spdlog/spdlog.h>
+
 using seahowl::aero::TowerElementAero;
 using seahowl::aero::TowerAero;
 using seahowl::Vector3d;
@@ -20,7 +22,8 @@ TowerAero::TowerAero() {}
 void TowerAero::build() {
     // check that enough reference points were defined to create elements (at least 2)
     if (reference_points.size() < 2) {
-        throw std::runtime_error("Not enough aero reference points defined for tower.");
+        spdlog::error("Not enough aero reference points defined for tower ({}).", reference_points.size());
+        exit(1);
     }
 
     // check that discretization_fractions was defined, otherwise take reference point fractions

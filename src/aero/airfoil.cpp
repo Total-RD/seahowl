@@ -1,6 +1,6 @@
 #include "seahowl/aero/airfoil.h"
 
-#include <stdexcept>
+#include <spdlog/spdlog.h>
 #include <string>
 
 using seahowl::aero::AirfoilCoefficients;
@@ -106,5 +106,6 @@ AirfoilCoefficients AirfoilProperties::find_coefficients(double alpha) {
             return coefficients;
         }
     }
-    throw std::runtime_error("Could not find alpha value (" + std::to_string(alpha) + ") for airfoil.");
+    spdlog::error("Could not find airfoil coefficients for alpha value {}.", alpha);
+    exit(1);
 }

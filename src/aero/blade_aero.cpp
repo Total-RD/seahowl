@@ -4,6 +4,8 @@
 #include "seahowl/aero/reference_point_aero.h"
 #include "seahowl/aero/bemt.h"
 
+#include <spdlog/spdlog.h>
+
 using seahowl::aero::BladeNodeAero;
 using seahowl::aero::BladeElementAero;
 using seahowl::aero::BladeAero;
@@ -69,7 +71,8 @@ BladeAero::BladeAero() {}
 void BladeAero::build() {
     // check that enough reference points were defined to create elements (at least 2)
     if (reference_points.size() < 2) {
-        throw std::runtime_error("Not enough aero reference points defined for blade.");
+        spdlog::critical("Not enough aero reference points defined for blade ({}).", reference_points.size());
+        exit(1);
     }
 
     // check that discretization_fractions was defined, otherwise take reference point fractions

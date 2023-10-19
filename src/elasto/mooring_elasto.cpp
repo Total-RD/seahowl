@@ -5,6 +5,8 @@
 #include "seahowl/elasto/reference_point_elasto.h"
 #include "seahowl/elasto/chrono_adapters.h"
 
+#include <spdlog/spdlog.h>
+
 using namespace seahowl::elasto;
 
 MooringElasto::MooringElasto() {}
@@ -52,7 +54,8 @@ void MooringElasto::build_elements() {
     const auto nelements = nodes.size() - 1;
 
     if (nelements <= 0) {
-        throw std::runtime_error("Trying to build blade with no element.");
+        spdlog::error("Trying to build mooring with no element.");
+        exit(1);
     }
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {

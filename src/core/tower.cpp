@@ -13,15 +13,14 @@ using namespace seahowl::aero;
 Tower::Tower(TowerElasto& elasto, TowerAero& aero) : elasto(elasto), aero(aero) {}
 
 void Tower::initialize(double time, double dt) {
-    spdlog::info("Initializing tower.");
-
     // mappings
     compute_mapping_aero2elasto();
     compute_mapping_elasto2aero();
     // update position of aero points
     update_positions_aero();
 
-    spdlog::info("Initializing tower finished.");
+    spdlog::info("Initialized tower of total mass {:.4}kg with {} elasto and {} aero elements.", elasto.get_mass(),
+                 elasto.elements.size(), aero.elements.size());
 }
 
 void Tower::prestep(double time, double dt) {
@@ -35,13 +34,9 @@ void Tower::poststep(double time, double dt) {
 }
 
 void Tower::build() {
-    spdlog::info("Building tower.");
-
     // build
     elasto.build();
     aero.build();
-
-    spdlog::info("Bilding tower finished.");
 }
 
 void Tower::set_discretization_elasto(std::vector<double> fractions) {
@@ -84,7 +79,9 @@ void Tower::update_positions_aero() {
 void Tower::update_loads_elasto() {
     elasto.reset_loads();
     if (aero.loads.size() != mapping_aero2elasto.size()) {
-        throw std::runtime_error("length of vector of loads and aero to elasto mapping do not match.");
+        spdlog::error("Tower: length of vector of loads ({}) and length of aero to elasto mapping ({}) do not match.",
+                      aero.loads.size(), mapping_aero2elasto.size());
+        exit(1);
     }
     auto offset = Vector3d(0.0, 0.0, 0.0);
     for (int ii = 0; ii < aero.loads.size(); ii++) {

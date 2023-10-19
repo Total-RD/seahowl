@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <numeric>
+#include <spdlog/spdlog.h>
 
 using seahowl::elasto::TowerElasto;
 
@@ -15,7 +16,8 @@ TowerElasto::TowerElasto() {}
 void TowerElasto::build() {
     // check that enough reference points were defined to create elements (at least 2)
     if (reference_points.size() <= 2) {
-        throw std::runtime_error("Not enough elasto reference points defined for blade.");
+        spdlog::error("Not enough elasto reference points defined for tower ({}).", reference_points.size());
+        exit(1);
     }
 
     // check that discretization_fractions was defined, otherwise take reference point fractions
@@ -57,7 +59,8 @@ void TowerElasto::build_elements_tapered_timoshenko() {
     const auto nelements = nodes.size() - 1;
 
     if (nelements <= 0) {
-        throw std::runtime_error("Trying to build blade with no element.");
+        spdlog::error("Trying to build tower with no element.");
+        exit(1);
     }
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {
