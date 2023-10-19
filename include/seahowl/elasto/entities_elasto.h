@@ -109,6 +109,11 @@ class BodyElasto : public virtual EntityLoadable {
      * param[in] is_fixed Fixed if true, free if false.
      */
     virtual void set_fixed(bool is_fixed) = 0;
+
+    /**
+     * @brief Returns whether body is fixed (true) or not (false).
+     */
+    virtual bool is_fixed() const = 0;
 };
 
 /**
@@ -127,6 +132,11 @@ class NodeElasto : public virtual EntityLoadable {
      * param[in] is_fixed Fixed if true, free if false.
      */
     virtual void set_fixed(bool is_fixed) = 0;
+
+    /**
+     * @brief Returns whether node is fixed (true) or not (false).
+     */
+    virtual bool is_fixed() const = 0;
 };
 
 /**

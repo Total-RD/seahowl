@@ -93,6 +93,7 @@ class BodyElastoChrono : public BodyElasto, public EntityDynamicChrono {
     virtual void accumulate_force(const Vector3d& force, bool is_local = false) override;
     virtual void accumulate_torque(const Vector3d& torque, bool is_local = true) override;
     virtual void set_fixed(bool is_fixed) override;
+    virtual bool is_fixed() const override;
     virtual double get_mass() override;
 };
 
@@ -123,6 +124,7 @@ class NodeElastoChrono : public NodeElasto, public EntityDynamicChrono, public N
     virtual void accumulate_force(const Vector3d& force, bool is_local = false) override;
     virtual void accumulate_torque(const Vector3d& torque, bool is_local = true) override;
     virtual void set_fixed(bool is_fixed) override;
+    virtual bool is_fixed() const override;
     void set_properties(const BladeReferencePointElasto& ref, bool fpm = false);
     void set_properties(const TowerReferencePointElasto& ref);
 };
@@ -144,6 +146,7 @@ class NodeElastoChronoD : public NodeElasto, public NodeElastoChronoBase {
     virtual void accumulate_force(const Vector3d& force, bool is_local = false) override;
     virtual void accumulate_torque(const Vector3d& torque, bool is_local = true) override;
     virtual void set_fixed(bool is_fixed) override;
+    virtual bool is_fixed() const override;
 
     virtual void set_position(const Vector3d& position) override;
     virtual Vector3d get_position() const override;

@@ -79,11 +79,6 @@ int main(int argc, char* argv[]) {
     system_core.system_aero = system_aero;
     populate_system_from_json(filepath_main.generic_string(), system_core);
 
-    for (auto& turbine : system_core.turbines) {
-        // fix foundation of the tower
-        turbine->tower.elasto.nodes.front()->set_fixed(true);
-    }
-
     // get main info
     std::ifstream json_file(filepath_main);
     // populate json object
@@ -141,9 +136,6 @@ int main(int argc, char* argv[]) {
     // statics
     if (statics_prestep) {
         system_elasto->do_statics(true, 10);
-        // for (auto& turbine : system_core.turbines) {
-        //     turbine->tower.elasto.nodes.front()->set_fixed(false);
-        // }
     }
 
     system_core.initialize(system_elasto->get_time(), dt);
@@ -186,12 +178,6 @@ int main(int argc, char* argv[]) {
             application->EndScene();
 #endif
             time_outputs += dt_outputs;
-
-            if (system_core.get_time() > 3) {
-                for (auto& turbine : system_core.turbines) {
-                    turbine->tower.elasto.nodes.front()->set_fixed(false);
-                }
-            }
         }
     }
 

@@ -230,6 +230,10 @@ void BodyElastoChrono::set_fixed(bool is_fixed) {
     chobj->SetBodyFixed(is_fixed);
 }
 
+bool BodyElastoChrono::is_fixed() const {
+    return chobj->GetBodyFixed();
+}
+
 double BodyElastoChrono::get_mass() {
     return chobj->GetMass();
 }
@@ -300,6 +304,10 @@ void NodeElastoChrono::accumulate_torque(const Vector3d& torque, bool is_local) 
 
 void NodeElastoChrono::set_fixed(bool is_fixed) {
     chobj->SetFixed(is_fixed);
+}
+
+bool NodeElastoChrono::is_fixed() const {
+    return chobj->IsFixed();
 }
 
 void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool fpm) {
@@ -462,6 +470,10 @@ void NodeElastoChronoD::accumulate_torque(const Vector3d& torque, bool is_local)
 
 void NodeElastoChronoD::set_fixed(bool is_fixed) {
     chobj->SetFixed(is_fixed);
+}
+
+bool NodeElastoChronoD::is_fixed() const {
+    return chobj->IsFixed();
 }
 
 void NodeElastoChronoD::set_position(const Vector3d& position) {
@@ -745,10 +757,16 @@ double SystemElastoChrono::get_time() const {
 }
 
 void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
-    // constrain rotor
+    // constrain rotor and tower
+    std::vector<bool> tower_fixed;
     for (auto& turbine : turbines) {
+        // rotor
         turbine->rna.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        // tower
+        tower_fixed.push_back(turbine->tower.nodes.front()->is_fixed());
+        turbine->tower.nodes.front()->set_fixed(true);
     }
+
     // linear statics
     if (linear) {
         chobj->DoStaticLinear();
@@ -757,9 +775,14 @@ void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
     if (nonlinear_steps > 0) {
         chobj->DoStaticNonlinear(nonlinear_steps, true);
     }
-    // unconstrain rotor
+
+    // unconstrain rotor (and tower if it was free)
+    int idx_turbine = 0;
     for (auto& turbine : turbines) {
+        // rotor
         turbine->rna.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        // tower
+        turbine->tower.nodes.front()->set_fixed(tower_fixed[idx_turbine]);
     }
 };
 

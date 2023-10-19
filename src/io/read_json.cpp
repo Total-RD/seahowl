@@ -738,6 +738,12 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         auto rotor_pitch0 = turbine.rna.elasto.rotor->pitch_collective;
         turbine.rna.elasto.rotor->apply_collective_pitch_increment(rotor_pitch0);
         turbine.rna.elasto.rotor->pitch_collective = rotor_pitch0;
+
+        if (is_floating) {
+            turbine.tower.elasto.nodes.front()->set_fixed(false);
+        } else {
+            turbine.tower.elasto.nodes.front()->set_fixed(true);
+        }
     }
 
     // assemble whole system (Chrono)
