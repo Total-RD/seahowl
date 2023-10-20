@@ -379,7 +379,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
 
     if (rotor_json.at("type").get<std::string>() == "disk") {
         turbine.aero.use_disktheory = true;
-        spdlog::info("Aerodynamic model: Actuator Disk Theory");
+        spdlog::info("Aerodynamic model: Actuator Disk Theory.");
         // get rotor performance from table
         if (!rotor_json.contains("performance_file")) {
             spdlog::critical("The \"performance_file\" key must be given for actuator disk rotor.");
@@ -390,8 +390,25 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
             spdlog::critical("When Disk Theory is activated, you can't ask for AeroDyn module.");
             exit(1);
         }
-    } else
-        spdlog::info("Aerodynamic model: Blade Element Momentum Theory");
+    } else {
+        spdlog::info("Aerodynamic model: Blade Element Momentum Theory (BEMT).");
+    }
+
+    // check rotor type
+    if (rotor_json.at("type") == "fea") {
+        if (rotor_json.at("fpm") == true) {
+            spdlog::info("Rotor type: finite element blades (FPM).");
+        } else {
+            spdlog::info("Rotor type: finite element blades.");
+        }
+    } else if (rotor_json.at("type") == "rigid") {
+        spdlog::info("Rotor type: rigid.");
+    } else if (rotor_json.at("type") == "disk") {
+        spdlog::info("Rotor type: disk");
+    } else {
+        spdlog::critical("Wrong rotor type: try \"fea\" or \"rigid\" or \"disk\".");
+        exit(1);
+    }
 
     // blades
     std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
@@ -410,9 +427,6 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
             blade_elasto = std::make_shared<seahowl::elasto::BladeElastoRigid>();
         } else if (rotor_json.at("type").get<std::string>() == "disk") {
             blade_elasto = std::make_shared<seahowl::elasto::BladeElastoRigid>();
-        } else {
-            spdlog::critical("Wrong blade type: try \"fea\" or \"rigid\" or \"disk\".");
-            exit(1);
         }
         auto blade_aero = std::make_shared<seahowl::aero::BladeAero>();
         auto blade = std::make_shared<seahowl::core::Blade>(*blade_elasto, *blade_aero);
@@ -506,6 +520,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
 
         auto floater_type = json_obj_floater.at("type").get<std::string>();
         if (floater_type == "HydroChrono") {
+            spdlog::info("Hydrodynamic model: HydroChrono.");
 #ifdef HAVE_HYDROCHRONO
             // dynamic cast turbine
             auto& turbine_floating = dynamic_cast<seahowl::elasto::TurbineFloatingElasto&>(turbine.elasto);
@@ -568,6 +583,7 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
     // wind
     auto wind_json = environment_json.at("wind");
     if (wind_json.at("type").get<std::string>() == "ramp") {
+        spdlog::info("Inflow model: wind ramp.");
         system_core.wind_model = std::make_shared<seahowl::aero::WindRamp>();
         auto wind_options = wind_json.at("options");
         auto wind_model = std::dynamic_pointer_cast<seahowl::aero::WindRamp>(system_core.wind_model);
@@ -581,6 +597,7 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         wind_model->shear_coefficient = wind_options.at("shear_coefficient").get<double>();
         wind_model->density = environment_json.at("air_density").get<double>();
     } else if (wind_json.at("type").get<std::string>() == "inflowwind") {
+        spdlog::info("Inflow model: InflowWind.");
 #ifdef HAVE_INFLOWWIND
         std::string inflowwind_filepath;
         std::string windwnd_filepath;
@@ -648,6 +665,7 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         }
         turbine.aero.WrVTK_dt = json_obj.at("outputs").at("dt").get<double>();
         if (turbine.aero.use_aerodyn) {
+            spdlog::info("Aerodynamic model: AeroDyn.");
             std::string inflowwind_filepath;
             std::string aerodyn_filepath;
             if (turbine_json.contains("file_aerodyn")) {
