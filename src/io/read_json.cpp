@@ -81,14 +81,17 @@ void check_file_exists(const std::string& filepath) {
     }
 }
 
-std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
-    std::string filepath) {
+json get_json_from_file(const std::string& filepath) {
     check_file_exists(filepath);
     std::ifstream json_file(filepath);
-
-    // populate json object
     json json_obj;
     json_file >> json_obj;
+    return json_obj;
+}
+
+std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
+    std::string filepath) {
+    auto json_obj = get_json_from_file(filepath);
 
     // EXTRACT INFO
     std::vector<seahowl::elasto::BladeReferencePointElasto> reference_points;
@@ -150,12 +153,7 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
 }
 
 std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_json(std::string filepath) {
-    check_file_exists(filepath);
-    std::ifstream json_file(filepath);
-
-    // populate json object
-    json json_obj;
-    json_file >> json_obj;
+    auto json_obj = get_json_from_file(filepath);
 
     // EXTRACT INFO
     std::vector<seahowl::aero::BladeReferencePointAero> reference_points;
@@ -189,9 +187,8 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
             auto main_directory = fs::path(filepath).parent_path();
             auto airfoil_filename = point.at("airfoil_file").get<std::string>();
             auto airfoil_filepath = main_directory / airfoil_filename;
-            std::ifstream airfoil_file(airfoil_filepath.u8string());
-            json json_airfoil;
-            airfoil_file >> json_airfoil;
+
+            auto json_airfoil = get_json_from_file(airfoil_filepath.u8string());
 
             const auto nreynolds = json_airfoil.size();
             for (int jj = 0; jj < nreynolds; jj++) {
@@ -243,12 +240,7 @@ void populate_blade_from_json(std::string filepath, seahowl::core::Blade& blade)
 
 std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points_from_json(
     std::string filepath) {
-    check_file_exists(filepath);
-    std::ifstream json_file(filepath);
-
-    // populate json object
-    json json_obj;
-    json_file >> json_obj;
+    auto json_obj = get_json_from_file(filepath);
 
     // EXTRACT INFO
     double height = json_obj.at("height").get<double>();
@@ -283,12 +275,7 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
 }
 
 std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points_from_json(std::string filepath) {
-    check_file_exists(filepath);
-    std::ifstream json_file(filepath);
-
-    // populate json object
-    json json_obj;
-    json_file >> json_obj;
+    auto json_obj = get_json_from_file(filepath);
 
     // EXTRACT INFO
     double height = json_obj.at("height").get<double>();
@@ -314,12 +301,7 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
 }
 
 void populate_tower_elasto_from_json(std::string filepath, seahowl::elasto::TowerElasto& tower) {
-    check_file_exists(filepath);
-    std::ifstream json_file(filepath);
-
-    // populate json object
-    json json_obj;
-    json_file >> json_obj;
+    auto json_obj = get_json_from_file(filepath);
 
     tower.reference_points = get_tower_elasto_reference_points_from_json(filepath);
     tower.height = json_obj.at("height").get<double>();
@@ -333,18 +315,12 @@ void populate_tower_aero_from_json(std::string filepath, seahowl::aero::TowerAer
 
 void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower) {
     spdlog::debug("Populating tower from " + filepath + " file.");
-    check_file_exists(filepath);
     populate_tower_elasto_from_json(filepath, tower.elasto);
     populate_tower_aero_from_json(filepath, tower.aero);
 }
 
 void populate_rna_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
-    check_file_exists(filepath);
-    std::ifstream json_file(filepath);
-
-    // populate json object
-    json json_obj;
-    json_file >> json_obj;
+    auto json_obj = get_json_from_file(filepath);
 
     // EXTRACT INFO
     //
@@ -375,12 +351,7 @@ void populate_rna_elasto_from_json(std::string filepath, seahowl::elasto::RotorN
 }
 
 void populate_rna_aero_from_json(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
-    check_file_exists(filepath);
-    std::ifstream json_file(filepath);
-
-    // populate json object
-    json json_obj;
-    json_file >> json_obj;
+    auto json_obj = get_json_from_file(filepath);
 
     // EXTRACT INFO
     //
@@ -391,20 +362,13 @@ void populate_rna_aero_from_json(std::string filepath, seahowl::aero::RotorNacel
 
 void populate_rna_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rna) {
     spdlog::info("Populating RNA from " + filepath + " file.");
-    check_file_exists(filepath);
     populate_rna_elasto_from_json(filepath, rna.elasto);
     populate_rna_aero_from_json(filepath, rna.aero);
 }
 
 void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& turbine) {
     spdlog::debug("Populating turbine from " + filepath + " file.");
-    check_file_exists(filepath);
-
-    // get turbine info
-    std::ifstream json_file(filepath);
-    // populate json object
-    json json_obj;
-    json_file >> json_obj;
+    auto json_obj = get_json_from_file(filepath);
 
     auto DATADIR = absolute(path(filepath).parent_path());
 
@@ -521,10 +485,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     }
 
     // get extra drivetrain info
-    std::ifstream json_file2(filepath_rna);
-    // populate json object
-    json json_obj2;
-    json_file2 >> json_obj2;
+    auto json_obj2 = get_json_from_file(filepath_rna);
     auto drivetrain = json_obj2.at("drivetrain");
     // gearbox
     drivetrain.at("gearbox_ratio").get_to(turbine.gearbox_ratio);
@@ -540,11 +501,9 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
 
     if (json_obj.contains("floater")) {
         auto floater_json = json_obj.at("floater");
-        // get extra drivetrain info
-        std::ifstream json_file_floater((DATADIR / floater_json.at("file").get<std::string>()).generic_string());
-        // populate json object
-        json json_obj_floater;
-        json_file_floater >> json_obj_floater;
+        auto json_obj_floater =
+            get_json_from_file((DATADIR / floater_json.at("file").get<std::string>()).generic_string());
+
         auto floater_type = json_obj_floater.at("type").get<std::string>();
         if (floater_type == "HydroChrono") {
 #ifdef HAVE_HYDROCHRONO
@@ -590,14 +549,9 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
 }
 
 void populate_system_from_json(std::string filepath, seahowl::core::System& system_core) {
-    check_file_exists(filepath);
     auto DATADIR = absolute(path(filepath)).parent_path();
 
-    // get main info
-    std::ifstream json_file(filepath);
-    // populate json object
-    json json_obj;
-    json_file >> json_obj;
+    auto json_obj = get_json_from_file(filepath);
 
     // outputs
     auto outputs_json = json_obj.at("outputs");
@@ -665,9 +619,8 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         // make turbine aero
         system_core.system_aero->turbines.push_back(seahowl::aero::TurbineAero());
         // check if floater defined
-        std::ifstream json_file_turbine(filepath_turbine);
-        json json_obj_turbine;
-        json_file_turbine >> json_obj_turbine;
+
+        auto json_obj_turbine = get_json_from_file(filepath_turbine);
         bool is_floating = false;
         if (json_obj_turbine.contains("floater")) {
             // floating turbine if floater is defined
