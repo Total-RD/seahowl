@@ -42,6 +42,7 @@ option(SEAHOWL_ENABLE_HYDROCHRONO "Enable HydroChrono library" OFF)
 
 - Chrono (8.0.0): https://github.com/projectchrono/chrono
 - nlohmann-json (v3.10.5): https://github.com/nlohmann/json
+- spdlog (v1.12.0): https://github.com/gabime/spdlog
 
 #### Optional
 
@@ -101,6 +102,7 @@ It is a JSON dictionary containing:
 - outputs: (dict)
   - **dt**: (float) the time stepping value for outputs of the simulation [s].
   - **VTK**: (bool) whether VTK will be part of outputs or not.
+  - **log_level**: (string) global log level ("critical", "error", "warning", "info", "debug", "trace").
 - environment: (dict)
   - **gravity**: (array of floats length 3) gravitational acceleration [m/s2].
   - **air_density**: density of air [kg/m3].
