@@ -4,6 +4,22 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 
+void seahowl::set_log_level_global(std::string level) {
+    if (level == "critical") {
+        spdlog::set_level(spdlog::level::critical);
+    } else if (level == "error" || level == "err") {
+        spdlog::set_level(spdlog::level::err);
+    } else if (level == "warning" || level == "warn") {
+        spdlog::set_level(spdlog::level::warn);
+    } else if (level == "info") {
+        spdlog::set_level(spdlog::level::info);
+    } else if (level == "debug") {
+        spdlog::set_level(spdlog::level::debug);
+    } else if (level == "trace") {
+        spdlog::set_level(spdlog::level::trace);
+    }
+}
+
 std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
     const std::vector<double>& discretization_fractions,
     const std::vector<double>& reference_fractions) {

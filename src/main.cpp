@@ -93,6 +93,7 @@ int main(int argc, char* argv[]) {
     system_core.system_elasto = system_elasto;
     system_core.system_aero = system_aero;
     populate_system_from_json(filepath_main.generic_string(), system_core);
+    spdlog::debug("Populated system.");
 
     // get main info
     std::ifstream json_file(filepath_main);
@@ -150,12 +151,10 @@ int main(int argc, char* argv[]) {
     // initialization
     // statics
     if (statics_prestep) {
-        spdlog::info("Performing statics prestep with {} nonlinear steps.", 10);
         system_elasto->do_statics(true, 10);
-        spdlog::info("Finished statics prestep.");
+        spdlog::debug("Performed statics prestep.");
     }
 
-    spdlog::info("Initializing system.");
     system_core.initialize(system_elasto->get_time(), dt);
 
     int step = 0;

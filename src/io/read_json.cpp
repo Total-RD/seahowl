@@ -239,7 +239,6 @@ void populate_blade_from_json(std::string filepath, seahowl::core::Blade& blade)
     spdlog::debug("Populating blade from " + filepath + " file.");
     populate_blade_elasto_from_json(filepath, blade.elasto);
     populate_blade_aero_from_json(filepath, blade.aero);
-    spdlog::debug("Populating blade finished.");
 }
 
 std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points_from_json(
@@ -337,7 +336,6 @@ void populate_tower_from_json(std::string filepath, seahowl::core::Tower& tower)
     check_file_exists(filepath);
     populate_tower_elasto_from_json(filepath, tower.elasto);
     populate_tower_aero_from_json(filepath, tower.aero);
-    spdlog::debug("Populating tower finished.");
 }
 
 void populate_rna_elasto_from_json(std::string filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
@@ -396,7 +394,6 @@ void populate_rna_from_json(std::string filepath, seahowl::core::RotorNacelleAss
     check_file_exists(filepath);
     populate_rna_elasto_from_json(filepath, rna.elasto);
     populate_rna_aero_from_json(filepath, rna.aero);
-    spdlog::debug("Populating RNA finished.");
 }
 
 void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& turbine) {
@@ -590,11 +587,9 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
             throw std::runtime_error("Type of floater defined in turbine json file does not exist.");
         }
     }
-    spdlog::debug("Populating turbine finished.");
 }
 
 void populate_system_from_json(std::string filepath, seahowl::core::System& system_core) {
-    spdlog::debug("Populating system from " + filepath + " file.");
     check_file_exists(filepath);
     auto DATADIR = absolute(path(filepath)).parent_path();
 
@@ -603,6 +598,13 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
     // populate json object
     json json_obj;
     json_file >> json_obj;
+
+    // outputs
+    auto outputs_json = json_obj.at("outputs");
+    // logging
+    auto log_level = outputs_json.at("log_level").get<std::string>();
+    seahowl::set_log_level_global(log_level);
+    spdlog::debug("Populating system from " + filepath + " file.");
 
     // environmental info
     auto environment_json = json_obj.at("environment");
@@ -747,6 +749,4 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
 
     // assemble whole system (Chrono)
     system_core.assemble();
-
-    spdlog::debug("Populating system finished.");
 }

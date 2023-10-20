@@ -8,6 +8,13 @@
 namespace seahowl {
 
 /**
+ * @brief Set global logging level.
+ *
+ * @param[in] level Logging level ("critical", "error", "warning", "info", "debug", "trace").
+ */
+void set_log_level_global(std::string level);
+
+/**
  * @brief Parametric discretization point.
  */
 struct DiscretizationPoint {
