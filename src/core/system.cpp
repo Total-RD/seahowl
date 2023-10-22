@@ -65,7 +65,7 @@ void System::assemble() {
     }
 }
 
-double System::get_time() {
+double System::get_time() const {
     return elasto.get_time();
 }
 

@@ -11,6 +11,9 @@ namespace env {
 class FluidModel;
 class SoilModel;
 }  // namespace env
+namespace servo {
+class Controller;
+}  // namespace servo
 namespace aero {
 class SystemAero;
 }  // namespace aero
@@ -93,7 +96,7 @@ class System : public ComponentDynamic {
     /**
      * @brief Returns time of simulation.
      */
-    double get_time();
+    double get_time() const;
 
     /**
      * @brief Sets time of simulation.

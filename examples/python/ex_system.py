@@ -11,7 +11,7 @@ t_output_next = 0.0
 system_elasto = pyseahowl.elasto.SystemElastoChrono()
 system_aero = pyseahowl.aero.SystemAero()
 system_core = pyseahowl.core.System(system_elasto, system_aero)
-pyseahowl.populate_system_from_json(filepath, system_core)
+pyseahowl.io.populate_system_from_json(filepath, system_core)
 
 # fix tower bottom nodes
 for turbine in system_core.turbines:

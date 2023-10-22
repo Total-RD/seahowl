@@ -445,6 +445,7 @@ if (SEAHOWL_ENABLE_PYTHON)
         ${PYSEAHOWL_DIR}/pyseahowl_aero.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_servo.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_core.cpp
+        ${PYSEAHOWL_DIR}/pyseahowl_io.cpp
     )
 	target_compile_features(pyseahowl PRIVATE cxx_std_17)
     target_link_libraries(pyseahowl PRIVATE seahowl_core)

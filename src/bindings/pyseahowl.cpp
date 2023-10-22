@@ -3,17 +3,6 @@
 #include <pybind11/eigen.h>
 
 #include <seahowl/commons/entities.h>
-#include <seahowl/io/read_json.h>
-#include <seahowl/core/blade.h>
-#include <seahowl/core/rotor.h>
-#include <seahowl/core/turbine.h>
-#include <seahowl/core/system.h>
-#include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/elasto/tower_elasto.h>
-#include <seahowl/elasto/rotor_elasto.h>
-#include <seahowl/aero/blade_aero.h>
-#include <seahowl/aero/tower_aero.h>
-#include <seahowl/aero/rotor_aero.h>
 
 namespace py = pybind11;
 
@@ -22,6 +11,7 @@ void initialize_pyseahowl_elasto(py::module& m);
 void initialize_pyseahowl_aero(py::module& m);
 void initialize_pyseahowl_servo(py::module& m);
 void initialize_pyseahowl_core(py::module& m);
+void initialize_pyseahowl_io(py::module& m);
 
 PYBIND11_MODULE(pyseahowl, m) {
     // commons.h
@@ -58,14 +48,6 @@ PYBIND11_MODULE(pyseahowl, m) {
     // core
     initialize_pyseahowl_core(m);
 
-    // io/read_json.h
-    m.def("populate_blade_from_json", &populate_blade_from_json);
-    m.def("populate_blade_elasto_from_json", &populate_blade_elasto_from_json);
-    m.def("populate_blade_aero_from_json", &populate_blade_aero_from_json);
-    m.def("populate_tower_from_json", &populate_tower_from_json);
-    m.def("populate_tower_elasto_from_json", &populate_tower_elasto_from_json);
-    m.def("populate_tower_aero_from_json", &populate_tower_aero_from_json);
-    m.def("populate_rna_from_json", &populate_rna_from_json);
-    m.def("populate_turbine_from_json", &populate_turbine_from_json);
-    m.def("populate_system_from_json", &populate_system_from_json);
+    // io
+    initialize_pyseahowl_io(m);
 }

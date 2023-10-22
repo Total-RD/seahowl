@@ -60,7 +60,7 @@ void output_results(seahowl::core::System& system_core) {
     spdlog::info(output_sstring.str());
 
     // output info in file
-    write_turbine_info_to_csv("./output/output", system_core, system_core.get_time());
+    write_turbine_info_to_csv("./output/output", system_core);
 }
 
 void run_simulation(int argc, char* argv[]) {

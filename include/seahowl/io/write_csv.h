@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 
 // forward declarations
@@ -14,4 +16,4 @@ class System;
  * @param[in] ssystem System to output.
  * @param[in] time Time of simulation.
  */
-void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::System& ssystem, double time);
+void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::System& ssystem);
