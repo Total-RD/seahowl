@@ -2,6 +2,7 @@
 
 #include "seahowl/elasto/component_elasto.h"
 #include "seahowl/commons/numerics.h"
+#include "seahowl/env/soil_models.h"
 
 namespace seahowl {
 namespace elasto {
@@ -52,6 +53,13 @@ class MooringElasto : public ComponentElastoFEA {
      * param[in] fluid_density Density of fluid.
      */
     void compute_hydro_loads(const Vector3d& gravitational_acceleration, double fluid_density);
+
+    /**
+     * @brief Computes seabed interaction loads on cable.
+     *
+     * param[in] seabed Seabed model.
+     */
+    void compute_seabed_loads(const seahowl::env::SoilModel& seabed);
 
   private:
     /**

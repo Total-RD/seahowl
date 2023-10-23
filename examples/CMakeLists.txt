@@ -69,5 +69,5 @@ target_compile_features(ex_mooring
 
 target_link_libraries(ex_mooring
     PRIVATE
-	seahowl_core
+	seahowl_core spdlog::spdlog
 )

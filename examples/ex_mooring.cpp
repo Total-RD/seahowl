@@ -1,9 +1,10 @@
 #include <seahowl/elasto/mooring_elasto.h>
 #include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/commons/numerics.h>
+#include <seahowl/env/soil_models.h>
 
 #include <filesystem>  // C++17
-#include <iostream>
+#include <spdlog/spdlog.h>
 
 using std::filesystem::create_directory;
 
@@ -19,56 +20,9 @@ using std::filesystem::create_directory;
 using namespace seahowl;
 using namespace seahowl::elasto;
 
-void seabed_interaction(seahowl::elasto::SystemElasto& system, seahowl::elasto::MooringElasto& mooring) {
-    auto seabed_depth = 0.0;
-    auto seabed_stiffness = 1e6;
-    auto seabed_stiffness_shear = 0;
-    Vector3d gravity_direction =
-        system.get_gravitational_acceleration() / system.get_gravitational_acceleration().norm();
-    auto seabed_position = (-gravity_direction) * seabed_depth;
-    for (auto& element : mooring.elements) {
-        auto element_length = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_rest_length();
-        auto element_mass = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_mass();
-        for (auto& node : element->nodes) {
-            // assuming a flat seabed normal to gravitational acceleration direction
-            auto seabed_normal = -gravity_direction;
-
-            auto node_position = node->get_position();
-            Vector3d node_z_vector = node_position.cwiseProduct(seabed_normal);
-            double penetration_depth = (seabed_position - node_z_vector).dot(seabed_normal);
-            if (penetration_depth >= 0) {
-                // stiffness force
-                auto load_stiffness_linear = seabed_stiffness * penetration_depth * mooring.diameter * seabed_normal;
-                // apply on node for half an element length
-                node->set_force(node->get_force() + 0.5 * element_length * (load_stiffness_linear));
-
-                // damping force
-                auto lambda = 0.5;  // fraction of critical damping
-                auto node_velocity = node->get_velocity();
-                double penetration_velocity = (node_velocity).dot(-seabed_normal);
-                if (penetration_depth >= 0 && penetration_velocity > 0) {
-                    auto load_damping_normal =
-                        2.0 * lambda *
-                        std::sqrt(seabed_stiffness * element_mass * mooring.diameter * (0.5 * element_length)) *
-                        penetration_velocity * seabed_normal;
-                    node->set_force(node->get_force() + load_damping_normal);
-                }
-
-                Vector3d tangential_velocity = node_velocity + penetration_velocity * seabed_normal;
-                if (penetration_depth >= 0 && tangential_velocity.norm() > 0) {
-                    auto load_damping_tangential =
-                        -2.0 * lambda *
-                        std::sqrt(seabed_stiffness_shear * element_mass * mooring.diameter * (0.5 * element_length)) *
-                        tangential_velocity;
-                    node->set_force(node->get_force() + load_damping_tangential);
-                }
-            }
-        }
-    }
-}
-
 void setup_cables(seahowl::elasto::SystemElasto& system,
                   seahowl::elasto::MooringElasto& mooring,
+                  seahowl::env::SoilModel& seabed,
                   double dt = 0.01,
                   int nsteps = 1000,
                   double fluid_density = 1000.0) {
@@ -98,12 +52,12 @@ void setup_cables(seahowl::elasto::SystemElasto& system,
             element.set_rest_length(lengths_initial[idx_el] + lengths_delta[idx_el] * step);
         }
         mooring.compute_hydro_loads(system.get_gravitational_acceleration(), fluid_density);
-        seabed_interaction(system, mooring);
+        mooring.compute_seabed_loads(seabed);
         system.step(dt);
     }
 }
 
-int main(int argc, char* argv[]) {
+void run_simulation() {
     double dt = 0.01;
 
     // system
@@ -155,6 +109,12 @@ int main(int argc, char* argv[]) {
     // anchor_link.set_constraintss(true, true, true,     // x, y, z
     //                                   true, false, false);  // Rx, Ry, Rz
 
+    auto seabed = seahowl::env::LinearSoilModel();
+    seabed.soil_position = 0.0;
+    seabed.soil_normal = seahowl::Vector3d(0.0, 0.0, 1.0);
+    seabed.stiffness_normal = 1e6;
+    seabed.stiffness_shear = 0.0;
+
     double time = 0;
     double step = 0;
 
@@ -176,14 +136,16 @@ int main(int argc, char* argv[]) {
     draw_system_init(system_elasto.chobj, application);
 #endif
 
-    setup_cables(system_elasto, mooring, dt, 1000, fluid_density);
+    spdlog::info("Setting up cables.");
+    setup_cables(system_elasto, mooring, seabed, dt, 1000, fluid_density);
+    spdlog::info("Cables ready.");
     while (true) {
         time += system_elasto.get_time();
         mooring.compute_hydro_loads(system_elasto.get_gravitational_acceleration(), fluid_density);
-        seabed_interaction(system_elasto, mooring);
+        mooring.compute_seabed_loads(seabed);
         system_elasto.step(dt);
         step += 1;
-        std::cout << "time: " << time << ", tension: " << fairlead_link.get_reaction_force().norm() << std::endl;
+        spdlog::info("time: {}, tension {}.", time, fairlead_link.get_reaction_force().norm());
 #ifdef HAVE_VTK
         if (output_vtk) {
             for (auto const& vtk_output : vtk_outputs) {
@@ -197,6 +159,14 @@ int main(int argc, char* argv[]) {
         application->EndScene();
 #endif
     }
+}
 
-    return 0;
+int main(int argc, char* argv[]) {
+    try {
+        run_simulation();
+        return 0;
+    } catch (const std::exception& e) {
+        spdlog::critical(e.what());
+        return 1;
+    }
 }

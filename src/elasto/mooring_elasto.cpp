@@ -119,3 +119,15 @@ void MooringElasto::compute_hydro_loads(const Vector3d& gravitational_accelerati
         }
     }
 }
+
+void MooringElasto::compute_seabed_loads(const seahowl::env::SoilModel& seabed) {
+    for (auto& element : elements) {
+        auto element_length = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_rest_length();
+        auto element_mass = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_mass();
+        for (auto& node : element->nodes) {
+            auto contact_area = diameter * (0.5 * element_length);
+            auto penetration_load = seabed.get_penetration_load(*node, contact_area, element_mass);
+            node->set_force(node->get_force() + penetration_load);
+        }
+    }
+}
