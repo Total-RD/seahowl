@@ -2,18 +2,20 @@ Glossary
 ==================
 
 
-
-
 .. glossary::
     :sorted:
 
+    BEMT : bemt
+        Blade Element Momentum Theory
 
     FOWT : fowt
-        Floatting Offshore Wind Turbines
+        Floating Offshore Wind Turbine
 
-    Controller : fowt
-        Controller
+    RNA : rna
+        Rotor-Nacelle Assembly
 
-    Prandtl : fowt
-        Approximation for tip losses
-        `wiki Prandtl <https://onlinelibrary.wiley.com/doi/epdf/10.1002/we.153>`_
+    RPM : rpm
+        Revolutions Per Minute
+
+    SEAHOWL : seahowl
+        Servo-Elasto-Aero-Hydro Offshore Wind Lab
