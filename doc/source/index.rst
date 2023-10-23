@@ -20,6 +20,7 @@ Table of Contents
    :caption: Contents
 
    _user/user
+   _user/api_python
 
 .. toctree::
    :maxdepth: 1

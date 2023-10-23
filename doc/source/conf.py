@@ -44,8 +44,12 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.inheritance_diagram'
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.autodoc',
+   'sphinx.ext.autosummary',
 ]
+
+autosummary_generate = True  # Turn on sphinx.ext.autosummary
 
 # Include TODO comments
 todo_include_todos = True
