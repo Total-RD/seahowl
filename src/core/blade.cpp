@@ -92,9 +92,9 @@ void Blade::update_positions_aero() {
 void Blade::update_loads_elasto() {
     elasto.reset_loads();
     if (aero.loads.size() != mapping_aero2elasto_elements.size()) {
-        spdlog::error("Blade: length of vector of loads ({}) and length of aero to elasto mapping ({}) do not match.",
-                      aero.loads.size(), mapping_aero2elasto_elements.size());
-        exit(1);
+        throw std::runtime_error("Blade: length of vector of loads (" + std::to_string(aero.loads.size()) +
+                                 " and length of aero to elasto mapping(" +
+                                 std::to_string(mapping_aero2elasto_elements.size()) + ") do not match.");
     }
     for (int ii = 0; ii < aero.loads.size(); ii++) {
         elasto.accumulate_load_along_blade(aero.loads[ii], mapping_aero2elasto_elements[ii].index,

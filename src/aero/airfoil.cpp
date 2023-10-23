@@ -106,6 +106,5 @@ AirfoilCoefficients AirfoilProperties::find_coefficients(double alpha) {
             return coefficients;
         }
     }
-    spdlog::error("Could not find airfoil coefficients for alpha value {}.", alpha);
-    exit(1);
+    throw std::runtime_error("Could not find airfoil coefficients for alpha value " + std::to_string(alpha) + ".");
 }

@@ -76,8 +76,7 @@ std::string copy_file_and_increment(std::string filepath, std::string destinatio
 
 void check_file_exists(const std::string& filepath) {
     if (!fs::exists(filepath)) {
-        spdlog::critical("File {} does not exist.", filepath);
-        exit(1);
+        throw std::runtime_error("File \"" + filepath + "\" does not exist.");
     }
 }
 
@@ -99,8 +98,7 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
     auto points = json_obj.at("reference_points").get<json>();
     auto damping_coefficients = json_obj.at("damping_coefficients").get<std::vector<double>>();
     if (damping_coefficients.size() != 4) {
-        spdlog::critical("Damping coefficients of blade has to be vector of length 4.");
-        exit(1);
+        throw std::runtime_error("Damping coefficients of blade has to be vector of length 4.");
     }
 
     double blade_length = points[points.size() - 1]["coordinates"][2];
@@ -110,8 +108,7 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
 
         auto coords = point.at("coordinates").get<std::vector<double>>();
         if (coords.size() != 3) {
-            spdlog::critical("Coordinates along blade have to be vectors of length 3.");
-            exit(1);
+            throw std::runtime_error("Coordinates along blade have to be vectors of length 3.");
         }
         reference_point.fraction = coords[2] / blade_length;
         reference_point.coordinates = Vector3d(coords[0], coords[1], coords[2]);
@@ -127,13 +124,11 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
         auto sm = point.at("stiffness_matrix").get<std::vector<std::vector<double>>>();
         auto mm = point.at("mass_matrix").get<std::vector<std::vector<double>>>();
         if (sm.size() != 6 || mm.size() != 6) {
-            spdlog::critical("Mass and stiffness matrices along blade have to be defined as 6x6 matrices.");
-            exit(1);
+            throw std::runtime_error("Mass and stiffness matrices along blade have to be defined as 6x6 matrices.");
         }
         for (int irow = 0; irow < 6; irow++) {
             if (sm[irow].size() != 6 || mm[irow].size() != 6) {
-                spdlog::critical("Mass and stiffness matrices along blade have to be defined as 6x6 matrices.");
-                exit(1);
+                throw std::runtime_error("Mass and stiffness matrices along blade have to be defined as 6x6 matrices.");
             }
             for (int icol = 0; icol < 6; icol++) {
                 reference_point.mass_matrix(irow, icol) = mm[irow][icol];
@@ -167,8 +162,7 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
 
         auto coords = point.at("coordinates").get<std::vector<double>>();
         if (coords.size() != 3) {
-            spdlog::critical("Coordinates along blade have to be vectors of length 3.");
-            exit(1);
+            throw std::runtime_error("Coordinates along blade have to be vectors of length 3.");
         }
         reference_point.fraction = coords[2] / blade_length;
         reference_point.coordinates = Vector3d(coords[0], coords[1], coords[2]);
@@ -199,8 +193,7 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
 
                 for (int kk = 0; kk < coeffs.size(); kk++) {
                     if (coeffs[kk].size() != 4) {
-                        spdlog::critical("Airfoil coefficients has to be vectors of length 4.");
-                        exit(1);
+                        throw std::runtime_error("Airfoil coefficients has to be vectors of length 4.");
                     }
                     seahowl::aero::AirfoilCoefficients coefficients;
                     coefficients.alpha = coeffs[kk][0];
@@ -335,8 +328,7 @@ void populate_rna_elasto_from_json(std::string filepath, seahowl::elasto::RotorN
     auto nacelle = json_obj.at("nacelle");
     auto cm = nacelle.at("CM").get<std::vector<double>>();
     if (cm.size() != 3) {
-        spdlog::critical("Center of mass of nacelle has to be vector of length 3.");
-        exit(1);
+        throw std::runtime_error("Center of mass of nacelle has to be vector of length 3.");
     }
     rna.nacelle.center_of_mass = Vector3d(cm[0], cm[1], cm[2]);
     nacelle.at("mass").get_to(rna.nacelle.mass);
@@ -361,7 +353,7 @@ void populate_rna_aero_from_json(std::string filepath, seahowl::aero::RotorNacel
 }
 
 void populate_rna_from_json(std::string filepath, seahowl::core::RotorNacelleAssembly& rna) {
-    spdlog::info("Populating RNA from " + filepath + " file.");
+    spdlog::debug("Populating RNA from " + filepath + " file.");
     populate_rna_elasto_from_json(filepath, rna.elasto);
     populate_rna_aero_from_json(filepath, rna.aero);
 }
@@ -382,13 +374,11 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
         spdlog::info("Aerodynamic model: Actuator Disk Theory.");
         // get rotor performance from table
         if (!rotor_json.contains("performance_file")) {
-            spdlog::critical("The \"performance_file\" key must be given for actuator disk rotor.");
-            exit(1);
+            throw std::runtime_error("The \"performance_file\" key must be given for actuator disk rotor.");
         }
         get_disk_perf_from_table((DATADIR / rotor_json.at("performance_file")).generic_string(), turbine.rna.aero);
         if (turbine.aero.use_aerodyn == true) {
-            spdlog::critical("When Disk Theory is activated, you can't ask for AeroDyn module.");
-            exit(1);
+            throw std::runtime_error("When Disk Theory is activated, you can't ask for AeroDyn module.");
         }
     } else {
         spdlog::info("Aerodynamic model: Blade Element Momentum Theory (BEMT).");
@@ -406,8 +396,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     } else if (rotor_json.at("type") == "disk") {
         spdlog::info("Rotor type: disk");
     } else {
-        spdlog::critical("Wrong rotor type: try \"fea\" or \"rigid\" or \"disk\".");
-        exit(1);
+        throw std::runtime_error("Rotor type does not exist: try \"fea\" or \"rigid\" or \"disk\".");
     }
 
     // blades
@@ -455,12 +444,10 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     // update info if rotor is rigid
     if (rotor_json.at("type").get<std::string>() == "rigid" || rotor_json.at("type").get<std::string>() == "disk") {
         if (!rotor_json.contains("inertia_total")) {
-            spdlog::critical("The \"inertia_total\" key must be provided for rigid rotors.");
-            exit(1);
+            throw std::runtime_error("The \"inertia_total\" key must be provided for rigid rotors.");
         }
         if (!rotor_json.contains("mass_blades_total")) {
-            spdlog::critical("The \"mass_blades_total\" key must be given for rigid rotors.");
-            exit(1);
+            throw std::runtime_error("The \"mass_blades_total\" key must be given for rigid rotors.");
         }
         auto rotor_inertia = rotor_json.at("inertia_total").get<double>();
         turbine.rna.elasto.rotor->hub.inertia = rotor_inertia;
@@ -478,8 +465,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     if (controller_json.at("type").get<std::string>() == "DISCON") {
         auto OUTPUT_CONTROLLER_DIR = path("./output/dynlib_copies");
         if (!controller_json.at("options").contains("libfile")) {
-            spdlog::critical("Need to define path to libfile for DISCON routine.");
-            exit(1);
+            throw std::runtime_error("Need to define path to libfile for DISCON routine.");
         }
         auto libfilepath = path(DATADIR / controller_json.at("options").at("libfile"));
         check_file_exists(libfilepath.generic_string());
@@ -489,8 +475,7 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
             (DATADIR / controller_json.at("options").at("infile")).generic_string(), copyfilepath);
     } else if (controller_json.at("type").get<std::string>() == "RPM") {
         if (!controller_json.at("options").contains("target_rpm")) {
-            spdlog::critical("Need to define target RPM for RPM controller (target_rpm).");
-            exit(1);
+            throw std::runtime_error("Need to define target RPM for RPM controller (target_rpm).");
         } else {
             auto controller = std::make_shared<seahowl::servo::ControllerVariableTorque>();
             controller_json.at("options").at("target_rpm").get_to(controller->target_rpm);
@@ -605,14 +590,12 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         if (wind_options.contains("file_inflowwind")) {
             inflowwind_filepath = (DATADIR / wind_options.at("file_inflowwind")).generic_string();
         } else {
-            spdlog::critical("InflowWind file not defined.");
-            exit(1);
+            throw std::runtime_error(("InflowWind file not defined.");
         }
         if (wind_options.contains("file_windwnd")) {
             windwnd_filepath = (DATADIR / wind_options.at("file_windwnd")).generic_string();
         } else {
-            spdlog::critical("InflowWind input file (.wnd) not defined.");
-            exit(1);
+            throw std::runtime_error(("InflowWind input file (.wnd) not defined.");
         }
         system_core.wind_model =
             std::make_shared<seahowl::aero::InflowWindAdapter>(inflowwind_filepath, windwnd_filepath);
@@ -620,12 +603,12 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         double dt = json_obj.at("numerics").at("dt").get<double>();
         wind_model->init(dt);
 #else
-        spdlog::critical("InflowWind module in CMAKE options should be enabled if wind type 'inflowwind' selected.");
-        exit(1);
+        throw std::runtime_error(
+            "InflowWind module in CMAKE options should be enabled if wind type 'inflowwind' selected.");
 #endif
     } else {
-        spdlog::critical("The input wind type is unknown. Please use the existing wind types: ramp or inflowwind.");
-        exit(1);
+        throw std::runtime_error(
+            "The input wind type is unknown. Please use the existing wind types: ramp or inflowwind.");
     }
 
     // turbines
@@ -671,14 +654,12 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
             if (turbine_json.contains("file_aerodyn")) {
                 aerodyn_filepath = (DATADIR / turbine_json.at("file_aerodyn")).generic_string();
             } else {
-                spdlog::critical("Turbine set to use aerodyn but AeroDyn file path not defined.");
-                exit(1);
+                throw std::runtime_error(("Turbine set to use aerodyn but AeroDyn file path not defined.");
             }
             if (wind_json.at("options").contains("file_inflowwind")) {
                 inflowwind_filepath = (DATADIR / wind_json.at("options").at("file_inflowwind")).generic_string();
             } else {
-                spdlog::critical("Turbine set to use aerodyn but InflowWind file not defined.");
-                exit(1);
+                throw std::runtime_error(("Turbine set to use aerodyn but InflowWind file not defined.");
             }
             turbine.aero.aerodyn =
                 std::make_shared<seahowl::aero::AeroDynAdapter>(aerodyn_filepath, inflowwind_filepath);

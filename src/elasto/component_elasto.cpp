@@ -95,8 +95,8 @@ void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
                                                  const Vector3d& offset) {
     // sanity check
     if (element_index >= elements.size() || element_index < 0) {
-        spdlog::error("Element index {} does not exist (number of elements: {}).", element_index, elements.size());
-        exit(1);
+        throw std::runtime_error("Element index " + std::to_string(element_index) +
+                                 " does not exist (number of elements: " + std::to_string(elements.size()) + ").");
     }
 
     // get position and rotation

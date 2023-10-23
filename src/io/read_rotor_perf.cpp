@@ -1,5 +1,7 @@
 #include "seahowl/io/read_rotor_perf.h"
-#include <seahowl/core/rotor.h>
+
+#include "seahowl/core/rotor.h"
+
 #include <string>
 #include <memory>
 #include <vector>
@@ -7,15 +9,23 @@
 #include <spdlog/spdlog.h>
 #include <typeinfo>
 #include <filesystem>
+
 namespace fs = std::filesystem;
 using std::filesystem::path;
+
+const std::string& get_disk_perf_line(std::vector<std::string>& lines, int index) {
+    const std::string& line = lines[index];
+    if (line.empty()) {
+        throw std::runtime_error("Disk performance file: empty string at index " + std::to_string(index) + ".");
+    }
+    return line;
+}
 
 void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& aero) {
     std::string appo;
 
     if (!fs::exists(filepath)) {
-        spdlog::critical("File {} does not exist.", filepath);
-        exit(1);
+        throw std::runtime_error("File \"" + filepath + "\" does not exist.");
     }
 
     std::ifstream myfile(filepath.c_str());
@@ -56,11 +66,7 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
             }
         }
 
-        const std::string& lineX = stringVector[ind1 + 1];
-        if (lineX.empty()) {
-            spdlog::error("Disk performance file: empty string at index {}.", ind1 + 1);
-            exit(1);
-        }
+        const std::string& lineX = get_disk_perf_line(stringVector, ind1 + 1);
         std::istringstream iss(lineX);
         double number;
         while (iss >> number) {
@@ -68,11 +74,7 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
         }
         Eigen::VectorXd PitchOut = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(pitch.data(), pitch.size());
 
-        const std::string& lineX2 = stringVector[ind2 + 1];
-        if (lineX2.empty()) {
-            spdlog::error("Disk performance file: empty string at index {}.", ind2 + 1);
-            exit(1);
-        }
+        const std::string& lineX2 = get_disk_perf_line(stringVector, ind2 + 1);
         std::istringstream iss2(lineX2);
         while (iss2 >> number) {
             TSR.push_back(number);
@@ -83,11 +85,7 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
         power_coeff.resize(TSR.size(), pitch.size());
         power_coeff.setZero();
         for (unsigned ii = 0; ii < TSR.size(); ii++) {
-            const std::string& lineX4 = stringVector[ind4 + 2 + ii];
-            if (lineX4.empty()) {
-                spdlog::error("Disk performance file: empty string at index {}.", ind4 + 2 + ii);
-                exit(1);
-            }
+            const std::string& lineX4 = get_disk_perf_line(stringVector, ind4 + 2 + ii);
             std::istringstream iss4(lineX4);
             double numberX;
             int jj = 0;
@@ -102,11 +100,7 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleA
         thrust_coeff.resize(TSR.size(), pitch.size());
         thrust_coeff.setZero();
         for (unsigned ii = 0; ii < TSR.size(); ii++) {
-            const std::string& lineX5 = stringVector[ind5 + 2 + ii];
-            if (lineX5.empty()) {
-                spdlog::error("Disk performance: empty string at index {}.", ind5 + 2 + ii);
-                exit(1);
-            }
+            const std::string& lineX5 = get_disk_perf_line(stringVector, ind5 + 2 + ii);
             std::istringstream iss5(lineX5);
             double numberX;
             int jj = 0;

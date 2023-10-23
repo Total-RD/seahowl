@@ -25,11 +25,9 @@ std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
     const std::vector<double>& reference_fractions) {
     // check for potential errors
     if (discretization_fractions.size() == 0) {
-        spdlog::error("Cannot get discretization with empty array.");
-        exit(1);
+        throw std::runtime_error("Cannot get discretization with empty array.");
     } else if (reference_fractions.size() < 2) {
-        spdlog::error("Cannot get discretization with reference array with less than 2 elements.");
-        exit(1);
+        throw std::runtime_error("Cannot get discretization with reference array with less than 2 elements.");
     }
 
     std::vector<DiscretizationPoint> points;
@@ -37,8 +35,8 @@ std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
         double fraction = discretization_fractions[ii];
         // check bounds
         if (fraction < 0.0 || fraction > 1.0) {
-            spdlog::error("Discretization fraction must be between 0 and 1 but was {}.", fraction);
-            exit(1);
+            throw std::runtime_error("Discretization fraction must be between 0 and 1 but was " +
+                                     std::to_string(fraction) + ".");
         }
         if (fraction == 0) {
             DiscretizationPoint point{};
@@ -83,11 +81,10 @@ double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
     }
 
     if (y0 == -99 || x0 == -99) {
-        spdlog::error("Bilinear interpolation failed: x or y not found in the coefficients list.");
-        spdlog::error("    x = {}, y = {},", x, y);
-        spdlog::error("    x_list = {},", x_list.transpose());
-        spdlog::error("    y_list = {}.", y_list.transpose());
-        exit(1);
+        spdlog::error("x = {}, y = {},", x, y);
+        spdlog::error("x_list = {},", x_list.transpose());
+        spdlog::error("y_list = {}.", y_list.transpose());
+        throw std::runtime_error("Bilinear interpolation failed: x or y not found in the coefficients list.");
     };
 
     double x_frac = (x - x_list[x0]) / (std::fabs(x_list[x0] - x_list[x0 + 1]));

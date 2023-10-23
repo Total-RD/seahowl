@@ -28,8 +28,7 @@ BladeReferencePointAero BladeReferencePointAero::operator+(const BladeReferenceP
     new_point.structural_twist += other.structural_twist;
     for (int ii = 0; ii < airfoil_properties.size(); ii++) {
         if (airfoil_properties[ii].reynolds_number != other.airfoil_properties[ii].reynolds_number) {
-            spdlog::error("Trying to add airfoil properties with different Reynolds number.");
-            exit(1);
+            throw std::runtime_error("Trying to add airfoil properties with different Reynolds number.");
         }
         new_point.airfoil_properties[ii] = airfoil_properties[ii] + other.airfoil_properties[ii];
     }

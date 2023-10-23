@@ -79,9 +79,9 @@ void Tower::update_positions_aero() {
 void Tower::update_loads_elasto() {
     elasto.reset_loads();
     if (aero.loads.size() != mapping_aero2elasto.size()) {
-        spdlog::error("Tower: length of vector of loads ({}) and length of aero to elasto mapping ({}) do not match.",
-                      aero.loads.size(), mapping_aero2elasto.size());
-        exit(1);
+        throw std::runtime_error("Tower: length of vector of loads (" + std::to_string(aero.loads.size()) +
+                                 " and length of aero to elasto mapping(" + std::to_string(mapping_aero2elasto.size()) +
+                                 ") do not match.");
     }
     auto offset = Vector3d(0.0, 0.0, 0.0);
     for (int ii = 0; ii < aero.loads.size(); ii++) {

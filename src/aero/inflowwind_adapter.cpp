@@ -44,8 +44,7 @@ void seahowl::aero::InflowWindLib::SetIFWINFILE(std::string name) {
     spdlog::info("Set InflowWind INFILE: {name}.", name);
     std::ifstream file(name);
     if (!file.is_open()) {
-        spdlog::error("Failed to open inflowwind input file.");
-        exit(1);
+        throw std::runtime_error("Failed to open inflowwind input file.");
     }
     std::string line;
     while (std::getline(file, line)) {
@@ -59,8 +58,7 @@ void seahowl::aero::InflowWindLib::SetWNDINFILE(std::string name) {
     spdlog::info("Set wind.wnd INFILE: {}.", name);
     std::ifstream file(name);
     if (!file.is_open()) {
-        spdlog::error("Failed to open wind.wnd input file.");
-        exit(1);
+        throw std::runtime_error("Failed to open wind.wnd input file.");
     }
     std::string line;
     while (std::getline(file, line)) {

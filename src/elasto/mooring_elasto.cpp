@@ -54,8 +54,7 @@ void MooringElasto::build_elements() {
     const auto nelements = nodes.size() - 1;
 
     if (nelements <= 0) {
-        spdlog::error("Trying to build mooring with no element.");
-        exit(1);
+        throw std::runtime_error("Trying to build mooring with no element.");
     }
 
     for (size_t ii = 1; ii < nelements + 1; ii++) {

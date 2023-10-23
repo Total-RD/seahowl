@@ -30,6 +30,7 @@ using json = nlohmann::json;
 #include <sstream>
 #include <spdlog/spdlog.h>
 #include <spdlog/stopwatch.h>
+#include "spdlog/pattern_formatter.h"
 
 #include <seahowl/servo/controller.h>
 
@@ -59,15 +60,17 @@ void output_results(seahowl::core::System& system_core) {
     write_turbine_info_to_csv("./output/output", system_core, system_core.get_time());
 }
 
-/**@brief Driver main function */
-int main(int argc, char* argv[]) {
+void run_simulation(int argc, char* argv[]) {
     spdlog::set_level(spdlog::level::info);
+    spdlog::info("Start SEAHOWL simulation.");
+
     // stopwatch before doing anything
     spdlog::stopwatch sw0;
 
     // SETUP
+    spdlog::set_pattern("[%^%l%$] %v");
     spdlog::info("**************************************************************");
-    spdlog::info("START INITIAL SETUP.");
+    spdlog::info("INITIAL SETUP.");
     spdlog::info("**************************************************************");
 
     auto DATADIR = absolute(path(u8"../data"));
@@ -169,7 +172,7 @@ int main(int argc, char* argv[]) {
 
     double time_outputs = dt_outputs;
     spdlog::info("**************************************************************");
-    spdlog::info("START MAIN SIMULATION LOOP.");
+    spdlog::info("MAIN SIMULATION LOOP.");
     spdlog::info("Initial setup time: {:.3}s.", sw0);
     spdlog::info("Resetting simulation stopwatch to 0s.");
     spdlog::info("**************************************************************");
@@ -204,6 +207,15 @@ int main(int argc, char* argv[]) {
             time_outputs += dt_outputs;
         }
     }
+}
 
-    return 0;
+/**@brief Driver main function */
+int main(int argc, char* argv[]) {
+    try {
+        run_simulation(argc, argv);
+        return 0;
+    } catch (const std::exception& e) {
+        spdlog::critical(e.what());
+        return 1;
+    }
 }
