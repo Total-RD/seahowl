@@ -21,7 +21,7 @@ using namespace seahowl;
 using namespace seahowl::elasto;
 
 void setup_cables(seahowl::elasto::SystemElasto& system,
-                  seahowl::elasto::MooringElasto& mooring,
+                  seahowl::elasto::MooringElastoFEA& mooring,
                   seahowl::env::SoilModel& seabed,
                   double dt = 0.01,
                   int nsteps = 1000,
@@ -65,10 +65,20 @@ void run_simulation() {
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
     double fluid_density = 1000.0;
 
+    // make fairlead
+    auto fairlead = seahowl::elasto::BodyElastoChrono();
+    fairlead.set_position(Vector3d(0.0, 837.60 - 58, 200.0 - 14.0));
+    fairlead.set_fixed(true);
+    system_elasto.add(fairlead);
+
+    // make anchor
+    auto anchor = seahowl::elasto::BodyElastoChrono();
+    anchor.set_position(Vector3d(0.0, 0.0, 0.0));
+    anchor.set_fixed(true);
+    system_elasto.add(anchor);
+
     // mooring line
-    auto mooring = seahowl::elasto::MooringElasto();
-    mooring.fairlead_position = Vector3d(0.0, 837.60 - 58, 200.0 - 14.0);
-    mooring.anchor_position = Vector3d(0.0, 0.0, 0.0);
+    auto mooring = seahowl::elasto::MooringElastoFEA(fairlead, anchor);
     mooring.length = 850.0;
     mooring.diameter = 0.185;
     mooring.stiffness_axial = 3270e6;
@@ -86,28 +96,6 @@ void run_simulation() {
     //
     mooring.build();
     mooring.assemble(system_elasto);
-
-    // make fairlead
-    auto fairlead = seahowl::elasto::BodyElastoChrono();
-    fairlead.set_fixed(true);
-    system_elasto.add(fairlead);
-    // attach to fairlead
-    auto fairlead_link = seahowl::elasto::LinkChronoCable();
-    fairlead_link.initialize(*mooring.nodes.front(), fairlead);
-    system_elasto.add(fairlead_link);
-    // fairlead_link.set_constraints(true, true, true,     // x, y, z
-    //                                     true, false, false);  // Rx, Ry, Rz
-
-    // make anchor
-    auto anchor = seahowl::elasto::BodyElastoChrono();
-    anchor.set_fixed(true);
-    system_elasto.add(anchor);
-    // attach to anchor
-    auto anchor_link = seahowl::elasto::LinkChronoCable();
-    anchor_link.initialize(*mooring.nodes.back(), anchor);
-    system_elasto.add(anchor_link);
-    // anchor_link.set_constraintss(true, true, true,     // x, y, z
-    //                                   true, false, false);  // Rx, Ry, Rz
 
     auto seabed = seahowl::env::LinearSoilModel();
     seabed.soil_position = 0.0;
@@ -145,7 +133,7 @@ void run_simulation() {
         mooring.compute_seabed_loads(seabed);
         system_elasto.step(dt);
         step += 1;
-        spdlog::info("time: {}, tension {}.", time, fairlead_link.get_reaction_force().norm());
+        spdlog::info("time: {}, tension {}.", time, mooring.fairlead_link->get_reaction_force().norm());
 #ifdef HAVE_VTK
         if (output_vtk) {
             for (auto const& vtk_output : vtk_outputs) {

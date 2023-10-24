@@ -1,23 +1,32 @@
 #pragma once
 
 #include "seahowl/elasto/component_elasto.h"
+#include "seahowl/elasto/entities_elasto.h"
 #include "seahowl/commons/numerics.h"
 #include "seahowl/env/soil_models.h"
 
 namespace seahowl {
 namespace elasto {
 
+class MooringElasto {
+  public:
+    BodyElasto& fairlead;
+    BodyElasto& anchor;
+
+    MooringElasto(BodyElasto& fairlead, BodyElasto& anchor);
+};
+
 /**
  * @brief Mooring as an elastodynamic FEA component.
  *
  * Moorings are discretized into Euler-Bernoulli beam elements.
  */
-class MooringElasto : public ComponentElastoFEA {
+class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
   public:
-    /** @brief Position of the fairlead. */
-    Vector3d fairlead_position = {0.0, 0.0, 0.0};
-    /** @brief Position of the anchor. */
-    Vector3d anchor_position = {0.0, 0.0, 0.0};
+    /** @brief Link between line and fairlead. */
+    std::unique_ptr<seahowl::elasto::Link> fairlead_link;
+    /** @brief Link between line and anchor. */
+    std::unique_ptr<seahowl::elasto::Link> anchor_link;
     /** @brief Position of the mooring line. */
     double diameter = 0.0;
     /** @brief Axial stiffness of the mooring line. */
@@ -37,7 +46,7 @@ class MooringElasto : public ComponentElastoFEA {
     /** @brief Added mass coefficient (tangential) of the mooring line. */
     double added_mass_coefficient_tangential = 1.0;
 
-    MooringElasto();
+    MooringElastoFEA(BodyElasto& fairlead, BodyElasto& anchor);
 
     /**
      * @brief Builds the mooring (to call before assemble).
@@ -45,6 +54,8 @@ class MooringElasto : public ComponentElastoFEA {
     void build();
 
     void build_nodes(const std::vector<ReferencePointElasto>& discretized_points);
+
+    virtual void assemble(SystemElasto& system) override;
 
     /**
      * @brief Computes hydro loads on cable.

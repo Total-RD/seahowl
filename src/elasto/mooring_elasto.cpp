@@ -9,14 +9,19 @@
 
 using namespace seahowl::elasto;
 
-MooringElasto::MooringElasto() {}
+MooringElasto::MooringElasto(BodyElasto& fairlead, BodyElasto& anchor) : fairlead(fairlead), anchor(anchor) {}
 
-void MooringElasto::build() {
+MooringElastoFEA::MooringElastoFEA(BodyElasto& fairlead, BodyElasto& anchor) : MooringElasto(fairlead, anchor) {
+    fairlead_link = std::make_unique<seahowl::elasto::LinkChronoCable>();
+    anchor_link = std::make_unique<seahowl::elasto::LinkChronoCable>();
+}
+
+void MooringElastoFEA::build() {
     // make reference points between fairlead and anchor
     std::vector<ReferencePointElasto> points;
     for (auto& fraction : discretization_fractions) {
         auto point = ReferencePointElasto();
-        point.coordinates = fairlead_position + (anchor_position - fairlead_position) * fraction;
+        point.coordinates = fairlead.get_position() + (anchor.get_position() - fairlead.get_position()) * fraction;
         point.fraction = fraction;
         points.push_back(point);
     }
@@ -25,7 +30,7 @@ void MooringElasto::build() {
     build_elements();
 }
 
-void MooringElasto::build_nodes(const std::vector<ReferencePointElasto>& discretized_points) {
+void MooringElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& discretized_points) {
     nodes.clear();
     const auto nnodes = discretized_points.size();
 
@@ -47,9 +52,13 @@ void MooringElasto::build_nodes(const std::vector<ReferencePointElasto>& discret
         auto node = std::make_shared<NodeElastoChronoD>(node_pos, node_axis);
         nodes.push_back(node);
     };
+
+    // initialize links
+    fairlead_link->initialize(*nodes.front(), fairlead);
+    anchor_link->initialize(*nodes.back(), anchor);
 };
 
-void MooringElasto::build_elements() {
+void MooringElastoFEA::build_elements() {
     elements.clear();
     const auto nelements = nodes.size() - 1;
 
@@ -71,7 +80,13 @@ void MooringElasto::build_elements() {
     }
 }
 
-void MooringElasto::compute_hydro_loads(const Vector3d& gravitational_acceleration, double fluid_density) {
+void MooringElastoFEA::assemble(SystemElasto& system) {
+    ComponentElastoFEA::assemble(system);
+    system.add(*fairlead_link);
+    system.add(*anchor_link);
+}
+
+void MooringElastoFEA::compute_hydro_loads(const Vector3d& gravitational_acceleration, double fluid_density) {
     for (int ii = 0; ii < nodes.size(); ii++) {
         nodes[ii]->set_force(Vector3d(0.0, 0.0, 0.0));
     }
@@ -120,7 +135,7 @@ void MooringElasto::compute_hydro_loads(const Vector3d& gravitational_accelerati
     }
 }
 
-void MooringElasto::compute_seabed_loads(const seahowl::env::SoilModel& seabed) {
+void MooringElastoFEA::compute_seabed_loads(const seahowl::env::SoilModel& seabed) {
     for (auto& element : elements) {
         auto element_length = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_rest_length();
         auto element_mass = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_mass();
