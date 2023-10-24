@@ -6,34 +6,34 @@ using namespace seahowl::elasto;
 
 FloaterElasto::FloaterElasto(){};
 
-seahowl::elasto::BodyElasto& FloaterElasto::add_body(std::string& name) {
+seahowl::elasto::BodyElasto& FloaterElasto::add_body(const std::string& name) {
     floater_bodies[name] = std::make_unique<seahowl::elasto::BodyElastoChrono>();
     return *floater_bodies[name];
 }
 
-seahowl::elasto::BodyElasto& FloaterElasto::get_body(std::string& name) {
+seahowl::elasto::BodyElasto& FloaterElasto::get_body(const std::string& name) {
     return *floater_bodies[name];
 }
 
-void FloaterElasto::add_fairlead(Vector3d& position, std::string connected_body_name) {
+void FloaterElasto::add_fairlead(const Vector3d& position, const std::string& connected_body_name) {
     if (floater_bodies.count(connected_body_name) == 0) {
         throw std::runtime_error("Trying to add a fairlead to a non-existing floater body " + connected_body_name +
                                  ".");
     }
 
     // fairlead
-    fairlead_bodies[connected_body_name].push_back(std::unique_ptr<seahowl::elasto::BodyElastoChrono>());
+    fairlead_bodies[connected_body_name].push_back(std::make_unique<seahowl::elasto::BodyElastoChrono>());
     auto& fairlead = *(fairlead_bodies[connected_body_name].back());
     fairlead.set_position(position);
 
     // link
-    fairlead_links[connected_body_name].push_back(std::unique_ptr<seahowl::elasto::LinkChrono>());
+    fairlead_links[connected_body_name].push_back(std::make_unique<seahowl::elasto::LinkChrono>());
     auto& link = *(fairlead_links[connected_body_name].back().get());
-    link.set_constraints(true, true, true, false, false, false);
+    link.set_constraints(true, true, true, true, true, true);
     link.initialize(fairlead, *floater_bodies[connected_body_name]);
 }
 
-seahowl::elasto::BodyElasto& FloaterElasto::get_fairlead_body(std::string body_name, int index) {
+seahowl::elasto::BodyElasto& FloaterElasto::get_fairlead_body(const std::string& body_name, int index) {
     if (floater_bodies.count(body_name) == 0) {
         throw std::runtime_error("Trying to get fairlead body from a non-existing floater body " + body_name + ".");
     }
@@ -47,7 +47,7 @@ seahowl::elasto::BodyElasto& FloaterElasto::get_fairlead_body(std::string body_n
     }
 }
 
-seahowl::elasto::Link& FloaterElasto::get_fairlead_link(std::string body_name, int index) {
+seahowl::elasto::Link& FloaterElasto::get_fairlead_link(const std::string& body_name, int index) {
     if (floater_bodies.count(body_name) == 0) {
         throw std::runtime_error("Trying to get fairlead link from a non-existing floater body " + body_name + ".");
     }
@@ -78,7 +78,7 @@ void FloaterElasto::assemble(seahowl::elasto::SystemElasto& system) {
     }
 }
 
-void FloaterElasto::set_tower_connection_body_name(std::string connected_body_name) {
+void FloaterElasto::set_tower_connection_body_name(const std::string& connected_body_name) {
     tower_connection_name = connected_body_name;
 }
 

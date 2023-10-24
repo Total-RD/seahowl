@@ -29,14 +29,14 @@ class FloaterElasto : public ComponentElasto {
      *
      * @param[in] name The name of the body (for access purposes).
      */
-    seahowl::elasto::BodyElasto& add_body(std::string& name);
+    seahowl::elasto::BodyElasto& add_body(const std::string& name);
 
     /**
      * @brief Gets body.
      *
      * @param[in] name The name of the body to return.
      */
-    seahowl::elasto::BodyElasto& get_body(std::string& name);
+    seahowl::elasto::BodyElasto& get_body(const std::string& name);
 
     /**
      * @brief Adds fairlead to system.
@@ -44,7 +44,7 @@ class FloaterElasto : public ComponentElasto {
      * @param[in] position Absolute position of fairlead.
      * @param[in] connected_body_name Name of the body connected to the fairlead.
      */
-    virtual void add_fairlead(Vector3d& position, std::string connected_body_name);
+    virtual void add_fairlead(const Vector3d& position, const std::string& connected_body_name);
 
     /**
      * @brief Returns fairlead body.
@@ -52,7 +52,7 @@ class FloaterElasto : public ComponentElasto {
      * @param[in] body_name Name of body on which fairlead is connected.
      * @param[in] index Index of fairlead.
      */
-    virtual seahowl::elasto::BodyElasto& get_fairlead_body(std::string body_name, int index);
+    virtual seahowl::elasto::BodyElasto& get_fairlead_body(const std::string& body_name, int index);
 
     /**
      * @brief Returns fairlead link.
@@ -60,14 +60,14 @@ class FloaterElasto : public ComponentElasto {
      * @param[in] body_name Name of body on which fairlead is connected.
      * @param[in] index Index of fairlead.
      */
-    virtual seahowl::elasto::Link& get_fairlead_link(std::string body_name, int index);
+    virtual seahowl::elasto::Link& get_fairlead_link(const std::string& body_name, int index);
 
     /**
      * @brief Sets name of body that will be used for tower connection.
      *
      * @param[in] connected_body_name Name of the body to connect to the tower.
      */
-    virtual void set_tower_connection_body_name(std::string connected_body_name);
+    virtual void set_tower_connection_body_name(const std::string& connected_body_name);
 
     /**
      * @brief Returns body to connect to tower.
@@ -98,9 +98,9 @@ class FloaterElasto : public ComponentElasto {
     /** @brief List of bodies and their names. */
     std::map<std::string, std::unique_ptr<seahowl::elasto::BodyElasto>> floater_bodies;
     /** @brief List of bodies and their names. */
-    std::map<std::string, std::vector<std::unique_ptr<seahowl::elasto::Link>>> fairlead_links;
+    std::map<std::string, std::deque<std::unique_ptr<seahowl::elasto::Link>>> fairlead_links;
     /** @brief List of bodies and their names. */
-    std::map<std::string, std::vector<std::unique_ptr<seahowl::elasto::BodyElasto>>> fairlead_bodies;
+    std::map<std::string, std::deque<std::unique_ptr<seahowl::elasto::BodyElasto>>> fairlead_bodies;
     /** @brief Name of body for tower connection */
     std::string tower_connection_name = "";
 };
