@@ -14,6 +14,16 @@ class MooringElasto {
     BodyElasto& anchor;
 
     MooringElasto(BodyElasto& fairlead, BodyElasto& anchor);
+
+    /**
+     * @brief Returns tension at fairlead.
+     */
+    virtual Vector3d get_tension_fairlead() const = 0;
+
+    /**
+     * @brief Returns tension at anchor.
+     */
+    virtual Vector3d get_tension_anchor() const = 0;
 };
 
 /**
@@ -71,6 +81,16 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
      * param[in] seabed Seabed model.
      */
     void compute_seabed_loads(const seahowl::env::SoilModel& seabed);
+
+    /**
+     * @brief Returns tension at fairlead.
+     */
+    virtual Vector3d get_tension_fairlead() const override;
+
+    /**
+     * @brief Returns tension at anchor.
+     */
+    virtual Vector3d get_tension_anchor() const override;
 
   private:
     /**

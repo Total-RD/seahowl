@@ -146,3 +146,11 @@ void MooringElastoFEA::compute_seabed_loads(const seahowl::env::SoilModel& seabe
         }
     }
 }
+
+seahowl::Vector3d MooringElastoFEA::get_tension_fairlead() const {
+    return fairlead_link->get_reaction_force();
+}
+
+seahowl::Vector3d MooringElastoFEA::get_tension_anchor() const {
+    return anchor_link->get_reaction_force();
+};
