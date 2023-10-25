@@ -5,14 +5,27 @@
 #include "seahowl/commons/numerics.h"
 #include "seahowl/env/soil_models.h"
 
+#include <deque>
+
 namespace seahowl {
 namespace elasto {
 
-class MooringElasto {
+/**
+ * @brief Mooring base class.
+ */
+class MooringElasto : public virtual ComponentElasto {
   public:
+    /** @brief Fairlead body. */
     BodyElasto& fairlead;
+    /** @brief Anchor body. */
     BodyElasto& anchor;
 
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] fairlead Fairlead body to attach to mooring.
+     * @param[in] anchor Anchor body to attach to mooring.
+     */
     MooringElasto(BodyElasto& fairlead, BodyElasto& anchor);
 
     /**
@@ -27,9 +40,31 @@ class MooringElasto {
 };
 
 /**
+ * @brief Mooring system class gathering mooring lines and anchors.
+ */
+struct MooringSystem : public ComponentElasto {
+  public:
+    /** @brief List of mooring lines. */
+    std::deque<std::unique_ptr<MooringElasto>> moorings;
+    /** @brief List of anchors. */
+    std::deque<std::unique_ptr<BodyElasto>> anchors;
+
+    /**
+     * @brief Constructor.
+     */
+    MooringSystem();
+
+    virtual void build() override;
+    virtual void assemble(SystemElasto& system) override;
+    virtual void rotate(double angle, const Vector3d& axis) const override;
+    virtual void translate(const Vector3d& translation_vector) const override;
+    virtual double get_mass() const override;
+};
+
+/**
  * @brief Mooring as an elastodynamic FEA component.
  *
- * Moorings are discretized into Euler-Bernoulli beam elements.
+ * Moorings are discretized into ANCF cable elements.
  */
 class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
   public:
@@ -56,12 +91,18 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
     /** @brief Added mass coefficient (tangential) of the mooring line. */
     double added_mass_coefficient_tangential = 1.0;
 
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] fairlead Fairlead body to attach to mooring.
+     * @param[in] anchor Anchor body to attach to mooring.
+     */
     MooringElastoFEA(BodyElasto& fairlead, BodyElasto& anchor);
 
     /**
      * @brief Builds the mooring (to call before assemble).
      */
-    void build();
+    virtual void build() override;
 
     void build_nodes(const std::vector<ReferencePointElasto>& discretized_points);
 

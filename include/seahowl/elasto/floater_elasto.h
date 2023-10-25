@@ -47,6 +47,13 @@ class FloaterElasto : public ComponentElasto {
     virtual void add_fairlead(const Vector3d& position, const std::string& connected_body_name);
 
     /**
+     * @brief Returns fairlead count for given body.
+     *
+     * @param[in] body_name Name of body on which fairleads are connected.
+     */
+    virtual int get_fairlead_count(const std::string& body_name) const;
+
+    /**
      * @brief Returns fairlead body.
      *
      * @param[in] body_name Name of body on which fairlead is connected.

@@ -9,6 +9,64 @@
 
 using namespace seahowl::elasto;
 
+MooringSystem::MooringSystem() {}
+
+void MooringSystem::build() {
+    for (auto& mooring : moorings) {
+        mooring->build();
+    }
+}
+
+void MooringSystem::assemble(SystemElasto& system) {
+    for (auto& mooring : moorings) {
+        mooring->assemble(system);
+    }
+    for (auto& anchor : anchors) {
+        system.add(*anchor);
+    }
+}
+
+void MooringSystem::rotate(double angle, const Vector3d& axis) const {
+    // moorings
+    for (auto& mooring : moorings) {
+        mooring->rotate(angle, axis);
+    }
+
+    // anchors
+    auto rotation = AngleAxisd(angle, axis);
+    for (auto& anchor : anchors) {
+        auto new_position_anchor = rotation * anchor->get_position();
+        auto new_rotation_anchor = (rotation * anchor->get_rotation()).normalized();
+        anchor->set_position(new_position_anchor);
+        anchor->set_rotation(new_rotation_anchor);
+    }
+}
+
+void MooringSystem::translate(const Vector3d& translation_vector) const {
+    // moorings
+    for (auto& mooring : moorings) {
+        mooring->translate(translation_vector);
+    }
+
+    // anchors
+    for (auto& anchor : anchors) {
+        anchor->set_position(anchor->get_position() + translation_vector);
+    }
+}
+
+double MooringSystem::get_mass() const {
+    double mass_total = 0.0;
+    // moorings
+    for (auto& mooring : moorings) {
+        mass_total += mooring->get_mass();
+    }
+    // anchors
+    for (auto& anchor : anchors) {
+        mass_total += anchor->get_mass();
+    }
+    return mass_total;
+}
+
 MooringElasto::MooringElasto(BodyElasto& fairlead, BodyElasto& anchor) : fairlead(fairlead), anchor(anchor) {}
 
 MooringElastoFEA::MooringElastoFEA(BodyElasto& fairlead, BodyElasto& anchor) : MooringElasto(fairlead, anchor) {
@@ -17,6 +75,18 @@ MooringElastoFEA::MooringElastoFEA(BodyElasto& fairlead, BodyElasto& anchor) : M
 }
 
 void MooringElastoFEA::build() {
+    // check that discretization_fractions was defined, otherwise take reference point fractions
+    if (discretization_fractions.size() == 0) {
+        throw std::runtime_error("Mooring elasto discretization was not defined.");
+    } else if (discretization_fractions.size() == 1) {
+        double npoints = discretization_fractions[0] + 1;
+        double dp = 1.0 / (npoints - 1);
+        discretization_fractions.clear();
+        for (int ii = 0; ii < int(npoints); ii++) {
+            discretization_fractions.push_back(ii * dp);
+        }
+    }
+
     // make reference points between fairlead and anchor
     std::vector<ReferencePointElasto> points;
     for (auto& fraction : discretization_fractions) {

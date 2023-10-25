@@ -9,6 +9,7 @@ using namespace seahowl::elasto;
 
 TurbineFloatingElasto::TurbineFloatingElasto() : TurbineElasto() {
     link_floater_tower = std::make_unique<seahowl::elasto::LinkChrono>();
+    mooring_system = std::make_unique<MooringSystem>();
 }
 
 void TurbineFloatingElasto::assemble(SystemElasto& system) {
@@ -25,11 +26,19 @@ void TurbineFloatingElasto::assemble(SystemElasto& system) {
         system.add(*(link_floater_tower.get()));
     }
 
+    // moorings
+    mooring_system->assemble(system);
+
     // assemble parent class
     TurbineElasto::assemble(system);
 }
 
 void TurbineFloatingElasto::build() {
+    if (floater) {
+        floater->build();
+    }
+    mooring_system->build();
+
     // parent class build
     TurbineElasto::build();
 }

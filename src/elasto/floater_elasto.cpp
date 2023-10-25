@@ -33,6 +33,13 @@ void FloaterElasto::add_fairlead(const Vector3d& position, const std::string& co
     link.initialize(fairlead, *floater_bodies[connected_body_name]);
 }
 
+int FloaterElasto::get_fairlead_count(const std::string& body_name) const {
+    if (floater_bodies.count(body_name) == 0) {
+        throw std::runtime_error("Trying to get fairlead count from a non-existing floater body " + body_name + ".");
+    }
+    return fairlead_bodies.at(body_name).size();
+};
+
 seahowl::elasto::BodyElasto& FloaterElasto::get_fairlead_body(const std::string& body_name, int index) {
     if (floater_bodies.count(body_name) == 0) {
         throw std::runtime_error("Trying to get fairlead body from a non-existing floater body " + body_name + ".");
