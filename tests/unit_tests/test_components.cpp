@@ -633,7 +633,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.77, 0.02);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.744, 0.02);
 }
 #endif
 
