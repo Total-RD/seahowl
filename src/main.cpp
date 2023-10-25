@@ -99,10 +99,7 @@ void run_simulation(int argc, char* argv[]) {
     spdlog::debug("Populated system.");
 
     // get main info
-    std::ifstream json_file(filepath_main);
-    // populate json object
-    json json_obj;
-    json_file >> json_obj;
+    auto json_obj = get_json_from_file(filepath_main.generic_string());
 
     // NUMERICS options
     bool statics_prestep = json_obj.at("numerics").at("statics_prestep").get<bool>();
