@@ -13,8 +13,8 @@ namespace env {
 
 class WaveWindModel : public FluidModel {
   public:
-    std::unique_ptr<WindModel> wind_model;
-    std::unique_ptr<WaveModel> wave_model;
+    std::shared_ptr<WindModel> wind_model;
+    std::shared_ptr<WaveModel> wave_model;
 
     virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
 
@@ -23,9 +23,9 @@ class WaveWindModel : public FluidModel {
 
 class SoilWaveWindModel : public FluidModel, public SoilModel {
   public:
-    std::unique_ptr<WindModel> wind_model;
-    std::unique_ptr<WaveModel> wave_model;
-    std::unique_ptr<SoilModel> soil_model;
+    std::shared_ptr<WindModel> wind_model;
+    std::shared_ptr<WaveModel> wave_model;
+    std::shared_ptr<SoilModel> soil_model;
 
     virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
 

@@ -17,6 +17,7 @@
 #include "seahowl/env/fluid_models.h"
 #include "seahowl/env/wind_models.h"
 #include "seahowl/env/wave_models.h"
+#include "seahowl/env/soil_models.h"
 #include "seahowl/env/combined_models.h"
 #include "seahowl/env/inflowwind_adapter.h"
 #include "seahowl/aero/airfoil.h"
@@ -572,15 +573,21 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
     system_core.system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
     auto gravity_vector = system_core.system_elasto->get_gravitational_acceleration();
     auto gravity_direction = gravity_vector / gravity_vector.norm();
+
     // environment
-    system_core.fluid_model = std::make_shared<seahowl::env::WaveWindModel>();
-    auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
+
     // sea
-    auto water_density = environment_json.at("water_density").get<double>();
-    auto mean_water_level = environment_json.at("mean_water_level").get<double>();
+    bool has_sea = false;
     if (environment_json.contains("sea")) {
+        has_sea = true;
         auto sea_json = environment_json.at("sea");
-        if (sea_json.at("type").get<std::string>() == "current") {
+        system_core.fluid_model = std::make_shared<seahowl::env::WaveWindModel>();
+        auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
+
+        // specific model options
+        if (sea_json.at("type").get<std::string>() == "still") {
+            fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
+        } else if (sea_json.at("type").get<std::string>() == "current") {
             fluid_model.wave_model = std::make_unique<seahowl::env::CurrentConstant>();
             auto& wave_model = dynamic_cast<seahowl::env::CurrentConstant&>(*fluid_model.wave_model);
             auto sea_options = sea_json.at("options");
@@ -588,28 +595,29 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
             wave_model.direction = Vector3d(sea_direction[0], sea_direction[1], 0.0);
             sea_options.at("velocity_surface").get_to(wave_model.velocity_surface);
             sea_options.at("velocity_seabed").get_to(wave_model.velocity_seabed);
-        } else if (sea_json.at("type").get<std::string>() == "still") {
-            fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
         } else {
             throw std::runtime_error(
-                "The input current type is unknown. Please use the existing current types: constant.");
+                "The input sea type is unknown. Please use the existing current types: still, current.");
         }
+
+        // general wave model options
+        auto& wave_model = dynamic_cast<seahowl::env::WaveModel&>(*fluid_model.wave_model);
+        sea_json.at("water_density").get_to(wave_model.density);
+        sea_json.at("mean_water_level").get_to(wave_model.mean_water_level);
+        sea_json.at("water_depth").get_to(wave_model.water_depth);
+        wave_model.surface_normal = -gravity_direction;
     } else {
-        fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
-        auto& wave_model = dynamic_cast<seahowl::env::StillWater&>(*fluid_model.wave_model);
+        spdlog::warn("Sea conditions were not defined.");
     }
-    // general wave options
-    environment_json.at("water_density").get_to(fluid_model.wave_model->density);
-    environment_json.at("mean_water_level").get_to(fluid_model.wave_model->mean_water_level);
-    environment_json.at("water_depth").get_to(fluid_model.wave_model->water_depth);
-    fluid_model.wave_model->surface_normal = -gravity_direction;
+
     // wind
     auto wind_json = environment_json.at("wind");
+    std::shared_ptr<seahowl::env::WindModel> wind_model_ptr;
     if (wind_json.at("type").get<std::string>() == "ramp") {
         spdlog::info("Inflow model: wind ramp.");
-        fluid_model.wind_model = std::make_unique<seahowl::env::WindRamp>();
+        wind_model_ptr = std::make_shared<seahowl::env::WindRamp>();
+        auto& wind_model = dynamic_cast<seahowl::env::WindRamp&>(*wind_model_ptr);
         auto wind_options = wind_json.at("options");
-        auto& wind_model = dynamic_cast<seahowl::env::WindRamp&>(*fluid_model.wind_model);
         auto v0 = wind_options.at("velocity_start").get<std::vector<double>>();
         auto v1 = wind_options.at("velocity_end").get<std::vector<double>>();
         wind_model.set_wind_ramp(Vector3d(v0[0], v0[1], v0[2]), wind_options.at("time_start").get<double>(),
@@ -618,7 +626,7 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
             Vector3d(system_core.system_elasto->get_gravitational_acceleration()).normalized();
         wind_model.reference_height = wind_options.at("reference_height").get<double>();
         wind_model.shear_coefficient = wind_options.at("shear_coefficient").get<double>();
-        wind_model.density = environment_json.at("air_density").get<double>();
+        wind_model.density = wind_json.at("air_density").get<double>();
     } else if (wind_json.at("type").get<std::string>() == "inflowwind") {
         spdlog::info("Inflow model: InflowWind.");
 #ifdef HAVE_INFLOWWIND
@@ -635,9 +643,8 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         } else {
             throw std::runtime_error("InflowWind input file (.wnd) not defined.");
         }
-        fluid_model.wind_model =
-            std::make_unique<seahowl::env::InflowWindAdapter>(inflowwind_filepath, windwnd_filepath);
-        auto& wind_model = dynamic_cast<seahowl::env::InflowWindAdapter&>(*fluid_model.wind_model);
+        wind_model_ptr = std::make_shared<seahowl::env::InflowWindAdapter>(inflowwind_filepath, windwnd_filepath);
+        auto& wind_model = dynamic_cast<seahowl::env::InflowWindAdapter&>(*wind_model_ptr);
         double dt = json_obj.at("numerics").at("dt").get<double>();
         wind_model.init(dt);
 #else
@@ -647,6 +654,31 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
     } else {
         throw std::runtime_error(
             "The input wind type is unknown. Please use the existing wind types: ramp or inflowwind.");
+    }
+
+    if (has_sea) {
+        auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
+        fluid_model.wind_model = std::move(wind_model_ptr);
+    } else {
+        system_core.fluid_model = std::move(wind_model_ptr);
+    }
+
+    // soil
+    if (environment_json.contains("soil")) {
+        auto soil_json = environment_json.at("soil");
+        if (soil_json.at("type") == "linear") {
+            system_core.soil_model = std::make_shared<seahowl::env::LinearSoilModel>();
+            auto& soil_model = dynamic_cast<seahowl::env::LinearSoilModel&>(*system_core.soil_model);
+            auto soil_options = soil_json.at("options");
+            soil_options.at("soil_position").get_to(soil_model.soil_position);
+            soil_options.at("stiffness_normal").get_to(soil_model.stiffness_normal);
+            soil_options.at("stiffness_shear").get_to(soil_model.stiffness_shear);
+            soil_model.soil_normal = -gravity_direction;
+        } else {
+            throw std::runtime_error("The input soil type is unknown. Please use the existing soil types: linear.");
+        }
+    } else {
+        spdlog::warn("Soil conditions were not defined.");
     }
 
     // turbines

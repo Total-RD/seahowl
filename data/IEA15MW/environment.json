@@ -1,11 +1,8 @@
 ﻿{
   "gravity": [0.0, 0.0, -9.81],
-  "air_density": 1.225,
-  "water_density": 1025,
-  "mean_water_level": 0.0,
-  "water_depth": 200.0,
   "wind": {
     "type": "ramp",
+    "air_density": 1.225,
     "options": {
       "reference_height": 150,
       "shear_coefficient": 0.12,
@@ -17,10 +14,21 @@
   },
   "sea": {
     "type": "current",
+    "water_density": 1025,
+    "mean_water_level": 0.0,
+    "water_depth": 200.0,
     "options": {
       "direction": [1.0, 0.0],
       "velocity_surface": 0.0,
       "velocity_seabed": 0.0
+    }
+  },
+  "soil": {
+    "type": "linear",
+    "options": {
+      "stiffness_normal": 1e6,
+      "stiffness_shear": 0.0,
+      "soil_position": -200.0
     }
   }
 }

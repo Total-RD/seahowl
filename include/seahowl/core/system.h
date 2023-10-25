@@ -9,19 +9,15 @@
 namespace seahowl {
 namespace env {
 class FluidModel;
-}// namespace env
-namespace servo {
-class Controller;
-}  // namespace servo
+class SoilModel;
+}  // namespace env
 namespace aero {
-class WindModel;
 class SystemAero;
 }  // namespace aero
 namespace elasto {
 class SystemElasto;
 }  // namespace elasto
 }  // namespace seahowl
-
 
 namespace seahowl {
 namespace core {
@@ -37,7 +33,11 @@ class System : public ComponentDynamic {
     std::deque<std::shared_ptr<Turbine>> turbines{};
     /** @brief Fluid model. */
     std::shared_ptr<seahowl::env::FluidModel> fluid_model;
+    /** @brief Soil model. */
+    std::shared_ptr<seahowl::env::SoilModel> soil_model;
+    /** @brief System for elastodynamics. */
     std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto;
+    /** @brief System for aerodynamics. */
     std::shared_ptr<seahowl::aero::SystemAero> system_aero;
 
     System();
