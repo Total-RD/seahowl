@@ -18,7 +18,8 @@
       "rotation": 0,
       "file": "./turbine.json",
       "use_aerodyn": false,
-      "file_aerodyn": "./aerodyn/IEA-15-240-RWT_AeroDyn15.dat"
+      "file_aerodyn": "./aerodyn/IEA-15-240-RWT_AeroDyn15.dat",
+      "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat"
     }
   ]
 }

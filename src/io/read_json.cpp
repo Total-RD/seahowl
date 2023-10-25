@@ -553,21 +553,8 @@ void populate_turbine_from_json(std::string filepath, seahowl::core::Turbine& tu
     }
 }
 
-void populate_system_from_json(std::string filepath, seahowl::core::System& system_core) {
-    auto DATADIR = absolute(path(filepath)).parent_path();
-
-    auto json_obj = get_json_from_file(filepath);
-
-    // outputs
-    auto outputs_json = json_obj.at("outputs");
-    // logging
-    auto log_level = outputs_json.at("log_level").get<std::string>();
-    seahowl::set_log_level_global(log_level);
-    spdlog::debug("Populating system from " + filepath + " file.");
-
-    // environmental info
-    auto filepath_environment = (DATADIR / json_obj.at("environment").at("file").get<std::string>()).generic_string();
-    auto environment_json = get_json_from_file(filepath_environment);
+void populate_environmental_conditions_from_json(std::string filepath, seahowl::core::System& system_core) {
+    auto environment_json = get_json_from_file(filepath);
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
     system_core.system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
@@ -680,6 +667,23 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
     } else {
         spdlog::warn("Soil conditions were not defined.");
     }
+}
+
+void populate_system_from_json(std::string filepath, seahowl::core::System& system_core) {
+    auto DATADIR = absolute(path(filepath)).parent_path();
+
+    auto json_obj = get_json_from_file(filepath);
+
+    // outputs
+    auto outputs_json = json_obj.at("outputs");
+    // logging
+    auto log_level = outputs_json.at("log_level").get<std::string>();
+    seahowl::set_log_level_global(log_level);
+    spdlog::debug("Populating system from " + filepath + " file.");
+
+    // environmental info
+    auto filepath_environment = (DATADIR / json_obj.at("environment").at("file").get<std::string>()).generic_string();
+    populate_environmental_conditions_from_json(filepath_environment, system_core);
 
     // turbines
     auto turbines_json = json_obj.at("turbines");
@@ -689,7 +693,6 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
         // make turbine aero
         system_core.system_aero->turbines.push_back(seahowl::aero::TurbineAero());
         // check if floater defined
-
         auto json_obj_turbine = get_json_from_file(filepath_turbine);
         bool is_floating = false;
         if (json_obj_turbine.contains("floater")) {
@@ -726,8 +729,8 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
             } else {
                 throw std::runtime_error("Turbine set to use aerodyn but AeroDyn file path not defined.");
             }
-            if (wind_json.at("options").contains("file_inflowwind")) {
-                inflowwind_filepath = (DATADIR / wind_json.at("options").at("file_inflowwind")).generic_string();
+            if (turbine_json.contains("file_inflowwind")) {
+                inflowwind_filepath = (DATADIR / turbine_json.at("file_inflowwind")).generic_string();
             } else {
                 throw std::runtime_error("Turbine set to use aerodyn but InflowWind file not defined.");
             }
