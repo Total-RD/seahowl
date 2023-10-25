@@ -13,7 +13,7 @@
 #include "seahowl/elasto/reference_point_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/servo/controller_discon.h"
-#include <seahowl/commons/numerics.h>
+#include "seahowl/commons/numerics.h"
 #include "seahowl/env/fluid_models.h"
 #include "seahowl/env/wind_models.h"
 #include "seahowl/env/wave_models.h"
@@ -565,7 +565,8 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
     spdlog::debug("Populating system from " + filepath + " file.");
 
     // environmental info
-    auto environment_json = json_obj.at("environment");
+    auto filepath_environment = (DATADIR / json_obj.at("environment").at("file").get<std::string>()).generic_string();
+    auto environment_json = get_json_from_file(filepath_environment);
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
     system_core.system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
@@ -574,19 +575,21 @@ void populate_system_from_json(std::string filepath, seahowl::core::System& syst
     // environment
     system_core.fluid_model = std::make_shared<seahowl::env::WaveWindModel>();
     auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
-    // waves
+    // sea
     auto water_density = environment_json.at("water_density").get<double>();
     auto mean_water_level = environment_json.at("mean_water_level").get<double>();
-    if (environment_json.contains("current")) {
-        auto current_json = environment_json.at("current");
-        if (current_json.at("type").get<std::string>() == "constant") {
+    if (environment_json.contains("sea")) {
+        auto sea_json = environment_json.at("sea");
+        if (sea_json.at("type").get<std::string>() == "current") {
             fluid_model.wave_model = std::make_unique<seahowl::env::CurrentConstant>();
             auto& wave_model = dynamic_cast<seahowl::env::CurrentConstant&>(*fluid_model.wave_model);
-            auto current_options = current_json.at("options");
-            auto current_direction = current_options.at("direction").get<std::vector<double>>();
-            wave_model.direction = Vector3d(current_direction[0], current_direction[1], 0.0);
-            current_options.at("velocity_surface").get_to(wave_model.velocity_surface);
-            current_options.at("velocity_seabed").get_to(wave_model.velocity_seabed);
+            auto sea_options = sea_json.at("options");
+            auto sea_direction = sea_options.at("direction").get<std::vector<double>>();
+            wave_model.direction = Vector3d(sea_direction[0], sea_direction[1], 0.0);
+            sea_options.at("velocity_surface").get_to(wave_model.velocity_surface);
+            sea_options.at("velocity_seabed").get_to(wave_model.velocity_seabed);
+        } else if (sea_json.at("type").get<std::string>() == "still") {
+            fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
         } else {
             throw std::runtime_error(
                 "The input current type is unknown. Please use the existing current types: constant.");
