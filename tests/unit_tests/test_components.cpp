@@ -723,7 +723,6 @@ TEST(test_inflowwind, rpm_initial_pitch) {
     auto wind_model =
         seahowl::env::InflowWindAdapter((DATADIR / "aerodyn/IEA-15-240-RWT_InflowWind.dat").generic_string(),
                                         (DATADIR / "aerodyn/long_step_wind.wnd").generic_string());
-    wind_model.init(dt);
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 

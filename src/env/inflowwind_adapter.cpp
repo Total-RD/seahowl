@@ -14,14 +14,11 @@ InflowWindAdapter::InflowWindAdapter(std::string InflowInfile, std::string WindW
     pImpl.reset(new InflowWindLib);
     pImpl->SetIFWINFILE(InflowInfile);
     pImpl->SetWNDINFILE(WindWndfile);
+    pImpl->SetTimeStep(0.01);  // time step should not matter (not used in InflowWind)
+    pImpl->Init();
 }
 
 InflowWindAdapter::~InflowWindAdapter() {}
-
-void InflowWindAdapter::init(double dt) {
-    pImpl->SetTimeStep(dt);
-    pImpl->Init();
-}
 
 void InflowWindAdapter::end() {
     pImpl->End();

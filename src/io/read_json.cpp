@@ -557,7 +557,11 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
 }
 
 void populate_environmental_conditions_from_json(const std::string& filepath, seahowl::core::System& system_core) {
+    spdlog::debug("Populating environmental conditions from " + filepath + " file.");
     auto environment_json = get_json_from_file(filepath);
+
+    auto DATADIR = absolute(path(filepath).parent_path());
+
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
     system_core.system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
@@ -634,9 +638,6 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
             throw std::runtime_error("InflowWind input file (.wnd) not defined.");
         }
         wind_model_ptr = std::make_shared<seahowl::env::InflowWindAdapter>(inflowwind_filepath, windwnd_filepath);
-        auto& wind_model = dynamic_cast<seahowl::env::InflowWindAdapter&>(*wind_model_ptr);
-        double dt = json_obj.at("numerics").at("dt").get<double>();
-        wind_model.init(dt);
 #else
         throw std::runtime_error(
             "InflowWind module in CMAKE options should be enabled if wind type 'inflowwind' selected.");

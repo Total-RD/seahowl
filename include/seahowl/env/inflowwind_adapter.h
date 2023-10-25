@@ -96,7 +96,6 @@ class InflowWindAdapter : public WindModel {
     InflowWindAdapter(std::string InflowInfile, std::string WindWndfile);
     ~InflowWindAdapter();
 
-    void init(double dt);
     void end();
     virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
 };
