@@ -53,21 +53,6 @@ struct BladeNodeAero : public EntityDynamicEigen {
      * @brief Get aero offset in global frame of reference.
      */
     Vector3d get_offset_aero_absolute() const;
-
-    /**
-     * @brief Returns induced velocity.
-     *
-     * @param[in] local_velocity_rotor0 Local uninduced velocity at node.
-     * @param[in] blade_pitch Pitch of blade on which node is placed.
-     * @param[in] nblades Number of blade.
-     * @param[in] tip_loss Whether to take tip loss into account or not.
-     * @param[in] hub_loss Whether to take hub loss into account or not.
-     */
-    Vector2d get_induced_velocity_rotor(const Vector2d& local_velocity_rotor0,
-                                        double blade_pitch = 0.0,
-                                        size_t nblades = 3,
-                                        bool tip_loss = true,
-                                        bool hub_loss = true);
 };
 
 /**

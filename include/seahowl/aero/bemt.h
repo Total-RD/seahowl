@@ -52,14 +52,14 @@ AirfoilCoefficients get_aero_coefficients_from_alpha(const double alpha,
  *
  * @param[out] node Node on which induced velocity in computed.
  * @param[in] local_velocity_rotor0 Local uninduced velocity at node.
- * @param[in] blade_pitch Pitch of blade on which node is placed.
+ * @param[in] pitch Pitch of blade on which node is placed.
  * @param[in] nblades Number of blade.
  * @param[in] tip_loss Whether to take tip loss into account or not.
  * @param[in] hub_loss Whether to take hub loss into account or not.
  */
 Vector2d get_induced_velocity(BladeNodeAero& node,
                               const Vector2d& local_velocity_rotor0,
-                              const double blade_pitch = 0.0,
+                              const double pitch = 0.0,
                               const size_t nblades = 3,
                               const bool tip_loss = true,
                               const bool hub_loss = true);

@@ -41,14 +41,13 @@ seahowl::aero::AirfoilCoefficients seahowl::aero::get_aero_coefficients_from_alp
 
 Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
                                              const Vector2d& local_velocity_rotor0,
-                                             const double blade_pitch,
+                                             const double pitch,
                                              const size_t nblades,
                                              const bool tip_loss,
                                              const bool hub_loss) {
     // local_velocity is in local element frame
     Vector2d local_velocity;
     Vector2d local_velocity_rotor;
-    double pitch_twist = blade_pitch + node.properties.structural_twist;
 
     double tol_rel = 1e-3;
     double tol_abs = 1e-3;
@@ -81,7 +80,7 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
 
         // get coefficients from angle of attack
         double phi = seahowl::aero::get_phi(local_velocity_rotor);
-        alpha = seahowl::aero::get_alpha_from_phi(phi, (blade_pitch + node.properties.structural_twist));
+        alpha = seahowl::aero::get_alpha_from_phi(phi, pitch);
         auto coefficients = seahowl::aero::get_aero_coefficients_from_alpha(alpha, node.properties.airfoil_properties);
 
         // get drag and lift coefficients

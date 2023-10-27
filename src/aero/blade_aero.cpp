@@ -9,7 +9,6 @@
 using seahowl::aero::BladeNodeAero;
 using seahowl::aero::BladeElementAero;
 using seahowl::aero::BladeAero;
-using seahowl::aero::get_induced_velocity;
 using seahowl::Vector3d;
 using seahowl::Vector2d;
 using seahowl::Quaternion;
@@ -25,14 +24,6 @@ BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
     wind_velocity = Vector3d(0.0, 0.0, 0.0);
     wind_velocity_shadowed = Vector3d(0.0, 0.0, 0.0);
     relative_velocity_induced = Vector3d(0.0, 0.0, 0.0);
-}
-
-Vector2d BladeNodeAero::get_induced_velocity_rotor(const Vector2d& local_velocity_rotor0,
-                                                   double blade_pitch,
-                                                   size_t nblades,
-                                                   bool tip_loss,
-                                                   bool hub_loss) {
-    return get_induced_velocity(*this, local_velocity_rotor0, blade_pitch, nblades, tip_loss, hub_loss);
 }
 
 Vector3d BladeNodeAero::get_offset_aero_absolute() const {
