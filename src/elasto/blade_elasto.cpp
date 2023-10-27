@@ -237,7 +237,15 @@ seahowl::EntityDynamicEigen BladeElastoRigid::get_entity_along_blade(double eta,
     // position
     Vector3d position = body_root->get_position() + body_root->get_rotation() * Vector3d(0.0, 0.0, z_position);
     entity.set_position(position);
-    entity.set_rotation(body_root->get_rotation());
+
+    // get structural twist
+    std::vector<double> eta_vector = {0.5 * (eta + 1.0)};
+    auto twist = seahowl::get_discretized_points(eta_vector, reference_points)[0].structural_twist;
+
+    // rotation
+    auto twist_matrix = AngleAxisd(-twist, body_root->get_rotation() * Vector3d(0.0, 0.0, 1.0));
+    auto rotation_matrix = twist_matrix * body_root->get_rotation().toRotationMatrix();
+    entity.set_rotation(Quaternion(rotation_matrix));
 
     // below has to be explicitly declared as Vector3d or there is an issue;
     Vector3d pos1 = entity.get_position();
