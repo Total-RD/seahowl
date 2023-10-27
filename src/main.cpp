@@ -34,6 +34,7 @@ using json = nlohmann::json;
 
 #include <seahowl/servo/controller.h>
 
+namespace fs = std::filesystem;
 using std::filesystem::path;
 using std::filesystem::create_directory;
 using std::filesystem::remove_all;
@@ -98,8 +99,11 @@ void run_simulation(int argc, char* argv[]) {
     populate_system_from_json(filepath_main.generic_string(), system_core);
     spdlog::debug("Populated system.");
 
-    // get main info
-    auto json_obj = get_json_from_file(filepath_main.generic_string());
+    // get main file info
+    std::ifstream json_file(filepath_main.generic_string());
+    json json_obj;
+    json_file >> json_obj;
+    json_file.close();
 
     // NUMERICS options
     bool statics_prestep = json_obj.at("numerics").at("statics_prestep").get<bool>();

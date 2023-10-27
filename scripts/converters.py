@@ -695,22 +695,8 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
     # main json with default values to overwrite when parsing OpenFAST files
     main_json = {
         "numerics": {"dt": 0.1, "t_end": 2000.0, "statics_prestep": True},
-        "outputs": {"dt": 0.1, "VTK": False},
-        "environment": {
-            "gravity": [0.0, 0.0, -9.81],
-            "air_density": 1.225,
-            "wind": {
-                "type": "ramp",
-                "options": {
-                    "reference_height": 150,
-                    "shear_coefficient": 0.12,
-                    "velocity_start": [12, 0, 0],
-                    "velocity_end": [25, 0, 0],
-                    "time_start": 500,
-                    "time_end": 1700,
-                },
-            },
-        },
+        "outputs": {"dt": 0.1, "VTK": False, "log_level": "info"},
+        "environment": {"file": "./environment.json"},
         "turbines": [
             {
                 "translation": [0, 0, 0],
@@ -719,6 +705,22 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                 "file": str(Path("./turbine.json")),
             }
         ],
+    }
+
+    environment_json = {
+        "gravity": [0.0, 0.0, -9.81],
+        "wind": {
+            "air_density": 1.225,
+            "type": "ramp",
+            "options": {
+                "reference_height": 150,
+                "shear_coefficient": 0.12,
+                "velocity_start": [12, 0, 0],
+                "velocity_end": [25, 0, 0],
+                "time_start": 500,
+                "time_end": 1700,
+            },
+        },
     }
 
     with open(filepath, "r") as f:
@@ -737,9 +739,9 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                 elif words[1] == "TMax":
                     main_json["numerics"]["t_end"] = float(words[0])
                 elif words[1] == "Gravity":
-                    main_json["environment"]["gravity"][2] = -float(words[0])
+                    environment_json["gravity"][2] = -float(words[0])
                 elif words[1] == "AirDens":
-                    main_json["environment"]["air_density"] = float(words[0])
+                    environment_json["air_density"] = float(words[0])
                 elif words[1] == "WrVTK":
                     if float(words[0]) != 0.0:
                         main_json["outputs"]["VTK"] = True
@@ -919,13 +921,16 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
             "controller": controller_json,
         }
 
-        # save turbine json
         if save_directory is not None:
+            # save turbine json
             fullpath = Path(save_directory) / "turbine.json"
             save_json(turbine_json, fullpath)
 
-        # save main json
-        if save_directory is not None:
+            # save environement json
+            fullpath = Path(save_directory) / "environment.json"
+            save_json(environment_json, fullpath)
+
+            # save main json
             fullpath = Path(save_directory) / "main.json"
             save_json(main_json, fullpath)
 

@@ -31,14 +31,6 @@ struct TowerReferencePointAero;
 #include <vector>
 #include <string>
 #include <memory>
-#include <nlohmann/json.hpp>
-
-/**
- * @brief Returns json object from file.
- *
- * @param[in] filepath Path of the json file.
- */
-nlohmann::json get_json_from_file(const std::string& filepath);
 
 /**
  * @brief Returns blade elasto reference points given a json file.
