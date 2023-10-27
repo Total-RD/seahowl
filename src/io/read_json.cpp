@@ -606,6 +606,9 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
         } catch (const std::exception& e) {
             throw std::runtime_error("Wrong elasto turbine type to use floater (needs to be TurbineFloatingElasto).");
         }
+        // dynamic cast turbine
+        auto& turbine_floating = dynamic_cast<seahowl::elasto::TurbineFloatingElasto&>(turbine.elasto);
+
         auto floater_json = json_obj.at("floater");
         auto json_obj_floater =
             get_json_from_file((DATADIR / floater_json.at("file").get<std::string>()).generic_string());
@@ -614,8 +617,6 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
         if (floater_type == "HydroChrono") {
             spdlog::info("Hydrodynamic model: HydroChrono.");
 #ifdef HAVE_HYDROCHRONO
-            // dynamic cast turbine
-            auto& turbine_floating = dynamic_cast<seahowl::elasto::TurbineFloatingElasto&>(turbine.elasto);
             // make floater
             turbine_floating.floater = std::make_unique<seahowl::hydro::FloaterHydroChrono>();
             auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine_floating.floater);
@@ -651,6 +652,61 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
 #else
             throw std::runtime_error("Trying to use HydroChrono but did not compile with HydroChrono dependency.");
 #endif
+
+            auto moorings_json = json_obj_floater.at("moorings");
+            for (auto& mooring_json : moorings_json) {
+                auto axis = mooring_json.at("rotation_axis").get<std::vector<double>>();
+                auto rotation_axis = seahowl::Vector3d(axis[0], axis[1], axis[2]);
+                auto rotation_angle = mooring_json.at("rotation_angle").get<double>() * seahowl::PI / 180.0;
+                auto rotation = seahowl::AngleAxisd(rotation_angle, rotation_axis);
+                spdlog::info(rotation_angle);
+
+                if (!turbine_floating.floater) {
+                    throw std::runtime_error("Trying to add moorings to a floating turbine without floater.");
+                }
+                auto& floater = *turbine_floating.floater;
+
+                // fairlead
+                std::string body_name = mooring_json.at("connected_body_name");
+                auto fpos = mooring_json.at("fairlead_position").get<std::vector<double>>();
+                auto fairlead_relative_position = seahowl::Vector3d(fpos[0], fpos[1], fpos[2]);
+                seahowl::Vector3d fairlead_position =
+                    floater.get_body(body_name).get_position() + rotation * fairlead_relative_position;
+                spdlog::info("fairlead: {}, {}, {}", fairlead_position[0], fairlead_position[1], fairlead_position[2]);
+                floater.add_fairlead(fairlead_position, body_name);
+                auto& fairlead_body = floater.get_fairlead_body(body_name, floater.get_fairlead_count(body_name) - 1);
+
+                // anchor
+                auto apos = mooring_json.at("anchor_position").get<std::vector<double>>();
+                auto anchor_relative_position = seahowl::Vector3d(apos[0], apos[1], apos[2]);
+                seahowl::Vector3d anchor_position =
+                    floater.get_body(body_name).get_position() + rotation * anchor_relative_position;
+                turbine_floating.mooring_system->anchors.push_back(
+                    std::make_unique<seahowl::elasto::BodyElastoChrono>());
+                auto& anchor_body = *turbine_floating.mooring_system->anchors.back();
+                anchor_body.set_position(anchor_position);
+                anchor_body.set_fixed(true);
+
+                auto mooring_properties_json = get_json_from_file(
+                    (DATADIR / mooring_json.at("line_properties").get<std::string>()).generic_string());
+                turbine_floating.mooring_system->moorings.push_back(
+                    std::make_unique<seahowl::elasto::MooringElastoFEA>(fairlead_body, anchor_body));
+                auto& mooring =
+                    dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*turbine_floating.mooring_system->moorings.back());
+
+                mooring_json.at("length").get_to(mooring.length);
+                mooring_json.at("discretization_elasto").get_to(mooring.discretization_fractions);
+                mooring_properties_json.at("diameter").get_to(mooring.diameter);
+                mooring_properties_json.at("stiffness_axial").get_to(mooring.stiffness_axial);
+                mooring_properties_json.at("stiffness_bending").get_to(mooring.stiffness_bending);
+                mooring_properties_json.at("density_linear").get_to(mooring.density_linear);
+                mooring_properties_json.at("drag_coefficient_normal").get_to(mooring.drag_coefficient_normal);
+                mooring_properties_json.at("drag_coefficient_tangential").get_to(mooring.drag_coefficient_tangential);
+                mooring_properties_json.at("added_mass_coefficient_normal")
+                    .get_to(mooring.added_mass_coefficient_normal);
+                mooring_properties_json.at("added_mass_coefficient_tangential")
+                    .get_to(mooring.added_mass_coefficient_tangential);
+            }
         } else {
             throw std::runtime_error("Type of floater defined in turbine json file does not exist.");
         }

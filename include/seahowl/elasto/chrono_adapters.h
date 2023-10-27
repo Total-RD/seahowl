@@ -280,6 +280,7 @@ class SystemElastoChrono : public SystemElasto {
     SystemElastoChrono();
     virtual void step(double dt) override;
     virtual double get_time() const override;
+    virtual void set_time(double time) override;
     virtual void do_statics(bool linear, int nonlinear_steps) override;
     virtual Vector3d get_gravitational_acceleration() const override;
     virtual void set_gravitational_acceleration(const Vector3d& gravitational_acceleration) override;

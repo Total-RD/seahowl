@@ -451,7 +451,7 @@ Vector3d NodeElastoChronoD::get_torque(bool is_local) const {
 
 void NodeElastoChronoD::set_force(const Vector3d& force, bool is_local) {
     if (is_local) {
-        chobj->SetForce(vec2ch(get_rotation() * force));
+        throw std::runtime_error("Cannot set force locally for ChNodeFEAxyzD.");
     } else {
         chobj->SetForce(vec2ch(force));
     }
@@ -755,6 +755,10 @@ void SystemElastoChrono::step(double dt) {
 
 double SystemElastoChrono::get_time() const {
     return chobj->GetChTime();
+}
+
+void SystemElastoChrono::set_time(double time) {
+    chobj->SetChTime(time);
 }
 
 void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {

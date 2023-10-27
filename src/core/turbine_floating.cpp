@@ -1,5 +1,6 @@
 #include "seahowl/core/turbine_floating.h"
 #include "seahowl/elasto/chrono_adapters.h"
+#include "seahowl/elasto/mooring_elasto.h"
 #include "seahowl/aero/turbine_aero.h"
 
 #include <spdlog/spdlog.h>
@@ -35,4 +36,26 @@ void TurbineFloating::poststep(double time, double dt) {
 void TurbineFloating::build() {
     elasto.build();
     aero.build();
+}
+
+void TurbineFloating::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
+    Turbine::apply_fluid_model(fluid_model, time);
+    for (auto& mooring : elasto.mooring_system->moorings) {
+        try {
+            dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*mooring).compute_hydro_loads(Vector3d(0., 0., -9.81),
+                                                                                           1025.);
+        } catch (const std::bad_cast& e) {
+            // do nothing
+        }
+    }
+}
+
+void TurbineFloating::apply_soil_model(seahowl::env::SoilModel& soil_model, double time) {
+    for (auto& mooring : elasto.mooring_system->moorings) {
+        try {
+            dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*mooring).compute_seabed_loads(soil_model);
+        } catch (const std::bad_cast& e) {
+            // do nothing
+        }
+    }
 }

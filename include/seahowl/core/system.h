@@ -87,6 +87,21 @@ class System : public ComponentDynamic {
      * @brief Returns time of simulation.
      */
     double get_time();
+
+    /**
+     * @brief Sets time of simulation.
+     *
+     * @param[in] time Time of simulation.
+     */
+    void set_time(double time);
+
+    /**
+     * @brief Presetup for system, called before simulation actually starts.
+     *
+     * @param[in] dt Time step length.
+     * @param[in] nsteps Number of time steps for presetup.
+     */
+    void presetup(double dt, int nsteps);
 };
 }  // namespace core
 }  // namespace seahowl

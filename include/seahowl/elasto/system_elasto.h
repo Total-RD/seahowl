@@ -33,6 +33,13 @@ class SystemElasto {
     virtual double get_time() const = 0;
 
     /**
+     * @brief Sets time of simulation.
+     *
+     * @param[in] time Time of simulation.
+     */
+    virtual void set_time(double time) = 0;
+
+    /**
      * @brief Does statics step.
      *
      * @param[in] linear Do linear statics if true.

@@ -26,11 +26,11 @@ void TurbineFloatingElasto::assemble(SystemElasto& system) {
         system.add(*(link_floater_tower.get()));
     }
 
-    // moorings
-    mooring_system->assemble(system);
-
     // assemble parent class
     TurbineElasto::assemble(system);
+
+    // moorings
+    mooring_system->assemble(system);
 }
 
 void TurbineFloatingElasto::build() {

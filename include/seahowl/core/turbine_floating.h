@@ -68,6 +68,22 @@ class TurbineFloating : public Turbine {
      * Calls build for each of the components of the turbine.
      */
     void build();
+
+    /**
+     * @brief Applies fluid model to turbine components.
+     *
+     * @param[in] fluid_model Fluid model affecting turbine components.
+     * @param[in] time Time of simulation.
+     */
+    virtual void apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) override;
+
+    /**
+     * @brief Applies soil model to turbine components.
+     *
+     * @param[in] soil_model Soil model affecting turbine components.
+     * @param[in] time Time of simulation.
+     */
+    virtual void apply_soil_model(seahowl::env::SoilModel& soil_model, double time) override;
 };
 
 }  // namespace core

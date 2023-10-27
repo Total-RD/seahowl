@@ -8,9 +8,10 @@
     }
   },
   "rotor": {
-    "type": "fea",
+    "type": "rigid",
     "options": {
-      "fpm": false
+      "inertia_blades": 3.5148698e8,
+      "mass_blades": 195e3
     },
     "discretization": {
       "elasto": [49],

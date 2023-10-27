@@ -24,7 +24,9 @@ using json = nlohmann::json;
 #include <seahowl/aero/system_aero.h>
 #include <seahowl/core/blade.h>
 #include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/core/turbine_floating.h>
+#include <seahowl/elasto/mooring_elasto.h>
+#include <seahowl/elasto/chrono_adapters.h>
+#include <seahowl/elasto/turbine_floating_elasto.h>
 
 #include <filesystem>  // C++17
 #include <sstream>
@@ -145,15 +147,35 @@ void run_simulation(int argc, char* argv[]) {
 #endif
 
     // simulation loop
-
+    //
     // initialization
     // statics
-    if (statics_prestep) {
-        system_elasto->do_statics(true, 10);
-        spdlog::debug("Performed statics prestep.");
-    }
-
+    // if (statics_prestep) {
+    //    system_elasto->do_statics(true, 10);
+    //    spdlog::debug("Performed statics prestep.");
+    //}
+    system_core.step(1e-6);  // need to do tiny time step before system initialization if statics not done
     system_core.initialize(system_elasto->get_time(), dt);
+
+    // get cables setup properly
+    system_core.presetup(0.05, 100);
+
+    // presimulation for cables to reach equilibrium
+    spdlog::info("Presimulation for cables and rotor equilibrium.");
+    system_core.turbines[0]->elasto.tower.nodes.front()->set_fixed(true);
+    while (system_elasto->get_time() < 200.0) {
+        // prestep
+        system_core.prestep(system_core.get_time(), dt);
+
+        // step
+        system_core.step(dt);
+
+        // poststep
+        system_core.poststep(system_core.get_time(), dt);
+    }
+    system_core.turbines[0]->elasto.tower.nodes.front()->set_fixed(false);
+    system_core.set_time(0.0);
+    spdlog::info("Presimulation finished.");
 
     int step = 0;
     output_results(system_core);

@@ -199,7 +199,7 @@ void MooringElastoFEA::compute_hydro_loads(const Vector3d& gravitational_acceler
             auto load_added_mass = load_added_mass_axial + load_added_mass_normal;
 
             // apply load drag over half element (each node gets half of a given element)
-            auto load_half_element = (load_drag + load_added_mass) * 0.5 * element_length;
+            auto load_half_element = (load_drag + load_added_mass + load_buoyancy) * 0.5 * element_length;
             element->nodes[ii]->set_force(element->nodes[ii]->get_force() + load_half_element);
         }
     }

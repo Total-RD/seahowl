@@ -1,0 +1,10 @@
+﻿{
+  "diameter": 0.333,
+  "stiffness_axial": 3270e6,
+  "stiffness_bending": 0.0,
+  "density_linear": 685.0,
+  "drag_coefficient_normal": 1.11,
+  "drag_coefficient_tangential": 0.20,
+  "added_mass_coefficient_normal": 0.82,
+  "added_mass_coefficient_tangential": 0.27
+}

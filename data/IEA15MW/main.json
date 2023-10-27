@@ -14,7 +14,7 @@
   },
   "turbines": [
     {
-      "file": "./turbine.json",
+      "file": "./turbine_floating.json",
       "translation": [0, 0, 0],
       "rotation": 0
     }

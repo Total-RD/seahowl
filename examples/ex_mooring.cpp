@@ -80,7 +80,7 @@ void run_simulation() {
     // mooring line
     auto mooring = seahowl::elasto::MooringElastoFEA(fairlead, anchor);
     mooring.length = 850.0;
-    mooring.diameter = 0.185;
+    mooring.diameter = 0.333;
     mooring.stiffness_axial = 3270e6;
     mooring.stiffness_bending = 0.0;
     mooring.density_linear = 685.0;
