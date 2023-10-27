@@ -147,7 +147,8 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const FluidModel& wind_model,
                 (node.distance_from_hub < tol && hub_loss)) {
                 node.load = Vector3d(0.0, 0.0, 0.0);
             } else {
-                double airfoil_angle = blade->pitch + node.properties.structural_twist;
+                double airfoil_angle =
+                    seahowl::PI / 2 - acos(global_direction_normal.dot(node.get_rotation() * Vector3d(0.0, 1.0, 0.0)));
                 // get induced velocity (2D) from blade node
                 auto local_velocity =
                     get_induced_velocity(node, local_velocity0, airfoil_angle, blades.size(), tip_loss, hub_loss);
