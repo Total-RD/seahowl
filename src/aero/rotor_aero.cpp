@@ -147,9 +147,15 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const FluidModel& wind_model,
                 (node.distance_from_hub < tol && hub_loss)) {
                 node.load = Vector3d(0.0, 0.0, 0.0);
             } else {
-                double airfoil_angle =
-                    seahowl::PI / 2 - acos(global_direction_normal.dot(node.get_rotation() * Vector3d(0.0, 1.0, 0.0)));
-                // get induced velocity (2D) from blade node
+                // get airfoil angle with rotor plane
+                auto airfoil_direction = node.get_rotation() * Vector3d(0.0, -1.0, 0.0);
+                double airfoil_angle = acos(airfoil_direction.dot(global_direction_normal)) - seahowl::PI / 2;
+                // check direction of airfoil axis
+                if (airfoil_direction.dot(global_direction_tangent) < 0) {
+                    airfoil_angle = seahowl::PI - airfoil_angle;
+                }
+
+                // get induced velocity
                 auto local_velocity =
                     get_induced_velocity(node, local_velocity0, airfoil_angle, blades.size(), tip_loss, hub_loss);
 
@@ -195,7 +201,6 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const FluidModel& wind_model,
 }
 
 void RotorNacelleAssemblyAero::compute_aero_loads_disk(const FluidModel& wind_model, double time) {
-
     auto pos_hub = body_hub.get_position();
     auto vel_hub = body_hub.get_velocity();
     double density = wind_model.get_fluid_density(pos_hub, time);
