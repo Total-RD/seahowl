@@ -35,6 +35,18 @@ class Entity {
      * @brief Returns rotation of entity.
      */
     virtual Quaternion get_rotation() const = 0;
+
+    /**
+     * @brief Returns rotation matrix of entity.
+     */
+    Eigen::Matrix<double, 3, 3> get_rotation_matrix() const { return get_rotation().toRotationMatrix(); };
+
+    /**
+     * @brief Sets rotation matrix of entity.
+     *
+     * @param[in] rotation Rotation matrix of entity.
+     */
+    void set_rotation_matrix(Eigen::Matrix<double, 3, 3> rotation) { set_rotation(Quaternion(rotation)); };
 };
 
 /**

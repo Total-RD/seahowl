@@ -18,8 +18,10 @@ PYBIND11_MODULE(pyseahowl, m) {
     py::class_<seahowl::Entity, std::shared_ptr<seahowl::Entity>>(m, "Entity")
         .def("get_position", &seahowl::Entity::get_position)
         .def("set_position", &seahowl::Entity::set_position)
-        .def("get_rotation", &seahowl::Entity::get_rotation)
-        .def("set_rotation", &seahowl::Entity::set_rotation);
+        //.def("get_rotation", &seahowl::Entity::get_rotation)
+        .def("get_rotation_matrix", &seahowl::Entity::get_rotation_matrix)
+        //.def("set_rotation", &seahowl::Entity::set_rotation)
+        .def("set_rotation_matrix", &seahowl::Entity::set_rotation_matrix);
     py::class_<seahowl::EntityDynamic, std::shared_ptr<seahowl::EntityDynamic>, seahowl::Entity>(m, "EntityDynamic")
         .def("get_velocity", &seahowl::EntityDynamic::get_velocity)
         .def("set_velocity", &seahowl::EntityDynamic::set_velocity)
