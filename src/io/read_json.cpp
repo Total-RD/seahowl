@@ -798,6 +798,19 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
         // get ref to turbine added last
         auto& turbine = *system_core.turbines.back();
 
+#ifdef HAVE_AERODYN
+        try {
+            // set VTK options if using AeroDyn
+            auto& turbine_aero = dynamic_cast<seahowl::aero::TurbineAeroDyn&>(turbine.aero);
+            if (outputs_json.at("VTK").get<bool>()) {
+                turbine_aero.WrVTK = 2;
+                turbine_aero.WrVTK_dt = outputs_json.at("dt").get<double>();
+            }
+        } catch (const std::bad_cast& e) {
+            // do nothing if not using AeroDyn
+        }
+#endif
+
         // build turbine
         turbine.build();
         // rotate turbine to align tower with gravity vector
