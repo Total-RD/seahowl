@@ -21,7 +21,7 @@ const std::string& get_disk_perf_line(std::vector<std::string>& lines, int index
     return line;
 }
 
-void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorNacelleAssemblyAero& aero) {
+void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorAeroDisk& aero) {
     std::string appo;
 
     if (!fs::exists(filepath)) {

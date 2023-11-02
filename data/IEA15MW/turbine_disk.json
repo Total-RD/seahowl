@@ -4,6 +4,7 @@
     "fpm": false,
     "inertia_total": 3.524605e8,
     "mass_blades_total": 195e3,
+    "radius": 117,
     "performance_file": "./controller/Cp_Ct_Cq.IEA15MW_modified.txt",
     "discretization": {
       "elasto": [49],

@@ -2,16 +2,13 @@
 
 #include "seahowl/aero/rotor_aero.h"
 #include "seahowl/aero/tower_aero.h"
-#ifdef HAVE_AERODYN
-    #include "seahowl/aero/aerodyn_adapter.h"
-#endif
 
 #include <vector>
 
 // forward declarations
 namespace seahowl {
 namespace env {
-    class WindModel;
+class WindModel;
 }  // namespace env
 }  // namespace seahowl
 
@@ -22,7 +19,7 @@ namespace seahowl {
 namespace aero {
 
 class ComponentAero {
-    virtual void compute_aero_loads(env::FluidModel& wind_model, double time){};
+    virtual void compute_aero_loads(const env::FluidModel& wind_model, double time){};
 };
 
 /**
@@ -38,22 +35,6 @@ class TurbineAero : public ComponentAero {
     seahowl::aero::RotorNacelleAssemblyAero rna;
     /** @brief Tower of the turbine. */
     seahowl::aero::TowerAero tower;
-
-    /** @brief Whether to use AeroDyn or not. */
-    bool use_aerodyn = false;
-
-    /** @brief Whether to use DiskTheory or not. */
-    bool use_disktheory = false;
-#ifdef HAVE_AERODYN
-    /** @brief AeroDyn adapter (only used if AeroDyn is enabled). */
-    std::shared_ptr<seahowl::aero::AeroDynAdapter> aerodyn;
-    /** @brief Option to save VTK in AeroDyn, 0: none; 1: init only; 2: animation. */
-    int WrVTK = 0;
-    /** @brief VTK save type, 1: surface; 2: lines; 3: both. */
-    int WrVTK_Type = 1;
-    /** @brief VTK save time step. */
-    double WrVTK_dt;
-#endif
 
     /**
      * @brief Constructor.
@@ -73,7 +54,7 @@ class TurbineAero : public ComponentAero {
      * @param[in] time Time of the simulation (usually 0 at init).
      * @param[in] dt Time step length.
      */
-    void initialize(double time, double dt);
+    virtual void initialize(double time, double dt);
 
     /**
      * @brief Computes aero loads on turbine.
@@ -81,7 +62,7 @@ class TurbineAero : public ComponentAero {
      * @param[in] wind_model Wind model to use for applying aero loads.
      * @param[in] time Time of simulation.
      */
-    virtual void compute_aero_loads(env::FluidModel& wind_model, double time) override;
+    virtual void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
 };
 
 }  // namespace aero

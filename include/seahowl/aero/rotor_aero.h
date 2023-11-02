@@ -19,60 +19,46 @@ class FluidModel;
 namespace seahowl {
 namespace aero {
 
-// The structure containing the coefficients for the rotor disk
-struct DiskCoefficients {
-    // Member variables
-    Eigen::MatrixXd thrust_coeff;
-    Eigen::MatrixXd power_coeff;
-    Eigen::VectorXd tsr_list;
-    Eigen::VectorXd pitch_list;
-    seahowl::Vector2d get_disk_coefficients_from_table(double TSR, double pitch);
-};
-
-/**
- * @brief Rotor-Nacelle Assembly (RNA) of wind turbine as an aero component.
- */
-class RotorNacelleAssemblyAero {
+class RotorAero {
   public:
     /** @brief List of blades. */
     std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades;
     /** @brief Hub. */
     EntityDynamicEigen body_hub;
-    /** @brief Hub. */
-    EntityDynamicEigen body_nacelle;
-    /** @brief Total radius of the rotor (hub + blades). */
-    double radius = 0.0;
     /** @brief Radius of hub. */
     double hub_radius = 0.0;
+    /** @brief Aerodynamic torque on hub. */
+    double hub_torque_aero = 0.0;
+    /** @brief Aerodynamic thrust on hub. */
+    double hub_thrust_aero = 0.0;
+    /** @brief Total radius of the rotor (hub + blades). */
+    double radius = 0.0;
     /** @brief Azimuth of rotor. */
     double azimuth = 0.0;
-
     /** @brief Collective pitch of blades (in radians). */
-    double pitch_collective = 0;
+    double pitch_collective = 0.0;
 
-    /** @brief The tables of actuator disk coefficients. */
-    DiskCoefficients disk_coefficients;
+    virtual void build() = 0;
+    virtual void initialize() = 0;
+    virtual void compute_aero_loads(const env::FluidModel& wind_model, double time) = 0;
+};
 
-    /** @brief Aerodynamic torque from disk coeffs. */
-    double torque_aero = 0;
+class RotorAeroBEMT : public RotorAero {
+  public:
+    /** @brief Reference to tower aero. */
+    TowerAero& tower_ref;
+    /** Whether to take tip loss into account or not. */
+    bool has_tip_loss = true;
+    /** Whether to take hub loss into account or not. */
+    bool has_hub_loss = true;
+    /** Whether to take tower shadow into account or not. */
+    bool has_tower_shadow = true;
 
-    /** @brief Aerodynamic thrust from disk coeffs. */
-    double thrust_aero = 0;
+    RotorAeroBEMT(TowerAero& tower_ref);
 
-    /**
-     * @brief Constructor.
-     */
-    RotorNacelleAssemblyAero();
-
-    /**
-     * @brief Builds the rotor.
-     */
-    void build();
-
-    /**
-     * @brief Initialize rotor related variables with current configuration.
-     */
-    void initialize();
+    virtual void build() override;
+    virtual void initialize() override;
+    virtual void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
 
     /**
      * @brief Computes chord solidity on all aero nodes of blades.
@@ -93,55 +79,52 @@ class RotorNacelleAssemblyAero {
      * @brief Computes radius on all aero nodes of blades.
      */
     void compute_radii();
+};
+
+// The structure containing the coefficients for the rotor disk
+struct DiskCoefficients {
+    // Member variables
+    Eigen::MatrixXd thrust_coeff;
+    Eigen::MatrixXd power_coeff;
+    Eigen::VectorXd tsr_list;
+    Eigen::VectorXd pitch_list;
+    seahowl::Vector2d get_disk_coefficients_from_table(double TSR, double pitch);
+};
+
+class RotorAeroDisk : public RotorAero {
+  public:
+    /** @brief The tables of actuator disk coefficients. */
+    DiskCoefficients disk_coefficients;
+
+    virtual void build() override{};
+    void initialize() override;
+    void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
+};
+
+/**
+ * @brief Rotor-Nacelle Assembly (RNA) of wind turbine as an aero component.
+ */
+class RotorNacelleAssemblyAero {
+  public:
+    /** @brief Rotor. */
+    std::shared_ptr<RotorAero> rotor;
+    /** @brief Nacelle. */
+    EntityDynamicEigen body_nacelle;
 
     /**
-     * @brief Computes wind loads on all aero nodes of blades.
-     *
-     * @param[in] wind_model Wind model to use for retrieving uninduced wind velocity at nodes.
-     * @param[in] time Time of simulation.
-     * @param[in] tower_aero Tower reference (for tower shadow effects).
-     * @param[in] tower_shadow Whether to take tower shadow effect into account or not.
-     * @param[in] tip_loss Whether to take tip loss into account or not.
-     * @param[in] hub_loss Whether to take hub loss into account or not.
+     * @brief Constructor.
      */
-    void compute_aero_loads(const env::FluidModel& wind_model,
-                            double time,
-                            const TowerAero& tower_aero,
-                            bool tower_shadow = true,
-                            bool tip_loss = true,
-                            bool hub_loss = true);
+    RotorNacelleAssemblyAero();
 
     /**
-     * @brief Computes wind loads on rotor.
-     *
-     * @param[in] wind_model Wind model to use for retrieving uninduced wind velocity at nodes.
-     * @param[in] time Time of simulation.
-     * @param[in] pitch collective pitch rotor (for getting performance from table).
-     * @param[in] RPM Rotor speed (for getting performance from table).
-     *
+     * @brief Builds rotor.
      */
-    void compute_aero_loads_disk(const env::FluidModel& wind_model, double time);
+    void build();
 
-#ifdef HAVE_AERODYN
     /**
-     * @brief Computes wind loads on all aero nodes of blades using AeroDyn.
-     *
-     * @param[out] LoadAeroDyn Array of loads.
-     * @param[in] wind_model Wind model to use for retrieving uninduced wind velocity at nodes.
-     * @param[in] time Time of simulation.
-     * @param[in] tower_aero Tower reference (for tower shadow effects).
-     * @param[in] tower_shadow Whether to take tower shadow effect into account or not.
-     * @param[in] tip_loss Whether to take tip loss into account or not.
-     * @param[in] hub_loss Whether to take hub loss into account or not.
+     * @brief Initializes rotor related variables with current configuration.
      */
-    void compute_aero_loads(float* LoadAeroDyn,
-                            env::FluidModel& wind_model,
-                            double time,
-                            const TowerAero& tower_aero,
-                            bool tower_shadow = true,
-                            bool tip_loss = true,
-                            bool hub_loss = true);
-#endif
+    void initialize();
 };
 
 }  // namespace aero

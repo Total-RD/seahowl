@@ -30,11 +30,6 @@ void Turbine::initialize(double time, double dt) {
 void Turbine::prestep(double time, double dt) {
     rna.prestep(time, dt);
     tower.prestep(time, dt);
-
-    if (aero.use_disktheory) {
-        rna.elasto.rotor->body_hub->accumulate_torque(Vector3d(rna.aero.torque_aero, 0, 0), true);
-        rna.elasto.rotor->body_hub->accumulate_force(Vector3d(rna.aero.thrust_aero, 0, 0), true);
-    }
 }
 
 void Turbine::poststep(double time, double dt) {

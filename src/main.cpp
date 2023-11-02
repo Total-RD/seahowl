@@ -144,12 +144,6 @@ void run_simulation(int argc, char* argv[]) {
     draw_system_init(system_chrono, application);
 #endif
 
-#ifdef HAVE_AERODYN
-    if (system_core.turbines[0]->aero.use_aerodyn) {
-        remove_all("./output/vtk-ADI");
-    }
-#endif
-
     // simulation loop
 
     // initialization

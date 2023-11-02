@@ -14,7 +14,7 @@ namespace aero {
 class SystemAero {
   public:
     /** @brief Turbines in system. */
-    std::deque<TurbineAero> turbines{};
+    std::deque<std::shared_ptr<TurbineAero>> turbines{};
 };
 
 }  // namespace aero

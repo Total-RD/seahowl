@@ -8,11 +8,9 @@
 #include "seahowl/env/wind_models.h"
 
 #include <cmath>
+#include <spdlog/spdlog.h>
 
-using seahowl::aero::BladeAero;
-using seahowl::aero::RotorNacelleAssemblyAero;
-using seahowl::aero::TowerAero;
-using seahowl::aero::DiskCoefficients;
+using namespace seahowl::aero;
 using seahowl::env::FluidModel;
 using seahowl::Vector3d;
 using seahowl::Vector2d;
@@ -33,6 +31,19 @@ seahowl::Vector2d DiskCoefficients::get_disk_coefficients_from_table(double TSR,
 RotorNacelleAssemblyAero::RotorNacelleAssemblyAero() {}
 
 void RotorNacelleAssemblyAero::build() {
+    rotor->build();
+}
+
+void RotorNacelleAssemblyAero::initialize() {
+    if (!rotor) {
+        std::runtime_error("Cannot initialize aero RNA without having defined and attached a rotor to it.");
+    }
+    rotor->initialize();
+}
+
+RotorAeroBEMT::RotorAeroBEMT(TowerAero& tower_ref) : tower_ref(tower_ref) {}
+
+void RotorAeroBEMT::build() {
     // build blades
     for (auto& blade : blades) {
         blade->build();
@@ -49,7 +60,7 @@ void RotorNacelleAssemblyAero::build() {
     initialize();
 }
 
-void RotorNacelleAssemblyAero::initialize() {
+void RotorAeroBEMT::initialize() {
     // compute blade elements related values
     compute_distances_from_tip();
     compute_distances_from_hub();
@@ -57,7 +68,7 @@ void RotorNacelleAssemblyAero::initialize() {
     compute_chords_solidity();
 }
 
-void RotorNacelleAssemblyAero::compute_chords_solidity() {
+void RotorAeroBEMT::compute_chords_solidity() {
     auto nblades = blades.size();
     for (auto& blade : blades) {
         for (auto& node : blade->nodes) {
@@ -67,33 +78,28 @@ void RotorNacelleAssemblyAero::compute_chords_solidity() {
     }
 }
 
-void RotorNacelleAssemblyAero::compute_distances_from_hub() {
+void RotorAeroBEMT::compute_distances_from_hub() {
     for (int ii = 0; ii < blades.size(); ii++) {
         auto& blade = blades[ii];
         blade->compute_distances_from_hub(body_hub.get_position(), hub_radius);
     }
 }
 
-void RotorNacelleAssemblyAero::compute_distances_from_tip() {
+void RotorAeroBEMT::compute_distances_from_tip() {
     for (int ii = 0; ii < blades.size(); ii++) {
         auto& blade = blades[ii];
         blade->compute_distances_from_tip();
     }
 }
 
-void RotorNacelleAssemblyAero::compute_radii() {
+void RotorAeroBEMT::compute_radii() {
     for (int ii = 0; ii < blades.size(); ii++) {
         auto& blade = blades[ii];
         blade->compute_radii(body_hub.get_position());
     }
 }
 
-void RotorNacelleAssemblyAero::compute_aero_loads(const FluidModel& wind_model,
-                                                  double time,
-                                                  const TowerAero& tower_aero,
-                                                  bool tower_shadow,
-                                                  bool tip_loss,
-                                                  bool hub_loss) {
+void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time) {
     for (auto& blade : blades) {
         auto blade_azimuth = azimuth + blade->azimuth0;
         // check that blade_azimuth is between pi and -pi
@@ -114,9 +120,9 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const FluidModel& wind_model,
             Vector3d wind_velocity = wind_velocity0;
 
             // correct wind velocity with tower shadow (if activated)
-            if (tower_shadow) {
+            if (has_tower_shadow) {
                 if (blade_azimuth > PI / 2.0 || blade_azimuth < -PI / 2.0) {
-                    seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity, position, tower_aero);
+                    seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity, position, tower_ref);
                 }
             }
 
@@ -143,8 +149,8 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const FluidModel& wind_model,
             auto local_velocity0 = Vector2d(local_velocity_tangent, local_velocity_normal);
 
             double tol = 1e-6;
-            if (local_velocity0.norm() < tol || (node.distance_from_tip < tol && tip_loss) ||
-                (node.distance_from_hub < tol && hub_loss)) {
+            if (local_velocity0.norm() < tol || (node.distance_from_tip < tol && has_tip_loss) ||
+                (node.distance_from_hub < tol && has_hub_loss)) {
                 node.load = Vector3d(0.0, 0.0, 0.0);
             } else {
                 // get airfoil angle with rotor plane
@@ -156,8 +162,8 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const FluidModel& wind_model,
                 }
 
                 // get induced velocity
-                auto local_velocity =
-                    get_induced_velocity(node, local_velocity0, airfoil_angle, blades.size(), tip_loss, hub_loss);
+                auto local_velocity = get_induced_velocity(node, local_velocity0, airfoil_angle, blades.size(),
+                                                           has_tip_loss, has_hub_loss);
 
                 // get coefficients from angle of attack
                 double phi = seahowl::aero::get_phi(local_velocity);
@@ -200,7 +206,13 @@ void RotorNacelleAssemblyAero::compute_aero_loads(const FluidModel& wind_model,
     }
 }
 
-void RotorNacelleAssemblyAero::compute_aero_loads_disk(const FluidModel& wind_model, double time) {
+void RotorAeroDisk::initialize() {
+    if (radius <= 0.0) {
+        throw std::runtime_error("Disk actuator rotor cannot be initialized if radius is not set.");
+    }
+}
+
+void RotorAeroDisk::compute_aero_loads(const FluidModel& wind_model, double time) {
     auto pos_hub = body_hub.get_position();
     auto vel_hub = body_hub.get_velocity();
     double density = wind_model.get_fluid_density(pos_hub, time);
@@ -246,37 +258,6 @@ void RotorNacelleAssemblyAero::compute_aero_loads_disk(const FluidModel& wind_mo
 
     // auto load_global = load_n_global + load_t_global;
 
-    torque_aero = load_t;
-    thrust_aero = load_n;
+    hub_torque_aero = load_t;
+    hub_thrust_aero = load_n;
 }
-
-#ifdef HAVE_AERODYN
-void RotorNacelleAssemblyAero::compute_aero_loads(float* LoadAeroDyn,
-                                                  FluidModel& wind_model,
-                                                  double time,
-                                                  const TowerAero& tower_aero,
-                                                  bool tower_shadow,
-                                                  bool tip_loss,
-                                                  bool hub_loss) {
-    int count_blade = -1;
-    for (auto& blade : blades) {
-        count_blade += 1;
-        auto blade_azimuth = azimuth + blade->azimuth0;
-        // check that blade_azimuth is between pi and -pi
-        if (blade_azimuth < -PI || blade_azimuth > PI) {
-            blade_azimuth = abs(std::fmod((blade_azimuth + 3 * PI), 2 * PI)) - PI;
-        }
-        int count_node = -1;
-        for (auto& node : blade->nodes) {
-            count_node += 1;
-            // store load in global frame
-            int pp = (count_blade * (blade->elements.size() + 1) + count_node) * 6;
-            node.load = Vector3d(LoadAeroDyn[pp], LoadAeroDyn[pp + 1], LoadAeroDyn[pp + 2]);
-        }
-        // update loads of blade
-        for (int ii = 0; ii < blade->elements.size(); ii++) {
-            blade->loads[ii] = blade->elements[ii].get_load();
-        }
-    }
-}
-#endif

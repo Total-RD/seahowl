@@ -35,6 +35,10 @@ void RotorNacelleAssembly::prestep(double time, double dt) {
     for (auto& blade : blades) {
         blade->prestep(time, dt);
     }
+
+    // apply extra torque and thrust (if any) to hub
+    elasto.rotor->body_hub->accumulate_torque(Vector3d(aero.rotor->hub_torque_aero, 0, 0), true);
+    elasto.rotor->body_hub->accumulate_force(Vector3d(aero.rotor->hub_thrust_aero, 0, 0), true);
 }
 
 void RotorNacelleAssembly::poststep(double time, double dt) {
@@ -46,16 +50,16 @@ void RotorNacelleAssembly::poststep(double time, double dt) {
 
 void RotorNacelleAssembly::update_positions_aero() {
     // pitch collective
-    aero.pitch_collective = elasto.rotor->pitch_collective;
+    aero.rotor->pitch_collective = elasto.rotor->pitch_collective;
     // azimuth
-    aero.azimuth = elasto.get_azimuth();
+    aero.rotor->azimuth = elasto.get_azimuth();
     // body_hub
-    aero.body_hub.set_position(elasto.rotor->body_hub->get_position());
-    aero.body_hub.set_rotation(elasto.rotor->body_hub->get_rotation());
-    aero.body_hub.set_velocity(elasto.rotor->body_hub->get_velocity());
-    aero.body_hub.set_acceleration(elasto.rotor->body_hub->get_acceleration());
-    aero.body_hub.set_rotational_velocity(elasto.rotor->body_hub->get_rotational_velocity());
-    aero.body_hub.set_rotational_acceleration(elasto.rotor->body_hub->get_rotational_acceleration());
+    aero.rotor->body_hub.set_position(elasto.rotor->body_hub->get_position());
+    aero.rotor->body_hub.set_rotation(elasto.rotor->body_hub->get_rotation());
+    aero.rotor->body_hub.set_velocity(elasto.rotor->body_hub->get_velocity());
+    aero.rotor->body_hub.set_acceleration(elasto.rotor->body_hub->get_acceleration());
+    aero.rotor->body_hub.set_rotational_velocity(elasto.rotor->body_hub->get_rotational_velocity());
+    aero.rotor->body_hub.set_rotational_acceleration(elasto.rotor->body_hub->get_rotational_acceleration());
     // body_nacelle
     aero.body_nacelle.set_position(elasto.body_nacelle->get_position());
     aero.body_nacelle.set_rotation(elasto.body_nacelle->get_rotation());

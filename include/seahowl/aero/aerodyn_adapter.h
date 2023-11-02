@@ -2,13 +2,16 @@
 
 #include <iostream>
 #include <cstring>
+#include <memory>
 
 #include <seahowl/commons/numerics.h>
+#include <seahowl/aero/turbine_aero.h>
+#include <seahowl/aero/rotor_aero.h>
 
 namespace seahowl {
-namespace aero {
-class TurbineAero;
-}  // namespace aero
+namespace env {
+class FluidModel;
+}  // namespace env
 }  // namespace seahowl
 
 /// <summary>
@@ -257,6 +260,30 @@ class AeroDynAdapter {
     void setMotionNac(seahowl::aero::TurbineAero& turbine);
     void setMotionRoot(seahowl::aero::TurbineAero& turbine);
     void setMotionMesh(seahowl::aero::TurbineAero& turbine);
+};
+
+class TurbineAeroDyn : public TurbineAero {
+  public:
+    /** @brief AeroDyn adapter. */
+    std::shared_ptr<seahowl::aero::AeroDynAdapter> aerodyn;
+    /** @brief Option to save VTK in AeroDyn, 0: none; 1: init only; 2: animation. */
+    int WrVTK = 0;
+    /** @brief VTK save type, 1: surface; 2: lines; 3: both. */
+    int WrVTK_Type = 1;
+    /** @brief VTK save time step. */
+    double WrVTK_dt;
+
+    TurbineAeroDyn();
+    void initialize(double time, double dt) override;
+    void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
+};
+
+class RotorAeroDyn : public RotorAeroBEMT {
+  public:
+    float* loads_aerodyn;
+
+    RotorAeroDyn(TowerAero& tower_ref);
+    virtual void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
 };
 
 }  // namespace aero
