@@ -369,6 +369,41 @@ void populate_rna_from_json(const std::string& filepath, seahowl::core::RotorNac
     populate_rna_aero_from_json(filepath, rna.aero);
 }
 
+void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
+    spdlog::debug("Adding turbine to system from " + filepath + " file.");
+    auto json_obj = get_json_from_file(filepath);
+
+    // make turbine aero
+    if (json_obj.at("aero").at("solver") == "aerodyn" || json_obj.at("aero").at("solver") == "AeroDyn") {
+#ifdef HAVE_AERODYN
+        auto turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>();
+        system_core.system_aero->turbines.push_back(turbine_aero);
+#endif
+    } else {
+        auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
+        system_core.system_aero->turbines.push_back(turbine_aero);
+    }
+
+    // make turbine elasto
+    if (json_obj.contains("floater")) {
+        // floating turbine if floater is defined
+        auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineFloatingElasto>();
+        system_core.system_elasto->turbines.push_back(turbine_elasto);
+    } else {
+        // simple turbine if floater is not defined
+        auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
+        system_core.system_elasto->turbines.push_back(turbine_elasto);
+    }
+
+    // add turbine to system
+    auto turbine = std::make_shared<seahowl::core::Turbine>(*system_core.system_elasto->turbines.back(),
+                                                            *system_core.system_aero->turbines.back());
+    system_core.turbines.push_back(turbine);
+
+    // populate turbine
+    populate_turbine_from_json(filepath, *turbine);
+}
+
 void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turbine& turbine) {
     spdlog::debug("Populating turbine from " + filepath + " file.");
     auto json_obj = get_json_from_file(filepath);
@@ -379,24 +414,58 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
     auto tower_json = json_obj.at("tower");
     auto rna_json = json_obj.at("rna");
     auto controller_json = json_obj.at("controller");
+    auto aero_json = json_obj.at("aero");
 
-    try {
-        // do nothing if rotor aero was already defined for AeroDyn
-        dynamic_cast<seahowl::aero::TurbineAeroDyn&>(turbine.aero);
-    } catch (const std::exception& e) {
-        if (rotor_json.at("type").get<std::string>() == "disk") {
-            auto rotor_disk = std::make_shared<seahowl::aero::RotorAeroDisk>();
-            turbine.rna.aero.rotor = rotor_disk;
-            spdlog::info("Aerodynamic model: Actuator Disk Theory.");
-            // get rotor performance from table
-            if (!rotor_json.contains("performance_file")) {
-                throw std::runtime_error("The \"performance_file\" key must be given for actuator disk rotor.");
-            }
-            get_disk_perf_from_table((DATADIR / rotor_json.at("performance_file")).generic_string(), *rotor_disk);
-        } else {
-            turbine.rna.aero.rotor = std::make_shared<seahowl::aero::RotorAeroBEMT>(turbine.aero.tower);
-            spdlog::info("Aerodynamic model: Blade Element Momentum Theory (BEMT).");
+    if (aero_json.at("solver").get<std::string>() == "bemt" || aero_json.at("solver").get<std::string>() == "BEMT") {
+        spdlog::info("Aerodynamic model: Blade Element Momentum Theory (BEMT).");
+        auto rotor_aero = std::make_shared<seahowl::aero::RotorAeroBEMT>(turbine.aero.tower);
+        turbine.rna.aero.rotor = rotor_aero;
+        auto aero_options = aero_json.at("options");
+        aero_options.at("hub_loss").get_to(rotor_aero->has_hub_loss);
+        aero_options.at("tip_loss").get_to(rotor_aero->has_tip_loss);
+        aero_options.at("tower_shadow").get_to(rotor_aero->has_tower_shadow);
+
+    } else if (aero_json.at("solver").get<std::string>() == "disk") {
+        spdlog::info("Aerodynamic model: Actuator Disk Theory.");
+        if (rotor_json.at("type").get<std::string>() != "disk") {
+            throw std::runtime_error("Only rotor type \"disk\" can be used with aero solver \"disk\".");
         }
+        auto rotor_disk = std::make_shared<seahowl::aero::RotorAeroDisk>();
+        turbine.rna.aero.rotor = rotor_disk;
+        auto aero_options = aero_json.at("options");
+        // get rotor performance from table
+        get_disk_perf_from_table((DATADIR / aero_options.at("performance_file").get<std::string>()), *rotor_disk);
+    } else if (aero_json.at("solver").get<std::string>() == "aerodyn" ||
+               aero_json.at("solver").get<std::string>() == "AeroDyn") {
+        spdlog::info("Aerodynamic model: AeroDyn.");
+#ifdef HAVE_AERODYN
+        // check that right turbine type was defined for AeroDyn
+        try {
+            auto& turbine_aero = dynamic_cast<seahowl::aero::TurbineAeroDyn&>(turbine.aero);
+        } catch (const std::exception& e) {
+            throw std::runtime_error("Wrong aero turbine type to use AeroDyn solver (needs to be TurbineAeroDyn).");
+        }
+        auto& turbine_aero = dynamic_cast<seahowl::aero::TurbineAeroDyn&>(turbine.aero);
+        auto aero_options = aero_json.at("options");
+        std::string inflowwind_filepath;
+        std::string aerodyn_filepath;
+        if (aero_options.contains("file_aerodyn")) {
+            aerodyn_filepath = (DATADIR / aero_options.at("file_aerodyn").get<std::string>()).generic_string();
+        } else {
+            throw std::runtime_error("Turbine set to use aerodyn but AeroDyn file path not defined.");
+        }
+        if (aero_options.contains("file_inflowwind")) {
+            inflowwind_filepath = (DATADIR / aero_options.at("file_inflowwind").get<std::string>()).generic_string();
+        } else {
+            throw std::runtime_error("Turbine set to use aerodyn but InflowWind file not defined.");
+        }
+        turbine_aero.aerodyn.set_infiles(aerodyn_filepath, inflowwind_filepath);
+        turbine_aero.rna.rotor = std::make_shared<seahowl::aero::RotorAeroDyn>(turbine.aero.tower);
+#else
+        throw std::runtime_error("Trying to use AeroDyn for turbine but the code was not compiled for using AeroDyn.");
+#endif
+    } else {
+        throw std::runtime_error("Unknown aero solver \"" + aero_json.at("solver").get<std::string>() + "\".");
     }
 
     // check rotor type
@@ -415,47 +484,40 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
     }
 
     // blades
-    std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
-    std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades_elasto;
-    std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades_aero;
-    auto blades_json = rotor_json.at("blades");
-    for (auto& blade_json : blades_json) {
-        auto filepath_blade = (DATADIR / blade_json.at("file").get<std::string>()).generic_string();
-        std::shared_ptr<seahowl::elasto::BladeElasto> blade_elasto;
-        if (rotor_json.at("type").get<std::string>() == "fea") {
-            blade_elasto = std::make_shared<seahowl::elasto::BladeElastoFEA>();
-            auto& blade_elasto_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade_elasto);
-            rotor_json.at("discretization").at("elasto").get_to(blade_elasto_fea.discretization_fractions);
-            rotor_json.at("fpm").get_to(blade_elasto_fea.fpm_mode);
-        } else if (rotor_json.at("type").get<std::string>() == "rigid") {
-            blade_elasto = std::make_shared<seahowl::elasto::BladeElastoRigid>();
-        } else if (rotor_json.at("type").get<std::string>() == "disk") {
-            blade_elasto = std::make_shared<seahowl::elasto::BladeElastoRigid>();
+    // only make blades if rotor type is not disk
+    if (rotor_json.at("type").get<std::string>() != "disk") {
+        std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
+        std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades_elasto;
+        std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades_aero;
+        auto blades_json = rotor_json.at("blades");
+        for (auto& blade_json : blades_json) {
+            auto filepath_blade = (DATADIR / blade_json.at("file").get<std::string>()).generic_string();
+            std::shared_ptr<seahowl::elasto::BladeElasto> blade_elasto;
+            if (rotor_json.at("type").get<std::string>() == "fea") {
+                blade_elasto = std::make_shared<seahowl::elasto::BladeElastoFEA>();
+                auto& blade_elasto_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade_elasto);
+                rotor_json.at("discretization").at("elasto").get_to(blade_elasto_fea.discretization_fractions);
+                rotor_json.at("fpm").get_to(blade_elasto_fea.fpm_mode);
+            } else if (rotor_json.at("type").get<std::string>() == "rigid") {
+                blade_elasto = std::make_shared<seahowl::elasto::BladeElastoRigid>();
+            }
+            auto blade_aero = std::make_shared<seahowl::aero::BladeAero>();
+            auto blade = std::make_shared<seahowl::core::Blade>(*blade_elasto, *blade_aero);
+            populate_blade_from_json(filepath_blade, *blade);
+            rotor_json.at("discretization").at("aero").get_to(blade->aero.discretization_fractions);
+            blade_json.at("initial_pitch").get_to(blade->elasto.pitch);
+            blade_elasto->precone = blade_json.at("precone").get<double>() * PI / 180.0;
+            // no precone if blade is rigid (assumed that blade is on rotor disc)
+            if (rotor_json.at("type").get<std::string>() == "rigid") {
+                blade_elasto->precone = 0.0;
+            }
+            blades_elasto.push_back(blade_elasto);
+            blades_aero.push_back(blade_aero);
+            blades.push_back(blade);
         }
-        auto blade_aero = std::make_shared<seahowl::aero::BladeAero>();
-        auto blade = std::make_shared<seahowl::core::Blade>(*blade_elasto, *blade_aero);
-        populate_blade_from_json(filepath_blade, *blade);
-        rotor_json.at("discretization").at("aero").get_to(blade->aero.discretization_fractions);
-        blade_json.at("initial_pitch").get_to(blade->elasto.pitch);
-        blade_elasto->precone = blade_json.at("precone").get<double>() * PI / 180.0;
-        // no precone if blade is rigid (assumed that blade is on rotor disc)
-        if (rotor_json.at("type").get<std::string>() == "rigid" || rotor_json.at("type").get<std::string>() == "disk") {
-            blade_elasto->precone = 0.0;
-        }
-        blades_elasto.push_back(blade_elasto);
-        blades_aero.push_back(blade_aero);
-        blades.push_back(blade);
-    }
-
-    turbine.elasto.rna.rotor->blades = blades_elasto;
-    turbine.aero.rna.rotor->blades = blades_aero;
-    turbine.rna.blades = blades;
-
-    // empty blades list of rotor type is disk
-    if (rotor_json.at("type").get<std::string>() == "disk") {
-        turbine.elasto.rna.rotor->blades.clear();
-        turbine.aero.rna.rotor->blades.clear();
-        turbine.rna.blades.clear();
+        turbine.elasto.rna.rotor->blades = blades_elasto;
+        turbine.aero.rna.rotor->blades = blades_aero;
+        turbine.rna.blades = blades;
     }
 
     // RNA
@@ -528,6 +590,11 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
     turbine.rna.elasto.rotor->hub.inertia += drivetrain_inertia;
 
     if (json_obj.contains("floater")) {
+        try {
+            auto& turbine_elasto = dynamic_cast<seahowl::elasto::TurbineFloatingElasto&>(turbine.elasto);
+        } catch (const std::exception& e) {
+            throw std::runtime_error("Wrong elasto turbine type to use floater (needs to be TurbineFloatingElasto).");
+        }
         auto floater_json = json_obj.at("floater");
         auto json_obj_floater =
             get_json_from_file((DATADIR / floater_json.at("file").get<std::string>()).generic_string());
@@ -570,6 +637,8 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
                 }
             }
             body.set_inertia_matrix(body_inertia_matrix);
+#else
+            throw std::runtime_error("Trying to use HydroChrono but did not compile with HydroChrono dependency.");
 #endif
         } else {
             throw std::runtime_error("Type of floater defined in turbine json file does not exist.");
@@ -713,60 +782,13 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
     // turbines
     auto turbines_json = json_obj.at("turbines");
     for (int ii = 0; ii < turbines_json.size(); ii++) {
+        // add turbine to system
         auto turbine_json = turbines_json[ii];
         auto filepath_turbine = (DATADIR / turbine_json.at("file").get<std::string>()).generic_string();
-        // make turbine aero
-        if (turbine_json.at("use_aerodyn").get<bool>()) {
-#ifdef HAVE_AERODYN
-            auto turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>();
-            turbine_aero->rna.rotor = std::make_shared<seahowl::aero::RotorAeroDyn>(turbine_aero->tower);
-            bool output_vtk = json_obj.at("outputs").at("VTK").get<bool>();
-            if (output_vtk) {
-                turbine_aero->WrVTK = 2;
-            }
-            turbine_aero->WrVTK_dt = json_obj.at("outputs").at("dt").get<double>();
-            spdlog::info("Aerodynamic model: AeroDyn.");
-            std::string inflowwind_filepath;
-            std::string aerodyn_filepath;
-            if (turbine_json.contains("file_aerodyn")) {
-                aerodyn_filepath = (DATADIR / turbine_json.at("file_aerodyn")).generic_string();
-            } else {
-                throw std::runtime_error("Turbine set to use aerodyn but AeroDyn file path not defined.");
-            }
-            if (turbine_json.contains("file_inflowwind")) {
-                inflowwind_filepath = (DATADIR / turbine_json.at("file_inflowwind")).generic_string();
-            } else {
-                throw std::runtime_error("Turbine set to use aerodyn but InflowWind file not defined.");
-            }
-            turbine_aero->aerodyn =
-                std::make_shared<seahowl::aero::AeroDynAdapter>(aerodyn_filepath, inflowwind_filepath);
-            system_core.system_aero->turbines.push_back(turbine_aero);
-#else
-            throw std::runtime_error(
-                "Trying to use AeroDyn for turbine (use_aerodyn is set to true) but the code was not compiled with "
-                "AeroDyn adapter enabled.");
-#endif
-        } else {
-            auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
-            system_core.system_aero->turbines.push_back(turbine_aero);
-        }
-        // check if floater defined
-        auto json_obj_turbine = get_json_from_file(filepath_turbine);
-        bool is_floating = false;
-        if (json_obj_turbine.contains("floater")) {
-            // floating turbine if floater is defined
-            auto floating_turbine_elasto = std::make_shared<seahowl::elasto::TurbineFloatingElasto>();
-            system_core.system_elasto->turbines.push_back(floating_turbine_elasto);
-            is_floating = true;
-        } else {
-            // simple turbine if floater is not defined
-            system_core.system_elasto->turbines.push_back(std::make_shared<seahowl::elasto::TurbineElasto>());
-        }
-        system_core.turbines.push_back(std::move(std::make_shared<seahowl::core::Turbine>(
-            *system_core.system_elasto->turbines[ii], *system_core.system_aero->turbines[ii])));
-        // get reference to turbine object
+        add_turbine_to_system_from_json(filepath_turbine, system_core);
+
+        // get ref to turbine added last
         auto& turbine = *system_core.turbines.back();
-        populate_turbine_from_json(filepath_turbine, turbine);
 
         // build turbine
         turbine.build();
@@ -794,9 +816,12 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
         turbine.rna.elasto.rotor->apply_collective_pitch_increment(rotor_pitch0);
         turbine.rna.elasto.rotor->pitch_collective = rotor_pitch0;
 
-        if (is_floating) {
-            turbine.tower.elasto.nodes.front()->set_fixed(false);
-        } else {
+        try {
+            // if floating: do not fix tower
+            auto& turbine_elasto = dynamic_cast<seahowl::elasto::TurbineFloatingElasto&>(turbine.elasto);
+            turbine_elasto.tower.nodes.front()->set_fixed(false);
+        } catch (const std::exception& e) {
+            // if not floating: fix tower
             turbine.tower.elasto.nodes.front()->set_fixed(true);
         }
     }

@@ -1,10 +1,9 @@
 ﻿{
   "aero": {
-    "solver": "BEMT",
+    "solver": "aerodyn",
     "options": {
-      "hub_loss": true,
-      "tip_loss": true,
-      "tower_shadow": true
+      "file_aerodyn": "./aerodyn/IEA-15-240-RWT_AeroDyn15.dat",
+      "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat"
     }
   },
   "rotor": {
@@ -36,7 +35,7 @@
     ]
   },
   "rna": {
-    "initial_pitch_collective": 0,
+    "initial_pitch_collective": 0.31416,
     "file": "./rna.json"
   },
   "tower": {
@@ -47,6 +46,10 @@
     "file": "./tower.json"
   },
   "controller": {
-    "type": ""
+    "type": "",
+    "options": {
+      "infile": "./controller/DISCON.IN",
+      "libfile": "./controller/libdiscon.so"
+    }
   }
 }

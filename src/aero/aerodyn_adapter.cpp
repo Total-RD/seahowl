@@ -9,22 +9,24 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <spdlog/spdlog.h>
 // #include <numeric>
 // #include <sstream>
 
-seahowl::aero::AeroDynAdapter::AeroDynAdapter(std::string AerodynInfile, std::string InflowInfile) {
-    std::cout << "Initialising Aerodyn15" << std::endl;
-
+seahowl::aero::AeroDynAdapter::AeroDynAdapter() {
+    spdlog::debug("Initialising Aerodyn15 adapter");
+    pImpl = AeroDynInflowLib();
     pImpl.ADinputFilePassed = false;
     pImpl.IfWinputFilePassed = false;
-
-    pImpl.SetADINFILE(AerodynInfile);
-    pImpl.SetIFWINFILE(InflowInfile);
-
     pImpl.SetOUTNAME("Turbine");
 }
 
 seahowl::aero::AeroDynAdapter::~AeroDynAdapter() {}
+
+void seahowl::aero::AeroDynAdapter::set_infiles(const std::string& AerodynInfile, const std::string& InflowInfile) {
+    pImpl.SetADINFILE(AerodynInfile);
+    pImpl.SetIFWINFILE(InflowInfile);
+}
 
 void seahowl::aero::AeroDynAdapter::initialize(double time, double dt, seahowl::aero::TurbineAero& turbine) {
     pImpl.SetTimeStep(dt);
@@ -234,28 +236,28 @@ void seahowl::aero::AeroDynInflowLib::CheckError() {
     if (ErrStat == 0) {
         return;
     } else if (ErrStat == 1) {
-        std::cout << "AeroDyn/InflowWind INFO: " << ErrMsg << std::endl;
+        spdlog::info("AeroDyn/InflowWind INFO: {}.", ErrMsg);
     } else if (ErrStat == 2) {
-        std::cerr << "AeroDyn/InflowWind WARNING: " << ErrMsg << std::endl;
+        spdlog::warn("AeroDyn/InflowWind WARNING: {}", ErrMsg);
     } else {
-        std::cerr << "AeroDyn/InflowWind ERROR: " << ErrMsg << std::endl;
+        spdlog::error("AeroDyn/InflowWind ERROR: {}.", ErrMsg);
     }
 }
 
-void seahowl::aero::AeroDynInflowLib::SetADINFILE(std::string name) {
-    std::cout << "Set Aeodyn INFILE: '" << name << "'\n";
+void seahowl::aero::AeroDynInflowLib::SetADINFILE(const std::string& name) {
+    spdlog::debug("Set AeroDyn INFILE: {}.", name);
     ADinputFileString = name;
     ADinputFileStringLength = ADinputFileString.length();
 }
 
-void seahowl::aero::AeroDynInflowLib::SetIFWINFILE(std::string name) {
-    std::cout << "Set InflowWind INFILE: '" << name << "'\n";
+void seahowl::aero::AeroDynInflowLib::SetIFWINFILE(const std::string& name) {
+    spdlog::debug("Set InflowWind INFILE: {}.", name);
     IfWinputFileString = name;
     IfWinputFileStringLength = IfWinputFileString.length();
 }
 
-void seahowl::aero::AeroDynInflowLib::SetOUTNAME(std::string name) {
-    std::cout << "Set Output filename: '" << name << "'\n";
+void seahowl::aero::AeroDynInflowLib::SetOUTNAME(const std::string& name) {
+    spdlog::debug("Set AeroDyn/InflowWind output file: {}.", name);
     strcpy(OutRootName, name.c_str());
 }
 
@@ -422,19 +424,20 @@ void seahowl::aero::AeroDynInflowLib::End() {
     // delete [] meshPos_C, meshOri_C, meshVel_C, meshAcc_C;
 }
 
-seahowl::aero::TurbineAeroDyn::TurbineAeroDyn() {
+seahowl::aero::TurbineAeroDyn::TurbineAeroDyn() : TurbineAero() {
     rna.rotor = std::make_shared<seahowl::aero::RotorAeroDyn>(tower);
 }
 
 void seahowl::aero::TurbineAeroDyn::initialize(double time, double dt) {
     TurbineAero::initialize(time, dt);
-    aerodyn->pImpl.SetVTK(WrVTK, WrVTK_Type, WrVTK_dt);
-    aerodyn->initialize(time, dt, *this);
+
+    aerodyn.pImpl.SetVTK(WrVTK, WrVTK_Type, WrVTK_dt);
+    aerodyn.initialize(time, dt, *this);
 }
 
 void seahowl::aero::TurbineAeroDyn::compute_aero_loads(const seahowl::env::FluidModel& wind_model, double time) {
-    aerodyn->calcul(time, *this);
-    dynamic_cast<seahowl::aero::RotorAeroDyn&>(*rna.rotor).loads_aerodyn = aerodyn->pImpl.MeshFrc;
+    aerodyn.calcul(time, *this);
+    dynamic_cast<seahowl::aero::RotorAeroDyn&>(*rna.rotor).loads_aerodyn = aerodyn.pImpl.MeshFrc;
     rna.rotor->compute_aero_loads(wind_model, time);
 }
 

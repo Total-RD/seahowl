@@ -1,9 +1,18 @@
 ﻿{
+  "aero": {
+    "solver": "BEMT",
+    "options": {
+      "hub_loss": true,
+      "tip_loss": true,
+      "tower_shadow": true
+    }
+  },
   "rotor": {
     "type": "rigid",
     "fpm": false,
     "inertia_total": 3.524605e8,
     "mass_blades_total": 195e3,
+    "radius": 117,
     "discretization": {
       "elasto": [49],
       "aero": [49]

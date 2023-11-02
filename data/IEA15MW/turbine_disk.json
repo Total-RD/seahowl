@@ -1,32 +1,16 @@
 ﻿{
+  "aero": {
+    "solver": "disk",
+    "options": {
+      "performance_file": "./controller/Cp_Ct_Cq.IEA15MW_modified.txt"
+    }
+},
   "rotor": {
     "type": "disk",
     "fpm": false,
     "inertia_total": 3.524605e8,
     "mass_blades_total": 195e3,
-    "radius": 117,
-    "performance_file": "./controller/Cp_Ct_Cq.IEA15MW_modified.txt",
-    "discretization": {
-      "elasto": [49],
-      "aero": [49]
-    },
-    "blades": [
-      {
-        "file": "./blade.json",
-        "initial_pitch": 0,
-        "precone": -4.0
-      },
-      {
-        "file": "./blade.json",
-        "initial_pitch": 0,
-        "precone": -4.0
-      },
-      {
-        "file": "./blade.json",
-        "initial_pitch": 0,
-        "precone": -4.0
-      }
-    ]
+    "radius": 117
   },
   "rna": {
     "initial_pitch_collective": 0,

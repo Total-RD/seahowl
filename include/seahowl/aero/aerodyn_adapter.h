@@ -124,9 +124,9 @@ struct AeroDynInflowLib {
     // aerodynamic load computed on mesh point
     float* MeshFrc;
 
-    void SetADINFILE(std::string name);
-    void SetIFWINFILE(std::string name);
-    void SetOUTNAME(std::string name);
+    void SetADINFILE(const std::string& name);
+    void SetIFWINFILE(const std::string& name);
+    void SetOUTNAME(const std::string& name);
 
     void SetTime(double time);
     void SetTimeStep(double dt);
@@ -158,7 +158,7 @@ struct AeroDynInflowLib {
     void Update();
     void End();
 
-  private:
+  public:
     // Input file string
     std::string ADinputFileString;
     std::string IfWinputFileString;
@@ -248,9 +248,11 @@ class AeroDynAdapter {
     seahowl::aero::AeroDynInflowLib pImpl;
     std::vector<Vector3d> loads;
 
+    AeroDynAdapter();
     AeroDynAdapter(std::string AerodynInfile, std::string InflowInfile);
     ~AeroDynAdapter();
 
+    void set_infiles(const std::string& AerodynInfile, const std::string& InflowInfile);
     void initialize(double time, double dt, seahowl::aero::TurbineAero& turbine);
     void calcul(double time, seahowl::aero::TurbineAero& turbine);
     void update(double time, double dt, seahowl::aero::TurbineAero& turbine);
@@ -265,7 +267,7 @@ class AeroDynAdapter {
 class TurbineAeroDyn : public TurbineAero {
   public:
     /** @brief AeroDyn adapter. */
-    std::shared_ptr<seahowl::aero::AeroDynAdapter> aerodyn;
+    seahowl::aero::AeroDynAdapter aerodyn;
     /** @brief Option to save VTK in AeroDyn, 0: none; 1: init only; 2: animation. */
     int WrVTK = 0;
     /** @brief VTK save type, 1: surface; 2: lines; 3: both. */

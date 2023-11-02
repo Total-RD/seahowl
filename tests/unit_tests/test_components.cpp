@@ -586,13 +586,12 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAeroDyn();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    populate_turbine_from_json((DATADIR / "turbine_nocontrol.json").generic_string(), turbine);
+    populate_turbine_from_json((DATADIR / "turbine_nocontrol_aerodyn.json").generic_string(), turbine);
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
 
-    turbine_aero.aerodyn = std::make_shared<seahowl::aero::AeroDynAdapter>(
-        (DATADIR / "aerodyn/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
-        (DATADIR / "aerodyn/IEA-15-240-RWT_InflowWind.dat").generic_string());
+    turbine_aero.aerodyn.set_infiles((DATADIR / "aerodyn/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
+                                     (DATADIR / "aerodyn/IEA-15-240-RWT_InflowWind.dat").generic_string());
 
     turbine.build();
     turbine.elasto.assemble(system_elasto);

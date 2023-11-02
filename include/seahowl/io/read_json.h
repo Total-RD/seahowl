@@ -140,6 +140,14 @@ void populate_rna_from_json(const std::string& filepath, seahowl::core::RotorNac
  * @brief Populates turbine given a json file.
  *
  * @param[in] filepath Path of the json file describing the turbine.
+ * @param[out] system_core System to add the new turbine.
+ */
+void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core::System& system_core);
+
+/**
+ * @brief Populates turbine given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the turbine.
  * @param[out] turbine Turbine to populate.
  */
 void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turbine& turbine);
@@ -156,6 +164,6 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
  * @brief Returns System instance given a json file.
  *
  * @param[in] filepath Path of the json file describing the system.
- * @param[out] system System to populate.
+ * @param[out] system_core System to populate.
  */
 void populate_system_from_json(const std::string& filepath_main, seahowl::core::System& system_core);

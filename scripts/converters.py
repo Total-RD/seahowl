@@ -891,6 +891,10 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                             f3.writelines(lines2)
 
         turbine_json = {
+            "aero": {
+                "solver": "BEMT",
+                "options": {"hub_loss": True, "tip_loss": True, "tower_shadow": True},
+            },
             "rotor": {
                 "fpm": False,
                 "type": "fea",
