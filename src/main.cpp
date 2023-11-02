@@ -48,7 +48,7 @@ void output_results(seahowl::core::System& system_core) {
     output_sstring << "    turbine info -> rpm: " << std::setprecision(3) << turbine.rna.elasto.get_rpm()
                    << ", power: " << turbine.get_generated_power();
     int nblades = turbine.rna.blades.size();
-    if (nblades <= 3) {
+    if (nblades <= 3 && nblades > 0) {
         for (int ii = 0; ii < turbine.rna.blades.size(); ii++) {
             output_sstring << ", pitch" << ii + 1 << ": " << turbine.rna.elasto.rotor->pitch_collective;
         }
