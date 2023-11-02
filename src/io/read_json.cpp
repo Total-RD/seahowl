@@ -396,8 +396,15 @@ void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core:
     }
 
     // add turbine to system
-    auto turbine = std::make_shared<seahowl::core::Turbine>(*system_core.system_elasto->turbines.back(),
-                                                            *system_core.system_aero->turbines.back());
+    std::shared_ptr<seahowl::core::Turbine> turbine;
+    if (json_obj.contains("floater")) {
+        turbine = std::make_shared<seahowl::core::TurbineFloating>(
+            dynamic_cast<seahowl::elasto::TurbineFloatingElasto&>(*system_core.system_elasto->turbines.back()),
+            *system_core.system_aero->turbines.back());
+    } else {
+        turbine = std::make_shared<seahowl::core::Turbine>(*system_core.system_elasto->turbines.back(),
+                                                           *system_core.system_aero->turbines.back());
+    }
     system_core.turbines.push_back(turbine);
 
     // populate turbine
@@ -434,7 +441,8 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
         turbine.rna.aero.rotor = rotor_disk;
         auto aero_options = aero_json.at("options");
         // get rotor performance from table
-        get_disk_perf_from_table((DATADIR / aero_options.at("performance_file").get<std::string>()), *rotor_disk);
+        auto perf_filepath = (DATADIR / aero_options.at("performance_file").get<std::string>()).generic_string();
+        get_disk_perf_from_table(perf_filepath, *rotor_disk);
     } else if (aero_json.at("solver").get<std::string>() == "aerodyn" ||
                aero_json.at("solver").get<std::string>() == "AeroDyn") {
         spdlog::info("Aerodynamic model: AeroDyn.");

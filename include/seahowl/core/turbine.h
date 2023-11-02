@@ -72,7 +72,7 @@ class Turbine : public ComponentDynamic {
      * @param[in] time Time of the simulation (usually 0 at init).
      * @param[in] dt Time step length.
      */
-    void initialize(double time, double dt) override;
+    virtual void initialize(double time, double dt) override;
 
     /**
      * @brief Prestep for turbine, called before elastodynamic stepping.
