@@ -3,7 +3,6 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <spdlog/spdlog.h>
 
@@ -39,7 +38,7 @@ seahowl::Vector3d InflowWindAdapter::get_fluid_velocity(const seahowl::Vector3d&
 }
 
 void InflowWindLib::SetIFWINFILE(std::string name) {
-    spdlog::info("Set InflowWind INFILE: {name}.", name);
+    spdlog::info("Set InflowWind INFILE: {}.", name);
     std::ifstream file(name);
     if (!file.is_open()) {
         throw std::runtime_error("Failed to open inflowwind input file.");
@@ -70,11 +69,11 @@ void InflowWindLib::CheckError() {
     if (ErrStat == 0) {
         return;
     } else if (ErrStat == 1) {
-        std::cout << "InflowWind INFO: " << ErrMsg << std::endl;
+        spdlog::info("InflowWind INFO: {}.", ErrMsg);
     } else if (ErrStat == 2) {
-        std::cerr << "InflowWind WARNING: " << ErrMsg << std::endl;
+        spdlog::warn("InflowWind WARNING: {}.", ErrMsg);
     } else {
-        std::cerr << "InflowWind ERROR: " << ErrMsg << std::endl;
+        spdlog::error("InflowWind ERROR: {}.", ErrMsg);
     }
 }
 
