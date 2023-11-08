@@ -8,10 +8,9 @@
   },
   "rotor": {
     "type": "fea",
-    "fpm": false,
-    "inertia_total": 3.524605e8,
-    "mass_blades_total": 195e3,
-    "radius": 117,
+    "options": {
+      "fpm": false
+    },
     "discretization": {
       "elasto": [49],
       "aero": [49]

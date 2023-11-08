@@ -896,8 +896,10 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                 "options": {"hub_loss": True, "tip_loss": True, "tower_shadow": True},
             },
             "rotor": {
-                "fpm": False,
                 "type": "fea",
+                "options": {
+                    "fpm": False,
+                },
                 "discretization": {
                     "elasto": blade_elasto_json["discretization_elasto"],
                     "aero": blade_aero_json["discretization_aero"],

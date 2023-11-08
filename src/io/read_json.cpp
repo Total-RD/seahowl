@@ -477,8 +477,9 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
     }
 
     // check rotor type
+    auto rotor_options = rotor_json.at("options");
     if (rotor_json.at("type") == "fea") {
-        if (rotor_json.at("fpm") == true) {
+        if (rotor_options.at("fpm") == true) {
             spdlog::info("Rotor type: finite element blades (FPM).");
         } else {
             spdlog::info("Rotor type: finite element blades.");
@@ -505,7 +506,7 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
                 blade_elasto = std::make_shared<seahowl::elasto::BladeElastoFEA>();
                 auto& blade_elasto_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade_elasto);
                 rotor_json.at("discretization").at("elasto").get_to(blade_elasto_fea.discretization_fractions);
-                rotor_json.at("fpm").get_to(blade_elasto_fea.fpm_mode);
+                rotor_options.at("fpm").get_to(blade_elasto_fea.fpm_mode);
             } else if (rotor_json.at("type").get<std::string>() == "rigid") {
                 blade_elasto = std::make_shared<seahowl::elasto::BladeElastoRigid>();
             }
@@ -535,21 +536,23 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
 
     // update info if rotor is rigid
     if (rotor_json.at("type").get<std::string>() == "rigid" || rotor_json.at("type").get<std::string>() == "disk") {
-        if (!rotor_json.contains("inertia_total")) {
-            throw std::runtime_error("The \"inertia_total\" key must be provided for rigid/disk rotors.");
+        if (!rotor_options.contains("inertia_blades")) {
+            throw std::runtime_error(
+                "The \"inertia_blades\" key (rotor options) must be provided for rigid/disk rotors.");
         }
-        if (!rotor_json.contains("mass_blades_total")) {
-            throw std::runtime_error("The \"mass_blades_total\" key must be given for rigid/disk rotors.");
+        if (!rotor_options.contains("mass_blades")) {
+            throw std::runtime_error("The \"mass_blades\" key (rotor options) must be given for rigid/disk rotors.");
         }
-        auto rotor_inertia = rotor_json.at("inertia_total").get<double>();
-        turbine.rna.elasto.rotor->hub.inertia = rotor_inertia;
-        auto blades_mass = rotor_json.at("mass_blades_total").get<double>();
+        auto blades_inertia = rotor_options.at("inertia_blades").get<double>();
+        turbine.rna.elasto.rotor->hub.inertia += blades_inertia;
+        auto blades_mass = rotor_options.at("mass_blades").get<double>();
         turbine.rna.elasto.rotor->hub.mass += blades_mass;
         if (rotor_json.at("type").get<std::string>() == "disk") {
-            if (!rotor_json.contains("radius")) {
-                throw std::runtime_error("The \"radius\" key must be given for rotors using actuator disk theory.");
+            if (!rotor_options.contains("radius")) {
+                throw std::runtime_error(
+                    "The \"radius\" key (rotor options) must be given for rotors using actuator disk theory.");
             } else {
-                rotor_json.at("radius").get_to(turbine.rna.aero.rotor->radius);
+                rotor_options.at("radius").get_to(turbine.rna.aero.rotor->radius);
             }
         }
     }
