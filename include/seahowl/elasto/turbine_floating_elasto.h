@@ -28,7 +28,7 @@ class TurbineFloatingElasto : public TurbineElasto {
     // components
     //
     /** @brief Floater of the turbine. */
-    std::unique_ptr<seahowl::elasto::FloaterElasto> floater;
+    std::shared_ptr<seahowl::elasto::FloaterElasto> floater;
     /** @brief Link between floater and tower of the turbine. */
     std::unique_ptr<seahowl::elasto::Link> link_floater_tower;
     /** @brief Floater of the turbine. */

@@ -657,7 +657,7 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
             spdlog::info("Hydrodynamic model: HydroChrono.");
 #ifdef HAVE_HYDROCHRONO
             // make floater
-            turbine_floating.floater = std::make_unique<seahowl::hydro::FloaterHydroChrono>();
+            turbine_floating.floater = std::make_shared<seahowl::hydro::FloaterHydroChrono>();
             auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine_floating.floater);
             auto floater_options = json_obj_floater.at("options");
             // add h5file path
@@ -736,7 +736,7 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
                     anchor_position += floater.get_body(body_name).get_position();
                 }
                 turbine_floating.mooring_system->anchors.push_back(
-                    std::make_unique<seahowl::elasto::BodyElastoChrono>());
+                    std::make_shared<seahowl::elasto::BodyElastoChrono>());
                 auto& anchor_body = *turbine_floating.mooring_system->anchors.back();
                 anchor_body.set_position(anchor_position);
                 anchor_body.set_fixed(true);
@@ -744,7 +744,7 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
                 auto mooring_properties_json = get_json_from_file(
                     (DATADIR / mooring_json.at("line_properties").get<std::string>()).generic_string());
                 turbine_floating.mooring_system->moorings.push_back(
-                    std::make_unique<seahowl::elasto::MooringElastoFEA>(fairlead_body, anchor_body));
+                    std::make_shared<seahowl::elasto::MooringElastoFEA>(fairlead_body, anchor_body));
                 auto& mooring =
                     dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*turbine_floating.mooring_system->moorings.back());
 

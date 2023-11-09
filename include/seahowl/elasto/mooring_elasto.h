@@ -50,9 +50,9 @@ class MooringElasto : public virtual ComponentElasto {
 struct MooringSystem : public ComponentElasto {
   public:
     /** @brief List of mooring lines. */
-    std::deque<std::unique_ptr<MooringElasto>> moorings;
+    std::deque<std::shared_ptr<MooringElasto>> moorings;
     /** @brief List of anchors. */
-    std::deque<std::unique_ptr<BodyElasto>> anchors;
+    std::deque<std::shared_ptr<BodyElasto>> anchors;
 
     /**
      * @brief Constructor.

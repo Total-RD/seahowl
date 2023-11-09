@@ -8,7 +8,10 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/elasto/rotor_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
+#include <seahowl/elasto/mooring_elasto.h>
+#include <seahowl/elasto/floater_elasto.h>
 #include <seahowl/elasto/turbine_elasto.h>
+#include <seahowl/elasto/turbine_floating_elasto.h>
 #include <seahowl/elasto/system_elasto.h>
 #include <seahowl/elasto/chrono_adapters.h>
 
@@ -228,5 +231,52 @@ void initialize_pyseahowl_elasto(py::module& m) {
                                                                                                 "TurbineElasto")
         .def_readonly("rna", &seahowl::elasto::TurbineElasto::rna)
         .def_readonly("tower", &seahowl::elasto::TurbineElasto::tower)
+        .def(py::init<>());
+
+    // elasto/floater_elasto.h
+    py::class_<seahowl::elasto::FloaterElasto, std::shared_ptr<seahowl::elasto::FloaterElasto>,
+               seahowl::elasto::ComponentElasto>(m_elasto, "FloaterElasto")
+        .def("add_body", &seahowl::elasto::FloaterElasto::add_body)
+        .def("get_body", &seahowl::elasto::FloaterElasto::get_body, py::return_value_policy::reference_internal)
+        .def("add_fairlead", &seahowl::elasto::FloaterElasto::add_fairlead)
+        .def("get_fairlead_link", &seahowl::elasto::FloaterElasto::get_fairlead_link,
+             py::return_value_policy::reference_internal)
+        .def("get_fairlead_body", &seahowl::elasto::FloaterElasto::get_fairlead_body,
+             py::return_value_policy::reference_internal)
+        .def("set_tower_connection_body_name", &seahowl::elasto::FloaterElasto::set_tower_connection_body_name)
+        .def("get_tower_connection_body", &seahowl::elasto::FloaterElasto::get_tower_connection_body,
+             py::return_value_policy::reference_internal);
+
+    // elasto/mooring_elasto.h
+    py::class_<seahowl::elasto::MooringSystem, std::shared_ptr<seahowl::elasto::MooringSystem>,
+               seahowl::elasto::ComponentElasto>(m_elasto, "MooringSystem")
+        .def(py::init<>())
+        .def_readwrite("moorings", &seahowl::elasto::MooringSystem::moorings)
+        .def_readwrite("anchors", &seahowl::elasto::MooringSystem::anchors);
+    py::class_<seahowl::elasto::MooringElasto, std::shared_ptr<seahowl::elasto::MooringElasto>,
+               seahowl::elasto::ComponentElasto>(m_elasto, "MooringElasto")
+        .def_property_readonly("fairlead", [](seahowl::elasto::MooringElasto& mooring) { return &mooring.fairlead; })
+        .def_property_readonly("anchor", [](seahowl::elasto::MooringElasto& mooring) { return &mooring.anchor; })
+        .def("get_tension_fairlead", &seahowl::elasto::MooringElasto::get_tension_fairlead)
+        .def("get_tension_anchor", &seahowl::elasto::MooringElasto::get_tension_anchor);
+    py::class_<seahowl::elasto::MooringElastoFEA, std::shared_ptr<seahowl::elasto::MooringElastoFEA>,
+               seahowl::elasto::MooringElasto, seahowl::elasto::ComponentElastoFEA>(m_elasto, "MooringElastoFEA")
+        .def(py::init<seahowl::elasto::BodyElasto&, seahowl::elasto::BodyElasto&>());
+
+    // elasto/turbine_floating_elasto.h
+    py::class_<seahowl::elasto::TurbineFloatingElasto, std::shared_ptr<seahowl::elasto::TurbineFloatingElasto>,
+               seahowl::elasto::TurbineElasto>(m_elasto, "TurbineFloatingElasto")
+        //.def_property_readonly(
+        //    "floater", [](seahowl::elasto::TurbineFloatingElasto& turbine) { return turbine.floater.get(); },
+        //    py::return_value_policy::reference_internal)
+        .def_readwrite("floater", &seahowl::elasto::TurbineFloatingElasto::floater)
+        .def_property_readonly(
+            "link_floater_tower",
+            [](seahowl::elasto::TurbineFloatingElasto& turbine) { return turbine.link_floater_tower.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "mooring_system",
+            [](seahowl::elasto::TurbineFloatingElasto& turbine) { return turbine.mooring_system.get(); },
+            py::return_value_policy::reference_internal)
         .def(py::init<>());
 }
