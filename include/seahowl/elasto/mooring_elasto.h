@@ -29,6 +29,11 @@ class MooringElasto : public virtual ComponentElasto {
     MooringElasto(BodyElasto& fairlead, BodyElasto& anchor);
 
     /**
+     * @brief Prestep of the mooring.
+     */
+    virtual void prestep(double time, double dt){};
+
+    /**
      * @brief Returns tension at fairlead.
      */
     virtual Vector3d get_tension_fairlead() const = 0;

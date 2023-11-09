@@ -26,6 +26,11 @@ void TurbineFloating::initialize(double time, double dt) {
 void TurbineFloating::prestep(double time, double dt) {
     // parent class prestep
     Turbine::prestep(time, dt);
+
+    // prestep for moorings
+    for (auto& mooring : elasto.mooring_system->moorings) {
+        mooring->prestep(time, dt);
+    }
 }
 
 void TurbineFloating::poststep(double time, double dt) {
