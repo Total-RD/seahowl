@@ -649,6 +649,19 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
                 }
             }
             body.set_inertia_matrix(body_inertia_matrix);
+
+            auto dm = json_obj_floater.at("damping_matrix").get<std::vector<std::vector<double>>>();
+            if (dm.size() != 6) {
+                throw std::runtime_error("Viscous damping matrix for floater has to be defined as 6x6 matrices.");
+            }
+            for (int irow = 0; irow < 6; irow++) {
+                if (dm[irow].size() != 6) {
+                    throw std::runtime_error("Viscous damping matrix for floater has to be defined as 6x6 matrices.");
+                }
+                for (int icol = 0; icol < 6; icol++) {
+                    floater.damping_matrix(irow, icol) = dm[irow][icol];
+                }
+            }
 #else
             throw std::runtime_error("Trying to use HydroChrono but did not compile with HydroChrono dependency.");
 #endif

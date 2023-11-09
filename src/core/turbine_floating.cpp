@@ -31,6 +31,10 @@ void TurbineFloating::prestep(double time, double dt) {
     for (auto& mooring : elasto.mooring_system->moorings) {
         mooring->prestep(time, dt);
     }
+
+    if (elasto.floater) {
+        elasto.floater->prestep(time, dt);
+    }
 }
 
 void TurbineFloating::poststep(double time, double dt) {

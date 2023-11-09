@@ -12,10 +12,15 @@ namespace elasto {
 
 class FloaterElasto : public ComponentElasto {
   public:
+    /* @brief Damping matrix of floater.*/
+    Eigen::Matrix<double, 6, 6> damping_matrix;
+
     /**
      * @brief Constructor.
      */
     FloaterElasto();
+
+    virtual void prestep(double time, double dt);
 
     /**
      * @brief Assembles the component (adds all bodies to the system).
