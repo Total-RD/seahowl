@@ -195,7 +195,10 @@ void run_simulation(int argc, char* argv[]) {
         std::cout << "|";
 
         // fix tower
-        system_core.turbines[0]->elasto.tower.nodes.front()->set_fixed(true);
+        bool tower_was_fixed = system_core.turbines[0]->elasto.tower.nodes.front()->is_fixed();
+        if (!tower_was_fixed) {
+            system_core.turbines[0]->elasto.tower.nodes.front()->set_fixed(true);
+        }
         auto presim_time = system_elasto->get_time();
         while (presim_time <= 0) {
             if (std::fmod(presim_time + presim_duration, presim_frac) <= dt) {
@@ -218,7 +221,9 @@ void run_simulation(int argc, char* argv[]) {
 #endif
         }
         std::cout << "|" << std::endl;
-        system_core.turbines[0]->elasto.tower.nodes.front()->set_fixed(false);
+        if (!tower_was_fixed) {
+            system_core.turbines[0]->elasto.tower.nodes.front()->set_fixed(false);
+        }
 
         // reset time to zero exactly
         if (fabs(system_core.get_time()) > 1e-10) {
