@@ -1,4 +1,4 @@
-﻿{
+{
   "aero": {
     "solver": "BEMT",
     "options": {
@@ -8,10 +8,9 @@
     }
   },
   "rotor": {
-    "type": "rigid",
+    "type": "fea",
     "options": {
-      "inertia_blades": 3.5148698e8,
-      "mass_blades": 195e3
+      "fpm": false
     },
     "discretization": {
       "elasto": [49],
@@ -20,36 +19,36 @@
     "blades": [
       {
         "file": "./blade.json",
-        "initial_pitch": 0,
+        "initial_pitch": 0.0,
         "precone": -4.0
       },
       {
         "file": "./blade.json",
-        "initial_pitch": 0,
+        "initial_pitch": 0.0,
         "precone": -4.0
       },
       {
         "file": "./blade.json",
-        "initial_pitch": 0,
+        "initial_pitch": 0.0,
         "precone": -4.0
       }
     ]
   },
   "rna": {
-    "initial_pitch_collective": 0,
+    "initial_pitch_collective": 0.0,
     "file": "./rna.json"
   },
   "tower": {
     "discretization": {
-      "elasto": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+      "elasto": [10],
       "aero": [19]
     },
-    "file": "./tower.json"
+    "file": "./tower_floating.json"
   },
   "controller": {
     "type": "DISCON",
     "options": {
-      "infile": "./controller/DISCON.IN",
+      "infile": "./controller/DISCON_floating.IN",
       "libfile": "./controller/libdiscon.so"
     }
   },

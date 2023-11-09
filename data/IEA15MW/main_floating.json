@@ -2,14 +2,14 @@
   "numerics": {
     "dt": 0.05,
     "t_end": 2000.0,
-    "presim_duration": 0.0,
+    "presim_duration": 200.0,
     "statics": {
-      "linear_step": true,
-      "nonlinear_steps": 10
+      "linear_step": false,
+      "nonlinear_steps": 0
     },
     "presetup": {
       "dt": 0.001,
-      "steps": 0
+      "steps": 100
     }
   },
   "outputs": {
@@ -22,7 +22,7 @@
   },
   "turbines": [
     {
-      "file": "./turbine.json",
+      "file": "./turbine_floating.json",
       "translation": [0, 0, 0],
       "rotation": 0
     }

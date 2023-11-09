@@ -659,7 +659,6 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
                 auto rotation_axis = seahowl::Vector3d(axis[0], axis[1], axis[2]);
                 auto rotation_angle = mooring_json.at("rotation_angle").get<double>() * seahowl::PI / 180.0;
                 auto rotation = seahowl::AngleAxisd(rotation_angle, rotation_axis);
-                spdlog::info(rotation_angle);
 
                 if (!turbine_floating.floater) {
                     throw std::runtime_error("Trying to add moorings to a floating turbine without floater.");
@@ -672,7 +671,6 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
                 auto fairlead_relative_position = seahowl::Vector3d(fpos[0], fpos[1], fpos[2]);
                 seahowl::Vector3d fairlead_position =
                     floater.get_body(body_name).get_position() + rotation * fairlead_relative_position;
-                spdlog::info("fairlead: {}, {}, {}", fairlead_position[0], fairlead_position[1], fairlead_position[2]);
                 floater.add_fairlead(fairlead_position, body_name);
                 auto& fairlead_body = floater.get_fairlead_body(body_name, floater.get_fairlead_count(body_name) - 1);
 

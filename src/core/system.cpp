@@ -7,10 +7,13 @@
 #include "seahowl/aero/turbine_aero.h"
 #include "seahowl/env/wind_models.h"
 #include "seahowl/core/turbine_floating.h"
+#include "seahowl/core/blade.h"
+#include "seahowl/elasto/blade_elasto.h"
 
 #include <vector>
 #include <spdlog/spdlog.h>
 #include <map>
+#include <iostream>
 
 using namespace seahowl::core;
 
@@ -83,6 +86,7 @@ void System::presetup(double dt, int nsteps) {
 
             // fix turbine
             turbine_floating.tower.elasto.nodes.front()->set_fixed(true);
+            turbine_floating.rna.elasto.rotor->body_hub->set_fixed(true);
 
             for (auto& mooring_ptr : turbine_floating.elasto.mooring_system->moorings) {
                 auto& mooring_elasto = *mooring_ptr;
@@ -127,7 +131,13 @@ void System::presetup(double dt, int nsteps) {
     }
 
     // apply length increments dynamically
+    int step_frac = int(nsteps / 20.0);
+    std::cout << "|0% -----------> 100%|" << std::endl;
+    std::cout << "|";
     for (int step = 0; step <= nsteps; step++) {
+        if (step > 0 && step % step_frac == 0) {
+            std::cout << "*";
+        }
         for (int idx_turbine = 0; idx_turbine < turbines.size(); idx_turbine++) {
             auto& turbine = *turbines[idx_turbine];
             try {
@@ -159,15 +169,18 @@ void System::presetup(double dt, int nsteps) {
                 // do nothing
             }
         }
+
         system_elasto->step(dt);
     }
 
+    std::cout << "|" << std::endl;
     // unfix floating turbine
     for (int idx_turbine = 0; idx_turbine < turbines.size(); idx_turbine++) {
         auto& turbine = *turbines[idx_turbine];
         try {
             auto& turbine_floating = dynamic_cast<TurbineFloating&>(turbine);
             turbine_floating.tower.elasto.nodes.front()->set_fixed(false);
+            turbine_floating.rna.elasto.rotor->body_hub->set_fixed(false);
         } catch (const std::bad_cast& e) {
             // do nothing
         }

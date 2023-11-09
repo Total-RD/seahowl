@@ -694,7 +694,19 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
 
     # main json with default values to overwrite when parsing OpenFAST files
     main_json = {
-        "numerics": {"dt": 0.1, "t_end": 2000.0, "statics_prestep": True},
+        "numerics": {
+            "dt": 0.1,
+            "t_end": 2000.0,
+            "presim_duration": 0.0,
+            "statics": {
+                "linear_step": True,
+                "nonlinear_steps": 10,
+            },
+            "presetup": {
+                "dt": 0.001,
+                "steps": 0,
+            }
+        },
         "outputs": {"dt": 0.1, "VTK": False, "log_level": "info"},
         "environment": {"file": "./environment.json"},
         "turbines": [
