@@ -17,8 +17,10 @@
       "line_properties": "./mooring_properties.json",
       "length": 850.0,
       "discretization_elasto": [10],
+      "relative_fairlead": true,
+      "relative_anchor": false,
       "fairlead_position": [-58.0, 0.0, 0.94],
-      "anchor_position": [-837.60, 0.0, -185.06],
+      "anchor_position": [-837.60, 0.0, -200.0],
       "rotation_axis": [0.0, 0.0, 1.0],
       "rotation_angle": 0.0
     }, {
@@ -26,8 +28,10 @@
       "line_properties": "./mooring_properties.json",
       "length": 850.0,
       "discretization_elasto": [10],
+      "relative_fairlead": true,
+      "relative_anchor": false,
       "fairlead_position": [-58.0, 0.0, 0.94],
-      "anchor_position": [-837.60, 0.0, -185.06],
+      "anchor_position": [-837.60, 0.0, -200.0],
       "rotation_axis": [0.0, 0.0, 1.0],
       "rotation_angle": 120.0
     }, {
@@ -35,8 +39,10 @@
       "line_properties": "./mooring_properties.json",
       "length": 850.0,
       "discretization_elasto": [10],
+      "relative_fairlead": true,
+      "relative_anchor": false,
       "fairlead_position": [-58.0, 0.0, 0.94],
-      "anchor_position": [-837.60, 0.0, -185.06],
+      "anchor_position": [-837.60, 0.0, -200.0],
       "rotation_axis": [0.0, 0.0, 1.0],
       "rotation_angle": 240.0
     }

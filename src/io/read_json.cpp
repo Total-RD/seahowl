@@ -666,19 +666,23 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
                 auto& floater = *turbine_floating.floater;
 
                 // fairlead
-                std::string body_name = mooring_json.at("connected_body_name");
+                auto body_name = mooring_json.at("connected_body_name").get<std::string>();
                 auto fpos = mooring_json.at("fairlead_position").get<std::vector<double>>();
                 auto fairlead_relative_position = seahowl::Vector3d(fpos[0], fpos[1], fpos[2]);
-                seahowl::Vector3d fairlead_position =
-                    floater.get_body(body_name).get_position() + rotation * fairlead_relative_position;
+                seahowl::Vector3d fairlead_position = rotation * fairlead_relative_position;
+                if (mooring_json.at("relative_fairlead").get<bool>()) {
+                    fairlead_position += floater.get_body(body_name).get_position();
+                }
                 floater.add_fairlead(fairlead_position, body_name);
                 auto& fairlead_body = floater.get_fairlead_body(body_name, floater.get_fairlead_count(body_name) - 1);
 
                 // anchor
                 auto apos = mooring_json.at("anchor_position").get<std::vector<double>>();
                 auto anchor_relative_position = seahowl::Vector3d(apos[0], apos[1], apos[2]);
-                seahowl::Vector3d anchor_position =
-                    floater.get_body(body_name).get_position() + rotation * anchor_relative_position;
+                seahowl::Vector3d anchor_position = rotation * anchor_relative_position;
+                if (mooring_json.at("relative_anchor").get<bool>()) {
+                    anchor_position += floater.get_body(body_name).get_position();
+                }
                 turbine_floating.mooring_system->anchors.push_back(
                     std::make_unique<seahowl::elasto::BodyElastoChrono>());
                 auto& anchor_body = *turbine_floating.mooring_system->anchors.back();
