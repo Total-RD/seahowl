@@ -26,7 +26,7 @@
   "soil": {
     "type": "linear",
     "options": {
-      "stiffness_normal": 1e6,
+      "stiffness_normal": 1e5,
       "stiffness_shear": 0.0,
       "soil_position": -200.0
     }

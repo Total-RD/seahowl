@@ -924,3 +924,50 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
     // assemble whole system (Chrono)
     system_core.assemble();
 }
+
+void initialize_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
+    auto json_obj = get_json_from_file(filepath);
+
+    // NUMERICS options
+    auto num_json = json_obj.at("numerics");
+    // intialization
+    auto statics_json = num_json.at("statics");
+    // timestepping
+    double dt = num_json.at("dt").get<double>();
+
+    // initialization
+    // statics
+    auto linear_step = statics_json.at("linear_step").get<bool>();
+    auto nonlinear_steps = statics_json.at("nonlinear_steps").get<int>();
+    if (linear_step && nonlinear_steps > 0) {
+        system_core.system_elasto->do_statics(linear_step, nonlinear_steps);
+        spdlog::debug("Performed statics prestep with linear step as {} and {} nonlinear steps.", linear_step,
+                      nonlinear_steps);
+    } else {
+        double tiny_dt = 1e-6;
+        system_core.step(tiny_dt);  // need to do tiny time step before system initialization if statics not done
+        system_core.set_time(system_core.get_time() - tiny_dt);
+    }
+
+    system_core.initialize(system_core.get_time(), dt);
+
+    // apply presetup
+    if (num_json.contains("presetup")) {
+        auto presetup_json = num_json.at("presetup");
+        auto presetup_duration = presetup_json.at("duration").get<double>();
+        auto presetup_dt = presetup_json.at("dt").get<double>();
+        system_core.run_presetup(presetup_duration, presetup_dt);
+    } else {
+        spdlog::debug("No presetup defined in json.");
+    }
+
+    if (num_json.contains("presim")) {
+        auto presim_json = num_json.at("presim");
+        auto presim_duration = presim_json.at("duration").get<double>();
+        auto presim_dt = presim_json.at("dt").get<double>();
+        auto fix_towers = presim_json.at("fix_towers").get<bool>();
+        system_core.run_presimulation(presim_duration, presim_dt, fix_towers);
+    } else {
+        spdlog::debug("No presim defined in json.");
+    }
+}

@@ -98,10 +98,20 @@ class System : public ComponentDynamic {
     /**
      * @brief Presetup for system, called before simulation actually starts.
      *
-     * @param[in] dt Time step length.
-     * @param[in] nsteps Number of time steps for presetup.
+     * @param[in] presetup_duration Duration of presetup.
+     * @param[in] presetup_dt Time step length.
      */
-    void presetup(double dt, int nsteps);
+    void run_presetup(double presetup_duration, double presetup_dt);
+
+    /**
+     * @brief Presimulation for system, called before simulation actually starts.
+     * All external loads are applied using initial conditions for the whole duration of the presimulation.
+     *
+     * @param[in] presim_duration Duration of presimulation.
+     * @param[in] presim_dt Time step length.
+     * @param[in] fix_towers Whether to fix tower bases or not.
+     */
+    void run_presimulation(double presim_duration, double presim_dt, bool fix_towers = true);
 };
 }  // namespace core
 }  // namespace seahowl

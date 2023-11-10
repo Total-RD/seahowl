@@ -167,3 +167,12 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
  * @param[out] system_core System to populate.
  */
 void populate_system_from_json(const std::string& filepath_main, seahowl::core::System& system_core);
+
+/**
+ * @brief Initializes (statics, presimulation, etc) System instance given a json file.
+ * The system needs to be prepopulated before initialization.
+ *
+ * @param[in] filepath Path of the json file describing the system.
+ * @param[out] system_core System to populate.
+ */
+void initialize_system_from_json(const std::string& filepath, seahowl::core::System& system_core);

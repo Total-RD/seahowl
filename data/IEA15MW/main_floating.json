@@ -2,14 +2,18 @@
   "numerics": {
     "dt": 0.05,
     "t_end": 2000.0,
-    "presim_duration": 200.0,
     "statics": {
       "linear_step": false,
       "nonlinear_steps": 0
     },
     "presetup": {
       "dt": 0.001,
-      "steps": 100
+      "duration": 0.1
+    },
+    "presim": {
+      "dt": 0.05,
+      "duration": 200.0,
+      "fix_towers": true
     }
   },
   "outputs": {

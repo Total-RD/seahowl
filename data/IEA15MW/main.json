@@ -6,10 +6,6 @@
     "statics": {
       "linear_step": true,
       "nonlinear_steps": 10
-    },
-    "presetup": {
-      "dt": 0.001,
-      "steps": 0
     }
   },
   "outputs": {

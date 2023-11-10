@@ -98,8 +98,12 @@ void run_simulation(int argc, char* argv[]) {
     auto system_core = seahowl::core::System();
     system_core.system_elasto = system_elasto;
     system_core.system_aero = system_aero;
+
     populate_system_from_json(filepath_main.generic_string(), system_core);
     spdlog::debug("Populated system.");
+
+    initialize_system_from_json(filepath_main.generic_string(), system_core);
+    spdlog::debug("Fully initialized system.");
 
     // get main file info
     std::ifstream json_file(filepath_main.generic_string());
@@ -109,9 +113,6 @@ void run_simulation(int argc, char* argv[]) {
 
     // NUMERICS options
     auto num_json = json_obj.at("numerics");
-    // intialization
-    auto statics_json = num_json.at("statics");
-    auto presetup_json = num_json.at("presetup");
     // timestepping
     double dt = num_json.at("dt").get<double>();
     double t_end = num_json.at("t_end").get<double>();
@@ -151,88 +152,11 @@ void run_simulation(int argc, char* argv[]) {
     draw_system_init(system_chrono, application);
 #endif
 
-    // simulation loop
-    //
-    // initialization
-    // statics
-    auto linear_step = statics_json.at("linear_step").get<bool>();
-    auto nonlinear_steps = statics_json.at("nonlinear_steps").get<int>();
-    if (linear_step && nonlinear_steps > 0) {
-        system_elasto->do_statics(linear_step, nonlinear_steps);
-        spdlog::debug("Performed statics prestep with linear step as {} and {} nonlinear steps.", linear_step,
-                      nonlinear_steps);
-    } else {
-        system_core.step(1e-6);  // need to do tiny time step before system initialization if statics not done
-        system_core.set_time(0.0);
-    }
-
-    system_core.initialize(system_elasto->get_time(), dt);
-
-    // apply presetup
-    auto presetup_dt = presetup_json.at("dt").get<double>();
-    auto presetup_steps = presetup_json.at("steps").get<int>();
-    if (presetup_dt > 0 && presetup_steps > 0) {
-        system_core.presetup(presetup_dt, presetup_steps);
-    }
-
 #ifdef HAVE_IRRLICHT
     application->GetDevice()->run();
     draw_system(system_chrono, application);
     application->EndScene();
 #endif
-
-    // presimulation
-    auto presim_duration = num_json.at("presim_duration").get<double>();
-    if (presim_duration > 0) {
-        // round duration with dt
-        presim_duration += dt - std::fmod(presim_duration, dt);
-        system_core.set_time(-presim_duration);
-
-        spdlog::info("Presimulation from {}s to 0s with dt={}s.", system_core.get_time(), dt);
-        double presim_frac = presim_duration / 20.0;
-
-        std::cout << "|0% -----------> 100%|" << std::endl;
-        std::cout << "|";
-
-        // fix tower
-        bool tower_was_fixed = system_core.turbines[0]->elasto.tower.nodes.front()->is_fixed();
-        if (!tower_was_fixed) {
-            system_core.turbines[0]->elasto.tower.nodes.front()->set_fixed(true);
-        }
-        auto presim_time = system_elasto->get_time();
-        while (presim_time <= 0) {
-            if (std::fmod(presim_time + presim_duration, presim_frac) <= dt) {
-                std::cout << "*";
-            }
-            // prestep
-            system_core.prestep(presim_time, dt);
-
-            // step
-            system_core.step(dt);
-            presim_time = system_core.get_time();
-
-            // poststep
-            system_core.poststep(presim_time, dt);
-
-#ifdef HAVE_IRRLICHT
-            application->GetDevice()->run();
-            draw_system(system_chrono, application);
-            application->EndScene();
-#endif
-        }
-        std::cout << "|" << std::endl;
-        if (!tower_was_fixed) {
-            system_core.turbines[0]->elasto.tower.nodes.front()->set_fixed(false);
-        }
-
-        // reset time to zero exactly
-        if (fabs(system_core.get_time()) > 1e-10) {
-            throw std::runtime_error("Presimulation step did not reach 0s (stopped at +" +
-                                     std::to_string(system_core.get_time()) + ").");
-        }
-        system_core.set_time(0.0);
-        spdlog::info("Presimulation finished.");
-    }
 
     int step = 0;
     output_results(system_core);

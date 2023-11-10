@@ -73,8 +73,15 @@ void System::set_time(double time) {
     system_elasto->set_time(time);
 }
 
-void System::presetup(double dt, int nsteps) {
-    spdlog::info("Presetup of simulation for {} steps with dt={}.", nsteps, dt);
+void System::run_presetup(double presetup_duration, double presetup_dt) {
+    if (presetup_duration == 0.0 || presetup_dt == 0.0 || presetup_dt > presetup_duration) {
+        // do nothing if dt or number of steps is zero
+        return;
+    }
+    int nsteps = int(presetup_duration / presetup_dt);
+    spdlog::info("Presetup of simulation for {} steps with dt={}.", nsteps, presetup_dt);
+
+    double time_init = get_time();
 
     std::map<int, std::vector<std::vector<double>>> lengths_initial_moorings;
     std::map<int, std::vector<std::vector<double>>> lengths_final_moorings;
@@ -170,7 +177,7 @@ void System::presetup(double dt, int nsteps) {
             }
         }
 
-        system_elasto->step(dt);
+        system_elasto->step(presetup_dt);
     }
 
     std::cout << "|" << std::endl;
@@ -187,7 +194,59 @@ void System::presetup(double dt, int nsteps) {
     }
 
     // reset time
-    set_time(0.0);
+    set_time(time_init);
 
     spdlog::info("Presetup finished.");
+}
+
+void System::run_presimulation(double presim_duration, double presim_dt, bool fix_towers) {
+    if (presim_duration == 0.0 || presim_dt == 0.0 || presim_dt > presim_duration) {
+        // do nothing if duration is zero
+        return;
+    }
+    int nsteps = int(presim_duration / presim_dt);
+    spdlog::info("Presimulation for {} steps with dt={}.", nsteps, presim_dt);
+    if (get_time() != 0) {
+        throw std::runtime_error(
+            "Trying to do a presimulation step after simulation started (t=" + std::to_string(get_time()) + ").");
+    }
+    std::cout << "|0% -----------> 100%|" << std::endl;
+    std::cout << "|";
+
+    // fix tower
+    std::vector<bool> tower_was_fixed;
+    for (auto& turbine : turbines) {
+        tower_was_fixed.push_back(turbine->elasto.tower.nodes.front()->is_fixed());
+        if (!tower_was_fixed.back() && fix_towers) {
+            turbine->elasto.tower.nodes.front()->set_fixed(true);
+        }
+    }
+
+    int presim_frac = nsteps / 20;
+    int istep = 0;
+    while (istep < nsteps) {
+        istep += 1;
+        if (istep % presim_frac == 0) {
+            std::cout << "*";
+        }
+        // prestep
+        prestep(0.0, presim_dt);
+
+        // step
+        step(presim_dt);
+
+        // poststep
+        poststep(0.0, presim_dt);
+
+        set_time(0.0);
+    }
+    std::cout << "|" << std::endl;
+    for (int ii = 0; ii < turbines.size(); ii++) {
+        if (tower_was_fixed[ii]) {
+            turbines[ii]->elasto.tower.nodes.front()->set_fixed(true);
+        } else {
+            turbines[ii]->elasto.tower.nodes.front()->set_fixed(false);
+        }
+    }
+    spdlog::info("Presimulation finished.");
 }
