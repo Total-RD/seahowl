@@ -1,276 +1,53 @@
 # SEAHOWL: Servo-Elasto-Aero-Hydro Offshore Wind Lab
 
-SEAHOWL is a time domain multi-physics wind turbine simulation platform.
-
-## Installation
-
-### Compilation
-
-From a directory `./build`:
-
-```bash
-cmake .. -DChrono_DIR=/path/to/your/chrono/cmake/build/directory
-make
-```
-
-If compiling with AeroDyn:
-```bash
-cmake .. -DChrono_DIR=/path/to/your/chrono/cmake/build/directory -DAERODYN_LIBRARY_RELEASE=/path/to/your/libaerodyn_inflow_c_binding.so
-make
-```
-
-
-#### Default CMAKE Options:
-
-```cmake
-option(SEAHOWL_ENABLE_IRRLICHT "Enable Irrlicht 3D visualization library" OFF)
-option(SEAHOWL_ENABLE_TESTS "Enable tests" OFF)
-option(SEAHOWL_ENABLE_DOC "Generate html documentation" OFF)
-option(SEAHOWL_ENABLE_BUILD "Build library and drivers" ON)
-option(SEAHOWL_ENABLE_PYTHON "Enable python binding" OFF)
-option(SEAHOWL_ENABLE_EXAMPLES "Enable examples" ON)
-option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
-option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
-option(SEAHOWL_ENABLE_INFLOWWIND "Enable InflowWind module" OFF)
-option(SEAHOWL_ENABLE_HYDROCHRONO "Enable HydroChrono library" OFF)
-```
-
-
-### Dependencies
-
-#### Core (necessary)
-
-- Chrono (8.0.0): https://github.com/projectchrono/chrono
-- nlohmann-json (v3.10.5): https://github.com/nlohmann/json
-- spdlog (v1.12.0): https://github.com/gabime/spdlog
-
-#### Optional
-
-- AeroDyn: https://github.com/Total-RD/aerodyn4seahowl
-- InflowWind: https://github.com/Total-RD/aerodyn4seahowl
-- HydroChrono: https://github.com/NREL/HydroChrono
-
-#### Documentation
-
-- Doxygen (Release_1_8_20): https://github.com/doxygen/doxygen
-- Graphviz (7.0.4): https://graphviz.org/
-- Sphinx (v5.3.0): https://github.com/sphinx-doc/sphinx
-
-#### Visualization
-
-- VTK (v9.2.0): https://gitlab.kitware.com/vtk/vtk
-- Irrlicht (1.8.4): https://irrlicht.sourceforge.io/
-
-#### Tests
-
-- GoogleTest (release-1.12.1): https://github.com/google/googletest
-
-#### Python bindings
-
-- pybind11 (Version 2.10.4): https://github.com/pybind/pybind11
+SEAHOWL is a time domain multi-physics simulation framework for onshore, offshore, and floating wind turbines.
 
 
 ## Usage
 
 ### Using the driver
 
+For example, if you are in the root directory of this repository and compiled the SEAHOWL driver in a `./build` directory, you can run:
+
 ```bash
-[path/to/seahowl_driver] [path/to/main/file/json]
+./build/seahowl_driver ./data/IEA15MW/main.json
 ```
 
-For example, if from this repository your compiled driver is in a `build` folder, you can run the given example:
-```bash
-./build/seahowl_driver ./data/IEA15MW_main.json
+An `output` folder containing all the outputs will be automatically created.
+
+
+### Using python bindings
+
+If you compiled the python bindings and added them to your `PYTHONPATH`, you can use SEAHOWL as follows:
+
+```python
+import pyseahowl
+
+# make system
+system_elasto = pyseahowl.elasto.SystemElastoChrono()
+system_aero = pyseahowl.aero.SystemAero()
+system_core = pyseahowl.core.System(system_elasto, system_aero)
+
+# populate and initialize system from json file
+filepath = "./data/IEA15MW/main.json"
+pyseahowl.io.populate_system_from_json(filepath, system_core)
+pyseahowl.io.initialize_system_from_json(filepath, system_core)
+
+# run simulation loop
+dt = 0.05
+t_sim = 0.
+while system_core.get_time() < 200:
+    # make a time step
+    system_core.prestep(t_sim, dt)
+    system_core.step(dt)
+    system_core.poststep(t_sim, dt)
+
+    t_sim = system_core.get_time()
+
+    # print info about turbine
+    print("time: {t_sim:.3f}, rpm: {rpm:.3f}, pitch: {pitch:.3f}".format(
+        t_sim=t_sim,
+        rpm=system_core.turbines[0].rna.elasto.get_rpm(),
+        pitch=system_core.turbines[0].rna.elasto.rotor.pitch_collective,
+    ))
 ```
-
-
-### Input files
-
-The simulation of a wind turbine can be entirely piloted from input files without recompilation of the code needed.
-For examples of input files, look at the `./data/` folder with files based on the reference IEA15MW turbine properties.
-
-
-#### Main file (main.json)
-
-The main JSON file pilots numerical options, environmental conditions, and points to turbine files used for the simulation.
-It is a JSON dictionary containing:
-
-- numerics: (dict)
-  - **dt**: (float) the time stepping value for the simulation [s].
-  - **t_end**: (float) the ending time of the simulation [s].
-  - **aerodyn**: (bool) option to enable aerodyn module. In-house BEMT will be used if this option is disable.
-- outputs: (dict)
-  - **dt**: (float) the time stepping value for outputs of the simulation [s].
-  - **VTK**: (bool) whether VTK will be part of outputs or not.
-  - **log_level**: (string) global log level ("critical", "error", "warning", "info", "debug", "trace").
-- environment: (dict)
-  - **gravity**: (array of floats length 3) gravitational acceleration [m/s2].
-  - **air_density**: density of air [kg/m3].
-  - **wind**: options for wind model.
-- turbines: (list of dict)
-  - **translation**: (float array of length 3) translation of turbine in space [m].
-  - **rotation**: rotation of turbine (yaw) [°].
-  - **file**: file path of turbine file (relative to this file path).
-  - **use_aerodyn**: whether to use AeroDyn or not for this turbine.
-  - **file_aerodyn**: path to AeroDyn .dat input file (only used if use_aerodyn is true).
-
-#### Available Wind Models
-
-- Wind `ramp`:
-```json
-{
-  "type": "ramp",
-  "options": {
-    "reference_height": 150,
-    "shear_coefficient": 0.12,
-     "velocity_start": [12, 0, 0],
-     "velocity_stop": [25, 0, 0],
-     "time_start": 500,
-     "time_stop": 1700
-  }
-}
-```
-
-- Wind `inflowwind` (Turbsim binary can be read):
-```json
-{
-  "type": "inflowwind",
-  "options": {
-     "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat",
-  }
-}
-```
-
-
-#### Turbine file (turbine.json)
-
-The turbine JSON file pilots the discretization options of the blades and tower, as well as other general options.
-For discretization of blades and tower, it is possible to either use an ordered array of floats between 0 and 1 (with 0 and 1 included in the array as bounds) corresponding to the normalized abscissa of the reference points or only one integer corresponding to the number of elements to use for discretization.
-It is a JSON dictionary containing:
-- rotor: (dict)
-  - **type**: (string) type of rotor ("fea", "rigid", "disk")
-  - **fpm**: (bool) whether to consider Fully-Populated Matrix (FPM) elements (6x6 material properties) or not.
-  - **discretization**: (dict)
-    - **elasto**: (array of floats) discretization fractions (between 0 and 1) for elasto part of blade.
-    - **aero**: (array of floats) discretization fractions (between 0 and 1) for aero part of blade.
-  - **blades**: (list)
-    - **file**: file path of blade file (relative to this file path).
-    - **initial_pitch**: initial pitch of blade [°].
-    - **precone**: (float) precone of blade [°].
-- rna: (dict)
-  - **initial_pitch_collective**: initial collective pitch of blades [°].
-  - **file**: file path of RNA file (relative to this file path).
-- tower: (dict)
-  - **discretization**: (dict)
-    - **elasto**: (array of floats) discretization fractions (between 0 and 1) for elasto part of blade.
-    - **aero**: (array of floats) discretization fractions (between 0 and 1) for aero part of blade.
-  - **file**: file path of tower file (relative to this file path).
-- controller: (dict)
-  - **type**: (string) type of controller.
-  - **options**: (dict) options of controller.
-- floater: (optional dict) uses floater if defined
-  - **file**: file path of floater file
-
-
-#### Available controller models
-
-- No Controller
-```json
-{
-  "type": ""
-}
-```
-
-- Controller `DISCON`:
-The controller for DISCON routine (e.g. ROSCO controller), where the path to the controller options file (DISCON.IN) and path to library (libdiscon.so for Linux, or dll for Windows) must be provided.
-```json
-{
-  "type": "DISCON",
-    "options": {
-      "infile": "path/to/DISCON.IN",
-      "libfile": "path/to/libdiscon.so"
-    }
-}
-```
-
-- Controller `RPM`:
-For this controller, only variable torque is applied and a target RPM is set as the maximum RPM allowed for the rotor.
-```json
-{
-  "type": "RPM",
-  "options": {
-     "target_rpm": 5.0
-  }
-}
-```
-
- #### Rotor-Nacelle Assembly file (rna.json)
-
- The Rotor-Nacelle Assembly (RNA) JSON file describes everything related to the rotor, nacelle, drivetrain, generator, gearbox.
- It is a JSON dictionary containing:
-- **shaft**: (dict)
-  - **tilt**: (float) tilt of shaft [°].
-  - **distance_from_towertop**: distance of shaft frol towertop [m].
-- **nacelle**: (dict)
-  - **inertia**: (float) inertia of nacelle [kg.m2].
-  - **mass**: (float) mass of nacelle [kg]
-  - **CM**: (array of floats of length 3) center of mass offset from towertop [m].
-  - **yaw_bearing_mass**: mass of yaw bearing [kg].
-- **drivetrain**: (dict)
-  - **generator_efficiency**: (float) generator efficiency [%].
-  - **generator_inertia**: (float) generator inertia [kg.m2].
-  - **gearbox_ratio**: (float) gearbox ratio [/].
-  - **gearbox_efficiency**: (float) geabox efficiency [%].
-- **hub**:
-  - **radius**: (float) radius of hub [m].
-  - **overhang**: (float) overhang of hub [m].
-  - **inertia**: (float) inertia of hub [kg.m2].
-  - **mass**: (float) mass of hub [kg].
-  - **CM**: (float) offset of center of mass of hub [m].
-
-
-#### Blade file (blade.json)
-
-The blade JSON file is a reference file that should be defined only once per blade type and not be changed by the user (unless the blade properties themselves change).
-All the options that can change per simulation such as discretization should be defined in the turbine JSON file.
-Only *reference* points are defined in this file, which does not have to be defined at the same coordinates as the chosen numerical discretization during the simulation.
-It is a json dictionary containing:
-- **damping_coefficients**: (array of floats of length 4) damping coefficients of blade.
-- **reference_points**: (list of dict) list of reference points.
-  - **coordinates**: (array of floats of length 3) coordinates of reference point (IEC standard) [m].
-  - **twist**: (float) structural twist of blade at reference point [°].
-  - **mass_matrix**: (6x6 matrix of floats) mass matrix of blade at reference point [kg].
-  - **stiffness_matrix**: (6x6 matrix of floats) stiffness matrix of blade at reference point [N/m].
-  - **chord**: (float) chord length of blade at reference point [m].
-  - **airfoil_file**: (string) file path of airfoil file (relative to this file path).
-
-
-#### Tower file (tower.json)
-
-The tower JSON file is a reference file that should be defined only once per tower type and not be changed by the user (unless the tower properties themselves change).
-All the options that can change per simulation such as discretization should be defined in the turbine JSON file.
-Only *reference* points are defined in this file, which does not have to be defined at the same coordinates as the chosen numerical discretization during the simulation.
-It is a json dictionary containing:
-- **height**: (float) absolute height of towertop [m].
-- **base_height**: (float) absolute height of towerbase [m].
-- **damping_coefficients**: (array of floats of length 4) damping coefficients of blade.
-- **reference_points**: (list of dict) list of reference points.
-  - **fraction**: (float) normalized abscissa along tower (starting from base) of reference point.
-  - **density**: (float) density of tower at reference point [kg/m3].
-  - **stiffness_foreaft**: (float) fore-aft stiffness of tower at reference point [N/m].
-  - **stiffness_sideside**: (float) side-side stiffness of tower at reference point [N/m].
-  - **diameter**: (float) diameter of tower at reference point [m].
-  - **drag_coefficient**: (float) drag coefficient of tower at reference point [/].
-
-
-#### Floater file (floater.json)
-
-The floater JSON file describes the floater of a FOWT and is only used if the "floater" key is in the turbine json file.
-It is a json dictionary containing:
-- **mass**: (float) total mass of floater [kg].
-- **cog**: (array of floats of length 3) center of gravity of floater [m].
-- **inertia**: (3x3 matrix of floats) inertia of floater [kg.m2].
-- **type**: (string) type of floater (only "HydroChrono" available).
-- **options**:
-  - **file**: (string) file path of hydro .h5 file for HydroChrono,
-  - **name**: (string) name of body/floater in .h5 file

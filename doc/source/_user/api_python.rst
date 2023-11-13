@@ -13,6 +13,20 @@ Python API
    :template: custom-module-template.rst
    :recursive:
 
+   pyseahowl.core
+
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+
+   pyseahowl.env
+
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+
    pyseahowl.elasto
 
 .. autosummary::
@@ -28,3 +42,10 @@ Python API
    :recursive:
 
    pyseahowl.servo
+
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+
+   pyseahowl.io

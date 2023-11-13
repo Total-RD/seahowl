@@ -17,14 +17,20 @@ Table of Contents
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents
+   :caption: User guide
 
+   _user/install
    _user/user
+
+.. toctree::
+   :maxdepth: 1
+   :caption: API doc
+
    _user/api_python
 
 .. toctree::
    :maxdepth: 1
-   :caption: Annexes:
+   :caption: Annexes
 
    glossary
 
