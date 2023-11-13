@@ -56,10 +56,10 @@ int main(int argc, char** argv) {
     return RUN_ALL_TESTS();
 }
 
-TEST(test_blade, mass_deflection) {
+TEST(test_blade, mass_geometry) {
     // system
     auto system_elasto = SystemElastoChrono();
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
 
     // blade
     auto blade = seahowl::elasto::BladeElastoFEA();
@@ -73,23 +73,19 @@ TEST(test_blade, mass_deflection) {
     blade.assemble(system_elasto);
     blade.nodes.front()->set_fixed(true);
 
+    // check geometry
+    for (int ii = 0; ii < blade.nodes.size(); ii++) {
+        ASSERT_NEAR(blade.discretized_points[ii].coordinates.x(), blade.nodes[ii]->get_position().x(), 1e-4);
+        ASSERT_NEAR(blade.discretized_points[ii].coordinates.y(), blade.nodes[ii]->get_position().y(), 1e-4);
+        ASSERT_NEAR(blade.discretized_points[ii].coordinates.z(), blade.nodes[ii]->get_position().z(), 1e-4);
+    }
+
+    // statics
     system_elasto.do_statics(true, 0);
 
     // check mass
     double blade_mass = 67051.5;
     ASSERT_NEAR(blade_mass, blade.get_mass(), 1.0);
-
-    // check deflection from gravity (edge)
-    double deflection_edge = -0.8580;
-    blade.rotate(PI, Vector3d(0.0, 0.0, 1.0));
-    system_elasto.do_statics(true, 0);
-    ASSERT_NEAR(deflection_edge, blade.nodes.back()->get_position().y(), 0.001);
-
-    // check deflection from gravity (flap)
-    double deflection_flap = 2.91411;
-    blade.rotate(PI / 2.0, Vector3d(0.0, 0.0, 1.0));
-    system_elasto.do_statics(true, 0);
-    ASSERT_NEAR(deflection_flap, blade.nodes.back()->get_position().y(), 0.001);
 }
 
 TEST(test_rotor, mass) {
@@ -138,10 +134,10 @@ TEST(test_tower, mass) {
     ASSERT_NEAR(tower_mass, tower.get_mass(), 1.0);
 }
 
-TEST(test_blade, natural_period_dynamic_edge) {
+TEST(test_blade, edgewise) {
     // system
     auto system_elasto = SystemElastoChrono();
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
 
     // blade
     auto blade = seahowl::elasto::BladeElastoFEA();
@@ -155,10 +151,22 @@ TEST(test_blade, natural_period_dynamic_edge) {
     blade.assemble(system_elasto);
     blade.nodes.front()->set_fixed(true);
 
-    system_elasto.do_statics(true, 0);
+    // rotate blade (flat along y axis)
+    blade.rotate(PI / 2.0, Vector3d(1.0, 0.0, 0.0));
+    ASSERT_NEAR(blade.reference_points.back().coordinates.y(), blade.nodes.back()->get_position().z(), 1e-4);
+
+    // test deflection
+    system_elasto.do_statics(true, 10);
+    double deflection_edge = -0.954337;
+    ASSERT_NEAR(deflection_edge, blade.nodes.back()->get_position().z(), 1e-4);
+    // flip blade
+    blade.rotate(PI, Vector3d(0.0, 1.0, 0.0));
+    system_elasto.do_statics(true, 10);
+    double deflection_edge2 = -1.197823;
+    ASSERT_NEAR(deflection_edge2, blade.nodes.back()->get_position().z(), 1e-4);
 
     // static position of blade tip
-    double pos0 = blade.nodes.back()->get_position().y();
+    double pos0 = blade.nodes.back()->get_position().z();
 
     // check zero-crossings (static position of blade tip)
     int step = 0;
@@ -169,11 +177,11 @@ TEST(test_blade, natural_period_dynamic_edge) {
     double time = 0.0;
     double end_time = 10.0;
     double start_time = 0.0;
-    blade.nodes.back()->set_force(Vector3d(0.0, 1000.0, 0.0), false);
+    blade.nodes.back()->set_force(Vector3d(0.0, 0.0, 1000.0), false);
     while (time < end_time) {
         if (time > 0.5) {
             blade.nodes.back()->reset_loads();
-            if (blade.nodes.back()->get_position().y() < pos0 && pos_y > pos0) {
+            if (blade.nodes.back()->get_position().z() < pos0 && pos_y > pos0) {
                 if (start_time == 0.0) {
                     start_time = time;
                 } else {
@@ -182,7 +190,7 @@ TEST(test_blade, natural_period_dynamic_edge) {
                 }
             }
         }
-        pos_y = blade.nodes.back()->get_position().y();
+        pos_y = blade.nodes.back()->get_position().z();
         system_elasto.step(dt);
         time += dt;
         step += 1;
@@ -193,10 +201,10 @@ TEST(test_blade, natural_period_dynamic_edge) {
     ASSERT_NEAR(natural_period_ref, natural_period, 0.01);
 }
 
-TEST(test_blade, natural_period_dynamic_flap) {
+TEST(test_blade, flapwise) {
     // system
     auto system_elasto = SystemElastoChrono();
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, -9.81, 0.0));
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
 
     // blade
     auto blade = seahowl::elasto::BladeElastoFEA();
@@ -210,13 +218,22 @@ TEST(test_blade, natural_period_dynamic_flap) {
     blade.assemble(system_elasto);
     blade.nodes.front()->set_fixed(true);
 
-    // rotate blade for flap
-    blade.rotate(-PI / 2.0, Vector3d(0.0, 0.0, 1.0));
+    // rotate blade (flat along x axis)
+    blade.rotate(PI / 2.0, Vector3d(0.0, 1.0, 0.0));
+    ASSERT_NEAR(blade.reference_points.back().coordinates.x(), -blade.nodes.back()->get_position().z(), 1e-4);
 
-    system_elasto.do_statics(true, 0);
+    // test deflection
+    system_elasto.do_statics(true, 10);
+    double deflection_flap = 1.676042;
+    ASSERT_NEAR(deflection_flap, blade.nodes.back()->get_position().z(), 1e-4);
+    // flip blade
+    blade.rotate(PI, Vector3d(1.0, 0.0, 0.0));
+    system_elasto.do_statics(true, 10);
+    double deflection_flap2 = -6.012171;
+    ASSERT_NEAR(deflection_flap2, blade.nodes.back()->get_position().z(), 1e-4);
 
     // static position of blade tip
-    double pos0 = blade.nodes.back()->get_position().y();
+    double pos0 = blade.nodes.back()->get_position().z();
 
     // check zero-crossings (static position of blade tip)
     int step = 0;
@@ -227,11 +244,11 @@ TEST(test_blade, natural_period_dynamic_flap) {
     double time = 0.0;
     double end_time = 10.0;
     double start_time = 0.0;
-    blade.nodes.back()->set_force(Vector3d(0.0, 1000.0, 0.0), false);
+    blade.nodes.back()->set_force(Vector3d(0.0, 0.0, 1000.0), false);
     while (time < end_time) {
         if (time > 0.5) {
             blade.nodes.back()->reset_loads();
-            if (blade.nodes.back()->get_position().y() < pos0 && pos_y > pos0) {
+            if (blade.nodes.back()->get_position().z() < pos0 && pos_y > pos0) {
                 if (start_time == 0.0) {
                     start_time = time;
                 } else {
@@ -240,7 +257,7 @@ TEST(test_blade, natural_period_dynamic_flap) {
                 }
             }
         }
-        pos_y = blade.nodes.back()->get_position().y();
+        pos_y = blade.nodes.back()->get_position().z();
         system_elasto.step(dt);
         time += dt;
         step += 1;
@@ -278,7 +295,7 @@ TEST(test_tower, tower_shadow_check) {
     auto position1 = Vector3d(-14.0, -5.0, 50.0);
     Vector3d wind_velocity1 = wind_velocity;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity1, position1, tower_aero);
-    ASSERT_NEAR(wind_velocity1.x(), 9.223643, 0.001);
+    ASSERT_NEAR(wind_velocity1.x(), 9.216867, 0.001);
 
     // position 2
     auto position2 = Vector3d(-15.0, 0.0, 45.0);
@@ -290,7 +307,7 @@ TEST(test_tower, tower_shadow_check) {
     auto position3 = Vector3d(-16.0, 2.0, 20.0);
     Vector3d wind_velocity3 = wind_velocity;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity3, position3, tower_aero);
-    ASSERT_NEAR(wind_velocity3.x(), 9.056021, 0.001);
+    ASSERT_NEAR(wind_velocity3.x(), 9.068192, 0.001);
 }
 
 TEST(test_turbine, rpm_initial_pitch) {
@@ -349,7 +366,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.8025926, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.779032, 1e-4);
 }
 
 TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
@@ -408,7 +425,7 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.810848, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.791585, 1e-4);
 }
 
 TEST(test_turbine, controller_target_rpm) {
@@ -487,7 +504,7 @@ TEST(test_turbine, actuator_disk) {
     // turbine
     double initial_pitch = 0.0 * seahowl::PI / 1000.0;
     // power target
-    auto reference_power = 15.4e6;
+    auto reference_power = 15.5e6;
 
     // system
     auto system_elasto = SystemElastoChrono();
@@ -621,7 +638,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.744, 0.02);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.750755, 1e-4);
 }
 #endif
 
@@ -693,7 +710,7 @@ TEST(test_turbine, multiturbines) {
     }
 
     for (auto& turbine : system_core.turbines) {
-        ASSERT_NEAR(turbine->rna.elasto.get_rpm(), 2.829, 0.02);
+        ASSERT_NEAR(turbine->rna.elasto.get_rpm(), 2.791585, 0.02);
     }
 }
 
@@ -756,6 +773,6 @@ TEST(test_inflowwind, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.829, 0.02);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.765498, 1e-4);
 }
 #endif
