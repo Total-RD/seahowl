@@ -66,11 +66,11 @@ void initialize_pyseahowl_core(py::module& m) {
     // core/system.h
     py::class_<seahowl::core::System, std::shared_ptr<seahowl::core::System>, seahowl::core::ComponentDynamic>(m_core,
                                                                                                                "System")
-        .def(py::init<>())
+        .def(py::init<seahowl::elasto::SystemElasto&, seahowl::aero::SystemAero&>())
         .def("step", &seahowl::core::System::step)
         .def("get_time", &seahowl::core::System::get_time)
         .def_readonly("turbines", &seahowl::core::System::turbines)
         .def_readwrite("fluid_model", &seahowl::core::System::fluid_model)
-        .def_readwrite("system_elasto", &seahowl::core::System::system_elasto)
-        .def_readwrite("system_aero", &seahowl::core::System::system_aero);
+        .def_property_readonly("elasto", [](seahowl::core::System& system) { return &system.elasto; })
+        .def_property_readonly("aero", [](seahowl::core::System& system) { return &system.aero; });
 }

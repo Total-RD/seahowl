@@ -10,9 +10,7 @@ t_output_next = 0.0
 # get system
 system_elasto = pyseahowl.elasto.SystemElastoChrono()
 system_aero = pyseahowl.aero.SystemAero()
-system_core = pyseahowl.core.System()
-system_core.system_elasto = system_elasto
-system_core.system_aero = system_aero
+system_core = pyseahowl.core.System(system_elasto, system_aero)
 pyseahowl.populate_system_from_json(filepath, system_core)
 
 # fix tower bottom nodes
@@ -32,11 +30,11 @@ while t_sim < t_end:
     step += 1
     system_core.poststep(t_sim, dt)
 
-    t_sim = system_core.system_elasto.get_time()
+    t_sim = system_core.get_time()
     if t_sim >= t_output_next - 1e-6:
         turbine = system_core.turbines[0]
         print(
-            "time: {time}, step: {step}, rpm: {rpm}, pitch: {pitch}".format(
+            "time: {time:.3f}, step: {step:.3f}, rpm: {rpm:.3f}, pitch: {pitch:.3f}".format(
                 time=t_sim,
                 step=step,
                 rpm=turbine.rna.elasto.get_rpm(),

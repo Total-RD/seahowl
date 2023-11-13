@@ -36,11 +36,18 @@ class System : public ComponentDynamic {
     /** @brief Soil model. */
     std::shared_ptr<seahowl::env::SoilModel> soil_model;
     /** @brief System for elastodynamics. */
-    std::shared_ptr<seahowl::elasto::SystemElasto> system_elasto;
+    seahowl::elasto::SystemElasto& elasto;
     /** @brief System for aerodynamics. */
-    std::shared_ptr<seahowl::aero::SystemAero> system_aero;
-
-    System();
+    seahowl::aero::SystemAero& aero;
+    /**
+     * @brief Constructor.
+     *
+     * Instantiates system for communication between elasto, aero, servo, hydro components.
+     *
+     * @param[in] elasto Elastodynamic system.
+     * @param[in] aero Aerodynamic system.
+     */
+    System(seahowl::elasto::SystemElasto& elasto, seahowl::aero::SystemAero& aero);
 
     /**
      * @brief Initialize system.

@@ -377,33 +377,33 @@ void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core:
     if (json_obj.at("aero").at("solver") == "aerodyn" || json_obj.at("aero").at("solver") == "AeroDyn") {
 #ifdef HAVE_AERODYN
         auto turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>();
-        system_core.system_aero->turbines.push_back(turbine_aero);
+        system_core.aero.turbines.push_back(turbine_aero);
 #endif
     } else {
         auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
-        system_core.system_aero->turbines.push_back(turbine_aero);
+        system_core.aero.turbines.push_back(turbine_aero);
     }
 
     // make turbine elasto
     if (json_obj.contains("floater")) {
         // floating turbine if floater is defined
         auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineFloatingElasto>();
-        system_core.system_elasto->turbines.push_back(turbine_elasto);
+        system_core.elasto.turbines.push_back(turbine_elasto);
     } else {
         // simple turbine if floater is not defined
         auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
-        system_core.system_elasto->turbines.push_back(turbine_elasto);
+        system_core.elasto.turbines.push_back(turbine_elasto);
     }
 
     // add turbine to system
     std::shared_ptr<seahowl::core::Turbine> turbine;
     if (json_obj.contains("floater")) {
         turbine = std::make_shared<seahowl::core::TurbineFloating>(
-            dynamic_cast<seahowl::elasto::TurbineFloatingElasto&>(*system_core.system_elasto->turbines.back()),
-            *system_core.system_aero->turbines.back());
+            dynamic_cast<seahowl::elasto::TurbineFloatingElasto&>(*system_core.elasto.turbines.back()),
+            *system_core.aero.turbines.back());
     } else {
-        turbine = std::make_shared<seahowl::core::Turbine>(*system_core.system_elasto->turbines.back(),
-                                                           *system_core.system_aero->turbines.back());
+        turbine = std::make_shared<seahowl::core::Turbine>(*system_core.elasto.turbines.back(),
+                                                           *system_core.aero.turbines.back());
     }
     system_core.turbines.push_back(turbine);
 
@@ -736,8 +736,8 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
 
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
-    system_core.system_elasto->set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
-    auto gravity_vector = system_core.system_elasto->get_gravitational_acceleration();
+    system_core.elasto.set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
+    auto gravity_vector = system_core.elasto.get_gravitational_acceleration();
     auto gravity_direction = gravity_vector / gravity_vector.norm();
 
     // environment
@@ -788,8 +788,7 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
         auto v1 = wind_options.at("velocity_end").get<std::vector<double>>();
         wind_model.set_wind_ramp(Vector3d(v0[0], v0[1], v0[2]), wind_options.at("time_start").get<double>(),
                                  Vector3d(v1[0], v1[1], v1[2]), wind_options.at("time_end").get<double>());
-        wind_model.direction_gravity =
-            Vector3d(system_core.system_elasto->get_gravitational_acceleration()).normalized();
+        wind_model.direction_gravity = Vector3d(system_core.elasto.get_gravitational_acceleration()).normalized();
         wind_model.reference_height = wind_options.at("reference_height").get<double>();
         wind_model.shear_coefficient = wind_options.at("shear_coefficient").get<double>();
         wind_model.density = wind_json.at("air_density").get<double>();
@@ -888,7 +887,7 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
         // build turbine
         turbine.build();
         // rotate turbine to align tower with gravity vector
-        auto v1 = Vector3d(-system_core.system_elasto->get_gravitational_acceleration()).normalized();
+        auto v1 = Vector3d(-system_core.elasto.get_gravitational_acceleration()).normalized();
         auto v2 = (turbine.tower.elasto.nodes[1]->get_position() - turbine.tower.elasto.nodes[0]->get_position())
                       .normalized();
         auto rot_axis = v2.cross(v1);
@@ -896,7 +895,7 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
         turbine.rotate(rot_angle, rot_axis);
         // rotation around axis opposite to gravity (yaw)
         turbine.rotate(turbine_json.at("rotation").get<double>(),
-                       Vector3d(-system_core.system_elasto->get_gravitational_acceleration()).normalized());
+                       Vector3d(-system_core.elasto.get_gravitational_acceleration()).normalized());
         // translate turbine
         auto trans = turbine_json.at("translation").get<std::vector<double>>();
         turbine.translate(Vector3d(trans[0], trans[1], trans[2]));
@@ -940,7 +939,7 @@ void initialize_system_from_json(const std::string& filepath, seahowl::core::Sys
     auto linear_step = statics_json.at("linear_step").get<bool>();
     auto nonlinear_steps = statics_json.at("nonlinear_steps").get<int>();
     if (linear_step && nonlinear_steps > 0) {
-        system_core.system_elasto->do_statics(linear_step, nonlinear_steps);
+        system_core.elasto.do_statics(linear_step, nonlinear_steps);
         spdlog::debug("Performed statics prestep with linear step as {} and {} nonlinear steps.", linear_step,
                       nonlinear_steps);
     } else {

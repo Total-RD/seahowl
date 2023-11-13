@@ -730,6 +730,7 @@ void MeshElastoChrono::add(ElementElasto& element) {
 
 SystemElastoChrono::SystemElastoChrono() {
     chobj = chrono_types::make_shared<chrono::ChSystemSMC>();
+    set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
 
     // solver
     auto solver = chrono_types::make_shared<chrono::ChSolverSparseLU>();

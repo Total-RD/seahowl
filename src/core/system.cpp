@@ -17,7 +17,7 @@
 
 using namespace seahowl::core;
 
-System::System() {}
+System::System(seahowl::elasto::SystemElasto& elasto, seahowl::aero::SystemAero& aero) : elasto(elasto), aero(aero) {}
 
 void System::initialize(double time, double dt) {
     for (auto& turbine : turbines) {
@@ -49,7 +49,7 @@ void System::prestep(double time, double dt) {
 }
 
 void System::step(double dt) {
-    system_elasto->step(dt);
+    elasto.step(dt);
 }
 
 void System::poststep(double time, double dt) {
@@ -61,16 +61,16 @@ void System::poststep(double time, double dt) {
 
 void System::assemble() {
     for (auto& turbine : turbines) {
-        turbine->elasto.assemble(*(system_elasto.get()));
+        turbine->elasto.assemble(elasto);
     }
 }
 
 double System::get_time() {
-    return system_elasto->get_time();
+    return elasto.get_time();
 }
 
 void System::set_time(double time) {
-    system_elasto->set_time(time);
+    elasto.set_time(time);
 }
 
 void System::run_presetup(double presetup_duration, double presetup_dt) {
@@ -166,7 +166,7 @@ void System::run_presetup(double presetup_duration, double presetup_dt) {
                                 mooring.diameter, mooring.stiffness_axial, mooring.stiffness_bending);
                         }
                     }
-                    mooring.compute_hydro_loads(system_elasto->get_gravitational_acceleration(), 1000.);
+                    mooring.compute_hydro_loads(elasto.get_gravitational_acceleration(), 1000.);
 
                     if (soil_model) {
                         mooring.compute_seabed_loads(*soil_model);
@@ -177,7 +177,7 @@ void System::run_presetup(double presetup_duration, double presetup_dt) {
             }
         }
 
-        system_elasto->step(presetup_dt);
+        elasto.step(presetup_dt);
     }
 
     std::cout << "|" << std::endl;

@@ -89,15 +89,13 @@ void run_simulation(int argc, char* argv[]) {
     }
 
     // system elasto
-    auto system_elasto = std::make_shared<seahowl::elasto::SystemElastoChrono>();
-    auto system_chrono = system_elasto->chobj;
+    auto system_elasto = seahowl::elasto::SystemElastoChrono();
+    auto system_chrono = system_elasto.chobj;
     system_chrono->SetNumThreads(chrono::ChOMP::GetNumProcs(), 0, 1);
     // system aero
-    auto system_aero = std::make_shared<seahowl::aero::SystemAero>();
+    auto system_aero = seahowl::aero::SystemAero();
     // system core
-    auto system_core = seahowl::core::System();
-    system_core.system_elasto = system_elasto;
-    system_core.system_aero = system_aero;
+    auto system_core = seahowl::core::System(system_elasto, system_aero);
 
     populate_system_from_json(filepath_main.generic_string(), system_core);
     spdlog::debug("Populated system.");
@@ -163,7 +161,7 @@ void run_simulation(int argc, char* argv[]) {
 #ifdef HAVE_VTK
     if (output_vtk) {
         for (auto const& vtk_output : vtk_outputs) {
-            vtk_output.write(system_elasto->get_time(), step);
+            vtk_output.write(system_elasto.get_time(), step);
         }
     }
 #endif
@@ -175,7 +173,7 @@ void run_simulation(int argc, char* argv[]) {
     spdlog::info("Resetting simulation stopwatch to 0s.");
     spdlog::info("**************************************************************");
     spdlog::stopwatch sw_total;
-    while (system_elasto->get_time() < t_end) {
+    while (system_core.get_time() < t_end) {
         // prestep
         system_core.prestep(system_core.get_time(), dt);
 
@@ -188,7 +186,7 @@ void run_simulation(int argc, char* argv[]) {
 
         // output
         if (system_core.get_time() >= (time_outputs - 1e-6)) {
-            spdlog::info("time: {:.6}s, step: {}, stopwatch: {:.3}s", system_elasto->get_time(), step, sw_total);
+            spdlog::info("time: {:.6}s, step: {}, stopwatch: {:.3}s", system_core.get_time(), step, sw_total);
             output_results(system_core);
 #ifdef HAVE_VTK
             if (output_vtk) {
