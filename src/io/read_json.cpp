@@ -245,6 +245,8 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
     const std::string& filepath) {
     auto json_obj = get_json_from_file(filepath);
 
+    auto tower_type = json_obj.at("type").get<std::string>();
+
     // EXTRACT INFO
     double height = json_obj.at("height").get<double>();
     double base_height = json_obj.at("base_height").get<double>();
@@ -259,19 +261,56 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         point.at("fraction").get_to(reference_point.fraction);
         reference_point.coordinates =
             Vector3d(0.0, 0.0, (height - base_height) * reference_point.fraction + base_height);
-        point.at("stiffness_sideside").get_to(reference_point.stiffness_sideside);
-        point.at("stiffness_foreaft").get_to(reference_point.stiffness_foreaft);
-        point.at("density").get_to(reference_point.density);
         reference_point.damping_coefficients[0] = damping_coefficients[0];
         reference_point.damping_coefficients[1] = damping_coefficients[1];
         reference_point.damping_coefficients[2] = damping_coefficients[2];
         reference_point.damping_coefficients[3] = damping_coefficients[3];
+        if (tower_type == "cylinder") {
+            // general properties
+            auto tower_options = json_obj.at("options");
+            auto density = tower_options.at("density").get<double>();
+            auto young_modulus = tower_options.at("young_modulus").get<double>();
+            auto poisson_ratio = tower_options.at("poisson_ratio").get<double>();
+            auto shear_modulus = 0.5 * young_modulus / (1.0 + poisson_ratio);
 
-        ///@todo change to actual values
-        reference_point.stiffness_axial = 210e9;
-        reference_point.stiffness_torsion = 1e11;
+            // point-specific properties
+            auto diameter = point.at("diameter").get<double>();
+            auto thickness = point.at("thickness").get<double>();
 
-        reference_points.push_back(reference_point);
+            // geometry info
+            auto d1 = diameter;
+            auto d2 = diameter - 2.0 * thickness;
+            auto area = PI * (pow(d1, 2) - pow(d2, 2)) / 4.0;
+            // linear density
+            auto density_linear = density * area;
+            // stiffnesses
+            auto EI = young_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 64.;  // bending
+            auto EA = young_modulus * area;                                  // axial
+            auto kt = shear_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 32.;  // torsion
+
+            // populate reference point
+            reference_point.stiffness_foreaft = EI;
+            reference_point.stiffness_sideside = EI;
+            reference_point.stiffness_axial = EA;
+            reference_point.stiffness_torsion = kt;
+            reference_point.density = density_linear;
+
+            reference_points.push_back(reference_point);
+        } else if (tower_type == "anisotropic") {
+            for (int ii = 0; ii < points.size(); ii++) {
+                // populate reference point
+                point.at("stiffness_sideside").get_to(reference_point.stiffness_sideside);
+                point.at("stiffness_foreaft").get_to(reference_point.stiffness_foreaft);
+                point.at("stiffness_axial").get_to(reference_point.stiffness_axial);
+                point.at("stiffness_torsion").get_to(reference_point.stiffness_torsion);
+                point.at("density").get_to(reference_point.density);
+
+                reference_points.push_back(reference_point);
+            }
+        } else {
+            throw std::runtime_error("Tower type \"" + tower_type +
+                                     "\" not recognised (try \"cylinder\" or \"anisotropic\").");
+        }
     }
 
     return reference_points;

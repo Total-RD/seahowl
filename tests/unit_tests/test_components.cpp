@@ -130,7 +130,7 @@ TEST(test_tower, mass) {
     system_elasto.do_statics(true, 0);
 
     // check mass
-    double tower_mass = 870391.59776;
+    double tower_mass = 853463.237;
     ASSERT_NEAR(tower_mass, tower.get_mass(), 1.0);
 }
 
@@ -295,19 +295,19 @@ TEST(test_tower, tower_shadow_check) {
     auto position1 = Vector3d(-14.0, -5.0, 50.0);
     Vector3d wind_velocity1 = wind_velocity;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity1, position1, tower_aero);
-    ASSERT_NEAR(wind_velocity1.x(), 9.216867, 0.001);
+    ASSERT_NEAR(wind_velocity1.x(), 9.315126, 1e-4);
 
     // position 2
     auto position2 = Vector3d(-15.0, 0.0, 45.0);
     Vector3d wind_velocity2 = wind_velocity;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity2, position2, tower_aero);
-    ASSERT_NEAR(wind_velocity2.x(), 8.964047, 0.001);
+    ASSERT_NEAR(wind_velocity2.x(), 9.091580, 1e-4);
 
     // position 3
     auto position3 = Vector3d(-16.0, 2.0, 20.0);
     Vector3d wind_velocity3 = wind_velocity;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity3, position3, tower_aero);
-    ASSERT_NEAR(wind_velocity3.x(), 9.068192, 0.001);
+    ASSERT_NEAR(wind_velocity3.x(), 9.163947, 1e-4);
 }
 
 TEST(test_turbine, rpm_initial_pitch) {
@@ -366,7 +366,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.779032, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.780339, 1e-4);
 }
 
 TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
@@ -425,7 +425,7 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.791585, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.792103, 1e-4);
 }
 
 TEST(test_turbine, controller_target_rpm) {
@@ -638,7 +638,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.750755, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.750998, 1e-4);
 }
 #endif
 
@@ -773,6 +773,6 @@ TEST(test_inflowwind, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.765498, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.766250, 1e-4);
 }
 #endif

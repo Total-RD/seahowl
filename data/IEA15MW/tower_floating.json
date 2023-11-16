@@ -1,139 +1,62 @@
 {
+  "type": "cylinder",
   "damping_coefficients": [0.02, 0.02, 0.02, 0.02],
   "height": 144.386,
   "base_height": 15.0,
+  "options": {
+    "density": 7850,
+    "young_modulus": 210000000000.0,
+    "poisson_ratio": 0.3
+  },
   "reference_points": [{
     "fraction": 0.0,
-    "density": 23006.4213107425,
-    "stiffness_foreaft": 6770513741893.661,
-    "stiffness_sideside": 6770513741893.661,
-    "diameter": 10.0,
+    "diameter": 9.480079230031128,
+    "thickness": 0.0994483291996131,
     "drag_coefficient": 0.5
   }, {
-    "fraction": 0.100475,
-    "density": 20645.995757369445,
-    "stiffness_foreaft": 6086865344926.777,
-    "stiffness_sideside": 6086865344926.777,
-    "diameter": 10.0,
+    "fraction": 0.1114034260838268,
+    "diameter": 9.478316467844387,
+    "thickness": 0.08804484805328805,
     "drag_coefficient": 0.5
   }, {
-    "fraction": 0.111403,
-    "density": 20389.26791017103,
-    "stiffness_foreaft": 6012509438660.999,
-    "stiffness_sideside": 6012509438660.999,
-    "diameter": 10.0,
+    "fraction": 0.2228068521676536,
+    "diameter": 9.476535792205395,
+    "thickness": 0.07655157582340255,
     "drag_coefficient": 0.5
   }, {
-    "fraction": 0.200949,
-    "density": 18264.632102127107,
-    "stiffness_foreaft": 5394598975094.711,
-    "stiffness_sideside": 5394598975094.711,
-    "diameter": 10.0,
+    "fraction": 0.3342102782514804,
+    "diameter": 9.474727858234289,
+    "thickness": 0.06490901317256892,
     "drag_coefficient": 0.5
   }, {
-    "fraction": 0.222807,
-    "density": 17746.01273898164,
-    "stiffness_foreaft": 5243768263364.071,
-    "stiffness_sideside": 5243768263364.071,
-    "diameter": 10.0,
+    "fraction": 0.4456137043353072,
+    "diameter": 9.472894516493918,
+    "thickness": 0.053130061449685684,
     "drag_coefficient": 0.5
   }, {
-    "fraction": 0.301424,
-    "density": 15852.47402271775,
-    "stiffness_foreaft": 4690763553700.438,
-    "stiffness_sideside": 4690763553700.438,
-    "diameter": 10.0,
+    "fraction": 0.557017130419134,
+    "diameter": 9.47106829369864,
+    "thickness": 0.041423919767386685,
     "drag_coefficient": 0.5
   }, {
-    "fraction": 0.33421,
-    "density": 15062.80308193614,
-    "stiffness_foreaft": 4460141520157.67,
-    "stiffness_sideside": 4460141520157.67,
-    "diameter": 10.0,
+    "fraction": 0.6684205565029608,
+    "diameter": 9.46931128637315,
+    "thickness": 0.03018678026618815,
     "drag_coefficient": 0.5
   }, {
-    "fraction": 0.401898,
-    "density": 13409.917033573116,
-    "stiffness_foreaft": 3975378255922.296,
-    "stiffness_sideside": 3975378255922.296,
-    "diameter": 10.0,
+    "fraction": 0.7798239825867876,
+    "diameter": 9.467705445545128,
+    "thickness": 0.01993802820237356,
     "drag_coefficient": 0.5
   }, {
-    "fraction": 0.445614,
-    "density": 12342.4077780147,
-    "stiffness_foreaft": 3662296012994.249,
-    "stiffness_sideside": 3662296012994.249,
-    "diameter": 10.0,
-    "drag_coefficient": 0.5
-  }, {
-    "fraction": 0.502373,
-    "density": 10962.035240316254,
-    "stiffness_foreaft": 3255743789131.6416,
-    "stiffness_sideside": 3255743789131.6416,
-    "diameter": 10.0,
-    "drag_coefficient": 0.5
-  }, {
-    "fraction": 0.557017,
-    "density": 9633.099266285813,
-    "stiffness_foreaft": 2864340844739.592,
-    "stiffness_sideside": 2864340844739.592,
-    "diameter": 10.0,
-    "drag_coefficient": 0.49999999999999994
-  }, {
-    "fraction": 0.602847,
-    "density": 8560.974835035016,
-    "stiffness_foreaft": 2547272838273.76,
-    "stiffness_sideside": 2547272838273.76,
-    "diameter": 10.0,
-    "drag_coefficient": 0.5
-  }, {
-    "fraction": 0.668421,
-    "density": 7026.968999232271,
-    "stiffness_foreaft": 2093608918221.6,
-    "stiffness_sideside": 2093608918221.6,
-    "diameter": 10.0,
-    "drag_coefficient": 0.5
-  }, {
-    "fraction": 0.703322,
-    "density": 6280.882961858169,
-    "stiffness_foreaft": 1872112628693.3577,
-    "stiffness_sideside": 1872112628693.3577,
-    "diameter": 10.0,
-    "drag_coefficient": 0.5
-  }, {
-    "fraction": 0.779824,
-    "density": 4645.483574127345,
-    "stiffness_foreaft": 1386599057692.824,
-    "stiffness_sideside": 1386599057692.824,
-    "diameter": 10.0,
-    "drag_coefficient": 0.5
-  }, {
-    "fraction": 0.803796,
-    "density": 4204.49025030578,
-    "stiffness_foreaft": 1255231521750.8687,
-    "stiffness_sideside": 1255231521750.8687,
-    "diameter": 10.0,
-    "drag_coefficient": 0.5
-  }, {
-    "fraction": 0.891227,
-    "density": 2596.09348345098,
-    "stiffness_foreaft": 776106082282.2759,
-    "stiffness_sideside": 776106082282.2759,
-    "diameter": 10.0,
-    "drag_coefficient": 0.5
-  }, {
-    "fraction": 0.904271,
-    "density": 2490.436982678561,
-    "stiffness_foreaft": 724885881564.0813,
-    "stiffness_sideside": 724885881564.0813,
-    "diameter": 10.0,
+    "fraction": 0.8912274086706145,
+    "diameter": 9.466323319248843,
+    "thickness": 0.011133470025252556,
     "drag_coefficient": 0.5
   }, {
     "fraction": 1.0,
-    "density": 1715.031343116859,
-    "stiffness_foreaft": 348984425373.3395,
-    "stiffness_sideside": 348984425373.3395,
-    "diameter": 6.5,
+    "diameter": 7.809674280299108,
+    "thickness": 0.008914883024937037,
     "drag_coefficient": 0.5
   }]
 }

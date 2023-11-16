@@ -40,7 +40,7 @@
   },
   "tower": {
     "discretization": {
-      "elasto": [10],
+      "elasto": [],
       "aero": [19]
     },
     "file": "./tower_floating.json"

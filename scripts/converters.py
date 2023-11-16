@@ -477,6 +477,7 @@ def convert_elastodyn_tower_file(
     filename_elastodyn, filename_elastodyn_tower, save_directory=None
 ):
     elastodyn_json = dict()
+    elastodyn_json["type"] = "cylinder"
     elastodyn_json["damping_coefficients"] = [0.02, 0.02, 0.02, 0.02]
 
     # elastodyn (general info)
@@ -512,22 +513,46 @@ def convert_elastodyn_tower_file(
     assert npoints != 0, "Could not find tower ElastoDyn info in given file."
     start_idx = 19
     fractions = list()
+
+    # assume basic steel properties and cylinder shape
+    young_modulus = 210e9
+    density = 7850
+    poisson_ratio = 0.3
+    options = {}
+    options["density"] = density
+    options["young_modulus"] = young_modulus
+    options["poisson_ratio"] = poisson_ratio
+    elastodyn_json["options"] = options
     for line in lines[start_idx : start_idx + npoints]:
         point = dict()
         words = line.split()
         point["fraction"] = float(words[0])
         fractions.append(point["fraction"])
-        point["density"] = float(words[1])
-        point["stiffness_foreaft"] = float(words[2])
-        point["stiffness_sideside"] = float(words[3])
+        density_linear = float(words[1])
+        inertia = float(words[2]) / young_modulus  # area moment of inertia
+        # inner
+        area_inner = (
+            (4 * np.pi * inertia - (density_linear / density) ** 2)
+            * (density / density_linear)
+            * 0.5
+        )
+        diameter_inner = np.sqrt(4 * area_inner / np.pi)
+        # outer
+        area_outer = density_linear / density + area_inner
+        diameter_outer = np.sqrt(4 * area_outer / np.pi)
+        point["diameter"] = diameter_outer
+        # thickness
+        thickness = 0.5 * (diameter_outer - diameter_inner)
+        point["thickness"] = thickness
+
+        point["drag_coefficient"] = 0.5  # cylinders
         points.append(point)
 
-    elastodyn_json["discretization_elasto"] = fractions
     elastodyn_json["reference_points"] = points
 
     # save to file
     if save_directory is not None:
-        fullpath = Path(save_directory) / filepath.with_suffix(".json")
+        fullpath = Path(save_directory) / "tower.json"
         save_json(elastodyn_json, fullpath)
 
     return elastodyn_json
@@ -780,7 +805,7 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                     tower_elasto_json = convert_elastodyn_tower_file(
                         filename_elastodyn=path_ED,
                         filename_elastodyn_tower=path_ED_tower,
-                        save_directory=None,
+                        save_directory=save_directory,
                     )
                     if blade_elasto_json is None:
                         blade_elasto_json = convert_elastodyn_blade_file(
@@ -825,13 +850,6 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                 # ServoDyn
                 elif words[1] == "ServoFile":
                     path_servo = filedir / words[0].replace('"', "")
-
-        # tower
-        tower_json = merge_elastodyn2aerodyn_tower(
-            elastodyn_json=tower_elasto_json,
-            aerodyn_json=tower_aero_json,
-            save_directory=save_directory,
-        )
 
         # rna
         rna_json = convert_elastodyn_rna_file(
@@ -926,8 +944,8 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
             },
             "tower": {
                 "discretization": {
-                    "elasto": tower_elasto_json["discretization_elasto"],
-                    "aero": tower_aero_json["discretization_aero"],
+                    "elasto": [],
+                    "aero": [],
                 },
                 "file": str(Path("./tower.json")),
             },
