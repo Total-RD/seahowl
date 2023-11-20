@@ -4,6 +4,7 @@
 #include "seahowl/elasto/entities_elasto.h"
 #include "seahowl/elasto/chrono_adapters.h"
 #include "seahowl/elasto/floater_elasto.h"
+#include "seahowl/env/wave_models.h"
 
 #include <string>
 
@@ -12,11 +13,11 @@
 namespace seahowl {
 namespace hydro {
 
+/**
+ * @brief HydroChrono adapter for floater class.
+ */
 class FloaterHydroChrono : public elasto::FloaterElasto {
   public:
-    /** @brief Waves (HydroChrono). */
-    std::shared_ptr<WaveBase> waves;
-
     /**
      * @brief Constructor.
      */
@@ -37,7 +38,16 @@ class FloaterHydroChrono : public elasto::FloaterElasto {
      */
     void set_h5_filepath(std::string filepath);
 
+    /**
+     * @brief Sets waves used to compute hydro loads on floater.
+     *
+     * @param[in] waves Waves to attach to floater.
+     */
+    void set_waves(std::shared_ptr<WaveBase> waves);
+
   private:
+    /** @brief Waves (HydroChrono). */
+    std::shared_ptr<WaveBase> waves;
     /** @brief HydroChrono logic class. */
     std::unique_ptr<TestHydro> hydrochrono_setter;
     /** @brief Path to potential flow frequency data file (HDF5 format). */
@@ -45,4 +55,27 @@ class FloaterHydroChrono : public elasto::FloaterElasto {
 };
 
 }  // namespace hydro
+
+namespace env {
+
+/**
+ * @brief Class for HydroChrono waves.
+ */
+class WaveModelHydroChrono : public WaveModel {
+  public:
+    /** @brief Waves (HydroChrono). */
+    std::shared_ptr<WaveBase> waves;
+
+    /**
+     * @brief Constructor.
+     */
+    WaveModelHydroChrono();
+
+    virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
+    virtual double get_fluid_density(const Vector3d& position, double time) const override;
+    virtual bool is_in_water(const Vector3d& position, double time) const override;
+};
+
+}  // namespace env
+
 }  // namespace seahowl

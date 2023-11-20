@@ -770,9 +770,46 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
         auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
 
         // specific model options
-        if (sea_json.at("type").get<std::string>() == "still") {
+        auto sea_type = sea_json.at("type").get<std::string>();
+        if (sea_type == "still") {
             fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
-        } else if (sea_json.at("type").get<std::string>() == "current") {
+        } else if (sea_type == "HydroChrono" || sea_type == "hydrochrono") {
+#ifdef HAVE_HYDROCHRONO
+            fluid_model.wave_model = std::make_unique<seahowl::env::WaveModelHydroChrono>();
+            auto& wave_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
+            auto sea_options = sea_json.at("options");
+            auto wave_type = sea_options.at("type").get<std::string>();
+            if (wave_type == "still") {
+                wave_model.waves = std::make_shared<NoWave>();
+            } else if (wave_type == "regular") {
+                auto hydrochrono_waves = std::make_shared<RegularWave>();
+                wave_model.waves = hydrochrono_waves;
+                hydrochrono_waves->regular_wave_amplitude_ = sea_options.at("wave_height").get<double>() / 2.0;
+                hydrochrono_waves->regular_wave_omega_ = 2 * PI / sea_options.at("wave_period").get<double>();
+            } else if (wave_type == "irregular") {
+                auto params = IrregularWaveParams();
+                sea_options.at("num_bodies").get_to(params.num_bodies_);
+                sea_options.at("wave_height").get_to(params.wave_height_);
+                sea_options.at("wave_period").get_to(params.wave_period_);
+                sea_options.at("frequency_min").get_to(params.frequency_min_);
+                sea_options.at("frequency_max").get_to(params.frequency_max_);
+                sea_options.at("nfrequencies").get_to(params.nfrequencies_);
+                sea_options.at("wave_period").get_to(params.wave_period_);
+                sea_options.at("peak_enhancement_factor").get_to(params.peak_enhancement_factor_);
+                sea_options.at("is_normalized").get_to(params.is_normalized_);
+                sea_options.at("seed").get_to(params.seed_);
+                sea_options.at("dt").get_to(params.simulation_dt_);
+                sea_options.at("duration").get_to(params.simulation_duration_);
+                params.ramp_duration_ = 0.0;
+                params.num_bodies_ = 1;
+                wave_model.waves = std::make_shared<IrregularWaves>(params);
+            } else {
+                throw std::runtime_error("Unrecognized wave type \"" + wave_type + "\" for HydroChrono.");
+            }
+#else
+            throw std::runtime_error("Must compile and enable HydroChrono dependency to use HydroChrono waves.");
+#endif
+        } else if (sea_type == "current") {
             fluid_model.wave_model = std::make_unique<seahowl::env::CurrentConstant>();
             auto& wave_model = dynamic_cast<seahowl::env::CurrentConstant&>(*fluid_model.wave_model);
             auto sea_options = sea_json.at("options");
@@ -782,7 +819,7 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
             sea_options.at("velocity_seabed").get_to(wave_model.velocity_seabed);
         } else {
             throw std::runtime_error(
-                "The input sea type is unknown. Please use the existing current types: still, current.");
+                "The input sea type is unknown. Please use the existing current types: still, current, HydroChrono.");
         }
 
         // general wave model options
@@ -887,6 +924,21 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
 
         // get ref to turbine added last
         auto& turbine = *system_core.turbines.back();
+
+#ifdef HAVE_HYDROCHRONO
+        try {
+            auto& turbine_floating = dynamic_cast<seahowl::core::TurbineFloating&>(turbine);
+            auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine_floating.elasto.floater);
+            try {
+                auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
+                auto& waves_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
+                floater.set_waves(waves_model.waves);
+            } catch (const std::bad_cast& e) {
+                throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
+            }
+        } catch (const std::bad_cast& e) {
+        }
+#endif
 
 #ifdef HAVE_AERODYN
         try {

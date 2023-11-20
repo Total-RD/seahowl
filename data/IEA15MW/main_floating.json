@@ -23,7 +23,7 @@
     "log_level": "info"
   },
   "environment": {
-    "file": "./environment.json"
+    "file": "./environment_hydrochrono.json"
   },
   "turbines": [
     {
