@@ -6,9 +6,6 @@ find_library(INFLOWWIND_LIBRARY
   PATHS ${PC_INFLOWWIND_LIBRARY_DIRS}
 )
 
-include(SelectLibraryConfigurations)
-select_library_configurations(INFLOWWIND)
-
 set(PC_INFLOWWIND_VERSION "0.1.0")
 
 include(FindPackageHandleStandardArgs)

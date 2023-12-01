@@ -6,9 +6,6 @@ find_library(AERODYN_LIBRARY
   PATHS ${PC_AERODYN_LIBRARY_DIRS}
 )
 
-include(SelectLibraryConfigurations)
-select_library_configurations(AERODYN)
-
 set(PC_AERODYN_VERSION "1.0.0") #${PC_AERODYN_VERSION})
 
 include(FindPackageHandleStandardArgs)
