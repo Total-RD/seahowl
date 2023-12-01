@@ -75,11 +75,34 @@ void InflowWindLib::SetIFWINFILE(std::string name) {
                 spdlog::trace("InflowWind: modified path to file to be relative:");
                 spdlog::trace("    from: {}", line_before);
                 spdlog::trace("    to: {}", line);
+                if (type_lowercase == "filename_uni") {
+                    // add wnd file if filename_uni
+                    if (insertoffset == 1) {
+                        // remove quotes
+                        words[0].erase(words[0].length() - 1, 1);
+                        words[0].erase(0, 1);
+                    }
+                    SetWNDINFILE((DATADIR / words[0]).string());
+                }
             };
         }
         IfWinputFileString += line + '\0';
     }
     IfWinputFileStringLength = IfWinputFileString.length();
+    file.close();
+}
+
+void InflowWindLib::SetWNDINFILE(std::string name) {
+    spdlog::info("Set wind.wnd INFILE: {}.", name);
+    std::ifstream file(name);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open wind.wnd input file.");
+    }
+    std::string line;
+    while (std::getline(file, line)) {
+        InputUniformString += line + '\0';
+    }
+    InputUniformStringLength = InputUniformString.length();
     file.close();
 }
 

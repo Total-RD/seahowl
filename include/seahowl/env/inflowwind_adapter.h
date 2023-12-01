@@ -49,6 +49,7 @@ struct InflowWindLib {
     float* Velocity;
 
     void SetIFWINFILE(std::string name);
+    void SetWNDINFILE(std::string name);
     void CheckError();
 
     void SetTimeStep(double dt);
