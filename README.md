@@ -137,7 +137,6 @@ It is a JSON dictionary containing:
   "type": "inflowwind",
   "options": {
      "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat",
-     "file_windwnd": "./aerodyn/long_step_wind.wnd"
   }
 }
 ```

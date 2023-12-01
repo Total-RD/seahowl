@@ -49,7 +49,6 @@ struct InflowWindLib {
     float* Velocity;
 
     void SetIFWINFILE(std::string name);
-    void SetWNDINFILE(std::string name);
     void CheckError();
 
     void SetTimeStep(double dt);
@@ -93,7 +92,7 @@ class InflowWindAdapter : public WindModel {
   public:
     std::unique_ptr<InflowWindLib> pImpl;
 
-    InflowWindAdapter(std::string InflowInfile, std::string WindWndfile);
+    InflowWindAdapter(std::string InflowInfile);
     ~InflowWindAdapter();
 
     void end();

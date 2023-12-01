@@ -835,19 +835,13 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
         spdlog::info("Inflow model: InflowWind.");
 #ifdef HAVE_INFLOWWIND
         std::string inflowwind_filepath;
-        std::string windwnd_filepath;
         auto wind_options = wind_json.at("options");
         if (wind_options.contains("file_inflowwind")) {
             inflowwind_filepath = (DATADIR / wind_options.at("file_inflowwind")).generic_string();
         } else {
             throw std::runtime_error("InflowWind file not defined.");
         }
-        if (wind_options.contains("file_windwnd")) {
-            windwnd_filepath = (DATADIR / wind_options.at("file_windwnd")).generic_string();
-        } else {
-            throw std::runtime_error("InflowWind input file (.wnd) not defined.");
-        }
-        wind_model_ptr = std::make_shared<seahowl::env::InflowWindAdapter>(inflowwind_filepath, windwnd_filepath);
+        wind_model_ptr = std::make_shared<seahowl::env::InflowWindAdapter>(inflowwind_filepath);
 #else
         throw std::runtime_error(
             "InflowWind module in CMAKE options should be enabled if wind type 'inflowwind' selected.");

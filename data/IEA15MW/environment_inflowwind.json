@@ -1,0 +1,28 @@
+﻿{
+  "gravity": [0.0, 0.0, -9.81],
+  "wind": {
+    "type": "inflowwind",
+    "options": {
+       "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat"
+    }
+  },
+  "sea": {
+    "type": "current",
+    "water_density": 1025,
+    "mean_water_level": 0.0,
+    "water_depth": 200.0,
+    "options": {
+      "direction": [1.0, 0.0],
+      "velocity_surface": 0.0,
+      "velocity_seabed": 0.0
+    }
+  },
+  "soil": {
+    "type": "linear",
+    "options": {
+      "stiffness_normal": 1e5,
+      "stiffness_shear": 0.0,
+      "soil_position": -200.0
+    }
+  }
+}
