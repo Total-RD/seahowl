@@ -3,7 +3,9 @@
 #include <pybind11/eigen.h>
 
 #include <seahowl/env/wind_models.h>
-#include <seahowl/env/inflowwind_adapter.h>
+#ifdef HAVE_INFLOWWIND
+    #include <seahowl/env/inflowwind_adapter.h>
+#endif
 
 namespace py = pybind11;
 
@@ -40,8 +42,10 @@ void initialize_pyseahowl_env(py::module& m) {
         .def_readwrite("wind_velocity_start", &seahowl::env::WindRamp::wind_velocity_start)
         .def_readwrite("wind_velocity_end", &seahowl::env::WindRamp::wind_velocity_end);
 
+#ifdef HAVE_INFLOWWIND
     // env/infflowwind_adapter.h
     py::class_<seahowl::env::InflowWindAdapter, std::shared_ptr<seahowl::env::InflowWindAdapter>,
                seahowl::env::FluidModel>(m_aero, "InflowWindAdapter")
         .def(py::init<std::string&>());
+#endif
 }

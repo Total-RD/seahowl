@@ -19,7 +19,9 @@
 #include "seahowl/env/wave_models.h"
 #include "seahowl/env/soil_models.h"
 #include "seahowl/env/combined_models.h"
-#include "seahowl/env/inflowwind_adapter.h"
+#ifdef HAVE_INFLOWWIND
+    #include "seahowl/env/inflowwind_adapter.h"
+#endif
 #include "seahowl/aero/airfoil.h"
 #include "seahowl/aero/blade_aero.h"
 #include "seahowl/aero/rotor_aero.h"
