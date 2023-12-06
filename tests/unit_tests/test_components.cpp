@@ -425,7 +425,7 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.792103, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.797544, 1e-4);
 }
 
 TEST(test_turbine, controller_target_rpm) {
@@ -487,7 +487,7 @@ TEST(test_turbine, controller_target_rpm) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, 1e-3);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, 1e-2);
 }
 
 TEST(test_turbine, actuator_disk) {

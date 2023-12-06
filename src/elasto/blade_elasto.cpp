@@ -187,8 +187,33 @@ BladeElastoRigid::BladeElastoRigid() {}
 
 void BladeElastoRigid::build() {
     body_root = std::make_unique<BodyElastoChrono>();
-    // body_root->set_mass(0.0);
     length = reference_points.back().coordinates.z();
+
+    // calculate mass
+    double mass_total = 0.0;
+    double inertia_total = 0.0;
+    for (int ii = 0; ii < reference_points.size() - 1; ii++) {
+        auto& point1 = reference_points[ii];
+        auto& point2 = reference_points[ii + 1];
+        auto rho1 = point1.mass_matrix(2, 2);
+        auto rho2 = point2.mass_matrix(2, 2);
+        auto l1 = point1.coordinates.z();
+        auto l2 = point2.coordinates.z();
+        auto length_segment = abs(l2 - l1);
+
+        // mass of blade segment
+        mass_total += 0.5 * (rho1 + rho2) * length_segment;
+
+        // inertia assuming rod element with non-uniform linear density
+        inertia_total += ((pow(l2, 4) - pow(l1, 4)) / 4.0 * (rho2 - rho1) +
+                          (pow(l2, 3) - pow(l1, 3)) / 3.0 * (rho1 * l2 - rho2 * l1)) /
+                         length_segment;
+    };
+
+    // set mass and inertia at root
+    body_root->set_mass(mass_total);
+    // inertia of blade calculated from body root for rotation along local x and y
+    body_root->set_inertia_diagonal(Vector3d(inertia_total, inertia_total, 0.0));
 }
 
 void BladeElastoRigid::assemble(SystemElasto& system) {
@@ -211,7 +236,7 @@ void BladeElastoRigid::translate(const Vector3d& translation_vector) const {
 }
 
 double BladeElastoRigid::get_mass() const {
-    return mass;
+    return body_root->get_mass();
 }
 
 void BladeElastoRigid::apply_pitch_increment(double pitch_increment) {
