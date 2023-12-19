@@ -41,7 +41,7 @@ using std::filesystem::path;
 using std::filesystem::create_directory;
 using std::filesystem::remove_all;
 
-void output_results(seahowl::core::System& system_core) {
+void output_results(const seahowl::core::System& system_core, const std::string& output_folder) {
     // output
     auto& turbine = *system_core.turbines[0];
 
@@ -60,7 +60,7 @@ void output_results(seahowl::core::System& system_core) {
     spdlog::info(output_sstring.str());
 
     // output info in file
-    write_turbine_info_to_csv("./output/output", system_core);
+    write_turbine_info_to_csv(output_folder + "./output", system_core);
 }
 
 void run_simulation(int argc, char* argv[]) {
@@ -78,15 +78,34 @@ void run_simulation(int argc, char* argv[]) {
 
     auto DATADIR = absolute(path(u8"../data"));
     auto logoname = (DATADIR / ".." / "doc" / "source" / "totalenergies_alpha.png").generic_string();
-    // outputs
-    remove_all("./output");
-    create_directory("./output");
 
     // path of main input file
     auto filepath_main = DATADIR / "IEA15MW/main.json";
     if (argc > 1) {
         filepath_main = absolute(path(argv[1]));
     }
+    // get main file info
+    std::ifstream json_file(filepath_main.generic_string());
+    json json_obj;
+    json_file >> json_obj;
+    json_file.close();
+
+    // NUMERICS options
+    auto num_json = json_obj.at("numerics");
+    // timestepping
+    auto dt = num_json.at("dt").get<double>();
+    auto t_end = num_json.at("t_end").get<double>();
+    // outputs
+    auto outputs_json = json_obj.at("outputs");
+    auto dt_outputs = outputs_json.at("dt").get<double>();
+    auto output_vtk = outputs_json.at("VTK").get<bool>();
+    std::string output_folder = "./output";
+    if (outputs_json.contains("folder")) {
+        output_folder = outputs_json.at("folder").get<std::string>();
+    }
+
+    // outputs
+    fs::create_directories(output_folder);
 
     // system elasto
     auto system_elasto = seahowl::elasto::SystemElastoChrono();
@@ -103,40 +122,25 @@ void run_simulation(int argc, char* argv[]) {
     initialize_system_from_json(filepath_main.generic_string(), system_core);
     spdlog::debug("Fully initialized system.");
 
-    // get main file info
-    std::ifstream json_file(filepath_main.generic_string());
-    json json_obj;
-    json_file >> json_obj;
-    json_file.close();
-
-    // NUMERICS options
-    auto num_json = json_obj.at("numerics");
-    // timestepping
-    double dt = num_json.at("dt").get<double>();
-    double t_end = num_json.at("t_end").get<double>();
-    // outputs
-    auto outputs_json = json_obj.at("outputs");
-    double dt_outputs = outputs_json.at("dt").get<double>();
-    bool output_vtk = outputs_json.at("VTK").get<bool>();
-
 #ifdef HAVE_VTK
     std::vector<OutputMeshVTK> vtk_outputs;
     if (output_vtk) {
         for (auto [turbine_ptr, idx_turbine] = std::tuple{system_core.turbines.begin(), 0};
              turbine_ptr != system_core.turbines.end(); turbine_ptr++, idx_turbine++) {
             auto& turbine = *turbine_ptr;
-            create_directory("./output/vtk");
+            auto output_folder_vtk = output_folder + "/vtk";
+            create_directory(output_folder_vtk);
             for (auto [blade_ptr, idx_blade] = std::tuple{turbine->rna.blades.begin(), 0};
                  blade_ptr != turbine->rna.blades.end(); blade_ptr++, idx_blade++) {
                 auto& blade = *blade_ptr;
                 auto& post_blade =
                     vtk_outputs.emplace_back(dynamic_cast<seahowl::elasto::BladeElastoFEA&>(blade->elasto));
-                post_blade.initialize(
-                    ("./output/vtk/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
-                        .c_str());
+                post_blade.initialize((output_folder_vtk + "/turbine" + std::to_string(idx_turbine) + "_blade" +
+                                       std::to_string(idx_blade))
+                                          .c_str());
             }
             auto& post_tower = vtk_outputs.emplace_back(turbine->tower.elasto);
-            post_tower.initialize(("./output/vtk/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
+            post_tower.initialize((output_folder_vtk + "/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
         }
     }
 #endif
@@ -157,7 +161,7 @@ void run_simulation(int argc, char* argv[]) {
 #endif
 
     int step = 0;
-    output_results(system_core);
+    output_results(system_core, output_folder);
 #ifdef HAVE_VTK
     if (output_vtk) {
         for (auto const& vtk_output : vtk_outputs) {
@@ -187,7 +191,7 @@ void run_simulation(int argc, char* argv[]) {
         // output
         if (system_core.get_time() >= (time_outputs - 1e-6)) {
             spdlog::info("time: {:.6}s, step: {}, stopwatch: {:.3}s", system_core.get_time(), step, sw_total);
-            output_results(system_core);
+            output_results(system_core, output_folder);
 #ifdef HAVE_VTK
             if (output_vtk) {
                 for (auto const& vtk_output : vtk_outputs) {

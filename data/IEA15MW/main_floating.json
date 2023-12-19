@@ -18,6 +18,7 @@
   },
   "outputs": {
     "dt": 0.1,
+    "folder": "./output",
     "VTK": false,
     "log_level": "info"
   },

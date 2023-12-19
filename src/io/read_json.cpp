@@ -606,7 +606,7 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
 
     // controller
     if (controller_json.at("type").get<std::string>() == "DISCON") {
-        auto OUTPUT_CONTROLLER_DIR = path("./output/dynlib_copies");
+        auto OUTPUT_CONTROLLER_DIR = path("./dynlib_copies");
         if (!controller_json.at("options").contains("libfile")) {
             throw std::runtime_error("Need to define path to libfile for DISCON routine.");
         }
@@ -886,6 +886,10 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
 
     // outputs
     auto outputs_json = json_obj.at("outputs");
+    std::string output_folder = "./output";
+    if (outputs_json.contains("folder")) {
+        output_folder = outputs_json.at("folder").get<std::string>();
+    }
     // logging
     auto log_level = outputs_json.at("log_level").get<std::string>();
     seahowl::set_log_level_global(log_level);
