@@ -1,6 +1,10 @@
 ﻿{
+  "type": "HydroChrono",
+  "options": {
+    "file": "./VolturnUS.h5"
+  },
+  "position": [0.0, 0.0, -14.94],
   "mass": 17839e3,
-  "cog": [0.0, 0.0, -14.94],
   "inertia": [
     [1.251e10, 0.0, 0.0],
     [0.0, 1.251e10, 0.0],
@@ -14,11 +18,18 @@
     [-8.918e6, 0.0, 0.0, 0.0, 1.676e10, 0.0],
     [0.0, 0.0, 0.0, 0.0, 0.0, 4.798e10]
   ],
-  "type": "HydroChrono",
-  "options": {
-    "file": "./VolturnUS.h5",
-    "name": "body1"
-  },
+  "bodies": [
+    {
+      "name": "body1",
+      "position": [0.0, 0.0, -14.94],
+      "mass": 0.0,
+      "inertia": [
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0]
+      ]
+    }
+  ],
   "moorings": [
     {
       "connected_body_name": "body1",

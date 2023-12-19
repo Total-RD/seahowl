@@ -238,9 +238,6 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("get_fairlead_link", &seahowl::elasto::FloaterElasto::get_fairlead_link,
              py::return_value_policy::reference_internal)
         .def("get_fairlead_body", &seahowl::elasto::FloaterElasto::get_fairlead_body,
-             py::return_value_policy::reference_internal)
-        .def("set_tower_connection_body_name", &seahowl::elasto::FloaterElasto::set_tower_connection_body_name)
-        .def("get_tower_connection_body", &seahowl::elasto::FloaterElasto::get_tower_connection_body,
              py::return_value_policy::reference_internal);
 
     // elasto/mooring_elasto.h

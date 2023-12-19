@@ -423,6 +423,30 @@ void add_turbine_to_system_from_json(const std::string& filepath,
     turbine->build();
 }
 
+auto populate_body_from_json(const json& body_json, seahowl::elasto::BodyElasto& body) {
+    body.set_mass(body_json.at("mass").get<double>());
+    auto body_position = body_json.at("position").get<std::vector<double>>();
+    if (body_position.size() != 3) {
+        throw std::runtime_error("Position of body should be a vector of length 3.");
+    }
+    body.set_position(Vector3d(body_position[0], body_position[1], body_position[2]));
+    // inertia body
+    auto body_inertia = body_json.at("inertia").get<std::vector<std::vector<double>>>();
+    if (body_inertia.size() != 3) {
+        throw std::runtime_error("Inertia matrix of body should be 3x3.");
+    }
+    Eigen::Matrix<double, 3, 3> body_inertia_matrix;
+    for (int row = 0; row < 3; row++) {
+        if (body_inertia[row].size() != 3) {
+            throw std::runtime_error("Inertia matrix of body should be 3x3.");
+        }
+        for (int col = 0; col < 3; col++) {
+            body_inertia_matrix(row, col) = body_inertia[row][col];
+        }
+    }
+    body.set_inertia_matrix(body_inertia_matrix);
+}
+
 void populate_turbine_from_json(const std::string& filepath,
                                 seahowl::core::Turbine& turbine,
                                 const std::string& output_folder) {
@@ -642,40 +666,25 @@ void populate_turbine_from_json(const std::string& filepath,
             auto floater_options = json_obj_floater.at("options");
             // add h5file path
             floater.set_h5_filepath((DATADIR / floater_options.at("file").get<std::string>()).generic_string());
-            // make body
-            auto body_name = floater_options.at("name").get<std::string>();
-            floater.add_body(body_name);
-            // position body
-            auto& body = floater.get_body(body_name);
-            body.set_mass(json_obj_floater.at("mass").get<double>());
-            auto body_position = json_obj_floater.at("cog").get<std::vector<double>>();
-            if (body_position.size() != 3) {
-                throw std::runtime_error("COG of floater should be a vector of length 3.");
+            // get main body info
+            auto& body = *floater.body_main;
+            populate_body_from_json(json_obj_floater, body);
+            // get other bodies info
+            auto bodies_json = json_obj_floater.at("bodies");
+            for (auto& body_json : bodies_json) {
+                auto body_name = body_json.at("name").get<std::string>();
+                floater.add_body(body_name);
+                populate_body_from_json(body_json, floater.get_body(body_name));
             }
-            body.set_position(Vector3d(body_position[0], body_position[1], body_position[2]));
-            // inertia body
-            auto body_inertia = json_obj_floater.at("inertia").get<std::vector<std::vector<double>>>();
-            if (body_inertia.size() != 3) {
-                throw std::runtime_error("Inertia matrix of floater should be 3x3.");
-            }
-            Eigen::Matrix<double, 3, 3> body_inertia_matrix;
-            for (int row = 0; row < 3; row++) {
-                if (body_inertia[row].size() != 3) {
-                    throw std::runtime_error("Inertia matrix of floater should be 3x3.");
-                }
-                for (int col = 0; col < 3; col++) {
-                    body_inertia_matrix(row, col) = body_inertia[row][col];
-                }
-            }
-            body.set_inertia_matrix(body_inertia_matrix);
 
             auto dm = json_obj_floater.at("damping_matrix").get<std::vector<std::vector<double>>>();
             if (dm.size() != 6) {
-                throw std::runtime_error("Viscous damping matrix for floater has to be defined as 6x6 matrices.");
+                throw std::runtime_error("Viscous damping matrix for floater body has to be defined as 6x6 matrices.");
             }
             for (int irow = 0; irow < 6; irow++) {
                 if (dm[irow].size() != 6) {
-                    throw std::runtime_error("Viscous damping matrix for floater has to be defined as 6x6 matrices.");
+                    throw std::runtime_error(
+                        "Viscous damping matrix for floater body has to be defined as 6x6 matrices.");
                 }
                 for (int icol = 0; icol < 6; icol++) {
                     floater.damping_matrix(irow, icol) = dm[irow][icol];
@@ -703,7 +712,7 @@ void populate_turbine_from_json(const std::string& filepath,
                 auto fairlead_relative_position = seahowl::Vector3d(fpos[0], fpos[1], fpos[2]);
                 seahowl::Vector3d fairlead_position = rotation * fairlead_relative_position;
                 if (mooring_json.at("relative_fairlead").get<bool>()) {
-                    fairlead_position += floater.get_body(body_name).get_position();
+                    fairlead_position += floater.body_main->get_position();
                 }
                 floater.add_fairlead(fairlead_position, body_name);
                 auto& fairlead_body = floater.get_fairlead_body(body_name, floater.get_fairlead_count(body_name) - 1);
@@ -713,7 +722,7 @@ void populate_turbine_from_json(const std::string& filepath,
                 auto anchor_relative_position = seahowl::Vector3d(apos[0], apos[1], apos[2]);
                 seahowl::Vector3d anchor_position = rotation * anchor_relative_position;
                 if (mooring_json.at("relative_anchor").get<bool>()) {
-                    anchor_position += floater.get_body(body_name).get_position();
+                    anchor_position += floater.body_main->get_position();
                 }
                 turbine_floating.mooring_system->anchors.push_back(
                     std::make_shared<seahowl::elasto::BodyElastoChrono>());

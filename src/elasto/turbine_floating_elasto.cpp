@@ -18,7 +18,7 @@ void TurbineFloatingElasto::assemble(SystemElasto& system) {
         // assemble floater
         floater->assemble(system);
         // make floater-tower connection
-        auto& body_floater = floater->get_tower_connection_body();
+        auto& body_floater = *floater->body_main;
         auto& node_tower = *(tower.nodes.front().get());
         link_floater_tower->initialize(body_floater, node_tower);
         link_floater_tower->set_constraints(true, true, true, true, true, true);

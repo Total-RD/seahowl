@@ -6,10 +6,12 @@
 
 using namespace seahowl::elasto;
 
-FloaterElasto::FloaterElasto(){};
+FloaterElasto::FloaterElasto() {
+    body_main = std::make_unique<seahowl::elasto::BodyElastoChrono>();
+};
 
 void FloaterElasto::prestep(double time, double dt) {
-    auto& floater_body = get_tower_connection_body();
+    auto& floater_body = *body_main;
     floater_body.reset_loads();
 
     // apply viscous damping
@@ -99,6 +101,15 @@ void FloaterElasto::assemble(seahowl::elasto::SystemElasto& system) {
         auto& body = *bodymap.second;
         system.add(body);
     }
+    // link hydro bodies to body_main
+    // needs to happen after adding hydro bodies to system (HydroChrono requirement)
+    system.add(*body_main);
+    for (auto& bodymap : floater_bodies) {
+        auto& body = *bodymap.second;
+        auto link_cog = std::make_unique<seahowl::elasto::LinkChrono>();
+        link_cog->initialize(*body_main, body);
+        system.add(*link_cog);
+    }
     for (auto& fairleadmap : fairlead_bodies) {
         for (auto& fairlead : fairleadmap.second) {
             system.add(*fairlead);
@@ -107,24 +118,6 @@ void FloaterElasto::assemble(seahowl::elasto::SystemElasto& system) {
     for (auto& linkmap : fairlead_links) {
         for (auto& link : linkmap.second) {
             system.add(*link);
-        }
-    }
-}
-
-void FloaterElasto::set_tower_connection_body_name(const std::string& connected_body_name) {
-    tower_connection_name = connected_body_name;
-}
-
-seahowl::elasto::BodyElasto& FloaterElasto::get_tower_connection_body() const {
-    if (floater_bodies.size() < 1) {
-        throw std::runtime_error("Need to add at least one body to floater before connecting to tower.");
-    } else if (floater_bodies.size() == 1) {
-        return *(floater_bodies.begin()->second);
-    } else {
-        if (tower_connection_name == "") {
-            throw std::runtime_error("Need to set name of floater body that connects to tower.");
-        } else {
-            return *floater_bodies.at(tower_connection_name);
         }
     }
 }

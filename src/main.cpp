@@ -19,6 +19,8 @@ using json = nlohmann::json;
 #include <seahowl/aero/system_aero.h>
 #include <seahowl/core/blade.h>
 #include <seahowl/elasto/blade_elasto.h>
+#include <seahowl/core/turbine_floating.h>
+#include <seahowl/elasto/mooring_elasto.h>
 
 #include <filesystem>  // C++17
 #include <fstream>

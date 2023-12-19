@@ -14,6 +14,7 @@ class FloaterElasto : public ComponentElasto {
   public:
     /* @brief Damping matrix of floater.*/
     Eigen::Matrix<double, 6, 6> damping_matrix;
+    std::unique_ptr<seahowl::elasto::BodyElasto> body_main;
 
     /**
      * @brief Constructor.
@@ -73,18 +74,6 @@ class FloaterElasto : public ComponentElasto {
      * @param[in] index Index of fairlead.
      */
     virtual seahowl::elasto::Link& get_fairlead_link(const std::string& body_name, int index);
-
-    /**
-     * @brief Sets name of body that will be used for tower connection.
-     *
-     * @param[in] connected_body_name Name of the body to connect to the tower.
-     */
-    virtual void set_tower_connection_body_name(const std::string& connected_body_name);
-
-    /**
-     * @brief Returns body to connect to tower.
-     */
-    virtual seahowl::elasto::BodyElasto& get_tower_connection_body() const;
 
     /**
      * @brief Translates the floater.
