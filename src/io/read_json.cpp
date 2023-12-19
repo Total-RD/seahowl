@@ -1,4 +1,5 @@
 #include "seahowl/io/read_json.h"
+#include "seahowl/io/utils_io.h"
 #include "seahowl/io/read_rotor_perf.h"
 
 #include "seahowl/commons/utils.h"
@@ -53,42 +54,6 @@ using json = nlohmann::json;
 using seahowl::Vector3d;
 using seahowl::Vector2d;
 using seahowl::PI;
-
-/**@brief Copy file to destination dir, increment file name if already exists, and return path to new copid file.
- */
-std::string copy_file_and_increment(const std::string& filepath, std::string destination_dir) {
-    if (!fs::exists(destination_dir)) {
-        fs::create_directories(destination_dir);
-    }
-    path pfilepath = fs::path(filepath);
-    path filecopypath;
-    if (fs::exists(destination_dir / pfilepath.filename())) {
-        auto filename = pfilepath.stem().generic_string();
-        auto fileext = pfilepath.extension().generic_string();
-        bool copied = false;
-        int file_idx = 0;
-        while (!copied) {
-            filecopypath = fs::path(destination_dir) / (filename + std::to_string(file_idx) + fileext);
-            if (!fs::exists(filecopypath)) {
-                fs::copy(pfilepath, filecopypath);
-                pfilepath = filecopypath;
-                copied = true;
-            } else {
-                file_idx += 1;
-            }
-        }
-    } else {
-        filecopypath = destination_dir / pfilepath.filename();
-        fs::copy(pfilepath, filecopypath);
-    }
-    return filecopypath.generic_string();
-}
-
-void check_file_exists(const std::string& filepath) {
-    if (!fs::exists(filepath)) {
-        throw std::runtime_error("File \"" + filepath + "\" does not exist.");
-    }
-}
 
 json get_json_from_file(const std::string& filepath) {
     check_file_exists(filepath);
@@ -410,7 +375,9 @@ void populate_rna_from_json(const std::string& filepath, seahowl::core::RotorNac
     populate_rna_aero_from_json(filepath, rna.aero);
 }
 
-void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
+void add_turbine_to_system_from_json(const std::string& filepath,
+                                     seahowl::core::System& system_core,
+                                     const std::string& output_folder) {
     spdlog::debug("Adding turbine to system from " + filepath + " file.");
     auto json_obj = get_json_from_file(filepath);
 
@@ -449,10 +416,12 @@ void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core:
     system_core.turbines.push_back(turbine);
 
     // populate turbine
-    populate_turbine_from_json(filepath, *turbine);
+    populate_turbine_from_json(filepath, *turbine, output_folder);
 }
 
-void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turbine& turbine) {
+void populate_turbine_from_json(const std::string& filepath,
+                                seahowl::core::Turbine& turbine,
+                                const std::string& output_folder) {
     spdlog::debug("Populating turbine from " + filepath + " file.");
     auto json_obj = get_json_from_file(filepath);
 
@@ -606,16 +575,22 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
 
     // controller
     if (controller_json.at("type").get<std::string>() == "DISCON") {
-        auto OUTPUT_CONTROLLER_DIR = path("./dynlib_copies");
         if (!controller_json.at("options").contains("libfile")) {
             throw std::runtime_error("Need to define path to libfile for DISCON routine.");
         }
         auto libfilepath = path(DATADIR / controller_json.at("options").at("libfile"));
+
+        // copy libdiscon to temporary folder with new name in case there are several turbines
         check_file_exists(libfilepath.generic_string());
-        auto copyfilepath =
-            copy_file_and_increment(libfilepath.generic_string(), OUTPUT_CONTROLLER_DIR.generic_string());
-        turbine.controller = std::make_shared<seahowl::servo::ControllerDISCON>(
+        // first copy libdiscon to tmp folder
+        auto copyfilepath = copy_file_and_increment(libfilepath.generic_string(), output_folder + "/tmp");
+
+        // instantiate controller
+        auto controller = std::make_shared<seahowl::servo::ControllerDISCON>(
             (DATADIR / controller_json.at("options").at("infile")).generic_string(), copyfilepath);
+        controller->pImpl.output_folder = output_folder;
+        turbine.controller = controller;
+
     } else if (controller_json.at("type").get<std::string>() == "RPM") {
         if (!controller_json.at("options").contains("target_rpm")) {
             throw std::runtime_error("Need to define target RPM for RPM controller (target_rpm).");
@@ -905,7 +880,7 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
         // add turbine to system
         auto turbine_json = turbines_json[ii];
         auto filepath_turbine = (DATADIR / turbine_json.at("file").get<std::string>()).generic_string();
-        add_turbine_to_system_from_json(filepath_turbine, system_core);
+        add_turbine_to_system_from_json(filepath_turbine, system_core, output_folder);
 
         // get ref to turbine added last
         auto& turbine = *system_core.turbines.back();

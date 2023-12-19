@@ -1,6 +1,7 @@
 #include "seahowl/servo/controller_discon.h"
 
 #include "seahowl/core/turbine.h"
+#include "seahowl/io/utils_io.h"
 #include "seahowl/elasto/rotor_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 
@@ -8,6 +9,7 @@
 #include <string>
 #include <spdlog/spdlog.h>
 #include <filesystem>
+namespace fs = std::filesystem;
 #ifdef __unix__
     #include <dlfcn.h>
 #endif
@@ -408,14 +410,7 @@ not... IF (LocalVar%iStatus == 0) THEN LocalVar%BlPitch(1) = avrSWAP(4) LocalVar
 
     */
 
-/*
-
-
-auto* handler = dlopen("/home/tridelat/work/NREL/ROSCO/ROSCO/build/libdiscon.so");
-auto discon1 = dlsym(handler, "DISCON");
-*/
-
-void seahowl::servo::DisconController::Init(std::string libfile) {
+void seahowl::servo::DisconController::Init(const std::string& libfile) {
     // Load dynamic library and point to DISCON routine
 #ifdef __unix__
     void* handler = dlopen(libfile.c_str(), RTLD_LAZY);

@@ -27,6 +27,8 @@ struct DisconController {
     typedef void (*DISCON_routine)(float* avrSWAP, int* aviFAIL, char* accINFILE, char* avcOUTNAME, char* avcMSG);
     DISCON_routine DISCON;
 
+    std::string output_folder = "./output";
+
     float& m_time = avrSWAP[1];     ///<@brief Time
     float& m_dt = avrSWAP[2];       ///<@brief Time step
     float& m_pitch = avrSWAP[41];   ///<@brief Pitch return controller states
@@ -53,7 +55,7 @@ struct DisconController {
     /// <param name="omega">rotor speed</param>
     /// <param name="pitch">pitch collective</param>
     /// <param name="nblades">number of blades</param>
-    void Init(std::string libfile);
+    void Init(const std::string& libfile);
 
     /// <summary>
     /// Call the DISCON controller

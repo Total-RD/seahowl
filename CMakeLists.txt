@@ -278,8 +278,18 @@ endif(SEAHOWL_ENABLE_INFLOWWIND)
 source_group(env FILES ${SEAHOWL_ENV_SOURCES} ${SEAHOWL_ENV_HEADERS})
 
 # io
-set(SEAHOWL_IO_SOURCES src/io/read_json.cpp src/io/write_csv.cpp src/io/read_rotor_perf.cpp)
-set(SEAHOWL_IO_HEADERS include/seahowl/io/read_json.h include/seahowl/io/write_csv.h include/seahowl/io/read_rotor_perf.h)
+set(SEAHOWL_IO_SOURCES
+    src/io/read_json.cpp
+    src/io/write_csv.cpp
+    src/io/read_rotor_perf.cpp
+    src/io/utils_io.cpp
+)
+set(SEAHOWL_IO_HEADERS
+    include/seahowl/io/read_json.h
+    include/seahowl/io/write_csv.h
+    include/seahowl/io/read_rotor_perf.h
+    include/seahowl/io/utils_io.h
+)
 if(SEAHOWL_ENABLE_VTK)
     list(APPEND SEAHOWL_IO_SOURCES src/io/write_vtk.cpp)
     list(APPEND SEAHOWL_IO_HEADERS include/seahowl/io/write_vtk.h)
