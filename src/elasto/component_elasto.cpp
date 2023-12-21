@@ -111,21 +111,17 @@ void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
     auto load0 = load * weight0;
     auto node0 = element->nodes[0];
     // load in global reference
-    node0->set_force(node0->get_force() + load0, false);
-    // torque in node reference
-    node0->set_torque(node0->get_torque() +
-                          node0->get_rotation().inverse() * ((position + offset - node0->get_position()).cross(load0)),
-                      true);
+    node0->accumulate_force(load0, false);
+    // torque in global reference
+    node0->accumulate_torque((position + offset - node0->get_position()).cross(load0), false);
     // load on second node
     double weight1 = 0.5 * abs(eta + 1);
     auto load1 = load * weight1;
     auto node1 = element->nodes[1];
     // load in global reference
-    node1->set_force(node1->get_force() + load1, false);
-    // torque in node reference
-    node1->set_torque(node1->get_torque() +
-                          node1->get_rotation().inverse() * ((position + offset - node1->get_position()).cross(load1)),
-                      true);
+    node1->accumulate_force(load1, false);
+    // torque in global reference
+    node1->accumulate_torque((position + offset - node1->get_position()).cross(load1), false);
 }
 
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_positions() const {

@@ -28,7 +28,10 @@ BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
 
 Vector3d BladeNodeAero::get_offset_aero_absolute() const {
     auto& offset = properties.offset_aero;
-    auto offset3D = Vector3d(0.0, offset.y(), -offset.x());  // assumes offset in IEC coords
+    auto offset3D = Vector3d(offset.x(), offset.y(), 0.0);
+    // remove structural twist (offset aero is expressed with twist already applied
+    offset3D = AngleAxisd(properties.structural_twist, Vector3d(0.0, 0.0, 1.0)) * offset3D;
+    // apply rotation of node (includes twist + pitch)
     auto offset_absolute = rotation * offset3D;
     return offset_absolute;
 }

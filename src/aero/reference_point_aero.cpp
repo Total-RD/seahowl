@@ -12,6 +12,7 @@ BladeReferencePointAero BladeReferencePointAero::operator*(const double factor) 
     BladeReferencePointAero new_point = *this;
     new_point.fraction *= factor;
     new_point.coordinates *= factor;
+    new_point.offset_aero *= factor;
     new_point.chord *= factor;
     new_point.structural_twist *= factor;
     for (int ii = 0; ii < airfoil_properties.size(); ii++) {
@@ -24,6 +25,7 @@ BladeReferencePointAero BladeReferencePointAero::operator+(const BladeReferenceP
     BladeReferencePointAero new_point = *this;
     new_point.fraction += other.fraction;
     new_point.coordinates += other.coordinates;
+    new_point.offset_aero += other.offset_aero;
     new_point.chord += other.chord;
     new_point.structural_twist += other.structural_twist;
     for (int ii = 0; ii < airfoil_properties.size(); ii++) {
