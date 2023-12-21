@@ -14,7 +14,7 @@ AirfoilCoefficients AirfoilCoefficients::operator*(const double factor) const {
     // (and angles of attack should be the same for both airfoils)
     new_point.lift *= factor;
     new_point.drag *= factor;
-    new_point.added_mass *= factor;
+    new_point.moment *= factor;
     return new_point;
 }
 
@@ -24,7 +24,7 @@ AirfoilCoefficients AirfoilCoefficients::operator+(const AirfoilCoefficients& ot
     // (and angles of attack should be the same for both airfoils)
     new_point.lift += other.lift;
     new_point.drag += other.drag;
-    new_point.added_mass += other.added_mass;
+    new_point.moment += other.moment;
     return new_point;
 };
 
@@ -101,8 +101,7 @@ AirfoilCoefficients AirfoilProperties::find_coefficients(double alpha) {
             coefficients.alpha = coefficients_list[ii].alpha * weight1 + coefficients_list[ii + 1].alpha * weight2;
             coefficients.lift = coefficients_list[ii].lift * weight1 + coefficients_list[ii + 1].lift * weight2;
             coefficients.drag = coefficients_list[ii].drag * weight1 + coefficients_list[ii + 1].drag * weight2;
-            coefficients.added_mass =
-                coefficients_list[ii].added_mass * weight1 + coefficients_list[ii + 1].added_mass * weight2;
+            coefficients.moment = coefficients_list[ii].moment * weight1 + coefficients_list[ii + 1].moment * weight2;
             return coefficients;
         }
     }

@@ -174,6 +174,7 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
                 // get drag and lift coefficients
                 auto cl = coefficients.lift;
                 auto cd = coefficients.drag;
+                auto cm = coefficients.moment;
                 // projected to rotor local frame
                 double cos_phi = cos(phi);
                 double sin_phi = sin(phi);
@@ -185,11 +186,13 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
                 auto chord = node.properties.chord;
                 auto load_n = 0.5 * density * vel * vel * chord * cn;
                 auto load_t = 0.5 * density * vel * vel * chord * ct;
+                auto moment = 0.5 * density * vel * vel * chord * chord * cm;
 
                 // transform from local to global load
                 auto load_n_global = global_direction_normal * load_n;
                 auto load_t_global = global_direction_tangent * load_t;
                 auto load_global = load_n_global + load_t_global;
+                auto moment_global = global_direction_hub2node * moment;
 
                 // store load in global frame
                 node.load = load_global;
@@ -197,11 +200,14 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
                 node.wind_velocity_shadowed = wind_velocity;
                 node.relative_velocity_induced =
                     global_direction_normal * local_velocity.y() + global_direction_tangent * local_velocity.x();
+                // store moment in local frame
+                node.moment = moment_global;
             }
         }
         // update loads of blade
         for (int ii = 0; ii < blade->elements.size(); ii++) {
             blade->loads[ii] = blade->elements[ii].get_load();
+            blade->moments[ii] = blade->elements[ii].get_moment();
         }
     }
 }

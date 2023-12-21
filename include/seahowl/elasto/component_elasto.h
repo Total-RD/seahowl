@@ -122,11 +122,16 @@ class ComponentElastoFEA : public virtual ComponentElasto {
      * @brief Accumulates load on a given FEA element.
      *
      * @param[in] load Load vector to accumulate.
+     * @param[in] load Moment vector to accumulate.
      * @param[in] element_index Index of the element on which the load is accumulated.
      * @param[in] eta Abscissa of the element within the range [-1, +1], with -1 at node1 and +1 at node2.
      * @param[in] offset Offset from given abscissa along longitudinal axis of element.
      */
-    void accumulate_element_load(const Vector3d& load, int element_index, double eta, const Vector3d& offset);
+    void accumulate_element_load(const Vector3d& load,
+                                 const Vector3d& moment,
+                                 int element_index,
+                                 double eta,
+                                 const Vector3d& offset);
 
     /**
      * @brief Returns all nodes positions (global frame of reference).

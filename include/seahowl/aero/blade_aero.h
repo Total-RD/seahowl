@@ -22,6 +22,8 @@ namespace aero {
 struct BladeNodeAero : public EntityDynamicEigen {
     /** @brief Load calculated at node. */
     Vector3d load;
+    /** @brief Moment calculated at node. */
+    Vector3d moment;
     /** @brief Uninduced wind velocity at node. */
     Vector3d wind_velocity;
     /** @brief Tower-shadowed wind velocity at node. */
@@ -84,6 +86,11 @@ struct BladeElementAero {
     Vector3d get_load() const;
 
     /**
+     * @brief Returns integrated moment at center of element.
+     */
+    Vector3d get_moment() const;
+
+    /**
      * @brief Get position of center of element.
      */
     Vector3d get_position() const;
@@ -119,6 +126,8 @@ class BladeAero {
     std::vector<BladeElementAero> elements;
     /** @brief Loads at center of blade elements. */
     std::vector<Vector3d> loads;
+    /** @brief Loads at center of blade elements. */
+    std::vector<Vector3d> moments;
     /** @brief Initial azimuth of the blade relative to rotor azimuth (in radians). */
     double azimuth0 = 0.0;
     /** @brief Pitch of the blade (in radians). */

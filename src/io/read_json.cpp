@@ -143,11 +143,14 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
         }
         reference_point.fraction = coords[2] / blade_length;
         reference_point.coordinates = Vector3d(coords[0], coords[1], coords[2]);
+        reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
         if (point.contains("offset_aero")) {
             auto oa = point.at("offset_aero").get<std::vector<double>>();
-            reference_point.offset_aero = Vector2d(oa[0], oa[1]);
+            // remove structural twist (offset aero is expressed with twist already applied)
+            auto offset3D = seahowl::AngleAxisd(reference_point.structural_twist, Vector3d(0.0, 0.0, 1.0)) *
+                            Vector3d(oa[0], oa[1], 0.0);
+            reference_point.offset_aero = Vector2d(offset3D[0], offset3D[1]);
         }
-        reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
 
         if (point.contains("chord")) {
             reference_point.chord = point["chord"];
@@ -176,7 +179,7 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
                     coefficients.alpha = coeffs[kk][0];
                     coefficients.lift = coeffs[kk][1];
                     coefficients.drag = coeffs[kk][2];
-                    coefficients.added_mass = coeffs[kk][3];
+                    coefficients.moment = coeffs[kk][3];
                     coefficients_list.push_back(coefficients);
                 }
                 seahowl::aero::AirfoilProperties airfoil;

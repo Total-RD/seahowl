@@ -29,8 +29,6 @@ BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
 Vector3d BladeNodeAero::get_offset_aero_absolute() const {
     auto& offset = properties.offset_aero;
     auto offset3D = Vector3d(offset.x(), offset.y(), 0.0);
-    // remove structural twist (offset aero is expressed with twist already applied
-    offset3D = AngleAxisd(properties.structural_twist, Vector3d(0.0, 0.0, 1.0)) * offset3D;
     // apply rotation of node (includes twist + pitch)
     auto offset_absolute = rotation * offset3D;
     return offset_absolute;
@@ -44,6 +42,10 @@ BladeElementAero::BladeElementAero(const BladeNodeAero& node1, const BladeNodeAe
 
 Vector3d BladeElementAero::get_load() const {
     return 0.5 * (node1.load + node2.load) * length;
+}
+
+Vector3d BladeElementAero::get_moment() const {
+    return 0.5 * (node1.moment + node2.moment) * length;
 }
 
 Vector3d BladeElementAero::get_position() const {
@@ -96,6 +98,7 @@ void BladeAero::build() {
     for (int ii = 0; ii < discretized_points.size() - 1; ii++) {
         elements.push_back(BladeElementAero(nodes[ii], nodes[ii + 1]));
         loads.push_back(Vector3d(0.0, 0.0, 0.0));
+        moments.push_back(Vector3d(0.0, 0.0, 0.0));
     }
 
     // get distance from tip

@@ -291,6 +291,7 @@ void NodeElastoChrono::set_torque(const Vector3d& torque, bool is_local) {
     if (is_local) {
         chobj->SetTorque(vec_iec2ch(torque));
     } else {
+        // chobj->SetTorque(chobj->TransformDirectionParentToLocal(vec2ch(torque)));
         chobj->SetTorque(vec_iec2ch(get_rotation().inverse() * torque));
     }
 }

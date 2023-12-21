@@ -17,8 +17,8 @@ struct AirfoilCoefficients {
     double lift = 0.0;
     /** @brief Drag coefficient (Cd). */
     double drag = 0.0;
-    /** @brief Added mass coefficient. */
-    double added_mass = 0.0;
+    /** @brief Moment coefficient. */
+    double moment = 0.0;
 
     /**
      * @brief Constructor.

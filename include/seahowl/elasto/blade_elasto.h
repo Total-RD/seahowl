@@ -44,6 +44,7 @@ class BladeElasto : public virtual ComponentElasto {
     virtual EntityDynamicEigen get_entity_along_blade(double eta, int element_index = 0) const = 0;
 
     virtual void accumulate_load_along_blade(const Vector3d& load,
+                                             const Vector3d& moment,
                                              int element_index,
                                              double eta,
                                              const Vector3d& offset) = 0;
@@ -90,6 +91,7 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
     virtual Vector3d get_blade_root_moment() const override;
     virtual EntityDynamicEigen get_entity_along_blade(double eta, int element_index = 0) const override;
     virtual void accumulate_load_along_blade(const Vector3d& load,
+                                             const seahowl::Vector3d& moment,
                                              int element_index,
                                              double eta,
                                              const Vector3d& offset) override;
@@ -137,6 +139,7 @@ class BladeElastoRigid : public BladeElasto {
     virtual EntityDynamicEigen get_entity_along_blade(double eta, int element_index = 0) const override;
     virtual void reset_loads() override;
     virtual void accumulate_load_along_blade(const Vector3d& load,
+                                             const seahowl::Vector3d& moment,
                                              int element_index,
                                              double eta,
                                              const Vector3d& offset) override;

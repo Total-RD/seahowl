@@ -172,10 +172,11 @@ seahowl::EntityDynamicEigen BladeElastoFEA::get_entity_along_blade(double eta, i
 }
 
 void BladeElastoFEA::accumulate_load_along_blade(const seahowl::Vector3d& load,
+                                                 const seahowl::Vector3d& moment,
                                                  int element_index,
                                                  double eta,
                                                  const seahowl::Vector3d& offset) {
-    accumulate_element_load(load, element_index, eta, offset);
+    accumulate_element_load(load, moment, element_index, eta, offset);
 }
 
 void BladeElastoFEA::attach_root_to_body(const BodyElasto& body) {
@@ -295,6 +296,7 @@ void BladeElastoRigid::reset_loads() {
 }
 
 void BladeElastoRigid::accumulate_load_along_blade(const seahowl::Vector3d& load,
+                                                   const seahowl::Vector3d& moment,
                                                    int element_index,
                                                    double eta,
                                                    const seahowl::Vector3d& offset) {
@@ -304,8 +306,7 @@ void BladeElastoRigid::accumulate_load_along_blade(const seahowl::Vector3d& load
     // apply moment on root
     auto entity = get_entity_along_blade(eta, element_index);
     auto distance = (entity.get_position() + offset - body_root->get_position());
-    auto moment = distance.cross(load);
-    body_root->accumulate_torque(moment, false);
+    body_root->accumulate_torque(moment + distance.cross(load), false);
 }
 
 void BladeElastoRigid::attach_root_to_body(const BodyElasto& body) {

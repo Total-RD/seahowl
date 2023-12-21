@@ -97,7 +97,7 @@ void Blade::update_loads_elasto() {
                                  std::to_string(mapping_aero2elasto_elements.size()) + ") do not match.");
     }
     for (int ii = 0; ii < aero.loads.size(); ii++) {
-        elasto.accumulate_load_along_blade(aero.loads[ii], mapping_aero2elasto_elements[ii].index,
+        elasto.accumulate_load_along_blade(aero.loads[ii], aero.moments[ii], mapping_aero2elasto_elements[ii].index,
                                            mapping_aero2elasto_elements[ii].eta,
                                            aero.elements[ii].get_offset_aero_absolute());
     }
