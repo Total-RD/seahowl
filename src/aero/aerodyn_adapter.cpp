@@ -454,10 +454,12 @@ void seahowl::aero::RotorAeroDyn::compute_aero_loads(const seahowl::env::FluidMo
             // store load in global frame
             int pp = (count_blade * (blade->elements.size() + 1) + count_node) * 6;
             node.load = Vector3d(loads_aerodyn[pp], loads_aerodyn[pp + 1], loads_aerodyn[pp + 2]);
+            node.moment = Vector3d(loads_aerodyn[pp + 3], loads_aerodyn[pp + 4], loads_aerodyn[pp + 5]);
         }
         // update loads of blade
         for (int ii = 0; ii < blade->elements.size(); ii++) {
             blade->loads[ii] = blade->elements[ii].get_load();
+            blade->moments[ii] = blade->elements[ii].get_moment();
         }
     }
 }

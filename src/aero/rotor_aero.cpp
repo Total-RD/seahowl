@@ -200,7 +200,7 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
                 node.wind_velocity_shadowed = wind_velocity;
                 node.relative_velocity_induced =
                     global_direction_normal * local_velocity.y() + global_direction_tangent * local_velocity.x();
-                // store moment in local frame
+                // store moment in global frame
                 node.moment = moment_global;
             }
         }
