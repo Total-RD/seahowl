@@ -77,8 +77,8 @@ void Blade::update_positions_aero() {
         int elasto_element_index = mapping_aero2elasto_nodes[ii].index;
         double eta = mapping_aero2elasto_nodes[ii].eta;
         auto entity = elasto.get_entity_along_blade(eta, elasto_element_index);
-        node_aero.set_position(entity.get_position());
         node_aero.set_rotation(entity.get_rotation());
+        node_aero.set_position(entity.get_position() + node_aero.get_offset_aero_absolute());
         node_aero.set_velocity(entity.get_velocity());
         node_aero.set_rotational_velocity(entity.get_rotational_velocity());
         node_aero.set_acceleration(entity.get_acceleration());
