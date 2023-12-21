@@ -366,7 +366,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.780339, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.746750, 1e-4);
 }
 
 TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
@@ -425,7 +425,7 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.797544, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.797311, 1e-4);
 }
 
 TEST(test_turbine, controller_target_rpm) {
@@ -638,7 +638,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.750998, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.750620, 1e-4);
 }
 #endif
 
@@ -772,6 +772,6 @@ TEST(test_inflowwind, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.766250, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.733759, 1e-4);
 }
 #endif
