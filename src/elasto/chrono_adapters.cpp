@@ -313,8 +313,6 @@ bool NodeElastoChrono::is_fixed() const {
 }
 
 void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool fpm) {
-    Eigen::Matrix<double, 6, 6> mm = ref.mass_matrix.replicate(1, 1);
-    Eigen::Matrix<double, 6, 6> sm = ref.stiffness_matrix.replicate(1, 1);
     // Convert from IEC convention to Chrono convention.
     // IEC standard:
     // x-axis: flapwise pointing towards nacelle,
@@ -324,31 +322,17 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
     // x-axis: longitudinal pointing towards blade tip,
     // y-axis : edgewise pointing towards trailing edge,
     // z-axis : flapwise pointing away from nacelle.
-    int jjo, kko;
-    for (int jj = 0; jj < 6; jj++) {
-        if (jj == 2 || jj == 5) {
-            jjo = -2;
-        }
-        if (jj == 1 || jj == 4) {
-            jjo = +0;
-        }
-        if (jj == 0 || jj == 3) {
-            jjo = +2;
-        }
-        for (int kk = 0; kk < 6; kk++) {
-            if (kk == 2 || kk == 5) {
-                kko = -2;
-            }
-            if (kk == 1 || kk == 4) {
-                kko = +0;
-            }
-            if (kk == 0 || kk == 3) {
-                kko = +2;
-            }
-            mm(jj + jjo, kk + kko) = ref.mass_matrix(jj, kk);
-            sm(jj + jjo, kk + kko) = ref.stiffness_matrix(jj, kk);
+    Eigen::Matrix<double, 3, 3> rot33 = AngleAxisd(PI / 2, Vector3d(0.0, 1.0, 0.0)).toRotationMatrix();
+    Eigen::Matrix<double, 6, 6> rot66 = Eigen::Matrix<double, 6, 6>::Zero();
+    for (int ii = 0; ii < 3; ii++) {
+        for (int jj = 0; jj < 3; jj++) {
+            rot66(ii, jj) = rot33(ii, jj);
+            rot66(ii + 3, jj + 3) = rot33(ii, jj);
         }
     }
+    auto mm = rot66 * ref.mass_matrix * rot66.transpose();
+    auto sm = rot66 * ref.stiffness_matrix * rot66.transpose();
+
     if (fpm == true) {
         auto sectionFPM = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>();
         section = sectionFPM;
