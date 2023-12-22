@@ -1,0 +1,51 @@
+﻿{
+  "aero": {
+    "solver": "BEMT",
+    "options": {
+      "hub_loss": true,
+      "tip_loss": true,
+      "tower_shadow": true
+    }
+  },
+  "rotor": {
+    "type": "fea",
+    "options": {
+      "fpm": true
+    },
+    "discretization": {
+      "elasto": [49],
+      "aero": [49]
+    },
+    "blades": [
+      {
+        "file": "./blade.json",
+        "initial_pitch": 0,
+        "precone": -4.0
+      },
+      {
+        "file": "./blade.json",
+        "initial_pitch": 0,
+        "precone": -4.0
+      },
+      {
+        "file": "./blade.json",
+        "initial_pitch": 0,
+        "precone": -4.0
+      }
+    ]
+  },
+  "rna": {
+    "initial_pitch_collective": 0,
+    "file": "./rna.json"
+  },
+  "tower": {
+    "discretization": {
+      "elasto": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+      "aero": [19]
+    },
+    "file": "./tower.json"
+  },
+  "controller": {
+    "type": ""
+  }
+}
