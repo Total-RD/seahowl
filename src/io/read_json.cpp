@@ -420,6 +420,7 @@ void add_turbine_to_system_from_json(const std::string& filepath,
 
     // populate turbine
     populate_turbine_from_json(filepath, *turbine, output_folder);
+    turbine->build();
 }
 
 void populate_turbine_from_json(const std::string& filepath,
@@ -900,8 +901,6 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
         }
 #endif
 
-        // build turbine
-        turbine.build();
         // rotate turbine to align tower with gravity vector
         auto v1 = Vector3d(-system_core.elasto.get_gravitational_acceleration()).normalized();
         auto v2 = (turbine.tower.elasto.nodes[1]->get_position() - turbine.tower.elasto.nodes[0]->get_position())
@@ -915,16 +914,6 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
         // translate turbine
         auto trans = turbine_json.at("translation").get<std::vector<double>>();
         turbine.translate(Vector3d(trans[0], trans[1], trans[2]));
-
-        // apply initial pitches
-        for (auto& blade : turbine.rna.blades) {
-            auto pitch0 = blade->elasto.pitch;
-            blade->elasto.apply_pitch_increment(pitch0);
-            blade->elasto.pitch = pitch0;
-        }
-        auto rotor_pitch0 = turbine.rna.elasto.rotor->pitch_collective;
-        turbine.rna.elasto.rotor->apply_collective_pitch_increment(rotor_pitch0);
-        turbine.rna.elasto.rotor->pitch_collective = rotor_pitch0;
 
         try {
             // if floating: do not fix tower

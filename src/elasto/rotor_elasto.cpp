@@ -53,6 +53,17 @@ void RotorElasto::build() {
         // link root node of blade to rotor center
         blade->attach_root_to_body(*body_hub);
     }
+
+    // apply initial pitch of blades
+    for (auto& blade : blades) {
+        // get blade pitch diff with collective pitch
+        auto individual_blade_pitch = blade->pitch - pitch_collective;
+        // apply total pitch to blade
+        auto total_blade_pitch = pitch_collective + individual_blade_pitch;
+        blade->apply_pitch_increment(total_blade_pitch);
+        // register new pitch value
+        blade->pitch = total_blade_pitch;
+    }
 }
 
 void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {

@@ -29,6 +29,7 @@ void initialize_pyseahowl_io(py::module& m) {
     m_io.def("populate_tower_aero_from_json", &populate_tower_aero_from_json);
     m_io.def("populate_rna_from_json", &populate_rna_from_json);
     m_io.def("populate_turbine_from_json", &populate_turbine_from_json);
+    m_io.def("add_turbine_to_system_from_json", &add_turbine_to_system_from_json);
     m_io.def("populate_system_from_json", &populate_system_from_json);
     m_io.def("initialize_system_from_json", &initialize_system_from_json);
 
