@@ -126,8 +126,9 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
             blade_azimuth = abs(std::fmod((blade_azimuth + 3 * PI), 2 * PI)) - PI;
         }
         // tangent from root, to use if sweep is assumed to be through shear
-        auto root_tangent =
-            disk_normal.cross(blade->nodes.front().get_rotation() * Vector3d(0.0, 0.0, 1.0)).normalized();
+        auto root_axis = blade->nodes.front().get_rotation() * Vector3d(0.0, 0.0, 1.0);
+        auto disk_axis = (root_axis - (root_axis.dot(disk_normal)) * disk_normal).normalized();
+        auto disk_tangent = disk_axis.cross(disk_normal).normalized();
 
         int count = -1;
         // iterate over blade nodes
@@ -139,7 +140,7 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
             auto node_rotation = node.get_rotation();
             auto node_velocity = node.get_velocity();
             auto node_normal = node_rotation * Vector3d(1.0, 0.0, 0.0);
-            auto node_tangent = node_rotation * Vector3d(0.0, -1.0, 0.0);
+            auto node_tangent = node_rotation * Vector3d(0.0, 1.0, 0.0);
             auto node_axis = node_rotation * Vector3d(0.0, 0.0, 1.0);
 
             // fluid density
@@ -155,24 +156,20 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
             // relative velocity
             auto global_velocity = Vector3d(wind_velocity - node_velocity);
 
-            auto direction_hub2node = (node_position - body_hub.get_position()).normalized();
-            auto disk_tangent = disk_normal.cross(direction_hub2node).normalized();
-            auto disk_axis = disk_tangent.cross(disk_normal).normalized();
-
             // get normal vector of bent blade
             // assume shear along blade for sweep
-            auto angle_z = get_vector_angle_from_plane(node_axis, disk_normal, root_tangent);
-            auto blade_normal_sheared = AngleAxisd(angle_z, root_tangent) * disk_normal;
+            auto angle_z = get_vector_angle_from_plane(node_axis, disk_normal, disk_tangent);
+            auto blade_normal_sheared = AngleAxisd(angle_z, disk_tangent) * disk_normal;
 
             // make coordinate system to use for BEMT
             auto global_normal = blade_normal_sheared;
-            auto global_tangent = root_tangent;
-            auto global_axis = global_tangent.cross(global_normal);
+            auto global_tangent = disk_tangent;
+            auto global_axis = global_normal.cross(global_tangent);
 
             // uninduced local velocity (2D)
             // frame perpendicular to rotor disc
-            // x: tangential velocity (coplanar with rotor disc)
-            // y: normal velocity (normal to rotor disc, pointing from hub to nacelle)
+            // x airfoil: tangential velocity (tangential to chord, pointing towards tail of airfoil) --> y IEC
+            // y airfoil: normal velocity (normal to chord, pointing up) --> x IEC
             double local_velocity_normal0 = global_velocity.dot(global_normal);
             double local_velocity_tangent0 = global_velocity.dot(global_tangent);
             auto local_velocity0 = Vector2d(local_velocity_tangent0, local_velocity_normal0);
@@ -202,7 +199,7 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
                 double cos_phi = cos(phi);
                 double sin_phi = sin(phi);
                 double cn = cl * cos_phi + cd * sin_phi;
-                double ct = cl * sin_phi - cd * cos_phi;
+                double ct = -cl * sin_phi + cd * cos_phi;
 
                 // calculate drag and lift force
                 auto vel = local_velocity.norm();

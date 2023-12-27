@@ -12,7 +12,7 @@ using seahowl::Vector3d;
 using seahowl::PI;
 
 double seahowl::aero::get_phi(const Vector2d& fluid_velocity) {
-    double phi = atan2(fluid_velocity.y(), -fluid_velocity.x());
+    double phi = atan2(fluid_velocity.y(), fluid_velocity.x());
     return phi;
 }
 
@@ -90,7 +90,7 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
         double cos_phi = cos(phi);
         double sin_phi = sin(phi);
         double cn = cl * cos_phi + cd * sin_phi;
-        double ct = cl * sin_phi - cd * cos_phi;
+        double ct = -cl * sin_phi + cd * cos_phi;
 
         double tol_induction = 1e-6;  // tolerance for induction variables to avoid singularities
 
@@ -149,7 +149,7 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
         } else if (fabs(sin_phi) < tol_induction) {
             ap = ap_max;
         } else {
-            double kp = node.chord_solidity * ct / (4.0 * loss_factor * sin_phi * cos_phi);
+            double kp = -node.chord_solidity * ct / (4.0 * loss_factor * sin_phi * cos_phi);
             if (local_velocity_rotor.y() < 0.0) {
                 kp = -kp;
             }
