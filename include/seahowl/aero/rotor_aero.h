@@ -61,24 +61,9 @@ class RotorAeroBEMT : public RotorAero {
     virtual void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
 
     /**
-     * @brief Computes chord solidity on all aero nodes of blades.
+     * @brief Computes radius, distances from tip and hub, and chord solidity on all aero nodes of blades.
      */
-    void compute_chords_solidity();
-
-    /**
-     * @brief Computes distance from hub on all aero nodes of blades.
-     */
-    void compute_distances_from_hub();
-
-    /**
-     * @brief Computes distance from blade tip on all aero nodes of blades.
-     */
-    void compute_distances_from_tip();
-
-    /**
-     * @brief Computes radius on all aero nodes of blades.
-     */
-    void compute_radii();
+    void compute_radii_distances_solidity();
 };
 
 // The structure containing the coefficients for the rotor disk
