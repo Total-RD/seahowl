@@ -16,6 +16,11 @@ using seahowl::Vector3d;
 using seahowl::Vector2d;
 using seahowl::PI;
 
+Vector3d project_vector_to_plane(const Vector3d& vec, const Vector3d& plane_normal) {
+    auto vec_projected = (vec - (vec.dot(plane_normal)) * plane_normal);
+    return vec_projected;
+}
+
 double get_vector_angle_from_plane(const Vector3d& vec, const Vector3d& plane_normal, const Vector3d& plane_tangent) {
     double angle = acos(vec.dot(plane_normal)) - seahowl::PI / 2;
     if ((plane_normal.cross(vec)).dot(plane_tangent) < 0) {
@@ -127,7 +132,7 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
         }
         // tangent from root, to use if sweep is assumed to be through shear
         auto root_axis = blade->nodes.front().get_rotation() * Vector3d(0.0, 0.0, 1.0);
-        auto disk_axis = (root_axis - (root_axis.dot(disk_normal)) * disk_normal).normalized();
+        auto disk_axis = project_vector_to_plane(root_axis, disk_normal).normalized();
         auto disk_tangent = disk_axis.cross(disk_normal).normalized();
 
         int count = -1;
@@ -160,6 +165,10 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
             // assume shear along blade for sweep
             auto angle_z = get_vector_angle_from_plane(node_axis, disk_normal, disk_tangent);
             auto blade_normal_sheared = AngleAxisd(angle_z, disk_tangent) * disk_normal;
+            // unsheared
+            auto node_axis_projected = project_vector_to_plane(node_axis, disk_normal).normalized();
+            auto blade_tangent = node_axis_projected.cross(disk_normal);
+            auto blade_normal = node_axis.cross(blade_tangent);
 
             // make coordinate system to use for BEMT
             auto global_normal = blade_normal_sheared;
@@ -179,8 +188,9 @@ void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time
                 (node.distance_from_hub < tol && has_hub_loss)) {
                 node.load = Vector3d(0.0, 0.0, 0.0);
             } else {
-                // get angle of airfoil to disk plane
-                auto angle_airfoil = get_vector_angle_from_plane(node_tangent, global_normal, -global_axis);
+                // get angle of airfoil (pitch + twist + torsion) from plane of bent blade
+                auto angle_airfoil = get_vector_angle_from_plane(node_normal, blade_tangent, -node_axis_projected);
+
                 // get induced velocity
                 auto local_velocity = get_induced_velocity(node, local_velocity0, angle_airfoil, blades.size(),
                                                            has_tip_loss, has_hub_loss);
