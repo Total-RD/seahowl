@@ -363,7 +363,7 @@ target_link_libraries(seahowl_core
 )
 
 if (SEAHOWL_ENABLE_HYDROCHRONO)
-    target_link_libraries(seahowl_core PUBLIC HydroChrono::HydroChrono)
+    target_link_libraries(seahowl_core PRIVATE HydroChrono::HydroChrono)
 endif (SEAHOWL_ENABLE_HYDROCHRONO)
 
 if(SEAHOWL_ENABLE_VTK)
