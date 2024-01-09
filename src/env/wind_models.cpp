@@ -7,12 +7,8 @@ Vector3d get_sheared_wind_velocity(const Vector3d& velocity,
                                    const Vector3d& position,
                                    const Vector3d& direction_gravity,
                                    double shear_coefficient,
-                                   double reference_height,
-                                   double reference_length) {
+                                   double reference_height) {
     double distance = position.dot(-direction_gravity);
-    if (distance > reference_length) {
-        distance = reference_length;
-    }
     return velocity * pow(distance / reference_height, shear_coefficient);
 }
 
@@ -30,8 +26,8 @@ void ConstantWind::set_wind_velocity(Vector3d velocity) {
 }
 
 Vector3d ConstantWind::get_fluid_velocity(const Vector3d& position, double time) const {
-    auto velocity = get_sheared_wind_velocity(wind_velocity, position, direction_gravity, shear_coefficient,
-                                              reference_height, reference_length);
+    auto velocity =
+        get_sheared_wind_velocity(wind_velocity, position, direction_gravity, shear_coefficient, reference_height);
     return velocity;
 }
 
@@ -60,7 +56,6 @@ Vector3d WindRamp::get_fluid_velocity(const Vector3d& position, double time) con
             std::runtime_error("End time is less than start time for the wind ramp.");
         }
     }
-    velocity = get_sheared_wind_velocity(velocity, position, direction_gravity, shear_coefficient, reference_height,
-                                         reference_length);
+    velocity = get_sheared_wind_velocity(velocity, position, direction_gravity, shear_coefficient, reference_height);
     return velocity;
 }

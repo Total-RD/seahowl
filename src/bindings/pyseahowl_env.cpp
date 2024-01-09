@@ -26,7 +26,6 @@ void initialize_pyseahowl_env(py::module& m) {
         m_aero, "ShearedWind")
         .def_readwrite("shear_coefficient", &seahowl::env::ShearedWind::shear_coefficient)
         .def_readwrite("reference_height", &seahowl::env::ShearedWind::reference_height)
-        .def_readwrite("reference_length", &seahowl::env::ShearedWind::reference_length)
         .def_readwrite("direction_gravity", &seahowl::env::ShearedWind::direction_gravity);
     py::class_<seahowl::env::ConstantWind, std::shared_ptr<seahowl::env::ConstantWind>, seahowl::env::ShearedWind>(
         m_aero, "ConstantWind")

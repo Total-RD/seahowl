@@ -26,8 +26,6 @@ class ShearedWind : public WindModel {
     double shear_coefficient = 0.0;
     /** @brief Reference height (where constant velocity is defined). */
     double reference_height = 150.0;
-    /** @brief Reference length (length of shear). */
-    double reference_length = 240.0;
     /** @brief Direction of gravitational acceleration. */
     Vector3d direction_gravity{0.0, 0.0, -1.0};
 };
