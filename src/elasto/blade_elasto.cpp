@@ -148,27 +148,7 @@ seahowl::Vector3d BladeElastoFEA::get_blade_root_moment() const {
 }
 
 seahowl::EntityDynamicEigen BladeElastoFEA::get_entity_along_blade(double eta, int element_index) const {
-    auto entity = seahowl::EntityDynamicEigen();
-    Vector3d new_position;
-    Quaternion new_rotation;
-    evaluate_position_rotation(new_position, new_rotation, element_index, eta);
-    entity.set_position(new_position);
-    entity.set_rotation(new_rotation);
-
-    // update properties of aero nodes
-    double weight1 = 0.5 * fabs(eta - 1.0);
-    double weight2 = 0.5 * fabs(eta + 1.0);
-    auto& element = elements[element_index];
-    auto& node1 = element->nodes[0];
-    auto& node2 = element->nodes[1];
-    entity.set_velocity(weight1 * node1->get_velocity() + weight2 * node2->get_velocity());
-    entity.set_rotational_velocity(weight1 * node1->get_rotational_velocity() +
-                                   weight2 * node2->get_rotational_velocity());
-    entity.set_acceleration(weight1 * node1->get_acceleration() + weight2 * node2->get_acceleration());
-    entity.set_rotational_acceleration(weight1 * node1->get_rotational_acceleration() +
-                                       weight2 * node2->get_rotational_acceleration());
-
-    return entity;
+    return get_entity_along_component(eta, element_index);
 }
 
 void BladeElastoFEA::accumulate_load_along_blade(const seahowl::Vector3d& load,

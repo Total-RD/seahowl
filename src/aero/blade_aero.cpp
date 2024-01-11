@@ -6,12 +6,8 @@
 
 #include <spdlog/spdlog.h>
 
-using seahowl::aero::BladeNodeAero;
-using seahowl::aero::BladeElementAero;
-using seahowl::aero::BladeAero;
-using seahowl::Vector3d;
-using seahowl::Vector2d;
-using seahowl::Quaternion;
+using namespace seahowl;
+using namespace seahowl::aero;
 
 BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
     properties = point;
@@ -95,6 +91,8 @@ void BladeAero::build() {
     }
     // elements
     elements.clear();
+    loads.clear();
+    moments.clear();
     for (int ii = 0; ii < discretized_points.size() - 1; ii++) {
         elements.push_back(BladeElementAero(nodes[ii], nodes[ii + 1]));
         loads.push_back(Vector3d(0.0, 0.0, 0.0));

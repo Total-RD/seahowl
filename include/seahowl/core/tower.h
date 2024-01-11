@@ -36,8 +36,10 @@ class Tower : public ComponentDynamic {
     seahowl::elasto::TowerElasto& elasto;
     /** @brief Aerodynamic model of the tower. */
     seahowl::aero::TowerAero& aero;
-    /** @brief Mapping of aero elements into elasto domain. */
-    std::vector<seahowl::DiscretizationPoint> mapping_aero2elasto;
+    /** @brief Mapping of aero nodes into elasto domain. */
+    std::vector<seahowl::DiscretizationPoint> mapping_aero2elasto_nodes;
+    /** @brief Mapping of aero elements (central point of elements) into elasto domain. */
+    std::vector<seahowl::DiscretizationPoint> mapping_aero2elasto_elements;
     /** @brief Mapping of elasto nodes into aero domain. */
     std::vector<seahowl::DiscretizationPoint> mapping_elasto2aero;
 

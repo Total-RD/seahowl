@@ -7,15 +7,38 @@
 
 #include <spdlog/spdlog.h>
 
-using seahowl::aero::TowerElementAero;
-using seahowl::aero::TowerAero;
+using namespace seahowl;
+using namespace seahowl::aero;
 using seahowl::env::FluidModel;
-using seahowl::Vector3d;
-using seahowl::PI;
 
-TowerElementAero::TowerElementAero(const TowerReferencePointAero& point1, const TowerReferencePointAero& point2) {
-    properties = (point1 + point2) * 0.5;
-    length = (point1.coordinates - point2.coordinates).norm();
+TowerNodeAero::TowerNodeAero(TowerReferencePointAero& point) {
+    properties = point;
+    set_position(point.coordinates);
+    set_velocity(Vector3d(0.0, 0.0, 0.0));
+    set_acceleration(Vector3d(0.0, 0.0, 0.0));
+    set_rotational_velocity(Vector3d(0.0, 0.0, 0.0));
+    set_rotational_acceleration(Vector3d(0.0, 0.0, 0.0));
+    load = Vector3d(0.0, 0.0, 0.0);
+}
+
+TowerElementAero::TowerElementAero(const TowerNodeAero& node1, const TowerNodeAero& node2)
+    : node1(node1), node2(node2) {
+    fraction = 0.5 * (node1.properties.fraction + node2.properties.fraction);
+    length = (node1.get_position() - node2.get_position()).norm();
+}
+
+Vector3d TowerElementAero::get_load() const {
+    return 0.5 * (node1.load + node2.load) * length;
+}
+
+Vector3d TowerElementAero::get_position() const {
+    return 0.5 * (node1.get_position() + node2.get_position());
+}
+
+Quaternion TowerElementAero::get_rotation() const {
+    // returning rotation of node1
+    // TODO: average rotation of node1 and node2
+    return node1.get_rotation();
 }
 
 TowerAero::TowerAero() {}
@@ -43,34 +66,40 @@ void TowerAero::build() {
 
     // build
     discretized_points = seahowl::get_discretized_points(discretization_fractions, reference_points);
-    for (int ii = 0; ii < discretized_points.size() - 1; ii++) {
-        // make element
-        auto element = TowerElementAero(discretized_points[ii], discretized_points[ii + 1]);
-        elements.push_back(element);
+    // nodes
+    nodes.clear();
+    for (int ii = 0; ii < discretized_points.size(); ii++) {
         // push empty load
+        nodes.push_back(TowerNodeAero(discretized_points[ii]));
+    }
+    // elements
+    elements.clear();
+    loads.clear();
+    for (int ii = 0; ii < discretized_points.size() - 1; ii++) {
+        elements.push_back(TowerElementAero(nodes[ii], nodes[ii + 1]));
         loads.push_back(Vector3d(0.0, 0.0, 0.0));
     }
 }
 
 void TowerAero::compute_aero_loads(const FluidModel& wind_model, double time) {
-    for (int ii = 0; ii < elements.size(); ii++) {
-        auto& element = elements[ii];
-        auto& properties = element.properties;
-
-        auto density = wind_model.get_fluid_density(properties.coordinates, time);
+    for (auto& node : nodes) {
+        auto density = wind_model.get_fluid_density(node.get_position(), time);
         // get fluid relative velocity
-        auto wind_velocity = wind_model.get_fluid_velocity(properties.coordinates, time);
-        auto velocity_relative = wind_velocity - properties.velocity;
-        auto dir = properties.rotation.vec();  // tangent direction
+        auto wind_velocity = wind_model.get_fluid_velocity(node.get_position(), time);
+        auto velocity_relative = wind_velocity - node.get_velocity();
+        auto dir = node.get_rotation() * Vector3d(0.0, 0.0, 1.0);  // tangent direction
         auto dot = velocity_relative.dot(dir);
         auto velocity_tangent = dir * dot;
         auto velocity_normal = velocity_relative - velocity_tangent;
 
-        auto length = element.length;
-        auto diameter = properties.diameter;
-        auto cd = properties.drag_coefficient;
-        auto load_drag = 0.5 * density * cd * diameter * velocity_normal.norm() * velocity_normal * length;
+        auto diameter = node.properties.diameter;
+        auto cd = node.properties.drag_coefficient;
+        auto load_drag = 0.5 * density * cd * diameter * velocity_normal.norm() * velocity_normal;
 
-        loads[ii] = load_drag;
+        node.load = load_drag;
+    }
+
+    for (int ii = 0; ii < elements.size(); ii++) {
+        loads[ii] = elements[ii].get_load();
     }
 }

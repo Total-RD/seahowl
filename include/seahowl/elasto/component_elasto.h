@@ -172,6 +172,14 @@ class ComponentElastoFEA : public virtual ComponentElasto {
      * @brief Returns all nodes loads (global frame of reference).
      */
     std::vector<Vector3d> get_nodes_loads() const;
+
+    /**
+     * @brief Returns zntity along component.
+     *
+     * @param[in] eta Normalized abscissa between node1 and node2 of element.
+     * @param[in] element Element index.
+     */
+    seahowl::EntityDynamicEigen get_entity_along_component(double eta, int element_index) const;
 };
 
 }  // namespace elasto

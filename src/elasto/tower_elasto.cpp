@@ -65,7 +65,7 @@ void TowerElasto::build_elements_tapered_timoshenko() {
     for (size_t ii = 1; ii < nelements + 1; ii++) {
         // create element
         auto element = std::make_shared<ElementBladeElastoChrono>();
-        // add element to blade elements vector
+        // add element to tower elements vector
         elements.push_back(element);
         // set element nodes
         element->set_nodes(nodes[ii - 1], nodes[ii]);

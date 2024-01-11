@@ -4,13 +4,6 @@
 #include "seahowl/commons/entities.h"
 #include "seahowl/aero/reference_point_aero.h"
 
-// forward declarations
-namespace seahowl {
-namespace aero {
-struct BladeReferencePointAero;
-}  // namespace aero
-}  // namespace seahowl
-
 namespace seahowl {
 
 /**@brief Aerodynamic module */
@@ -21,15 +14,15 @@ namespace aero {
  */
 struct BladeNodeAero : public EntityDynamicEigen {
     /** @brief Load calculated at node. */
-    Vector3d load;
+    Vector3d load{0.0, 0.0, 0.0};
     /** @brief Moment calculated at node. */
-    Vector3d moment;
+    Vector3d moment{0.0, 0.0, 0.0};
     /** @brief Uninduced wind velocity at node. */
-    Vector3d wind_velocity;
+    Vector3d wind_velocity{0.0, 0.0, 0.0};
     /** @brief Tower-shadowed wind velocity at node. */
-    Vector3d wind_velocity_shadowed;
+    Vector3d wind_velocity_shadowed{0.0, 0.0, 0.0};
     /** @brief Induced wind velocity at node. */
-    Vector3d relative_velocity_induced;
+    Vector3d relative_velocity_induced{0.0, 0.0, 0.0};
     /** @brief Reference point associated to node (aerodynamic properties). */
     BladeReferencePointAero properties;
 
@@ -66,11 +59,11 @@ struct BladeElementAero {
     /** @brief Second node of element. */
     const BladeNodeAero& node2;
     /** @brief Fraction (normalized abscissa along longitudinal axis of component) of center of element. */
-    double fraction;
+    double fraction = 0.0;
     /** @brief Length of element. */
-    double length;
+    double length = 0.0;
     /** @brief Offset (x, y) for the aerodynamic center of blade at center of element. */
-    Vector2d offset_aero;
+    Vector2d offset_aero = {0.0, 0.0};
 
     /**
      * @brief Constructor.

@@ -196,31 +196,71 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
                                                       const Vector3d& position,
                                                       const seahowl::aero::TowerAero& tower_aero) {
     // get wind velocity in tower reference frame
-    auto& towertop_position = tower_aero.elements.back().properties.coordinates;
-    auto& towertop_rotation = tower_aero.elements.back().properties.rotation;
+    auto& towertop = tower_aero.nodes.back();
+    auto& towerbase = tower_aero.nodes.front();
+    auto towertop_position = towertop.get_position();
+    auto towerbase_position = towerbase.get_position();
+    // tower axis assumption: tower is straight from towerbottom to towertop)
+    auto tower_axis = (towertop_position - towerbase_position).normalized();
+    // get average tower velocity (for relative wind velocity)
+    auto tower_velocity = Vector3d(0.0, 0.0, 0.0);
+    for (auto& node : tower_aero.nodes) {
+        tower_velocity += node.get_velocity();
+    }
+    tower_velocity /= (tower_aero.nodes.size());
+
+    // find rotation between global z-axis and tower z-axis (IEC coordinate system)
+    auto tower_rot = Quaternion(1.0, 0.0, 0.0, 0.0);
+    auto z_global = Vector3d(0.0, 0.0, 1.0);
+    auto z_dot = tower_axis.dot(z_global);
+    double tol = 1.0e-6;
+    if (z_dot < -(1.0 - tol)) {
+        // 180 degrees rotation
+        tower_rot = AngleAxisd(PI, Vector3d(1.0, 0.0, 0.0));
+    } else if (z_dot > 1.0 - tol) {
+        // no rotation
+        tower_rot = Quaternion(1.0, 0.0, 0.0, 0.0);
+    } else {
+        auto axis_tower_rot = z_global.cross(tower_axis).normalized();
+        auto angle_tower_rot = acos(z_dot);
+        tower_rot = AngleAxisd(angle_tower_rot, axis_tower_rot);
+    }
+
     // only take wind velocity perpendicular to tower axis
-    auto wind_velocity_tower = Vector3d(wind_velocity.x(), wind_velocity.y(), 0.0);
+    auto wind_velocity_tower = tower_rot.inverse() * (wind_velocity - tower_velocity);
+    wind_velocity_tower[2] = 0.0;
+    auto wind_axis_tower = wind_velocity_tower.normalized();
 
-    // project element coordinates to tower reference frame
-    Vector3d coordinates_projected = -(towertop_rotation.inverse() * (position - towertop_position));
+    // get z positions along tower axis
+    // rotate all positions around center of tower to get relative positions to tower center in IEC coordinate system
+    auto rotation_center = 0.5 * (towerbase_position + towertop_position);
+    auto position_relative = tower_rot.inverse() * (position - rotation_center);
+    auto towerbase_relative = tower_rot.inverse() * (towerbase_position - rotation_center);
+    auto towertop_relative = tower_rot.inverse() * (towertop_position - rotation_center);
+    auto z_position = position_relative.z();
+    auto z_towerbase = towerbase_relative.z();
+    auto z_towertop = towertop_relative.z();
+    if (z_position > z_towerbase && z_position < z_towertop) {
+        // get diameter at z position
+        auto z_rel = (z_position - z_towerbase) / (z_towertop - z_towerbase);
+        std::vector<double> fractions{z_rel};
+        auto tower_radius = seahowl::get_discretized_points(fractions, tower_aero.discretized_points)[0].diameter / 2.0;
 
-    // find tower radius
-    auto tower_length =
-        (tower_aero.reference_points.back().coordinates - tower_aero.reference_points.front().coordinates).norm();
-    if (coordinates_projected.z() >= 0 && coordinates_projected.z() <= tower_length) {
-        std::vector<double> fractions{(tower_length - coordinates_projected.z()) / tower_length};
-        auto tower_radius = seahowl::get_discretized_points(fractions, tower_aero.reference_points)[0].diameter / 2.0;
-        // front distance of point from tower
-        auto xx = coordinates_projected.x();
+        // find relative position
+        auto position_projected = towerbase_relative + z_rel * (towertop_relative - towerbase_relative);
+        auto position_relative_projected = position_relative - position_projected;
+        // front position of point from tower
+        auto x_rel = position_relative_projected.dot(wind_axis_tower);
+        auto xx = abs(x_rel);
         auto xx2 = pow(xx, 2);
-        // side distance from tower of point
-        auto yy = coordinates_projected.y();
+        // side position of point from tower
+        auto y_rel = position_relative_projected.dot(Vector3d(1.0, 1.0, 1.0) - wind_axis_tower.cwiseAbs());
+        auto yy = abs(y_rel);
         auto yy2 = pow(yy, 2);
-        wind_velocity_tower =
-            (wind_velocity_tower + wind_velocity_tower.cwiseProduct(pow(tower_radius, 2) / pow(yy2 + xx2, 2) *
-                                                                    Vector3d((yy2 - xx2), (-2.0 * xx * yy), 0.0)));
 
-        // correct wind velocity
-        wind_velocity = towertop_rotation * wind_velocity_tower;
+        // update wind velocity
+        wind_velocity =
+            wind_velocity + tower_rot * wind_velocity_tower.cwiseProduct(pow(tower_radius, 2) / pow(yy2 + xx2, 2) *
+                                                                         Vector3d((yy2 - xx2), (-2.0 * xx * yy), 0.0));
     }
 }

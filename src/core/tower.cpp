@@ -49,11 +49,18 @@ void Tower::set_discretization_aero(std::vector<double> fractions) {
 
 void Tower::compute_mapping_aero2elasto() {
     // get aero element position (center) from which loads will be applied
-    std::vector<double> aero_discretization_fractions;
-    for (int ii = 0; ii < aero.elements.size(); ii++) {
-        aero_discretization_fractions.push_back(aero.elements[ii].properties.fraction);
+    std::vector<double> aero_discretization_fractions_elements;
+    for (auto& element : aero.elements) {
+        aero_discretization_fractions_elements.push_back(element.fraction);
     }
-    mapping_aero2elasto = get_indice_and_positions(aero_discretization_fractions, elasto.discretization_fractions);
+    mapping_aero2elasto_elements =
+        get_indice_and_positions(aero_discretization_fractions_elements, elasto.discretization_fractions);
+    std::vector<double> aero_discretization_fractions_nodes;
+    for (auto& node : aero.nodes) {
+        aero_discretization_fractions_nodes.push_back(node.properties.fraction);
+    }
+    mapping_aero2elasto_nodes =
+        get_indice_and_positions(aero_discretization_fractions_nodes, elasto.discretization_fractions);
 }
 
 void Tower::compute_mapping_elasto2aero() {
@@ -61,31 +68,32 @@ void Tower::compute_mapping_elasto2aero() {
 }
 
 void Tower::update_positions_aero() {
-    for (int ii = 0; ii < aero.elements.size(); ii++) {
-        // update position and rotation of aero elements
-        int elasto_element_index = mapping_aero2elasto[ii].index;
-        auto element_elasto = elasto.elements[elasto_element_index];
-        double eta = mapping_aero2elasto[ii].eta;
-        auto& element_aero = aero.elements[ii];
-        elasto.evaluate_position_rotation(element_aero.properties.coordinates, element_aero.properties.rotation,
-                                          elasto_element_index, eta);
+    for (int ii = 0; ii < aero.nodes.size(); ii++) {
+        auto& node_aero = aero.nodes[ii];
 
-        // update velocity of aero elements
-        aero.elements[ii].properties.velocity =
-            0.5 * (element_elasto->nodes[0]->get_velocity() + element_elasto->nodes[1]->get_velocity());
+        // update position and rotation of aero elements
+        int elasto_element_index = mapping_aero2elasto_nodes[ii].index;
+        double eta = mapping_aero2elasto_nodes[ii].eta;
+        auto entity = elasto.get_entity_along_component(eta, elasto_element_index);
+        node_aero.set_rotation(entity.get_rotation());
+        node_aero.set_position(entity.get_position());
+        node_aero.set_velocity(entity.get_velocity());
+        node_aero.set_rotational_velocity(entity.get_rotational_velocity());
+        node_aero.set_acceleration(entity.get_acceleration());
+        node_aero.set_rotational_acceleration(entity.get_rotational_acceleration());
     }
 }
 
 void Tower::update_loads_elasto() {
     elasto.reset_loads();
-    if (aero.loads.size() != mapping_aero2elasto.size()) {
+    if (aero.loads.size() != mapping_aero2elasto_elements.size()) {
         throw std::runtime_error("Tower: length of vector of loads (" + std::to_string(aero.loads.size()) +
-                                 " and length of aero to elasto mapping(" + std::to_string(mapping_aero2elasto.size()) +
-                                 ") do not match.");
+                                 " and length of aero to elasto mapping(" +
+                                 std::to_string(mapping_aero2elasto_elements.size()) + ") do not match.");
     }
     auto offset = Vector3d(0.0, 0.0, 0.0);
     for (int ii = 0; ii < aero.loads.size(); ii++) {
-        elasto.accumulate_element_load(aero.loads[ii], Vector3d(0.0, 0.0, 0.0), mapping_aero2elasto[ii].index,
-                                       mapping_aero2elasto[ii].eta, offset);
+        elasto.accumulate_element_load(aero.loads[ii], Vector3d(0.0, 0.0, 0.0), mapping_aero2elasto_elements[ii].index,
+                                       mapping_aero2elasto_elements[ii].eta, offset);
     }
 }
