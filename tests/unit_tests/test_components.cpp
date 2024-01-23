@@ -268,7 +268,7 @@ TEST(test_blade, flapwise) {
     ASSERT_NEAR(natural_period_ref, natural_period, 0.01);
 }
 
-TEST(test_tower, tower_shadow_check) {
+TEST(test_bemt, tower_shadow_check) {
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
@@ -295,35 +295,55 @@ TEST(test_tower, tower_shadow_check) {
     auto position1 = Vector3d(-14.0, -5.0, 50.0);
     Vector3d wind_velocity1 = wind_velocity;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity1, position1, tower_aero);
-    ASSERT_NEAR(wind_velocity1.x(), 9.258011, 1e-4);
+    ASSERT_NEAR(wind_velocity1.x(), 9.100318, 1e-4);
+    ASSERT_NEAR(wind_velocity1.y(), 2.625343, 1e-4);
+    ASSERT_NEAR(wind_velocity1.z(), 1.0, 1e-4);
 
     // position 2
     auto position2 = Vector3d(-15.0, 0.0, 45.0);
     Vector3d wind_velocity2 = wind_velocity;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity2, position2, tower_aero);
-    ASSERT_NEAR(wind_velocity2.x(), 8.967558, 1e-4);
+    ASSERT_NEAR(wind_velocity2.x(), 9.047282, 1e-4);
+    ASSERT_NEAR(wind_velocity2.y(), 3.285815, 1e-4);
+    ASSERT_NEAR(wind_velocity2.z(), 1.0, 1e-4);
 
     // position 3
     auto position3 = Vector3d(-16.0, 2.0, 20.0);
     Vector3d wind_velocity3 = wind_velocity;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity3, position3, tower_aero);
-    ASSERT_NEAR(wind_velocity3.x(), 8.977193, 1e-4);
+    ASSERT_NEAR(wind_velocity3.x(), 9.227646, 1e-4);
+    ASSERT_NEAR(wind_velocity3.y(), 3.463146, 1e-4);
+    ASSERT_NEAR(wind_velocity3.z(), 1.0, 1e-4);
 
     auto wind_velocity_xz = Vector3d(10.0, 0.0, 1.0);
 
     // position 4
-    auto position4 = Vector3d(-16.0, 2.0, 20.0);
+    auto position4 = Vector3d(-6.0, 2.0, 20.0);
     Vector3d wind_velocity4 = wind_velocity_xz;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity4, position4, tower_aero);
-    ASSERT_NEAR(wind_velocity4.x(), 9.163947, 1e-4);
+    ASSERT_NEAR(wind_velocity4.x(), 5.514508, 1e-4);
+    ASSERT_NEAR(wind_velocity4.y(), 3.364119, 1e-4);
+    ASSERT_NEAR(wind_velocity4.z(), 1.0, 1e-4);
 
-    // position 4
+    // position 5
     auto position5 = Vector3d(-16.0, -2.0, 20.0);
     Vector3d wind_velocity5 = wind_velocity_xz;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity5, position5, tower_aero);
     ASSERT_NEAR(wind_velocity5.x(), 9.163947, 1e-4);
+    ASSERT_NEAR(wind_velocity5.y(), -0.212330, 1e-4);
+    ASSERT_NEAR(wind_velocity5.z(), 1.0, 1e-4);
 
-    // position 5 rotation
+    // position 5 wind rotation
+    auto rot2 = AngleAxisd(PI / 36.0, Vector3d(0.0, 0.0, 1.0));
+    auto position5_rot2 = rot2 * position5;
+    Vector3d wind_velocity5_rot2 = rot2 * wind_velocity_xz;
+    seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity5_rot2, position5_rot2, tower_aero);
+    auto rot2_wind = rot2.inverse() * wind_velocity5_rot2;
+    ASSERT_NEAR(rot2_wind.x(), 9.163947, 1e-4);
+    ASSERT_NEAR(rot2_wind.y(), -0.212330, 1e-4);
+    ASSERT_NEAR(rot2_wind.z(), 1.0, 1e-4);
+
+    // position 5 tower and wind rotation
     auto rot = AngleAxisd(PI / 36.0, Vector3d(0.0, 1.0, 0.0));
     auto position5_rot = rot * position5;
     for (auto& node : tower_aero.nodes) {
@@ -331,7 +351,10 @@ TEST(test_tower, tower_shadow_check) {
     }
     Vector3d wind_velocity5_rot = rot * wind_velocity_xz;
     seahowl::aero::apply_tower_shadow_effect_on_wind(wind_velocity5_rot, position5_rot, tower_aero);
-    ASSERT_NEAR((rot.inverse() * wind_velocity5_rot).x(), 9.163947, 1e-4);
+    auto rot_wind = rot.inverse() * wind_velocity5_rot;
+    ASSERT_NEAR(rot_wind.x(), 9.163947, 1e-4);
+    ASSERT_NEAR(rot_wind.y(), -0.212330, 1e-4);
+    ASSERT_NEAR(rot_wind.z(), 1.0, 1e-4);
 }
 
 TEST(test_turbine, rpm_initial_pitch) {
@@ -390,7 +413,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.697633, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.696608, 1e-4);
 }
 
 TEST(test_turbine, rpm_initial_pitch_fpm) {
@@ -449,7 +472,7 @@ TEST(test_turbine, rpm_initial_pitch_fpm) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.701226, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.700212, 1e-4);
 }
 
 TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
@@ -508,7 +531,7 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.798212, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.798572, 1e-4);
 }
 
 TEST(test_turbine, controller_target_rpm) {
@@ -855,6 +878,6 @@ TEST(test_inflowwind, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.687303, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.686469, 1e-4);
 }
 #endif

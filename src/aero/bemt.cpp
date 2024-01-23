@@ -230,6 +230,7 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
     auto wind_velocity_tower = tower_rot.inverse() * (wind_velocity - tower_velocity);
     wind_velocity_tower[2] = 0.0;
     auto wind_axis_tower = wind_velocity_tower.normalized();
+    auto wind_normal_tower = Vector3d(0., 0., 1.).cross(wind_axis_tower);
 
     // get z positions along tower axis
     // rotate all positions around center of tower to get relative positions to tower center in IEC coordinate system
@@ -250,17 +251,23 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
         auto position_projected = towerbase_relative + z_rel * (towertop_relative - towerbase_relative);
         auto position_relative_projected = position_relative - position_projected;
         // front position of point from tower
-        auto x_rel = position_relative_projected.dot(wind_axis_tower);
-        auto xx = abs(x_rel);
+        auto xx = position_relative_projected.dot(wind_axis_tower);
         auto xx2 = pow(xx, 2);
         // side position of point from tower
-        auto y_rel = position_relative_projected.dot(Vector3d(1.0, 1.0, 1.0) - wind_axis_tower.cwiseAbs());
-        auto yy = abs(y_rel);
+        auto yy = position_relative_projected.dot(wind_normal_tower);
         auto yy2 = pow(yy, 2);
+        // factor for tower shadow calculations
+        auto factor = pow(tower_radius, 2) / pow(yy2 + xx2, 2);
+
+        // wind shadow tangential to wind direction
+        auto wind_shadow_x = factor * (yy2 - xx2) * wind_velocity_tower.norm();
+        // wind shadow normal to wind direction
+        auto wind_shadow_y = factor * (-2.0 * xx * yy) * wind_velocity_tower.norm();
+
+        // total tower shadow contributions
+        auto wind_shadow = wind_shadow_x * wind_axis_tower + wind_shadow_y * wind_normal_tower;
 
         // update wind velocity
-        wind_velocity =
-            wind_velocity + tower_rot * wind_velocity_tower.cwiseProduct(pow(tower_radius, 2) / pow(yy2 + xx2, 2) *
-                                                                         Vector3d((yy2 - xx2), (-2.0 * xx * yy), 0.0));
+        wind_velocity += tower_rot * wind_shadow;
     }
 }
