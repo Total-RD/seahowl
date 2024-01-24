@@ -209,47 +209,25 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
     }
     tower_velocity /= (tower_aero.nodes.size());
 
-    // find rotation between global z-axis and tower z-axis (IEC coordinate system)
-    auto tower_rot = Quaternion(1.0, 0.0, 0.0, 0.0);
-    auto z_global = Vector3d(0.0, 0.0, 1.0);
-    auto z_dot = tower_axis.dot(z_global);
-    double tol = 1.0e-6;
-    if (z_dot < -(1.0 - tol)) {
-        // 180 degrees rotation
-        tower_rot = AngleAxisd(PI, Vector3d(1.0, 0.0, 0.0));
-    } else if (z_dot > 1.0 - tol) {
-        // no rotation
-        tower_rot = Quaternion(1.0, 0.0, 0.0, 0.0);
-    } else {
-        auto axis_tower_rot = z_global.cross(tower_axis).normalized();
-        auto angle_tower_rot = acos(z_dot);
-        tower_rot = AngleAxisd(angle_tower_rot, axis_tower_rot);
-    }
-
     // only take wind velocity perpendicular to tower axis
-    auto wind_velocity_tower = tower_rot.inverse() * (wind_velocity - tower_velocity);
-    wind_velocity_tower[2] = 0.0;
+    auto wind_velocity_tower =
+        (wind_velocity - tower_velocity) - ((wind_velocity - tower_velocity).dot(tower_axis)) * (tower_axis);
     auto wind_axis_tower = wind_velocity_tower.normalized();
-    auto wind_normal_tower = Vector3d(0., 0., 1.).cross(wind_axis_tower);
+    auto wind_normal_tower = tower_axis.cross(wind_axis_tower);
 
     // get z positions along tower axis
     // rotate all positions around center of tower to get relative positions to tower center in IEC coordinate system
-    auto rotation_center = 0.5 * (towerbase_position + towertop_position);
-    auto position_relative = tower_rot.inverse() * (position - rotation_center);
-    auto towerbase_relative = tower_rot.inverse() * (towerbase_position - rotation_center);
-    auto towertop_relative = tower_rot.inverse() * (towertop_position - rotation_center);
-    auto z_position = position_relative.z();
-    auto z_towerbase = towerbase_relative.z();
-    auto z_towertop = towertop_relative.z();
-    if (z_position > z_towerbase && z_position < z_towertop) {
+    auto z_position = (position - towerbase_position).dot(tower_axis);
+    auto z_towertop = (towertop_position - towerbase_position).dot(tower_axis);
+    if (z_position >= 0 && z_position <= z_towertop) {
         // get diameter at z position
-        auto z_rel = (z_position - z_towerbase) / (z_towertop - z_towerbase);
+        auto z_rel = z_position / z_towertop;
         std::vector<double> fractions{z_rel};
         auto tower_radius = seahowl::get_discretized_points(fractions, tower_aero.discretized_points)[0].diameter / 2.0;
 
         // find relative position
-        auto position_projected = towerbase_relative + z_rel * (towertop_relative - towerbase_relative);
-        auto position_relative_projected = position_relative - position_projected;
+        auto position_projected = towerbase_position + z_rel * (towertop_position - towerbase_position);
+        auto position_relative_projected = position - position_projected;
         // front position of point from tower
         auto xx = position_relative_projected.dot(wind_axis_tower);
         auto xx2 = pow(xx, 2);
@@ -268,6 +246,6 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
         auto wind_shadow = wind_shadow_x * wind_axis_tower + wind_shadow_y * wind_normal_tower;
 
         // update wind velocity
-        wind_velocity += tower_rot * wind_shadow;
+        wind_velocity += wind_shadow;
     }
 }
