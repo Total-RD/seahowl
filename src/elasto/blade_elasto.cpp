@@ -144,7 +144,16 @@ void BladeElastoFEA::apply_pitch_increment(double pitch_increment) {
 }
 
 seahowl::Vector3d BladeElastoFEA::get_blade_root_moment() const {
-    return elements[0]->get_torque(-1.0);
+    auto root_moment = elements[0]->get_torque(-1.0);
+    auto root_twist = reference_points[0].structural_twist;
+
+    // remove twist from blade root moment
+    auto x1 = root_moment.x();
+    auto y1 = root_moment.y();
+    auto x2 = cos(-root_twist) * x1 - sin(-root_twist) * y1;
+    auto y2 = sin(-root_twist) * x1 + cos(-root_twist) * y1;
+
+    return Vector3d(x2, y2, root_moment.z());
 }
 
 seahowl::EntityDynamicEigen BladeElastoFEA::get_entity_along_blade(double eta, int element_index) const {
