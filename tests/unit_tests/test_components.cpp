@@ -390,9 +390,9 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine.rna.elasto.lock_shaft(true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine.rna.elasto.lock_shaft(false);
     }
 
     double time = 0.0;
@@ -449,9 +449,9 @@ TEST(test_turbine, rpm_initial_pitch_fpm) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine.rna.elasto.lock_shaft(true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine.rna.elasto.lock_shaft(false);
     }
 
     double time = 0.0;
@@ -508,9 +508,9 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine.rna.elasto.lock_shaft(true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine.rna.elasto.lock_shaft(false);
     }
 
     double time = 0.0;
@@ -541,7 +541,7 @@ TEST(test_turbine, controller_target_rpm) {
     // solver
     auto verbose = false;
     // timestepping
-    double dt = 0.1;
+    double dt = 0.05;
     // wind
     auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
@@ -570,16 +570,16 @@ TEST(test_turbine, controller_target_rpm) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine.rna.elasto.lock_shaft(true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine.rna.elasto.lock_shaft(false);
     }
 
     double time = 0.0;
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
     // while (application.GetDevice()->run()) {
-    while (time < 200) {
+    while (time < 100) {
         // prestep
         // compute forces
         turbine.aero.compute_aero_loads(wind_model, time);
@@ -634,9 +634,9 @@ TEST(test_turbine, actuator_disk) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine.rna.elasto.lock_shaft(true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine.rna.elasto.lock_shaft(false);
     }
 
     double time = 0.0;
@@ -721,9 +721,9 @@ TEST(test_aerodyn, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine.rna.elasto.lock_shaft(true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine.rna.elasto.lock_shaft(false);
     }
 
     double time = 0.0;
@@ -855,9 +855,9 @@ TEST(test_inflowwind, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine.rna.elasto.lock_shaft(true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine.rna.elasto.lock_shaft(false);
     }
 
     double time = 0.0;

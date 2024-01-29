@@ -360,6 +360,9 @@ void populate_rna_elasto_from_json(const std::string& filepath, seahowl::elasto:
     shaft.at("tilt").get_to(rna.shaft.tilt);
     // convert to radians
     rna.shaft.tilt *= PI / 180.0;
+    // drivetrain
+    auto drivetrain = json_obj.at("drivetrain");
+    drivetrain.at("generator_inertia").get_to(rna.shaft.generator_inertia);
 }
 
 void populate_rna_aero_from_json(const std::string& filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
@@ -614,10 +617,6 @@ void populate_turbine_from_json(const std::string& filepath,
     // generator
     drivetrain.at("generator_efficiency").get_to(turbine.generator_efficiency);
     turbine.generator_efficiency /= 100.0;
-    // add inertia of generator to hub directly
-    double drivetrain_inertia;
-    drivetrain.at("generator_inertia").get_to(drivetrain_inertia);
-    turbine.rna.elasto.rotor->hub.inertia += drivetrain_inertia;
 
     if (json_obj.contains("floater")) {
         try {

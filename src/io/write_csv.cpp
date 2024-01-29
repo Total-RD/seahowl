@@ -29,7 +29,9 @@ void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::Syst
             myfile.open(filename);
             myfile << "time (s),wind x (m/s),wind y (m/s),wind z (m/s),rpm,power (W),pitch (rad),torque elec "
                       "(Nm),axial thrust (N),axial torque (Nm),rotor azimuth (rad),tower base moment x (Nm),tower base "
-                      "moment y (Nm),tower base moment z (Nm),";
+                      "moment y (Nm),tower base moment z (Nm),tower base force x (N),tower base force y (N),tower "
+                      "base force z (N),tower top moment x (Nm),tower top moment y (Nm),tower top moment z (Nm),"
+                      "tower top force x (N),tower top force y (N),tower top force z (N),";
             for (int idx_blade = 1; idx_blade < turbine.rna.blades.size() + 1; idx_blade++) {
                 myfile << "blade" + std::to_string(idx_blade) + " wind x (m/s),";
                 myfile << "blade" + std::to_string(idx_blade) + " wind y (m/s),";
@@ -76,6 +78,27 @@ void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::Syst
         myfile << std::to_string(tower_base_moment.y());
         myfile << ",";
         myfile << std::to_string(tower_base_moment.z());
+        myfile << ",";
+        auto tower_base_force = turbine.tower.elasto.get_tower_base_force();
+        myfile << std::to_string(tower_base_force.x());
+        myfile << ",";
+        myfile << std::to_string(tower_base_force.y());
+        myfile << ",";
+        myfile << std::to_string(tower_base_force.z());
+        myfile << ",";
+        auto tower_top_moment = turbine.tower.elasto.get_tower_top_moment();
+        myfile << std::to_string(tower_top_moment.x());
+        myfile << ",";
+        myfile << std::to_string(tower_top_moment.y());
+        myfile << ",";
+        myfile << std::to_string(tower_top_moment.z());
+        myfile << ",";
+        auto tower_top_force = turbine.tower.elasto.get_tower_top_force();
+        myfile << std::to_string(tower_top_force.x());
+        myfile << ",";
+        myfile << std::to_string(tower_top_force.y());
+        myfile << ",";
+        myfile << std::to_string(tower_top_force.z());
         myfile << ",";
         for (int ii = 0; ii < turbine.rna.blades.size(); ii++) {
             auto& blade = turbine.rna.blades[ii];

@@ -38,6 +38,21 @@ class TowerElasto : public ComponentElastoFEA {
      */
     Vector3d get_tower_base_moment() const;
 
+    /**
+     * @brief Returns tower base moment (second node of last element of tower).
+     */
+    Vector3d get_tower_top_moment() const;
+
+    /**
+     * @brief Returns tower base force (first node of first element of tower).
+     */
+    Vector3d get_tower_base_force() const;
+
+    /**
+     * @brief Returns tower base force (second node of last element of tower).
+     */
+    Vector3d get_tower_top_force() const;
+
   private:
     /**
      * @brief Builds the blade with Timoshenko elements (lineic density, foreaft stiffness, sideside stiffness).

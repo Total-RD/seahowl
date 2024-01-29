@@ -752,7 +752,7 @@ void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
     std::vector<bool> tower_fixed;
     for (auto& turbine : turbines) {
         // rotor
-        turbine->rna.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        turbine->rna.lock_shaft(true);
         // tower
         tower_fixed.push_back(turbine->tower.nodes.front()->is_fixed());
         turbine->tower.nodes.front()->set_fixed(true);
@@ -771,7 +771,7 @@ void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
     int idx_turbine = 0;
     for (auto& turbine : turbines) {
         // rotor
-        turbine->rna.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine->rna.lock_shaft(false);
         // tower
         turbine->tower.nodes.front()->set_fixed(tower_fixed[idx_turbine]);
     }

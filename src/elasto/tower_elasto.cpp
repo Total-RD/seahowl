@@ -73,5 +73,17 @@ void TowerElasto::build_elements_tapered_timoshenko() {
 }
 
 seahowl::Vector3d TowerElasto::get_tower_base_moment() const {
-    return elements[0]->get_torque(-1.0);
+    return elements.front()->get_torque(-1.0);
+}
+
+seahowl::Vector3d TowerElasto::get_tower_top_moment() const {
+    return elements.back()->get_torque(1.0);
+}
+
+seahowl::Vector3d TowerElasto::get_tower_base_force() const {
+    return elements.front()->get_force(-1.0);
+}
+
+seahowl::Vector3d TowerElasto::get_tower_top_force() const {
+    return elements.back()->get_force(1.0);
 }

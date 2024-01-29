@@ -61,11 +61,19 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("set_rest_length", &seahowl::elasto::ElementMooringElasto::set_rest_length)
         .def("get_rest_length", &seahowl::elasto::ElementMooringElasto::get_rest_length);
     py::class_<seahowl::elasto::Link, std::shared_ptr<seahowl::elasto::Link>>(m_elasto, "Link")
+        .def("initialize", [](seahowl::elasto::Link& link, seahowl::elasto::BodyElasto& body,
+                              seahowl::elasto::BodyElasto& body2) { link.initialize(body, body2); })
+        .def("initialize", [](seahowl::elasto::Link& link, seahowl::elasto::BodyElasto& body,
+                              seahowl::elasto::NodeElasto& node) { link.initialize(body, node); })
+        .def("initialize", [](seahowl::elasto::Link& link, seahowl::elasto::NodeElasto& node,
+                              seahowl::elasto::BodyElasto& body) { link.initialize(node, body); })
         .def("set_constraints", &seahowl::elasto::Link::set_constraints)
         .def("get_reaction_force", &seahowl::elasto::Link::get_reaction_force)
         .def("get_reaction_torque", &seahowl::elasto::Link::get_reaction_torque);
     py::class_<seahowl::elasto::MeshElasto, std::shared_ptr<seahowl::elasto::MeshElasto>>(m_elasto, "MeshElasto");
     py::class_<seahowl::elasto::SystemElasto, std::shared_ptr<seahowl::elasto::SystemElasto>>(m_elasto, "SystemElasto")
+        .def("add", [](seahowl::elasto::SystemElasto& system, seahowl::elasto::BodyElasto& body) { system.add(body); })
+        .def("add", [](seahowl::elasto::SystemElasto& system, seahowl::elasto::Link& link) { system.add(link); })
         .def("step", &seahowl::elasto::SystemElasto::step)
         .def("get_time", &seahowl::elasto::SystemElasto::get_time)
         .def("set_gravitational_acceleration", &seahowl::elasto::SystemElasto::set_gravitational_acceleration)
@@ -191,6 +199,9 @@ void initialize_pyseahowl_elasto(py::module& m) {
             "body_shaft", [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.body_shaft.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
+            "body_bedplate", [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.body_bedplate.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
             "body_nacelle", [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.body_nacelle.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
@@ -201,15 +212,19 @@ void initialize_pyseahowl_elasto(py::module& m) {
             "link_shaft_hub", [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_shaft_hub.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
+            "link_shaft_bedplate",
+            [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_shaft_bedplate.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
             "link_shaft_nacelle",
-            [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_shaft_nacelle.get(); },
+            [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_bedplate_nacelle.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
-            "link_shaft_yaw_bearing",
-            [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_shaft_yaw_bearing.get(); },
+            "link_nacelle_yaw_bearing",
+            [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_nacelle_yaw_bearing.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
-            "link_shaft_yaw_bearing",
+            "link_nacelle_yaw_bearing",
             [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_towertop_yaw_bearing.get(); },
             py::return_value_policy::reference_internal);
 
