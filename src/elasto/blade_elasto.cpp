@@ -156,6 +156,19 @@ seahowl::Vector3d BladeElastoFEA::get_blade_root_moment() const {
     return Vector3d(x2, y2, root_moment.z());
 }
 
+seahowl::Vector3d BladeElastoFEA::get_blade_root_force() const {
+    auto root_force = elements[0]->get_force(-1.0);
+    auto root_twist = reference_points[0].structural_twist;
+
+    // remove twist from blade root moment
+    auto x1 = root_force.x();
+    auto y1 = root_force.y();
+    auto x2 = cos(-root_twist) * x1 - sin(-root_twist) * y1;
+    auto y2 = sin(-root_twist) * x1 + cos(-root_twist) * y1;
+
+    return Vector3d(x2, y2, root_force.z());
+}
+
 seahowl::EntityDynamicEigen BladeElastoFEA::get_entity_along_blade(double eta, int element_index) const {
     return get_entity_along_component(eta, element_index);
 }
@@ -177,11 +190,13 @@ BladeElastoRigid::BladeElastoRigid() {}
 
 void BladeElastoRigid::build() {
     body_root = std::make_unique<BodyElastoChrono>();
+    body_cog = std::make_unique<BodyElastoChrono>();
     length = reference_points.back().coordinates.z();
 
     // calculate mass
     double mass_total = 0.0;
     double inertia_total = 0.0;
+    double z_pos = 0.0;
     for (int ii = 0; ii < reference_points.size() - 1; ii++) {
         auto& point1 = reference_points[ii];
         auto& point2 = reference_points[ii + 1];
@@ -192,23 +207,37 @@ void BladeElastoRigid::build() {
         auto length_segment = abs(l2 - l1);
 
         // mass of blade segment
-        mass_total += 0.5 * (rho1 + rho2) * length_segment;
+        auto mass_segment = 0.5 * (rho1 + rho2) * length_segment;
+        mass_total += mass_segment;
+        z_pos += 0.5 * (l1 + l2) * mass_segment;
 
         // inertia assuming rod element with non-uniform linear density
         inertia_total += ((pow(l2, 4) - pow(l1, 4)) / 4.0 * (rho2 - rho1) +
                           (pow(l2, 3) - pow(l1, 3)) / 3.0 * (rho1 * l2 - rho2 * l1)) /
                          length_segment;
     };
+    z_pos /= mass_total;
 
     // set mass and inertia at root
-    body_root->set_mass(mass_total);
+    body_cog->set_position(Vector3d(0., 0., z_pos));
+    body_cog->set_mass(mass_total);
+    body_cog->set_inertia_diagonal(Vector3d(0., 0., 0.));
     // inertia of blade calculated from body root for rotation along local x and y
+    body_root->set_position(Vector3d(0., 0., 0.));
+    body_root->set_mass(0.);
     body_root->set_inertia_diagonal(Vector3d(inertia_total, inertia_total, 0.0));
+
+    // link root and cog
+    link_cog_root = std::make_unique<LinkChrono>();
+    link_cog_root->set_constraints(true, true, true, true, true, true);
+    link_cog_root->initialize(*body_cog, *body_root);
 }
 
 void BladeElastoRigid::assemble(SystemElasto& system) {
     BladeElasto::assemble(system);
     system.add(*(body_root.get()));
+    system.add(*(body_cog.get()));
+    system.add(*(link_cog_root.get()));
 }
 
 void BladeElastoRigid::rotate(double angle, const Vector3d& axis) const {
@@ -218,15 +247,21 @@ void BladeElastoRigid::rotate(double angle, const Vector3d& axis) const {
     auto new_rotation_root = (rotation * body_root->get_rotation()).normalized();
     body_root->set_position(new_position_root);
     body_root->set_rotation(new_rotation_root);
+    // blade cog
+    auto new_position_cog = rotation * body_cog->get_position();
+    auto new_rotation_cog = (rotation * body_cog->get_rotation()).normalized();
+    body_cog->set_position(new_position_cog);
+    body_cog->set_rotation(new_rotation_cog);
 }
 
 void BladeElastoRigid::translate(const Vector3d& translation_vector) const {
     // blade root
     body_root->set_position(body_root->get_position() + translation_vector);
+    body_cog->set_position(body_cog->get_position() + translation_vector);
 }
 
 double BladeElastoRigid::get_mass() const {
-    return body_root->get_mass();
+    return body_cog->get_mass() + body_root->get_mass();
 }
 
 void BladeElastoRigid::apply_pitch_increment(double pitch_increment) {
@@ -240,7 +275,11 @@ void BladeElastoRigid::apply_pitch_increment(double pitch_increment) {
 }
 
 seahowl::Vector3d BladeElastoRigid::get_blade_root_moment() const {
-    return body_root->get_torque();
+    return link_cog_root->get_reaction_torque() + body_root->get_torque();
+}
+
+seahowl::Vector3d BladeElastoRigid::get_blade_root_force() const {
+    return link_cog_root->get_reaction_force() + body_root->get_force();
 }
 
 seahowl::EntityDynamicEigen BladeElastoRigid::get_entity_along_blade(double eta, int element_index) const {
@@ -282,6 +321,7 @@ seahowl::EntityDynamicEigen BladeElastoRigid::get_entity_along_blade(double eta,
 
 void BladeElastoRigid::reset_loads() {
     body_root->reset_loads();
+    body_cog->reset_loads();
 }
 
 void BladeElastoRigid::accumulate_load_along_blade(const seahowl::Vector3d& load,

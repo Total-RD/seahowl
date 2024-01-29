@@ -157,6 +157,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readwrite("discretization_fractions", &seahowl::elasto::BladeElasto::discretization_fractions)
         .def("apply_pitch_increment", &seahowl::elasto::BladeElasto::apply_pitch_increment)
         .def("get_blade_root_moment", &seahowl::elasto::BladeElasto::get_blade_root_moment)
+        .def("get_blade_root_force", &seahowl::elasto::BladeElasto::get_blade_root_force)
         .def("get_entity_along_blade", &seahowl::elasto::BladeElasto::get_entity_along_blade)
         .def("accumulate_load_along_blade", &seahowl::elasto::BladeElasto::accumulate_load_along_blade)
         .def("attach_root_to_body", &seahowl::elasto::BladeElasto::attach_root_to_body);
@@ -167,11 +168,6 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def(py::init<>());
     py::class_<seahowl::elasto::BladeElastoRigid, std::shared_ptr<seahowl::elasto::BladeElastoRigid>,
                seahowl::elasto::BladeElasto>(m_elasto, "BladeElastoRigid")
-        .def_property_readonly(
-            "body_root", [](seahowl::elasto::BladeElastoRigid& blade) { return blade.body_root.get(); },
-            py::return_value_policy::reference_internal)
-        .def_readwrite("length", &seahowl::elasto::BladeElastoRigid::length)
-        .def_readwrite("mass", &seahowl::elasto::BladeElastoRigid::mass)
         .def(py::init<>());
 
     // elasto/rotor_elasto.h
@@ -227,8 +223,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("get_tower_base_moment", &seahowl::elasto::TowerElasto::get_tower_base_moment);
 
     // elasto/turbine_elasto.h
-    py::class_<seahowl::elasto::TurbineElasto, std::shared_ptr<seahowl::elasto::TurbineElasto>>(m_elasto,
-                                                                                                "TurbineElasto")
+    py::class_<seahowl::elasto::TurbineElasto, std::shared_ptr<seahowl::elasto::TurbineElasto>,
+               seahowl::elasto::ComponentElasto>(m_elasto, "TurbineElasto")
         .def_readonly("rna", &seahowl::elasto::TurbineElasto::rna)
         .def_readonly("tower", &seahowl::elasto::TurbineElasto::tower)
         .def(py::init<>());

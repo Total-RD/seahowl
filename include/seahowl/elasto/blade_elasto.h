@@ -37,9 +37,14 @@ class BladeElasto : public virtual ComponentElasto {
     virtual void apply_pitch_increment(double pitch_increment) = 0;
 
     /**
-     * @brief Returns blade root moment (first node of first element of blade).
+     * @brief Returns blade root moment.
      */
     virtual Vector3d get_blade_root_moment() const = 0;
+
+    /**
+     * @brief Returns blade root force.
+     */
+    virtual Vector3d get_blade_root_force() const = 0;
 
     virtual EntityDynamicEigen get_entity_along_blade(double eta, int element_index = 0) const = 0;
 
@@ -89,6 +94,7 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
 
     virtual void apply_pitch_increment(double pitch_increment) override;
     virtual Vector3d get_blade_root_moment() const override;
+    virtual Vector3d get_blade_root_force() const override;
     virtual EntityDynamicEigen get_entity_along_blade(double eta, int element_index = 0) const override;
     virtual void accumulate_load_along_blade(const Vector3d& load,
                                              const seahowl::Vector3d& moment,
@@ -116,13 +122,6 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
  */
 class BladeElastoRigid : public BladeElasto {
   public:
-    /** @brief Body at the root of the blade. */
-    std::unique_ptr<BodyElastoChrono> body_root;
-    /** @brief Length of the blade. */
-    double length = 0.0;
-    /** @brief Mass of the blade. */
-    double mass = 0.0;
-
     /**
      * @brief Constructor.
      */
@@ -136,6 +135,7 @@ class BladeElastoRigid : public BladeElasto {
 
     virtual void apply_pitch_increment(double pitch_increment) override;
     virtual Vector3d get_blade_root_moment() const override;
+    virtual Vector3d get_blade_root_force() const override;
     virtual EntityDynamicEigen get_entity_along_blade(double eta, int element_index = 0) const override;
     virtual void reset_loads() override;
     virtual void accumulate_load_along_blade(const Vector3d& load,
@@ -144,6 +144,16 @@ class BladeElastoRigid : public BladeElasto {
                                              double eta,
                                              const Vector3d& offset) override;
     virtual void attach_root_to_body(const BodyElasto& body) override;
+
+  private:
+    /** @brief Length of the blade. */
+    double length = 0.0;
+    /** @brief Body at the root of the blade. */
+    std::unique_ptr<BodyElastoChrono> body_root;
+    /** @brief Body at the COG of the blade. */
+    std::unique_ptr<BodyElastoChrono> body_cog;
+    /** @brief Link between bodies at the root and COG of the blade. */
+    std::unique_ptr<Link> link_cog_root;
 };
 
 }  // namespace elasto
