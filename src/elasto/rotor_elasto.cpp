@@ -50,9 +50,6 @@ void RotorElasto::build() {
         // rotate blade around hub
         blade->rotate(azimuth0,
                       Vector3d(1.0, 0.0, 0.0));  // X is the axis pointing towards nacelle for blade (IEC standard)
-
-        // link root node of blade to rotor center
-        blade->attach_root_to_body(*body_hub);
     }
 
     // apply initial pitch of blades
@@ -64,6 +61,9 @@ void RotorElasto::build() {
         blade->apply_pitch_increment(total_blade_pitch);
         // register new pitch value
         blade->pitch = total_blade_pitch;
+
+        // link root node of blade to rotor center
+        blade->attach_root_to_body(*body_hub);
     }
 }
 
