@@ -8,9 +8,7 @@ using seahowl::elasto::BladeElasto;
 using seahowl::elasto::RotorElasto;
 using seahowl::elasto::RotorNacelleAssemblyElasto;
 
-RotorElasto::RotorElasto() {
-    body_hub = std::make_unique<BodyElastoChrono>();
-}
+RotorElasto::RotorElasto() {}
 
 void RotorElasto::assemble(SystemElasto& system) {
     for (auto& blade : blades) {
@@ -28,6 +26,7 @@ void RotorElasto::build() {
     auto rotation0 = Quaternion(1.0, 0.0, 0.0, 0.0);
 
     // hub
+    body_hub = std::make_unique<BodyElastoChrono>();
     // mass and inertia
     body_hub->set_mass(hub.mass);
     body_hub->set_inertia_diagonal(Vector3d(hub.inertia, 0., 0.));
@@ -77,11 +76,6 @@ void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
     }
     pitch_collective += pitch_increment;
 }
-
-void RotorElasto::accumulate_axial_torque(double torque) {
-    body_hub->accumulate_torque(Vector3d(torque, 0.0, 0.0), true);
-}
-
 void RotorElasto::rotate(double angle, const Vector3d& axis) const {
     // blades
     for (auto& blade : blades) {
@@ -103,6 +97,7 @@ void RotorElasto::translate(const Vector3d& translation_vector) const {
     // hub
     body_hub->set_position(body_hub->get_position() + translation_vector);
 }
+
 double RotorElasto::get_mass() const {
     double total_mass = 0.0;
     // blades
@@ -118,37 +113,22 @@ void RotorElasto::reset_loads() {
     body_hub->reset_loads();
 }
 
+void RotorElasto::accumulate_axial_torque(double torque) {
+    body_hub->accumulate_torque(Vector3d(torque, 0.0, 0.0), true);
+}
+
 RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {
-    // rotor
     rotor = std::make_unique<RotorElasto>();
-
-    // shaft
-    body_shaft = std::make_unique<BodyElastoChrono>();
-    link_shaft_hub = std::make_unique<LinkChrono>();
-
-    // bedplate
-    body_bedplate = std::make_unique<BodyElastoChrono>();
-    link_shaft_bedplate = std::make_unique<LinkChrono>();
-
-    // nacelle
-    body_nacelle = std::make_unique<BodyElastoChrono>();
-    link_bedplate_nacelle = std::make_unique<LinkChrono>();
-
-    // yaw bearing
-    body_yaw_bearing = std::make_unique<BodyElastoChrono>();
-    link_nacelle_yaw_bearing = std::make_unique<LinkChrono>();
 }
 
 void RotorNacelleAssemblyElasto::assemble(SystemElasto& system) {
     rotor->assemble(system);
     system.add(*(body_shaft.get()));
-    system.add(*(body_bedplate.get()));
-    system.add(*(link_shaft_bedplate.get()));
     system.add(*(link_shaft_hub.get()));
     system.add(*(body_nacelle.get()));
-    system.add(*(link_bedplate_nacelle.get()));
+    system.add(*(link_shaft_nacelle.get()));
     system.add(*(body_yaw_bearing.get()));
-    system.add(*(link_nacelle_yaw_bearing.get()));
+    system.add(*(link_shaft_yaw_bearing.get()));
 }
 
 void RotorNacelleAssemblyElasto::build() {
@@ -163,29 +143,20 @@ void RotorNacelleAssemblyElasto::build() {
     auto rotation0 = Quaternion(1.0, 0.0, 0.0, 0.0);
 
     // shaft
+    body_shaft = std::make_unique<BodyElastoChrono>();
     // move end of shaft at yaw axis of nacelle
     body_shaft->set_position(Vector3d(0.0, 0.0, shaft.distance_from_towertop));
     // align rotation
     body_shaft->set_rotation(rotor->body_hub->get_rotation());
     // massless body
     body_shaft->set_mass(0.0);
-    body_shaft->set_inertia_diagonal(Vector3d(shaft.generator_inertia, 0.0, 0.0));
     // link hub to shaft
+    link_shaft_hub = std::make_unique<LinkChrono>();
     link_shaft_hub->initialize(*(rotor->body_hub.get()), *(body_shaft.get()));
-    link_shaft_hub->set_constraints(true, true, true, true, true, true);
-
-    // bedplate
-    // move bedplate at yaw axis of nacelle
-    body_bedplate->set_position(Vector3d(0.0, 0.0, shaft.distance_from_towertop));
-    // align rotation
-    body_bedplate->set_rotation(rotor->body_hub->get_rotation());
-    // massless body
-    body_bedplate->set_mass(0.0);
-    // link shaft to bedplate
-    link_shaft_bedplate->initialize(*(body_shaft.get()), *(body_bedplate.get()));
-    link_shaft_bedplate->set_constraints(true, true, true, false, true, true);
+    link_shaft_hub->set_constraints(true, true, true, false, true, true);
 
     // nacelle
+    body_nacelle = std::make_unique<BodyElastoChrono>();
     body_nacelle->set_position(nacelle.center_of_mass);
     body_nacelle->set_rotation(rotation0);
     // mass and inertia
@@ -193,16 +164,19 @@ void RotorNacelleAssemblyElasto::build() {
     ///@todo  change to full 3x3 inertia matrix
     body_nacelle->set_inertia_diagonal(Vector3d(0.0, 0.0, nacelle.inertia));
     // link nacelle body to shaft body
-    link_bedplate_nacelle->initialize(*(body_bedplate.get()), *(body_nacelle.get()));
-    link_bedplate_nacelle->set_constraints(true, true, true, true, true, true);
+    link_shaft_nacelle = std::make_unique<LinkChrono>();
+    link_shaft_nacelle->initialize(*(body_nacelle.get()), *(body_shaft.get()));
+    link_shaft_nacelle->set_constraints(true, true, true, true, true, true);
 
     // yaw bearing
+    body_yaw_bearing = std::make_unique<BodyElastoChrono>();
     body_yaw_bearing->set_position(Vector3d(0.0, 0.0, 0.0));
     body_yaw_bearing->set_rotation(rotation0);
     body_yaw_bearing->set_mass(nacelle.yaw_bearing_mass);
     // link yaw bearing body to shaft body
-    link_nacelle_yaw_bearing->initialize(*(body_bedplate.get()), *(body_yaw_bearing.get()));
-    link_nacelle_yaw_bearing->set_constraints(true, true, true, true, true, true);
+    link_shaft_yaw_bearing = std::make_unique<LinkChrono>();
+    link_shaft_yaw_bearing->initialize(*(body_shaft.get()), *(body_yaw_bearing.get()));
+    link_shaft_yaw_bearing->set_constraints(true, true, true, true, true, true);
 }
 
 void RotorNacelleAssemblyElasto::rotate(double angle, const Vector3d& axis) const {
@@ -214,11 +188,6 @@ void RotorNacelleAssemblyElasto::rotate(double angle, const Vector3d& axis) cons
     auto new_rotation_shaft = (rotation * body_shaft->get_rotation()).normalized();
     body_shaft->set_position(new_position_shaft);
     body_shaft->set_rotation(new_rotation_shaft);
-    // bedplate
-    auto new_position_bedplate = rotation * body_bedplate->get_position();
-    auto new_rotation_bedplate = (rotation * body_bedplate->get_rotation()).normalized();
-    body_bedplate->set_position(new_position_bedplate);
-    body_bedplate->set_rotation(new_rotation_bedplate);
     // nacelle
     auto new_position_nacelle = rotation * body_nacelle->get_position();
     auto new_rotation_nacelle = (rotation * body_nacelle->get_rotation()).normalized();
@@ -236,8 +205,6 @@ void RotorNacelleAssemblyElasto::translate(const Vector3d& translation_vector) c
     rotor->translate(translation_vector);
     // shaft
     body_shaft->set_position(body_shaft->get_position() + translation_vector);
-    // bedplate
-    body_bedplate->set_position(body_bedplate->get_position() + translation_vector);
     // nacelle
     body_nacelle->set_position(body_nacelle->get_position() + translation_vector);
     // yaw_bearing
@@ -250,8 +217,6 @@ double RotorNacelleAssemblyElasto::get_mass() const {
     total_mass += rotor->get_mass();
     // shaft
     total_mass += body_shaft->get_mass();
-    // bedplate
-    total_mass += body_bedplate->get_mass();
     // nacelle
     total_mass += body_nacelle->get_mass();
     // yaw_bearing
@@ -262,23 +227,12 @@ double RotorNacelleAssemblyElasto::get_mass() const {
 void RotorNacelleAssemblyElasto::reset_loads() {
     rotor->reset_loads();
     body_shaft->reset_loads();
-    body_bedplate->reset_loads();
-    body_nacelle->reset_loads();
-    body_yaw_bearing->reset_loads();
-}
-
-void RotorNacelleAssemblyElasto::lock_shaft(bool locked) {
-    if (locked) {
-        link_shaft_bedplate->set_constraints(true, true, true, true, true, true);
-    } else {
-        link_shaft_bedplate->set_constraints(true, true, true, false, true, true);
-    }
 }
 
 double RotorNacelleAssemblyElasto::get_rpm() const {
     // relative rotational velocity between hub and shaft (in local reference frame of the hub)
     auto rotational_velocity =
-        (body_shaft->get_rotational_velocity(true) - body_bedplate->get_rotational_velocity(true));
+        (rotor->body_hub->get_rotational_velocity(true) - body_shaft->get_rotational_velocity(true));
     // convert to rpm
     auto rpm = rotational_velocity.x() * 60 / (2 * PI);
     return rpm;
@@ -286,7 +240,7 @@ double RotorNacelleAssemblyElasto::get_rpm() const {
 
 double RotorNacelleAssemblyElasto::get_azimuth() const {
     // get angle between quaternions
-    auto qq = (body_bedplate->get_rotation().conjugate() * body_shaft->get_rotation()).normalized();
+    auto qq = (body_shaft->get_rotation().conjugate() * rotor->body_hub->get_rotation()).normalized();
     double angle0 = 2 * std::atan2(qq.vec().x(), qq.w());
     // get angle between 0 and 2pi
     double angle1 = fmod(angle0, 2 * PI);
@@ -311,6 +265,6 @@ double RotorNacelleAssemblyElasto::get_axial_torque() const {
 }
 
 void RotorNacelleAssemblyElasto::accumulate_electrical_torque(double torque) {
+    rotor->body_hub->accumulate_torque(Vector3d(-torque, 0.0, 0.0), true);
     body_shaft->accumulate_torque(Vector3d(torque, 0.0, 0.0), true);
-    body_bedplate->accumulate_torque(Vector3d(-torque, 0.0, 0.0), true);
 }

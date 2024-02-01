@@ -56,8 +56,6 @@ struct ShaftProperties {
     double tilt = 0.0;
     /** @brief Distance of shaft axis from towertop. */
     double distance_from_towertop = 0.0;
-    /** @brief Inertia of the hub. */
-    double generator_inertia = 0.0;
 };
 
 class RotorElasto : public ComponentElasto {
@@ -97,7 +95,7 @@ class RotorElasto : public ComponentElasto {
     virtual double get_mass() const override;
 
     /**
-     * @brief Resets all loads.
+     * @brief Resets accumulated loads.
      */
     void reset_loads();
 
@@ -113,7 +111,7 @@ class RotorElasto : public ComponentElasto {
     void apply_collective_pitch_increment(double pitch_increment);
 
     /**
-     * @brief Accumulates torque on the hub.
+     * @brief Accumulates torque on the rotor.
      *
      * @param[in] torque Torque to accumulate on axial axis of hub.
      */
@@ -134,8 +132,6 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     std::unique_ptr<seahowl::elasto::RotorElasto> rotor;
     /** @brief Shaft rigid body. */
     std::unique_ptr<seahowl::elasto::BodyElasto> body_shaft;
-    /** @brief Bedplate rigid body (to fix shaft). */
-    std::unique_ptr<seahowl::elasto::BodyElasto> body_bedplate;
     /** @brief Nacelle rigid body. */
     std::unique_ptr<seahowl::elasto::BodyElasto> body_nacelle;
     /** @brief Yaw bearing rigid body. */
@@ -143,14 +139,12 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
 
     // links
     //
-    /** @brief Link between shaft and hub (fixed). */
+    /** @brief Link between shaft and hub (revolute). */
     std::unique_ptr<Link> link_shaft_hub;
-    /** @brief Link between shaft and bedplate (revolute). */
-    std::unique_ptr<Link> link_shaft_bedplate;
-    /** @brief Link between bedplate and nacelle (fixed). */
-    std::unique_ptr<Link> link_bedplate_nacelle;
-    /** @brief Link between nacelle and yaw bearing (fixed). */
-    std::unique_ptr<Link> link_nacelle_yaw_bearing;
+    /** @brief Link between shaft and nacelle (fixed). */
+    std::unique_ptr<Link> link_shaft_nacelle;
+    /** @brief Link between shaft and yaw bearing (fixed). */
+    std::unique_ptr<Link> link_shaft_yaw_bearing;
     /** @brief Link between towertop (if any) and yaw bearing (fixed). */
     std::unique_ptr<Link> link_towertop_yaw_bearing;
     ///@}
@@ -184,14 +178,9 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     double get_mass() const override;                                   ///< @see ElastoComponent::get_mass
 
     /**
-     * @brief Resets all loads.
+     * @brief Resets accumulated loads.
      */
     void reset_loads();
-
-    /**
-     * @brief Locks shaft if true, unlocks it if false.
-     */
-    void lock_shaft(bool locked);
 
     /**
      * @brief Returns the RPM of the rotor.
@@ -214,9 +203,9 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     double get_azimuth() const;
 
     /**
-     * @brief Accumulates electrical torque on the rotor.
+     * @brief Accumulates torque on the rotor.
      *
-     * @param[in] torque Torque to accumulate on axial axis of rotor.
+     * @param[in] torque Torque to accumulate on axial axis of hub.
      */
     void accumulate_electrical_torque(double torque);
 };

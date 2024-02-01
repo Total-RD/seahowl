@@ -48,6 +48,7 @@ void ControllerVariableTorque::step(double time, double dt, const seahowl::core:
         // @todo Line below is specific to actuator disk (otherwise torque_aero is zero), need to move it
         // inside turbine.rna.elasto.get_axial_torque()
         torque_aero += turbine.rna.aero.rotor->hub_torque_aero;
+
         torque_elec = torque_aero * std::pow(rpm / target_rpm, 2);
         // torque_elec must be the torque at the generator --> scaled by gearbox ratio and efficiency
         torque_elec *= turbine.gearbox_efficiency / turbine.gearbox_ratio;

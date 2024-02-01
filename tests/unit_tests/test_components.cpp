@@ -390,9 +390,9 @@ TEST(test_turbine, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.lock_shaft(true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.lock_shaft(false);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
@@ -449,9 +449,9 @@ TEST(test_turbine, rpm_initial_pitch_fpm) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.lock_shaft(true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.lock_shaft(false);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
@@ -508,9 +508,9 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.lock_shaft(true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.lock_shaft(false);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
@@ -570,9 +570,9 @@ TEST(test_turbine, controller_target_rpm) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.lock_shaft(true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.lock_shaft(false);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
@@ -634,9 +634,9 @@ TEST(test_turbine, actuator_disk) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.lock_shaft(true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.lock_shaft(false);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
@@ -721,9 +721,9 @@ TEST(test_aerodyn, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.lock_shaft(true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.lock_shaft(false);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
@@ -855,9 +855,9 @@ TEST(test_inflowwind, rpm_initial_pitch) {
 
     // statics
     if (statics_prestep) {
-        turbine.rna.elasto.lock_shaft(true);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
         system_elasto.do_statics(true, 10);
-        turbine.rna.elasto.lock_shaft(false);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
     double time = 0.0;
