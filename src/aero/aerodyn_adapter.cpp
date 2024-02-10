@@ -369,6 +369,9 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     WtrDpth = 0.0;           // Water depth (m)
     MSL2SWL = 0.0;           // Offset between still-water level and mean sea level (m) [positive upward]
 
+    // Type of aerodynamic projection
+    AeroProjMod = 1;  // Original AeroDyn model where momentum balance is done in the WithoutSweepPitchTwist system
+
     // Interpolation order (must be 1: linear, or 2: quadratic)
     InterpOrder = 1;  // default of linear interpolation
 
@@ -385,12 +388,16 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     // NumBlades    = 3;
     // NumMeshPts   = 1;
 
+    // Output file
+    wrOuts = 0;     // wrOuts -- file format for writing outputs
+    DT_Outs = 0.0;  // DT_Outs -- timestep for outputs to file
+
     AeroDyn_Inflow_C_Init(ADinputFilePassed, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed, &IfWinputFile,
                           IfWinputFileStringLength, OutRootName, gravity, defFldDens, defKinVisc, defSpdSound, defPatm,
-                          defPvap, WtrDpth, MSL2SWL, InterpOrder, Time, DT, TMax, storeHHVel, TransposeDCM, WrVTK,
-                          WrVTK_Type, WrVTK_dt, VTKNacDim, VTKHubRad, HubPos, HubOri, NacPos, NacOri, NumBlades,
-                          BldRootPos, BldRootOri, NumMeshPts, MeshPos, MeshOri, NumChannels, OutputChannelNames,
-                          OutputChannelUnits, ErrStat, ErrMsg);
+                          defPvap, WtrDpth, MSL2SWL, AeroProjMod, InterpOrder, DT, TMax, storeHHVel, TransposeDCM,
+                          WrVTK, WrVTK_Type, WrVTK_dt, VTKNacDim, VTKHubRad, wrOuts, DT_Outs, HubPos, HubOri, NacPos,
+                          NacOri, NumBlades, BldRootPos, BldRootOri, NumMeshPts, MeshPos, MeshOri, NumChannels,
+                          OutputChannelNames, OutputChannelUnits, ErrStat, ErrMsg);
 
     CheckError();
 }

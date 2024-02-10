@@ -34,8 +34,8 @@ void AeroDyn_Inflow_C_Init(bool& ADinputFilePassed,
                            float& defPvap_C,
                            float& WtrDpth_C,
                            float& MSL2SWL_C,
+                           int& AeroProjMod_C,
                            int& InterpOrder_C,
-                           double& T_initial_C,
                            double& DT_C,
                            double& TMax_C,
                            bool& storeHHVel,
@@ -45,6 +45,8 @@ void AeroDyn_Inflow_C_Init(bool& ADinputFilePassed,
                            double& WrVTK_dt,
                            float* VTKNacDim_in,
                            float& VTKHubRad_in,
+                           int& wrOuts_C,
+                           double& DT_Outs_C,
                            float* HubPos_C,
                            double* HubOri_C,
                            float* NacPos_C,
@@ -184,6 +186,13 @@ struct AeroDynInflowLib {
     float WtrDpth;      // Water depth (m)
     float MSL2SWL;      // Offset between still-water level and mean sea level (m) [positive upward]
 
+    // Aero calculation method -- AeroProjMod
+    // APM_BEM_NoSweepPitchTwist - 1 -  "Original AeroDyn model where momentum balance is done in the
+    // WithoutSweepPitchTwist system" APM_BEM_Polar             - 2 -  "Use staggered polar grid for momentum balance in
+    // each annulus" APM_LiftingLine           - 3 -  "Use the blade lifting line (i.e. the structural) orientation
+    // (currently for OLAF with VAWT)" Type of aerodynamic projection
+    int AeroProjMod;
+
     // Interpolation order (must be 1: linear, or 2: quadratic)
     int InterpOrder;  // default of linear interpolation
 
@@ -204,6 +213,10 @@ struct AeroDynInflowLib {
     double WrVTK_dt;   // vtk save time step
     float* VTKNacDim;  // default nacelle dimension for VTK surface rendering [x0,y0,z0,Lx,Ly,Lz] (m)
     float VTKHubRad;   // default hub radius for VTK surface rendering
+
+    // Write outputs to file
+    int wrOuts;      // write ADI output file
+    double DT_Outs;  // timestep to write output file from ADI
 
     // Initial position of hub and blades
     // used for setup of AD, not used after init.
