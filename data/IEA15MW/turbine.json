@@ -43,7 +43,7 @@
       "elasto": [],
       "aero": [19]
     },
-    "file": "./tower.json"
+    "file": "./tower.csv"
   },
   "controller": {
     "type": "DISCON",

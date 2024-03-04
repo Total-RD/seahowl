@@ -123,14 +123,14 @@ TEST(test_tower, mass) {
 
     // tower
     auto tower = seahowl::elasto::TowerElasto();
-    populate_tower_elasto_from_json((DATADIR / "tower.json").generic_string(), tower);
+    populate_tower_elasto_from_json((DATADIR / "tower.csv").generic_string(), tower);
     tower.build();
     tower.assemble(system_elasto);
 
     system_elasto.do_statics(true, 0);
 
     // check mass
-    double tower_mass = 853463.237;
+    double tower_mass = 853459.747;
     ASSERT_NEAR(tower_mass, tower.get_mass(), 1.0);
 }
 
@@ -277,7 +277,7 @@ TEST(test_bemt, tower_shadow_check) {
     auto tower_elasto = seahowl::elasto::TowerElasto();
     auto tower_aero = seahowl::aero::TowerAero();
     auto tower = seahowl::core::Tower(tower_elasto, tower_aero);
-    populate_tower_from_json((DATADIR / "tower.json").generic_string(), tower);
+    populate_tower_from_json((DATADIR / "tower.csv").generic_string(), tower);
 
     // build elasto and aero parts
     tower.build();

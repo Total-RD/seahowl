@@ -64,6 +64,123 @@ json get_json_from_file(const std::string& filepath) {
     return json_obj;
 }
 
+class InputData {
+  public:
+    int nrows = 0;
+    virtual void open(const std::string& filepath) = 0;
+    virtual double get(const std::string& key, int row) = 0;
+};
+
+class InputDataCSV : public InputData {
+    std::map<std::string, std::vector<double>> csv_data;
+
+  public:
+    void open(const std::string& filepath) override {
+        check_file_exists(filepath);
+        // open file
+        std::ifstream csv_file;
+        csv_file.open(filepath);
+
+        // headers
+        std::map<int, std::string> csv_headers;
+        std::string line, word;
+        std::getline(csv_file, line);
+        std::stringstream line_ss(line);
+        int idx_header = 0;
+        while (std::getline(line_ss, word, ',')) {
+            csv_data[word] = {};
+            csv_headers[idx_header] = word;
+            idx_header += 1;
+        }
+
+        // data
+        int idx_line = 1;
+        while (std::getline(csv_file, line)) {
+            std::stringstream line_ss(line);
+            int idx_word = 0;
+            while (std::getline(line_ss, word, ',')) {
+                csv_data[csv_headers[idx_word]].push_back(std::stod(word));
+                idx_word += 1;
+            }
+            idx_line += 1;
+            if (idx_word != idx_header) {
+                throw std::runtime_error("File " + filepath + " at line " + std::to_string(idx_line) +
+                                         ": number of columns (" + std::to_string(idx_word) +
+                                         ") different from number of headers (" + std::to_string(idx_header) + ").");
+            }
+        }
+        nrows = idx_line - 1;
+
+        csv_file.close();
+    }
+
+    double get(const std::string& key, int row) override {
+        if (csv_data.count(key) > 0) {
+            return csv_data[key][row];
+        } else {
+            throw std::runtime_error("Header " + key + " does not exist in CSV file.");
+        }
+    }
+};
+
+class InputDataJSON : public InputData {
+    json json_data;
+
+  public:
+    void open(const std::string& filepath) override {
+        check_file_exists(filepath);
+        std::ifstream json_file(filepath);
+        json_file >> json_data;
+        json_file.close();
+        nrows = json_data.size();
+    }
+
+    double get(const std::string& key, int row) override { return json_data[row].at(key).get<double>(); }
+};
+
+std::shared_ptr<InputData> get_input_data(const std::string& filepath) {
+    // READ INPUT DATA
+    std::shared_ptr<InputData> input_data;
+    auto file_extension = filepath.substr(filepath.find_last_of(".") + 1);
+    if (file_extension == "csv") {
+        input_data = std::make_shared<InputDataCSV>();
+    } else if (file_extension == "json") {
+        input_data = std::make_shared<InputDataJSON>();
+    }
+    input_data->open(filepath);
+
+    return input_data;
+}
+
+std::map<std::string, std::vector<std::string>> get_csv_info_from_file(const std::string& filepath) {
+    check_file_exists(filepath);
+    std::ifstream csv_file(filepath);
+
+    std::map<std::string, std::vector<std::string>> csv_data;
+    std::map<int, std::string> csv_headers;
+
+    std::string line, word;
+    if (csv_file.is_open()) {
+        // header
+        std::getline(csv_file, line);
+        std::stringstream line_ss(line);
+        int idx_header = 0;
+        while (std::getline(line_ss, word, ',')) {
+            csv_data[word] = {};
+            csv_headers[idx_header] = word;
+        }
+
+        // data
+        while (std::getline(csv_file, line)) {
+            std::stringstream line_ss(line);
+            int idx_word = 0;
+            while (std::getline(line_ss, word, ',')) {
+                csv_data[csv_headers[idx_word]].push_back(word);
+            }
+        }
+    }
+}
+
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
     const std::string& filepath) {
     auto json_obj = get_json_from_file(filepath);
@@ -213,74 +330,56 @@ void populate_blade_from_json(const std::string& filepath, seahowl::core::Blade&
 
 std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points_from_json(
     const std::string& filepath) {
-    auto json_obj = get_json_from_file(filepath);
-
-    auto tower_type = json_obj.at("type").get<std::string>();
+    auto input_data = get_input_data(filepath);
 
     // EXTRACT INFO
-    double height = json_obj.at("height").get<double>();
-    double base_height = json_obj.at("base_height").get<double>();
-    auto damping_coefficients = json_obj.at("damping_coefficients").get<std::vector<double>>();
+    std::vector<seahowl::elasto::TowerReferencePointElasto> reference_points;
+    Vector3d pos0 = Vector3d(input_data->get("x", 0), input_data->get("y", 0), input_data->get("z", 0));
+    Vector3d pos1 = Vector3d(input_data->get("x", input_data->nrows - 1), input_data->get("y", input_data->nrows - 1),
+                             input_data->get("z", input_data->nrows - 1));
+    double length = (pos1 - pos0).norm();
 
     // MAKE TOWER REFERENCE POINTS
-    std::vector<seahowl::elasto::TowerReferencePointElasto> reference_points;
-    auto points = json_obj.at("reference_points").get<json>();
-    for (int ii = 0; ii < points.size(); ii++) {
-        auto& point = points[ii];
+    for (int ii = 0; ii < input_data->nrows; ii++) {
         auto reference_point = seahowl::elasto::TowerReferencePointElasto();
-        point.at("fraction").get_to(reference_point.fraction);
         reference_point.coordinates =
-            Vector3d(0.0, 0.0, (height - base_height) * reference_point.fraction + base_height);
-        reference_point.damping_coefficients[0] = damping_coefficients[0];
-        reference_point.damping_coefficients[1] = damping_coefficients[1];
-        reference_point.damping_coefficients[2] = damping_coefficients[2];
-        reference_point.damping_coefficients[3] = damping_coefficients[3];
-        if (tower_type == "cylinder") {
-            // general properties
-            auto tower_options = json_obj.at("options");
-            auto density = tower_options.at("density").get<double>();
-            auto young_modulus = tower_options.at("young_modulus").get<double>();
-            auto poisson_ratio = tower_options.at("poisson_ratio").get<double>();
-            auto shear_modulus = 0.5 * young_modulus / (1.0 + poisson_ratio);
+            Vector3d(input_data->get("x", ii), input_data->get("y", ii), input_data->get("z", ii));
+        reference_point.fraction = (reference_point.coordinates - pos0).norm() / length;
 
-            // point-specific properties
-            auto diameter = point.at("diameter").get<double>();
-            auto thickness = point.at("thickness").get<double>();
+        // general properties
+        auto density = input_data->get("density", ii);
+        auto young_modulus = input_data->get("young_modulus", ii);
+        auto poisson_ratio = input_data->get("poisson_ratio", ii);
+        auto shear_modulus = 0.5 * young_modulus / (1.0 + poisson_ratio);
 
-            // geometry info
-            auto d1 = diameter;
-            auto d2 = diameter - 2.0 * thickness;
-            auto area = PI * (pow(d1, 2) - pow(d2, 2)) / 4.0;
-            // linear density
-            auto density_linear = density * area;
-            // stiffnesses
-            auto EI = young_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 64.;  // bending
-            auto EA = young_modulus * area;                                  // axial
-            auto kt = shear_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 32.;  // torsion
+        // point-specific properties
+        auto diameter = input_data->get("diameter", ii);
+        auto thickness = input_data->get("thickness", ii);
 
-            // populate reference point
-            reference_point.stiffness_foreaft = EI;
-            reference_point.stiffness_sideside = EI;
-            reference_point.stiffness_axial = EA;
-            reference_point.stiffness_torsion = kt;
-            reference_point.density = density_linear;
+        // geometry info
+        auto d1 = diameter;
+        auto d2 = diameter - 2.0 * thickness;
+        auto area = PI * (pow(d1, 2) - pow(d2, 2)) / 4.0;
+        // linear density
+        auto density_linear = density * area;
+        // stiffnesses
+        auto EI = young_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 64.;  // bending
+        auto EA = young_modulus * area;                                  // axial
+        auto kt = shear_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 32.;  // torsion
 
-            reference_points.push_back(reference_point);
-        } else if (tower_type == "anisotropic") {
-            for (int ii = 0; ii < points.size(); ii++) {
-                // populate reference point
-                point.at("stiffness_sideside").get_to(reference_point.stiffness_sideside);
-                point.at("stiffness_foreaft").get_to(reference_point.stiffness_foreaft);
-                point.at("stiffness_axial").get_to(reference_point.stiffness_axial);
-                point.at("stiffness_torsion").get_to(reference_point.stiffness_torsion);
-                point.at("density").get_to(reference_point.density);
+        // populate reference point
+        reference_point.stiffness_foreaft = EI;
+        reference_point.stiffness_sideside = EI;
+        reference_point.stiffness_axial = EA;
+        reference_point.stiffness_torsion = kt;
+        reference_point.density = density_linear;
 
-                reference_points.push_back(reference_point);
-            }
-        } else {
-            throw std::runtime_error("Tower type \"" + tower_type +
-                                     "\" not recognised (try \"cylinder\" or \"anisotropic\").");
-        }
+        reference_point.damping_coefficients[0] = input_data->get("damping_z", ii);
+        reference_point.damping_coefficients[1] = input_data->get("damping_y", ii);
+        reference_point.damping_coefficients[2] = input_data->get("damping_x", ii);
+        reference_point.damping_coefficients[3] = input_data->get("damping_t", ii);
+
+        reference_points.push_back(reference_point);
     }
 
     return reference_points;
@@ -288,24 +387,24 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
 
 std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points_from_json(
     const std::string& filepath) {
-    auto json_obj = get_json_from_file(filepath);
+    auto input_data = get_input_data(filepath);
 
     // EXTRACT INFO
-    double height = json_obj.at("height").get<double>();
-    double base_height = json_obj.at("base_height").get<double>();
-    auto damping_coefficients = json_obj.at("damping_coefficients").get<std::vector<double>>();
+    Vector3d pos0 = Vector3d(input_data->get("x", 0), input_data->get("y", 0), input_data->get("z", 0));
+    Vector3d pos1 = Vector3d(input_data->get("x", input_data->nrows - 1), input_data->get("y", input_data->nrows - 1),
+                             input_data->get("z", input_data->nrows - 1));
+    double length = (pos1 - pos0).norm();
 
     // MAKE TOWER REFERENCE POINTS
     std::vector<seahowl::aero::TowerReferencePointAero> reference_points;
-    auto points = json_obj.at("reference_points").get<json>();
-    for (int ii = 0; ii < points.size(); ii++) {
-        auto& point = points[ii];
+    for (int ii = 0; ii < input_data->nrows; ii++) {
         auto reference_point = seahowl::aero::TowerReferencePointAero();
-        point.at("fraction").get_to(reference_point.fraction);
         reference_point.coordinates =
-            Vector3d(0.0, 0.0, (height - base_height) * reference_point.fraction + base_height);
-        point.at("diameter").get_to(reference_point.diameter);
-        point.at("drag_coefficient").get_to(reference_point.drag_coefficient);
+            Vector3d(input_data->get("x", ii), input_data->get("y", ii), input_data->get("z", ii));
+        reference_point.fraction = (reference_point.coordinates - pos0).norm() / length;
+
+        reference_point.diameter = input_data->get("diameter", ii);
+        reference_point.drag_coefficient = input_data->get("drag_coefficient", ii);
 
         reference_points.push_back(reference_point);
     }
@@ -314,11 +413,9 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
 }
 
 void populate_tower_elasto_from_json(const std::string& filepath, seahowl::elasto::TowerElasto& tower) {
-    auto json_obj = get_json_from_file(filepath);
-
     tower.reference_points = get_tower_elasto_reference_points_from_json(filepath);
-    tower.height = json_obj.at("height").get<double>();
-    tower.base_height = json_obj.at("base_height").get<double>();
+    tower.height = tower.reference_points.back().coordinates.z();
+    tower.base_height = tower.reference_points.front().coordinates.z();
 }
 
 void populate_tower_aero_from_json(const std::string& filepath, seahowl::aero::TowerAero& tower) {
