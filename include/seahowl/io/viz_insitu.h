@@ -12,13 +12,6 @@ class SystemElasto;
 }  // namespace elasto
 }  // namespace seahowl
 
-namespace chrono {
-class ChSystem;
-namespace irrlicht {
-class ChVisualSystemIrrlicht;
-}  // namespace irrlicht
-}  // namespace chrono
-
 namespace seahowl {
 namespace io {
 class VisualizationInSitu {

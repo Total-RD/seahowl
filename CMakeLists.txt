@@ -284,6 +284,7 @@ set(SEAHOWL_IO_SOURCES
     src/io/read_rotor_perf.cpp
     src/io/utils_io.cpp
 	src/io/viz_insitu.cpp
+	src/io/output_manager.cpp
 )
 set(SEAHOWL_IO_HEADERS
     include/seahowl/io/read_json.h
@@ -291,6 +292,7 @@ set(SEAHOWL_IO_HEADERS
     include/seahowl/io/read_rotor_perf.h
     include/seahowl/io/utils_io.h
 	include/seahowl/io/viz_insitu.h
+	include/seahowl/io/output_manager.h
 )
 if(SEAHOWL_ENABLE_VTK)
     list(APPEND SEAHOWL_IO_SOURCES src/io/write_vtk.cpp)

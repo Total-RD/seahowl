@@ -1,8 +1,8 @@
 #include "seahowl/io/viz_insitu_irrlicht.h"
 
-#include <seahowl/commons/numerics.h>
-#include <seahowl/core/system.h>
-#include <seahowl/elasto/chrono_adapters.h>
+#include "seahowl/commons/numerics.h"
+#include "seahowl/core/system.h"
+#include "seahowl/elasto/chrono_adapters.h"
 
 #include <chrono/physics/ChSystem.h>
 #include <chrono_irrlicht/ChVisualSystemIrrlicht.h>

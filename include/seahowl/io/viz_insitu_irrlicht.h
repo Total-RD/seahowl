@@ -2,9 +2,6 @@
 
 #include "seahowl/io/viz_insitu.h"
 
-#include <chrono/physics/ChSystem.h>
-#include <chrono_irrlicht/ChVisualSystemIrrlicht.h>
-
 namespace chrono {
 class ChSystem;
 namespace irrlicht {

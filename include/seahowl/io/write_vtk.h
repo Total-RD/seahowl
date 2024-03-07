@@ -1,6 +1,6 @@
 #pragma once
 
-#include <seahowl/elasto/component_elasto.h>
+#include "seahowl/elasto/component_elasto.h"
 
 // Forward declaration
 class vtkUnstructuredGrid;
