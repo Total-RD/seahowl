@@ -91,6 +91,7 @@ void run_simulation(int argc, char* argv[]) {
     auto outputs_json = json_obj.at("outputs");
     auto dt_outputs = outputs_json.at("dt").get<double>();
     auto output_vtk = outputs_json.at("VTK").get<bool>();
+    auto has_gui = outputs_json.at("gui").get<bool>();
     std::string output_folder = "./output";
     if (outputs_json.contains("folder")) {
         output_folder = outputs_json.at("folder").get<std::string>();
@@ -136,14 +137,15 @@ void run_simulation(int argc, char* argv[]) {
 #endif
 
     std::unique_ptr<VisualizationInSitu> viz_insitu;
+    if (has_gui) {
 #ifdef HAVE_IRRLICHT
-    viz_insitu = std::make_unique<VisualizationInSituIrrlicht>();
+        viz_insitu = std::make_unique<VisualizationInSituIrrlicht>();
 #else
-    viz_insitu = std::make_unique<VisualizationInSitu>();
+        viz_insitu = std::make_unique<VisualizationInSitu>();
 #endif
-
-    viz_insitu->initialize(system_core);
-    viz_insitu->draw();
+        viz_insitu->initialize(system_core);
+        viz_insitu->draw();
+    }
 
     int step = 0;
     output_results(system_core, output_folder);
@@ -184,7 +186,9 @@ void run_simulation(int argc, char* argv[]) {
                 }
             }
 #endif
-            viz_insitu->draw();
+            if (has_gui) {
+                viz_insitu->draw();
+            }
             time_outputs += dt_outputs;
         }
     }
