@@ -108,7 +108,7 @@ void run_simulation() {
 
 #ifdef HAVE_VTK
     auto output_vtk = false;
-    std::vector<OutputMeshVTK> vtk_outputs;
+    std::vector<seahowl::io::OutputMeshVTK> vtk_outputs;
     if (output_vtk) {
         create_directory("./output");
         auto& post_mooring = vtk_outputs.emplace_back(mooring);

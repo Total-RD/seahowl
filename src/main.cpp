@@ -114,25 +114,9 @@ void run_simulation(int argc, char* argv[]) {
     spdlog::debug("Fully initialized system.");
 
 #ifdef HAVE_VTK
-    std::vector<OutputMeshVTK> vtk_outputs;
+    auto vtk_system = seahowl::io::OutputSystemVTK(system_core, output_folder + "/vtk/");
     if (output_vtk) {
-        for (auto [turbine_ptr, idx_turbine] = std::tuple{system_core.turbines.begin(), 0};
-             turbine_ptr != system_core.turbines.end(); turbine_ptr++, idx_turbine++) {
-            auto& turbine = *turbine_ptr;
-            auto output_folder_vtk = output_folder + "/vtk";
-            create_directory(output_folder_vtk);
-            for (auto [blade_ptr, idx_blade] = std::tuple{turbine->rna.blades.begin(), 0};
-                 blade_ptr != turbine->rna.blades.end(); blade_ptr++, idx_blade++) {
-                auto& blade = *blade_ptr;
-                auto& post_blade =
-                    vtk_outputs.emplace_back(dynamic_cast<seahowl::elasto::BladeElastoFEA&>(blade->elasto));
-                post_blade.initialize((output_folder_vtk + "/turbine" + std::to_string(idx_turbine) + "_blade" +
-                                       std::to_string(idx_blade))
-                                          .c_str());
-            }
-            auto& post_tower = vtk_outputs.emplace_back(turbine->tower.elasto);
-            post_tower.initialize((output_folder_vtk + "/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
-        }
+        vtk_system.initialize();
     }
 #endif
 
@@ -151,9 +135,7 @@ void run_simulation(int argc, char* argv[]) {
     output_results(system_core, output_folder);
 #ifdef HAVE_VTK
     if (output_vtk) {
-        for (auto const& vtk_output : vtk_outputs) {
-            vtk_output.write(system_elasto.get_time(), step);
-        }
+        vtk_system.write(step);
     }
 #endif
 
@@ -181,9 +163,7 @@ void run_simulation(int argc, char* argv[]) {
             output_results(system_core, output_folder);
 #ifdef HAVE_VTK
             if (output_vtk) {
-                for (auto const& vtk_output : vtk_outputs) {
-                    vtk_output.write(system_core.get_time(), step);
-                }
+                vtk_system.write(step);
             }
 #endif
             if (has_gui) {

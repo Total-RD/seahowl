@@ -1,5 +1,8 @@
 #include <seahowl/io/write_vtk.h>
 #include <seahowl/commons/numerics.h>
+#include <seahowl/core/system.h>
+#include <seahowl/core/blade.h>
+#include <seahowl/elasto/blade_elasto.h>
 
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
@@ -8,12 +11,16 @@
 #include <vtkPointData.h>
 #include <vtkDoubleArray.h>
 
+#include <filesystem>  // C++17
 #include <string>
 #include <vector>
 #include <map>
 #include <cstdio>
 
+namespace fs = std::filesystem;
+
 using seahowl::Vector3d;
+using namespace seahowl::io;
 
 OutputMeshVTK::OutputMeshVTK(seahowl::elasto::ComponentElastoFEA& component) : component(component) {
     mesh = vtkUnstructuredGrid::New();
@@ -125,5 +132,33 @@ void OutputMeshVTK::write(double time, int time_step) const {
         writer->SetFileName(fname);
         writer->SetInputData(mesh);
         writer->Write();
+    }
+}
+
+OutputSystemVTK::OutputSystemVTK(seahowl::core::System& system_core, const std::string& output_folder)
+    : system_core(system_core), output_folder(output_folder) {}
+
+void OutputSystemVTK::initialize() {
+    vtk_meshes.clear();
+    for (auto [turbine_ptr, idx_turbine] = std::tuple{system_core.turbines.begin(), 0};
+         turbine_ptr != system_core.turbines.end(); turbine_ptr++, idx_turbine++) {
+        auto& turbine = *turbine_ptr;
+        fs::create_directory(output_folder);
+        for (auto [blade_ptr, idx_blade] = std::tuple{turbine->rna.blades.begin(), 0};
+             blade_ptr != turbine->rna.blades.end(); blade_ptr++, idx_blade++) {
+            auto& blade = *blade_ptr;
+            auto& post_blade = vtk_meshes.emplace_back(dynamic_cast<seahowl::elasto::BladeElastoFEA&>(blade->elasto));
+            post_blade.initialize(
+                (output_folder + "/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
+                    .c_str());
+        }
+        auto& post_tower = vtk_meshes.emplace_back(turbine->tower.elasto);
+        post_tower.initialize((output_folder + "/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
+    }
+}
+
+void OutputSystemVTK::write(int step) {
+    for (auto const& vtk_output : vtk_meshes) {
+        vtk_output.write(system_core.elasto.get_time(), step);
     }
 }
