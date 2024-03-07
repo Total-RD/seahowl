@@ -5,15 +5,14 @@ using json = nlohmann::json;
     #include <seahowl/io/write_vtk.h>
 #endif
 
-#ifdef HAVE_IRRLICHT
-    #include <chrono_irrlicht/ChVisualSystemIrrlicht.h>
-    #include <seahowl/io/viz_insitu.h>
-#endif
-
 #include <cmath>
 
 #include <seahowl/io/read_json.h>
 #include <seahowl/io/write_csv.h>
+#include <seahowl/io/viz_insitu.h>
+#ifdef HAVE_IRRLICHT
+    #include <seahowl/io/viz_insitu_irrlicht.h>
+#endif
 
 #include <seahowl/core/system.h>
 #include <seahowl/aero/system_aero.h>
@@ -136,21 +135,15 @@ void run_simulation(int argc, char* argv[]) {
     }
 #endif
 
+    std::unique_ptr<VisualizationInSitu> viz_insitu;
 #ifdef HAVE_IRRLICHT
-    auto application = chrono_types::make_shared<chrono::irrlicht::ChVisualSystemIrrlicht>();
-    application->SetWindowTitle("SEAHOWL");
-    application->Initialize();
-    application->SetCameraVertical(chrono::CameraVerticalDir::Z);
-    application->AddLogo(logoname);
-    auto system_chrono = system_elasto.chobj;
-    draw_system_init(system_chrono, application);
+    viz_insitu = std::make_unique<VisualizationInSituIrrlicht>();
+#else
+    viz_insitu = std::make_unique<VisualizationInSitu>();
 #endif
 
-#ifdef HAVE_IRRLICHT
-    application->GetDevice()->run();
-    draw_system(system_chrono, application);
-    application->EndScene();
-#endif
+    viz_insitu->initialize(system_core);
+    viz_insitu->draw();
 
     int step = 0;
     output_results(system_core, output_folder);
@@ -191,11 +184,7 @@ void run_simulation(int argc, char* argv[]) {
                 }
             }
 #endif
-#ifdef HAVE_IRRLICHT
-            application->GetDevice()->run();
-            draw_system(system_chrono, application);
-            application->EndScene();
-#endif
+            viz_insitu->draw();
             time_outputs += dt_outputs;
         }
     }

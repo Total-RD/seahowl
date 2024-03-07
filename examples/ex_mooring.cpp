@@ -12,9 +12,9 @@ using std::filesystem::create_directory;
     #include <seahowl/io/write_vtk.h>
 #endif
 
+#include <seahowl/io/viz_insitu.h>
 #ifdef HAVE_IRRLICHT
-    #include <chrono_irrlicht/ChVisualSystemIrrlicht.h>
-    #include <seahowl/io/viz_insitu.h>
+    #include <seahowl/io/viz_insitu_irrlicht.h>
 #endif
 
 using namespace seahowl;
@@ -116,13 +116,14 @@ void run_simulation() {
     }
 #endif
 
+    std::unique_ptr<VisualizationInSitu> viz_insitu;
 #ifdef HAVE_IRRLICHT
-    auto application = chrono_types::make_shared<chrono::irrlicht::ChVisualSystemIrrlicht>();
-    application->SetWindowTitle("SEAHOWL");
-    application->Initialize();
-    application->SetCameraVertical(chrono::CameraVerticalDir::Z);
-    draw_system_init(system_elasto.chobj, application);
+    viz_insitu = std::make_unique<VisualizationInSituIrrlicht>();
+#else
+    viz_insitu = std::make_unique<VisualizationInSity>();
 #endif
+    viz_insitu->initialize_elasto(system_elasto);
+    viz_insitu->draw();
 
     spdlog::info("Setting up cables.");
     setup_cables(system_elasto, mooring, seabed, dt, 1000, fluid_density);
@@ -141,11 +142,7 @@ void run_simulation() {
             }
         }
 #endif
-#ifdef HAVE_IRRLICHT
-        application->GetDevice()->run();
-        draw_system(system_elasto.chobj, application);
-        application->EndScene();
-#endif
+        viz_insitu->draw();
     }
 }
 
