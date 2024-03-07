@@ -19,6 +19,8 @@ class ChVisualSystemIrrlicht;
 }  // namespace irrlicht
 }  // namespace chrono
 
+namespace seahowl {
+namespace io {
 class VisualizationInSitu {
   public:
     VisualizationInSitu();
@@ -42,3 +44,5 @@ class VisualizationInSitu {
      */
     virtual void draw();
 };
+}  // namespace io
+}  // namespace seahowl

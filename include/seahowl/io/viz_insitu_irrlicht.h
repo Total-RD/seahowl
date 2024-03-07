@@ -12,6 +12,8 @@ class ChVisualSystemIrrlicht;
 }  // namespace irrlicht
 }  // namespace chrono
 
+namespace seahowl {
+namespace io {
 class VisualizationInSituIrrlicht : public VisualizationInSitu {
   public:
     VisualizationInSituIrrlicht();
@@ -39,3 +41,5 @@ class VisualizationInSituIrrlicht : public VisualizationInSitu {
     std::shared_ptr<chrono::irrlicht::ChVisualSystemIrrlicht> application_irrlicht;
     std::shared_ptr<chrono::ChSystem> system_chrono;
 };
+}  // namespace io
+}  // namespace seahowl

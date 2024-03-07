@@ -116,11 +116,11 @@ void run_simulation() {
     }
 #endif
 
-    std::unique_ptr<VisualizationInSitu> viz_insitu;
+    std::unique_ptr<seahowl::io::VisualizationInSitu> viz_insitu;
 #ifdef HAVE_IRRLICHT
-    viz_insitu = std::make_unique<VisualizationInSituIrrlicht>();
+    viz_insitu = std::make_unique<seahowl::io::VisualizationInSituIrrlicht>();
 #else
-    viz_insitu = std::make_unique<VisualizationInSity>();
+    viz_insitu = std::make_unique<seahowl::io::VisualizationInSitu>();
 #endif
     viz_insitu->initialize_elasto(system_elasto);
     viz_insitu->draw();

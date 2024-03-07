@@ -120,12 +120,12 @@ void run_simulation(int argc, char* argv[]) {
     }
 #endif
 
-    std::unique_ptr<VisualizationInSitu> viz_insitu;
+    std::unique_ptr<seahowl::io::VisualizationInSitu> viz_insitu;
     if (has_gui) {
 #ifdef HAVE_IRRLICHT
-        viz_insitu = std::make_unique<VisualizationInSituIrrlicht>();
+        viz_insitu = std::make_unique<seahowl::io::VisualizationInSituIrrlicht>();
 #else
-        viz_insitu = std::make_unique<VisualizationInSitu>();
+        viz_insitu = std::make_unique<seahowl::io::VisualizationInSitu>();
 #endif
         viz_insitu->initialize(system_core);
         viz_insitu->draw();

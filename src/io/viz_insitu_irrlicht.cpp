@@ -13,6 +13,7 @@
 namespace fs = std::filesystem;
 
 using seahowl::Vector3d;
+using namespace seahowl::io;
 
 VisualizationInSituIrrlicht::VisualizationInSituIrrlicht() {
     application_irrlicht = chrono_types::make_shared<chrono::irrlicht::ChVisualSystemIrrlicht>();
