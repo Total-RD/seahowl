@@ -165,6 +165,7 @@ set(SEAHOWL_CORE_SOURCES
     src/core/turbine.cpp
     src/core/turbine_floating.cpp
     src/core/system.cpp
+    src/core/simulation.cpp
 )
 set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/reference_point.h
@@ -175,6 +176,7 @@ set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/turbine.h
     include/seahowl/core/turbine_floating.h
     include/seahowl/core/system.h
+    include/seahowl/core/simulation.h
 )
 source_group(core FILES ${SEAHOWL_CORE_SOURCES} ${SEAHOWL_CORE_HEADERS})
 
