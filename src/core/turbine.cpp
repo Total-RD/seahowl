@@ -28,14 +28,9 @@ void Turbine::initialize(double time, double dt) {
 }
 
 void Turbine::prestep(double time, double dt) {
+    // presteps
     rna.prestep(time, dt);
     tower.prestep(time, dt);
-}
-
-void Turbine::poststep(double time, double dt) {
-    // hub loads
-    // reset external loads applied on RNA
-    rna.elasto.reset_loads();
 
     // apply aero torque losses from gearbox efficiency for next step
     auto aero_torque = rna.elasto.get_axial_torque();
@@ -68,7 +63,9 @@ void Turbine::poststep(double time, double dt) {
             }
         }
     }
+}
 
+void Turbine::poststep(double time, double dt) {
     // poststeps
     rna.poststep(time, dt);
     tower.poststep(time, dt);
