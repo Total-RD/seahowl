@@ -135,6 +135,9 @@ class DisconInterface {
     // Helper to force the cast of value to float
     void SetAvrSWAP(size_t index, double value);
 
+    // Forces the value of AvrSWAP even if it is of "out" type
+    void SetForcedAvrSWAP(size_t index, double value);
+
     /// <summary>
     /// Get Value from avrSWAP array of DISCON
     /// </summary>
