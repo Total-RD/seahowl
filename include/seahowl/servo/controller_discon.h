@@ -18,15 +18,10 @@
 namespace seahowl {
 namespace servo {
 
-/**@brief ROSCO Discon wrapping (adapter) interface
- *
- * @todo Set as Pimpl private implementation of seahowl::servo::Controller class
+/**@brief DISCON wrapping (adapter) interface
  */
-struct DisconController {
-    // declare DISCON routine type and variable to load from dynamic library
-    typedef void (*DISCON_routine)(float* avrSWAP, int* aviFAIL, char* accINFILE, char* avcOUTNAME, char* avcMSG);
-    DISCON_routine DISCON;
-
+class DisconInterface {
+  public:
     float& m_time = avrSWAP[1];     ///<@brief Time
     float& m_dt = avrSWAP[2];       ///<@brief Time step
     float& m_pitch = avrSWAP[41];   ///<@brief Pitch return controller states
@@ -53,12 +48,12 @@ struct DisconController {
     /// <param name="omega">rotor speed</param>
     /// <param name="pitch">pitch collective</param>
     /// <param name="nblades">number of blades</param>
-    void Init(const std::string& libfile);
+    virtual void Init(const std::string& libfile = u8"");
 
     /// <summary>
     /// Call the DISCON controller
     /// </summary>
-    void Call();
+    virtual void Call();
 
     /// <summary>
     /// Helper to set the guess pitch
@@ -152,13 +147,13 @@ struct DisconController {
     /// ex! control/DISCON.in find other files in control directory
     /// </summary>
     /// <param name="name">DISCON.IN input file path</param>
-    void SetINFILE(std::string name = u8"DISCON.IN");
+    void SetINFILE(const std::string& name = u8"DISCON.IN");
 
     /// <summary>
     /// Set output base name (relative to working directory).
     /// </summary>
     /// <param name="name">a name (not a path)</param>
-    void SetOUTNAME(std::string name = u8"simDEBUG.RO.dbg");
+    void SetOUTNAME(const std::string& name = u8"simDEBUG.RO.dbg");
 
     /// <summary>
     /// Print all output
@@ -166,6 +161,12 @@ struct DisconController {
     void PrintAllOut(std::ostream& ssout = std::cout) const;
 
   private:
+    // declare DISCON routine type and variable to load from dynamic library
+    typedef void (*DISCON_routine)(float* avrSWAP, int* aviFAIL, char* accINFILE, char* avcOUTNAME, char* avcMSG);
+    DISCON_routine DISCON;
+
+    bool has_dll = false;
+
     static constexpr size_t MAX_SWAP = 500;
 
     float avrSWAP[MAX_SWAP];
@@ -181,7 +182,7 @@ struct DisconController {
 class ControllerDISCON : public Controller {
   public:
     /** @brief Object for communication with DISCON routine. */
-    seahowl::servo::DisconController pImpl;
+    seahowl::servo::DisconInterface pImpl;
 
     /**
      * @brief Constructor.
@@ -189,7 +190,7 @@ class ControllerDISCON : public Controller {
      * @param[in] infile Path of parameters file.
      * @param[in] infile Path of output file.
      */
-    ControllerDISCON(std::string infile = u8"DISCON.IN", std::string libfile = u8"libdiscon.so");
+    ControllerDISCON(const std::string& infile = u8"DISCON.IN", const std::string& libfile = u8"libdiscon.so");
 
     /**
      * @brief Initialization of controller.

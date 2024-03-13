@@ -15,17 +15,11 @@
     #include <windows.h>
 #endif
 
-seahowl::servo::ControllerDISCON::ControllerDISCON(std::string infile, std::string libfile_in) {
+seahowl::servo::ControllerDISCON::ControllerDISCON(const std::string& infile, const std::string& libfile)
+    : libfile(libfile) {
     has_pitch_control = true;
     has_torque_control = true;
 
-    if (!std::filesystem::exists(std::filesystem::path(libfile_in))) {
-        throw std::runtime_error("Dynamic library path for DISCON routine does not exist: " + libfile_in);
-    } else if (!std::filesystem::exists(std::filesystem::path(infile))) {
-        throw std::runtime_error("Input file path for DISCON routine does not exist: " + infile);
-    }
-
-    libfile = libfile_in;
     pImpl.ResetAll();
     pImpl.SetINFILE(infile);
     pImpl.SetOUTNAME(libfile + ".dbg");
@@ -340,86 +334,25 @@ static std::vector<discon::ParamDef> ArrayInfo{
     {164, "in", 'R', "Yaw bearing angular acceleration", "rad/s2"}};
 }  // namespace discon
 
-/*
-
-Record
-number
-Data
-flow8
-Data
-type
-9
-Description
-See
-note(
-s)
-Units
-1 in I See Section A.2 -
-
-
-
-
-*/
-
-/*
-
-CHARACTER(KIND=C_CHAR),         INTENT(IN   )   :: accINFILE(NINT(avrSWAP(50)))     ! The name of the parameter
-input file CHARACTER(KIND=C_CHAR),         INTENT(IN   )   :: avcOUTNAME(NINT(avrSWAP(51)))    ! OUTNAME (Simulation
-RootName) CHARACTER(KIND=C_CHAR),         INTENT(INOUT)   :: avcMSG(NINT(avrSWAP(49)))        ! MESSAGE (Message
-from DLL to simulation code [ErrMsg])  The message which will be displayed by the calling program if aviFAIL <> 0.
-CHARACTER(SIZE(avcOUTNAME)-1)                   :: RootName                         ! a Fortran version of the input
-C string (not considered an array here)    [subtract 1 for the C null-character] CHARACTER(SIZE(avcMSG)-1) :: ErrMsg
-
-
-    LocalVar%GenSpeed           = avrSWAP(20)
-    LocalVar%RotSpeed           = avrSWAP(21)
-    LocalVar%GenTqMeas          = avrSWAP(23)
-    LocalVar%Y_M                = avrSWAP(24)
-    LocalVar%HorWindV           = avrSWAP(27)
-    LocalVar%rootMOOP(1)        = avrSWAP(30)
-    LocalVar%rootMOOP(2)        = avrSWAP(31)
-    LocalVar%rootMOOP(3)        = avrSWAP(32)
-    LocalVar%FA_Acc             = avrSWAP(53)
-    LocalVar%NacIMU_FA_Acc      = avrSWAP(83)
-    LocalVar%Azimuth            = avrSWAP(60)
-    LocalVar%NumBl              = NINT(avrSWAP(61))
-
-    ! --- NJA: usually feedback back the previous pitch command helps for numerical stability, sometimes it does
-not... IF (LocalVar%iStatus == 0) THEN LocalVar%BlPitch(1) = avrSWAP(4) LocalVar%BlPitch(2) = avrSWAP(33)
-        LocalVar%BlPitch(3) = avrSWAP(34)
-    ELSE
-        LocalVar%BlPitch(1) = LocalVar%PitCom(1)
-        LocalVar%BlPitch(2) = LocalVar%PitCom(2)
-        LocalVar%BlPitch(3) = LocalVar%PitCom(3)
-    ENDIF
-
-
-    ! Set unused outputs to zero (See Appendix A of Bladed User's Guide):
-    avrSWAP(35) = 1.0 ! Generator contactor status: 1=main (high speed) variable-speed generator
-    avrSWAP(36) = 0.0 ! Shaft brake status: 0=off
-    avrSWAP(41) = 0.0 ! Demanded yaw actuator torque
-    avrSWAP(46) = 0.0 ! Demanded pitch rate (Collective pitch)
-    avrSWAP(55) = 0.0 ! Pitch override: 0=yes
-    avrSWAP(56) = 0.0 ! Torque override: 0=yes
-    avrSWAP(65) = 0.0 ! Number of variables returned for logging
-    avrSWAP(72) = 0.0 ! Generator start-up resistance
-    avrSWAP(79) = 0.0 ! Request for loads: 0=none
-    avrSWAP(80) = 0.0 ! Variable slip current status
-    avrSWAP(81) = 0.0 ! Variable slip current demand
-
-
-    */
-
-void seahowl::servo::DisconController::Init(const std::string& libfile) {
-    // Load dynamic library and point to DISCON routine
+void seahowl::servo::DisconInterface::Init(const std::string& libfile) {
+    if (libfile != "") {
+        if (!std::filesystem::exists(std::filesystem::path(libfile)) && libfile != "") {
+            throw std::runtime_error("DISCON: dynamic library path for DISCON routine does not exist: " + libfile +
+                                     ".");
+        }
+        has_dll = true;
+        // Load dynamic library and point to DISCON routine
 #ifdef __unix__
-    void* handler = dlopen(libfile.c_str(), RTLD_LAZY);
-    DISCON = (DISCON_routine)dlsym(handler, "DISCON");
+        void* handler = dlopen(libfile.c_str(), RTLD_LAZY);
+        DISCON = (DISCON_routine)dlsym(handler, "DISCON");
 #endif
 #ifdef _WIN32
-    HMODULE handler = LoadLibrary(libfile.c_str());
-    DISCON = (DISCON_routine)GetProcAddress(handler, "DISCON");
+        HMODULE handler = LoadLibrary(libfile.c_str());
+        DISCON = (DISCON_routine)GetProcAddress(handler, "DISCON");
 #endif
+    } else {
+        spdlog::warn("DISCON: no dynamic library transmitted to DISCON interface.");
+    }
 
     avrSWAP[58] = 500;  // Buffer chaar size
     avrSWAP[50] = 500;  // self.char_buffer
@@ -433,13 +366,13 @@ void seahowl::servo::DisconController::Init(const std::string& libfile) {
     SetAvrSWAP(1, 1.0);  // iStatus : standard  step (not the first, which was already just called)
 };
 
-void seahowl::servo::DisconController::ResetAll() {
+void seahowl::servo::DisconInterface::ResetAll() {
     for (auto& v : avrSWAP) {
         v = 0.0;
     }
 }
 
-void seahowl::servo::DisconController::PrintAllOut(std::ostream& ssout) const {
+void seahowl::servo::DisconInterface::PrintAllOut(std::ostream& ssout) const {
     for (int i = 1; i < 150; ++i) {
         auto& ap = discon::ArrayInfo.at(i);
         ///@todo Better to use GetAvrSWAP but without log
@@ -450,25 +383,30 @@ void seahowl::servo::DisconController::PrintAllOut(std::ostream& ssout) const {
     }
 }
 
-void seahowl::servo::DisconController::SetINFILE(std::string name) {
-    spdlog::debug("Set DISCON INFILE: '" + name + "'\n");
+void seahowl::servo::DisconInterface::SetINFILE(const std::string& name) {
+    spdlog::debug("Set DISCON INFILE: " + name + ".");
+    if (name == "") {
+        spdlog::warn("DISCON: no input file transmitted to DISCON interface.");
+    } else if (!std::filesystem::exists(std::filesystem::path(name))) {
+        throw std::runtime_error("DISCON: input file path for DISCON routine does not exist: " + name + ".");
+    }
     strcpy(accINFILE, name.c_str());
     SetAvrSWAP(50, name.length());
 }
 
-void seahowl::servo::DisconController::SetOUTNAME(std::string name) {
-    spdlog::debug("Set DISCON OUTNAME:'" + name + "'\n");
+void seahowl::servo::DisconInterface::SetOUTNAME(const std::string& name) {
+    spdlog::debug("Set DISCON OUTNAME:'" + name + ".");
     strcpy(avcOUTNAME, name.c_str());
     SetAvrSWAP(51, name.length());
 }
 
-void seahowl::servo::DisconController::SetPitch(double pitch_angle) {
+void seahowl::servo::DisconInterface::SetPitch(double pitch_angle) {
     SetAvrSWAP(4, static_cast<float>(pitch_angle));
     SetAvrSWAP(33, static_cast<float>(pitch_angle));
     SetAvrSWAP(34, static_cast<float>(pitch_angle));
 }
 
-void seahowl::servo::DisconController::SetPitchBlade(int index_blade, double pitch_angle) {
+void seahowl::servo::DisconInterface::SetPitchBlade(int index_blade, double pitch_angle) {
     switch (index_blade) {
         case 0:
             SetAvrSWAP(4, static_cast<float>(pitch_angle));
@@ -484,7 +422,7 @@ void seahowl::servo::DisconController::SetPitchBlade(int index_blade, double pit
     }
 }
 
-void seahowl::servo::DisconController::SetRootMomentBlade(int index_blade, double flap, double edge) {
+void seahowl::servo::DisconInterface::SetRootMomentBlade(int index_blade, double flap, double edge) {
     switch (index_blade) {
         case 0:
             SetAvrSWAP(30, static_cast<float>(flap));
@@ -503,56 +441,56 @@ void seahowl::servo::DisconController::SetRootMomentBlade(int index_blade, doubl
     }
 }
 
-void seahowl::servo::DisconController::SetTowerTopAcceleration(double foreaft, double sideside) {
+void seahowl::servo::DisconInterface::SetTowerTopAcceleration(double foreaft, double sideside) {
     SetAvrSWAP(53, static_cast<float>(foreaft));
     SetAvrSWAP(54, static_cast<float>(sideside));
 };
 
-void seahowl::servo::DisconController::SetNacelleRotationalAcceleration(double roll, double pitch, double yaw) {
+void seahowl::servo::DisconInterface::SetNacelleRotationalAcceleration(double roll, double pitch, double yaw) {
     SetAvrSWAP(82, static_cast<float>(roll));
     SetAvrSWAP(83, static_cast<float>(pitch));
     SetAvrSWAP(84, static_cast<float>(yaw));
 };
 
-void seahowl::servo::DisconController::SetWindSpeed(double ws) {
+void seahowl::servo::DisconInterface::SetWindSpeed(double ws) {
     SetAvrSWAP(27, static_cast<float>(ws));
 }
 
-void seahowl::servo::DisconController::SetRotorSpeed(double omega) {
+void seahowl::servo::DisconInterface::SetRotorSpeed(double omega) {
     SetAvrSWAP(21, omega);
 }
 
-void seahowl::servo::DisconController::SetGeneratorSpeed(double omega) {
+void seahowl::servo::DisconInterface::SetGeneratorSpeed(double omega) {
     SetAvrSWAP(20, omega);
 }
 
-void seahowl::servo::DisconController::SetTime(double time) {
+void seahowl::servo::DisconInterface::SetTime(double time) {
     SetAvrSWAP(2, time);
 }
 
-void seahowl::servo::DisconController::SetDeltaTime(double dt) {
+void seahowl::servo::DisconInterface::SetDeltaTime(double dt) {
     SetAvrSWAP(3, dt);
 }
 
-void seahowl::servo::DisconController::SetRotorAzimuth(double azimuth) {
+void seahowl::servo::DisconInterface::SetRotorAzimuth(double azimuth) {
     SetAvrSWAP(60, azimuth);
 }
 
-void seahowl::servo::DisconController::SetGeneratedPower(double power) {
+void seahowl::servo::DisconInterface::SetGeneratedPower(double power) {
     SetAvrSWAP(15, power);
 }
 
-void seahowl::servo::DisconController::SetShaftPower(double power) {
+void seahowl::servo::DisconInterface::SetShaftPower(double power) {
     SetAvrSWAP(14, power);
 }
 
-void seahowl::servo::DisconController::SetNumberOfBlades(size_t nblades) {
+void seahowl::servo::DisconInterface::SetNumberOfBlades(size_t nblades) {
     SetAvrSWAP(61, nblades);
 }
 
-void seahowl::servo::DisconController::SetAvrSWAP(size_t index, float value) {
+void seahowl::servo::DisconInterface::SetAvrSWAP(size_t index, float value) {
     if (index < 1 || index > MAX_SWAP) {
-        throw std::runtime_error("DISCON: avrSWAP index out of bounds");
+        throw std::runtime_error("DISCON: avrSWAP index out of bounds.");
     }
 
     auto& ap = discon::ArrayInfo.at(index);
@@ -569,14 +507,14 @@ void seahowl::servo::DisconController::SetAvrSWAP(size_t index, float value) {
     avrSWAP[ap.index - 1] = value;
 }
 
-void seahowl::servo::DisconController::SetAvrSWAP(size_t index, size_t value) {
+void seahowl::servo::DisconInterface::SetAvrSWAP(size_t index, size_t value) {
     SetAvrSWAP(index, static_cast<float>(value));
 }
-void seahowl::servo::DisconController::SetAvrSWAP(size_t index, double value) {
+void seahowl::servo::DisconInterface::SetAvrSWAP(size_t index, double value) {
     SetAvrSWAP(index, static_cast<float>(value));
 }
 
-float seahowl::servo::DisconController::GetAvrSWAP(size_t index) const {
+float seahowl::servo::DisconInterface::GetAvrSWAP(size_t index) const {
     if (index < 1 || index > MAX_SWAP) {
         throw std::runtime_error("DISCON: avrSWAP index out of bounds");
     }
@@ -596,6 +534,8 @@ float seahowl::servo::DisconController::GetAvrSWAP(size_t index) const {
     return value;
 }
 
-void seahowl::servo::DisconController::Call() {
-    DISCON(avrSWAP, &aviFAIL, accINFILE, avcOUTNAME, avcMSG);
+void seahowl::servo::DisconInterface::Call() {
+    if (has_dll) {
+        DISCON(avrSWAP, &aviFAIL, accINFILE, avcOUTNAME, avcMSG);
+    }
 }

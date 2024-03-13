@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[]) {
     std::cout << "Hello ROSCO\n";
-    seahowl::servo::DisconController discon_params;
+    seahowl::servo::DisconInterface discon_params;
 
     std::cout << "Initialize the controller\n";
     discon_params.ResetAll();

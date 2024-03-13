@@ -606,16 +606,22 @@ void populate_turbine_from_json(const std::string& filepath,
         if (!controller_json.at("options").contains("libfile")) {
             throw std::runtime_error("Need to define path to libfile for DISCON routine.");
         }
-        auto libfilepath = path(DATADIR / controller_json.at("options").at("libfile"));
 
-        // copy libdiscon to temporary folder with new name in case there are several turbines
-        check_file_exists(libfilepath.generic_string());
-        // first copy libdiscon to tmp folder
-        auto copyfilepath = copy_file_and_increment(libfilepath.generic_string(), output_folder + "/tmp");
-
+        auto libfilepath = controller_json.at("options").at("libfile").get<std::string>();
+        if (libfilepath != "") {
+            // absolute path
+            libfilepath = path(DATADIR / libfilepath).generic_string();
+            // copy libdiscon to temporary folder with new name in case there are several turbines
+            check_file_exists(libfilepath);
+            // first copy libdiscon to tmp folder
+            libfilepath = copy_file_and_increment(libfilepath, output_folder + "/tmp");
+        }
+        auto infilepath = controller_json.at("options").at("infile").get<std::string>();
+        if (infilepath != "") {
+            infilepath = (DATADIR / infilepath).generic_string();
+        }
         // instantiate controller
-        auto controller = std::make_shared<seahowl::servo::ControllerDISCON>(
-            (DATADIR / controller_json.at("options").at("infile")).generic_string(), copyfilepath);
+        auto controller = std::make_shared<seahowl::servo::ControllerDISCON>(infilepath, libfilepath);
         turbine.controller = controller;
 
     } else if (controller_json.at("type").get<std::string>() == "RPM") {
