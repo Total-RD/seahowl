@@ -4,7 +4,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 
-void seahowl::set_log_level_global(std::string level) {
+void seahowl::set_log_level_global(const std::string& level) {
     if (level == "critical") {
         spdlog::set_level(spdlog::level::critical);
     } else if (level == "error" || level == "err") {
@@ -17,6 +17,8 @@ void seahowl::set_log_level_global(std::string level) {
         spdlog::set_level(spdlog::level::debug);
     } else if (level == "trace") {
         spdlog::set_level(spdlog::level::trace);
+    } else {
+        throw std::runtime_error("Log level unknown: " + level + ".");
     }
 }
 
