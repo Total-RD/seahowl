@@ -398,10 +398,10 @@ TEST(test_turbine, rpm_initial_pitch) {
     double time = 0.0;
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
-    // while (application.GetDevice()->run()) {
     while (time < 50) {
         // prestep
         // compute forces
+        turbine.apply_control(time, dt);
         turbine.aero.compute_aero_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
@@ -457,10 +457,10 @@ TEST(test_turbine, rpm_initial_pitch_fpm) {
     double time = 0.0;
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
-    // while (application.GetDevice()->run()) {
     while (time < 50) {
         // prestep
         // compute forces
+        turbine.apply_control(time, dt);
         turbine.aero.compute_aero_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
@@ -516,10 +516,10 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
     double time = 0.0;
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
-    // while (application.GetDevice()->run()) {
     while (time < 50) {
         // prestep
         // compute forces
+        turbine.apply_control(time, dt);
         turbine.aero.compute_aero_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
@@ -578,10 +578,10 @@ TEST(test_turbine, controller_target_rpm) {
     double time = 0.0;
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
-    // while (application.GetDevice()->run()) {
     while (time < 100) {
         // prestep
         // compute forces
+        turbine.apply_control(time, dt);
         turbine.aero.compute_aero_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
@@ -642,10 +642,10 @@ TEST(test_turbine, actuator_disk) {
     double time = 0.0;
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
-    // while (application.GetDevice()->run()) {
     while (time < 100) {
         // prestep
         // compute forces
+        turbine.apply_control(time, dt);
         turbine.aero.compute_aero_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
@@ -670,6 +670,7 @@ TEST(test_turbine, actuator_disk) {
     while (time < 200) {
         // prestep
         // compute forces
+        turbine.apply_control(time, dt);
         turbine.aero.compute_aero_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
@@ -729,10 +730,10 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     double time = 0.0;
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
-    // while (application.GetDevice()->run()) {
     while (time < 50) {
         // prestep
         // compute forces
+        turbine.apply_control(time, dt);
         turbine.aero.compute_aero_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
@@ -863,10 +864,10 @@ TEST(test_inflowwind, rpm_initial_pitch) {
     double time = 0.0;
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
     turbine.initialize(time, dt);
-    // while (application.GetDevice()->run()) {
     while (time < 50) {
         // prestep
         // compute forces
+        turbine.apply_control(time, dt);
         turbine.aero.compute_aero_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);

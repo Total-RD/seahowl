@@ -37,10 +37,6 @@ void RotorNacelleAssembly::prestep(double time, double dt) {
         blade->prestep(time, dt);
     }
 
-    // hub loads
-    // reset external loads applied on RNA
-    elasto.reset_loads();
-
     // apply extra torque and thrust (if any) to hub
     elasto.rotor->body_hub->accumulate_torque(Vector3d(aero.rotor->hub_torque_aero, 0, 0), true);
     elasto.rotor->body_hub->accumulate_force(Vector3d(aero.rotor->hub_thrust_aero, 0, 0), true);

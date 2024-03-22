@@ -69,6 +69,11 @@ class Turbine : public ComponentDynamic {
     Turbine(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineAero& aero);
 
     /**
+     * @brief Applies control to turbine.
+     */
+    void apply_control(double time, double dt);
+
+    /**
      * @brief Initialize turbine, called before starting the simulation.
      *
      * Calls init for each of its components.

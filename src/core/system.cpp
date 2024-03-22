@@ -35,6 +35,8 @@ void System::initialize(double time, double dt) {
 
 void System::prestep(double time, double dt) {
     for (auto& turbine : turbines) {
+        turbine->apply_control(time, dt);
+
         // compute forces from fluid model
         if (fluid_model) {
             turbine->apply_fluid_model(*fluid_model, time);

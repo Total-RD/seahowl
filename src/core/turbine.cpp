@@ -27,11 +27,45 @@ void Turbine::initialize(double time, double dt) {
     spdlog::info("Initialized turbine of total mass {:.4}kg.", elasto.get_mass());
 }
 
+void Turbine::apply_control(double time, double dt) {
+    // controller step
+    controller->step(time, dt, *this);
+
+    // apply electrical torque from controller
+    if (controller->has_torque_control) {
+        auto torque_elec = controller->get_torque_elec() * gearbox_ratio * gearbox_efficiency;
+        // torque elec is applied on hub body (locally)
+        rna.elasto.accumulate_electrical_torque(torque_elec);
+    }
+
+    // apply pitch from controller
+    if (controller->has_pitch_control) {
+        auto collective_pitch_increment = controller->get_collective_pitch() - rna.elasto.rotor->pitch_collective;
+        rna.elasto.rotor->apply_collective_pitch_increment(collective_pitch_increment);
+        if (rna.blades.size() <= 3) {
+            // individual pitch only works with up to 3 blades
+            for (int idx_blade = 0; idx_blade < rna.blades.size(); idx_blade++) {
+                auto& blade = *rna.blades[idx_blade];
+                // individual pitch increment difference with collective pitch increment that was already applied
+                auto blade_pitch_increment =
+                    (controller->get_pitch_blade(idx_blade) - collective_pitch_increment) - blade.elasto.pitch;
+                blade.elasto.apply_pitch_increment(blade_pitch_increment);
+                blade.update_positions_aero();
+            }
+        }
+    }
+}
+
 void Turbine::prestep(double time, double dt) {
     // presteps
     rna.prestep(time, dt);
     tower.prestep(time, dt);
+}
 
+void Turbine::poststep(double time, double dt) {
+    // hub loads
+    // reset external loads applied on RNA
+    rna.elasto.reset_loads();
     // apply aero torque losses from gearbox efficiency for next step
     auto aero_torque = rna.elasto.get_axial_torque();
     if (controller->has_torque_control) {
@@ -40,32 +74,6 @@ void Turbine::prestep(double time, double dt) {
     }
     rna.elasto.rotor->accumulate_axial_torque(-aero_torque * (1.0 - gearbox_efficiency));
 
-    // controller step
-    controller->step(time, dt, *this);
-    // apply torque from controller
-    if (controller->has_torque_control) {
-        auto torque_elec = controller->get_torque_elec() * gearbox_ratio * gearbox_efficiency;
-        // torque elec is applied on hub body (locally)
-        rna.elasto.accumulate_electrical_torque(torque_elec);
-    }
-    // apply pitch from controller
-    if (controller->has_pitch_control) {
-        auto collective_pitch_increment = controller->get_collective_pitch() - rna.elasto.rotor->pitch_collective;
-        rna.elasto.rotor->apply_collective_pitch_increment(collective_pitch_increment);
-        if (rna.blades.size() <= 3) {
-            // individual pitch only works with up to 3 blades
-            for (int idx_blade = 0; idx_blade < rna.blades.size(); idx_blade++) {
-                auto& blade = rna.blades[idx_blade]->elasto;
-                // individual pitch increment difference with collective pitch increment that was already applied
-                auto blade_pitch_increment =
-                    (controller->get_pitch_blade(idx_blade) - collective_pitch_increment) - blade.pitch;
-                blade.apply_pitch_increment(blade_pitch_increment);
-            }
-        }
-    }
-}
-
-void Turbine::poststep(double time, double dt) {
     // poststeps
     rna.poststep(time, dt);
     tower.poststep(time, dt);
