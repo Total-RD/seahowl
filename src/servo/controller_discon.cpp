@@ -549,6 +549,22 @@ float seahowl::servo::DisconInterface::GetAvrSWAP(size_t index) const {
     return value;
 }
 
+float seahowl::servo::DisconInterface::GetForcedAvrSWAP(size_t index) const {
+    if (index < 1 || index > MAX_SWAP) {
+        throw std::runtime_error("DISCON: avrSWAP index out of bounds");
+    }
+
+    auto& ap = discon::ArrayInfo.at(index);
+    if (ap.index != index) {
+        spdlog::warn("DISCON: mismatch array index {} and record number {}.", index, ap.index);
+    }
+
+    auto& value = avrSWAP[index - 1];
+    spdlog::trace("DISCON: get [{}] {}: {} {}.", index, ap.description, value, ap.unit);
+
+    return value;
+}
+
 void seahowl::servo::DisconInterface::Call() {
     if (has_dll) {
         DISCON(avrSWAP, &aviFAIL, accINFILE, avcOUTNAME, avcMSG);

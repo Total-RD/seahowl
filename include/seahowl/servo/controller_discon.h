@@ -144,6 +144,9 @@ class DisconInterface {
     /// <param name="index">Index Fortran. (eg +1 compared to C)</param>
     float GetAvrSWAP(size_t index) const;
 
+    // Forces the value of AvrSWAP even if it is of "in" type
+    float GetForcedAvrSWAP(size_t index) const;
+
     /// <summary>
     /// Set input filename with path relative to working directory.
     /// Path is used for other files
@@ -196,6 +199,15 @@ class ControllerDISCON : public Controller {
     ControllerDISCON(const std::string& infile = u8"DISCON.IN", const std::string& libfile = u8"libdiscon.so");
 
     /**
+     * @brief Updates turbine variables of object communicating with DISCON module.
+     *
+     * @param[in] time Time of simulation.
+     * @param[in] dt Time step legnth.
+     * @param[in] turbine Turbine that is controlled by this controller.
+     */
+    void update_turbine_variables(double time, double dt, const seahowl::core::Turbine& turbine);
+
+    /**
      * @brief Initialization of controller.
      *
      * @param[in] time Time of simulation.
@@ -232,9 +244,6 @@ class ControllerDISCON : public Controller {
   private:
     /** @brief Filepath of dynamic library (for DISCON routine). */
     std::string libfile;
-
-    // updates turbine variables of object communicating with DISCON module
-    void update_turbine_variables(double time, double dt, const seahowl::core::Turbine& turbine);
 };
 
 }  // namespace servo
