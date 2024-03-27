@@ -17,6 +17,7 @@ void run_simulation(int argc, char* argv[]) {
     }
 
     auto simulation = seahowl::core::Simulation();
+    simulation.populate_from_file(filepath_main.generic_string());
     simulation.initialize_from_file(filepath_main.generic_string());
     simulation.run_all();
 }

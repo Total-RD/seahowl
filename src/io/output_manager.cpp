@@ -11,16 +11,24 @@
 #include "seahowl/elasto/turbine_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 
+#include <filesystem>  // C++17
 #include <sstream>
 #include <iomanip>
 #include <spdlog/spdlog.h>
 
 using namespace seahowl::io;
+namespace fs = std::filesystem;
 
-OutputManager::OutputManager(seahowl::core::System& system_core, const std::string& output_folder)
-    : system_core(system_core), output_folder(output_folder) {}
+OutputManager::OutputManager(seahowl::core::System& system_core) : system_core(system_core) {}
+
+void OutputManager::set_output_folder(const std::string& output_folder) {
+    this->output_folder = output_folder;
+}
 
 void OutputManager::initialize() {
+    // outputs
+    spdlog::debug("Creating directory {} for outputs.", output_folder);
+    fs::create_directories(output_folder);
     if (has_vtk) {
 #ifdef HAVE_VTK
         output_vtk = std::make_unique<OutputSystemVTK>(system_core, output_folder + "/vtk/");

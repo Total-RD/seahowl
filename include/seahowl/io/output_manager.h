@@ -23,12 +23,13 @@ class OutputManager {
     bool has_gui = false;
     bool has_csv = true;
 
-    OutputManager(seahowl::core::System& system_core, const std::string& output_folder);
+    OutputManager(seahowl::core::System& system_core);
+    void set_output_folder(const std::string& output_folder);
     void initialize();
     void output_all(int step);
 
   private:
-    std::string output_folder;
+    std::string output_folder = ".";
     seahowl::core::System& system_core;
 #ifdef HAVE_VTK
     std::unique_ptr<OutputSystemVTK> output_vtk;

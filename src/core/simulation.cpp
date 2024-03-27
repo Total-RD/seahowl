@@ -25,7 +25,7 @@ Simulation::Simulation() {
     system_core = std::make_unique<System>(*system_elasto, *system_aero);
 }
 
-void Simulation::initialize_from_file(const std::string& filepath) {  // SETUP
+void Simulation::populate_from_file(const std::string& filepath) {
     spdlog::stopwatch sw_setup;
     spdlog::set_pattern("[%^%l%$] %v");
     spdlog::info("**************************************************************");
@@ -37,6 +37,8 @@ void Simulation::initialize_from_file(const std::string& filepath) {  // SETUP
     json json_obj;
     json_file >> json_obj;
     json_file.close();
+
+    populate_system_from_json(filepath, *system_core);
 
     // NUMERICS options
     auto num_json = json_obj.at("numerics");
@@ -52,16 +54,24 @@ void Simulation::initialize_from_file(const std::string& filepath) {  // SETUP
     }
 
     // outputs
-    outputs = std::make_unique<seahowl::io::OutputManager>(*system_core, output_folder);
+    outputs = std::make_unique<seahowl::io::OutputManager>(*system_core);
+    outputs->set_output_folder(output_folder);
     outputs->has_vtk = outputs_json.at("VTK").get<bool>();
     outputs->has_gui = outputs_json.at("gui").get<bool>();
+
+    spdlog::debug("Populated system in {:.3}s.", sw_setup);
+}
+
+void Simulation::initialize_from_file(const std::string& filepath) {
+    spdlog::stopwatch sw_setup;
+
+    // get main file info
+    std::ifstream json_file(filepath);
+    json json_obj;
+    json_file >> json_obj;
+    json_file.close();
+
     outputs->initialize();
-
-    // outputs
-    fs::create_directories(output_folder);
-
-    populate_system_from_json(filepath, *system_core);
-    spdlog::debug("Populated system.");
 
     initialize_system_from_json(filepath, *system_core);
     spdlog::debug("Fully initialized system.");

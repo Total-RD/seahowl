@@ -14,16 +14,15 @@ namespace core {
 class Simulation {
   public:
     std::unique_ptr<System> system_core;
+    std::unique_ptr<seahowl::io::OutputManager> outputs;
 
     double dt = 0.025;
     double dt_output = 0.;
     double duration = 1000.0;
 
-    bool output_vtk = false;
-    std::string output_folder;
-
     Simulation();
 
+    void populate_from_file(const std::string& filepath);
     void initialize_from_file(const std::string& filepath);
     void step();
     void run_all();
@@ -33,7 +32,7 @@ class Simulation {
     std::unique_ptr<seahowl::aero::SystemAero> system_aero;
     int nstep = 0;
     double t_output_next = 0.0;
-    std::unique_ptr<seahowl::io::OutputManager> outputs;
+    std::string main_filepath;
 };
 
 }  // namespace core
