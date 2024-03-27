@@ -63,14 +63,22 @@ void initialize_pyseahowl_elasto(py::module& m) {
     py::class_<seahowl::elasto::Link, std::shared_ptr<seahowl::elasto::Link>>(m_elasto, "Link")
         .def("set_constraints", &seahowl::elasto::Link::set_constraints)
         .def("get_reaction_force", &seahowl::elasto::Link::get_reaction_force)
-        .def("get_reaction_torque", &seahowl::elasto::Link::get_reaction_torque);
+        .def("get_reaction_torque", &seahowl::elasto::Link::get_reaction_torque)
+        .def("initialize", &seahowl::elasto::Link::initialize);
     py::class_<seahowl::elasto::MeshElasto, std::shared_ptr<seahowl::elasto::MeshElasto>>(m_elasto, "MeshElasto");
     py::class_<seahowl::elasto::SystemElasto, std::shared_ptr<seahowl::elasto::SystemElasto>>(m_elasto, "SystemElasto")
         .def("step", &seahowl::elasto::SystemElasto::step)
         .def("get_time", &seahowl::elasto::SystemElasto::get_time)
         .def("set_gravitational_acceleration", &seahowl::elasto::SystemElasto::set_gravitational_acceleration)
         .def("get_gravitational_acceleration", &seahowl::elasto::SystemElasto::get_gravitational_acceleration)
-        .def("do_statics", &seahowl::elasto::SystemElasto::do_statics);
+        .def("do_statics", &seahowl::elasto::SystemElasto::do_statics)
+        .def("add", static_cast<void (seahowl::elasto::SystemElasto::*)(seahowl::elasto::BodyElasto & body)>(
+                        &seahowl::elasto::SystemElasto::add))
+        .def("add", static_cast<void (seahowl::elasto::SystemElasto::*)(seahowl::elasto::MeshElasto & mesh)>(
+                        &seahowl::elasto::SystemElasto::add))
+        .def("add", static_cast<void (seahowl::elasto::SystemElasto::*)(seahowl::elasto::Link & link)>(
+                        &seahowl::elasto::SystemElasto::add))
+        .def_readonly("turbines", &seahowl::elasto::SystemElasto::turbines);
 
     // elasto/chrono_adapters.h
     py::class_<seahowl::elasto::BodyElastoChrono, std::shared_ptr<seahowl::elasto::BodyElastoChrono>,
@@ -144,6 +152,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readonly("nodes", &seahowl::elasto::ComponentElastoFEA::nodes)
         .def_readonly("elements", &seahowl::elasto::ComponentElastoFEA::elements)
         .def_readwrite("discretization_fractions", &seahowl::elasto::ComponentElastoFEA::discretization_fractions)
+        .def("assemble", &seahowl::elasto::ComponentElastoFEA::assemble)
         .def("evaluate_position_rotation", &seahowl::elasto::ComponentElastoFEA::evaluate_position_rotation)
         .def("accumulate_element_load", &seahowl::elasto::ComponentElastoFEA::accumulate_element_load);
 
@@ -255,7 +264,21 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("get_tension_anchor", &seahowl::elasto::MooringElasto::get_tension_anchor);
     py::class_<seahowl::elasto::MooringElastoFEA, std::shared_ptr<seahowl::elasto::MooringElastoFEA>,
                seahowl::elasto::MooringElasto, seahowl::elasto::ComponentElastoFEA>(m_elasto, "MooringElastoFEA")
-        .def(py::init<seahowl::elasto::BodyElasto&, seahowl::elasto::BodyElasto&>());
+        .def(py::init<seahowl::elasto::BodyElasto&, seahowl::elasto::BodyElasto&>())
+        .def("build", &seahowl::elasto::MooringElastoFEA::build)
+        .def("compute_hydro_loads", &seahowl::elasto::MooringElastoFEA::compute_hydro_loads)
+        .def_readwrite("length", &seahowl::elasto::MooringElastoFEA::length)
+        .def_readwrite("diameter", &seahowl::elasto::MooringElastoFEA::diameter)
+        .def_readwrite("stiffness_axial", &seahowl::elasto::MooringElastoFEA::stiffness_axial)
+        .def_readwrite("stiffness_bending", &seahowl::elasto::MooringElastoFEA::stiffness_bending)
+        .def_readwrite("density_linear", &seahowl::elasto::MooringElastoFEA::density_linear)
+        .def_readwrite("drag_coefficient_normal", &seahowl::elasto::MooringElastoFEA::drag_coefficient_normal)
+        .def_readwrite("drag_coefficient_tangential", &seahowl::elasto::MooringElastoFEA::drag_coefficient_tangential)
+        .def_readwrite("added_mass_coefficient_normal",
+                       &seahowl::elasto::MooringElastoFEA::added_mass_coefficient_normal)
+        .def_readwrite("added_mass_coefficient_tangential",
+                       &seahowl::elasto::MooringElastoFEA::added_mass_coefficient_tangential)
+        .def_readwrite("discretization_fractions", &seahowl::elasto::MooringElastoFEA::discretization_fractions);
 
     // elasto/turbine_floating_elasto.h
     py::class_<seahowl::elasto::TurbineFloatingElasto, std::shared_ptr<seahowl::elasto::TurbineFloatingElasto>,

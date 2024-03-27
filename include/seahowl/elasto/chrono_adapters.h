@@ -26,6 +26,7 @@ class ChQuaternion;
 template <class Real>
 class ChFrameMoving;
 class ChBody;
+class ChBodyFrame;
 class ChLinkBase;
 class ChLinkPointPoint;
 class ChLinkPointFrame;
@@ -56,7 +57,7 @@ Quaternion ch2quat(const chrono::ChQuaternion<double>& quaternion_in);
 //
 class EntityDynamicChrono : public virtual EntityDynamic {
   public:
-    std::shared_ptr<chrono::ChFrameMoving<double>> chobj;
+    std::shared_ptr<chrono::ChBodyFrame> chobj;
 
     virtual void set_position(const Vector3d& position) override;
     virtual Vector3d get_position() const override;
@@ -232,9 +233,8 @@ class LinkChrono : public Link, public LinkChronoBase {
 
     LinkChrono();
     virtual void set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) override;
-    virtual void initialize(const BodyElasto& body1, const BodyElasto& body2) override;
-    virtual void initialize(const NodeElasto& node1, const BodyElasto& body2) override;
-    virtual void initialize(const NodeElasto& node1, const NodeElasto& node2) override;
+
+    virtual void initialize(const Entity& entity1, const Entity& entity2) override;
     Vector3d get_reaction_force() const override;
     Vector3d get_reaction_torque() const override;
 };
@@ -249,9 +249,7 @@ class LinkChronoCable : public Link, public LinkChronoBase {
 
     LinkChronoCable();
     virtual void set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) override;
-    virtual void initialize(const BodyElasto& body1, const BodyElasto& body2) override;
-    virtual void initialize(const NodeElasto& node1, const BodyElasto& body2) override;
-    virtual void initialize(const NodeElasto& node1, const NodeElasto& node2) override;
+    virtual void initialize(const Entity& entity1, const Entity& entity2) override;
     Vector3d get_reaction_force() const override;
     Vector3d get_reaction_torque() const override;
 };

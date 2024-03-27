@@ -635,22 +635,10 @@ LinkChrono::LinkChrono() {
     LinkChronoBase::chobj = chobj;
 }
 
-void LinkChrono::initialize(const BodyElasto& body1, const BodyElasto& body2) {
-    chobj->Initialize(dynamic_cast<const BodyElastoChrono&>(body1).chobj,
-                      dynamic_cast<const BodyElastoChrono&>(body2).chobj,
-                      dynamic_cast<const BodyElastoChrono&>(body2).chobj->GetFrame_COG_to_abs());
-}
-
-void LinkChrono::initialize(const NodeElasto& node1, const BodyElasto& body2) {
-    chobj->Initialize(dynamic_cast<const NodeElastoChrono&>(node1).chobj,
-                      dynamic_cast<const BodyElastoChrono&>(body2).chobj,
-                      dynamic_cast<const BodyElastoChrono&>(body2).chobj->GetFrame_COG_to_abs());
-}
-
-void LinkChrono::initialize(const NodeElasto& node1, const NodeElasto& node2) {
-    chobj->Initialize(dynamic_cast<const NodeElastoChrono&>(node1).chobj,
-                      dynamic_cast<const NodeElastoChrono&>(node2).chobj,
-                      dynamic_cast<const NodeElastoChrono&>(node2).chobj->Frame());
+void LinkChrono::initialize(const Entity& entity1, const Entity& entity2) {
+    chobj->Initialize(dynamic_cast<const EntityDynamicChrono&>(entity1).chobj,
+                      dynamic_cast<const EntityDynamicChrono&>(entity2).chobj,
+                      *dynamic_cast<const EntityDynamicChrono&>(entity2).chobj);
 }
 
 void LinkChrono::set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) {
@@ -667,24 +655,38 @@ Vector3d LinkChrono::get_reaction_torque() const {
 
 LinkChronoCable::LinkChronoCable() {}
 
-void LinkChronoCable::initialize(const BodyElasto& body1, const BodyElasto& body2) {
-    throw std::runtime_error("Cannot link 2 bodies with cable link.");
-}
-
-void LinkChronoCable::initialize(const NodeElasto& node1, const BodyElasto& body2) {
-    auto link = chrono_types::make_shared<chrono::fea::ChLinkPointFrame>();
-    link->Initialize(dynamic_cast<const NodeElastoChronoD&>(node1).chobj,
-                     dynamic_cast<const BodyElastoChrono&>(body2).chobj);
-    chobj = link;
-    LinkChronoBase::chobj = chobj;
-}
-
-void LinkChronoCable::initialize(const NodeElasto& node1, const NodeElasto& node2) {
-    auto link = chrono_types::make_shared<chrono::fea::ChLinkPointPoint>();
-    link->Initialize(dynamic_cast<const NodeElastoChronoD&>(node1).chobj,
-                     dynamic_cast<const NodeElastoChronoD&>(node2).chobj);
-    chobj = link;
-    LinkChronoBase::chobj = chobj;
+void LinkChronoCable::initialize(const Entity& entity1, const Entity& entity2) {
+    try {
+        auto link = chrono_types::make_shared<chrono::fea::ChLinkPointFrame>();
+        auto node = dynamic_cast<const NodeElastoChronoD&>(entity1);
+        auto body = dynamic_cast<const BodyElastoChrono&>(entity2);
+        link->Initialize(node.chobj, body.chobj);
+        chobj = link;
+        LinkChronoBase::chobj = chobj;
+        return;
+    } catch (const std::bad_cast& e) {
+    }
+    try {
+        auto link = chrono_types::make_shared<chrono::fea::ChLinkPointFrame>();
+        auto body = dynamic_cast<const BodyElastoChrono&>(entity1);
+        auto node = dynamic_cast<const NodeElastoChronoD&>(entity2);
+        link->Initialize(node.chobj, body.chobj);
+        chobj = link;
+        LinkChronoBase::chobj = chobj;
+        return;
+    } catch (const std::bad_cast& e) {
+    }
+    try {
+        auto link = chrono_types::make_shared<chrono::fea::ChLinkPointPoint>();
+        auto node1 = dynamic_cast<const NodeElastoChronoD&>(entity1);
+        auto node2 = dynamic_cast<const NodeElastoChronoD&>(entity2);
+        link->Initialize(node1.chobj, node2.chobj);
+        chobj = link;
+        LinkChronoBase::chobj = chobj;
+        return;
+    } catch (const std::bad_cast& e) {
+    }
+    throw std::runtime_error("Cannot link these entities with cable link.");
 }
 
 void LinkChronoCable::set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) {

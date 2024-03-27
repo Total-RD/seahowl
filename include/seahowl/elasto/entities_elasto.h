@@ -250,24 +250,9 @@ class ElementMooringElasto : public virtual ElementElasto {
 class Link {
   public:
     /**
-     * @brief Initialize link between bodies.
+     * @brief Initialize link between entitiies.
      */
-    virtual void initialize(const BodyElasto& body1, const BodyElasto& body2) = 0;
-
-    /**
-     * @brief Initialize link between node and body.
-     */
-    virtual void initialize(const NodeElasto& node1, const BodyElasto& body2) = 0;
-
-    /**
-     * @brief Initialize link between body and node.
-     */
-    void initialize(const BodyElasto& body1, const NodeElasto& node2) { initialize(node2, body1); };
-
-    /**
-     * @brief Initialize link between node and node.
-     */
-    virtual void initialize(const NodeElasto& node1, const NodeElasto& node2) = 0;
+    virtual void initialize(const Entity& entity1, const Entity& entity2) = 0;
 
     /**
      * @brief Sets constraints (true: constrained; false: unconstrained).
