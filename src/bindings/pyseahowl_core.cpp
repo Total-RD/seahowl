@@ -3,6 +3,7 @@
 #include <pybind11/eigen.h>
 
 #include <seahowl/core/component.h>
+#include <seahowl/core/simulation.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/core/turbine_floating.h>
 #include <seahowl/elasto/turbine_elasto.h>
@@ -18,6 +19,7 @@
 #include <seahowl/env/wind_models.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/io/read_json.h>
+#include <seahowl/io/read_json.h>
 
 namespace py = pybind11;
 
@@ -31,6 +33,20 @@ void initialize_pyseahowl_core(py::module& m) {
         .def("initialize", &seahowl::core::ComponentDynamic::initialize)
         .def("prestep", &seahowl::core::ComponentDynamic::prestep)
         .def("poststep", &seahowl::core::ComponentDynamic::poststep);
+
+    // core/simulation.h
+    py::class_<seahowl::core::Simulation, std::shared_ptr<seahowl::core::Simulation>>(m_core, "Simulation")
+        .def(py::init<>())
+        .def("run_all", &seahowl::core::Simulation::run_all)
+        .def("step", &seahowl::core::Simulation::step)
+        .def("populate_from_file", &seahowl::core::Simulation::populate_from_file)
+        .def("initialize_from_file", &seahowl::core::Simulation::initialize_from_file)
+        .def_readwrite("dt", &seahowl::core::Simulation::dt)
+        .def_readwrite("dt_output", &seahowl::core::Simulation::dt_output)
+        .def_readwrite("duration", &seahowl::core::Simulation::duration)
+        .def_property_readonly(
+            "outputs", [](seahowl::core::Simulation& sim) { return sim.outputs.get(); },
+            py::return_value_policy::reference_internal);
 
     // core/turbine.h
     py::class_<seahowl::core::Turbine, std::shared_ptr<seahowl::core::Turbine>, seahowl::core::ComponentDynamic>(

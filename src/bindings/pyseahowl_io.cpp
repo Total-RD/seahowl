@@ -13,6 +13,7 @@
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/aero/rotor_aero.h>
 #include <seahowl/io/write_csv.h>
+#include <seahowl/io/output_manager.h>
 
 namespace py = pybind11;
 
@@ -35,4 +36,14 @@ void initialize_pyseahowl_io(py::module& m) {
 
     // io/write_csv.h
     m_io.def("write_turbine_info_to_csv", &write_turbine_info_to_csv);
+
+    // io/output_manager.h
+    py::class_<seahowl::io::OutputManager, std::shared_ptr<seahowl::io::OutputManager>>(m_io, "OutputManager")
+        .def(py::init<seahowl::core::System&>())
+        .def("set_output_folder", &seahowl::io::OutputManager::set_output_folder)
+        .def("initialize", &seahowl::io::OutputManager::initialize)
+        .def("output_all", &seahowl::io::OutputManager::output_all)
+        .def_readwrite("has_vtk", &seahowl::io::OutputManager::has_vtk)
+        .def_readwrite("has_gui", &seahowl::io::OutputManager::has_gui)
+        .def_readwrite("has_csv", &seahowl::io::OutputManager::has_csv);
 }
