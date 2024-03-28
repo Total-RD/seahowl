@@ -1,4 +1,5 @@
 #include <seahowl/core/simulation.h>
+#include <seahowl/io/read_json.h>
 
 #include <filesystem>  // C++17
 #include <spdlog/spdlog.h>
@@ -64,6 +65,14 @@ void apply_args(int argc, char* argv[], seahowl::core::Simulation& simulation) {
                 std::string output_folder = argv[ii + 1];
                 spdlog::warn("Simulation variable override with {} {}.", argv[ii], output_folder);
                 simulation.outputs->set_output_folder(output_folder);
+            } else {
+                throw std::runtime_error("No value following " + std::string(argv[ii]) + " argument.");
+            }
+        } else if (arg == "--env-file") {
+            if (ii < argc - 1) {
+                std::string env_file = argv[ii + 1];
+                spdlog::warn("Simulation variable override with {} {}.", argv[ii], env_file);
+                populate_environmental_conditions_from_json(env_file, *simulation.system_core);
             } else {
                 throw std::runtime_error("No value following " + std::string(argv[ii]) + " argument.");
             }
