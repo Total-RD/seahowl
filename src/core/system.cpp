@@ -168,7 +168,7 @@ void System::run_presetup(double presetup_duration, double presetup_dt) {
                                 mooring.diameter, mooring.stiffness_axial, mooring.stiffness_bending);
                         }
                     }
-                    mooring.compute_hydro_loads(elasto.get_gravitational_acceleration(), 1000.);
+                    mooring.compute_hydro_loads(*fluid_model, 0.0);
 
                     if (soil_model) {
                         mooring.compute_seabed_loads(*soil_model);
@@ -251,4 +251,8 @@ void System::run_presimulation(double presim_duration, double presim_dt, bool fi
         }
     }
     spdlog::info("Presimulation finished.");
+}
+
+void System::add_turbine(std::shared_ptr<Turbine> turbine) {
+    turbines.push_back(turbine);
 }

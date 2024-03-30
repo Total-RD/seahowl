@@ -154,16 +154,15 @@ void MooringElastoFEA::assemble(SystemElasto& system) {
     ComponentElastoFEA::assemble(system);
     system.add(*fairlead_link);
     system.add(*anchor_link);
+    gravitational_acceleration = system.get_gravitational_acceleration();
 }
 
-void MooringElastoFEA::compute_hydro_loads(const Vector3d& gravitational_acceleration, double fluid_density) {
+void MooringElastoFEA::compute_hydro_loads(seahowl::env::FluidModel& fluid_model, double time) {
     for (int ii = 0; ii < nodes.size(); ii++) {
         nodes[ii]->set_force(Vector3d(0.0, 0.0, 0.0));
     }
 
     auto area = PI * pow(diameter, 2) / 4.0;
-    // buoyancy
-    auto load_buoyancy = fluid_density * area * (-gravitational_acceleration);
 
     for (int ii = 0; ii < elements.size(); ii++) {
         auto& element = elements[ii];
@@ -172,6 +171,9 @@ void MooringElastoFEA::compute_hydro_loads(const Vector3d& gravitational_acceler
         // loads nodes
         for (int ii = 0; ii < 2; ii++) {
             auto dir = element->nodes[ii]->get_direction();
+            auto pos = element->nodes[ii]->get_position();
+            auto fluid_density = fluid_model.get_fluid_density(pos, time);
+            auto load_buoyancy = fluid_density * area * (-gravitational_acceleration);
 
             // drag
             auto fluid_velocity = Vector3d(0.0, 0.0, 0.0);

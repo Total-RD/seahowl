@@ -122,6 +122,13 @@ class System : public ComponentDynamic {
      * @param[in] fix_towers Whether to fix tower bases or not.
      */
     void run_presimulation(double presim_duration, double presim_dt, bool fix_towers = true);
+
+    /**
+     * @brief Adds turbine to system.
+     *
+     * @param[in] turbine Turbine to add to system.
+     */
+    void add_turbine(std::shared_ptr<seahowl::core::Turbine> turbine);
 };
 }  // namespace core
 }  // namespace seahowl

@@ -4,6 +4,7 @@
 #include "seahowl/elasto/entities_elasto.h"
 #include "seahowl/commons/numerics.h"
 #include "seahowl/env/soil_models.h"
+#include "seahowl/env/fluid_models.h"
 
 #include <deque>
 
@@ -116,10 +117,10 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
     /**
      * @brief Computes hydro loads on cable.
      *
-     * param[in] gravitational_acceleration Gravitational acceleration vector.
-     * param[in] fluid_density Density of fluid.
+     * param[in] fluid_model Fluid model.
+     * param[in] time Simulation time.
      */
-    void compute_hydro_loads(const Vector3d& gravitational_acceleration, double fluid_density);
+    void compute_hydro_loads(seahowl::env::FluidModel& fluid_model, double time);
 
     /**
      * @brief Computes seabed interaction loads on cable.
@@ -143,6 +144,8 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
      * @brief Builds the mooring with ANCF cable elements.
      */
     void build_elements();
+
+    Vector3d gravitational_acceleration{0.0, 0.0, -9.81};  // for buoyancy calculations
 };
 
 }  // namespace elasto

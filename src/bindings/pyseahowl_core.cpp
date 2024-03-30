@@ -108,6 +108,7 @@ void initialize_pyseahowl_core(py::module& m) {
         .def("set_time", &seahowl::core::System::set_time)
         .def("run_presetup", &seahowl::core::System::run_presetup)
         .def("run_presimulation", &seahowl::core::System::run_presimulation)
+        .def("add_turbine", &seahowl::core::System::add_turbine)
         .def_readonly("turbines", &seahowl::core::System::turbines)
         .def_readwrite("fluid_model", &seahowl::core::System::fluid_model)
         .def_property_readonly("elasto", [](seahowl::core::System& system) { return &system.elasto; })

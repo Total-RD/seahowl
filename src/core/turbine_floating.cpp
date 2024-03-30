@@ -51,8 +51,7 @@ void TurbineFloating::apply_fluid_model(seahowl::env::FluidModel& fluid_model, d
     Turbine::apply_fluid_model(fluid_model, time);
     for (auto& mooring : elasto.mooring_system->moorings) {
         try {
-            dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*mooring).compute_hydro_loads(Vector3d(0., 0., -9.81),
-                                                                                           1025.);
+            dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*mooring).compute_hydro_loads(fluid_model, time);
         } catch (const std::bad_cast& e) {
             // do nothing
         }

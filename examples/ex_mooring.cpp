@@ -2,6 +2,7 @@
 #include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/commons/numerics.h>
 #include <seahowl/env/soil_models.h>
+#include <seahowl/env/wave_models.h>
 
 #include <filesystem>  // C++17
 #include <spdlog/spdlog.h>
@@ -23,9 +24,9 @@ using namespace seahowl::elasto;
 void setup_cables(seahowl::elasto::SystemElasto& system,
                   seahowl::elasto::MooringElastoFEA& mooring,
                   seahowl::env::SoilModel& seabed,
+                  seahowl::env::FluidModel& fluid,
                   double dt = 0.01,
-                  int nsteps = 1000,
-                  double fluid_density = 1000.0) {
+                  int nsteps = 1000) {
     // check that mooring was built properly
     int nb_elements = mooring.elements.size();
     if (nb_elements != mooring.discretization_fractions.size() - 1) {
@@ -51,7 +52,7 @@ void setup_cables(seahowl::elasto::SystemElasto& system,
             auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring.elements[idx_el]);
             element.set_rest_length(lengths_initial[idx_el] + lengths_delta[idx_el] * step);
         }
-        mooring.compute_hydro_loads(system.get_gravitational_acceleration(), fluid_density);
+        mooring.compute_hydro_loads(fluid, 0.0);
         mooring.compute_seabed_loads(seabed);
         system.step(dt);
     }
@@ -103,6 +104,11 @@ void run_simulation() {
     seabed.stiffness_normal = 1e6;
     seabed.stiffness_shear = 0.0;
 
+    auto fluid = seahowl::env::StillWater();
+    fluid.density = 1025.0;
+    fluid.mean_water_level = 1000.;
+    fluid.water_depth = -1000.;
+
     double time = 0;
     double step = 0;
 
@@ -126,11 +132,11 @@ void run_simulation() {
     viz_insitu->draw();
 
     spdlog::info("Setting up cables.");
-    setup_cables(system_elasto, mooring, seabed, dt, 1000, fluid_density);
+    setup_cables(system_elasto, mooring, seabed, fluid, dt, 1000);
     spdlog::info("Cables ready.");
     while (true) {
         time += system_elasto.get_time();
-        mooring.compute_hydro_loads(system_elasto.get_gravitational_acceleration(), fluid_density);
+        mooring.compute_hydro_loads(fluid, system_elasto.get_time());
         mooring.compute_seabed_loads(seabed);
         system_elasto.step(dt);
         step += 1;
