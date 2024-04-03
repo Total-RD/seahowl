@@ -20,6 +20,12 @@ def save_json(json_dict, path):
         f.write(jsbeautifier.beautify(json.dumps(json_dict), options))
 
 
+def save_csv(header, array, path):
+    mydirectory = Path(path).parent
+    mydirectory.mkdir(parents=True, exist_ok=True)
+    np.savetxt(path, array, header=header, delimiter=",", comments="")
+
+
 def merge_interpolate_points(json_points1, json_points2):
     # get fractions as lists
     fractions1 = list()
@@ -476,10 +482,6 @@ def merge_beamdyn2aerodyn(beamdyn_json, aerodyn_json, save_directory=None):
 def convert_elastodyn_tower_file(
     filename_elastodyn, filename_elastodyn_tower, save_directory=None
 ):
-    elastodyn_json = dict()
-    elastodyn_json["type"] = "cylinder"
-    elastodyn_json["damping_coefficients"] = [0.02, 0.02, 0.02, 0.02]
-
     # elastodyn (general info)
     filepath = Path(filename_elastodyn)
     points = list()
@@ -489,9 +491,9 @@ def convert_elastodyn_tower_file(
             words = line.split()
             if len(words) > 1:
                 if words[1] == "TowerHt":
-                    elastodyn_json["height"] = float(words[0])
+                    height = float(words[0])
                 if words[1] == "TowerBsHt":
-                    elastodyn_json["base_height"] = float(words[0])
+                    base_height = float(words[0])
 
     # elastodyn tower (reference points)
     filepath = Path(filename_elastodyn_tower)
@@ -503,31 +505,27 @@ def convert_elastodyn_tower_file(
             words = line.split()
             if len(words) > 1:
                 if words[1] == "TowerHt":
-                    elastodyn_json["height"] = float(words[0])
+                    height = float(words[0])
                 if words[1] == "TowerBsHt":
-                    elastodyn_json["base_height"] = float(words[0])
+                    base_height = float(words[0])
             if len(words) >= 2 and words[1] == "NTwInpSt":
                 npoints = int(words[0])
                 break
 
     assert npoints != 0, "Could not find tower ElastoDyn info in given file."
     start_idx = 19
-    fractions = list()
 
+    header = "x,y,z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient,damping_x,damping_y,damping_z,damping_t"
+    csv_array = np.zeros([npoints, len(header.split(","))])
     # assume basic steel properties and cylinder shape
     young_modulus = 210e9
     density = 7850
     poisson_ratio = 0.3
-    options = {}
-    options["density"] = density
-    options["young_modulus"] = young_modulus
-    options["poisson_ratio"] = poisson_ratio
-    elastodyn_json["options"] = options
-    for line in lines[start_idx : start_idx + npoints]:
+    drag_coefficient = 0.5
+    for ii, line in enumerate(lines[start_idx : start_idx + npoints]):
         point = dict()
         words = line.split()
-        point["fraction"] = float(words[0])
-        fractions.append(point["fraction"])
+        fraction = float(words[0])
         density_linear = float(words[1])
         inertia = float(words[2]) / young_modulus  # area moment of inertia
         # inner
@@ -540,91 +538,29 @@ def convert_elastodyn_tower_file(
         # outer
         area_outer = density_linear / density + area_inner
         diameter_outer = np.sqrt(4 * area_outer / np.pi)
-        point["diameter"] = diameter_outer
         # thickness
         thickness = 0.5 * (diameter_outer - diameter_inner)
-        point["thickness"] = thickness
 
-        point["drag_coefficient"] = 0.5  # cylinders
-        points.append(point)
-
-    elastodyn_json["reference_points"] = points
-
-    # save to file
-    if save_directory is not None:
-        fullpath = Path(save_directory) / "tower.json"
-        save_json(elastodyn_json, fullpath)
-
-    return elastodyn_json
-
-
-def convert_aerodyn_tower_file(filename, save_directory=None):
-    filepath = Path(filename)
-    aerodyn_json = dict()
-
-    points = list()
-    fractions = list()
-    with open(filepath, "r") as f:
-        lines = f.readlines()
-        npoints = 0
-        start_idx = 0
-        npoints = 0
-        for ii, line in enumerate(lines):
-            words = line.split()
-            if len(words) >= 2 and words[1] == "NumTwrNds":
-                npoints = int(words[0])
-                start_idx = ii + 3
-                break
-
-        assert start_idx != 0, "Could not find tower AeroDyn info in given file."
-        for line in lines[start_idx : start_idx + npoints]:
-            point = dict()
-            words = line.split()
-            point["elevation"] = float(words[0])
-            point["diameter"] = float(words[1])
-            point["drag_coefficient"] = float(words[2])
-            if len(words) > 3:
-                point["TI"] = float(words[3])
-            else:
-                point["TI"] = 0.0
-            points.append(point)
-
-    tower_bottom = points[0]["elevation"]
-    tower_top = points[-1]["elevation"]
-    tower_length = tower_top - tower_bottom
-    for point in points:
-        point["fraction"] = (point["elevation"] - tower_bottom) / tower_length
-        fractions.append(point["fraction"])
-        point.pop("elevation", None)
-        point.pop("TI", None)
-
-    aerodyn_json["discretization_aero"] = fractions
-    aerodyn_json["reference_points"] = points
+        csv_array[ii] = [
+            0.0,
+            0.0,
+            base_height + fraction * (height - base_height),
+            diameter_outer,
+            thickness,
+            density_linear,
+            young_modulus,
+            poisson_ratio,
+            drag_coefficient,
+            0.02,
+            0.02,
+            0.02,
+            0.02,
+        ]
 
     # save to file
     if save_directory is not None:
-        fullpath = Path(save_directory) / filepath.with_suffix(".json")
-        save_json(aerodyn_json, fullpath)
-
-    return aerodyn_json
-
-
-def merge_elastodyn2aerodyn_tower(elastodyn_json, aerodyn_json, save_directory=None):
-    merged_json = copy.deepcopy(elastodyn_json)
-    reference_points = merge_interpolate_points(
-        json_points1=elastodyn_json["reference_points"],
-        json_points2=aerodyn_json["reference_points"],
-    )
-    merged_json["reference_points"] = reference_points
-    merged_json.pop("discretization_aero", None)
-    merged_json.pop("discretization_elasto", None)
-
-    # save to file
-    if save_directory is not None:
-        fullpath = Path(save_directory) / "tower.json"
-        save_json(merged_json, fullpath)
-
-    return merged_json
+        fullpath = Path(save_directory) / "tower.csv"
+        save_csv(header, csv_array, fullpath)
 
 
 def convert_elastodyn_rna_file(
@@ -844,9 +780,6 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                         save_polar=True,
                         save_aerodyn=False,
                     )
-                    tower_aero_json = convert_aerodyn_tower_file(
-                        filename=path_AD, save_directory=None
-                    )
                 # ServoDyn
                 elif words[1] == "ServoFile":
                     path_servo = filedir / words[0].replace('"', "")
@@ -947,7 +880,7 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                     "elasto": [],
                     "aero": [],
                 },
-                "file": str(Path("./tower.json")),
+                "file": str(Path("./tower.csv")),
             },
             "controller": controller_json,
         }
