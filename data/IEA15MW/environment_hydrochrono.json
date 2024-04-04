@@ -29,7 +29,8 @@
       "peak_enhancement_factor": 3.3,
       "is_normalized": true,
       "seed": 42,
-      "num_bodies": 1
+      "num_bodies": 1,
+      "wave_stretching": true
     }
   },
   "soil": {

@@ -2,6 +2,7 @@
 
 #include "seahowl/elasto/chrono_adapters.h"
 
+#include <hydroc/hydro_forces.h>
 #include <chrono/physics/ChBody.h>
 
 #include <spdlog/spdlog.h>
@@ -48,7 +49,11 @@ WaveModelHydroChrono::WaveModelHydroChrono() {
 }
 
 seahowl::Vector3d WaveModelHydroChrono::get_fluid_velocity(const Vector3d& position, double time) const {
-    return Vector3d(0.0, 0.0, 0.0);
+    if (is_in_water(position, time)) {
+        return waves->GetVelocity(position, time);
+    } else {
+        throw std::runtime_error("Cannot retrieve water velocity above mean water level.");
+    }
 }
 
 double WaveModelHydroChrono::get_fluid_density(const Vector3d& position, double time) const {
@@ -56,5 +61,10 @@ double WaveModelHydroChrono::get_fluid_density(const Vector3d& position, double 
 }
 
 bool WaveModelHydroChrono::is_in_water(const Vector3d& position, double time) const {
-    return false;
+    auto water_level = waves->mwl_ + waves->GetElevation(position, time);
+    if (position.dot(surface_normal) <= water_level) {
+        return true;
+    } else {
+        return false;
+    }
 }

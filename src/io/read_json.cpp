@@ -32,6 +32,7 @@
 #ifdef HAVE_HYDROCHRONO
     #include "seahowl/hydro/hydrochrono_adapter.h"
     #include "seahowl/elasto/chrono_adapters.h"
+    #include <hydroc/hydro_forces.h>
 #endif
 #ifdef HAVE_AERODYN
     #include "seahowl/aero/aerodyn_adapter.h"
@@ -912,11 +913,18 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
                 sea_options.at("seed").get_to(params.seed_);
                 sea_options.at("dt").get_to(params.simulation_dt_);
                 sea_options.at("duration").get_to(params.simulation_duration_);
+                sea_options.at("wave_stretching").get_to(params.wave_stretching_);
                 params.ramp_duration_ = 0.0;
                 params.num_bodies_ = 1;
                 wave_model.waves = std::make_shared<IrregularWaves>(params);
             } else {
                 throw std::runtime_error("Unrecognized wave type \"" + wave_type + "\" for HydroChrono.");
+            }
+            sea_json.at("mean_water_level").get_to(wave_model.waves->mwl_);
+            sea_json.at("water_depth").get_to(wave_model.waves->water_depth_);
+            wave_model.waves->g_ = gravity_vector.norm();
+            if (wave_type == "irregular") {
+                dynamic_cast<IrregularWaves&>(*wave_model.waves).CreateSpectrum();
             }
 #else
             throw std::runtime_error("Must compile and enable HydroChrono dependency to use HydroChrono waves.");

@@ -8,7 +8,10 @@
 
 #include <string>
 
-#include <hydroc/hydro_forces.h>
+// forward declarations for HydroChrono
+class WaveBase;
+class TestHydro;
+// namespace hydroc
 
 namespace seahowl {
 namespace hydro {
