@@ -20,6 +20,7 @@ class WindModel : public FluidModel {
     virtual double get_fluid_density(const Vector3d& position, double time) const override;
 };
 
+/**@brief Sheared wind model. This model and derived models assume a ground level at z=0.0. */
 class ShearedWind : public WindModel {
   public:
     /** @brief Wind shear coefficient. */
@@ -30,7 +31,7 @@ class ShearedWind : public WindModel {
     Vector3d direction_gravity{0.0, 0.0, -1.0};
 };
 
-/**@brief Constant wind models */
+/**@brief Constant wind models. */
 class ConstantWind : public ShearedWind {
   public:
     /** @brief Wind velocity. */
@@ -57,7 +58,7 @@ class ConstantWind : public ShearedWind {
     virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
 };
 
-/**@brief Wind ramp model */
+/**@brief Wind ramp model. */
 class WindRamp : public ShearedWind {
   public:
     /** @brief Starting time of ramp. */
