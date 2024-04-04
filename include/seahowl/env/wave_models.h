@@ -26,7 +26,12 @@ class WaveModel : public FluidModel {
      * @param[in] position Position at which fluid velocity is extracted.
      * @param[in] time Time of simulation.
      */
-    virtual bool is_in_water(const Vector3d& position, double time) const = 0;
+    bool is_in_water(const Vector3d& position, double time) const;
+
+    /**
+     * @brief Returns water level.
+     */
+    virtual double get_water_level(const Vector3d& position, double time) const = 0;
 };
 
 /**
@@ -43,7 +48,7 @@ class StillWater : public WaveModel {
 
     virtual double get_fluid_density(const Vector3d& position, double time) const override;
 
-    virtual bool is_in_water(const Vector3d& position, double time) const override;
+    virtual double get_water_level(const Vector3d& position, double time) const override;
 };
 
 /**

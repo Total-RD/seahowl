@@ -3,6 +3,14 @@
 using namespace seahowl::env;
 using seahowl::Vector3d;
 
+bool WaveModel::is_in_water(const Vector3d& position, double time) const {
+    if (position.dot(surface_normal) <= get_water_level(position, time)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 StillWater::StillWater() {}
 
 Vector3d StillWater::get_fluid_velocity(const Vector3d& position, double time) const {
@@ -21,12 +29,8 @@ double StillWater::get_fluid_density(const Vector3d& position, double time) cons
     }
 }
 
-bool StillWater::is_in_water(const Vector3d& position, double time) const {
-    if (position.dot(surface_normal) <= mean_water_level) {
-        return true;
-    } else {
-        return false;
-    }
+double StillWater::get_water_level(const Vector3d& position, double time) const {
+    return mean_water_level;
 }
 
 CurrentConstant::CurrentConstant() {}

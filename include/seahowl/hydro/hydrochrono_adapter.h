@@ -76,7 +76,7 @@ class WaveModelHydroChrono : public WaveModel {
 
     virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
     virtual double get_fluid_density(const Vector3d& position, double time) const override;
-    virtual bool is_in_water(const Vector3d& position, double time) const override;
+    virtual double get_water_level(const Vector3d& position, double time) const override;
 };
 
 }  // namespace env

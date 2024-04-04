@@ -60,11 +60,6 @@ double WaveModelHydroChrono::get_fluid_density(const Vector3d& position, double 
     return density;
 }
 
-bool WaveModelHydroChrono::is_in_water(const Vector3d& position, double time) const {
-    auto water_level = waves->mwl_ + waves->GetElevation(position, time);
-    if (position.dot(surface_normal) <= water_level) {
-        return true;
-    } else {
-        return false;
-    }
+double WaveModelHydroChrono::get_water_level(const Vector3d& position, double time) const {
+    return waves->mwl_ + waves->GetElevation(position, time);
 }
