@@ -13,7 +13,7 @@ void initialize_pyseahowl_servo(py::module& m);
 void initialize_pyseahowl_core(py::module& m);
 void initialize_pyseahowl_io(py::module& m);
 
-PYBIND11_MODULE(pyseahowl, m) {
+PYBIND11_MODULE(seahowl, m) {
     // commons.h
     py::class_<seahowl::Entity, std::shared_ptr<seahowl::Entity>>(m, "Entity")
         .def("get_position", &seahowl::Entity::get_position)

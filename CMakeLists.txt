@@ -452,7 +452,7 @@ endif(SEAHOWL_ENABLE_DOC)
 # PYTHON
 # ====================
 if (SEAHOWL_ENABLE_PYTHON)
-    set(PYSEAHOWL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/bindings)
+    set(PYSEAHOWL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/bindings/python)
     pybind11_add_module(
         pyseahowl
         ${PYSEAHOWL_DIR}/pyseahowl.cpp
@@ -466,4 +466,5 @@ if (SEAHOWL_ENABLE_PYTHON)
 	target_compile_features(pyseahowl PRIVATE cxx_std_17)
     target_link_libraries(pyseahowl PRIVATE seahowl_core)
     target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
+    set_target_properties(pyseahowl PROPERTIES OUTPUT_NAME seahowl)
 endif (SEAHOWL_ENABLE_PYTHON)
