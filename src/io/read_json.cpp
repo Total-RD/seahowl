@@ -153,35 +153,6 @@ std::shared_ptr<InputData> get_input_data(const std::string& filepath) {
     return input_data;
 }
 
-std::map<std::string, std::vector<std::string>> get_csv_info_from_file(const std::string& filepath) {
-    check_file_exists(filepath);
-    std::ifstream csv_file(filepath);
-
-    std::map<std::string, std::vector<std::string>> csv_data;
-    std::map<int, std::string> csv_headers;
-
-    std::string line, word;
-    if (csv_file.is_open()) {
-        // header
-        std::getline(csv_file, line);
-        std::stringstream line_ss(line);
-        int idx_header = 0;
-        while (std::getline(line_ss, word, ',')) {
-            csv_data[word] = {};
-            csv_headers[idx_header] = word;
-        }
-
-        // data
-        while (std::getline(csv_file, line)) {
-            std::stringstream line_ss(line);
-            int idx_word = 0;
-            while (std::getline(line_ss, word, ',')) {
-                csv_data[csv_headers[idx_word]].push_back(word);
-            }
-        }
-    }
-}
-
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
     const std::string& filepath) {
     auto json_obj = get_json_from_file(filepath);
