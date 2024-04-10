@@ -21,13 +21,16 @@ class WaveWindModel : public FluidModel {
     virtual double get_fluid_density(const Vector3d& position, double time) const override;
 };
 
-class SoilWaveWindModel : public WaveWindModel, public SoilModel {
+class FluidSoilModel : public FluidModel, public SoilModel {
   public:
+    std::shared_ptr<FluidModel> fluid_model;
     std::shared_ptr<SoilModel> soil_model;
 
     virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
 
     virtual double get_fluid_density(const Vector3d& position, double time) const override;
+
+    virtual bool is_in_soil(const Vector3d& position) const override;
 
     virtual Vector3d get_penetration_load(const EntityDynamic& entity,
                                           double contact_area,

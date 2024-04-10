@@ -26,6 +26,9 @@ class RotorNacelleAssemblyAero;
 struct BladeReferencePointAero;
 struct TowerReferencePointAero;
 }  // namespace aero
+namespace env {
+class FluidSoilModel;
+}  // namespace env
 }  // namespace seahowl
 
 #include <vector>
@@ -155,6 +158,13 @@ void add_turbine_to_system_from_json(const std::string& filepath,
 void populate_turbine_from_json(const std::string& filepath,
                                 seahowl::core::Turbine& turbine,
                                 const std::string& output_folder = "./output");
+
+/**
+ * @brief Creates and returns environmental conditions given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the environmental conditions.
+ */
+std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(const std::string& filepath);
 
 /**
  * @brief Populates environmental conditions given a json file and a system.

@@ -14,6 +14,7 @@
 #include <seahowl/aero/rotor_aero.h>
 #include <seahowl/io/write_csv.h>
 #include <seahowl/io/output_manager.h>
+#include <seahowl/env/combined_models.h>
 
 namespace py = pybind11;
 
@@ -31,6 +32,9 @@ void initialize_pyseahowl_io(py::module& m) {
     m_io.def("populate_rna_from_json", &populate_rna_from_json);
     m_io.def("populate_turbine_from_json", &populate_turbine_from_json);
     m_io.def("add_turbine_to_system_from_json", &add_turbine_to_system_from_json);
+    m_io.def("populate_environmental_conditions_from_json", &populate_environmental_conditions_from_json);
+    m_io.def("get_environmental_model_from_json", &get_environmental_model_from_json);
+    m_io.def("populate_system_from_json", &populate_system_from_json);
     m_io.def("populate_system_from_json", &populate_system_from_json);
     m_io.def("initialize_system_from_json", &initialize_system_from_json);
 
