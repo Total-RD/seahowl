@@ -32,7 +32,7 @@ void FloaterHydroChrono::initialize() {
     }
 
     // send ChBody list to HydroChrono
-    hydrochrono_setter = std::make_unique<TestHydro>(chbodies, h5_filepath);
+    hydrochrono_setter = std::make_shared<TestHydro>(chbodies, h5_filepath);
     hydrochrono_setter->AddWaves(waves);
 }
 
@@ -40,9 +40,13 @@ void FloaterHydroChrono::set_h5_filepath(std::string filepath) {
     h5_filepath = filepath;
 }
 
-void FloaterHydroChrono::set_waves(std::shared_ptr<WaveBase> waves) {
+void FloaterHydroChrono::set_waves_hydrochrono(std::shared_ptr<WaveBase> waves) {
     this->waves = waves;
 }
+
+void FloaterHydroChrono::set_waves(std::shared_ptr<seahowl::env::WaveModelHydroChrono> waves) {
+    this->waves = waves->waves;
+};
 
 WaveModelHydroChrono::WaveModelHydroChrono() {
     waves = std::make_shared<NoWave>();

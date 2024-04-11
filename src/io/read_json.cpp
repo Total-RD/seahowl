@@ -1021,7 +1021,7 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
                     try {
                         auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
                         auto& waves_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
-                        floater.set_waves(waves_model.waves);
+                        floater.set_waves_hydrochrono(waves_model.waves);
                     } catch (const std::bad_cast& e) {
                         throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
                     }
@@ -1071,7 +1071,7 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
             try {
                 auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
                 auto& waves_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
-                floater.set_waves(waves_model.waves);
+                floater.set_waves_hydrochrono(waves_model.waves);
             } catch (const std::bad_cast& e) {
                 throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
             }

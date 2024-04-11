@@ -14,6 +14,12 @@ class TestHydro;
 // namespace hydroc
 
 namespace seahowl {
+namespace env {
+class WaveModelHydroChrono;
+}  // namespace env
+}  // namespace seahowl
+
+namespace seahowl {
 namespace hydro {
 
 /**
@@ -46,13 +52,20 @@ class FloaterHydroChrono : public elasto::FloaterElasto {
      *
      * @param[in] waves Waves to attach to floater.
      */
-    void set_waves(std::shared_ptr<WaveBase> waves);
+    void set_waves_hydrochrono(std::shared_ptr<WaveBase> waves);
+
+    /**
+     * @brief Sets waves used to compute hydro loads on floater.
+     *
+     * @param[in] waves Waves to attach to floater.
+     */
+    void set_waves(std::shared_ptr<seahowl::env::WaveModelHydroChrono> waves);
 
   private:
     /** @brief Waves (HydroChrono). */
     std::shared_ptr<WaveBase> waves;
     /** @brief HydroChrono logic class. */
-    std::unique_ptr<TestHydro> hydrochrono_setter;
+    std::shared_ptr<TestHydro> hydrochrono_setter;
     /** @brief Path to potential flow frequency data file (HDF5 format). */
     std::string h5_filepath = "";
 };

@@ -34,9 +34,8 @@ void FloaterElasto::prestep(double time, double dt) {
     floater_body.accumulate_torque(damping_torque, false);
 }
 
-seahowl::elasto::BodyElasto& FloaterElasto::add_body(const std::string& name) {
+void FloaterElasto::add_body(const std::string& name) {
     floater_bodies[name] = std::make_unique<seahowl::elasto::BodyElastoChrono>();
-    return *floater_bodies[name];
 }
 
 seahowl::elasto::BodyElasto& FloaterElasto::get_body(const std::string& name) {

@@ -459,6 +459,7 @@ if (SEAHOWL_ENABLE_PYTHON)
         ${PYSEAHOWL_DIR}/pyseahowl_env.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_elasto.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_aero.cpp
+        ${PYSEAHOWL_DIR}/pyseahowl_hydro.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_servo.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_core.cpp
         ${PYSEAHOWL_DIR}/pyseahowl_io.cpp

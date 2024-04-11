@@ -35,7 +35,7 @@ class FloaterElasto : public ComponentElasto {
      *
      * @param[in] name The name of the body (for access purposes).
      */
-    seahowl::elasto::BodyElasto& add_body(const std::string& name);
+    void add_body(const std::string& name);
 
     /**
      * @brief Gets body.
