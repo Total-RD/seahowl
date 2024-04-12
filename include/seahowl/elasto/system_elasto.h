@@ -79,6 +79,13 @@ class SystemElasto {
      * @param[in] link Link to add to system.
      */
     virtual void add(Link& link) = 0;
+
+    /**
+     * @brief Adds link to system.
+     *
+     * @param[in] link Link to add to system.
+     */
+    virtual void add(LinkMatrixStiffnessDamping& link) = 0;
 };
 
 }  // namespace elasto

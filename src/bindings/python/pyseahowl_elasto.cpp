@@ -65,6 +65,11 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("get_reaction_force", &seahowl::elasto::Link::get_reaction_force)
         .def("get_reaction_torque", &seahowl::elasto::Link::get_reaction_torque)
         .def("initialize", &seahowl::elasto::Link::initialize);
+    py::class_<seahowl::elasto::LinkMatrixStiffnessDamping,
+               std::shared_ptr<seahowl::elasto::LinkMatrixStiffnessDamping>>(m_elasto, "LinkMatrixStiffnessDamping")
+        .def("initialize", &seahowl::elasto::LinkMatrixStiffnessDamping::initialize)
+        .def("set_stiffness_matrix", &seahowl::elasto::LinkMatrixStiffnessDamping::set_stiffness_matrix)
+        .def("set_damping_matrix", &seahowl::elasto::LinkMatrixStiffnessDamping::set_damping_matrix);
     py::class_<seahowl::elasto::MeshElasto, std::shared_ptr<seahowl::elasto::MeshElasto>>(m_elasto, "MeshElasto");
     py::class_<seahowl::elasto::SystemElasto, std::shared_ptr<seahowl::elasto::SystemElasto>>(m_elasto, "SystemElasto")
         .def("step", &seahowl::elasto::SystemElasto::step)
@@ -78,6 +83,9 @@ void initialize_pyseahowl_elasto(py::module& m) {
                         &seahowl::elasto::SystemElasto::add))
         .def("add", static_cast<void (seahowl::elasto::SystemElasto::*)(seahowl::elasto::Link & link)>(
                         &seahowl::elasto::SystemElasto::add))
+        .def("add",
+             static_cast<void (seahowl::elasto::SystemElasto::*)(seahowl::elasto::LinkMatrixStiffnessDamping & link)>(
+                 &seahowl::elasto::SystemElasto::add))
         .def_readonly("turbines", &seahowl::elasto::SystemElasto::turbines);
 
     // elasto/chrono_adapters.h
@@ -103,6 +111,10 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def(py::init<>());
     py::class_<seahowl::elasto::LinkChrono, std::shared_ptr<seahowl::elasto::LinkChrono>, seahowl::elasto::Link>(
         m_elasto, "LinkChrono")
+        .def(py::init<>());
+    py::class_<seahowl::elasto::LinkMatrixStiffnessDampingChrono,
+               std::shared_ptr<seahowl::elasto::LinkMatrixStiffnessDampingChrono>,
+               seahowl::elasto::LinkMatrixStiffnessDamping>(m_elasto, "LinkMatrixStiffnessDampingChrono")
         .def(py::init<>());
     py::class_<seahowl::elasto::LinkChronoCable, std::shared_ptr<seahowl::elasto::LinkChronoCable>,
                seahowl::elasto::Link>(m_elasto, "LinkChronoCable")

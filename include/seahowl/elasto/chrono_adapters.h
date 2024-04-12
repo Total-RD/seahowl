@@ -31,6 +31,7 @@ class ChLinkBase;
 class ChLinkPointPoint;
 class ChLinkPointFrame;
 class ChLinkMateGeneric;
+class ChLoadBodyBodyBushingGeneric;
 class ChSystem;
 namespace fea {
 class ChNodeFEAbase;
@@ -255,6 +256,22 @@ class LinkChronoCable : public Link, public LinkChronoBase {
 };
 
 /**
+ * @brief Chrono link class using stiffness and damping matrices.
+ */
+class LinkMatrixStiffnessDampingChrono : public LinkMatrixStiffnessDamping {
+  public:
+    /** @brief Pointer to underlying Chrono object. */
+    std::shared_ptr<chrono::ChLoadBodyBodyBushingGeneric> chobj;
+    Eigen::Matrix<double, 6, 6> stiffness_matrix;
+    Eigen::Matrix<double, 6, 6> damping_matrix;
+
+    LinkMatrixStiffnessDampingChrono();
+    void initialize(const Entity& entity1, const Entity& entity2) override;
+    void set_stiffness_matrix(const Eigen::Matrix<double, 6, 6>& stiffness_matrix) override;
+    void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& damping_matrix) override;
+};
+
+/**
  * @brief Chrono elasto mesh class.
  */
 class MeshElastoChrono : public MeshElasto {
@@ -285,6 +302,7 @@ class SystemElastoChrono : public SystemElasto {
     virtual void add(BodyElasto& body) override;
     virtual void add(MeshElasto& mesh) override;
     virtual void add(Link& link) override;
+    virtual void add(LinkMatrixStiffnessDamping& link) override;
 };
 
 }  // namespace elasto

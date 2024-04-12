@@ -9,6 +9,8 @@
 #include <chrono/fea/ChElementBeamTaperedTimoshenkoFPM.h>
 #include <chrono/fea/ChElementCableANCF.h>
 #include <chrono/physics/ChLinkMate.h>
+#include <chrono/physics/ChLoadsBody.h>
+#include <chrono/physics/ChLoadContainer.h>
 #include <chrono/fea/ChLinkPointPoint.h>
 #include <chrono/fea/ChLinkPointFrame.h>
 #include <chrono/physics/ChLinkRevolute.h>
@@ -703,6 +705,41 @@ Vector3d LinkChronoCable::get_reaction_torque() const {
     return ch2vec(chobj->Get_react_torque());
 }
 
+LinkMatrixStiffnessDampingChrono::LinkMatrixStiffnessDampingChrono() {
+    // empty stiffness and damping matrices
+    stiffness_matrix = Eigen::Matrix<double, 6, 6>::Zero();
+    damping_matrix = Eigen::Matrix<double, 6, 6>::Zero();
+}
+
+void LinkMatrixStiffnessDampingChrono::initialize(const Entity& entity1, const Entity& entity2) {
+    try {
+        // cast to Chrono bodies
+        auto body1 = dynamic_cast<const BodyElastoChrono&>(entity1);
+        auto body2 = dynamic_cast<const BodyElastoChrono&>(entity2);
+
+        // instantiate Chrono object
+        chobj = chrono_types::make_shared<chrono::ChLoadBodyBodyBushingGeneric>(
+            body1.chobj, body2.chobj, body2.chobj->GetFrame_COG_to_abs(), stiffness_matrix, damping_matrix);
+    } catch (const std::bad_cast& e) {
+        throw std::runtime_error("Cannot link these entities with cable link.");
+    }
+};
+
+void LinkMatrixStiffnessDampingChrono::set_stiffness_matrix(const Eigen::Matrix<double, 6, 6>& stiffness_matrix) {
+    this->stiffness_matrix = stiffness_matrix;
+    if (chobj) {
+        chobj->SetStiffnessMatrix(stiffness_matrix);
+        auto kk = chobj->GetStiffnessMatrix();
+    }
+}
+
+void LinkMatrixStiffnessDampingChrono::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& damping_matrix) {
+    this->damping_matrix = damping_matrix;
+    if (chobj) {
+        chobj->SetDampingMatrix(damping_matrix);
+    }
+}
+
 MeshElastoChrono::MeshElastoChrono() {
     chobj = chrono_types::make_shared<chrono::fea::ChMesh>();
 }
@@ -797,6 +834,12 @@ void SystemElastoChrono::add(MeshElasto& mesh) {
 
 void SystemElastoChrono::add(Link& link) {
     chobj->Add(dynamic_cast<LinkChronoBase&>(link).chobj);
+}
+
+void SystemElastoChrono::add(LinkMatrixStiffnessDamping& link) {
+    auto load_container = chrono_types::make_shared<chrono::ChLoadContainer>();
+    load_container->Add(dynamic_cast<LinkMatrixStiffnessDampingChrono&>(link).chobj);
+    chobj->Add(load_container);
 }
 
 }  // namespace elasto

@@ -251,6 +251,9 @@ class Link {
   public:
     /**
      * @brief Initialize link between entitiies.
+     *
+     * @param[in] entity1 First entity to link.
+     * @param[in] entity2 Second entity to link.
      */
     virtual void initialize(const Entity& entity1, const Entity& entity2) = 0;
 
@@ -275,6 +278,34 @@ class Link {
      * @brief Returns reaction torque.
      */
     virtual Vector3d get_reaction_torque() const = 0;
+};
+
+/**
+ * @brief Link class using stiffness and damping matrices.
+ */
+class LinkMatrixStiffnessDamping {
+  public:
+    /**
+     * @brief Initialize link between entitiies.
+     *
+     * @param[in] entity1 First entity to link.
+     * @param[in] entity2 Second entity to link.
+     */
+    virtual void initialize(const Entity& entity1, const Entity& entity2) = 0;
+
+    /**
+     * @brief Sets stiffness matrix of link.
+     *
+     * @param[in] stiffness_matrix Stiffness matrix for link (6x6).
+     */
+    virtual void set_stiffness_matrix(const Eigen::Matrix<double, 6, 6>& stiffness_matrix) = 0;
+
+    /**
+     * @brief Sets damping matrix of link.
+     *
+     * @param[in] damping_matrix Damping matrix for link (6x6).
+     */
+    virtual void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& damping_matrix) = 0;
 };
 
 /**
