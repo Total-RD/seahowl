@@ -102,13 +102,17 @@ class RotorElasto : public ComponentElasto {
     /**
      * @brief Applies pitch increment to all blades (i.e. rotates blades around their respective longitudinal axis).
      *
-     * This function links the towertop node to the yaw bearing rigid body by translating the RNA so that the tower
-     * towertop node and yaw bearing coordinates match each other.
-     * The link between towertop node and yaw bearing is fixed.
-     *
      * @param[in] pitch_increment Pitch increment to apply (in radians).
      */
     void apply_collective_pitch_increment(double pitch_increment);
+
+    /**
+     * @brief Applies pitch increment on a given blade (i.e. rotates the blade around its longitudinal axis).
+     *
+     * @param[in] pitch_increment Pitch increment to apply (in radians).
+     * @param[in] blade_index Index of blade to pitch (0, 1, or 2 for a 3-bladed turbine).
+     */
+    void apply_blade_pitch_increment(double pitch_increment, int blade_index);
 
     /**
      * @brief Accumulates torque on the rotor.

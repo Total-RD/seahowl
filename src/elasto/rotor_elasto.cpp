@@ -52,12 +52,13 @@ void RotorElasto::build() {
     }
 
     // apply initial pitch of blades
-    for (auto& blade : blades) {
+    for (int ii = 0; ii < blades.size(); ii++) {
+        auto blade = blades[ii];
         // get blade pitch diff with collective pitch
         auto individual_blade_pitch = blade->pitch - pitch_collective;
         // apply total pitch to blade
         auto total_blade_pitch = pitch_collective + individual_blade_pitch;
-        blade->apply_pitch_increment(total_blade_pitch);
+        apply_blade_pitch_increment(total_blade_pitch, ii);
         // register new pitch value
         blade->pitch = total_blade_pitch;
 
@@ -68,14 +69,22 @@ void RotorElasto::build() {
 
 void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
     for (int ii = 0; ii < blades.size(); ii++) {
-        // apply pitch on blade
-        auto blade = blades[ii];
-        blade->apply_pitch_increment(pitch_increment);
-        // update blade-hub constraint
-        blade->attach_root_to_body(*body_hub);
+        apply_blade_pitch_increment(pitch_increment, ii);
     }
     pitch_collective += pitch_increment;
 }
+
+void RotorElasto::apply_blade_pitch_increment(double pitch_increment, int blade_index) {
+    if (blade_index >= blades.size()) {
+        throw std::runtime_error("Cannot find blade index " + std::to_string(blade_index) +
+                                 " (number of blades: " + std::to_string(blades.size()) + ".");
+    }
+    auto blade = blades[blade_index];
+    blade->apply_pitch_increment(pitch_increment);
+    // update blade-hub constraint
+    blade->attach_root_to_body(*body_hub);
+}
+
 void RotorElasto::rotate(double angle, const Vector3d& axis) const {
     // blades
     for (auto& blade : blades) {
