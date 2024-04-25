@@ -49,21 +49,9 @@ void RotorElasto::build() {
         // rotate blade around hub
         blade->rotate(azimuth0,
                       Vector3d(1.0, 0.0, 0.0));  // X is the axis pointing towards nacelle for blade (IEC standard)
-    }
 
-    // apply initial pitch of blades
-    for (int ii = 0; ii < blades.size(); ii++) {
-        auto blade = blades[ii];
-        // get blade pitch diff with collective pitch
-        auto individual_blade_pitch = blade->pitch - pitch_collective;
-        // apply total pitch to blade
-        auto total_blade_pitch = pitch_collective + individual_blade_pitch;
-        apply_blade_pitch_increment(total_blade_pitch, ii);
-        // register new pitch value
-        blade->pitch = total_blade_pitch;
-
-        // link root node of blade to rotor center
-        blade->attach_root_to_body(*body_hub);
+        // apply initial pitch of blades
+        apply_blade_pitch_increment(blade->pitch, ii);
     }
 }
 
