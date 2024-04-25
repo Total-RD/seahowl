@@ -173,7 +173,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
     // elasto/rotor_elasto.h
     py::class_<seahowl::elasto::RotorElasto, std::shared_ptr<seahowl::elasto::RotorElasto>>(m_elasto, "RotorElasto")
         .def("apply_collective_pitch_increment", &seahowl::elasto::RotorElasto::apply_collective_pitch_increment)
-        .def("apply_blade_pitch_increment", &seahowl::elasto::RotorElasto::apply_collective_pitch_increment)
+        .def("apply_blade_pitch_increment", &seahowl::elasto::RotorElasto::apply_blade_pitch_increment)
         .def_readonly("blades", &seahowl::elasto::RotorElasto::blades)
         .def_property_readonly("body_hub", [](seahowl::elasto::RotorElasto& rotor) { return rotor.body_hub.get(); })
         .def_readonly("pitch_collective", &seahowl::elasto::RotorElasto::pitch_collective);
