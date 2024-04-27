@@ -205,6 +205,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("get_rpm", &seahowl::elasto::RotorNacelleAssemblyElasto::get_rpm)
         .def("accumulate_electrical_torque", &seahowl::elasto::RotorNacelleAssemblyElasto::accumulate_electrical_torque)
         .def("get_axial_thrust", &seahowl::elasto::RotorNacelleAssemblyElasto::get_axial_thrust)
+        .def("get_electrical_torque", &seahowl::elasto::RotorNacelleAssemblyElasto::get_electrical_torque)
         .def("get_axial_torque", &seahowl::elasto::RotorNacelleAssemblyElasto::get_axial_torque)
         .def("get_azimuth", &seahowl::elasto::RotorNacelleAssemblyElasto::get_azimuth)
         .def_property_readonly(

@@ -212,6 +212,15 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
      * @param[in] torque Torque to accumulate on axial axis of hub.
      */
     void accumulate_electrical_torque(double torque);
+
+    /**
+     * @brief Returns the electrical torque applied on the rotor.
+     */
+    double get_electrical_torque() const;
+
+  private:
+    /** @brief Accumulated Electrical torque on the rotor.*/
+    double torque_elec_accumulated;
 };
 
 }  // namespace elasto
