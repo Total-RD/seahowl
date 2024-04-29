@@ -112,6 +112,13 @@ class ControllerVariableTorque : public Controller {
      * @brief Returns electrical torque to apply.
      */
     virtual double get_torque_elec() const override;
+
+    /**
+     * @brief Sets target RPM.
+     *
+     * @param[in] target_rpm Target (max) RPM.
+     */
+    void set_target_rpm(double target_rpm);
 };
 
 }  // namespace servo

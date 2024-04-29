@@ -64,3 +64,7 @@ void ControllerVariableTorque::step(double time, double dt, const seahowl::core:
 double ControllerVariableTorque::get_torque_elec() const {
     return torque_elec;
 }
+
+void ControllerVariableTorque::set_target_rpm(double target_rpm) {
+    this->target_rpm = target_rpm;
+}
