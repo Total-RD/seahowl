@@ -23,6 +23,7 @@ Simulation::Simulation() {
     system_elasto = std::make_unique<seahowl::elasto::SystemElastoChrono>();
     system_aero = std::make_unique<seahowl::aero::SystemAero>();
     system_core = std::make_unique<System>(*system_elasto, *system_aero);
+    outputs = std::make_unique<seahowl::io::OutputManager>(*system_core);
 }
 
 void Simulation::populate_from_file(const std::string& filepath) {
@@ -62,7 +63,19 @@ void Simulation::populate_from_file(const std::string& filepath) {
     spdlog::debug("Populated system in {:.3}s.", sw_setup);
 }
 
+void Simulation::initialize() {
+    if (is_initialized) {
+        throw std::runtime_error("Simulation was already initialized.");
+    }
+    outputs->initialize();
+    system_core->initialize(system_core->get_time(), dt);
+    is_initialized = true;
+}
+
 void Simulation::initialize_from_file(const std::string& filepath) {
+    if (is_initialized) {
+        throw std::runtime_error("Simulation was already initialized.");
+    }
     spdlog::stopwatch sw_setup;
 
     // get main file info
@@ -79,10 +92,14 @@ void Simulation::initialize_from_file(const std::string& filepath) {
     outputs->output_all(0);
 
     t_output_next = dt_output;
+    is_initialized = true;
     spdlog::info("Initial setup time: {:.3}s.", sw_setup);
 };
 
 void Simulation::step() {
+    if (!is_initialized) {
+        initialize();
+    }
     spdlog::stopwatch sw_step;
     // prestep
     system_core->prestep(system_core->get_time(), dt);

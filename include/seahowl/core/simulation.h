@@ -19,11 +19,13 @@ class Simulation {
     double dt = 0.025;
     double dt_output = 0.;
     double duration = 1000.0;
+    bool is_initialized = false;
 
     Simulation();
 
     void populate_from_file(const std::string& filepath);
     void initialize_from_file(const std::string& filepath);
+    void initialize();
     void step();
     void run_all();
 
