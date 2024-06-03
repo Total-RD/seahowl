@@ -226,3 +226,11 @@ seahowl::Vector3d MooringElastoFEA::get_tension_fairlead() const {
 seahowl::Vector3d MooringElastoFEA::get_tension_anchor() const {
     return anchor_link->get_reaction_force();
 };
+
+double MooringElastoFEA::get_length() const {
+    double total_length = 0.0;
+    for (auto& element : elements) {
+        total_length += dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_rest_length();
+    }
+    return total_length;
+}

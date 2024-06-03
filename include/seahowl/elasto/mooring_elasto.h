@@ -43,6 +43,11 @@ class MooringElasto : public virtual ComponentElasto {
      * @brief Returns tension at anchor.
      */
     virtual Vector3d get_tension_anchor() const = 0;
+
+    /**
+     * @brief Returns total length of mooring.
+     */
+    virtual double get_length() const = 0;
 };
 
 /**
@@ -138,6 +143,11 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
      * @brief Returns tension at anchor.
      */
     virtual Vector3d get_tension_anchor() const override;
+
+    /**
+     * @brief Returns total length of mooring.
+     */
+    virtual double get_length() const override;
 
   private:
     /**

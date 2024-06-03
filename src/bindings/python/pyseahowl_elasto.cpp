@@ -279,7 +279,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_property_readonly("fairlead", [](seahowl::elasto::MooringElasto& mooring) { return &mooring.fairlead; })
         .def_property_readonly("anchor", [](seahowl::elasto::MooringElasto& mooring) { return &mooring.anchor; })
         .def("get_tension_fairlead", &seahowl::elasto::MooringElasto::get_tension_fairlead)
-        .def("get_tension_anchor", &seahowl::elasto::MooringElasto::get_tension_anchor);
+        .def("get_tension_anchor", &seahowl::elasto::MooringElasto::get_tension_anchor)
+        .def("get_length", &seahowl::elasto::MooringElasto::get_length);
     py::class_<seahowl::elasto::MooringElastoFEA, std::shared_ptr<seahowl::elasto::MooringElastoFEA>,
                seahowl::elasto::MooringElasto, seahowl::elasto::ComponentElastoFEA>(m_elasto, "MooringElastoFEA")
         .def(py::init<seahowl::elasto::BodyElasto&, seahowl::elasto::BodyElasto&>())
