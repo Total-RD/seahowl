@@ -29,6 +29,7 @@ class OutputManager {
     void output_all(int step);
 
   private:
+    bool is_initialized = false;
     std::string output_folder = ".";
     seahowl::core::System& system_core;
 #ifdef HAVE_VTK
