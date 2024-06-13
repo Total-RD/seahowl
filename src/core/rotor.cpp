@@ -18,7 +18,7 @@ RotorNacelleAssembly::RotorNacelleAssembly(seahowl::elasto::RotorNacelleAssembly
                                            seahowl::aero::RotorNacelleAssemblyAero& aero)
     : elasto(elasto), aero(aero) {}
 
-void RotorNacelleAssembly::initialize(double time, double dt) {
+void RotorNacelleAssembly::initialize_this(double time, double dt) {
     for (auto& blade : blades) {
         blade->initialize(time, dt);
         // update initial azimuth of aero blade

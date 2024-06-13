@@ -89,6 +89,8 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
 }
 
 void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const seahowl::core::Turbine& turbine) {
+    spdlog::debug("Initialization of DISCON controller.");
+
     auto nblades = turbine.rna.blades.size();
     if (nblades == 0) {
         spdlog::warn(
@@ -103,6 +105,8 @@ void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const 
     pImpl.SetAvrSWAP(27, 10.0);  // estimated wind speed (needs to be != 0 at init for it to work in ROSCO!)
 
     pImpl.Init(libfile);
+
+    spdlog::debug("Finished initialization of DISCON controller.");
 }
 
 double seahowl::servo::ControllerDISCON::get_torque_elec() const {

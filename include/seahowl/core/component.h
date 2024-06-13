@@ -18,7 +18,7 @@ class ComponentDynamic {
      * @param[in] time Time of the simulation (usually 0 at init).
      * @param[in] dt Time step length.
      */
-    virtual void initialize(double time, double dt) = 0;
+    void initialize(double time, double dt);
 
     /**
      * @brief Prestep for component, called before elastodynamic stepping.
@@ -35,6 +35,12 @@ class ComponentDynamic {
      * @param[in] dt Time step length.
      */
     virtual void poststep(double time, double dt) = 0;
+
+  protected:
+    bool is_initialized = false;
+
+  private:
+    virtual void initialize_this(double time, double dt) = 0;
 };
 
 }  // namespace core

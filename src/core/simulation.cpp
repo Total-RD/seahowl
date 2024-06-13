@@ -87,7 +87,6 @@ void Simulation::initialize_from_file(const std::string& filepath) {
     outputs->initialize();
 
     initialize_system_from_json(filepath, *system_core);
-    spdlog::debug("Fully initialized system.");
 
     outputs->output_all(0);
 

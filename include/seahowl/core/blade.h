@@ -52,16 +52,6 @@ class Blade : public ComponentDynamic {
     Blade(seahowl::elasto::BladeElasto& elasto, seahowl::aero::BladeAero& aero);
 
     /**
-     * @brief Initialize blade, called before starting the simulation.
-     *
-     * Runs the preset and poststep once to make elasto and aero components match.
-     *
-     * @param[in] time Time of the simulation (usually 0 at init).
-     * @param[in] dt Time step length.
-     */
-    void initialize(double time, double dt) override;
-
-    /**
      * @brief Prestep for blade, called before elastodynamic stepping.
      *
      * Updates aero loads on elasto component.
@@ -114,6 +104,16 @@ class Blade : public ComponentDynamic {
     void update_loads_elasto();
 
   private:
+    /**
+     * @brief Initialize blade, called before starting the simulation.
+     *
+     * Runs the preset and poststep once to make elasto and aero components match.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
+    void initialize_this(double time, double dt) override;
+
     /**
      * @brief Computes the aero->elasto mapping that is used when accumulating aero loads on elasto component.
      */

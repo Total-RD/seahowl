@@ -12,9 +12,8 @@ using namespace seahowl::elasto;
 TurbineFloating::TurbineFloating(seahowl::elasto::TurbineFloatingElasto& elasto, seahowl::aero::TurbineAero& aero)
     : elasto(elasto), Turbine(elasto, aero) {}
 
-void TurbineFloating::initialize(double time, double dt) {
-    // parent class initialize
-    Turbine::initialize(time, dt);
+void TurbineFloating::initialize_this(double time, double dt) {
+    Turbine::initialize_this(time, dt);  // initialize parent class
 
     if (elasto.floater) {
         elasto.floater->initialize();

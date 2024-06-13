@@ -3,6 +3,7 @@
 #include <pybind11/eigen.h>
 
 #include <seahowl/commons/entities.h>
+#include <seahowl/commons/utils.h>
 
 namespace py = pybind11;
 
@@ -14,7 +15,10 @@ void initialize_pyseahowl_core(py::module& m);
 void initialize_pyseahowl_io(py::module& m);
 
 PYBIND11_MODULE(seahowl, m) {
-    // commons.h
+    // utils.h
+    m.def("set_log_level_global", &seahowl::set_log_level_global);
+
+    // entities.h
     py::class_<seahowl::Entity, std::shared_ptr<seahowl::Entity>>(m, "Entity")
         .def("get_position", &seahowl::Entity::get_position)
         .def("set_position", &seahowl::Entity::set_position)

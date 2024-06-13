@@ -74,16 +74,6 @@ class Turbine : public ComponentDynamic {
     void apply_control(double time, double dt);
 
     /**
-     * @brief Initialize turbine, called before starting the simulation.
-     *
-     * Calls init for each of its components.
-     *
-     * @param[in] time Time of the simulation (usually 0 at init).
-     * @param[in] dt Time step length.
-     */
-    virtual void initialize(double time, double dt) override;
-
-    /**
      * @brief Prestep for turbine, called before elastodynamic stepping.
      *
      * Calls prestep on each of the components of the turbine.
@@ -156,6 +146,17 @@ class Turbine : public ComponentDynamic {
      * @param[in] time Time of simulation.
      */
     virtual void apply_soil_model(seahowl::env::SoilModel& soil_model, double time);
+
+  protected:
+    /**
+     * @brief Initialize turbine, called before starting the simulation.
+     *
+     * Calls init for each of its components.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
+    virtual void initialize_this(double time, double dt) override;
 };
 
 }  // namespace core

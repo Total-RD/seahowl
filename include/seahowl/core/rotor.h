@@ -47,16 +47,6 @@ class RotorNacelleAssembly : public ComponentDynamic {
                          seahowl::aero::RotorNacelleAssemblyAero& aero);
 
     /**
-     * @brief Initialize RNA, called before starting the simulation.
-     *
-     * Runs preset and poststep once to make elasto and aero components match.
-     *
-     * @param[in] time Time of the simulation (usually 0 at init).
-     * @param[in] dt Time step length.
-     */
-    void initialize(double time, double dt) override;
-
-    /**
      * @brief Prestep for RNA, called before elastodynamic stepping.
      *
      * Calls prestep for each blade.
@@ -85,6 +75,17 @@ class RotorNacelleAssembly : public ComponentDynamic {
      * @brief Builds the RNA and blades associated to it.
      */
     void build();
+
+  private:
+    /**
+     * @brief Initialize RNA, called before starting the simulation.
+     *
+     * Runs preset and poststep once to make elasto and aero components match.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
+    void initialize_this(double time, double dt) override;
 };
 
 }  // namespace core

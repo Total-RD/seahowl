@@ -53,14 +53,6 @@ class System : public ComponentDynamic {
     System(seahowl::elasto::SystemElasto& elasto, seahowl::aero::SystemAero& aero);
 
     /**
-     * @brief Initialize system.
-     *
-     * @param[in] time Time of the simulation (usually 0 at init).
-     * @param[in] dt Time step length.
-     */
-    virtual void initialize(double time, double dt) override;
-
-    /**
      * @brief Prestep for system, called before elastodynamic stepping.
      *
      * @param[in] time Time of the simulation.
@@ -129,6 +121,15 @@ class System : public ComponentDynamic {
      * @param[in] turbine Turbine to add to system.
      */
     void add_turbine(std::shared_ptr<seahowl::core::Turbine> turbine);
+
+  private:
+    /**
+     * @brief Initialize system.
+     *
+     * @param[in] time Time of the simulation (usually 0 at init).
+     * @param[in] dt Time step length.
+     */
+    virtual void initialize_this(double time, double dt) override;
 };
 }  // namespace core
 }  // namespace seahowl

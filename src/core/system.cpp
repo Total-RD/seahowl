@@ -19,7 +19,7 @@ using namespace seahowl::core;
 
 System::System(seahowl::elasto::SystemElasto& elasto, seahowl::aero::SystemAero& aero) : elasto(elasto), aero(aero) {}
 
-void System::initialize(double time, double dt) {
+void System::initialize_this(double time, double dt) {
     for (auto& turbine : turbines) {
         turbine->initialize(time, dt);
     }

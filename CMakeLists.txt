@@ -159,6 +159,7 @@ source_group(commons FILES ${SEAHOWL_COMMONS_SOURCES} ${SEAHOWL_COMMONS_HEADERS}
 # core
 set(SEAHOWL_CORE_SOURCES
     src/core/reference_point.cpp
+    src/core/component.cpp
     src/core/rotor.cpp
     src/core/blade.cpp
     src/core/tower.cpp
