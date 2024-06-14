@@ -1,4 +1,4 @@
-import pyseahowl
+import seahowl
 
 # options
 filepath = "../../data/IEA15MW/main.json"  # change to actual filepath
@@ -8,10 +8,10 @@ t_end = 200.0
 t_output_next = 0.0
 
 # get system
-system_elasto = pyseahowl.elasto.SystemElastoChrono()
-system_aero = pyseahowl.aero.SystemAero()
-system_core = pyseahowl.core.System(system_elasto, system_aero)
-pyseahowl.io.populate_system_from_json(filepath, system_core)
+system_elasto = seahowl.elasto.SystemElastoChrono()
+system_aero = seahowl.aero.SystemAero()
+system_core = seahowl.core.System(system_elasto, system_aero)
+seahowl.io.populate_system_from_json(filepath, system_core)
 
 # fix tower bottom nodes
 for turbine in system_core.turbines:
