@@ -14,12 +14,12 @@
 
 using seahowl::PI;
 
-void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::System& ssystem) {
-    auto time = ssystem.get_time();
-    for (int idx_turbine = 0; idx_turbine < ssystem.turbines.size(); idx_turbine++) {
-        auto& turbine = *ssystem.turbines[idx_turbine];
+void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::System& system_core) {
+    auto time = system_core.get_time();
+    for (int idx_turbine = 0; idx_turbine < system_core.turbines.size(); idx_turbine++) {
+        auto& turbine = *system_core.turbines[idx_turbine];
         std::string filename;
-        if (ssystem.turbines.size() == 1) {
+        if (system_core.turbines.size() == 1) {
             filename = fileprefix + ".csv";
         } else {
             filename = fileprefix + "_turbine" + std::to_string(idx_turbine) + ".csv";
@@ -51,14 +51,23 @@ void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::Syst
         }
         myfile << std::to_string(time);
         myfile << ",";
-        auto wind_velocity_hub =
-            ssystem.fluid_model->get_fluid_velocity(turbine.rna.elasto.rotor->body_hub->get_position(), time);
-        myfile << std::to_string(wind_velocity_hub.x());
-        myfile << ",";
-        myfile << std::to_string(wind_velocity_hub.y());
-        myfile << ",";
-        myfile << std::to_string(wind_velocity_hub.z());
-        myfile << ",";
+        if (system_core.fluid_model) {
+            auto wind_velocity_hub =
+                system_core.fluid_model->get_fluid_velocity(turbine.rna.elasto.rotor->body_hub->get_position(), time);
+            myfile << std::to_string(wind_velocity_hub.x());
+            myfile << ",";
+            myfile << std::to_string(wind_velocity_hub.y());
+            myfile << ",";
+            myfile << std::to_string(wind_velocity_hub.z());
+            myfile << ",";
+        } else {
+            myfile << std::to_string(0.0);
+            myfile << ",";
+            myfile << std::to_string(0.0);
+            myfile << ",";
+            myfile << std::to_string(0.0);
+            myfile << ",";
+        }
         myfile << std::to_string(turbine.rna.elasto.get_rpm());
         myfile << ",";
         myfile << std::to_string(turbine.get_generated_power());
