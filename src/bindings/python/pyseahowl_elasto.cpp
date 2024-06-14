@@ -72,7 +72,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("set_damping_matrix", &seahowl::elasto::LinkMatrixStiffnessDamping::set_damping_matrix);
     py::class_<seahowl::elasto::MeshElasto, std::shared_ptr<seahowl::elasto::MeshElasto>>(m_elasto, "MeshElasto");
     py::class_<seahowl::elasto::SystemElasto, std::shared_ptr<seahowl::elasto::SystemElasto>>(m_elasto, "SystemElasto")
-        .def("step", &seahowl::elasto::SystemElasto::step)
+        .def("assemble", &seahowl::elasto::SystemElasto::assemble)
         .def("get_time", &seahowl::elasto::SystemElasto::get_time)
         .def("set_gravitational_acceleration", &seahowl::elasto::SystemElasto::set_gravitational_acceleration)
         .def("get_gravitational_acceleration", &seahowl::elasto::SystemElasto::get_gravitational_acceleration)

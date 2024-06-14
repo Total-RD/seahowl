@@ -7,9 +7,22 @@
 #include <vector>
 #include <numeric>
 #include <spdlog/spdlog.h>
+#include <typeinfo>
 
 using namespace seahowl::elasto;
 using namespace seahowl;
+
+void ComponentElasto::assemble(SystemElasto& system) {
+    spdlog::debug("Assembly of component: {}.", std::string(typeid(*this).name()));
+    if (is_assembled) {
+        throw std::runtime_error("Component already assembled: " + std::string(typeid(*this).name()) + ".");
+    }
+
+    assemble_this(system);  // component-specific initialization
+    is_assembled = true;
+
+    spdlog::debug("Finished assembly of component: {}.", std::string(typeid(*this).name()));
+}
 
 void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& discretized_points) {
     nodes.clear();
@@ -44,7 +57,7 @@ void ComponentElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& di
     };
 };
 
-void ComponentElastoFEA::assemble(SystemElasto& system) {
+void ComponentElastoFEA::assemble_this(SystemElasto& system) {
     for (auto node : nodes) {
         system.mesh->add(*(node.get()));
     }

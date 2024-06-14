@@ -792,7 +792,7 @@ TEST(test_turbine, multiturbines) {
     }
 
     // assemble system
-    system_core.assemble();
+    system_core.elasto.assemble();
 
     // statics
     if (statics_prestep) {

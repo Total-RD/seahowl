@@ -95,7 +95,7 @@ seahowl::elasto::Link& FloaterElasto::get_fairlead_link(const std::string& body_
     }
 }
 
-void FloaterElasto::assemble(seahowl::elasto::SystemElasto& system) {
+void FloaterElasto::assemble_this(seahowl::elasto::SystemElasto& system) {
     for (auto& bodymap : floater_bodies) {
         auto& body = *bodymap.second;
         system.add(body);

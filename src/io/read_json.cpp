@@ -1123,13 +1123,15 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
             turbine.tower.elasto.nodes.front()->set_fixed(true);
         }
     }
-
-    // assemble whole system (Chrono)
-    system_core.assemble();
 }
 
 void initialize_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
     auto json_obj = get_json_from_file(filepath);
+
+    // assemble system if it was not already
+    if (system_core.elasto.is_assembled) {
+        system_core.elasto.assemble();
+    }
 
     // NUMERICS options
     auto num_json = json_obj.at("numerics");

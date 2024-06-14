@@ -10,7 +10,7 @@ TurbineElasto::TurbineElasto() {
     tower = TowerElasto();
 }
 
-void TurbineElasto::assemble(SystemElasto& system) {
+void TurbineElasto::assemble_this(SystemElasto& system) {
     // assemble rotor & tower
     rna.assemble(system);
     tower.assemble(system);

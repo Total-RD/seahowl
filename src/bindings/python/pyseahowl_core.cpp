@@ -105,8 +105,6 @@ void initialize_pyseahowl_core(py::module& m) {
     py::class_<seahowl::core::System, std::shared_ptr<seahowl::core::System>, seahowl::core::ComponentDynamic>(m_core,
                                                                                                                "System")
         .def(py::init<seahowl::elasto::SystemElasto&, seahowl::aero::SystemAero&>())
-        .def("assemble", &seahowl::core::System::assemble)
-        .def("assemble", &seahowl::core::System::assemble)
         .def("step", &seahowl::core::System::step)
         .def("get_time", &seahowl::core::System::get_time)
         .def("set_time", &seahowl::core::System::set_time)

@@ -15,7 +15,7 @@ BladeElasto::BladeElasto() {
     link_root->set_constraints(true, true, true, true, true, true);
 }
 
-void BladeElasto::assemble(SystemElasto& system) {
+void BladeElasto::assemble_this(SystemElasto& system) {
     if (is_mounted) {
         system.add(*(link_root.get()));
     }
@@ -23,9 +23,9 @@ void BladeElasto::assemble(SystemElasto& system) {
 
 BladeElastoFEA::BladeElastoFEA() {}
 
-void BladeElastoFEA::assemble(SystemElasto& system) {
-    BladeElasto::assemble(system);
-    ComponentElastoFEA::assemble(system);
+void BladeElastoFEA::assemble_this(SystemElasto& system) {
+    BladeElasto::assemble_this(system);
+    ComponentElastoFEA::assemble_this(system);
 }
 
 void BladeElastoFEA::build() {
@@ -233,8 +233,8 @@ void BladeElastoRigid::build() {
     link_cog_root->initialize(*body_cog, *body_root);
 }
 
-void BladeElastoRigid::assemble(SystemElasto& system) {
-    BladeElasto::assemble(system);
+void BladeElastoRigid::assemble_this(SystemElasto& system) {
+    BladeElasto::assemble_this(system);
     system.add(*(body_root.get()));
     system.add(*(body_cog.get()));
     system.add(*(link_cog_root.get()));

@@ -12,7 +12,7 @@ TurbineFloatingElasto::TurbineFloatingElasto() : TurbineElasto() {
     mooring_system = std::make_unique<MooringSystem>();
 }
 
-void TurbineFloatingElasto::assemble(SystemElasto& system) {
+void TurbineFloatingElasto::assemble_this(SystemElasto& system) {
     // assemble floater first
     if (floater) {
         // assemble floater
@@ -27,7 +27,7 @@ void TurbineFloatingElasto::assemble(SystemElasto& system) {
     }
 
     // assemble parent class
-    TurbineElasto::assemble(system);
+    TurbineElasto::assemble_this(system);
 
     // moorings
     mooring_system->assemble(system);

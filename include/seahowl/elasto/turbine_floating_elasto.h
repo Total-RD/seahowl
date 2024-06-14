@@ -42,15 +42,6 @@ class TurbineFloatingElasto : public TurbineElasto {
     TurbineFloatingElasto();
 
     /**
-     * @brief Assembles the turbine (elasto part).*
-     *
-     * Calls assemble for each of the components of the turbine.
-     *
-     * @param[out] system System on which to add bodies, links, etc.
-     */
-    void assemble(seahowl::elasto::SystemElasto& system) override;
-
-    /**
      * @brief Builds the turbine.
      *
      * Calls build for each of the components of the turbine.
@@ -76,6 +67,9 @@ class TurbineFloatingElasto : public TurbineElasto {
      * @brief Returns the mass of the turbine.
      */
     virtual double get_mass() const override;
+
+  protected:
+    void assemble_this(seahowl::elasto::SystemElasto& system) override;
 };
 
 }  // namespace elasto

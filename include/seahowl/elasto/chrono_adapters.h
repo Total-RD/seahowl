@@ -293,6 +293,7 @@ class SystemElastoChrono : public SystemElasto {
     std::shared_ptr<chrono::ChSystem> chobj;
 
     SystemElastoChrono();
+    virtual void assemble() override;
     virtual void step(double dt) override;
     virtual double get_time() const override;
     virtual void set_time(double time) override;

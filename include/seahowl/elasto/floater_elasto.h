@@ -24,13 +24,6 @@ class FloaterElasto : public ComponentElasto {
     virtual void prestep(double time, double dt);
 
     /**
-     * @brief Assembles the component (adds all bodies to the system).
-     *
-     * @param[out] system System to which bodies.
-     */
-    virtual void assemble(seahowl::elasto::SystemElasto& system) override;
-
-    /**
      * @brief Creates and adds body to floater.
      *
      * @param[in] name The name of the body (for access purposes).
@@ -104,6 +97,8 @@ class FloaterElasto : public ComponentElasto {
     std::map<std::string, std::deque<std::unique_ptr<seahowl::elasto::BodyElasto>>> fairlead_bodies;
     /** @brief Name of body for tower connection */
     std::string tower_connection_name = "";
+
+    virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;
 };
 
 }  // namespace elasto

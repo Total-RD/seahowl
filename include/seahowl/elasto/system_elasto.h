@@ -19,6 +19,15 @@ class SystemElasto {
     std::deque<std::shared_ptr<TurbineElasto>> turbines{};
     /** @brief Mesh used for FEA elements. */
     std::shared_ptr<MeshElasto> mesh;
+    /** @brief Whether system has been assembled or not. */
+    bool is_assembled = false;
+
+    /**
+     * @brief Assembles the system.*
+     *
+     * Calls assemble for each turbine of the system.
+     */
+    virtual void assemble() = 0;
 
     /**
      * @brief Does an elasto step.

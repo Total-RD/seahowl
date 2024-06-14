@@ -10,7 +10,7 @@ using seahowl::elasto::RotorNacelleAssemblyElasto;
 
 RotorElasto::RotorElasto() {}
 
-void RotorElasto::assemble(SystemElasto& system) {
+void RotorElasto::assemble_this(SystemElasto& system) {
     for (auto& blade : blades) {
         blade->assemble(system);
     }
@@ -118,7 +118,7 @@ RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {
     rotor = std::make_unique<RotorElasto>();
 }
 
-void RotorNacelleAssemblyElasto::assemble(SystemElasto& system) {
+void RotorNacelleAssemblyElasto::assemble_this(SystemElasto& system) {
     rotor->assemble(system);
     system.add(*(body_shaft.get()));
     system.add(*(link_shaft_hub.get()));

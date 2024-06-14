@@ -79,13 +79,6 @@ class RotorElasto : public ComponentElasto {
     RotorElasto();
 
     /**
-     * @brief Assembles the component (adds all rigid bodies and links to the system).
-     *
-     * @param[out] system System to which rigid bodies and links are added.
-     */
-    virtual void assemble(seahowl::elasto::SystemElasto& system) override;
-
-    /**
      * @brief Builds the rotor.
      */
     void build();
@@ -120,6 +113,9 @@ class RotorElasto : public ComponentElasto {
      * @param[in] torque Torque to accumulate on axial axis of hub.
      */
     void accumulate_axial_torque(double torque);
+
+  protected:
+    virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;
 };
 
 /**
@@ -166,13 +162,6 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     RotorNacelleAssemblyElasto();
 
     /**
-     * @brief Assembles the component (adds all rigid bodies and links to the system).
-     *
-     * @param[out] system System to which rigid bodies and links are added.
-     */
-    virtual void assemble(seahowl::elasto::SystemElasto& system) override;
-
-    /**
      * @brief Builds the rotor.
      */
     void build();
@@ -217,6 +206,9 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
      * @brief Returns the electrical torque applied on the rotor.
      */
     double get_electrical_torque() const;
+
+  protected:
+    virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;
 
   private:
     /** @brief Accumulated Electrical torque on the rotor.*/

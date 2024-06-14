@@ -66,10 +66,12 @@ struct MooringSystem : public ComponentElasto {
     MooringSystem();
 
     virtual void build() override;
-    virtual void assemble(SystemElasto& system) override;
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;
     virtual double get_mass() const override;
+
+  protected:
+    virtual void assemble_this(SystemElasto& system) override;
 };
 
 /**
@@ -117,8 +119,6 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
 
     void build_nodes(const std::vector<ReferencePointElasto>& discretized_points);
 
-    virtual void assemble(SystemElasto& system) override;
-
     /**
      * @brief Computes hydro loads on cable.
      *
@@ -148,6 +148,9 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
      * @brief Returns total length of mooring.
      */
     virtual double get_length() const override;
+
+  protected:
+    virtual void assemble_this(SystemElasto& system) override;
 
   private:
     /**

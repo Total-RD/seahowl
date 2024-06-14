@@ -20,16 +20,26 @@ using namespace seahowl::core;
 System::System(seahowl::elasto::SystemElasto& elasto, seahowl::aero::SystemAero& aero) : elasto(elasto), aero(aero) {}
 
 void System::initialize_this(double time, double dt) {
+    // assemble elasto system if it hasn't been already
+    if (!elasto.is_assembled) {
+        elasto.assemble();
+    }
+
+    // initialize all turbines
     for (auto& turbine : turbines) {
         turbine->initialize(time, dt);
     }
 
+    // check if fluid model exists
     if (!fluid_model) {
         spdlog::warn("No fluid model was attached to the system.");
     }
+
+    // check if soil model exists
     if (!soil_model) {
         spdlog::warn("No soil model was attached to the system.");
     }
+
     spdlog::info("Initialized system with number of turbines: {}.", turbines.size());
 }
 
@@ -58,12 +68,6 @@ void System::poststep(double time, double dt) {
     for (auto& turbine : turbines) {
         // turbine poststep
         turbine->poststep(time, dt);
-    }
-}
-
-void System::assemble() {
-    for (auto& turbine : turbines) {
-        turbine->elasto.assemble(elasto);
     }
 }
 

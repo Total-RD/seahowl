@@ -27,8 +27,6 @@ class BladeElasto : public virtual ComponentElasto {
 
     BladeElasto();
 
-    virtual void assemble(SystemElasto& system) override;
-
     /**
      * @brief Applies pitch increment to the blade (i.e. rotates the blade around its longitudinal axis).
      *
@@ -59,6 +57,8 @@ class BladeElasto : public virtual ComponentElasto {
   protected:
     /** @brief Whether the blade is mounted (e.g. on a rotor) or not. */
     bool is_mounted = false;
+
+    virtual void assemble_this(SystemElasto& system) override;
 };
 
 /**
@@ -82,7 +82,6 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
     BladeElastoFEA();
 
     virtual void build() override;
-    virtual void assemble(SystemElasto& system) override;
     using ComponentElastoFEA::rotate;
     using ComponentElastoFEA::translate;
     using ComponentElastoFEA::get_mass;
@@ -104,6 +103,8 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
     virtual void attach_root_to_body(const BodyElasto& body) override;
 
   private:
+    virtual void assemble_this(SystemElasto& system) override;
+
     /**
      * @brief Builds the blade with simple Timoshenko elements (lineic density, flap stiffness, edge stiffness).
      */
@@ -128,7 +129,6 @@ class BladeElastoRigid : public BladeElasto {
     BladeElastoRigid();
 
     virtual void build() override;
-    virtual void assemble(SystemElasto& system) override;
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;
     virtual double get_mass() const override;
@@ -154,6 +154,8 @@ class BladeElastoRigid : public BladeElasto {
     std::unique_ptr<BodyElastoChrono> body_cog;
     /** @brief Link between bodies at the root and COG of the blade. */
     std::unique_ptr<Link> link_cog_root;
+
+    virtual void assemble_this(SystemElasto& system) override;
 };
 
 }  // namespace elasto

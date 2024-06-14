@@ -17,7 +17,7 @@ void MooringSystem::build() {
     }
 }
 
-void MooringSystem::assemble(SystemElasto& system) {
+void MooringSystem::assemble_this(SystemElasto& system) {
     for (auto& mooring : moorings) {
         mooring->assemble(system);
     }
@@ -150,8 +150,8 @@ void MooringElastoFEA::build_elements() {
     }
 }
 
-void MooringElastoFEA::assemble(SystemElasto& system) {
-    ComponentElastoFEA::assemble(system);
+void MooringElastoFEA::assemble_this(SystemElasto& system) {
+    ComponentElastoFEA::assemble_this(system);
     system.add(*fairlead_link);
     system.add(*anchor_link);
     gravitational_acceleration = system.get_gravitational_acceleration();

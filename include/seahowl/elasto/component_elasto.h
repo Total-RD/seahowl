@@ -35,7 +35,7 @@ class ComponentElasto {
      *
      * @param[out] mesh System on which to assemble component.
      */
-    virtual void assemble(SystemElasto& system){};
+    void assemble(SystemElasto& system);
 
     /**
      * @brief Initializes component.
@@ -66,6 +66,10 @@ class ComponentElasto {
      * @brief Returns the mass of the component.
      */
     virtual double get_mass() const = 0;
+
+  protected:
+    bool is_assembled = false;
+    virtual void assemble_this(SystemElasto& system) = 0;
 };
 
 /**
@@ -88,13 +92,6 @@ class ComponentElastoFEA : public virtual ComponentElasto {
      * @param[in] discretized_points Reference points from which the FEA nodes are built.
      */
     void build_nodes(const std::vector<ReferencePointElasto>& discretized_points);
-
-    /**
-     * @brief Assembles the FEA component (adds all nodes and elements to mesh).
-     *
-     * @param[out] mesh System on which to add nodes and elements.
-     */
-    virtual void assemble(SystemElasto& system) override;
 
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;
@@ -180,6 +177,14 @@ class ComponentElastoFEA : public virtual ComponentElasto {
      * @param[in] element Element index.
      */
     seahowl::EntityDynamicEigen get_entity_along_component(double eta, int element_index) const;
+
+  protected:
+    /**
+     * @brief Assembles the FEA component (adds all nodes and elements to mesh).
+     *
+     * @param[out] mesh System on which to add nodes and elements.
+     */
+    virtual void assemble_this(SystemElasto& system) override;
 };
 
 }  // namespace elasto

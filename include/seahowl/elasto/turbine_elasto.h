@@ -39,15 +39,6 @@ class TurbineElasto : public ComponentElasto {
     TurbineElasto();
 
     /**
-     * @brief Assembles the turbine (elasto part).*
-     *
-     * Calls assemble for each of the components of the turbine.
-     *
-     * @param[out] system System on which to add bodies, links, etc.
-     */
-    virtual void assemble(seahowl::elasto::SystemElasto& system) override;
-
-    /**
      * @brief Links RNA to tower.
      *
      * This function links the towertop node to the yaw bearing rigid body by translating the RNA so that the tower
@@ -82,6 +73,9 @@ class TurbineElasto : public ComponentElasto {
      * @brief Returns the mass of the turbine.
      */
     virtual double get_mass() const override;
+
+  protected:
+    virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;
 };
 
 }  // namespace elasto

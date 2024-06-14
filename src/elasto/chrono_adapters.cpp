@@ -774,6 +774,18 @@ SystemElastoChrono::SystemElastoChrono() {
     add(*(mesh.get()));
 }
 
+void SystemElastoChrono::assemble() {
+    spdlog::debug("Assembly of system.");
+    if (is_assembled) {
+        throw std::runtime_error("Component already assembled: " + std::string(typeid(*this).name()) + ".");
+    }
+    for (auto& turbine : turbines) {
+        turbine->assemble(*this);
+    }
+    is_assembled = true;
+    spdlog::debug("Finished assembly of system.");
+}
+
 void SystemElastoChrono::step(double dt) {
     chobj->DoStepDynamics(dt);
 }
@@ -787,6 +799,11 @@ void SystemElastoChrono::set_time(double time) {
 }
 
 void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
+    // assemble system if it was not already
+    if (!is_assembled) {
+        assemble();
+    }
+
     // constrain rotor and tower
     std::vector<bool> tower_fixed;
     for (auto& turbine : turbines) {
