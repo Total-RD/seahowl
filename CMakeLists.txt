@@ -142,7 +142,7 @@ endif()
 # ================
 # CORE LIBRARY
 # ================
-add_library(seahowl_core)
+add_library(seahowl_core SHARED)
 
 # commons
 set(SEAHOWL_COMMONS_SOURCES

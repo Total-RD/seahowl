@@ -108,7 +108,10 @@ void initialize_pyseahowl_elasto(py::module& m) {
     py::class_<seahowl::elasto::ElementMooringElastoChrono,
                std::shared_ptr<seahowl::elasto::ElementMooringElastoChrono>, seahowl::elasto::ElementMooringElasto>(
         m_elasto, "ElementMooringElastoChrono")
-        .def(py::init<>());
+        .def(py::init<>())
+        .def("set_properties", &seahowl::elasto::ElementMooringElasto::set_properties)
+        .def("set_rest_length", &seahowl::elasto::ElementMooringElastoChrono::set_rest_length)
+        .def("get_rest_length", &seahowl::elasto::ElementMooringElastoChrono::get_rest_length);
     py::class_<seahowl::elasto::LinkChrono, std::shared_ptr<seahowl::elasto::LinkChrono>, seahowl::elasto::Link>(
         m_elasto, "LinkChrono")
         .def(py::init<>());
