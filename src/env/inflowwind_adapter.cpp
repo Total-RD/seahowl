@@ -68,13 +68,6 @@ void InflowWindLib::SetIFWINFILE(std::string name) {
                 if (words[0].front() == '"') {
                     insertoffset = 1;
                 }
-                auto pos = line.find(words[0].front());
-                std::string line_before = line;
-                auto DATADIR = fs::absolute(fs::path(name)).parent_path();
-                line.insert(pos + insertoffset, (DATADIR).string() + "/");
-                spdlog::trace("InflowWind: modified path to file to be relative:");
-                spdlog::trace("    from: {}", line_before);
-                spdlog::trace("    to: {}", line);
                 if (type_lowercase == "filename_uni") {
                     // add wnd file if filename_uni
                     if (insertoffset == 1) {
@@ -82,7 +75,8 @@ void InflowWindLib::SetIFWINFILE(std::string name) {
                         words[0].erase(words[0].length() - 1, 1);
                         words[0].erase(0, 1);
                     }
-                    SetWNDINFILE((DATADIR / words[0]).string());
+                    auto IFWDIR = fs::path(name).parent_path();
+                    SetWNDINFILE((IFWDIR / words[0]).string());
                 }
             };
         }
