@@ -65,6 +65,13 @@ void InflowWindLib::SetIFWINFILE(std::string name) {
             std::transform(type_lowercase.begin(), type_lowercase.end(), type_lowercase.begin(), ::tolower);
 
             if (type_lowercase.find("filename") != std::string::npos) {
+                if (words[0].find(" ") != std::string::npos || IFWDIR.string().find(" ") != std::string::npos) {
+                    throw std::runtime_error(
+                        "InflowWind will not work with spaces in the path. There is a space in the relative path of "
+                        "the folder containing the input file of InflowWind "
+                        "('" +
+                        IFWDIR.string() + "') or file defined within the input file ('" + words[0] + "').");
+                }
                 size_t insertoffset = 0;
                 if (words[0].front() == '"') {
                     insertoffset = 1;
