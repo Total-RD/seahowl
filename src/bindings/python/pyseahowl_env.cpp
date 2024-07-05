@@ -49,7 +49,7 @@ void initialize_pyseahowl_env(py::module& m) {
 #ifdef HAVE_INFLOWWIND
     // env/infflowwind_adapter.h
     py::class_<seahowl::env::InflowWindAdapter, std::shared_ptr<seahowl::env::InflowWindAdapter>,
-               seahowl::env::FluidModel>(m_env, "InflowWindAdapter")
+               seahowl::env::WindModel>(m_env, "InflowWindAdapter")
         .def(py::init<std::string&>());
 #endif
 
