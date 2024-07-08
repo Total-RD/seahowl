@@ -195,6 +195,13 @@ Vector2d seahowl::aero::get_induced_velocity(seahowl::aero::BladeNodeAero& node,
 void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
                                                       const Vector3d& position,
                                                       const seahowl::aero::TowerAero& tower_aero) {
+    // check that wind velocity is not ~zero
+    double tol = 1e-6;
+    if (wind_velocity.norm() < tol) {
+        // do not affect wind velocity if below tolerance
+        return;
+    }
+
     // get wind velocity in tower reference frame
     auto& towertop = tower_aero.nodes.back();
     auto& towerbase = tower_aero.nodes.front();
@@ -234,6 +241,7 @@ void seahowl::aero::apply_tower_shadow_effect_on_wind(Vector3d& wind_velocity,
         // side position of point from tower
         auto yy = position_relative_projected.dot(wind_normal_tower);
         auto yy2 = pow(yy, 2);
+
         // factor for tower shadow calculations
         auto factor = pow(tower_radius, 2) / pow(yy2 + xx2, 2);
 
