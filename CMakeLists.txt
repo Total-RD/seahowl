@@ -251,8 +251,10 @@ source_group(servo FILES ${SEAHOWL_SERVO_SOURCES} ${SEAHOWL_SERVO_HEADERS})
 
 # hydro
 set(SEAHOWL_HYDRO_SOURCES
+    src/hydro/morison.cpp
 )
 set(SEAHOWL_HYDRO_HEADERS
+    include/seahowl/hydro/morison.h
 )
 if(SEAHOWL_ENABLE_HYDROCHRONO)
     list(APPEND SEAHOWL_HYDRO_SOURCES src/hydro/hydrochrono_adapter.cpp)
