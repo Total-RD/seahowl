@@ -60,6 +60,14 @@ seahowl::Vector3d WaveModelHydroChrono::get_fluid_velocity(const Vector3d& posit
     }
 }
 
+seahowl::Vector3d WaveModelHydroChrono::get_fluid_acceleration(const Vector3d& position, double time) const {
+    if (is_in_water(position, time)) {
+        return waves->GetAcceleration(position, time);
+    } else {
+        throw std::runtime_error("Cannot retrieve water acceleration above mean water level.");
+    }
+}
+
 double WaveModelHydroChrono::get_fluid_density(const Vector3d& position, double time) const {
     return density;
 }

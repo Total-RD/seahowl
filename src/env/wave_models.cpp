@@ -21,6 +21,14 @@ Vector3d StillWater::get_fluid_velocity(const Vector3d& position, double time) c
     }
 }
 
+Vector3d StillWater::get_fluid_acceleration(const Vector3d& position, double time) const {
+    if (is_in_water(position, time)) {
+        return Vector3d(0.0, 0.0, 0.0);
+    } else {
+        throw std::runtime_error("Cannot retrieve water acceleration above mean water level.");
+    }
+}
+
 double StillWater::get_fluid_density(const Vector3d& position, double time) const {
     if (is_in_water(position, time)) {
         return density;
@@ -44,5 +52,13 @@ Vector3d CurrentConstant::get_fluid_velocity(const Vector3d& position, double ti
         return direction * horizontal_velocity;
     } else {
         throw std::runtime_error("Cannot retrieve water velocity above mean water level.");
+    }
+}
+
+Vector3d CurrentConstant::get_fluid_acceleration(const Vector3d& position, double time) const {
+    if (is_in_water(position, time)) {
+        return Vector3d(0.0, 0.0, 0.0);
+    } else {
+        throw std::runtime_error("Cannot retrieve water acceleration above mean water level.");
     }
 }

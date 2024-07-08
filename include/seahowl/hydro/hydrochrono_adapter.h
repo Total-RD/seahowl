@@ -88,6 +88,7 @@ class WaveModelHydroChrono : public WaveModel {
     WaveModelHydroChrono();
 
     virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
+    virtual Vector3d get_fluid_acceleration(const Vector3d& position, double time) const override;
     virtual double get_fluid_density(const Vector3d& position, double time) const override;
     virtual double get_water_level(const Vector3d& position, double time) const override;
 };

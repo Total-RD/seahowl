@@ -25,6 +25,10 @@ class FluidModel {
      * @param[in] time Time of simulation.
      */
     virtual double get_fluid_density(const Vector3d& position, double time) const = 0;
+
+    virtual Vector3d get_fluid_acceleration(const Vector3d& position, double time) const {
+        return Vector3d(0.0, 0.0, 0.0);
+    };
 };
 
 }  // namespace env
