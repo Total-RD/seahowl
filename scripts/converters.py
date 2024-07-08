@@ -663,7 +663,7 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                 "nonlinear_steps": 10,
             },
         },
-        "outputs": {"dt": 0.1, "VTK": False, "log_level": "info"},
+        "outputs": {"dt": 0.1, "VTK": False, "log_level": "info", "gui": False},
         "environment": {"file": "./environment.json"},
         "turbines": [
             {
