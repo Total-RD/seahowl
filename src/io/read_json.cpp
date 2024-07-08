@@ -295,7 +295,7 @@ void populate_blade_aero_from_json(const std::string& filepath, seahowl::aero::B
 }
 
 void populate_blade_from_json(const std::string& filepath, seahowl::core::Blade& blade) {
-    spdlog::debug("Populating blade from " + filepath + " file.");
+    spdlog::debug("Populating blade from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
     populate_blade_elasto_from_json(filepath, blade.elasto);
     populate_blade_aero_from_json(filepath, blade.aero);
 }
@@ -396,7 +396,7 @@ void populate_tower_aero_from_json(const std::string& filepath, seahowl::aero::T
 }
 
 void populate_tower_from_json(const std::string& filepath, seahowl::core::Tower& tower) {
-    spdlog::debug("Populating tower from " + filepath + " file.");
+    spdlog::debug("Populating tower from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
     populate_tower_elasto_from_json(filepath, tower.elasto);
     populate_tower_aero_from_json(filepath, tower.aero);
 }
@@ -442,7 +442,7 @@ void populate_rna_aero_from_json(const std::string& filepath, seahowl::aero::Rot
 }
 
 void populate_rna_from_json(const std::string& filepath, seahowl::core::RotorNacelleAssembly& rna) {
-    spdlog::debug("Populating RNA from " + filepath + " file.");
+    spdlog::debug("Populating RNA from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
     populate_rna_elasto_from_json(filepath, rna.elasto);
     populate_rna_aero_from_json(filepath, rna.aero);
 }
@@ -519,10 +519,11 @@ auto populate_body_from_json(const json& body_json, seahowl::elasto::BodyElasto&
 void populate_turbine_from_json(const std::string& filepath,
                                 seahowl::core::Turbine& turbine,
                                 const std::string& output_folder) {
-    spdlog::debug("Populating turbine from " + filepath + " file.");
+    spdlog::debug("Populating turbine from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
+                  ").");
     auto json_obj = get_json_from_file(filepath);
 
-    auto DATADIR = absolute(path(filepath).parent_path());
+    auto DATADIR = path(filepath).parent_path();
 
     auto rotor_json = json_obj.at("rotor");
     auto tower_json = json_obj.at("tower");
@@ -678,7 +679,7 @@ void populate_turbine_from_json(const std::string& filepath,
 
         auto libfilepath = controller_json.at("options").at("libfile").get<std::string>();
         if (libfilepath != "") {
-            // absolute path
+            // path
             libfilepath = path(DATADIR / libfilepath).generic_string();
             // copy libdiscon to temporary folder with new name in case there are several turbines
             check_file_exists(libfilepath);
@@ -843,7 +844,7 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
     spdlog::debug("Getting environmental conditions from " + filepath + " file.");
     auto environment_json = get_json_from_file(filepath);
 
-    auto DATADIR = absolute(path(filepath).parent_path());
+    auto DATADIR = path(filepath).parent_path();
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
     auto gravity_vector = seahowl::Vector3d(gravity[0], gravity[1], gravity[2]);
@@ -998,10 +999,11 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
 }
 
 void populate_environmental_conditions_from_json(const std::string& filepath, seahowl::core::System& system_core) {
-    spdlog::debug("Populating environmental conditions from " + filepath + " file.");
+    spdlog::debug("Populating environmental conditions from " + filepath +
+                  " file (absolute: " + absolute(path(filepath)).string() + ").");
     auto environment_json = get_json_from_file(filepath);
 
-    auto DATADIR = absolute(path(filepath).parent_path());
+    auto DATADIR = path(filepath).parent_path();
 
     // gravity
     auto gravity = environment_json.at("gravity").get<std::vector<double>>();
@@ -1042,7 +1044,7 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
 }
 
 void populate_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
-    auto DATADIR = absolute(path(filepath)).parent_path();
+    auto DATADIR = path(filepath).parent_path();
 
     auto json_obj = get_json_from_file(filepath);
 
@@ -1055,7 +1057,8 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
     // logging
     auto log_level = outputs_json.at("log_level").get<std::string>();
     seahowl::set_log_level_global(log_level);
-    spdlog::debug("Populating system from " + filepath + " file.");
+    spdlog::debug("Populating system from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
+                  ").");
 
     // environmental info
     auto filepath_environment = (DATADIR / json_obj.at("environment").at("file").get<std::string>()).generic_string();

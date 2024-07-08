@@ -11,9 +11,9 @@ void run_simulation(int argc, char* argv[]) {
     spdlog::info("Start SEAHOWL simulation.");
 
     // path of main input file
-    auto filepath_main = fs::absolute(fs::path(u8"../data/IEA15MW/main.json"));
+    auto filepath_main = fs::path(u8"../data/IEA15MW/main.json");
     if (argc > 1) {
-        filepath_main = fs::absolute(fs::path(argv[1]));
+        filepath_main = fs::path(argv[1]);
     }
 
     auto simulation = seahowl::core::Simulation();
