@@ -13,8 +13,6 @@ extern "C" {
 
 void IfW_C_Init(const char** InputFileString_C,
                 int& InputFileStringLength_C,
-                const char** InputUniformString_C,
-                int& InputUniformStringLength_C,
                 int& NumWindPts_C,
                 double& DT_C,
                 int& NumChannels_C,
@@ -49,7 +47,6 @@ struct InflowWindLib {
     float* Velocity;
 
     void SetIFWINFILE(std::string name);
-    void SetWNDINFILE(std::string name);
     void CheckError();
 
     void SetTimeStep(double dt);
@@ -64,11 +61,9 @@ struct InflowWindLib {
   private:
     // Input file string
     std::string IfWinputFileString;
-    std::string InputUniformString;
 
     // Input file string length
     int IfWinputFileStringLength;
-    int InputUniformStringLength;
 
     // Number of wind points
     int NumWindPts = 1;

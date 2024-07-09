@@ -52,68 +52,8 @@ seahowl::Vector3d InflowWindAdapter::get_fluid_velocity(const seahowl::Vector3d&
 
 void InflowWindLib::SetIFWINFILE(std::string name) {
     spdlog::info("Set InflowWind INFILE: {}.", name);
-    std::ifstream file(name);
-    if (!file.is_open()) {
-        throw std::runtime_error("Failed to open inflowwind input file.");
-    }
-    auto IFWDIR = fs::path(name).parent_path();
-    std::string line;
-    while (std::getline(file, line)) {
-        std::vector<std::string> words = splitString(line);
-        if (words.size() > 1) {
-            std::string type_lowercase = words[1];
-            std::transform(type_lowercase.begin(), type_lowercase.end(), type_lowercase.begin(), ::tolower);
-
-            if (type_lowercase.find("filename") != std::string::npos) {
-                if (words[0].find(" ") != std::string::npos || IFWDIR.string().find(" ") != std::string::npos) {
-                    throw std::runtime_error(
-                        "InflowWind will not work with spaces in the path. There is a space in the relative path of "
-                        "the folder containing the input file of InflowWind "
-                        "('" +
-                        IFWDIR.string() + "') or file defined within the input file ('" + words[0] + "').");
-                }
-                size_t insertoffset = 0;
-                if (words[0].front() == '"') {
-                    insertoffset = 1;
-                }
-
-                auto pos = line.find(words[0].front());
-                std::string line_before = line;
-                line.insert(pos + insertoffset, (IFWDIR).string() + "/");
-                spdlog::trace("InflowWind: modified path to file to be relative:");
-                spdlog::trace("    from: {}", line_before);
-                spdlog::trace("    to: {}", line);
-
-                if (type_lowercase == "filename_uni") {
-                    // add wnd file if filename_uni
-                    if (insertoffset == 1) {
-                        // remove quotes
-                        words[0].erase(words[0].length() - 1, 1);
-                        words[0].erase(0, 1);
-                    }
-                    SetWNDINFILE((IFWDIR / words[0]).string());
-                }
-            };
-        }
-        IfWinputFileString += line + '\0';
-    }
+    IfWinputFileString = name;
     IfWinputFileStringLength = IfWinputFileString.length();
-    file.close();
-}
-
-void InflowWindLib::SetWNDINFILE(std::string name) {
-    spdlog::info("Set wind.wnd INFILE: {}.", name);
-    if (!fs::exists(name)) {
-        spdlog::warn("File {} not found, ignoring it.", name);
-        return;
-    }
-    std::ifstream file(name);
-    std::string line;
-    while (std::getline(file, line)) {
-        InputUniformString += line + '\0';
-    }
-    InputUniformStringLength = InputUniformString.length();
-    file.close();
 }
 
 void InflowWindLib::CheckError() {
@@ -146,10 +86,9 @@ void InflowWindLib::SetVel(float* Velocity_C) {
 
 void InflowWindLib::Init() {
     const char* IfWinputFile = IfWinputFileString.c_str();
-    const char* IfWUniformFile = InputUniformString.c_str();
 
-    IfW_C_Init(&IfWinputFile, IfWinputFileStringLength, &IfWUniformFile, InputUniformStringLength, NumWindPts, DT,
-               NumChannels, OutputChannelNames, OutputChannelUnits, ErrStat, ErrMsg);
+    IfW_C_Init(&IfWinputFile, IfWinputFileStringLength, NumWindPts, DT, NumChannels, OutputChannelNames,
+               OutputChannelUnits, ErrStat, ErrMsg);
     CheckError();
 }
 
