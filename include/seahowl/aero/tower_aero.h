@@ -3,6 +3,7 @@
 #include "seahowl/commons/numerics.h"
 #include "seahowl/commons/entities.h"
 #include "seahowl/aero/reference_point_aero.h"
+#include "seahowl/hydro/morison.h"
 
 #include <vector>
 
@@ -19,52 +20,6 @@ namespace seahowl {
 namespace aero {
 
 /**
- * @brief Tower aerodynamic node.
- */
-struct TowerNodeAero : public EntityDynamicEigen {
-    /** @brief Load calculated at node. */
-    Vector3d load{0.0, 0.0, 0.0};
-    /** @brief Reference point associated to node (aerodynamic properties). */
-    TowerReferencePointAero properties;
-
-    /**
-     * @brief Constructor.
-     */
-    TowerNodeAero(TowerReferencePointAero& point);
-};
-
-/**
- * @brief Tower aerodynamic element.
- */
-struct TowerElementAero {
-    /** @brief Fist node of element. */
-    const TowerNodeAero& node1;
-    /** @brief Second node of element. */
-    const TowerNodeAero& node2;
-    /** @brief Fraction (normalized abscissa along longitudinal axis of component) of center of element. */
-    double fraction = 0.0;
-    /** @brief Length of element. */
-    double length = 0.0;
-
-    TowerElementAero(const TowerNodeAero& point1, const TowerNodeAero& point2);
-
-    /**
-     * @brief Returns integrated load at center of element.
-     */
-    Vector3d get_load() const;
-
-    /**
-     * @brief Get position of center of element.
-     */
-    Vector3d get_position() const;
-
-    /**
-     * @brief Get rotation of center of element.
-     */
-    Quaternion get_rotation() const;
-};
-
-/**
  * @brief Tower of wind turbine as an aerodynamic component.
  */
 class TowerAero {
@@ -76,9 +31,9 @@ class TowerAero {
     /** @brief List of discretized points (interpolated reference points) describing the tower properties. */
     std::vector<TowerReferencePointAero> discretized_points;
     /** @brief Aero nodes. */
-    std::vector<TowerNodeAero> nodes;
+    std::vector<hydro::MorisonNode> nodes;
     /** @brief Aero elements. */
-    std::vector<TowerElementAero> elements;
+    std::vector<hydro::MorisonElement> elements;
     /** @brief Loads at center of tower elements. */
     std::vector<Vector3d> loads;
 

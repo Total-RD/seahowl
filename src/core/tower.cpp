@@ -52,19 +52,22 @@ void Tower::set_discretization_aero(std::vector<double> fractions) {
 }
 
 void Tower::compute_mapping_aero2elasto() {
+    mapping_aero2elasto_nodes =
+        get_indice_and_positions(aero.discretization_fractions, elasto.discretization_fractions);
+
     // get aero element position (center) from which loads will be applied
+    if (aero.elements.size() != aero.discretization_fractions.size() - 1) {
+        throw std::runtime_error("There are " + std::to_string(aero.elements.size()) + " elements for " +
+                                 std::to_string(aero.discretization_fractions.size() - 1) +
+                                 "discretization fractions (" + std::to_string(aero.nodes.size()) + " nodes).");
+    }
     std::vector<double> aero_discretization_fractions_elements;
-    for (auto& element : aero.elements) {
-        aero_discretization_fractions_elements.push_back(element.fraction);
+    for (int ii = 0; ii < aero.elements.size(); ii++) {
+        auto element_fraction = 0.5 * (aero.discretization_fractions[ii] + aero.discretization_fractions[ii + 1]);
+        aero_discretization_fractions_elements.push_back(element_fraction);
     }
     mapping_aero2elasto_elements =
         get_indice_and_positions(aero_discretization_fractions_elements, elasto.discretization_fractions);
-    std::vector<double> aero_discretization_fractions_nodes;
-    for (auto& node : aero.nodes) {
-        aero_discretization_fractions_nodes.push_back(node.properties.fraction);
-    }
-    mapping_aero2elasto_nodes =
-        get_indice_and_positions(aero_discretization_fractions_nodes, elasto.discretization_fractions);
 }
 
 void Tower::compute_mapping_elasto2aero() {
