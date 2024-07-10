@@ -48,4 +48,12 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def_property_readonly("node1", [](seahowl::hydro::MorisonElement& element) { return &element.node1; })
         .def_property_readonly("node2", [](seahowl::hydro::MorisonElement& element) { return &element.node2; })
         .def_readwrite("length", &seahowl::hydro::MorisonElement::length);
+    py::class_<seahowl::hydro::MorisonPlate, std::shared_ptr<seahowl::hydro::MorisonPlate>,
+               seahowl::EntityDynamicEigen>(m_hydro, "MorisonPlate")
+        .def(py::init<>())
+        .def("compute_loads", &seahowl::hydro::MorisonPlate::compute_loads)
+        .def_readwrite("load", &seahowl::hydro::MorisonPlate::load)
+        .def_readwrite("diameter", &seahowl::hydro::MorisonPlate::diameter)
+        .def_readwrite("drag_coefficient", &seahowl::hydro::MorisonPlate::drag_coefficient)
+        .def_readwrite("reverse_direction", &seahowl::hydro::MorisonPlate::reverse_direction);
 }

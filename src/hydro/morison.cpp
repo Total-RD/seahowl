@@ -80,3 +80,33 @@ Quaternion MorisonElement::get_rotation() const {
     // TODO: average rotation of node1 and node2
     return node1.get_rotation();
 }
+
+MorisonPlate::MorisonPlate() {}
+
+void MorisonPlate::compute_loads(const env::FluidModel& fluid_model, double time) {
+    auto area = PI * pow(diameter * 0.5, 2);
+
+    // vector pointing inwards of the plate
+    auto local_direction = Vector3d(0.0, 0.0, -1.0);
+    if (reverse_direction) {
+        local_direction *= -1.0;
+    }
+    auto global_direction = get_rotation() * local_direction;  // direction of plate
+
+    auto position = get_position();
+    auto velocity = get_velocity();
+    // fluid density
+    double fluid_density = fluid_model.get_fluid_density(position, time);
+    // fluid velocity
+    auto velocity_fluid = fluid_model.get_fluid_velocity(position, time);
+    auto velocity_relative = velocity_fluid - velocity;
+
+    load = Vector3d(0.0, 0.0, 0.0);
+    auto dot = velocity_relative.dot(global_direction);
+    if (dot > 0) {
+        // get magnitude of drag
+        double load_drag_area = 0.5 * fluid_density * drag_coefficient * area * dot * dot;
+        // project in global direction
+        load = load_drag_area * global_direction;
+    }
+}

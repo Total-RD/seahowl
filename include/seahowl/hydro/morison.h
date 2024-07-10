@@ -29,7 +29,7 @@ struct HydroCoefficients {
 };
 
 /**
- * @brief Tower aerodynamic node.
+ * @brief Morison node.
  */
 class MorisonNode : public EntityDynamicEigen {
   public:
@@ -48,6 +48,9 @@ class MorisonNode : public EntityDynamicEigen {
     void compute_loads(const env::FluidModel& fluid_model, double time);
 };
 
+/**
+ * @brief Morison element.
+ */
 class MorisonElement {
   public:
     /** @brief First node of element. */
@@ -73,6 +76,26 @@ class MorisonElement {
      * @brief Get rotation of center of element.
      */
     Quaternion get_rotation() const;
+};
+
+/** Morison plate (with normal along Z-axis). */
+class MorisonPlate : public EntityDynamicEigen {
+  public:
+    /** @brief Diameter at node. */
+    double diameter = 0.0;
+    /** @brief Drag coefficient. */
+    double drag_coefficient = 0.0;
+    /** @brief Load calculated at node. */
+    Vector3d load{0.0, 0.0, 0.0};
+    /** @brief Whether normal direction is along positive or negative Z-axis. */
+    bool reverse_direction = false;
+
+    /**
+     * @brief Constructor.
+     */
+    MorisonPlate();
+
+    void compute_loads(const env::FluidModel& fluid_model, double time);
 };
 
 }  // namespace hydro
