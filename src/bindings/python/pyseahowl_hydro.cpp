@@ -27,9 +27,9 @@ void initialize_pyseahowl_hydro(py::module& m) {
         m_hydro, "HydroCoefficients")
         .def(py::init<>())
         .def_readwrite("drag_normal", &seahowl::hydro::HydroCoefficients::drag_normal)
-        .def_readwrite("drag_tangent", &seahowl::hydro::HydroCoefficients::drag_tangent)
+        .def_readwrite("drag_axial", &seahowl::hydro::HydroCoefficients::drag_axial)
         .def_readwrite("added_mass_normal", &seahowl::hydro::HydroCoefficients::added_mass_normal)
-        .def_readwrite("added_mass_tangent", &seahowl::hydro::HydroCoefficients::added_mass_tangent)
+        .def_readwrite("added_mass_axial", &seahowl::hydro::HydroCoefficients::added_mass_axial)
         .def_readwrite("has_buoyancy", &seahowl::hydro::HydroCoefficients::has_buoyancy)
         .def_readwrite("has_inertia", &seahowl::hydro::HydroCoefficients::has_inertia);
     py::class_<seahowl::hydro::MorisonNode, std::shared_ptr<seahowl::hydro::MorisonNode>, seahowl::EntityDynamicEigen>(

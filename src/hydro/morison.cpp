@@ -22,17 +22,17 @@ void MorisonNode::compute_loads(const env::FluidModel& fluid_model, double time)
     // fluid velocity
     auto velocity_fluid = fluid_model.get_fluid_velocity(position, time);
 
-    auto dir = get_rotation() * Vector3d(0.0, 0.0, 1.0);  // tangent direction
+    auto dir = get_rotation() * Vector3d(0.0, 0.0, 1.0);  // axial direction
     auto velocity_relative = velocity_fluid - velocity;
-    auto velocity_relative_tangent = dir * velocity_relative.dot(dir);
-    auto velocity_relative_normal = velocity_relative - velocity_relative_tangent;
+    auto velocity_relative_axial = dir * velocity_relative.dot(dir);
+    auto velocity_relative_normal = velocity_relative - velocity_relative_axial;
 
     // drag
     auto load_drag_normal = 0.5 * fluid_density * coefficients.drag_normal * diameter *
                             velocity_relative_normal.norm() * velocity_relative_normal;
-    auto load_drag_tangent = 0.5 * fluid_density * coefficients.drag_tangent * diameter * PI *
-                             velocity_relative_tangent.norm() * velocity_relative_tangent;
-    load += load_drag_normal + load_drag_tangent;
+    auto load_drag_axial = 0.5 * fluid_density * coefficients.drag_axial * diameter * PI *
+                           velocity_relative_axial.norm() * velocity_relative_axial;
+    load += load_drag_normal + load_drag_axial;
 
     if (coefficients.has_inertia) {
         // fluid acceleration
@@ -40,18 +40,17 @@ void MorisonNode::compute_loads(const env::FluidModel& fluid_model, double time)
         // relative acceleration
         auto acceleration = get_acceleration();
         auto acceleration_relative = acceleration_fluid - acceleration;
-        auto acceleration_relative_tangent = dir * acceleration_relative.dot(dir);
-        auto acceleration_relative_normal = acceleration_relative - acceleration_relative_tangent;
+        auto acceleration_relative_axial = dir * acceleration_relative.dot(dir);
+        auto acceleration_relative_normal = acceleration_relative - acceleration_relative_axial;
 
         // added mass (with Cm = 1 + Ca)
-
         auto load_added_mass_fluid = fluid_density * area * acceleration_fluid;
         auto load_added_mass_normal =
             fluid_density * area * coefficients.added_mass_normal * acceleration_relative_normal;
-        auto load_added_mass_tangent = fluid_density * area * coefficients.added_mass_tangent * acceleration_relative_tangent;
+        auto load_added_mass_axial = fluid_density * area * coefficients.added_mass_axial * acceleration_relative_axial;
         // total inertia load
         auto load_inertia =
-            (load_added_mass_fluid + load_added_mass_normal + load_added_mass_tangent) * coefficients.inertia_factor;
+            (load_added_mass_fluid + load_added_mass_normal + load_added_mass_axial) * coefficients.inertia_factor;
         load += load_inertia;
     }
 

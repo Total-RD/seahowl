@@ -16,12 +16,12 @@ namespace hydro {
 struct HydroCoefficients {
     /** @brief Drag coefficient in normal direction (X-Y plane). */
     double drag_normal = 0.0;
-    /** @brief Drag coefficient in tangent direction (Z axis). */
-    double drag_tangent = 0.0;
+    /** @brief Drag coefficient in axial direction (Z axis). */
+    double drag_axial = 0.0;
     /** @brief Added mass coefficient in normal direction (X-Y plane). */
     double added_mass_normal = 0.0;
-    /** @brief Added mass coefficient in tangent direction (Z axis). */
-    double added_mass_tangent = 0.0;
+    /** @brief Added mass coefficient in axial direction (Z axis). */
+    double added_mass_axial = 0.0;
     /** @brief Whether to compute buoyancy or not. */
     bool has_buoyancy = true;
     /** @brief Whether to compute inertia loads or not. */
