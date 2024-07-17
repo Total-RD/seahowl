@@ -44,7 +44,10 @@ void TowerAero::build() {
         nodes.push_back(MorisonNode());
         nodes.back().set_position(point.coordinates);
         nodes.back().diameter = point.diameter;
-        nodes.back().coefficients.drag_normal = point.drag_coefficient;
+        nodes.back().coefficients.drag_normal = point.drag_coefficient_normal;
+        nodes.back().coefficients.drag_axial = point.drag_coefficient_axial;
+        nodes.back().coefficients.added_mass_normal = point.added_mass_coefficient_normal;
+        nodes.back().coefficients.added_mass_axial = point.added_mass_coefficient_axial;
     }
     // elements
     elements.clear();

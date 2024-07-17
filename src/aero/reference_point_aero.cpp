@@ -50,7 +50,10 @@ TowerReferencePointAero TowerReferencePointAero::operator*(const double factor) 
     // @todo Fix interpolation of quaternions in reference points (through "interpolate" function possibly).
     new_point.velocity *= factor;
     new_point.diameter *= factor;
-    new_point.drag_coefficient *= factor;
+    new_point.drag_coefficient_normal *= factor;
+    new_point.drag_coefficient_axial *= factor;
+    new_point.added_mass_coefficient_normal *= factor;
+    new_point.added_mass_coefficient_axial *= factor;
     return new_point;
 };
 
@@ -62,6 +65,9 @@ TowerReferencePointAero TowerReferencePointAero::operator+(const TowerReferenceP
     // @todo Fix interpolation of quaternions in reference points (through "interpolate" function possibly).
     new_point.velocity += other.velocity;
     new_point.diameter += other.diameter;
-    new_point.drag_coefficient += other.drag_coefficient;
+    new_point.drag_coefficient_normal += other.drag_coefficient_normal;
+    new_point.drag_coefficient_axial += other.drag_coefficient_axial;
+    new_point.added_mass_coefficient_normal += other.added_mass_coefficient_normal;
+    new_point.added_mass_coefficient_axial += other.added_mass_coefficient_axial;
     return new_point;
 };

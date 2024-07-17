@@ -376,7 +376,10 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
         reference_point.fraction = (reference_point.coordinates - pos0).norm() / length;
 
         reference_point.diameter = input_data->get("diameter", ii);
-        reference_point.drag_coefficient = input_data->get("drag_coefficient", ii);
+        reference_point.drag_coefficient_normal = input_data->get("drag_coefficient_normal", ii);
+        reference_point.drag_coefficient_axial = input_data->get("drag_coefficient_axial", ii);
+        reference_point.added_mass_coefficient_normal = input_data->get("added_mass_coefficient_normal", ii);
+        reference_point.added_mass_coefficient_axial = input_data->get("added_mass_coefficient_axial", ii);
 
         reference_points.push_back(reference_point);
     }
