@@ -910,6 +910,9 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
             if (wave_type == "irregular") {
                 dynamic_cast<IrregularWaves&>(*wave_model.waves).CreateSpectrum();
             }
+            if (wave_type == "regular") {
+                dynamic_cast<RegularWave&>(*wave_model.waves).Initialize();
+            }
 #else
             throw std::runtime_error("Must compile and enable HydroChrono dependency to use HydroChrono waves.");
 #endif
