@@ -49,6 +49,10 @@ void RotorNacelleAssembly::poststep(double time, double dt) {
     update_positions_aero();
 }
 
+void RotorNacelleAssembly::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
+    aero.rotor->compute_aero_loads(fluid_model, time);
+}
+
 void RotorNacelleAssembly::update_positions_aero() {
     // pitch collective
     aero.rotor->pitch_collective = elasto.rotor->pitch_collective;

@@ -29,6 +29,10 @@ void System::initialize_this(double time, double dt) {
     for (auto& turbine : turbines) {
         turbine->initialize(time, dt);
     }
+    // initialize all extra components
+    for (auto& component : components) {
+        component->initialize(time, dt);
+    }
 
     // check if fluid model exists
     if (!fluid_model) {
@@ -44,19 +48,29 @@ void System::initialize_this(double time, double dt) {
 }
 
 void System::prestep(double time, double dt) {
+    // apply control first
     for (auto& turbine : turbines) {
         turbine->apply_control(time, dt);
+    }
 
-        // compute forces from fluid model
-        if (fluid_model) {
-            turbine->apply_fluid_model(*fluid_model, time);
-        }
-        // compute forces from soil model
-        if (soil_model) {
-            turbine->apply_soil_model(*soil_model, time);
-        }
-        // turbine prestep (accumulates loads from aero to elasto)
+    // compute forces from fluid model
+    if (fluid_model) {
+        apply_fluid_model(*fluid_model, time);
+    }
+
+    // compute forces from soil model
+    if (soil_model) {
+        apply_soil_model(*soil_model, time);
+    }
+
+    // prestep (accumulates loads from aero to elasto)
+    for (auto& turbine : turbines) {
+        // turbine prestep
         turbine->prestep(time, dt);
+    }
+    for (auto& component : components) {
+        // component poststep
+        component->prestep(time, dt);
     }
 }
 
@@ -68,6 +82,32 @@ void System::poststep(double time, double dt) {
     for (auto& turbine : turbines) {
         // turbine poststep
         turbine->poststep(time, dt);
+    }
+    for (auto& component : components) {
+        // component poststep
+        component->poststep(time, dt);
+    }
+}
+
+void System::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
+    for (auto& turbine : turbines) {
+        // compute forces from fluid model
+        turbine->apply_fluid_model(fluid_model, time);
+    }
+    for (auto& component : components) {
+        // compute forces from fluid model
+        component->apply_fluid_model(fluid_model, time);
+    }
+}
+
+void System::apply_soil_model(seahowl::env::SoilModel& soil_model, double time) {
+    for (auto& turbine : turbines) {
+        // compute forces from fluid model
+        turbine->apply_soil_model(soil_model, time);
+    }
+    for (auto& component : components) {
+        // compute forces from fluid model
+        component->apply_soil_model(soil_model, time);
     }
 }
 
@@ -259,4 +299,8 @@ void System::run_presimulation(double presim_duration, double presim_dt, bool fi
 
 void System::add_turbine(std::shared_ptr<Turbine> turbine) {
     turbines.push_back(turbine);
+}
+
+void System::add_component(std::shared_ptr<ComponentDynamic> component) {
+    components.push_back(component);
 }

@@ -33,6 +33,10 @@ void Tower::poststep(double time, double dt) {
     update_positions_aero();
 }
 
+void Tower::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
+    aero.compute_aero_loads(fluid_model, time);
+}
+
 void Tower::build() {
     // build
     elasto.build();

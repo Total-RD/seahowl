@@ -71,6 +71,8 @@ class Tower : public ComponentDynamic {
      */
     void poststep(double time, double dt) override;
 
+    void apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) override;
+
     /**
      * @brief Builds the tower (aero and elasto part).
      *

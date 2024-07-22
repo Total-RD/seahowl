@@ -35,6 +35,10 @@ void Blade::poststep(double time, double dt) {
     update_positions_aero();
 }
 
+void Blade::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
+    spdlog::warn("Fluid model must be applied from Rotor instead of Blade directly.");
+}
+
 void Blade::build() {
     // build aero & elasto
     elasto.build();
