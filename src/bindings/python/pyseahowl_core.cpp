@@ -87,7 +87,9 @@ void initialize_pyseahowl_core(py::module& m) {
     // core/tower.h
     py::class_<seahowl::core::Tower, std::shared_ptr<seahowl::core::Tower>, seahowl::core::ComponentDynamic>(m_core,
                                                                                                              "Tower")
-        .def_property_readonly("elasto", [](seahowl::core::Tower& tower) { return &tower.elasto; });
+        .def(py::init<seahowl::elasto::TowerElasto&, seahowl::aero::TowerAero&>())
+        .def_property_readonly("elasto", [](seahowl::core::Tower& tower) { return &tower.elasto; })
+        .def_property_readonly("aero", [](seahowl::core::Tower& tower) { return &tower.aero; });
 
     // core/rotor.h
     py::class_<seahowl::core::RotorNacelleAssembly, std::shared_ptr<seahowl::core::RotorNacelleAssembly>,
@@ -113,6 +115,7 @@ void initialize_pyseahowl_core(py::module& m) {
         .def("run_presetup", &seahowl::core::System::run_presetup)
         .def("run_presimulation", &seahowl::core::System::run_presimulation)
         .def("add_turbine", &seahowl::core::System::add_turbine)
+        .def("add_component", &seahowl::core::System::add_component)
         .def_readonly("turbines", &seahowl::core::System::turbines)
         .def_readonly("components", &seahowl::core::System::components)
         .def_readwrite("fluid_model", &seahowl::core::System::fluid_model)

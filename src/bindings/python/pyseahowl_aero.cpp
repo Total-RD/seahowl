@@ -5,6 +5,7 @@
 #include <seahowl/aero/system_aero.h>
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/aero/rotor_aero.h>
+#include <seahowl/aero/tower_aero.h>
 #include <seahowl/aero/turbine_aero.h>
 
 namespace py = pybind11;
@@ -40,6 +41,13 @@ void initialize_pyseahowl_aero(py::module& m) {
     py::class_<seahowl::aero::RotorAero, std::shared_ptr<seahowl::aero::RotorAero>>(m_aero, "RotorAero")
         .def_readwrite("blades", &seahowl::aero::RotorAero::blades)
         .def_readonly("body_hub", &seahowl::aero::RotorAero::body_hub);
+
+    // aero/tower_aero.h
+    py::class_<seahowl::aero::TowerAero, std::shared_ptr<seahowl::aero::TowerAero>>(m_aero, "TowerAero")
+        .def(py::init<>())
+        .def_readwrite("discretization_fractions", &seahowl::aero::TowerAero::discretization_fractions)
+        .def_readwrite("nodes", &seahowl::aero::TowerAero::nodes)
+        .def("build", &seahowl::aero::TowerAero::build);
 
     // aero/turbine_aero.h
     py::class_<seahowl::aero::TurbineAero, std::shared_ptr<seahowl::aero::TurbineAero>>(m_aero, "TurbineAero")
