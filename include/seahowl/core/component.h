@@ -23,6 +23,11 @@ namespace core {
 class ComponentDynamic {
   public:
     /**
+     * @brief Builds the component, called before initializing the simulation.
+     */
+    virtual void build() = 0;
+
+    /**
      * @brief Initializes the component, called before starting the simulation.
      *
      * @param[in] time Time of the simulation (usually 0 at init).

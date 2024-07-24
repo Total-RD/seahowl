@@ -76,7 +76,7 @@ class RotorNacelleAssembly : public ComponentDynamic {
     /**
      * @brief Builds the RNA and blades associated to it.
      */
-    void build();
+    void build() override;
 
   private:
     /**

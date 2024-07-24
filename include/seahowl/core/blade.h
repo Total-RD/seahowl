@@ -79,7 +79,7 @@ class Blade : public ComponentDynamic {
      * Sets the nodes and elements for elasto and aero components of the blade, as well as the aero->elasto mapping and
      * elasto->aero mapping.
      */
-    void build();
+    virtual void build();
 
     /**
      * @brief Sets the discretization fractions to use when building the elasto part of the blade.

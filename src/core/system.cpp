@@ -19,6 +19,17 @@ using namespace seahowl::core;
 
 System::System(seahowl::elasto::SystemElasto& elasto, seahowl::aero::SystemAero& aero) : elasto(elasto), aero(aero) {}
 
+void System::build() {
+    // build all turbines
+    for (auto& turbine : turbines) {
+        turbine->build();
+    }
+    // build all extra components
+    for (auto& component : components) {
+        component->build();
+    }
+}
+
 void System::initialize_this(double time, double dt) {
     // assemble elasto system if it hasn't been already
     if (!elasto.is_assembled) {

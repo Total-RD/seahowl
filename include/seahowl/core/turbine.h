@@ -99,7 +99,7 @@ class Turbine : public ComponentDynamic {
      *
      * Calls build for each of the components of the turbine.
      */
-    void build();
+    virtual void build() override;
 
     /**
      * @brief Translates the turbine.

@@ -57,7 +57,7 @@ class TurbineFloating : public Turbine {
      *
      * Calls build for each of the components of the turbine.
      */
-    void build();
+    void build() override;
 
     /**
      * @brief Applies fluid model to turbine components.

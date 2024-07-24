@@ -30,9 +30,12 @@ void initialize_pyseahowl_core(py::module& m) {
     // core/utils.h
     py::class_<seahowl::core::ComponentDynamic, std::shared_ptr<seahowl::core::ComponentDynamic>>(m_core,
                                                                                                   "ComponentDynamic")
+        .def("build", &seahowl::core::ComponentDynamic::build)
         .def("initialize", &seahowl::core::ComponentDynamic::initialize)
         .def("prestep", &seahowl::core::ComponentDynamic::prestep)
-        .def("poststep", &seahowl::core::ComponentDynamic::poststep);
+        .def("poststep", &seahowl::core::ComponentDynamic::poststep)
+        .def("apply_fluid_model", &seahowl::core::ComponentDynamic::apply_fluid_model)
+        .def("apply_soil_model", &seahowl::core::ComponentDynamic::apply_soil_model);
 
     // core/simulation.h
     py::class_<seahowl::core::Simulation, std::shared_ptr<seahowl::core::Simulation>>(m_core, "Simulation")
@@ -58,7 +61,6 @@ void initialize_pyseahowl_core(py::module& m) {
         .def(py::init<seahowl::elasto::TurbineElasto&, seahowl::aero::TurbineAero&>())
         .def("get_generated_power", &seahowl::core::Turbine::get_generated_power)
         .def("get_generator_rpm", &seahowl::core::Turbine::get_generator_rpm)
-        .def("build", &seahowl::core::Turbine::build)
         .def_property_readonly("elasto", [](seahowl::core::Turbine& turbine) { return &turbine.elasto; })
         .def_property_readonly("aero", [](seahowl::core::Turbine& turbine) { return &turbine.aero; })
         .def_readonly("controller", &seahowl::core::Turbine::controller)
@@ -112,6 +114,7 @@ void initialize_pyseahowl_core(py::module& m) {
         .def("run_presimulation", &seahowl::core::System::run_presimulation)
         .def("add_turbine", &seahowl::core::System::add_turbine)
         .def_readonly("turbines", &seahowl::core::System::turbines)
+        .def_readonly("components", &seahowl::core::System::components)
         .def_readwrite("fluid_model", &seahowl::core::System::fluid_model)
         .def_property_readonly("elasto", [](seahowl::core::System& system) { return &system.elasto; })
         .def_property_readonly("aero", [](seahowl::core::System& system) { return &system.aero; });

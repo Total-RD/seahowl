@@ -54,6 +54,8 @@ class System : public ComponentDynamic {
      */
     System(seahowl::elasto::SystemElasto& elasto, seahowl::aero::SystemAero& aero);
 
+    void build() override;
+
     /**
      * @brief Prestep for system, called before elastodynamic stepping.
      *
