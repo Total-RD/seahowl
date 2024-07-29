@@ -1,0 +1,82 @@
+#pragma once
+
+#include "seahowl/commons/numerics.h"
+#include "seahowl/commons/entities.h"
+#include "seahowl/hydro/morison.h"
+
+#include <vector>
+#include <deque>
+#include <memory>
+
+// forward declarations
+namespace seahowl {
+namespace env {
+class FluidModel;
+}  // namespace env
+}  // namespace seahowl
+
+namespace seahowl {
+
+/**@brief Hydrodynamic module */
+namespace hydro {
+
+/**
+ * @brief Mooring of wind turbine as an hydrodynamic component.
+ */
+class MooringHydro {
+  public:
+    /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the hydro component. */
+    std::vector<double> discretization_fractions;
+    /** @brief Hydrodynamic coefficients. */
+    HydroCoefficients coefficients;
+    /** @brief Hydro nodes. */
+    std::vector<hydro::MorisonNode> nodes;
+    /** @brief Hydro elements. */
+    std::vector<hydro::MorisonElement> elements;
+    /** @brief Loads at center of mooring elements. */
+    std::vector<Vector3d> loads;
+    /** @brief Position of the mooring line. */
+    double diameter = 0.0;
+
+    /**
+     * @brief Constructor.
+     */
+    MooringHydro();
+
+    /**
+     * @brief Builds the mooring.
+     */
+    void build();
+
+    /**
+     * @brief Compute fluid loads on mooring using Morison's approach on cylindrical elements.
+     */
+    void compute_hydro_loads(const env::FluidModel& fluid_model, double time);
+};
+
+/**
+ * @brief Mooring system class gathering mooring lines.
+ */
+struct MooringSystemHydro {
+  public:
+    /** @brief List of mooring lines. */
+    std::deque<std::shared_ptr<MooringHydro>> moorings;
+
+    /**
+     * @brief Constructor.
+     */
+    MooringSystemHydro();
+
+    /**
+     * @brief Builds the mooring system.
+     */
+    void build();
+
+    /**
+     * @brief Compute fluid loads on mooring using Morison's approach on cylindrical elements.
+     */
+    void compute_hydro_loads(const env::FluidModel& fluid_model, double time);
+};
+
+}  // namespace hydro
+}  // namespace seahowl

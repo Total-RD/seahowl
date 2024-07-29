@@ -163,6 +163,7 @@ set(SEAHOWL_CORE_SOURCES
     src/core/rotor.cpp
     src/core/blade.cpp
     src/core/tower.cpp
+    src/core/mooring.cpp
     src/core/turbine.cpp
     src/core/turbine_floating.cpp
     src/core/system.cpp
@@ -174,6 +175,7 @@ set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/blade.h
     include/seahowl/core/rotor.h
     include/seahowl/core/tower.h
+    include/seahowl/core/mooring.h
     include/seahowl/core/turbine.h
     include/seahowl/core/turbine_floating.h
     include/seahowl/core/system.h
@@ -252,9 +254,11 @@ source_group(servo FILES ${SEAHOWL_SERVO_SOURCES} ${SEAHOWL_SERVO_HEADERS})
 # hydro
 set(SEAHOWL_HYDRO_SOURCES
     src/hydro/morison.cpp
+    src/hydro/mooring_hydro.cpp
 )
 set(SEAHOWL_HYDRO_HEADERS
     include/seahowl/hydro/morison.h
+    include/seahowl/hydro/mooring_hydro.h
 )
 if(SEAHOWL_ENABLE_HYDROCHRONO)
     list(APPEND SEAHOWL_HYDRO_SOURCES src/hydro/hydrochrono_adapter.cpp)

@@ -1,0 +1,57 @@
+#include "seahowl/hydro/mooring_hydro.h"
+
+#include "seahowl/commons/utils.h"
+#include "seahowl/commons/numerics.h"
+#include "seahowl/env/fluid_models.h"
+
+#include <spdlog/spdlog.h>
+
+using namespace seahowl;
+using namespace seahowl::hydro;
+using seahowl::env::FluidModel;
+
+MooringHydro::MooringHydro() {}
+
+void MooringHydro::build() {
+    // nodes
+    nodes.clear();
+    for (auto& fraction : discretization_fractions) {
+        // push empty load
+        nodes.push_back(MorisonNode());
+        nodes.back().diameter = diameter;
+        nodes.back().coefficients = coefficients;
+    }
+    // elements
+    elements.clear();
+    loads.clear();
+    for (int ii = 0; ii < discretization_fractions.size() - 1; ii++) {
+        elements.push_back(MorisonElement(nodes[ii], nodes[ii + 1]));
+        loads.push_back(Vector3d(0.0, 0.0, 0.0));
+    }
+}
+
+void MooringHydro::compute_hydro_loads(const FluidModel& fluid_model, double time) {
+    // compute loads at nodes
+    for (auto& node : nodes) {
+        node.compute_loads(fluid_model, time);
+    }
+
+    // integrate loads over elements and store them
+    for (int ii = 0; ii < elements.size(); ii++) {
+        loads[ii] = elements[ii].get_load();
+    }
+}
+
+MooringSystemHydro::MooringSystemHydro() {}
+
+void MooringSystemHydro::build() {
+    for (auto& mooring : moorings) {
+        mooring->build();
+    }
+}
+
+void MooringSystemHydro::compute_hydro_loads(const FluidModel& fluid_model, double time) {
+    for (auto& mooring : moorings) {
+        mooring->compute_hydro_loads(fluid_model, time);
+    }
+}

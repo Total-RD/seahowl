@@ -3,6 +3,7 @@
 #include <pybind11/eigen.h>
 
 #include <seahowl/hydro/morison.h>
+#include <seahowl/hydro/mooring_hydro.h>
 #include <seahowl/env/fluid_models.h>
 #ifdef HAVE_HYDROCHRONO
     #include <seahowl/hydro/hydrochrono_adapter.h>
@@ -22,6 +23,7 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def("set_h5_filepath", &seahowl::hydro::FloaterHydroChrono::set_h5_filepath)
         .def("set_waves", &seahowl::hydro::FloaterHydroChrono::set_waves);
 #endif
+
     // hydro/morison.h
     py::class_<seahowl::hydro::HydroCoefficients, std::shared_ptr<seahowl::hydro::HydroCoefficients>>(
         m_hydro, "HydroCoefficients")
@@ -56,4 +58,22 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def_readwrite("diameter", &seahowl::hydro::MorisonPlate::diameter)
         .def_readwrite("drag_coefficient", &seahowl::hydro::MorisonPlate::drag_coefficient)
         .def_readwrite("reverse_direction", &seahowl::hydro::MorisonPlate::reverse_direction);
+
+    // hydro/mooring.h
+    py::class_<seahowl::hydro::MooringHydro, std::shared_ptr<seahowl::hydro::MooringHydro>>(m_hydro, "MooringHydro")
+        .def(py::init<>())
+        .def_readwrite("discretization_fractions", &seahowl::hydro::MooringHydro::discretization_fractions)
+        .def_readwrite("diameter", &seahowl::hydro::MooringHydro::diameter)
+        .def_readwrite("coefficients", &seahowl::hydro::MooringHydro::coefficients)
+        .def_readwrite("loads", &seahowl::hydro::MooringHydro::loads)
+        .def_readonly("nodes", &seahowl::hydro::MooringHydro::nodes)
+        .def_readonly("elements", &seahowl::hydro::MooringHydro::elements)
+        .def("build", &seahowl::hydro::MooringHydro::build)
+        .def("compute_hydro_loads", &seahowl::hydro::MooringHydro::compute_hydro_loads);
+
+    py::class_<seahowl::hydro::MooringSystemHydro, std::shared_ptr<seahowl::hydro::MooringSystemHydro>>(
+        m_hydro, "MooringSystemHydro")
+        .def(py::init<>())
+        .def("build", &seahowl::hydro::MooringSystemHydro::build)
+        .def("compute_hydro_loads", &seahowl::hydro::MooringSystemHydro::compute_hydro_loads);
 }

@@ -9,7 +9,7 @@ using namespace seahowl::elasto;
 
 FloaterElasto::FloaterElasto() {
     body_main = std::make_unique<seahowl::elasto::BodyElastoChrono>();
-    mooring_system = std::make_unique<seahowl::elasto::MooringSystem>();
+    mooring_system = std::make_unique<seahowl::elasto::MooringSystemElasto>();
 };
 
 void FloaterElasto::build() {

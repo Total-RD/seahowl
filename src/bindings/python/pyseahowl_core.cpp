@@ -13,6 +13,9 @@
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/elasto/tower_elasto.h>
+#include <seahowl/core/mooring.h>
+#include <seahowl/elasto/mooring_elasto.h>
+#include <seahowl/hydro/mooring_hydro.h>
 #include <seahowl/core/system.h>
 #include <seahowl/elasto/system_elasto.h>
 #include <seahowl/aero/system_aero.h>
@@ -90,6 +93,13 @@ void initialize_pyseahowl_core(py::module& m) {
         .def(py::init<seahowl::elasto::TowerElasto&, seahowl::aero::TowerAero&>())
         .def_property_readonly("elasto", [](seahowl::core::Tower& tower) { return &tower.elasto; })
         .def_property_readonly("aero", [](seahowl::core::Tower& tower) { return &tower.aero; });
+
+    // core/mooring.h
+    py::class_<seahowl::core::Mooring, std::shared_ptr<seahowl::core::Mooring>, seahowl::core::ComponentDynamic>(
+        m_core, "Mooring")
+        .def(py::init<seahowl::elasto::MooringElastoFEA&, seahowl::hydro::MooringHydro&>())
+        .def_property_readonly("elasto", [](seahowl::core::Mooring& mooring) { return &mooring.elasto; })
+        .def_property_readonly("hydro", [](seahowl::core::Mooring& mooring) { return &mooring.hydro; });
 
     // core/rotor.h
     py::class_<seahowl::core::RotorNacelleAssembly, std::shared_ptr<seahowl::core::RotorNacelleAssembly>,

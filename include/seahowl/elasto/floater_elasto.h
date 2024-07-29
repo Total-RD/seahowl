@@ -14,7 +14,7 @@ namespace elasto {
 class FloaterElasto : public ComponentElasto {
   public:
     /** @brief Floater of the turbine. */
-    std::unique_ptr<seahowl::elasto::MooringSystem> mooring_system;
+    std::unique_ptr<seahowl::elasto::MooringSystemElasto> mooring_system;
     /** @brief Damping matrix of floater.*/
     Eigen::Matrix<double, 6, 6> damping_matrix;
     /** @brief Main body of floater.*/

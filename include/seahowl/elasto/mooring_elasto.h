@@ -53,7 +53,7 @@ class MooringElasto : public virtual ComponentElasto {
 /**
  * @brief Mooring system class gathering mooring lines and anchors.
  */
-struct MooringSystem : public ComponentElasto {
+struct MooringSystemElasto : public ComponentElasto {
   public:
     /** @brief List of mooring lines. */
     std::deque<std::shared_ptr<MooringElasto>> moorings;
@@ -63,7 +63,7 @@ struct MooringSystem : public ComponentElasto {
     /**
      * @brief Constructor.
      */
-    MooringSystem();
+    MooringSystemElasto();
 
     virtual void build() override;
     virtual void prestep(double time, double dt);

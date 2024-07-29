@@ -9,21 +9,21 @@
 
 using namespace seahowl::elasto;
 
-MooringSystem::MooringSystem() {}
+MooringSystemElasto::MooringSystemElasto() {}
 
-void MooringSystem::prestep(double time, double dt) {
+void MooringSystemElasto::prestep(double time, double dt) {
     for (auto& mooring : moorings) {
         mooring->prestep(time, dt);
     }
 }
 
-void MooringSystem::build() {
+void MooringSystemElasto::build() {
     for (auto& mooring : moorings) {
         mooring->build();
     }
 }
 
-void MooringSystem::assemble_this(SystemElasto& system) {
+void MooringSystemElasto::assemble_this(SystemElasto& system) {
     for (auto& mooring : moorings) {
         mooring->assemble(system);
     }
@@ -32,7 +32,7 @@ void MooringSystem::assemble_this(SystemElasto& system) {
     }
 }
 
-void MooringSystem::rotate(double angle, const Vector3d& axis) const {
+void MooringSystemElasto::rotate(double angle, const Vector3d& axis) const {
     // moorings
     for (auto& mooring : moorings) {
         mooring->rotate(angle, axis);
@@ -43,7 +43,7 @@ void MooringSystem::rotate(double angle, const Vector3d& axis) const {
     }
 }
 
-void MooringSystem::translate(const Vector3d& translation_vector) const {
+void MooringSystemElasto::translate(const Vector3d& translation_vector) const {
     // moorings
     for (auto& mooring : moorings) {
         mooring->translate(translation_vector);
@@ -54,7 +54,7 @@ void MooringSystem::translate(const Vector3d& translation_vector) const {
     }
 }
 
-double MooringSystem::get_mass() const {
+double MooringSystemElasto::get_mass() const {
     double mass_total = 0.0;
     // moorings
     for (auto& mooring : moorings) {

@@ -274,11 +274,11 @@ void initialize_pyseahowl_elasto(py::module& m) {
              py::return_value_policy::reference_internal);
 
     // elasto/mooring_elasto.h
-    py::class_<seahowl::elasto::MooringSystem, std::shared_ptr<seahowl::elasto::MooringSystem>,
-               seahowl::elasto::ComponentElasto>(m_elasto, "MooringSystem")
+    py::class_<seahowl::elasto::MooringSystemElasto, std::shared_ptr<seahowl::elasto::MooringSystemElasto>,
+               seahowl::elasto::ComponentElasto>(m_elasto, "MooringSystemElasto")
         .def(py::init<>())
-        .def_readwrite("moorings", &seahowl::elasto::MooringSystem::moorings)
-        .def_readwrite("anchors", &seahowl::elasto::MooringSystem::anchors);
+        .def_readwrite("moorings", &seahowl::elasto::MooringSystemElasto::moorings)
+        .def_readwrite("anchors", &seahowl::elasto::MooringSystemElasto::anchors);
     py::class_<seahowl::elasto::MooringElasto, std::shared_ptr<seahowl::elasto::MooringElasto>,
                seahowl::elasto::ComponentElasto>(m_elasto, "MooringElasto")
         .def_property_readonly("fairlead", [](seahowl::elasto::MooringElasto& mooring) { return &mooring.fairlead; })
