@@ -67,6 +67,14 @@ void Simulation::initialize() {
     if (is_initialized) {
         throw std::runtime_error("Simulation was already initialized.");
     }
+
+    // need to do tiny time step before system initialization if statics not done
+    // this is necessary for moorings for example (needed for Chrono to set element length element)
+    double tiny_dt = 1e-6;
+    spdlog::debug("Making small time step before initializing system.");
+    system_core->step(tiny_dt);
+    system_core->set_time(system_core->get_time() - tiny_dt);
+
     outputs->initialize();
     system_core->initialize(system_core->get_time(), dt);
     is_initialized = true;
