@@ -123,6 +123,7 @@ void FloaterElasto::assemble_this(seahowl::elasto::SystemElasto& system) {
 
 void FloaterElasto::translate(const Vector3d& translation_vector) const {
     // translate all bodies
+    body_main->translate(translation_vector);
     for (auto& bodymap : floater_bodies) {
         bodymap.second->translate(translation_vector);
     }

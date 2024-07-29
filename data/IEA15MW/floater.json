@@ -1,7 +1,7 @@
 ﻿{
   "type": "HydroChrono",
   "options": {
-    "file": "./VolturnUS.h5"
+    "file": "./iea15.h5"
   },
   "position": [0.0, 0.0, -14.94],
   "mass": 17839e3,
@@ -21,7 +21,7 @@
   "bodies": [
     {
       "name": "body1",
-      "position": [0.0, 0.0, -14.94],
+      "position": [0.0, 0.0, 0.0],
       "mass": 0.0,
       "inertia": [
         [0.0, 0.0, 0.0],

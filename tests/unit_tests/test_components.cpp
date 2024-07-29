@@ -786,7 +786,7 @@ TEST(test_turbine, multiturbines) {
         turbine.controller = std::make_shared<seahowl::servo::Controller>();
         // translate
         turbine.build();
-        turbine.translate(Vector3d(0.0 + ii * 150.0, 0.0 + ii * (-150.0), 0.0));
+        turbine.elasto.translate(Vector3d(0.0 + ii * 150.0, 0.0 + ii * (-150.0), 0.0));
         // fix
         turbine.tower.elasto.nodes.front()->set_fixed(true);
     }

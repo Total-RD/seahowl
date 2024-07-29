@@ -87,16 +87,6 @@ void Turbine::build() {
     aero.build();
 }
 
-void Turbine::translate(Vector3d translation_vector) {
-    rna.elasto.translate(translation_vector);
-    tower.elasto.translate(translation_vector);
-}
-
-void Turbine::rotate(double angle, Vector3d axis) {
-    rna.elasto.rotate(angle, axis);
-    tower.elasto.rotate(angle, axis);
-}
-
 double Turbine::get_shaft_power() const {
     // get generator rotation in rad/s scaled by gearbox ratio and efficiency
     auto rot_rads = rna.elasto.get_rpm() * (2.0 * PI / 60.0) * gearbox_ratio;

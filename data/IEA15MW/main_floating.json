@@ -21,7 +21,7 @@
     "folder": "./output",
     "VTK": false,
     "log_level": "info",
-    "gui": false
+    "gui": true
   },
   "environment": {
     "file": "./environment_hydrochrono.json"

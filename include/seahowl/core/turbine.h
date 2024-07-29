@@ -102,21 +102,6 @@ class Turbine : public ComponentDynamic {
     virtual void build() override;
 
     /**
-     * @brief Translates the turbine.
-     *
-     * @param[in] translation_vector The 3D translation vector.
-     */
-    void translate(Vector3d translation_vector);
-
-    /**
-     * @brief Rotates the turbine.
-     *
-     * @param[in] translation_vector The angle of rotation (in radians).
-     * @param[in] axis The axis of rotation (3D vector).
-     */
-    void rotate(double angle, Vector3d axis);
-
-    /**
      * @brief Returns shaft power.
      */
     double get_shaft_power() const;

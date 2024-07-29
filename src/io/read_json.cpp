@@ -1109,13 +1109,13 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
                       .normalized();
         auto rot_axis = v2.cross(v1);
         auto rot_angle = acos(v1.dot(v2));
-        turbine.rotate(rot_angle, rot_axis);
+        turbine.elasto.rotate(rot_angle, rot_axis);
         // rotation around axis opposite to gravity (yaw)
-        turbine.rotate(turbine_json.at("rotation").get<double>(),
-                       Vector3d(-system_core.elasto.get_gravitational_acceleration()).normalized());
+        turbine.elasto.rotate(turbine_json.at("rotation").get<double>() * PI / 180.0,
+                              Vector3d(-system_core.elasto.get_gravitational_acceleration()).normalized());
         // translate turbine
         auto trans = turbine_json.at("translation").get<std::vector<double>>();
-        turbine.translate(Vector3d(trans[0], trans[1], trans[2]));
+        turbine.elasto.translate(Vector3d(trans[0], trans[1], trans[2]));
 
         try {
             // if floating: do not fix tower
