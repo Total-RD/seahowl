@@ -241,23 +241,17 @@ void BladeElastoRigid::assemble_this(SystemElasto& system) {
 }
 
 void BladeElastoRigid::rotate(double angle, const Vector3d& axis) const {
-    auto rotation = AngleAxisd(angle, axis);
     // blade root
-    auto new_position_root = rotation * body_root->get_position();
-    auto new_rotation_root = (rotation * body_root->get_rotation()).normalized();
-    body_root->set_position(new_position_root);
-    body_root->set_rotation(new_rotation_root);
+    body_root->rotate(angle, axis);
     // blade cog
-    auto new_position_cog = rotation * body_cog->get_position();
-    auto new_rotation_cog = (rotation * body_cog->get_rotation()).normalized();
-    body_cog->set_position(new_position_cog);
-    body_cog->set_rotation(new_rotation_cog);
+    body_cog->rotate(angle, axis);
 }
 
 void BladeElastoRigid::translate(const Vector3d& translation_vector) const {
     // blade root
-    body_root->set_position(body_root->get_position() + translation_vector);
-    body_cog->set_position(body_cog->get_position() + translation_vector);
+    body_root->translate(translation_vector);
+    // blade cog
+    body_cog->translate(translation_vector);
 }
 
 double BladeElastoRigid::get_mass() const {

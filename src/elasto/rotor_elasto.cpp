@@ -78,12 +78,8 @@ void RotorElasto::rotate(double angle, const Vector3d& axis) const {
     for (auto& blade : blades) {
         blade->rotate(angle, axis);
     }
-    auto rotation = AngleAxisd(angle, axis);
     // hub
-    auto new_position_hub = rotation * body_hub->get_position();
-    auto new_rotation_hub = (rotation * body_hub->get_rotation()).normalized();
-    body_hub->set_position(new_position_hub);
-    body_hub->set_rotation(new_rotation_hub);
+    body_hub->rotate(angle, axis);
 }
 
 void RotorElasto::translate(const Vector3d& translation_vector) const {
@@ -92,7 +88,7 @@ void RotorElasto::translate(const Vector3d& translation_vector) const {
         blade->translate(translation_vector);
     }
     // hub
-    body_hub->set_position(body_hub->get_position() + translation_vector);
+    body_hub->translate(translation_vector);
 }
 
 double RotorElasto::get_mass() const {
@@ -181,31 +177,22 @@ void RotorNacelleAssemblyElasto::rotate(double angle, const Vector3d& axis) cons
     rotor->rotate(angle, axis);
     auto rotation = AngleAxisd(angle, axis);
     // shaft
-    auto new_position_shaft = rotation * body_shaft->get_position();
-    auto new_rotation_shaft = (rotation * body_shaft->get_rotation()).normalized();
-    body_shaft->set_position(new_position_shaft);
-    body_shaft->set_rotation(new_rotation_shaft);
+    body_shaft->rotate(angle, axis);
     // nacelle
-    auto new_position_nacelle = rotation * body_nacelle->get_position();
-    auto new_rotation_nacelle = (rotation * body_nacelle->get_rotation()).normalized();
-    body_nacelle->set_position(new_position_nacelle);
-    body_nacelle->set_rotation(new_rotation_nacelle);
+    body_nacelle->rotate(angle, axis);
     // yaw bearing
-    auto new_position_yaw_bearing = rotation * body_yaw_bearing->get_position();
-    auto new_rotation_yaw_bearing = (rotation * body_yaw_bearing->get_rotation()).normalized();
-    body_yaw_bearing->set_position(new_position_yaw_bearing);
-    body_yaw_bearing->set_rotation(new_rotation_yaw_bearing);
+    body_yaw_bearing->rotate(angle, axis);
 }
 
 void RotorNacelleAssemblyElasto::translate(const Vector3d& translation_vector) const {
     // rotor
     rotor->translate(translation_vector);
     // shaft
-    body_shaft->set_position(body_shaft->get_position() + translation_vector);
+    body_shaft->translate(translation_vector);
     // nacelle
-    body_nacelle->set_position(body_nacelle->get_position() + translation_vector);
+    body_nacelle->translate(translation_vector);
     // yaw_bearing
-    body_yaw_bearing->set_position(body_yaw_bearing->get_position() + translation_vector);
+    body_yaw_bearing->translate(translation_vector);
 }
 
 double RotorNacelleAssemblyElasto::get_mass() const {

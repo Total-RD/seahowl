@@ -4,6 +4,18 @@
 
 using namespace seahowl;
 
+void Entity::rotate(double angle, const Vector3d& axis) {
+    auto rotation = AngleAxisd(angle, axis);
+    auto new_position = rotation * get_position();
+    auto new_rotation = (rotation * get_rotation()).normalized();
+    set_position(new_position);
+    set_rotation(new_rotation);
+}
+
+void Entity::translate(const Vector3d& translation_vector) {
+    set_position(get_position() + translation_vector);
+}
+
 void EntityEigen::set_position(const Vector3d& position) {
     this->position = position;
 }

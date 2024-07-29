@@ -124,20 +124,23 @@ void FloaterElasto::assemble_this(seahowl::elasto::SystemElasto& system) {
 void FloaterElasto::translate(const Vector3d& translation_vector) const {
     // translate all bodies
     for (auto& bodymap : floater_bodies) {
-        auto& body = *bodymap.second;
-        body.set_position(body.get_position() + translation_vector);
+        bodymap.second->translate(translation_vector);
+    }
+    // translate all fairleads
+    for (auto& fairleadmap : floater_bodies) {
+        fairleadmap.second->translate(translation_vector);
     }
 }
 
 void FloaterElasto::rotate(double angle, const Vector3d& axis) const {
     // rotate all bodies
-    auto rotation = AngleAxisd(angle, axis);
+    body_main->rotate(angle, axis);
     for (auto& bodymap : floater_bodies) {
-        auto& body = *bodymap.second;
-        auto new_position_body = rotation * body.get_position();
-        auto new_rotation_body = (rotation * body.get_rotation()).normalized();
-        body.set_position(new_position_body);
-        body.set_rotation(new_rotation_body);
+        bodymap.second->rotate(angle, axis);
+    }
+    // rotate all fairleads
+    for (auto& fairleadmap : floater_bodies) {
+        fairleadmap.second->rotate(angle, axis);
     }
 }
 

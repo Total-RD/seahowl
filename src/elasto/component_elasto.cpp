@@ -67,18 +67,14 @@ void ComponentElastoFEA::assemble_this(SystemElasto& system) {
 }
 
 void ComponentElastoFEA::rotate(double angle, const Vector3d& axis) const {
-    auto rotation = AngleAxisd(angle, axis);
     for (auto& node : nodes) {
-        auto new_position = rotation * node->get_position();
-        node->set_position(new_position);
-        auto new_rotation = (rotation * node->get_rotation()).normalized();
-        node->set_rotation(new_rotation);
+        node->rotate(angle, axis);
     }
 }
 
 void ComponentElastoFEA::translate(const Vector3d& translation_vector) const {
     for (auto& node : nodes) {
-        node->set_position(node->get_position() + translation_vector);
+        node->translate(translation_vector);
     }
 }
 double ComponentElastoFEA::get_mass() const {

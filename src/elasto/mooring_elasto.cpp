@@ -31,14 +31,9 @@ void MooringSystem::rotate(double angle, const Vector3d& axis) const {
     for (auto& mooring : moorings) {
         mooring->rotate(angle, axis);
     }
-
     // anchors
-    auto rotation = AngleAxisd(angle, axis);
     for (auto& anchor : anchors) {
-        auto new_position_anchor = rotation * anchor->get_position();
-        auto new_rotation_anchor = (rotation * anchor->get_rotation()).normalized();
-        anchor->set_position(new_position_anchor);
-        anchor->set_rotation(new_rotation_anchor);
+        anchor->rotate(angle, axis);
     }
 }
 
@@ -47,10 +42,9 @@ void MooringSystem::translate(const Vector3d& translation_vector) const {
     for (auto& mooring : moorings) {
         mooring->translate(translation_vector);
     }
-
     // anchors
     for (auto& anchor : anchors) {
-        anchor->set_position(anchor->get_position() + translation_vector);
+        anchor->translate(translation_vector);
     }
 }
 

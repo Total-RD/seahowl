@@ -47,6 +47,21 @@ class Entity {
      * @param[in] rotation Rotation matrix of entity.
      */
     void set_rotation_matrix(Eigen::Matrix<double, 3, 3> rotation) { set_rotation(Quaternion(rotation)); };
+
+    /**
+     * @brief Rotates the entity.
+     *
+     * @param[in] translation_vector The angle of rotation (in radians).
+     * @param[in] axis The axis of rotation (3D vector).
+     */
+    void rotate(double angle, const Vector3d& axis);
+
+    /**
+     * @brief Translates the entity.
+     *
+     * @param[in] translation_vector The 3D translation vector.
+     */
+    void translate(const Vector3d& translation_vector);
 };
 
 /**
