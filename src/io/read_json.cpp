@@ -988,6 +988,7 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
             soil_options.at("stiffness_normal").get_to(soil_model.stiffness_normal);
             soil_options.at("stiffness_shear").get_to(soil_model.stiffness_shear);
             soil_model.soil_normal = -gravity_direction;
+            env_model->soil_model = std::move(soil_model_shared);
         } else {
             throw std::runtime_error("The input soil type is unknown. Please use the existing soil types: linear.");
         }
