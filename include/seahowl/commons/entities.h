@@ -37,6 +37,11 @@ class Entity {
     virtual Quaternion get_rotation() const = 0;
 
     /**
+     * @brief Returns direction of entity (local Z-axis projected in global frame).
+     */
+    virtual Vector3d get_direction() const { return get_rotation() * Vector3d(0.0, 0.0, 1.0); };
+
+    /**
      * @brief Returns rotation matrix of entity.
      */
     Eigen::Matrix<double, 3, 3> get_rotation_matrix() const { return get_rotation().toRotationMatrix(); };

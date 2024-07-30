@@ -408,10 +408,15 @@ NodeElastoChronoD::NodeElastoChronoD(const Vector3d& position, const Vector3d& d
     NodeElastoChronoBase::chobj = chobj;
 }
 
-void NodeElastoChronoD::set_rotation(const Quaternion& rotation) {}
+void NodeElastoChronoD::set_rotation(const Quaternion& rotation) {
+    // set rotation assuming direction of node to be local Z
+    chobj->SetD(vec2ch(rotation * Vector3d(0.0, 0.0, 1.0)));
+}
 
 Quaternion NodeElastoChronoD::get_rotation() const {
-    return Quaternion(1.0, 0.0, 0.0, 0.0);
+    // get rotation assuming direction of node to be local Z
+    // note: ChNodeFEAxyzD does not have a true rotation, only a direction
+    return Quaternion::FromTwoVectors(Vector3d(0.0, 0.0, 1.0), get_direction());
 }
 
 Vector3d NodeElastoChronoD::get_direction() const {

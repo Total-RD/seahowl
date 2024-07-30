@@ -122,11 +122,6 @@ class BodyElasto : public virtual EntityLoadable {
 class NodeElasto : public virtual EntityLoadable {
   public:
     /**
-     * @brief Returns main direction of node.
-     */
-    virtual Vector3d get_direction() const = 0;
-
-    /**
      * @brief Fix node in space.
      *
      * param[in] is_fixed Fixed if true, free if false.

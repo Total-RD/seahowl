@@ -42,7 +42,6 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("set_fixed", &seahowl::elasto::BodyElasto::set_fixed);
     py::class_<seahowl::elasto::NodeElasto, std::shared_ptr<seahowl::elasto::NodeElasto>,
                seahowl::elasto::EntityLoadable>(m_elasto, "NodeElasto", pybind11::multiple_inheritance())
-        .def("get_direction", &seahowl::elasto::NodeElasto::get_direction)
         .def("set_fixed", &seahowl::elasto::NodeElasto::set_fixed);
     py::class_<seahowl::elasto::ElementElasto, std::shared_ptr<seahowl::elasto::ElementElasto>>(m_elasto,
                                                                                                 "ElementElasto")
