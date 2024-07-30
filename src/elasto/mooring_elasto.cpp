@@ -11,6 +11,12 @@ using namespace seahowl::elasto;
 
 MooringSystem::MooringSystem() {}
 
+void MooringSystem::prestep(double time, double dt) {
+    for (auto& mooring : moorings) {
+        mooring->prestep(time, dt);
+    }
+}
+
 void MooringSystem::build() {
     for (auto& mooring : moorings) {
         mooring->build();

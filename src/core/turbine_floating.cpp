@@ -26,11 +26,7 @@ void TurbineFloating::prestep(double time, double dt) {
     // parent class prestep
     Turbine::prestep(time, dt);
 
-    // prestep for moorings
-    for (auto& mooring : elasto.mooring_system->moorings) {
-        mooring->prestep(time, dt);
-    }
-
+    // floater
     if (elasto.floater) {
         elasto.floater->prestep(time, dt);
     }
@@ -48,21 +44,25 @@ void TurbineFloating::build() {
 
 void TurbineFloating::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
     Turbine::apply_fluid_model(fluid_model, time);
-    for (auto& mooring : elasto.mooring_system->moorings) {
-        try {
-            dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*mooring).compute_hydro_loads(fluid_model, time);
-        } catch (const std::bad_cast& e) {
-            // do nothing
+    if (elasto.floater) {
+        for (auto& mooring : elasto.floater->mooring_system->moorings) {
+            try {
+                dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*mooring).compute_hydro_loads(fluid_model, time);
+            } catch (const std::bad_cast& e) {
+                // do nothing
+            }
         }
     }
 }
 
 void TurbineFloating::apply_soil_model(seahowl::env::SoilModel& soil_model, double time) {
-    for (auto& mooring : elasto.mooring_system->moorings) {
-        try {
-            dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*mooring).compute_seabed_loads(soil_model);
-        } catch (const std::bad_cast& e) {
-            // do nothing
+    if (elasto.floater) {
+        for (auto& mooring : elasto.floater->mooring_system->moorings) {
+            try {
+                dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*mooring).compute_seabed_loads(soil_model);
+            } catch (const std::bad_cast& e) {
+                // do nothing
+            }
         }
     }
 }

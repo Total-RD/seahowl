@@ -3,6 +3,7 @@
 #include "seahowl/commons/numerics.h"
 #include "seahowl/elasto/entities_elasto.h"
 #include "seahowl/elasto/system_elasto.h"
+#include "seahowl/elasto/mooring_elasto.h"
 
 #include <deque>
 #include <map>
@@ -12,14 +13,19 @@ namespace elasto {
 
 class FloaterElasto : public ComponentElasto {
   public:
-    /* @brief Damping matrix of floater.*/
+    /** @brief Floater of the turbine. */
+    std::unique_ptr<seahowl::elasto::MooringSystem> mooring_system;
+    /** @brief Damping matrix of floater.*/
     Eigen::Matrix<double, 6, 6> damping_matrix;
+    /** @brief Main body of floater.*/
     std::unique_ptr<seahowl::elasto::BodyElasto> body_main;
 
     /**
      * @brief Constructor.
      */
     FloaterElasto();
+
+    virtual void build();
 
     virtual void prestep(double time, double dt);
 

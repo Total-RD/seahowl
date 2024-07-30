@@ -152,7 +152,7 @@ void System::run_presetup(double presetup_duration, double presetup_dt) {
             turbine_floating.tower.elasto.nodes.front()->set_fixed(true);
             turbine_floating.rna.elasto.rotor->body_hub->set_fixed(true);
 
-            for (auto& mooring_ptr : turbine_floating.elasto.mooring_system->moorings) {
+            for (auto& mooring_ptr : turbine_floating.elasto.floater->mooring_system->moorings) {
                 auto& mooring_elasto = *mooring_ptr;
                 auto& mooring = dynamic_cast<seahowl::elasto::MooringElastoFEA&>(mooring_elasto);
 
@@ -206,9 +206,9 @@ void System::run_presetup(double presetup_duration, double presetup_dt) {
             auto& turbine = *turbines[idx_turbine];
             try {
                 auto& turbine_floating = dynamic_cast<TurbineFloating&>(turbine);
-                for (int idx_mooring = 0; idx_mooring < turbine_floating.elasto.mooring_system->moorings.size();
-                     idx_mooring++) {
-                    auto& mooring_elasto = *turbine_floating.elasto.mooring_system->moorings[idx_mooring];
+                for (int idx_mooring = 0;
+                     idx_mooring < turbine_floating.elasto.floater->mooring_system->moorings.size(); idx_mooring++) {
+                    auto& mooring_elasto = *turbine_floating.elasto.floater->mooring_system->moorings[idx_mooring];
                     auto& mooring = dynamic_cast<seahowl::elasto::MooringElastoFEA&>(mooring_elasto);
                     auto lengths_initial = lengths_initial_moorings[idx_turbine][idx_mooring];
                     auto lengths_delta = lengths_delta_moorings[idx_turbine][idx_mooring];

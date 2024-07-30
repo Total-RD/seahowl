@@ -258,6 +258,9 @@ void initialize_pyseahowl_elasto(py::module& m) {
     py::class_<seahowl::elasto::FloaterElasto, std::shared_ptr<seahowl::elasto::FloaterElasto>,
                seahowl::elasto::ComponentElasto>(m_elasto, "FloaterElasto")
         .def_property_readonly(
+            "mooring_system", [](seahowl::elasto::FloaterElasto& floater) { return floater.mooring_system.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
             "body_main", [](seahowl::elasto::FloaterElasto& floater) { return floater.body_main.get(); },
             py::return_value_policy::reference_internal)
         .def_readwrite("damping_matrix", &seahowl::elasto::FloaterElasto::damping_matrix)
@@ -310,10 +313,6 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_property_readonly(
             "link_floater_tower",
             [](seahowl::elasto::TurbineFloatingElasto& turbine) { return turbine.link_floater_tower.get(); },
-            py::return_value_policy::reference_internal)
-        .def_property_readonly(
-            "mooring_system",
-            [](seahowl::elasto::TurbineFloatingElasto& turbine) { return turbine.mooring_system.get(); },
             py::return_value_policy::reference_internal)
         .def(py::init<>());
 }

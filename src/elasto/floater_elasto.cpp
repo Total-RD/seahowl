@@ -1,6 +1,7 @@
 #include "seahowl/elasto/floater_elasto.h"
 
 #include "seahowl/elasto/chrono_adapters.h"
+#include "seahowl/elasto/mooring_elasto.h"
 
 #include <spdlog/spdlog.h>
 
@@ -8,7 +9,12 @@ using namespace seahowl::elasto;
 
 FloaterElasto::FloaterElasto() {
     body_main = std::make_unique<seahowl::elasto::BodyElastoChrono>();
+    mooring_system = std::make_unique<seahowl::elasto::MooringSystem>();
 };
+
+void FloaterElasto::build() {
+    mooring_system->build();
+}
 
 void FloaterElasto::prestep(double time, double dt) {
     auto& floater_body = *body_main;
@@ -32,6 +38,9 @@ void FloaterElasto::prestep(double time, double dt) {
     // apply damping
     floater_body.accumulate_force(damping_force, false);
     floater_body.accumulate_torque(damping_torque, false);
+
+    // mooring system prestep
+    mooring_system->prestep(time, dt);
 }
 
 void FloaterElasto::add_body(const std::string& name) {
@@ -96,10 +105,12 @@ seahowl::elasto::Link& FloaterElasto::get_fairlead_link(const std::string& body_
 }
 
 void FloaterElasto::assemble_this(seahowl::elasto::SystemElasto& system) {
+    // first add hydro bodies
     for (auto& bodymap : floater_bodies) {
         auto& body = *bodymap.second;
         system.add(body);
     }
+
     // link hydro bodies to body_main
     // needs to happen after adding hydro bodies to system (HydroChrono requirement)
     system.add(*body_main);
@@ -119,6 +130,9 @@ void FloaterElasto::assemble_this(seahowl::elasto::SystemElasto& system) {
             system.add(*link);
         }
     }
+
+    // moorings
+    mooring_system->assemble(system);
 }
 
 void FloaterElasto::translate(const Vector3d& translation_vector) const {
@@ -131,6 +145,8 @@ void FloaterElasto::translate(const Vector3d& translation_vector) const {
     for (auto& fairleadmap : floater_bodies) {
         fairleadmap.second->translate(translation_vector);
     }
+    // mooring system translate
+    mooring_system->translate(translation_vector);
 }
 
 void FloaterElasto::rotate(double angle, const Vector3d& axis) const {
@@ -143,6 +159,8 @@ void FloaterElasto::rotate(double angle, const Vector3d& axis) const {
     for (auto& fairleadmap : floater_bodies) {
         fairleadmap.second->rotate(angle, axis);
     }
+    // mooring system rotate
+    mooring_system->rotate(angle, axis);
 }
 
 double FloaterElasto::get_mass() const {
@@ -156,5 +174,7 @@ double FloaterElasto::get_mass() const {
             total_mass += fairlead->get_mass();
         }
     }
+    // mooring system
+    total_mass += mooring_system->get_mass();
     return total_mass;
 }

@@ -9,7 +9,6 @@ using namespace seahowl::elasto;
 
 TurbineFloatingElasto::TurbineFloatingElasto() : TurbineElasto() {
     link_floater_tower = std::make_unique<seahowl::elasto::LinkChrono>();
-    mooring_system = std::make_unique<MooringSystem>();
 }
 
 void TurbineFloatingElasto::assemble_this(SystemElasto& system) {
@@ -28,16 +27,12 @@ void TurbineFloatingElasto::assemble_this(SystemElasto& system) {
 
     // assemble parent class
     TurbineElasto::assemble_this(system);
-
-    // moorings
-    mooring_system->assemble(system);
 }
 
 void TurbineFloatingElasto::build() {
     if (floater) {
         floater->build();
     }
-    mooring_system->build();
 
     // parent class build
     TurbineElasto::build();
@@ -46,8 +41,6 @@ void TurbineFloatingElasto::build() {
 void TurbineFloatingElasto::translate(const Vector3d& translation_vector) const {
     // parent class translate
     TurbineElasto::translate(translation_vector);
-    // mooring system translate
-    mooring_system->translate(translation_vector);
     // floater translate
     if (floater) {
         floater->translate(translation_vector);
@@ -57,8 +50,6 @@ void TurbineFloatingElasto::translate(const Vector3d& translation_vector) const 
 void TurbineFloatingElasto::rotate(double angle, const Vector3d& axis) const {
     // parent class rotate
     TurbineElasto::rotate(angle, axis);
-    // mooring system rotate
-    mooring_system->rotate(angle, axis);
     // floater rotate
     if (floater) {
         floater->rotate(angle, axis);
@@ -69,8 +60,6 @@ double TurbineFloatingElasto::get_mass() const {
     double total_mass = 0.0;
     // turbine
     total_mass += TurbineElasto::get_mass();
-    // mooring system
-    total_mass += mooring_system->get_mass();
     // floater
     if (floater) {
         total_mass += floater->get_mass();

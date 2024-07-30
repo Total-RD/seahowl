@@ -803,18 +803,18 @@ void populate_turbine_from_json(const std::string& filepath,
                     if (mooring_json.at("relative_anchor").get<bool>()) {
                         anchor_position += floater.body_main->get_position();
                     }
-                    turbine_floating.mooring_system->anchors.push_back(
+                    turbine_floating.floater->mooring_system->anchors.push_back(
                         std::make_shared<seahowl::elasto::BodyElastoChrono>());
-                    auto& anchor_body = *turbine_floating.mooring_system->anchors.back();
+                    auto& anchor_body = *turbine_floating.floater->mooring_system->anchors.back();
                     anchor_body.set_position(anchor_position);
                     anchor_body.set_fixed(true);
 
                     auto mooring_properties_json = get_json_from_file(
                         (DATADIR / mooring_json.at("line_properties").get<std::string>()).generic_string());
-                    turbine_floating.mooring_system->moorings.push_back(
+                    turbine_floating.floater->mooring_system->moorings.push_back(
                         std::make_shared<seahowl::elasto::MooringElastoFEA>(fairlead_body, anchor_body));
                     auto& mooring = dynamic_cast<seahowl::elasto::MooringElastoFEA&>(
-                        *turbine_floating.mooring_system->moorings.back());
+                        *turbine_floating.floater->mooring_system->moorings.back());
 
                     mooring_json.at("length").get_to(mooring.length);
                     mooring_json.at("discretization_elasto").get_to(mooring.discretization_fractions);

@@ -66,6 +66,7 @@ struct MooringSystem : public ComponentElasto {
     MooringSystem();
 
     virtual void build() override;
+    virtual void prestep(double time, double dt);
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;
     virtual double get_mass() const override;
