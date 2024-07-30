@@ -58,10 +58,10 @@ void TowerAero::build() {
     }
 }
 
-void TowerAero::compute_aero_loads(const FluidModel& wind_model, double time) {
+void TowerAero::compute_fluid_loads(const FluidModel& wind_model, double time) {
     // compute loads at nodes
     for (auto& node : nodes) {
-        node.compute_loads(wind_model, time);
+        node.compute_fluid_loads(wind_model, time);
     }
 
     // integrate loads over elements and store them

@@ -53,6 +53,10 @@ seahowl::Vector2d DiskCoefficients::get_disk_coefficients_from_table(double TSR,
 
 RotorNacelleAssemblyAero::RotorNacelleAssemblyAero() {}
 
+void RotorNacelleAssemblyAero::compute_fluid_loads(const FluidModel& wind_model, double time) {
+    rotor->compute_fluid_loads(wind_model, time);
+}
+
 void RotorNacelleAssemblyAero::build() {
     rotor->build();
 }
@@ -114,7 +118,7 @@ void RotorAeroBEMT::compute_radii_distances_solidity() {
     }
 }
 
-void RotorAeroBEMT::compute_aero_loads(const FluidModel& wind_model, double time) {
+void RotorAeroBEMT::compute_fluid_loads(const FluidModel& wind_model, double time) {
     compute_radii_distances_solidity();
 
     auto hub_position = body_hub.get_position();
@@ -243,7 +247,7 @@ void RotorAeroDisk::initialize() {
     }
 }
 
-void RotorAeroDisk::compute_aero_loads(const FluidModel& wind_model, double time) {
+void RotorAeroDisk::compute_fluid_loads(const FluidModel& wind_model, double time) {
     auto pos_hub = body_hub.get_position();
     auto vel_hub = body_hub.get_velocity();
     double density = wind_model.get_fluid_density(pos_hub, time);

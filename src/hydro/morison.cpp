@@ -9,7 +9,7 @@ using namespace seahowl::hydro;
 
 MorisonNode::MorisonNode() {}
 
-void MorisonNode::compute_loads(const env::FluidModel& fluid_model, double time) {
+void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double time) {
     // reset total load
     load = Vector3d(0.0, 0.0, 0.0);
 
@@ -82,7 +82,7 @@ Quaternion MorisonElement::get_rotation() const {
 
 MorisonPlate::MorisonPlate() {}
 
-void MorisonPlate::compute_loads(const env::FluidModel& fluid_model, double time) {
+void MorisonPlate::compute_fluid_loads(const env::FluidModel& fluid_model, double time) {
     auto area = PI * pow(diameter * 0.5, 2);
 
     // vector pointing inwards of the plate

@@ -1,12 +1,13 @@
 #pragma once
 
+#include "seahowl/commons/numerics.h"
+#include "seahowl/aero/turbine_aero.h"
+#include "seahowl/aero/rotor_aero.h"
+#include "seahowl/commons/component_fluid.h"
+
 #include <iostream>
 #include <cstring>
 #include <memory>
-
-#include <seahowl/commons/numerics.h>
-#include <seahowl/aero/turbine_aero.h>
-#include <seahowl/aero/rotor_aero.h>
 
 namespace seahowl {
 namespace env {
@@ -290,7 +291,7 @@ class TurbineAeroDyn : public TurbineAero {
 
     TurbineAeroDyn();
     void initialize(double time, double dt) override;
-    void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
+    void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
 };
 
 class RotorAeroDyn : public RotorAeroBEMT {
@@ -298,7 +299,7 @@ class RotorAeroDyn : public RotorAeroBEMT {
     float* loads_aerodyn;
 
     RotorAeroDyn(TowerAero& tower_ref);
-    virtual void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
+    virtual void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
 };
 
 }  // namespace aero

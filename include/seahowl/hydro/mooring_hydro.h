@@ -3,6 +3,7 @@
 #include "seahowl/commons/numerics.h"
 #include "seahowl/commons/entities.h"
 #include "seahowl/hydro/morison.h"
+#include "seahowl/commons/component_fluid.h"
 
 #include <vector>
 #include <deque>
@@ -23,7 +24,7 @@ namespace hydro {
 /**
  * @brief Mooring of wind turbine as an hydrodynamic component.
  */
-class MooringHydro {
+class MooringHydro : public ComponentFluid {
   public:
     /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the hydro component. */
     std::vector<double> discretization_fractions;
@@ -51,7 +52,7 @@ class MooringHydro {
     /**
      * @brief Compute fluid loads on mooring using Morison's approach on cylindrical elements.
      */
-    void compute_hydro_loads(const env::FluidModel& fluid_model, double time);
+    void compute_fluid_loads(const env::FluidModel& fluid_model, double time);
 };
 
 /**
@@ -75,7 +76,7 @@ struct MooringSystemHydro {
     /**
      * @brief Compute fluid loads on mooring using Morison's approach on cylindrical elements.
      */
-    void compute_hydro_loads(const env::FluidModel& fluid_model, double time);
+    void compute_fluid_loads(const env::FluidModel& fluid_model, double time);
 };
 
 }  // namespace hydro

@@ -119,7 +119,7 @@ double Turbine::get_generator_rpm() const {
 }
 
 void Turbine::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
-    aero.compute_aero_loads(fluid_model, time);
+    aero.compute_fluid_loads(fluid_model, time);
 }
 
 void Turbine::apply_soil_model(seahowl::env::SoilModel& soil_model, double time) {}

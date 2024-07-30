@@ -2,6 +2,7 @@
 
 #include "seahowl/aero/rotor_aero.h"
 #include "seahowl/aero/tower_aero.h"
+#include "seahowl/commons/component_fluid.h"
 
 #include <vector>
 
@@ -17,17 +18,12 @@ namespace seahowl {
 
 /**@brief Seahowl aero module */
 namespace aero {
-
-class ComponentAero {
-    virtual void compute_aero_loads(const env::FluidModel& wind_model, double time){};
-};
-
 /**
  * @brief Wind turbine (blades, rotor-nacelle assembly, tower).
  *
  * This class controls each component, ensuring proper workflow for the aero part.
  */
-class TurbineAero : public ComponentAero {
+class TurbineAero : public ComponentFluid {
   public:
     // components
     //
@@ -62,7 +58,7 @@ class TurbineAero : public ComponentAero {
      * @param[in] wind_model Wind model to use for applying aero loads.
      * @param[in] time Time of simulation.
      */
-    virtual void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
+    virtual void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
 };
 
 }  // namespace aero

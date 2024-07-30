@@ -2,6 +2,7 @@
 
 #include "seahowl/commons/entities.h"
 #include "seahowl/commons/numerics.h"
+#include "seahowl/commons/component_fluid.h"
 
 #include <memory>
 
@@ -19,7 +20,7 @@ class FluidModel;
 namespace seahowl {
 namespace aero {
 
-class RotorAero {
+class RotorAero : public ComponentFluid {
   public:
     /** @brief List of blades. */
     std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades;
@@ -40,7 +41,7 @@ class RotorAero {
 
     virtual void build() = 0;
     virtual void initialize() = 0;
-    virtual void compute_aero_loads(const env::FluidModel& wind_model, double time) = 0;
+    virtual void compute_fluid_loads(const env::FluidModel& fluid_model, double time) = 0;
 };
 
 class RotorAeroBEMT : public RotorAero {
@@ -58,7 +59,7 @@ class RotorAeroBEMT : public RotorAero {
 
     virtual void build() override;
     virtual void initialize() override;
-    virtual void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
+    virtual void compute_fluid_loads(const env::FluidModel& wind_model, double time) override;
 
     /**
      * @brief Computes radius, distances from tip and hub, and chord solidity on all aero nodes of blades.
@@ -83,13 +84,13 @@ class RotorAeroDisk : public RotorAero {
 
     virtual void build() override{};
     void initialize() override;
-    void compute_aero_loads(const env::FluidModel& wind_model, double time) override;
+    void compute_fluid_loads(const env::FluidModel& wind_model, double time) override;
 };
 
 /**
  * @brief Rotor-Nacelle Assembly (RNA) of wind turbine as an aero component.
  */
-class RotorNacelleAssemblyAero {
+class RotorNacelleAssemblyAero : public ComponentFluid {
   public:
     /** @brief Rotor. */
     std::shared_ptr<RotorAero> rotor;
@@ -100,6 +101,8 @@ class RotorNacelleAssemblyAero {
      * @brief Constructor.
      */
     RotorNacelleAssemblyAero();
+
+    void compute_fluid_loads(const env::FluidModel& wind_model, double time) override;
 
     /**
      * @brief Builds rotor.

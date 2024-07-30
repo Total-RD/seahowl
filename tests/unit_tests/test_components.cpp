@@ -402,7 +402,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_aero_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -461,7 +461,7 @@ TEST(test_turbine, rpm_initial_pitch_fpm) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_aero_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -520,7 +520,7 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_aero_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -582,7 +582,7 @@ TEST(test_turbine, controller_target_rpm) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_aero_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -646,7 +646,7 @@ TEST(test_turbine, actuator_disk) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_aero_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -671,7 +671,7 @@ TEST(test_turbine, actuator_disk) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_aero_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -734,7 +734,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_aero_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -868,7 +868,7 @@ TEST(test_inflowwind, rpm_initial_pitch) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_aero_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(wind_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 

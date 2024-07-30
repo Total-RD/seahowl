@@ -152,6 +152,7 @@ set(SEAHOWL_COMMONS_SOURCES
 set(SEAHOWL_COMMONS_HEADERS
     include/seahowl/commons/numerics.h
     include/seahowl/commons/entities.h
+    include/seahowl/commons/component_fluid.h
     include/seahowl/commons/utils.h
 )
 source_group(commons FILES ${SEAHOWL_COMMONS_SOURCES} ${SEAHOWL_COMMONS_HEADERS})
