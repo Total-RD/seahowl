@@ -255,10 +255,12 @@ source_group(servo FILES ${SEAHOWL_SERVO_SOURCES} ${SEAHOWL_SERVO_HEADERS})
 set(SEAHOWL_HYDRO_SOURCES
     src/hydro/morison.cpp
     src/hydro/mooring_hydro.cpp
+    src/hydro/floater_hydro.cpp
 )
 set(SEAHOWL_HYDRO_HEADERS
     include/seahowl/hydro/morison.h
     include/seahowl/hydro/mooring_hydro.h
+    include/seahowl/hydro/floater_hydro.h
 )
 if(SEAHOWL_ENABLE_HYDROCHRONO)
     list(APPEND SEAHOWL_HYDRO_SOURCES src/hydro/hydrochrono_adapter.cpp)
