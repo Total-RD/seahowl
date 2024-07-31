@@ -33,13 +33,13 @@ void Simulation::populate_from_file(const std::string& filepath) {
     spdlog::info("INITIAL SIMULATION SETUP.");
     spdlog::info("**************************************************************");
 
+    populate_system_from_json(filepath, *system_core);
+
     // get main file info
     std::ifstream json_file(filepath);
     json json_obj;
     json_file >> json_obj;
     json_file.close();
-
-    populate_system_from_json(filepath, *system_core);
 
     // NUMERICS options
     auto num_json = json_obj.at("numerics");
@@ -85,12 +85,6 @@ void Simulation::initialize_from_file(const std::string& filepath) {
         throw std::runtime_error("Simulation was already initialized.");
     }
     spdlog::stopwatch sw_setup;
-
-    // get main file info
-    std::ifstream json_file(filepath);
-    json json_obj;
-    json_file >> json_obj;
-    json_file.close();
 
     outputs->initialize();
 
