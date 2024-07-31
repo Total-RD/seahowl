@@ -165,6 +165,7 @@ set(SEAHOWL_CORE_SOURCES
     src/core/blade.cpp
     src/core/tower.cpp
     src/core/mooring.cpp
+    src/core/floater.cpp
     src/core/turbine.cpp
     src/core/system.cpp
     src/core/simulation.cpp
@@ -176,6 +177,7 @@ set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/rotor.h
     include/seahowl/core/tower.h
     include/seahowl/core/mooring.h
+    include/seahowl/core/floater.h
     include/seahowl/core/turbine.h
     include/seahowl/core/system.h
     include/seahowl/core/simulation.h
