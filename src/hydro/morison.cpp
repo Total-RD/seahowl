@@ -7,6 +7,30 @@
 using namespace seahowl;
 using namespace seahowl::hydro;
 
+HydroCoefficients HydroCoefficients::operator*(const double factor) const {
+    HydroCoefficients new_point = *this;
+    new_point.drag_normal *= factor;
+    new_point.drag_axial *= factor;
+    new_point.added_mass_normal *= factor;
+    new_point.added_mass_axial *= factor;
+    new_point.buoyancy_factor *= factor;
+    new_point.inertia_factor *= factor;
+    new_point.acceleration_factor *= factor;
+    return new_point;
+};
+
+HydroCoefficients HydroCoefficients::operator+(const HydroCoefficients& other) const {
+    HydroCoefficients new_point = *this;
+    new_point.drag_normal += other.drag_normal;
+    new_point.drag_axial += other.drag_axial;
+    new_point.added_mass_normal += other.added_mass_normal;
+    new_point.added_mass_axial += other.added_mass_axial;
+    new_point.buoyancy_factor += other.buoyancy_factor;
+    new_point.inertia_factor += other.inertia_factor;
+    new_point.acceleration_factor += other.acceleration_factor;
+    return new_point;
+};
+
 MorisonNode::MorisonNode() {}
 
 void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double time) {
@@ -34,14 +58,11 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
                            velocity_relative_axial.norm() * velocity_relative_axial;
     load += load_drag_normal + load_drag_axial;
 
-    if (has_inertia) {
+    if (coefficients.inertia_factor != 0.0) {
         // fluid acceleration
         auto acceleration_fluid = fluid_model.get_fluid_acceleration(position, time);
         // relative acceleration
-        auto acceleration = Vector3d(0.0, 0.0, 0.0);
-        if (has_acceleration) {
-            auto acceleration = get_acceleration();
-        }
+        auto acceleration = get_acceleration() * coefficients.acceleration_factor;
         auto acceleration_relative = acceleration_fluid - acceleration;
         auto acceleration_relative_axial = dir * acceleration_relative.dot(dir);
         auto acceleration_relative_normal = acceleration_relative - acceleration_relative_axial;
@@ -58,11 +79,9 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
     }
 
     // buoyancy
-    if (has_buoyancy) {
-        Vector3d gravitational_acceleration{0.0, 0.0, -9.81};
-        auto load_buoyancy = fluid_density * area * (-gravitational_acceleration);
-        load += load_buoyancy;
-    }
+    Vector3d gravitational_acceleration{0.0, 0.0, -9.81};
+    auto load_buoyancy = fluid_density * area * (-gravitational_acceleration);
+    load += load_buoyancy * coefficients.buoyancy_factor;
 }
 
 MorisonElement::MorisonElement(const MorisonNode& node1, const MorisonNode& node2) : node1(node1), node2(node2) {

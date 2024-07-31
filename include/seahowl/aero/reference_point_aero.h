@@ -2,6 +2,7 @@
 
 #include "seahowl/commons/numerics.h"
 #include "seahowl/aero/airfoil.h"
+#include "seahowl/hydro/morison.h"
 
 // forward declarations
 namespace seahowl {
@@ -57,14 +58,8 @@ struct TowerReferencePointAero {
     Quaternion rotation{0.0, 0.0, 0.0, 0.0};
     /** @brief Diameter of tower at reference point. */
     double diameter = 0.0;
-    /** @brief Normal drag coefficient of tower at reference point. */
-    double drag_coefficient_normal = 0.0;
-    /** @brief Axial drag coefficient of tower at reference point. */
-    double drag_coefficient_axial = 0.0;
-    /** @brief Normal added mass coefficient of tower at reference point. */
-    double added_mass_coefficient_normal = 0.0;
-    /** @brief Axial added mass coefficient of tower at reference point. */
-    double added_mass_coefficient_axial = 0.0;
+    /** @brief Coefficients. */
+    hydro::HydroCoefficients coefficients;
 
     /**
      * @brief Constructor.
