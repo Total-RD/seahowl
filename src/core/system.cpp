@@ -6,9 +6,9 @@
 #include "seahowl/elasto/turbine_elasto.h"
 #include "seahowl/aero/turbine_aero.h"
 #include "seahowl/env/wind_models.h"
-#include "seahowl/core/turbine_floating.h"
 #include "seahowl/core/blade.h"
 #include "seahowl/elasto/blade_elasto.h"
+#include "seahowl/elasto/floater_elasto.h"
 
 #include <vector>
 #include <spdlog/spdlog.h>
@@ -145,52 +145,54 @@ void System::run_presetup(double presetup_duration, double presetup_dt) {
     std::map<int, std::vector<std::vector<double>>> lengths_delta_moorings;
     for (int idx_turbine = 0; idx_turbine < turbines.size(); idx_turbine++) {
         auto& turbine = *turbines[idx_turbine];
-        try {
-            auto& turbine_floating = dynamic_cast<TurbineFloating&>(turbine);
+        if (turbine.elasto.foundation) {
+            try {
+                auto& floater = dynamic_cast<seahowl::elasto::FloaterElasto&>(*turbine.elasto.foundation);
 
-            // fix turbine
-            turbine_floating.tower.elasto.nodes.front()->set_fixed(true);
-            turbine_floating.rna.elasto.rotor->body_hub->set_fixed(true);
+                // fix turbine
+                turbine.tower.elasto.nodes.front()->set_fixed(true);
+                turbine.rna.elasto.rotor->body_hub->set_fixed(true);
 
-            for (auto& mooring_ptr : turbine_floating.elasto.floater->mooring_system->moorings) {
-                auto& mooring_elasto = *mooring_ptr;
-                auto& mooring = dynamic_cast<seahowl::elasto::MooringElastoFEA&>(mooring_elasto);
+                for (auto& mooring_ptr : floater.mooring_system->moorings) {
+                    auto& mooring_elasto = *mooring_ptr;
+                    auto& mooring = dynamic_cast<seahowl::elasto::MooringElastoFEA&>(mooring_elasto);
 
-                // check that mooring was built properly
-                int nb_elements = mooring.elements.size();
-                if (nb_elements != mooring.discretization_fractions.size() - 1) {
-                    throw std::runtime_error(
-                        "Number of elements and discretization fractions on mooring do not match (build mooring "
-                        "first?).");
+                    // check that mooring was built properly
+                    int nb_elements = mooring.elements.size();
+                    if (nb_elements != mooring.discretization_fractions.size() - 1) {
+                        throw std::runtime_error(
+                            "Number of elements and discretization fractions on mooring do not match (build mooring "
+                            "first?).");
+                    }
+
+                    // get initial and final lengths of mooring, and length increment to apply
+                    std::vector<double> lengths_initial(nb_elements);
+                    std::vector<double> lengths_final(nb_elements);
+                    std::vector<double> lengths_delta(nb_elements);
+
+                    auto distance_fairlead_anchor =
+                        (mooring.fairlead.get_position() - mooring.anchor.get_position()).norm();
+                    auto density_equivalent = mooring.density_linear * (mooring.length / distance_fairlead_anchor) /
+                                              (seahowl::PI * pow(mooring.diameter / 2.0, 2));
+                    for (size_t idx_el = 0; idx_el < nb_elements; idx_el++) {
+                        auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring.elements[idx_el]);
+                        lengths_final[idx_el] = mooring.length * (mooring.discretization_fractions[idx_el + 1] -
+                                                                  mooring.discretization_fractions[idx_el]);
+                        lengths_initial[idx_el] =
+                            (element.nodes[1]->get_position() - element.nodes[0]->get_position()).norm();
+                        lengths_delta[idx_el] = (lengths_final[idx_el] - lengths_initial[idx_el]) / nsteps;
+                        // initializing element with density-equivalent length
+                        element.set_properties(density_equivalent, mooring.diameter, mooring.stiffness_axial,
+                                               mooring.stiffness_bending);
+                    }
+
+                    lengths_initial_moorings[idx_turbine].push_back(lengths_initial);
+                    lengths_final_moorings[idx_turbine].push_back(lengths_final);
+                    lengths_delta_moorings[idx_turbine].push_back(lengths_delta);
                 }
-
-                // get initial and final lengths of mooring, and length increment to apply
-                std::vector<double> lengths_initial(nb_elements);
-                std::vector<double> lengths_final(nb_elements);
-                std::vector<double> lengths_delta(nb_elements);
-
-                auto distance_fairlead_anchor =
-                    (mooring.fairlead.get_position() - mooring.anchor.get_position()).norm();
-                auto density_equivalent = mooring.density_linear * (mooring.length / distance_fairlead_anchor) /
-                                          (seahowl::PI * pow(mooring.diameter / 2.0, 2));
-                for (size_t idx_el = 0; idx_el < nb_elements; idx_el++) {
-                    auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring.elements[idx_el]);
-                    lengths_final[idx_el] = mooring.length * (mooring.discretization_fractions[idx_el + 1] -
-                                                              mooring.discretization_fractions[idx_el]);
-                    lengths_initial[idx_el] =
-                        (element.nodes[1]->get_position() - element.nodes[0]->get_position()).norm();
-                    lengths_delta[idx_el] = (lengths_final[idx_el] - lengths_initial[idx_el]) / nsteps;
-                    // initializing element with density-equivalent length
-                    element.set_properties(density_equivalent, mooring.diameter, mooring.stiffness_axial,
-                                           mooring.stiffness_bending);
-                }
-
-                lengths_initial_moorings[idx_turbine].push_back(lengths_initial);
-                lengths_final_moorings[idx_turbine].push_back(lengths_final);
-                lengths_delta_moorings[idx_turbine].push_back(lengths_delta);
+            } catch (const std::bad_cast& e) {
+                // do nothing
             }
-        } catch (const std::bad_cast& e) {
-            // do nothing
         }
     }
 
@@ -204,33 +206,35 @@ void System::run_presetup(double presetup_duration, double presetup_dt) {
         }
         for (int idx_turbine = 0; idx_turbine < turbines.size(); idx_turbine++) {
             auto& turbine = *turbines[idx_turbine];
-            try {
-                auto& turbine_floating = dynamic_cast<TurbineFloating&>(turbine);
-                for (int idx_mooring = 0;
-                     idx_mooring < turbine_floating.elasto.floater->mooring_system->moorings.size(); idx_mooring++) {
-                    auto& mooring_elasto = *turbine_floating.elasto.floater->mooring_system->moorings[idx_mooring];
-                    auto& mooring = dynamic_cast<seahowl::elasto::MooringElastoFEA&>(mooring_elasto);
-                    auto lengths_initial = lengths_initial_moorings[idx_turbine][idx_mooring];
-                    auto lengths_delta = lengths_delta_moorings[idx_turbine][idx_mooring];
-                    int nb_elements = mooring.elements.size();
-                    for (int idx_el = 0; idx_el < nb_elements; idx_el++) {
-                        auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring.elements[idx_el]);
-                        element.set_rest_length(lengths_initial[idx_el] + lengths_delta[idx_el] * step);
-                        if (step == 1) {
-                            // reset to actual properties after initializing with density-equivalent length
-                            element.set_properties(
-                                mooring.density_linear / (seahowl::PI * pow(mooring.diameter / 2.0, 2)),
-                                mooring.diameter, mooring.stiffness_axial, mooring.stiffness_bending);
+            if (turbine.elasto.foundation) {
+                try {
+                    auto& floater = dynamic_cast<seahowl::elasto::FloaterElasto&>(*turbine.elasto.foundation);
+                    for (int idx_mooring = 0; idx_mooring < floater.mooring_system->moorings.size(); idx_mooring++) {
+                        auto& mooring_elasto = *floater.mooring_system->moorings[idx_mooring];
+                        auto& mooring = dynamic_cast<seahowl::elasto::MooringElastoFEA&>(mooring_elasto);
+                        auto lengths_initial = lengths_initial_moorings[idx_turbine][idx_mooring];
+                        auto lengths_delta = lengths_delta_moorings[idx_turbine][idx_mooring];
+                        int nb_elements = mooring.elements.size();
+                        for (int idx_el = 0; idx_el < nb_elements; idx_el++) {
+                            auto& element =
+                                dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring.elements[idx_el]);
+                            element.set_rest_length(lengths_initial[idx_el] + lengths_delta[idx_el] * step);
+                            if (step == 1) {
+                                // reset to actual properties after initializing with density-equivalent length
+                                element.set_properties(
+                                    mooring.density_linear / (seahowl::PI * pow(mooring.diameter / 2.0, 2)),
+                                    mooring.diameter, mooring.stiffness_axial, mooring.stiffness_bending);
+                            }
+                        }
+                        mooring.compute_hydro_loads(*fluid_model, 0.0);
+
+                        if (soil_model) {
+                            mooring.compute_seabed_loads(*soil_model);
                         }
                     }
-                    mooring.compute_hydro_loads(*fluid_model, 0.0);
-
-                    if (soil_model) {
-                        mooring.compute_seabed_loads(*soil_model);
-                    }
+                } catch (const std::bad_cast& e) {
+                    // do nothing
                 }
-            } catch (const std::bad_cast& e) {
-                // do nothing
             }
         }
 
@@ -242,9 +246,9 @@ void System::run_presetup(double presetup_duration, double presetup_dt) {
     for (int idx_turbine = 0; idx_turbine < turbines.size(); idx_turbine++) {
         auto& turbine = *turbines[idx_turbine];
         try {
-            auto& turbine_floating = dynamic_cast<TurbineFloating&>(turbine);
-            turbine_floating.tower.elasto.nodes.front()->set_fixed(false);
-            turbine_floating.rna.elasto.rotor->body_hub->set_fixed(false);
+            auto& floater = dynamic_cast<seahowl::elasto::FloaterElasto&>(*turbine.elasto.foundation);
+            turbine.tower.elasto.nodes.front()->set_fixed(false);
+            turbine.rna.elasto.rotor->body_hub->set_fixed(false);
         } catch (const std::bad_cast& e) {
             // do nothing
         }

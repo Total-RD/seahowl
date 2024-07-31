@@ -2,6 +2,7 @@
 
 #include "seahowl/elasto/system_elasto.h"
 #include "seahowl/elasto/chrono_adapters.h"
+#include "seahowl/elasto/floater_elasto.h"
 
 using namespace seahowl::elasto;
 
@@ -11,8 +12,14 @@ TurbineElasto::TurbineElasto() {
 }
 
 void TurbineElasto::assemble_this(SystemElasto& system) {
-    // assemble rotor & tower
+    // assemble foundation
+    if (foundation) {
+        foundation->assemble(system);
+        foundation->link_to_entity(*(tower.nodes.front().get()));
+    }
+    // assemble RNA
     rna.assemble(system);
+    // assemble tower
     tower.assemble(system);
     // link tower to rotor
     link_rna_tower(system);
@@ -29,19 +36,30 @@ void TurbineElasto::link_rna_tower(SystemElasto& system) {
 }
 
 void TurbineElasto::build() {
-    // build rotor & tower
+    // build foundation
+    if (foundation) {
+        foundation->build();
+    }
+    // build RNA
     rna.build();
+    // build tower
     tower.build();
 }
 
 void TurbineElasto::translate(const Vector3d& translation_vector) const {
     rna.translate(translation_vector);
     tower.translate(translation_vector);
+    if (foundation) {
+        foundation->translate(translation_vector);
+    }
 }
 
 void TurbineElasto::rotate(double angle, const Vector3d& axis) const {
     rna.rotate(angle, axis);
     tower.rotate(angle, axis);
+    if (foundation) {
+        foundation->rotate(angle, axis);
+    }
 }
 
 double TurbineElasto::get_mass() const {
@@ -50,5 +68,9 @@ double TurbineElasto::get_mass() const {
     total_mass += rna.get_mass();
     // tower
     total_mass += tower.get_mass();
+    // foundation
+    if (foundation) {
+        foundation->get_mass();
+    }
     return total_mass;
 }

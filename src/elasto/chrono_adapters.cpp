@@ -643,9 +643,13 @@ LinkChrono::LinkChrono() {
 }
 
 void LinkChrono::initialize(const Entity& entity1, const Entity& entity2) {
-    chobj->Initialize(dynamic_cast<const EntityDynamicChrono&>(entity1).chobj,
-                      dynamic_cast<const EntityDynamicChrono&>(entity2).chobj,
-                      *dynamic_cast<const EntityDynamicChrono&>(entity2).chobj);
+    try {
+        chobj->Initialize(dynamic_cast<const EntityDynamicChrono&>(entity1).chobj,
+                          dynamic_cast<const EntityDynamicChrono&>(entity2).chobj,
+                          *dynamic_cast<const EntityDynamicChrono&>(entity2).chobj);
+    } catch (const std::bad_cast& e) {
+        throw std::runtime_error("Cannot link these entities.");
+    }
 }
 
 void LinkChrono::set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) {

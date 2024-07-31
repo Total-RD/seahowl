@@ -166,7 +166,6 @@ set(SEAHOWL_CORE_SOURCES
     src/core/tower.cpp
     src/core/mooring.cpp
     src/core/turbine.cpp
-    src/core/turbine_floating.cpp
     src/core/system.cpp
     src/core/simulation.cpp
 )
@@ -178,7 +177,6 @@ set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/tower.h
     include/seahowl/core/mooring.h
     include/seahowl/core/turbine.h
-    include/seahowl/core/turbine_floating.h
     include/seahowl/core/system.h
     include/seahowl/core/simulation.h
 )
@@ -194,7 +192,6 @@ set(SEAHOWL_ELASTO_SOURCES
     src/elasto/floater_elasto.cpp
     src/elasto/mooring_elasto.cpp
     src/elasto/turbine_elasto.cpp
-    src/elasto/turbine_floating_elasto.cpp
     src/elasto/chrono_adapters.cpp
 )
 set(SEAHOWL_ELASTO_HEADERS
@@ -208,7 +205,6 @@ set(SEAHOWL_ELASTO_HEADERS
     include/seahowl/elasto/floater_elasto.h
     include/seahowl/elasto/mooring_elasto.h
     include/seahowl/elasto/turbine_elasto.h
-    include/seahowl/elasto/turbine_floating_elasto.h
     include/seahowl/elasto/chrono_adapters.h
 )
 source_group(elasto FILES ${SEAHOWL_ELASTO_SOURCES} ${SEAHOWL_ELASTO_HEADERS})

@@ -5,7 +5,6 @@
 #include <seahowl/core/component.h>
 #include <seahowl/core/simulation.h>
 #include <seahowl/core/turbine.h>
-#include <seahowl/core/turbine_floating.h>
 #include <seahowl/elasto/turbine_elasto.h>
 #include <seahowl/aero/turbine_aero.h>
 #include <seahowl/core/rotor.h>
@@ -69,23 +68,6 @@ void initialize_pyseahowl_core(py::module& m) {
         .def_readonly("controller", &seahowl::core::Turbine::controller)
         .def_readonly("tower", &seahowl::core::Turbine::tower)
         .def_readonly("rna", &seahowl::core::Turbine::rna);
-
-    // core/turbine_floating.h
-    py::class_<seahowl::core::TurbineFloating, std::shared_ptr<seahowl::core::TurbineFloating>, seahowl::core::Turbine>(
-        m_core, "TurbineFloating")
-        .def(py::init<seahowl::elasto::TurbineFloatingElasto&, seahowl::aero::TurbineAero&>())
-        .def_property_readonly("elasto", [](seahowl::core::Turbine& turbine) { return &turbine.elasto; })
-        .def_property_readonly("aero", [](seahowl::core::Turbine& turbine) { return &turbine.aero; });
-    m_core.def(
-        "get_turbine_floating_reference",
-        [](seahowl::core::Turbine& turbine) {
-            try {
-                return dynamic_cast<seahowl::core::TurbineFloating&>(turbine);
-            } catch (const std::bad_cast& e) {
-                throw std::runtime_error("Cannot convert Turbine reference to TurbineFloating reference.");
-            }
-        },
-        py::return_value_policy::reference_internal);
 
     // core/tower.h
     py::class_<seahowl::core::Tower, std::shared_ptr<seahowl::core::Tower>, seahowl::core::ComponentDynamic>(m_core,

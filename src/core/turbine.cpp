@@ -4,6 +4,7 @@
 #include "seahowl/aero/turbine_aero.h"
 #include "seahowl/core/blade.h"
 #include "seahowl/elasto/blade_elasto.h"
+#include "seahowl/elasto/floater_elasto.h"
 #include "seahowl/servo/controller.h"
 
 #include <spdlog/spdlog.h>
@@ -23,6 +24,11 @@ void Turbine::initialize_this(double time, double dt) {
     controller->initialize(time, dt, *this);
 
     aero.initialize(time, dt);
+
+    ///@todo this elasto.foundation->initialize call should move within elasto class
+    if (elasto.foundation) {
+        elasto.foundation->initialize();
+    }
 
     spdlog::info("Initialized turbine of total mass {:.4}kg.", elasto.get_mass());
 }
@@ -63,6 +69,11 @@ void Turbine::prestep(double time, double dt) {
     // presteps
     rna.prestep(time, dt);
     tower.prestep(time, dt);
+
+    ///@todo this elasto.foundation->prestep call should move within elasto class
+    if (elasto.foundation) {
+        elasto.foundation->prestep(time, dt);
+    }
 }
 
 void Turbine::poststep(double time, double dt) {
@@ -120,6 +131,27 @@ double Turbine::get_generator_rpm() const {
 
 void Turbine::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
     aero.compute_fluid_loads(fluid_model, time);
+    if (elasto.foundation) {
+        try {
+            auto& floater = dynamic_cast<seahowl::elasto::FloaterElasto&>(*elasto.foundation);
+            for (auto& mooring : floater.mooring_system->moorings) {
+                dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*mooring).compute_hydro_loads(fluid_model, time);
+            }
+        } catch (const std::bad_cast& e) {
+            // do nothing
+        }
+    }
 }
 
-void Turbine::apply_soil_model(seahowl::env::SoilModel& soil_model, double time) {}
+void Turbine::apply_soil_model(seahowl::env::SoilModel& soil_model, double time) {
+    if (elasto.foundation) {
+        try {
+            auto& floater = dynamic_cast<seahowl::elasto::FloaterElasto&>(*elasto.foundation);
+            for (auto& mooring : floater.mooring_system->moorings) {
+                dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*mooring).compute_seabed_loads(soil_model);
+            }
+        } catch (const std::bad_cast& e) {
+            // do nothing
+        }
+    }
+}

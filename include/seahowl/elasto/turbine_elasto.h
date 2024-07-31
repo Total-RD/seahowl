@@ -5,9 +5,11 @@
 
 #include <vector>
 
+// forward declarations
 namespace seahowl {
 namespace elasto {
 class SystemElasto;
+class FoundationElasto;
 }  // namespace elasto
 }  // namespace seahowl
 
@@ -30,6 +32,8 @@ class TurbineElasto : public ComponentElasto {
     seahowl::elasto::RotorNacelleAssemblyElasto rna;
     /** @brief Tower of the turbine. */
     seahowl::elasto::TowerElasto tower;
+    /** @brief Foundation of the turbine */
+    std::shared_ptr<seahowl::elasto::FoundationElasto> foundation;
 
     /**
      * @brief Constructor.

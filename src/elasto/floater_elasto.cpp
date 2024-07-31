@@ -10,6 +10,12 @@ using namespace seahowl::elasto;
 FloaterElasto::FloaterElasto() {
     body_main = std::make_unique<seahowl::elasto::BodyElastoChrono>();
     mooring_system = std::make_unique<seahowl::elasto::MooringSystemElasto>();
+    link_floater_entity = std::make_unique<seahowl::elasto::LinkChrono>();
+}
+
+void FloaterElasto::link_to_entity(const Entity& entity) {
+    link_floater_entity->initialize(*body_main, entity);
+    link_floater_entity->set_constraints(true, true, true, true, true, true);
 };
 
 void FloaterElasto::build() {
@@ -130,6 +136,8 @@ void FloaterElasto::assemble_this(seahowl::elasto::SystemElasto& system) {
             system.add(*link);
         }
     }
+
+    system.add(*(link_floater_entity.get()));
 
     // moorings
     mooring_system->assemble(system);

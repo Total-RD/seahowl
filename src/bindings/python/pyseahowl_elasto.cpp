@@ -11,7 +11,6 @@
 #include <seahowl/elasto/mooring_elasto.h>
 #include <seahowl/elasto/floater_elasto.h>
 #include <seahowl/elasto/turbine_elasto.h>
-#include <seahowl/elasto/turbine_floating_elasto.h>
 #include <seahowl/elasto/system_elasto.h>
 #include <seahowl/elasto/chrono_adapters.h>
 
@@ -256,8 +255,12 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def(py::init<>());
 
     // elasto/floater_elasto.h
+    py::class_<seahowl::elasto::FoundationElasto, std::shared_ptr<seahowl::elasto::FoundationElasto>,
+               seahowl::elasto::ComponentElasto>(m_elasto, "FoundationElasto")
+        .def("link_to_entity", &seahowl::elasto::FoundationElasto::link_to_entity);
+
     py::class_<seahowl::elasto::FloaterElasto, std::shared_ptr<seahowl::elasto::FloaterElasto>,
-               seahowl::elasto::ComponentElasto>(m_elasto, "FloaterElasto")
+               seahowl::elasto::FoundationElasto>(m_elasto, "FloaterElasto")
         .def_property_readonly(
             "mooring_system", [](seahowl::elasto::FloaterElasto& floater) { return floater.mooring_system.get(); },
             py::return_value_policy::reference_internal)
@@ -303,17 +306,4 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readwrite("added_mass_coefficient_tangential",
                        &seahowl::elasto::MooringElastoFEA::added_mass_coefficient_tangential)
         .def_readwrite("discretization_fractions", &seahowl::elasto::MooringElastoFEA::discretization_fractions);
-
-    // elasto/turbine_floating_elasto.h
-    py::class_<seahowl::elasto::TurbineFloatingElasto, std::shared_ptr<seahowl::elasto::TurbineFloatingElasto>,
-               seahowl::elasto::TurbineElasto>(m_elasto, "TurbineFloatingElasto")
-        //.def_property_readonly(
-        //    "floater", [](seahowl::elasto::TurbineFloatingElasto& turbine) { return turbine.floater.get(); },
-        //    py::return_value_policy::reference_internal)
-        .def_readwrite("floater", &seahowl::elasto::TurbineFloatingElasto::floater)
-        .def_property_readonly(
-            "link_floater_tower",
-            [](seahowl::elasto::TurbineFloatingElasto& turbine) { return turbine.link_floater_tower.get(); },
-            py::return_value_policy::reference_internal)
-        .def(py::init<>());
 }

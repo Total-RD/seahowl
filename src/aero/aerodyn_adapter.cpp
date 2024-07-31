@@ -445,7 +445,7 @@ void seahowl::aero::TurbineAeroDyn::initialize(double time, double dt) {
 void seahowl::aero::TurbineAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_model, double time) {
     aerodyn.calcul(time, *this);
     dynamic_cast<seahowl::aero::RotorAeroDyn&>(*rna.rotor).loads_aerodyn = aerodyn.pImpl.MeshFrc;
-    rna.rotor->compute_fluid_loads(wind_model, time);
+    rna.compute_fluid_loads(wind_model, time);
 }
 
 seahowl::aero::RotorAeroDyn::RotorAeroDyn(TowerAero& tower_ref) : RotorAeroBEMT(tower_ref) {}

@@ -2,17 +2,31 @@
 
 #include "seahowl/commons/numerics.h"
 #include "seahowl/elasto/entities_elasto.h"
-#include "seahowl/elasto/system_elasto.h"
 #include "seahowl/elasto/mooring_elasto.h"
 
 #include <deque>
 #include <map>
 
+// forward declarations
+namespace seahowl {
+namespace elasto {
+class SystemElasto;
+}  // namespace elasto
+}  // namespace seahowl
+
 namespace seahowl {
 namespace elasto {
 
-class FloaterElasto : public ComponentElasto {
+class FoundationElasto : public ComponentElasto {
   public:
+    virtual void link_to_entity(const Entity& entity) = 0;
+    virtual void prestep(double time, double dt) = 0;
+};
+
+class FloaterElasto : public FoundationElasto {
+  public:
+    /** @brief Link between foundation and entity (e.g. towerbase of turbine). */
+    std::unique_ptr<seahowl::elasto::Link> link_floater_entity;
     /** @brief Mooring system of the floater. */
     std::unique_ptr<seahowl::elasto::MooringSystemElasto> mooring_system;
     /** @brief Damping matrix of floater.*/
@@ -25,9 +39,11 @@ class FloaterElasto : public ComponentElasto {
      */
     FloaterElasto();
 
-    virtual void build();
+    virtual void link_to_entity(const Entity& entity) override;
 
-    virtual void prestep(double time, double dt);
+    virtual void build() override;
+
+    virtual void prestep(double time, double dt) override;
 
     /**
      * @brief Creates and adds body to floater.
