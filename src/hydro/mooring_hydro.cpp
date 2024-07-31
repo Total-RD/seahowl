@@ -26,6 +26,7 @@ void MooringHydro::build() {
     loads.clear();
     for (int ii = 0; ii < discretization_fractions.size() - 1; ii++) {
         elements.push_back(MorisonElement(nodes[ii], nodes[ii + 1]));
+        elements.back().length = length * abs(discretization_fractions[ii + 1] - discretization_fractions[ii]);
         loads.push_back(Vector3d(0.0, 0.0, 0.0));
     }
 }

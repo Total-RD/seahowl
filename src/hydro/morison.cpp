@@ -22,7 +22,7 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
     // fluid velocity
     auto velocity_fluid = fluid_model.get_fluid_velocity(position, time);
 
-    auto dir = get_rotation() * Vector3d(0.0, 0.0, 1.0);  // axial direction
+    auto dir = get_direction();  // axial direction
     auto velocity_relative = velocity_fluid - velocity;
     auto velocity_relative_axial = dir * velocity_relative.dot(dir);
     auto velocity_relative_normal = velocity_relative - velocity_relative_axial;
@@ -34,11 +34,14 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
                            velocity_relative_axial.norm() * velocity_relative_axial;
     load += load_drag_normal + load_drag_axial;
 
-    if (coefficients.has_inertia) {
+    if (has_inertia) {
         // fluid acceleration
         auto acceleration_fluid = fluid_model.get_fluid_acceleration(position, time);
         // relative acceleration
-        auto acceleration = get_acceleration();
+        auto acceleration = Vector3d(0.0, 0.0, 0.0);
+        if (has_acceleration) {
+            auto acceleration = get_acceleration();
+        }
         auto acceleration_relative = acceleration_fluid - acceleration;
         auto acceleration_relative_axial = dir * acceleration_relative.dot(dir);
         auto acceleration_relative_normal = acceleration_relative - acceleration_relative_axial;
@@ -55,7 +58,7 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
     }
 
     // buoyancy
-    if (coefficients.has_buoyancy) {
+    if (has_buoyancy) {
         Vector3d gravitational_acceleration{0.0, 0.0, -9.81};
         auto load_buoyancy = fluid_density * area * (-gravitational_acceleration);
         load += load_buoyancy;
@@ -86,11 +89,10 @@ void MorisonPlate::compute_fluid_loads(const env::FluidModel& fluid_model, doubl
     auto area = PI * pow(diameter * 0.5, 2);
 
     // vector pointing inwards of the plate
-    auto local_direction = Vector3d(0.0, 0.0, -1.0);
-    if (reverse_direction) {
-        local_direction *= -1.0;
+    auto global_direction = get_direction();  // vector pointing inwards of the plate
+    if (!reverse_direction) {
+        global_direction *= -1.0;
     }
-    auto global_direction = get_rotation() * local_direction;  // direction of plate
 
     auto position = get_position();
     auto velocity = get_velocity();

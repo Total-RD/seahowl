@@ -31,16 +31,17 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def_readwrite("drag_normal", &seahowl::hydro::HydroCoefficients::drag_normal)
         .def_readwrite("drag_axial", &seahowl::hydro::HydroCoefficients::drag_axial)
         .def_readwrite("added_mass_normal", &seahowl::hydro::HydroCoefficients::added_mass_normal)
-        .def_readwrite("added_mass_axial", &seahowl::hydro::HydroCoefficients::added_mass_axial)
-        .def_readwrite("has_buoyancy", &seahowl::hydro::HydroCoefficients::has_buoyancy)
-        .def_readwrite("has_inertia", &seahowl::hydro::HydroCoefficients::has_inertia);
+        .def_readwrite("added_mass_axial", &seahowl::hydro::HydroCoefficients::added_mass_axial);
     py::class_<seahowl::hydro::MorisonNode, std::shared_ptr<seahowl::hydro::MorisonNode>, seahowl::EntityDynamicEigen>(
         m_hydro, "MorisonNode")
         .def(py::init<>())
         .def("compute_fluid_loads", &seahowl::hydro::MorisonNode::compute_fluid_loads)
         .def_readwrite("load", &seahowl::hydro::MorisonNode::load)
         .def_readwrite("diameter", &seahowl::hydro::MorisonNode::diameter)
-        .def_readwrite("coefficients", &seahowl::hydro::MorisonNode::coefficients);
+        .def_readwrite("coefficients", &seahowl::hydro::MorisonNode::coefficients)
+        .def_readwrite("has_buoyancy", &seahowl::hydro::MorisonNode::has_buoyancy)
+        .def_readwrite("has_acceleration", &seahowl::hydro::MorisonNode::has_acceleration)
+        .def_readwrite("has_inertia", &seahowl::hydro::MorisonNode::has_inertia);
     py::class_<seahowl::hydro::MorisonElement, std::shared_ptr<seahowl::hydro::MorisonElement>>(m_hydro,
                                                                                                 "MorisonElement")
         .def(py::init<const seahowl::hydro::MorisonNode&, const seahowl::hydro::MorisonNode&>())
@@ -63,6 +64,7 @@ void initialize_pyseahowl_hydro(py::module& m) {
     py::class_<seahowl::hydro::MooringHydro, std::shared_ptr<seahowl::hydro::MooringHydro>>(m_hydro, "MooringHydro")
         .def(py::init<>())
         .def_readwrite("discretization_fractions", &seahowl::hydro::MooringHydro::discretization_fractions)
+        .def_readwrite("length", &seahowl::hydro::MooringHydro::length)
         .def_readwrite("diameter", &seahowl::hydro::MooringHydro::diameter)
         .def_readwrite("coefficients", &seahowl::hydro::MooringHydro::coefficients)
         .def_readwrite("loads", &seahowl::hydro::MooringHydro::loads)

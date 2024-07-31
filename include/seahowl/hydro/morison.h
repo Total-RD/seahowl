@@ -22,10 +22,6 @@ struct HydroCoefficients {
     double added_mass_normal = 0.0;
     /** @brief Added mass coefficient in axial direction (Z axis). */
     double added_mass_axial = 0.0;
-    /** @brief Whether to compute buoyancy or not. */
-    bool has_buoyancy = true;
-    /** @brief Whether to compute inertia loads or not. */
-    bool has_inertia = true;
 };
 
 /**
@@ -39,6 +35,12 @@ class MorisonNode : public EntityDynamicEigen {
     HydroCoefficients coefficients;
     /** @brief Diameter at node. */
     double diameter = 0.0;
+    /** @brief Whether to compute buoyancy or not. */
+    bool has_buoyancy = true;
+    /** @brief Whether to compute inertia loads or not. */
+    bool has_inertia = true;
+    /** @brief Whether to compute acceleration. */
+    bool has_acceleration = true;
 
     /**
      * @brief Constructor.

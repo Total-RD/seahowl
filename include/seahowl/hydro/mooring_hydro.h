@@ -38,6 +38,8 @@ class MooringHydro : public ComponentFluid {
     std::vector<Vector3d> loads;
     /** @brief Position of the mooring line. */
     double diameter = 0.0;
+    /** @brief Length of the mooring line. */
+    double length = 0.0;
 
     /**
      * @brief Constructor.
