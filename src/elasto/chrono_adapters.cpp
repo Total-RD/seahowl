@@ -788,6 +788,10 @@ void SystemElastoChrono::assemble() {
         turbine->assemble(*this);
     }
     is_assembled = true;
+
+    // needed for some Chrono (e.g. for moorings or HydroChrono floater)
+    chobj->Update();
+
     spdlog::debug("Finished assembly of system.");
 }
 
@@ -836,6 +840,8 @@ void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
         // tower
         turbine->tower.nodes.front()->set_fixed(tower_fixed[idx_turbine]);
     }
+
+    spdlog::debug("Performed statics prestep with linear step as {} and {} nonlinear steps.", linear, nonlinear_steps);
 };
 
 Vector3d SystemElastoChrono::get_gravitational_acceleration() const {

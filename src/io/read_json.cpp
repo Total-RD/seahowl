@@ -1150,15 +1150,6 @@ void initialize_system_from_json(const std::string& filepath, seahowl::core::Sys
     auto nonlinear_steps = statics_json.at("nonlinear_steps").get<int>();
     if (linear_step && nonlinear_steps > 0) {
         system_core.elasto.do_statics(linear_step, nonlinear_steps);
-        spdlog::debug("Performed statics prestep with linear step as {} and {} nonlinear steps.", linear_step,
-                      nonlinear_steps);
-    } else {
-        // need to do tiny time step before system initialization if statics not done
-        // this is necessary for moorings for example (needed for Chrono to set element length element)
-        double tiny_dt = 1e-6;
-        spdlog::debug("Making small time step before initializing system.");
-        system_core.step(tiny_dt);
-        system_core.set_time(system_core.get_time() - tiny_dt);
     }
 
     system_core.initialize(system_core.get_time(), dt);
