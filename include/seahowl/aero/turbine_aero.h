@@ -2,6 +2,7 @@
 
 #include "seahowl/aero/rotor_aero.h"
 #include "seahowl/aero/tower_aero.h"
+#include "seahowl/hydro/floater_hydro.h"
 #include "seahowl/commons/component_fluid.h"
 
 #include <vector>
@@ -31,6 +32,8 @@ class TurbineAero : public ComponentFluid {
     seahowl::aero::RotorNacelleAssemblyAero rna;
     /** @brief Tower of the turbine. */
     seahowl::aero::TowerAero tower;
+    /** @brief Foundation of the turbine. */
+    std::shared_ptr<seahowl::hydro::FoundationFluid> foundation;
 
     /**
      * @brief Constructor.

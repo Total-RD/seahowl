@@ -13,6 +13,18 @@ using seahowl::env::FluidModel;
 MooringHydro::MooringHydro() {}
 
 void MooringHydro::build() {
+    // check that discretization_fractions was defined, otherwise take reference point fractions
+    if (discretization_fractions.size() == 0) {
+        throw std::runtime_error("Mooring hydro discretization was not defined.");
+    } else if (discretization_fractions.size() == 1) {
+        double npoints = discretization_fractions[0] + 1;
+        double dp = 1.0 / (npoints - 1);
+        discretization_fractions.clear();
+        for (int ii = 0; ii < int(npoints); ii++) {
+            discretization_fractions.push_back(ii * dp);
+        }
+    }
+
     // nodes
     nodes.clear();
     for (auto& fraction : discretization_fractions) {

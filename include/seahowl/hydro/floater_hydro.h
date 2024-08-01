@@ -19,10 +19,15 @@ namespace seahowl {
 /**@brief Hydrodynamic module */
 namespace hydro {
 
+class FoundationFluid : public ComponentFluid {
+  public:
+    virtual void build() = 0;
+};
+
 /**
  * @brief Floater of wind turbine as an hydrodynamic component.
  */
-class FloaterHydro : public ComponentFluid {
+class FloaterHydro : public FoundationFluid {
   public:
     /** @brief Mooring system of the floater. */
     std::unique_ptr<MooringSystemHydro> mooring_system;
@@ -31,6 +36,8 @@ class FloaterHydro : public ComponentFluid {
      * @brief Constructor.
      */
     FloaterHydro();
+
+    virtual void build() override;
 
     virtual void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
 };

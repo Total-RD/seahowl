@@ -3,6 +3,7 @@
 #include "seahowl/core/component.h"
 #include "seahowl/core/rotor.h"
 #include "seahowl/core/tower.h"
+#include "seahowl/core/floater.h"
 
 #include <vector>
 
@@ -48,6 +49,8 @@ class Turbine : public ComponentDynamic {
     Tower tower;
     /** @brief Controller of the turbine. */
     std::shared_ptr<seahowl::servo::Controller> controller;
+    /** @brief Foundation of the turbine. */
+    std::shared_ptr<Foundation> foundation;
 
     // parameters
     //

@@ -2,7 +2,9 @@
 
 #include "seahowl/core/mooring.h"
 #include "seahowl/elasto/floater_elasto.h"
+#include "seahowl/elasto/mooring_elasto.h"
 #include "seahowl/hydro/floater_hydro.h"
+#include "seahowl/hydro/mooring_hydro.h"
 
 #include <memory>
 #include <vector>
@@ -19,11 +21,14 @@ Floater::Floater(FloaterElasto& elasto, FloaterHydro& hydro) : elasto(elasto), h
 void Floater::initialize_this(double time, double dt) {
     mooring_system->initialize(time, dt);
 
+    elasto.initialize();
+
     spdlog::info("Initialized floater of total mass {:.4}kg (with moorings).", elasto.get_mass());
 }
 
 void Floater::prestep(double time, double dt) {
     mooring_system->prestep(time, dt);
+    elasto.prestep(time, dt);
 }
 
 void Floater::poststep(double time, double dt) {

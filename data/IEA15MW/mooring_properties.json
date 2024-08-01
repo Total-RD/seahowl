@@ -4,7 +4,7 @@
   "stiffness_bending": 0.0,
   "density_linear": 685.0,
   "drag_coefficient_normal": 1.11,
-  "drag_coefficient_tangential": 0.20,
+  "drag_coefficient_axial": 0.20,
   "added_mass_coefficient_normal": 0.82,
-  "added_mass_coefficient_tangential": 0.27
+  "added_mass_coefficient_axial": 0.27
 }

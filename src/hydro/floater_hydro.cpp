@@ -11,6 +11,10 @@ FloaterHydro::FloaterHydro() {
     mooring_system = std::make_unique<MooringSystemHydro>();
 }
 
+void FloaterHydro::build() {
+    mooring_system->build();
+}
+
 void FloaterHydro::compute_fluid_loads(const FluidModel& fluid_model, double time) {
     mooring_system->compute_fluid_loads(fluid_model, time);
 }
