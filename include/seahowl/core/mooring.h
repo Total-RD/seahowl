@@ -107,6 +107,8 @@ class Mooring : public ComponentDynamic {
     void update_loads_elasto();
 
   private:
+    void perform_sanity_check();
+
     /**
      * @brief Initialize mooring, called before starting the simulation.
      *
@@ -153,6 +155,7 @@ struct MooringSystem : public ComponentDynamic {
     void build() override;
 
   private:
+    void perform_sanity_check();
     void initialize_this(double time, double dt) override;
 };
 

@@ -12,7 +12,20 @@ using namespace seahowl::hydro;
 
 Mooring::Mooring(MooringElastoFEA& elasto, MooringHydro& hydro) : elasto(elasto), hydro(hydro) {}
 
+void Mooring::perform_sanity_check() {
+    if (elasto.length != hydro.length) {
+        throw std::runtime_error("Mooring has different lengths: " + std::to_string(elasto.length) +
+                                 " for elasto and " + std::to_string(hydro.length) + " for hydro.");
+    }
+    if (elasto.diameter != hydro.diameter) {
+        throw std::runtime_error("Mooring has different diameters: " + std::to_string(elasto.diameter) +
+                                 " for elasto and " + std::to_string(hydro.diameter) + " for hydro.");
+    }
+}
+
 void Mooring::initialize_this(double time, double dt) {
+    perform_sanity_check();
+
     // mappings
     compute_mapping_hydro2elasto();
     compute_mapping_elasto2hydro();
@@ -113,7 +126,32 @@ void Mooring::update_loads_elasto() {
 MooringSystem::MooringSystem(seahowl::elasto::MooringSystemElasto& elasto, seahowl::hydro::MooringSystemHydro& hydro)
     : elasto(elasto), hydro(hydro) {}
 
+void MooringSystem::perform_sanity_check() {
+    for (auto& mooring : moorings) {
+        // check that moorings are also present in their elasto and hydro system counterparts
+        bool found_elasto = false;
+        bool found_hydro = false;
+        for (auto& mooring_elasto : elasto.moorings) {
+            if (&mooring->elasto == &*mooring_elasto) {
+                found_elasto = true;
+            }
+        }
+        if (!found_elasto) {
+            throw std::runtime_error("Did not find mooring in mooring_system elasto class");
+        }
+        for (auto& mooring_hydro : hydro.moorings) {
+            if (&mooring->hydro == &*mooring_hydro) {
+                found_hydro = true;
+            }
+        }
+        if (!found_hydro) {
+            throw std::runtime_error("Did not find mooring in mooring_system hydro class");
+        }
+    }
+}
+
 void MooringSystem::initialize_this(double time, double dt) {
+    perform_sanity_check();
     for (auto& mooring : moorings) {
         mooring->initialize(time, dt);
     }
