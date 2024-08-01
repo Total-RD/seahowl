@@ -1,4 +1,6 @@
 #include <seahowl/elasto/mooring_elasto.h>
+#include <seahowl/hydro/mooring_hydro.h>
+#include <seahowl/core/mooring.h>
 #include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/commons/numerics.h>
 #include <seahowl/env/soil_models.h>
@@ -22,14 +24,16 @@ using namespace seahowl;
 using namespace seahowl::elasto;
 
 void setup_cables(seahowl::elasto::SystemElasto& system,
-                  seahowl::elasto::MooringElastoFEA& mooring,
+                  seahowl::core::Mooring& mooring,
                   seahowl::env::SoilModel& seabed,
                   seahowl::env::FluidModel& fluid,
                   double dt = 0.01,
                   int nsteps = 1000) {
+    auto& mooring_elasto = mooring.elasto;
+
     // check that mooring was built properly
-    int nb_elements = mooring.elements.size();
-    if (nb_elements != mooring.discretization_fractions.size() - 1) {
+    int nb_elements = mooring_elasto.elements.size();
+    if (nb_elements != mooring_elasto.discretization_fractions.size() - 1) {
         throw std::runtime_error(
             "Number of elements and discretization fractions on mooring do not match (build mooring first?).");
     }
@@ -39,9 +43,9 @@ void setup_cables(seahowl::elasto::SystemElasto& system,
     std::vector<double> lengths_final(nb_elements);
     std::vector<double> lengths_delta(nb_elements);
     for (size_t idx_el = 0; idx_el < nb_elements; idx_el++) {
-        auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring.elements[idx_el]);
-        lengths_final[idx_el] =
-            mooring.length * (mooring.discretization_fractions[idx_el + 1] - mooring.discretization_fractions[idx_el]);
+        auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring_elasto.elements[idx_el]);
+        lengths_final[idx_el] = mooring_elasto.length * (mooring_elasto.discretization_fractions[idx_el + 1] -
+                                                         mooring_elasto.discretization_fractions[idx_el]);
         lengths_initial[idx_el] = (element.nodes[1]->get_position() - element.nodes[0]->get_position()).norm();
         lengths_delta[idx_el] = (lengths_final[idx_el] - lengths_initial[idx_el]) / nsteps;
     }
@@ -49,12 +53,14 @@ void setup_cables(seahowl::elasto::SystemElasto& system,
     // apply length increments dynamically
     for (int step = 0; step <= nsteps; step++) {
         for (int idx_el = 0; idx_el < nb_elements; idx_el++) {
-            auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring.elements[idx_el]);
+            auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*mooring_elasto.elements[idx_el]);
             element.set_rest_length(lengths_initial[idx_el] + lengths_delta[idx_el] * step);
         }
-        mooring.compute_hydro_loads(fluid, 0.0);
-        mooring.compute_seabed_loads(seabed);
+        mooring.prestep(0.0, dt);
+        mooring.apply_fluid_model(fluid, 0.0);
+        mooring.apply_soil_model(seabed, 0.0);
         system.step(dt);
+        mooring.poststep(0.0, dt);
     }
 }
 
@@ -79,24 +85,37 @@ void run_simulation() {
     system_elasto.add(anchor);
 
     // mooring line
-    auto mooring = seahowl::elasto::MooringElastoFEA(fairlead, anchor);
-    mooring.length = 850.0;
-    mooring.diameter = 0.333;
-    mooring.stiffness_axial = 3270e6;
-    mooring.stiffness_bending = 0.0;
-    mooring.density_linear = 685.0;
-    mooring.drag_coefficient_normal = 2.0;
-    mooring.drag_coefficient_tangential = 1.15;
-    mooring.added_mass_coefficient_normal = 1.0;
-    mooring.added_mass_coefficient_tangential = 1.0;
-    mooring.discretization_fractions = {};
+    double mooring_length = 850.0;
+    double mooring_diameter = 0.333;
+    std::vector<double> mooring_discretization;
     int nelements = 40;
     for (int ii = 0; ii < nelements + 1; ii++) {
-        mooring.discretization_fractions.push_back(1.0 / nelements * ii);
+        mooring_discretization.push_back(1.0 / nelements * ii);
     }
-    //
+
+    auto mooring_elasto = seahowl::elasto::MooringElastoFEA(fairlead, anchor);
+    mooring_elasto.length = mooring_length;
+    mooring_elasto.diameter = mooring_diameter;
+    mooring_elasto.discretization_fractions = mooring_discretization;
+    mooring_elasto.stiffness_axial = 3270e6;
+    mooring_elasto.stiffness_bending = 0.0;
+    mooring_elasto.density_linear = 685.0;
+
+    auto mooring_hydro = seahowl::hydro::MooringHydro();
+    mooring_hydro.length = mooring_length;
+    mooring_hydro.diameter = mooring_diameter;
+    mooring_hydro.discretization_fractions = mooring_discretization;
+    mooring_hydro.coefficients.drag_normal = 2.0;
+    mooring_hydro.coefficients.drag_axial = 1.15;
+    mooring_hydro.coefficients.added_mass_normal = 1.0;
+    mooring_hydro.coefficients.added_mass_axial = 1.0;
+
+    auto mooring = seahowl::core::Mooring(mooring_elasto, mooring_hydro);
+
     mooring.build();
-    mooring.assemble(system_elasto);
+    mooring.elasto.assemble(system_elasto);
+    system_elasto.assemble();
+    mooring.initialize(0.0, 0.0);
 
     auto seabed = seahowl::env::LinearSoilModel();
     seabed.soil_position = 0.0;
@@ -117,7 +136,7 @@ void run_simulation() {
     std::vector<seahowl::io::OutputMeshVTK> vtk_outputs;
     if (output_vtk) {
         create_directory("./output");
-        auto& post_mooring = vtk_outputs.emplace_back(mooring);
+        auto& post_mooring = vtk_outputs.emplace_back(mooring_elasto);
         post_mooring.initialize("./output/mooring");
     }
 #endif
@@ -136,11 +155,13 @@ void run_simulation() {
     spdlog::info("Cables ready.");
     while (true) {
         time += system_elasto.get_time();
-        mooring.compute_hydro_loads(fluid, system_elasto.get_time());
-        mooring.compute_seabed_loads(seabed);
+        mooring.prestep(time, dt);
+        mooring.apply_fluid_model(fluid, system_elasto.get_time());
+        mooring.apply_soil_model(seabed, system_elasto.get_time());
         system_elasto.step(dt);
+        mooring.poststep(time, dt);
         step += 1;
-        spdlog::info("time: {}, tension {}.", time, mooring.fairlead_link->get_reaction_force().norm());
+        spdlog::info("time: {}, tension {}.", time, mooring.elasto.fairlead_link->get_reaction_force().norm());
 #ifdef HAVE_VTK
         if (output_vtk) {
             for (auto const& vtk_output : vtk_outputs) {

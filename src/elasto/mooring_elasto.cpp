@@ -157,56 +157,6 @@ void MooringElastoFEA::assemble_this(SystemElasto& system) {
     gravitational_acceleration = system.get_gravitational_acceleration();
 }
 
-void MooringElastoFEA::compute_hydro_loads(seahowl::env::FluidModel& fluid_model, double time) {
-    for (int ii = 0; ii < nodes.size(); ii++) {
-        nodes[ii]->set_force(Vector3d(0.0, 0.0, 0.0));
-    }
-
-    auto area = PI * pow(diameter, 2) / 4.0;
-
-    for (int ii = 0; ii < elements.size(); ii++) {
-        auto& element = elements[ii];
-        auto element_length = std::dynamic_pointer_cast<ElementMooringElastoChrono>(element)->get_rest_length();
-
-        // loads nodes
-        for (int ii = 0; ii < 2; ii++) {
-            auto dir = element->nodes[ii]->get_direction();
-            auto pos = element->nodes[ii]->get_position();
-            auto fluid_density = fluid_model.get_fluid_density(pos, time);
-            auto load_buoyancy = fluid_density * area * (-gravitational_acceleration);
-
-            // drag
-            auto fluid_velocity = Vector3d(0.0, 0.0, 0.0);
-            auto velocity_relative = fluid_velocity - element->nodes[ii]->get_velocity();
-            auto velocity_tangential = dir * velocity_relative.dot(dir);
-            auto velocity_normal = velocity_relative - velocity_tangential;
-
-            // load drag per unit length
-            auto load_drag_axial = 0.5 * fluid_density * drag_coefficient_tangential * PI * diameter *
-                                   velocity_tangential.norm() * velocity_tangential;
-            auto load_drag_normal =
-                0.5 * fluid_density * drag_coefficient_normal * diameter * velocity_normal.norm() * velocity_normal;
-            auto load_drag = load_drag_axial + load_drag_normal;
-
-            // added mass
-            auto fluid_acceleration = Vector3d(0.0, 0.0, 0.0);
-            auto acceleration_relative = fluid_acceleration - element->nodes[ii]->get_acceleration();
-            auto acceleration_tangential = dir * acceleration_relative.dot(dir);
-            auto acceleration_normal = acceleration_relative - acceleration_tangential;
-            // load added mass per unit length
-            auto load_added_mass_axial =
-                fluid_density * added_mass_coefficient_tangential * area * acceleration_tangential;
-            auto load_added_mass_normal = fluid_density * added_mass_coefficient_normal * area * acceleration_normal;
-            auto load_added_mass_fluid = fluid_density * area * fluid_acceleration;
-            auto load_added_mass = load_added_mass_axial + load_added_mass_normal;
-
-            // apply load drag over half element (each node gets half of a given element)
-            auto load_half_element = (load_drag + load_added_mass + load_buoyancy) * 0.5 * element_length;
-            element->nodes[ii]->set_force(element->nodes[ii]->get_force() + load_half_element);
-        }
-    }
-}
-
 void MooringElastoFEA::compute_seabed_loads(const seahowl::env::SoilModel& seabed) {
     for (auto& element : elements) {
         auto element_length = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_rest_length();

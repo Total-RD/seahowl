@@ -39,6 +39,10 @@ void Floater::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double ti
     mooring_system->apply_fluid_model(fluid_model, time);
 }
 
+void Floater::apply_soil_model(seahowl::env::SoilModel& soil_model, double time) {
+    mooring_system->apply_soil_model(soil_model, time);
+}
+
 void Floater::build() {
     // build elasto
     elasto.build();

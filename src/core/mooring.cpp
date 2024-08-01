@@ -37,6 +37,10 @@ void Mooring::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double ti
     hydro.compute_fluid_loads(fluid_model, time);
 }
 
+void Mooring::apply_soil_model(seahowl::env::SoilModel& soil_model, double time) {
+    elasto.compute_seabed_loads(soil_model);
+}
+
 void Mooring::build() {
     // build
     elasto.build();
@@ -95,7 +99,7 @@ void Mooring::update_loads_elasto() {
     elasto.reset_loads();
     if (hydro.loads.size() != mapping_hydro2elasto_elements.size()) {
         throw std::runtime_error("Mooring: length of vector of loads (" + std::to_string(hydro.loads.size()) +
-                                 " and length of hydro to elasto mapping(" +
+                                 ") and length of hydro to elasto mapping (" +
                                  std::to_string(mapping_hydro2elasto_elements.size()) + ") do not match.");
     }
     auto offset = Vector3d(0.0, 0.0, 0.0);
@@ -130,6 +134,12 @@ void MooringSystem::poststep(double time, double dt) {
 void MooringSystem::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
     for (auto& mooring : moorings) {
         mooring->apply_fluid_model(fluid_model, time);
+    }
+}
+
+void MooringSystem::apply_soil_model(seahowl::env::SoilModel& soil_model, double time) {
+    for (auto& mooring : moorings) {
+        mooring->apply_soil_model(soil_model, time);
     }
 }
 

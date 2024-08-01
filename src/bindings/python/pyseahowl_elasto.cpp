@@ -294,7 +294,6 @@ void initialize_pyseahowl_elasto(py::module& m) {
                seahowl::elasto::MooringElasto, seahowl::elasto::ComponentElastoFEA>(m_elasto, "MooringElastoFEA")
         .def(py::init<seahowl::elasto::BodyElasto&, seahowl::elasto::BodyElasto&>())
         .def("build", &seahowl::elasto::MooringElastoFEA::build)
-        .def("compute_hydro_loads", &seahowl::elasto::MooringElastoFEA::compute_hydro_loads)
         .def_readwrite("length", &seahowl::elasto::MooringElastoFEA::length)
         .def_readwrite("diameter", &seahowl::elasto::MooringElastoFEA::diameter)
         .def_readwrite("stiffness_axial", &seahowl::elasto::MooringElastoFEA::stiffness_axial)

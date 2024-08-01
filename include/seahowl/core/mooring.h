@@ -4,11 +4,11 @@
 #include <vector>
 #include <deque>
 
+#include "seahowl/commons/utils.h"  // for DiscretizationPoint
 #include "seahowl/core/component.h"
 
 // forward declarations
 namespace seahowl {
-struct DiscretizationPoint;
 namespace elasto {
 class MooringElastoFEA;
 class MooringSystemElasto;
@@ -72,6 +72,7 @@ class Mooring : public ComponentDynamic {
     void poststep(double time, double dt) override;
 
     void apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) override;
+    void apply_soil_model(seahowl::env::SoilModel& soil_model, double time) override;
 
     /**
      * @brief Builds the mooring (hydro and elasto part).
@@ -148,6 +149,7 @@ struct MooringSystem : public ComponentDynamic {
     void poststep(double time, double dt) override;
 
     void apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) override;
+    void apply_soil_model(seahowl::env::SoilModel& soil_model, double time) override;
     void build() override;
 
   private:

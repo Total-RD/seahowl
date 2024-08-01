@@ -121,14 +121,6 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
     void build_nodes(const std::vector<ReferencePointElasto>& discretized_points);
 
     /**
-     * @brief Computes hydro loads on cable.
-     *
-     * param[in] fluid_model Fluid model.
-     * param[in] time Simulation time.
-     */
-    void compute_hydro_loads(seahowl::env::FluidModel& fluid_model, double time);
-
-    /**
      * @brief Computes seabed interaction loads on cable.
      *
      * param[in] seabed Seabed model.
