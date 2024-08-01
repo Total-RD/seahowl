@@ -2,6 +2,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
 
+#include <seahowl/commons/component_fluid.h>
 #include <seahowl/aero/system_aero.h>
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/aero/rotor_aero.h>
@@ -32,29 +33,30 @@ void initialize_pyseahowl_aero(py::module& m) {
         .def_readwrite("nodes", &seahowl::aero::BladeAero::nodes);
 
     // aero/rotor_aero.h
-    py::class_<seahowl::aero::RotorNacelleAssemblyAero, std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero>>(
-        m_aero, "RotorNacelleAssemblyAero")
+    py::class_<seahowl::aero::RotorNacelleAssemblyAero, std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero>,
+               seahowl::ComponentFluid>(m_aero, "RotorNacelleAssemblyAero")
         .def(py::init<>())
-        .def_readonly("body_nacelle", &seahowl::aero::RotorNacelleAssemblyAero::body_nacelle)
-        .def("compute_fluid_loads", &seahowl::aero::RotorNacelleAssemblyAero::compute_fluid_loads);
+        .def_readonly("body_nacelle", &seahowl::aero::RotorNacelleAssemblyAero::body_nacelle);
 
     // aero/rotor_aero.h
-    py::class_<seahowl::aero::RotorAero, std::shared_ptr<seahowl::aero::RotorAero>>(m_aero, "RotorAero")
+    py::class_<seahowl::aero::RotorAero, std::shared_ptr<seahowl::aero::RotorAero>, seahowl::ComponentFluid>(
+        m_aero, "RotorAero")
         .def_readwrite("blades", &seahowl::aero::RotorAero::blades)
-        .def_readonly("body_hub", &seahowl::aero::RotorAero::body_hub)
-        .def("compute_fluid_loads", &seahowl::aero::RotorAero::compute_fluid_loads);
+        .def_readonly("body_hub", &seahowl::aero::RotorAero::body_hub);
 
     // aero/tower_aero.h
-    py::class_<seahowl::aero::TowerAero, std::shared_ptr<seahowl::aero::TowerAero>>(m_aero, "TowerAero")
+    py::class_<seahowl::aero::TowerAero, std::shared_ptr<seahowl::aero::TowerAero>, seahowl::ComponentFluid>(
+        m_aero, "TowerAero")
         .def(py::init<>())
         .def_readwrite("discretization_fractions", &seahowl::aero::TowerAero::discretization_fractions)
         .def_readwrite("nodes", &seahowl::aero::TowerAero::nodes)
-        .def("build", &seahowl::aero::TowerAero::build)
-        .def("compute_fluid_loads", &seahowl::aero::TowerAero::compute_fluid_loads);
+        .def("build", &seahowl::aero::TowerAero::build);
 
     // aero/turbine_aero.h
-    py::class_<seahowl::aero::TurbineAero, std::shared_ptr<seahowl::aero::TurbineAero>>(m_aero, "TurbineAero")
+    py::class_<seahowl::aero::TurbineAero, std::shared_ptr<seahowl::aero::TurbineAero>, seahowl::ComponentFluid>(
+        m_aero, "TurbineAero")
         .def(py::init<>())
         .def_readonly("rna", &seahowl::aero::TurbineAero::rna)
-        .def("compute_fluid_loads", &seahowl::aero::TurbineAero::compute_fluid_loads);
+        .def_readonly("tower", &seahowl::aero::TurbineAero::tower)
+        .def_readonly("foundation", &seahowl::aero::TurbineAero::foundation);
 }

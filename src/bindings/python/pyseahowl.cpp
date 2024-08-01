@@ -4,6 +4,7 @@
 
 #include <seahowl/commons/entities.h>
 #include <seahowl/commons/utils.h>
+#include <seahowl/commons/component_fluid.h>
 
 namespace py = pybind11;
 
@@ -43,6 +44,10 @@ PYBIND11_MODULE(seahowl, m) {
     py::class_<seahowl::EntityDynamicEigen, std::shared_ptr<seahowl::EntityDynamicEigen>, seahowl::EntityDynamic>(
         m, "EntityDynamicEigen")
         .def(py::init<>());
+
+    // component
+    py::class_<seahowl::ComponentFluid, std::shared_ptr<seahowl::ComponentFluid>>(m, "ComponentFluid")
+        .def("compute_fluid_loads", &seahowl::ComponentFluid::compute_fluid_loads);
 
     // env
     initialize_pyseahowl_env(m);

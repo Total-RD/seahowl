@@ -252,6 +252,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
                seahowl::elasto::ComponentElasto>(m_elasto, "TurbineElasto")
         .def_readonly("rna", &seahowl::elasto::TurbineElasto::rna)
         .def_readonly("tower", &seahowl::elasto::TurbineElasto::tower)
+        .def_readonly("foundation", &seahowl::elasto::TurbineElasto::foundation)
         .def(py::init<>());
 
     // elasto/floater_elasto.h

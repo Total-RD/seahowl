@@ -54,13 +54,13 @@ class MooringHydro : public ComponentFluid {
     /**
      * @brief Compute fluid loads on mooring using Morison's approach on cylindrical elements.
      */
-    void compute_fluid_loads(const env::FluidModel& fluid_model, double time);
+    void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
 };
 
 /**
  * @brief Mooring system class gathering mooring lines.
  */
-struct MooringSystemHydro {
+struct MooringSystemHydro : public ComponentFluid {
   public:
     /** @brief List of mooring lines. */
     std::deque<std::shared_ptr<MooringHydro>> moorings;
@@ -78,7 +78,7 @@ struct MooringSystemHydro {
     /**
      * @brief Compute fluid loads on mooring using Morison's approach on cylindrical elements.
      */
-    void compute_fluid_loads(const env::FluidModel& fluid_model, double time);
+    void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
 };
 
 }  // namespace hydro
