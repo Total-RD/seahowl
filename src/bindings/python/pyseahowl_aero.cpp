@@ -17,7 +17,16 @@ void initialize_pyseahowl_aero(py::module& m) {
 
     // aero/system_aero.h
     py::class_<seahowl::aero::SystemAero, std::shared_ptr<seahowl::aero::SystemAero>>(m_aero, "SystemAero")
-        .def(py::init<>());
+        .def(py::init<>())
+        .def("add",
+             static_cast<void (seahowl::aero::SystemAero::*)(std::shared_ptr<seahowl::aero::TurbineAero> turbine)>(
+                 &seahowl::aero::SystemAero::add))
+        .def("add",
+             static_cast<void (seahowl::aero::SystemAero::*)(std::shared_ptr<seahowl::ComponentFluid> component)>(
+                 &seahowl::aero::SystemAero::add))
+        .def_readonly("turbines", &seahowl::aero::SystemAero::turbines)
+        .def_readonly("components", &seahowl::aero::SystemAero::components);
+    ;
 
     // aero/blade_aero.h
     py::class_<seahowl::aero::BladeNodeAero, std::shared_ptr<seahowl::aero::BladeNodeAero>,

@@ -17,6 +17,8 @@ class SystemElasto {
   public:
     /** @brief Turbines in system. */
     std::deque<std::shared_ptr<TurbineElasto>> turbines{};
+    /** @brief Components in system. */
+    std::deque<std::shared_ptr<ComponentElasto>> components{};
     /** @brief Mesh used for FEA elements. */
     std::shared_ptr<MeshElasto> mesh;
     /** @brief Whether system has been assembled or not. */
@@ -95,6 +97,10 @@ class SystemElasto {
      * @param[in] link Link to add to system.
      */
     virtual void add(LinkMatrixStiffnessDamping& link) = 0;
+
+    virtual void add(std::shared_ptr<ComponentElasto> component) { components.push_back(component); };
+
+    virtual void add(std::shared_ptr<TurbineElasto> turbine) { turbines.push_back(turbine); }
 };
 
 }  // namespace elasto

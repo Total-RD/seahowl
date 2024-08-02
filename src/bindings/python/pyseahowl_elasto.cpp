@@ -85,7 +85,13 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("add",
              static_cast<void (seahowl::elasto::SystemElasto::*)(seahowl::elasto::LinkMatrixStiffnessDamping & link)>(
                  &seahowl::elasto::SystemElasto::add))
-        .def_readonly("turbines", &seahowl::elasto::SystemElasto::turbines);
+        .def("add", static_cast<void (seahowl::elasto::SystemElasto::*)(
+                        std::shared_ptr<seahowl::elasto::TurbineElasto> turbine)>(&seahowl::elasto::SystemElasto::add))
+        .def("add",
+             static_cast<void (seahowl::elasto::SystemElasto::*)(
+                 std::shared_ptr<seahowl::elasto::ComponentElasto> component)>(&seahowl::elasto::SystemElasto::add))
+        .def_readonly("turbines", &seahowl::elasto::SystemElasto::turbines)
+        .def_readonly("components", &seahowl::elasto::SystemElasto::components);
 
     // elasto/chrono_adapters.h
     py::class_<seahowl::elasto::BodyElastoChrono, std::shared_ptr<seahowl::elasto::BodyElastoChrono>,

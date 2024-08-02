@@ -117,14 +117,14 @@ class System : public ComponentDynamic {
      *
      * @param[in] turbine Turbine to add to system.
      */
-    void add_turbine(std::shared_ptr<seahowl::core::Turbine> turbine);
+    void add(std::shared_ptr<seahowl::core::Turbine> turbine);
 
     /**
      * @brief Adds component to system.
      *
      * @param[in] component Component to add to system.
      */
-    void add_component(std::shared_ptr<seahowl::core::ComponentDynamic> component);
+    void add(std::shared_ptr<seahowl::core::ComponentDynamic> component);
 
   private:
     /**

@@ -315,10 +315,10 @@ void System::run_presimulation(double presim_duration, double presim_dt, bool fi
     spdlog::info("Presimulation finished.");
 }
 
-void System::add_turbine(std::shared_ptr<Turbine> turbine) {
+void System::add(std::shared_ptr<Turbine> turbine) {
     turbines.push_back(turbine);
 }
 
-void System::add_component(std::shared_ptr<ComponentDynamic> component) {
+void System::add(std::shared_ptr<ComponentDynamic> component) {
     components.push_back(component);
 }

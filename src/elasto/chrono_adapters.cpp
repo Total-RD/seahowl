@@ -791,6 +791,9 @@ void SystemElastoChrono::assemble() {
     for (auto& turbine : turbines) {
         turbine->assemble(*this);
     }
+    for (auto& component : components) {
+        component->assemble(*this);
+    }
     is_assembled = true;
 
     // needed for some Chrono (e.g. for moorings or HydroChrono floater)
