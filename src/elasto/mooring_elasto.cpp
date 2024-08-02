@@ -11,6 +11,10 @@ using namespace seahowl::elasto;
 
 MooringSystemElasto::MooringSystemElasto() {}
 
+void MooringSystemElasto::add_mooring(std::shared_ptr<MooringElasto> mooring) {
+    moorings.push_back(mooring);
+}
+
 void MooringSystemElasto::prestep(double time, double dt) {
     for (auto& mooring : moorings) {
         mooring->prestep(time, dt);

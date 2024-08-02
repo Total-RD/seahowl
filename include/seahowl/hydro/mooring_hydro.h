@@ -71,6 +71,13 @@ struct MooringSystemHydro : public ComponentFluid {
     MooringSystemHydro();
 
     /**
+     * @brief Adds mooring to mooring system.
+     *
+     * @param[in] mooring Mooring to add to mooring system.
+     */
+    void add_mooring(std::shared_ptr<MooringHydro> mooring);
+
+    /**
      * @brief Builds the mooring system.
      */
     void build();

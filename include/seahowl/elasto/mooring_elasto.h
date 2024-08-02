@@ -56,14 +56,21 @@ class MooringElasto : public virtual ComponentElasto {
 struct MooringSystemElasto : public ComponentElasto {
   public:
     /** @brief List of mooring lines. */
-    std::deque<std::shared_ptr<MooringElasto>> moorings;
+    std::deque<std::shared_ptr<MooringElasto>> moorings{};
     /** @brief List of anchors. */
-    std::deque<std::shared_ptr<BodyElasto>> anchors;
+    std::deque<std::shared_ptr<BodyElasto>> anchors{};
 
     /**
      * @brief Constructor.
      */
     MooringSystemElasto();
+
+    /**
+     * @brief Adds mooring to mooring system.
+     *
+     * @param[in] mooring Mooring to add to mooring system.
+     */
+    void add_mooring(std::shared_ptr<MooringElasto> mooring);
 
     virtual void build() override;
     virtual void prestep(double time, double dt);
@@ -96,14 +103,6 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
     double density_linear = 0.0;
     /** @brief Unstretched length of the mooring line. */
     double length = 0.0;
-    /** @brief Drag coefficient (normal) of the mooring line. */
-    double drag_coefficient_normal = 2.0;
-    /** @brief Drag coefficient (tangential) of the mooring line. */
-    double drag_coefficient_tangential = 1.15;
-    /** @brief Added mass coefficient (normal) of the mooring line. */
-    double added_mass_coefficient_normal = 1.0;
-    /** @brief Added mass coefficient (tangential) of the mooring line. */
-    double added_mass_coefficient_tangential = 1.0;
 
     /**
      * @brief Constructor.

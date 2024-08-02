@@ -126,6 +126,10 @@ void Mooring::update_loads_elasto() {
 MooringSystem::MooringSystem(seahowl::elasto::MooringSystemElasto& elasto, seahowl::hydro::MooringSystemHydro& hydro)
     : elasto(elasto), hydro(hydro) {}
 
+void MooringSystem::add_mooring(std::shared_ptr<Mooring> mooring) {
+    moorings.push_back(mooring);
+}
+
 void MooringSystem::perform_sanity_check() {
     for (auto& mooring : moorings) {
         // check that moorings are also present in their elasto and hydro system counterparts

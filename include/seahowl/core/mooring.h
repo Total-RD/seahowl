@@ -147,6 +147,13 @@ struct MooringSystem : public ComponentDynamic {
      */
     MooringSystem(seahowl::elasto::MooringSystemElasto& elasto, seahowl::hydro::MooringSystemHydro& hydro);
 
+    /**
+     * @brief Adds mooring to mooring system.
+     *
+     * @param[in] mooring Mooring to add to mooring system.
+     */
+    void add_mooring(std::shared_ptr<Mooring> mooring);
+
     void prestep(double time, double dt) override;
     void poststep(double time, double dt) override;
 

@@ -34,6 +34,8 @@ void System::initialize_this(double time, double dt) {
     // assemble elasto system if it hasn't been already
     if (!elasto.is_assembled) {
         elasto.assemble();
+    } else {
+        spdlog::warn("Elasto system was already assembled, not reassembling.");
     }
 
     // initialize all turbines

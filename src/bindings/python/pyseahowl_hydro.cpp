@@ -78,6 +78,7 @@ void initialize_pyseahowl_hydro(py::module& m) {
                seahowl::ComponentFluid>(m_hydro, "MooringSystemHydro")
         .def(py::init<>())
         .def_readonly("moorings", &seahowl::hydro::MooringSystemHydro::moorings)
+        .def("add_mooring", &seahowl::hydro::MooringSystemHydro::add_mooring)
         .def("build", &seahowl::hydro::MooringSystemHydro::build);
 
     // hydro/floater_hydro.h

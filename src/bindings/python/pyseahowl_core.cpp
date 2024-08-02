@@ -86,6 +86,10 @@ void initialize_pyseahowl_core(py::module& m) {
         .def(py::init<seahowl::elasto::MooringElastoFEA&, seahowl::hydro::MooringHydro&>())
         .def_property_readonly("elasto", [](seahowl::core::Mooring& mooring) { return &mooring.elasto; })
         .def_property_readonly("hydro", [](seahowl::core::Mooring& mooring) { return &mooring.hydro; });
+    py::class_<seahowl::core::MooringSystem, std::shared_ptr<seahowl::core::MooringSystem>,
+               seahowl::core::ComponentDynamic>(m_core, "MooringSystem")
+        .def_readonly("moorings", &seahowl::core::MooringSystem::moorings)
+        .def("add_mooring", &seahowl::core::MooringSystem::add_mooring);
 
     // core/floater.h
     py::class_<seahowl::core::Foundation, std::shared_ptr<seahowl::core::Foundation>, seahowl::core::ComponentDynamic>(

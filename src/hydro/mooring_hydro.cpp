@@ -57,6 +57,10 @@ void MooringHydro::compute_fluid_loads(const FluidModel& fluid_model, double tim
 
 MooringSystemHydro::MooringSystemHydro() {}
 
+void MooringSystemHydro::add_mooring(std::shared_ptr<MooringHydro> mooring) {
+    moorings.push_back(mooring);
+}
+
 void MooringSystemHydro::build() {
     for (auto& mooring : moorings) {
         mooring->build();

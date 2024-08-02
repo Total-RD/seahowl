@@ -281,8 +281,9 @@ void initialize_pyseahowl_elasto(py::module& m) {
     py::class_<seahowl::elasto::MooringSystemElasto, std::shared_ptr<seahowl::elasto::MooringSystemElasto>,
                seahowl::elasto::ComponentElasto>(m_elasto, "MooringSystemElasto")
         .def(py::init<>())
-        .def_readwrite("moorings", &seahowl::elasto::MooringSystemElasto::moorings)
-        .def_readwrite("anchors", &seahowl::elasto::MooringSystemElasto::anchors);
+        .def_readonly("moorings", &seahowl::elasto::MooringSystemElasto::moorings)
+        .def_readwrite("anchors", &seahowl::elasto::MooringSystemElasto::anchors)
+        .def("add_mooring", &seahowl::elasto::MooringSystemElasto::add_mooring);
     py::class_<seahowl::elasto::MooringElasto, std::shared_ptr<seahowl::elasto::MooringElasto>,
                seahowl::elasto::ComponentElasto>(m_elasto, "MooringElasto")
         .def_property_readonly("fairlead", [](seahowl::elasto::MooringElasto& mooring) { return &mooring.fairlead; })
@@ -299,11 +300,5 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readwrite("stiffness_axial", &seahowl::elasto::MooringElastoFEA::stiffness_axial)
         .def_readwrite("stiffness_bending", &seahowl::elasto::MooringElastoFEA::stiffness_bending)
         .def_readwrite("density_linear", &seahowl::elasto::MooringElastoFEA::density_linear)
-        .def_readwrite("drag_coefficient_normal", &seahowl::elasto::MooringElastoFEA::drag_coefficient_normal)
-        .def_readwrite("drag_coefficient_tangential", &seahowl::elasto::MooringElastoFEA::drag_coefficient_tangential)
-        .def_readwrite("added_mass_coefficient_normal",
-                       &seahowl::elasto::MooringElastoFEA::added_mass_coefficient_normal)
-        .def_readwrite("added_mass_coefficient_tangential",
-                       &seahowl::elasto::MooringElastoFEA::added_mass_coefficient_tangential)
         .def_readwrite("discretization_fractions", &seahowl::elasto::MooringElastoFEA::discretization_fractions);
 }
