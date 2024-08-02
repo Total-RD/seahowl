@@ -72,7 +72,9 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def_readwrite("loads", &seahowl::hydro::MooringHydro::loads)
         .def_readonly("nodes", &seahowl::hydro::MooringHydro::nodes)
         .def_readonly("elements", &seahowl::hydro::MooringHydro::elements)
-        .def("build", &seahowl::hydro::MooringHydro::build);
+        .def("build", &seahowl::hydro::MooringHydro::build)
+        .def("set_length", &seahowl::hydro::MooringHydro::set_length)
+        .def("set_diameter", &seahowl::hydro::MooringHydro::set_diameter);
 
     py::class_<seahowl::hydro::MooringSystemHydro, std::shared_ptr<seahowl::hydro::MooringSystemHydro>,
                seahowl::ComponentFluid>(m_hydro, "MooringSystemHydro")

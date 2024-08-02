@@ -12,6 +12,16 @@ using namespace seahowl::hydro;
 
 Mooring::Mooring(MooringElastoFEA& elasto, MooringHydro& hydro) : elasto(elasto), hydro(hydro) {}
 
+void Mooring::set_length(double length) {
+    elasto.set_length(length);
+    hydro.set_length(length);
+}
+
+void Mooring::set_diameter(double diameter) {
+    elasto.set_diameter(diameter);
+    hydro.set_diameter(diameter);
+}
+
 void Mooring::perform_sanity_check() {
     if (elasto.length != hydro.length) {
         throw std::runtime_error("Mooring has different lengths: " + std::to_string(elasto.length) +

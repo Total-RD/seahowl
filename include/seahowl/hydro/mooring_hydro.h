@@ -47,6 +47,20 @@ class MooringHydro : public ComponentFluid {
     MooringHydro();
 
     /**
+     * @brief Sets length of the mooring line.
+     *
+     * @param[in] length Length of the mooring line.
+     */
+    void set_length(double length);
+
+    /**
+     * @brief Sets diameter of the mooring line.
+     *
+     * @param[in] diameter Diameter of the mooring line.
+     */
+    void set_diameter(double diameter);
+
+    /**
      * @brief Builds the mooring.
      */
     void build();

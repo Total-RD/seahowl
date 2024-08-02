@@ -52,6 +52,20 @@ class Mooring : public ComponentDynamic {
     Mooring(seahowl::elasto::MooringElastoFEA& elasto, seahowl::hydro::MooringHydro& hydro);
 
     /**
+     * @brief Sets length of the mooring line.
+     *
+     * @param[in] length Length of the mooring line.
+     */
+    void set_length(double length);
+
+    /**
+     * @brief Sets diameter of the mooring line.
+     *
+     * @param[in] diameter Diameter of the mooring line.
+     */
+    void set_diameter(double diameter);
+
+    /**
      * @brief Prestep for mooring, called before elastodynamic stepping.
      *
      * Updates hydro loads on elasto component.

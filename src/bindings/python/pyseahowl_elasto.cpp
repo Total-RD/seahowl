@@ -296,7 +296,9 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_property_readonly("anchor", [](seahowl::elasto::MooringElasto& mooring) { return &mooring.anchor; })
         .def("get_tension_fairlead", &seahowl::elasto::MooringElasto::get_tension_fairlead)
         .def("get_tension_anchor", &seahowl::elasto::MooringElasto::get_tension_anchor)
-        .def("get_length", &seahowl::elasto::MooringElasto::get_length);
+        .def("get_length", &seahowl::elasto::MooringElasto::get_length)
+        .def("set_length", &seahowl::elasto::MooringElasto::set_length)
+        .def("set_diameter", &seahowl::elasto::MooringElasto::set_diameter);
     py::class_<seahowl::elasto::MooringElastoFEA, std::shared_ptr<seahowl::elasto::MooringElastoFEA>,
                seahowl::elasto::MooringElasto, seahowl::elasto::ComponentElastoFEA>(m_elasto, "MooringElastoFEA")
         .def(py::init<seahowl::elasto::BodyElasto&, seahowl::elasto::BodyElasto&>())
@@ -306,5 +308,13 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readwrite("stiffness_axial", &seahowl::elasto::MooringElastoFEA::stiffness_axial)
         .def_readwrite("stiffness_bending", &seahowl::elasto::MooringElastoFEA::stiffness_bending)
         .def_readwrite("density_linear", &seahowl::elasto::MooringElastoFEA::density_linear)
-        .def_readwrite("discretization_fractions", &seahowl::elasto::MooringElastoFEA::discretization_fractions);
+        .def_property_readonly(
+            "fairlead_link", [](seahowl::elasto::MooringElastoFEA& mooring) { return mooring.fairlead_link.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "anchor_link", [](seahowl::elasto::MooringElastoFEA& mooring) { return mooring.anchor_link.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly("fairlead", [](seahowl::elasto::MooringElastoFEA& mooring) { return &mooring.fairlead; })
+
+        .def_property_readonly("anchor", [](seahowl::elasto::MooringElastoFEA& mooring) { return &mooring.anchor; });
 }

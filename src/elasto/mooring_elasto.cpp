@@ -78,6 +78,18 @@ MooringElastoFEA::MooringElastoFEA(BodyElasto& fairlead, BodyElasto& anchor) : M
     anchor_link = std::make_unique<seahowl::elasto::LinkChronoCable>();
 }
 
+void MooringElastoFEA::set_length(double length) {
+    this->length = length;
+    for (int ii = 0; ii < elements.size(); ii++) {
+        dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*elements[ii])
+            .set_rest_length(length * abs(discretization_fractions[ii + 1] - discretization_fractions[ii]));
+    }
+}
+
+void MooringElastoFEA::set_diameter(double diameter) {
+    this->diameter = diameter;
+}
+
 void MooringElastoFEA::build() {
     // check that discretization_fractions was defined, otherwise take reference point fractions
     if (discretization_fractions.size() == 0) {

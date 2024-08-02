@@ -12,6 +12,20 @@ using seahowl::env::FluidModel;
 
 MooringHydro::MooringHydro() {}
 
+void MooringHydro::set_length(double length) {
+    this->length = length;
+    for (int ii = 0; ii < elements.size(); ii++) {
+        elements[ii].length = length * abs(discretization_fractions[ii + 1] - discretization_fractions[ii]);
+    }
+}
+
+void MooringHydro::set_diameter(double diameter) {
+    this->diameter = diameter;
+    for (auto& node : nodes) {
+        node.diameter = diameter;
+    }
+}
+
 void MooringHydro::build() {
     // check that discretization_fractions was defined, otherwise take reference point fractions
     if (discretization_fractions.size() == 0) {

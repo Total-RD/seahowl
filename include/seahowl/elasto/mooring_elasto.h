@@ -30,6 +30,20 @@ class MooringElasto : public virtual ComponentElasto {
     MooringElasto(BodyElasto& fairlead, BodyElasto& anchor);
 
     /**
+     * @brief Sets length of the mooring line.
+     *
+     * @param[in] length Length of the mooring line.
+     */
+    virtual void set_length(double length) = 0;
+
+    /**
+     * @brief Sets diameter of the mooring line.
+     *
+     * @param[in] diameter Diameter of the mooring line.
+     */
+    virtual void set_diameter(double diameter) = 0;
+
+    /**
      * @brief Prestep of the mooring.
      */
     virtual void prestep(double time, double dt){};
@@ -111,6 +125,20 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
      * @param[in] anchor Anchor body to attach to mooring.
      */
     MooringElastoFEA(BodyElasto& fairlead, BodyElasto& anchor);
+
+    /**
+     * @brief Sets length of the mooring line.
+     *
+     * @param[in] length Length of the mooring line.
+     */
+    virtual void set_length(double length) override;
+
+    /**
+     * @brief Sets diameter of the mooring line.
+     *
+     * @param[in] diameter Diameter of the mooring line.
+     */
+    virtual void set_diameter(double diameter) override;
 
     /**
      * @brief Builds the mooring (to call before assemble).
