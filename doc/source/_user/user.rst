@@ -265,50 +265,22 @@ The floater input file contains information for the floater and its mooring syst
 Tower input file
 ****************
 
-The tower input file is a reference file that should be defined only once per tower type and not be changed by the user (unless the tower properties themselves change).
+The tower input file is a CSV or JSON reference file that should be defined only once per tower type and not be changed by the user (unless the tower properties themselves change).
 All the options such as discretization of the tower during runtime are defined in the turbine input file.
 Only *reference* points are defined in this file, and interpolation between them wil be used if it does not match the chosen numerical discretization during the simulation.
 
-The tower input file contains the main properties of the tower such as its height (tower top), the height of its base (tower bottom), and damping coefficients. The rest of the properties are defined through reference points along the tower according to their "fraction", ranging from 0 (tower base) to 1 (tower top).
-Each reference point contains information about elasto properties (the lineic density, the fore-aft stiffness, and the side-side stiffness) and aero properties (the diameter, and the drag coefficient).
+* **x**, **y**, **z**: (float) position of reference point [m]
+* **diameter**: (float) diameter of tower at reference point [m]
+* **thickness**: (float) thickness of tower at reference point [m]
+* **density**: (float) linear density of tower at reference point [kg/m]
+* **young_modulus**: (float) Young's modulus of tower material at reference point [Pa]
+* **poisson_ratio**: (float) Poisson's ratio of tower material at reference point [-]
+* **damping_x**, **damping_y**, **damping_z**, **damping_t**: (float) Damping coefficients at reference point [-]
 
-* **type**: (string) type of tower ("cylinder" or "anisotropic").
-* **height**: (float) absolute height of towertop [m].
-* **base_height**: (float) absolute height of towerbase [m].
-* **damping_coefficients**: (array of floats of length 4) damping coefficients of blade.
-
-If type is "cylinder":
-
-* **options**:
-
-   * **density**: (float) volumic density of tower material [kg/m3]
-   * **young_modulus**: (float) Young's modulus of tower material [Pa]
-   * **poisson_ratio**: (float) Poisson's ratio of tower material [-]
-
-* **reference_points**: (list of dict) list of reference points.
-
-   * **fraction**: (float) normalized abscissa along tower (starting from base) of reference point.
-   * **diameter**: (float) outer diameter of tower at reference point [m].
-   * **thickness**: (float) thickness of tower at reference point [m].
-   * **drag_coefficient**: (float) drag coefficient of tower at reference point [-].
-
-If type is "anisotropic"
-
-* **reference_points**: (list of dict) list of reference points.
-
-   * **fraction**: (float) normalized abscissa along tower (starting from base) of reference point.
-   * **density**: (float) density of tower at reference point [kg/m].
-   * **stiffness_foreaft**: (float) fore-aft stiffness of tower at reference point [N.m2].
-   * **stiffness_sideside**: (float) side-side stiffness of tower at reference point [N.m2].
-   * **stiffness_axial**: (float) axial stiffness of tower at reference point [N.m2].
-   * **stiffness_torsion**: (float) torsional stiffness of tower at reference point [N.m2].
-   * **diameter**: (float) diameter of tower at reference point [m].
-   * **drag_coefficient**: (float) drag coefficient of tower at reference point [-].
-
-.. literalinclude:: ../../../data/IEA15MW/tower.json
+.. literalinclude:: ../../../data/IEA15MW/tower.csv
    :language: json
    :linenos:
-   :lines: -24
+   :lines: -3
    :caption: Tower input file example (truncated)
 
 

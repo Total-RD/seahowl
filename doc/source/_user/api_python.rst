@@ -6,46 +6,53 @@ Python API
    :template: custom-module-template.rst
    :recursive:
 
-   pyseahowl
+   seahowl
 
 .. autosummary::
    :toctree: _autosummary
    :template: custom-module-template.rst
    :recursive:
 
-   pyseahowl.core
+   seahowl.core
 
 .. autosummary::
    :toctree: _autosummary
    :template: custom-module-template.rst
    :recursive:
 
-   pyseahowl.env
+   seahowl.env
 
 .. autosummary::
    :toctree: _autosummary
    :template: custom-module-template.rst
    :recursive:
 
-   pyseahowl.elasto
+   seahowl.elasto
 
 .. autosummary::
    :toctree: _autosummary
    :template: custom-module-template.rst
    :recursive:
 
-   pyseahowl.aero
+   seahowl.aero
 
 .. autosummary::
    :toctree: _autosummary
    :template: custom-module-template.rst
    :recursive:
 
-   pyseahowl.servo
+   seahowl.hydro
 
 .. autosummary::
    :toctree: _autosummary
    :template: custom-module-template.rst
    :recursive:
 
-   pyseahowl.io
+   seahowl.servo
+
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+
+   seahowl.io

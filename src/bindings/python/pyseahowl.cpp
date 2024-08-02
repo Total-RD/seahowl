@@ -10,6 +10,7 @@ namespace py = pybind11;
 void initialize_pyseahowl_env(py::module& m);
 void initialize_pyseahowl_elasto(py::module& m);
 void initialize_pyseahowl_aero(py::module& m);
+void initialize_pyseahowl_hydro(py::module& m);
 void initialize_pyseahowl_servo(py::module& m);
 void initialize_pyseahowl_core(py::module& m);
 void initialize_pyseahowl_io(py::module& m);
@@ -50,6 +51,9 @@ PYBIND11_MODULE(seahowl, m) {
 
     // aero
     initialize_pyseahowl_aero(m);
+
+    // aero
+    initialize_pyseahowl_hydro(m);
 
     // servo
     initialize_pyseahowl_servo(m);

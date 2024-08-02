@@ -44,13 +44,13 @@ find_package(Doxygen
     OPTIONAL_COMPONENTS mscgen dia)
 
 set(DOXYGEN_PROJECT_BRIEF "Servo-Elasto-Aero-Hydro Offshore Wind Lab")
-
-set(DOXYGEN_MATHJAX_EXTENSIONS YES)
-set(DOXYGEN_HIDE_UNDOC_MEMBERS YES)
-set(DOXYGEN_HIDE_UNDOC_CLASSES YES)
+set(DOXYGEN_QUIET YES)
+set(DOXYGEN_USE_MATHJAX YES)
+set(DOXYGEN_HIDE_UNDOC_MEMBERS NO)
+set(DOXYGEN_HIDE_UNDOC_CLASSES NO)
 set(DOXYGEN_GENERATE_TODOLIST YES)
 set(DOXYGEN_EXTRACT_STATIC YES)
-
+set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
 set(DOXYGEN_GENERATE_HTML YES)
 set(DOXYGEN_GENERATE_MAN NO)
 set(DOXYGEN_IMAGE_PATH ${SPHINX_SOURCE}/_static/images)
@@ -64,6 +64,7 @@ doxygen_add_docs(
 
 
 add_custom_target(documentation ALL DEPENDS Sphinx doxygen)
+add_dependencies(documentation pyseahowl)
 
 # For MSVC IDE
 set_target_properties(
