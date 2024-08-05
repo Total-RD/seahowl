@@ -41,6 +41,8 @@ class FloaterElasto : public FoundationElasto {
 
     virtual void link_to_entity(const Entity& entity) override;
 
+    virtual void presetup(double fraction) override;
+
     virtual void build() override;
 
     virtual void prestep(double time, double dt) override;

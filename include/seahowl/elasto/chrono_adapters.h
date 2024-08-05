@@ -294,6 +294,7 @@ class SystemElastoChrono : public SystemElasto {
 
     SystemElastoChrono();
     virtual void assemble() override;
+    virtual void presetup(double fraction) override;
     virtual void step(double dt) override;
     virtual double get_time() const override;
     virtual void set_time(double time) override;

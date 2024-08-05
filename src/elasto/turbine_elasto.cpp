@@ -46,6 +46,14 @@ void TurbineElasto::build() {
     tower.build();
 }
 
+void TurbineElasto::presetup(double fraction) {
+    if (foundation) {
+        foundation->presetup(fraction);
+    }
+    rna.presetup(fraction);
+    tower.presetup(fraction);
+}
+
 void TurbineElasto::translate(const Vector3d& translation_vector) const {
     rna.translate(translation_vector);
     tower.translate(translation_vector);

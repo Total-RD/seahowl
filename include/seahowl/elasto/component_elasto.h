@@ -32,8 +32,6 @@ class ComponentElasto {
 
     /**
      * @brief Assembles the component.
-     *
-     * @param[out] mesh System on which to assemble component.
      */
     void assemble(SystemElasto& system);
 
@@ -41,6 +39,13 @@ class ComponentElasto {
      * @brief Initializes component.
      */
     virtual void initialize(){};
+
+    /**
+     * @brief Presetup of component.
+     *
+     * @param[in] fraction Fraction of presetup phase, starting at 0.0 and ending at 1.0.
+     */
+    virtual void presetup(double fraction){};
 
     /**
      * @brief Resets accumulated loads of component.
@@ -181,8 +186,6 @@ class ComponentElastoFEA : public virtual ComponentElasto {
   protected:
     /**
      * @brief Assembles the FEA component (adds all nodes and elements to mesh).
-     *
-     * @param[out] mesh System on which to add nodes and elements.
      */
     virtual void assemble_this(SystemElasto& system) override;
 };

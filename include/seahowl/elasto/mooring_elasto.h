@@ -87,6 +87,7 @@ struct MooringSystemElasto : public ComponentElasto {
     void add_mooring(std::shared_ptr<MooringElasto> mooring);
 
     virtual void build() override;
+    virtual void presetup(double fraction) override;
     virtual void prestep(double time, double dt);
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;
@@ -145,6 +146,13 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
      */
     virtual void build() override;
 
+    /**
+     * @brief Presetup of mooring.
+     *
+     * @param[in] fraction Fraction of presetup phase, starting at 0.0 and ending at 1.0.
+     */
+    virtual void presetup(double fraction) override;
+
     void build_nodes(const std::vector<ReferencePointElasto>& discretized_points);
 
     /**
@@ -173,6 +181,8 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
     virtual void assemble_this(SystemElasto& system) override;
 
   private:
+    /** @brief Actual length of mooring before presetup. */
+    double length0 = -1.0;
     /**
      * @brief Builds the mooring with ANCF cable elements.
      */

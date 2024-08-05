@@ -52,6 +52,13 @@ class TurbineElasto : public ComponentElasto {
     void link_rna_tower(seahowl::elasto::SystemElasto& system);
 
     /**
+     * @brief Presetup of turbine.
+     *
+     * @param[in] fraction Fraction of presetup phase, starting at 0.0 and ending at 1.0.
+     */
+    virtual void presetup(double fraction) override;
+
+    /**
      * @brief Builds the turbine.
      *
      * Calls build for each of the components of the turbine.

@@ -22,6 +22,10 @@ void FloaterElasto::build() {
     mooring_system->build();
 }
 
+void FloaterElasto::presetup(double fraction) {
+    mooring_system->presetup(fraction);
+}
+
 void FloaterElasto::prestep(double time, double dt) {
     auto& floater_body = *body_main;
     floater_body.reset_loads();

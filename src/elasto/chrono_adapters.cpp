@@ -802,6 +802,15 @@ void SystemElastoChrono::assemble() {
     spdlog::debug("Finished assembly of system.");
 }
 
+void SystemElastoChrono::presetup(double fraction) {
+    for (auto& turbine : turbines) {
+        turbine->presetup(fraction);
+    }
+    for (auto& component : components) {
+        component->presetup(fraction);
+    }
+}
+
 void SystemElastoChrono::step(double dt) {
     chobj->DoStepDynamics(dt);
 }

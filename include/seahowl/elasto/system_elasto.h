@@ -32,6 +32,13 @@ class SystemElasto {
     virtual void assemble() = 0;
 
     /**
+     * @brief Presetup of system.
+     *
+     * @param[in] fraction Fraction of presetup phase, starting at 0.0 and ending at 1.0.
+     */
+    virtual void presetup(double fraction) = 0;
+
+    /**
      * @brief Does an elasto step.
      *
      * @param[in] dt Time step length.

@@ -15,6 +15,12 @@ void MooringSystemElasto::add_mooring(std::shared_ptr<MooringElasto> mooring) {
     moorings.push_back(mooring);
 }
 
+void MooringSystemElasto::presetup(double fraction) {
+    for (auto& mooring : moorings) {
+        mooring->presetup(fraction);
+    }
+}
+
 void MooringSystemElasto::prestep(double time, double dt) {
     for (auto& mooring : moorings) {
         mooring->prestep(time, dt);
@@ -114,6 +120,45 @@ void MooringElastoFEA::build() {
     // build
     build_nodes(points);
     build_elements();
+}
+
+void MooringElastoFEA::presetup(double fraction) {
+    int nb_elements = elements.size();
+    auto mooring_length_current = get_length();
+    if (fraction == 0) {
+        length0 = mooring_length_current;
+
+        // set length-equivalent properties
+        // necessary for Chrono cable element as changing linear density before the first time step has no effect
+        auto distance_fairlead_anchor = (fairlead.get_position() - anchor.get_position()).norm();
+        auto density_equivalent =
+            density_linear * (length / distance_fairlead_anchor) / (seahowl::PI * pow(diameter / 2.0, 2));
+        for (size_t idx_el = 0; idx_el < nb_elements; idx_el++) {
+            auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*elements[idx_el]);
+            element.set_properties(density_equivalent, diameter, stiffness_axial, stiffness_bending);
+            element.set_properties(
+                density_linear * length / mooring_length_current / (seahowl::PI * pow(diameter / 2.0, 2)), diameter,
+                stiffness_axial, stiffness_bending);
+        }
+    } else if (fraction <= 1.0) {
+        if (length0 < 0.0) {
+            throw std::runtime_error("Presetup of mooring: must be called with fraction=0.0 first.");
+        }
+        for (int idx_el = 0; idx_el < nb_elements; idx_el++) {
+            auto& element = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*elements[idx_el]);
+            auto element_length = element.get_rest_length();
+            auto element_fraction_range = abs(discretization_fractions[idx_el + 1] - discretization_fractions[idx_el]);
+
+            element.set_rest_length(length0 / nb_elements + (length - length0) * element_fraction_range * fraction);
+            element.set_properties(density_linear / (seahowl::PI * pow(diameter / 2.0, 2)), diameter, stiffness_axial,
+                                   stiffness_bending);
+        }
+        spdlog::debug(
+            "Presetup for mooring at fraction {}: length of {} (final length: {}), mass of {} (final mass: {}).",
+            fraction, get_length(), length, get_mass(), density_linear * length);
+    } else if (fraction > 1.0) {
+        throw std::runtime_error("Presetup of mooring: cannot have a fraction > 1.0.");
+    }
 }
 
 void MooringElastoFEA::build_nodes(const std::vector<ReferencePointElasto>& discretized_points) {
