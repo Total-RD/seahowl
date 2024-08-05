@@ -26,8 +26,8 @@ struct HydroCoefficients {
     double buoyancy_factor = 1.0;
     /** @brief Factor for inertia (1.0 for default behavior). */
     double inertia_factor = 1.0;
-    /** @brief Factor for acceleration (1.0 for default behavior). */
-    double acceleration_factor = 1.0;
+    /** @brief Factor for nodal acceleration (1.0 for default behavior). */
+    double nodal_acceleration_factor = 1.0;
 
     HydroCoefficients operator*(const double factor) const;
     HydroCoefficients operator+(const HydroCoefficients& other) const;

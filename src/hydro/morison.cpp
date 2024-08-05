@@ -15,7 +15,7 @@ HydroCoefficients HydroCoefficients::operator*(const double factor) const {
     new_point.added_mass_axial *= factor;
     new_point.buoyancy_factor *= factor;
     new_point.inertia_factor *= factor;
-    new_point.acceleration_factor *= factor;
+    new_point.nodal_acceleration_factor *= factor;
     return new_point;
 };
 
@@ -27,7 +27,7 @@ HydroCoefficients HydroCoefficients::operator+(const HydroCoefficients& other) c
     new_point.added_mass_axial += other.added_mass_axial;
     new_point.buoyancy_factor += other.buoyancy_factor;
     new_point.inertia_factor += other.inertia_factor;
-    new_point.acceleration_factor += other.acceleration_factor;
+    new_point.nodal_acceleration_factor += other.nodal_acceleration_factor;
     return new_point;
 };
 
@@ -62,7 +62,7 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
         // fluid acceleration
         auto acceleration_fluid = fluid_model.get_fluid_acceleration(position, time);
         // relative acceleration
-        auto acceleration = get_acceleration() * coefficients.acceleration_factor;
+        auto acceleration = get_acceleration() * coefficients.nodal_acceleration_factor;
         auto acceleration_relative = acceleration_fluid - acceleration;
         auto acceleration_relative_axial = dir * acceleration_relative.dot(dir);
         auto acceleration_relative_normal = acceleration_relative - acceleration_relative_axial;

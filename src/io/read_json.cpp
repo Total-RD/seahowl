@@ -381,8 +381,6 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
         reference_point.coefficients.added_mass_normal = input_data->get("added_mass_coefficient_normal", ii);
         reference_point.coefficients.added_mass_axial = input_data->get("added_mass_coefficient_axial", ii);
         reference_point.coefficients.buoyancy_factor = input_data->get("buoyancy_factor", ii);
-        reference_point.coefficients.acceleration_factor = input_data->get("acceleration_factor", ii);
-        reference_point.coefficients.inertia_factor = input_data->get("inertia_factor", ii);
 
         reference_points.push_back(reference_point);
     }
