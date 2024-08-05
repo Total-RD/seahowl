@@ -135,6 +135,7 @@ void initialize_pyseahowl_core(py::module& m) {
         .def_readonly("turbines", &seahowl::core::System::turbines)
         .def_readonly("components", &seahowl::core::System::components)
         .def_readwrite("fluid_model", &seahowl::core::System::fluid_model)
+        .def_readwrite("soil_model", &seahowl::core::System::soil_model)
         .def_property_readonly("elasto", [](seahowl::core::System& system) { return &system.elasto; })
         .def_property_readonly("aero", [](seahowl::core::System& system) { return &system.aero; });
 }

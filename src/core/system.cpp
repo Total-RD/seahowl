@@ -71,19 +71,20 @@ void System::prestep(double time, double dt) {
         apply_fluid_model(*fluid_model, time);
     }
 
-    // compute forces from soil model
-    if (soil_model) {
-        apply_soil_model(*soil_model, time);
-    }
-
     // prestep (accumulates loads from aero to elasto)
     for (auto& turbine : turbines) {
         // turbine prestep
         turbine->prestep(time, dt);
     }
     for (auto& component : components) {
-        // component poststep
+        // component prestep
         component->prestep(time, dt);
+    }
+
+    // compute forces from soil model
+    // happens after prestep because soil loads directly applied to elasto component (e.g. moorings)
+    if (soil_model) {
+        apply_soil_model(*soil_model, time);
     }
 }
 
@@ -155,27 +156,25 @@ void System::run_presimulation(double duration, double dt, bool fix_towers, bool
     int step_frac = int(nsteps / 20.0);
     std::cout << "|0% -----------> 100%|" << std::endl;
     std::cout << "|";
-
     for (int step = 0; step <= nsteps; step++) {
         if (step > 0 && step % step_frac == 0) {
             std::cout << "*";
         }
-
         if (with_presetup) {
             elasto.presetup(double(step) / double(nsteps));
         }
 
-        prestep(0.0, dt);
-
+        // stepping
+        prestep(time_init, dt);
         elasto.step(dt);
+        poststep(time_init, dt);
 
-        poststep(0.0, dt);
-
-        set_time(0.0);
+        // reset time
+        set_time(time_init);
     }
-
     std::cout << "|" << std::endl;
-    // unfix floating turbine
+
+    // unfix towers
     for (int idx_turbine = 0; idx_turbine < turbines.size(); idx_turbine++) {
         auto& turbine = *turbines[idx_turbine];
         if (tower_was_fixed[idx_turbine]) {
@@ -183,11 +182,7 @@ void System::run_presimulation(double duration, double dt, bool fix_towers, bool
         } else {
             turbines[idx_turbine]->elasto.tower.nodes.front()->set_fixed(false);
         }
-        turbine.rna.elasto.rotor->body_hub->set_fixed(false);
     }
-
-    // reset time
-    set_time(time_init);
 
     spdlog::info("Presimulation finished.");
 }
