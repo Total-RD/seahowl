@@ -39,6 +39,7 @@ void initialize_pyseahowl_aero(py::module& m) {
     py::class_<seahowl::aero::BladeAero, std::shared_ptr<seahowl::aero::BladeAero>>(m_aero, "BladeAero")
         .def(py::init<>())
         .def("get_total_load", &seahowl::aero::BladeAero::get_total_load)
+        .def("build", &seahowl::aero::BladeAero::build)
         .def_readwrite("nodes", &seahowl::aero::BladeAero::nodes);
 
     // aero/rotor_aero.h
@@ -58,8 +59,7 @@ void initialize_pyseahowl_aero(py::module& m) {
         m_aero, "TowerAero")
         .def(py::init<>())
         .def_readwrite("discretization_fractions", &seahowl::aero::TowerAero::discretization_fractions)
-        .def_readwrite("nodes", &seahowl::aero::TowerAero::nodes)
-        .def("build", &seahowl::aero::TowerAero::build);
+        .def_readwrite("nodes", &seahowl::aero::TowerAero::nodes);
 
     // aero/turbine_aero.h
     py::class_<seahowl::aero::TurbineAero, std::shared_ptr<seahowl::aero::TurbineAero>, seahowl::ComponentFluid>(

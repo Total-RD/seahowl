@@ -45,7 +45,7 @@ class TurbineAero : public ComponentFluid {
     /**
      * @brief Builds turbine.
      */
-    void build();
+    void build() override;
 
     /**
      * @brief Initializes turbine.

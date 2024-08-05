@@ -7,6 +7,7 @@ namespace seahowl {
 
 class ComponentFluid {
   public:
+    virtual void build() = 0;
     virtual void compute_fluid_loads(const env::FluidModel& fluid_model, double time) = 0;
 };
 

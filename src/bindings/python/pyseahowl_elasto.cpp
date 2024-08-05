@@ -162,6 +162,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
     // elasto/component_elasto.h
     py::class_<seahowl::elasto::ComponentElasto, std::shared_ptr<seahowl::elasto::ComponentElasto>>(m_elasto,
                                                                                                     "ComponentElasto")
+
+        .def("build", &seahowl::elasto::ComponentElasto::build)
         .def("assemble", &seahowl::elasto::ComponentElasto::assemble)
         .def("reset_loads", &seahowl::elasto::ComponentElasto::reset_loads)
         .def("rotate", &seahowl::elasto::ComponentElasto::rotate)
@@ -250,7 +252,6 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readwrite("reference_points", &seahowl::elasto::TowerElasto::reference_points)
         .def_readonly("discretized_points", &seahowl::elasto::TowerElasto::discretized_points)
         .def(py::init<>())
-        .def("build", &seahowl::elasto::TowerElasto::build)
         .def("get_tower_base_moment", &seahowl::elasto::TowerElasto::get_tower_base_moment);
 
     // elasto/turbine_elasto.h

@@ -28,7 +28,7 @@ class ComponentElasto {
     /**
      * @brief Builds the component (to call before assemble).
      */
-    virtual void build(){};
+    virtual void build() = 0;
 
     /**
      * @brief Assembles the component.

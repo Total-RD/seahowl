@@ -39,7 +39,6 @@ class RotorAero : public ComponentFluid {
     /** @brief Collective pitch of blades (in radians). */
     double pitch_collective = 0.0;
 
-    virtual void build() = 0;
     virtual void initialize() = 0;
     virtual void compute_fluid_loads(const env::FluidModel& fluid_model, double time) = 0;
 };

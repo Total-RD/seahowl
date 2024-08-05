@@ -94,7 +94,7 @@ struct MooringSystemHydro : public ComponentFluid {
     /**
      * @brief Builds the mooring system.
      */
-    void build();
+    void build() override;
 
     /**
      * @brief Compute fluid loads on mooring using Morison's approach on cylindrical elements.

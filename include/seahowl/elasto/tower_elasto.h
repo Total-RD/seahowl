@@ -31,7 +31,7 @@ class TowerElasto : public ComponentElastoFEA {
     /**
      * @brief Builds the blade (to call before assemble).
      */
-    void build();
+    void build() override;
 
     /**
      * @brief Returns tower base moment (first node of first element of tower).

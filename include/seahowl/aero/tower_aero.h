@@ -46,7 +46,7 @@ class TowerAero : public ComponentFluid {
     /**
      * @brief Builds the tower.
      */
-    void build();
+    void build() override;
 
     /**
      * @brief Compute wind loads on tower using Morison's approach on cylindrical elements.
