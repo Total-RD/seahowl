@@ -1169,7 +1169,7 @@ void initialize_system_from_json(const std::string& filepath, seahowl::core::Sys
         auto presetup_json = num_json.at("presetup");
         auto presetup_duration = presetup_json.at("duration").get<double>();
         auto presetup_dt = presetup_json.at("dt").get<double>();
-        system_core.run_presetup(presetup_duration, presetup_dt);
+        system_core.run_presimulation(presetup_duration, presetup_dt, true, true);
     } else {
         spdlog::debug("No presetup defined in json.");
     }
@@ -1179,7 +1179,7 @@ void initialize_system_from_json(const std::string& filepath, seahowl::core::Sys
         auto presim_duration = presim_json.at("duration").get<double>();
         auto presim_dt = presim_json.at("dt").get<double>();
         auto fix_towers = presim_json.at("fix_towers").get<bool>();
-        system_core.run_presimulation(presim_duration, presim_dt, fix_towers);
+        system_core.run_presimulation(presim_duration, presim_dt, true, false);
     } else {
         spdlog::debug("No presim defined in json.");
     }

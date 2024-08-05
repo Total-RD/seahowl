@@ -126,7 +126,6 @@ void initialize_pyseahowl_core(py::module& m) {
         .def("step", &seahowl::core::System::step)
         .def("get_time", &seahowl::core::System::get_time)
         .def("set_time", &seahowl::core::System::set_time)
-        .def("run_presetup", &seahowl::core::System::run_presetup)
         .def("run_presimulation", &seahowl::core::System::run_presimulation)
         .def("add", static_cast<void (seahowl::core::System::*)(std::shared_ptr<seahowl::core::Turbine> component)>(
                         &seahowl::core::System::add))

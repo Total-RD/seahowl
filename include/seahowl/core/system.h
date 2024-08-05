@@ -95,22 +95,14 @@ class System : public ComponentDynamic {
     void set_time(double time);
 
     /**
-     * @brief Presetup for system, called before simulation actually starts.
-     *
-     * @param[in] presetup_duration Duration of presetup.
-     * @param[in] presetup_dt Time step length.
-     */
-    void run_presetup(double presetup_duration, double presetup_dt);
-
-    /**
      * @brief Presimulation for system, called before simulation actually starts.
-     * All external loads are applied using initial conditions for the whole duration of the presimulation.
      *
-     * @param[in] presim_duration Duration of presimulation.
-     * @param[in] presim_dt Time step length.
+     * @param[in] duration Duration of presimulation.
+     * @param[in] dt Time step length.
      * @param[in] fix_towers Whether to fix tower bases or not.
+     * @param[in] with_presetup Whether to do presetup or not.
      */
-    void run_presimulation(double presim_duration, double presim_dt, bool fix_towers = true);
+    void run_presimulation(double duration, double dt, bool fix_towers = true, bool with_presetup = true);
 
     /**
      * @brief Adds turbine to system.
