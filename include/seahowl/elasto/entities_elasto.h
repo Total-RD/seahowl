@@ -240,6 +240,56 @@ class ElementMooringElasto : public virtual ElementElasto {
 };
 
 /**
+ * @brief Linear spring base class.
+ */
+class SpringLinear {
+  public:
+    /**
+     * @brief Initialize spring between bodies.
+     *
+     * @param[in] body1 First body to link.
+     * @param[in] body2 Second body to link.
+     */
+    virtual void initialize(const BodyElasto& body1, const BodyElasto& body2) = 0;
+
+    /**
+     * @brief Initialize spring between bodies with anchor offsets.
+     *
+     * @param[in] body1 First body to link.
+     * @param[in] body2 Second body to link.
+     * @param[in] local Whether anchor locations are in local body frames or global frame.
+     * @param[in] anchor1 Position of anchor for body1.
+     * @param[in] anchor2 Position of anchor for body2.
+     */
+    virtual void initialize_with_anchors(const BodyElasto& body1,
+                                         const BodyElasto& body2,
+                                         bool local,
+                                         const Vector3d& anchor1,
+                                         const Vector3d& anchor2) = 0;
+
+    /**
+     * @brief Sets rest length of spring.
+     *
+     * @param[in] rest_length Rest length of spring.
+     */
+    virtual void set_rest_length(double rest_length) = 0;
+
+    /**
+     * @brief Sets spring coefficient (K).
+     *
+     * @param[in] spring_coefficient Spring coefficient (K).
+     */
+    virtual void set_spring_coefficient(double spring_coefficient) = 0;
+
+    /**
+     * @brief Sets damping coefficient (D).
+     *
+     * @param[in] damping_coefficient Damping coefficient (D).
+     */
+    virtual void set_damping_coefficient(double damping_coefficient) = 0;
+};
+
+/**
  * @brief Elasto link/joint base class.
  */
 class Link {

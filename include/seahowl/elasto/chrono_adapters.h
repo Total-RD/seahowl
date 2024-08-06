@@ -31,6 +31,7 @@ class ChLinkBase;
 class ChLinkPointPoint;
 class ChLinkPointFrame;
 class ChLinkMateGeneric;
+class ChLinkTSDA;
 class ChLoadBodyBodyBushingGeneric;
 class ChSystem;
 namespace fea {
@@ -224,6 +225,23 @@ class LinkChronoBase {
     std::shared_ptr<chrono::ChLinkBase> chobj;
 };
 
+class SpringLinearChrono : public SpringLinear {
+  public:
+    /** @brief Pointer to underlying Chrono object. */
+    std::shared_ptr<chrono::ChLinkTSDA> chobj;
+
+    SpringLinearChrono();
+    virtual void initialize(const BodyElasto& body1, const BodyElasto& body2) override;
+    virtual void initialize_with_anchors(const BodyElasto& body1,
+                                         const BodyElasto& body2,
+                                         bool local,
+                                         const Vector3d& anchor1,
+                                         const Vector3d& anchor2) override;
+    virtual void set_rest_length(double rest_length) override;
+    virtual void set_spring_coefficient(double spring_coefficient) override;
+    virtual void set_damping_coefficient(double damping_coefficient) override;
+};
+
 /**
  * @brief Chrono link class.
  */
@@ -305,6 +323,7 @@ class SystemElastoChrono : public SystemElasto {
     virtual void add(MeshElasto& mesh) override;
     virtual void add(Link& link) override;
     virtual void add(LinkMatrixStiffnessDamping& link) override;
+    virtual void add(SpringLinear& spring) override;
 };
 
 }  // namespace elasto

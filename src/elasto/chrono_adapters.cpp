@@ -636,6 +636,37 @@ double ElementMooringElastoChrono::get_rest_length() const {
     return chobj->GetRestLength();
 }
 
+SpringLinearChrono::SpringLinearChrono() {
+    chobj = chrono_types::make_shared<chrono::ChLinkTSDA>();
+}
+
+void SpringLinearChrono::initialize(const BodyElasto& body1, const BodyElasto& body2) {
+    chobj->Initialize(dynamic_cast<const BodyElastoChrono&>(body1).chobj,
+                      dynamic_cast<const BodyElastoChrono&>(body2).chobj, true, chrono::ChVector<double>(0.0, 0.0, 0.0),
+                      chrono::ChVector<double>(0.0, 0.0, 0.0));
+}
+
+void SpringLinearChrono::initialize_with_anchors(const BodyElasto& body1,
+                                                 const BodyElasto& body2,
+                                                 bool local,
+                                                 const Vector3d& anchor1,
+                                                 const Vector3d& anchor2) {
+    chobj->Initialize(dynamic_cast<const BodyElastoChrono&>(body1).chobj,
+                      dynamic_cast<const BodyElastoChrono&>(body2).chobj, true, vec2ch(anchor1), vec2ch(anchor2));
+}
+
+void SpringLinearChrono::set_rest_length(double rest_length) {
+    chobj->SetRestLength(rest_length);
+}
+
+void SpringLinearChrono::set_spring_coefficient(double spring_coefficient) {
+    chobj->SetSpringCoefficient(spring_coefficient);
+}
+
+void SpringLinearChrono::set_damping_coefficient(double damping_coefficient) {
+    chobj->SetDampingCoefficient(damping_coefficient);
+}
+
 LinkChrono::LinkChrono() {
     chobj = chrono_types::make_shared<chrono::ChLinkMateGeneric>();
     chobj->SetConstrainedCoords(true, true, true, true, true, true);
@@ -884,6 +915,10 @@ void SystemElastoChrono::add(LinkMatrixStiffnessDamping& link) {
     auto load_container = chrono_types::make_shared<chrono::ChLoadContainer>();
     load_container->Add(dynamic_cast<LinkMatrixStiffnessDampingChrono&>(link).chobj);
     chobj->Add(load_container);
+}
+
+void SystemElastoChrono::add(SpringLinear& spring) {
+    chobj->Add(dynamic_cast<SpringLinearChrono&>(spring).chobj);
 }
 
 }  // namespace elasto

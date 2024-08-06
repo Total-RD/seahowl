@@ -105,8 +105,25 @@ class SystemElasto {
      */
     virtual void add(LinkMatrixStiffnessDamping& link) = 0;
 
+    /**
+     * @brief Adds spring to system.
+     *
+     * @param[in] spring Spring to add to system.
+     */
+    virtual void add(SpringLinear& spring) = 0;
+
+    /**
+     * @brief Adds component to system.
+     *
+     * @param[in] component Component to add to system.
+     */
     virtual void add(std::shared_ptr<ComponentElasto> component) { components.push_back(component); };
 
+    /**
+     * @brief Adds turbine to system.
+     *
+     * @param[in] turbine Turbine to add to system.
+     */
     virtual void add(std::shared_ptr<TurbineElasto> turbine) { turbines.push_back(turbine); }
 };
 
