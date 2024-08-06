@@ -8,6 +8,7 @@
 #include <seahowl/aero/rotor_aero.h>
 #include <seahowl/aero/tower_aero.h>
 #include <seahowl/aero/turbine_aero.h>
+#include <seahowl/aero/reference_point_aero.h>
 
 namespace py = pybind11;
 
@@ -59,6 +60,7 @@ void initialize_pyseahowl_aero(py::module& m) {
         m_aero, "TowerAero")
         .def(py::init<>())
         .def_readwrite("discretization_fractions", &seahowl::aero::TowerAero::discretization_fractions)
+        .def_readwrite("reference_points", &seahowl::aero::TowerAero::reference_points)
         .def_readwrite("nodes", &seahowl::aero::TowerAero::nodes);
 
     // aero/turbine_aero.h
@@ -68,4 +70,13 @@ void initialize_pyseahowl_aero(py::module& m) {
         .def_readonly("rna", &seahowl::aero::TurbineAero::rna)
         .def_readonly("tower", &seahowl::aero::TurbineAero::tower)
         .def_readonly("foundation", &seahowl::aero::TurbineAero::foundation);
+
+    // aero/reference_point_aero.h
+    py::class_<seahowl::aero::TowerReferencePointAero, std::shared_ptr<seahowl::aero::TowerReferencePointAero>>(
+        m_aero, "TowerReferencePointAero")
+        .def_readwrite("coordinates", &seahowl::aero::TowerReferencePointAero::coordinates)
+        .def_readwrite("fraction", &seahowl::aero::TowerReferencePointAero::fraction)
+        .def_readwrite("diameter", &seahowl::aero::TowerReferencePointAero::diameter)
+        .def_readwrite("coefficients", &seahowl::aero::TowerReferencePointAero::coefficients)
+        .def(py::init<>());
 }
