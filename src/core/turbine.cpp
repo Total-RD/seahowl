@@ -50,8 +50,11 @@ void Turbine::apply_control(double time, double dt) {
                 auto blade_pitch_increment =
                     (controller->get_pitch_blade(idx_blade) - collective_pitch_increment) - blade.elasto.pitch;
                 rna.elasto.rotor->apply_blade_pitch_increment(blade_pitch_increment, idx_blade);
-                blade.update_positions_aero();
             }
+        }
+        // update positions aero after moving blades with pitch control
+        for (auto& blade : rna.blades) {
+            blade->update_positions_aero();
         }
     }
 }
