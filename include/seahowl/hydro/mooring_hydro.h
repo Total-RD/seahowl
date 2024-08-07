@@ -74,7 +74,7 @@ class MooringHydro : public ComponentFluid {
 /**
  * @brief Mooring system class gathering mooring lines.
  */
-struct MooringSystemHydro : public ComponentFluid {
+class MooringSystemHydro : public ComponentFluid {
   public:
     /** @brief List of mooring lines. */
     std::deque<std::shared_ptr<MooringHydro>> moorings;

@@ -90,6 +90,10 @@ void Turbine::poststep(double time, double dt) {
     rna.poststep(time, dt);
     tower.poststep(time, dt);
 
+    if (foundation) {
+        foundation->poststep(time, dt);
+    }
+
     // controller poststep
     controller->poststep(time, dt, *this);
 }

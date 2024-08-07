@@ -144,7 +144,7 @@ class Mooring : public ComponentDynamic {
     void compute_mapping_elasto2hydro();
 };
 
-struct MooringSystem : public ComponentDynamic {
+class MooringSystem : public ComponentDynamic {
   public:
     /** @brief Elastodynamic model of the mooring system. */
     seahowl::elasto::MooringSystemElasto& elasto;
