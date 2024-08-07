@@ -23,7 +23,15 @@ def save_json(json_dict, path):
 def save_csv(header, array, path):
     mydirectory = Path(path).parent
     mydirectory.mkdir(parents=True, exist_ok=True)
-    np.savetxt(path, array, header=header, delimiter=",", comments="")
+    fmt = ""
+    for col in range(len(array[0])):
+        col_max = np.max(array[:, col])
+        if col_max != 0.0 and (abs(col_max) >= 1e6 or abs(col_max) < 1e-3):
+            fmt += "%.6e,"
+        else:
+            fmt += "%s,"
+
+    np.savetxt(path, array, header=header, delimiter=",", comments="", fmt=fmt)
 
 
 def merge_interpolate_points(json_points1, json_points2):
@@ -544,9 +552,9 @@ def convert_elastodyn_tower_file(
         csv_array[ii] = [
             0.0,
             0.0,
-            base_height + fraction * (height - base_height),
-            diameter_outer,
-            thickness,
+            round(base_height + fraction * (height - base_height), 6),
+            round(diameter_outer, 6),
+            round(thickness, 6),
             density_linear,
             young_modulus,
             poisson_ratio,
