@@ -1038,16 +1038,19 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
         auto sea_type = sea_json.at("type").get<std::string>();
         if (sea_type == "HydroChrono" || sea_type == "hydrochrono") {
             for (auto turbine : system_core.turbines) {
-                try {
-                    auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine->elasto.foundation);
+                if (turbine->elasto.foundation) {
                     try {
-                        auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
-                        auto& waves_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
-                        floater.set_waves_hydrochrono(waves_model.waves);
+                        auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine->elasto.foundation);
+                        try {
+                            auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
+                            auto& waves_model =
+                                dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
+                            floater.set_waves_hydrochrono(waves_model.waves);
+                        } catch (const std::bad_cast& e) {
+                            throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
+                        }
                     } catch (const std::bad_cast& e) {
-                        throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
                     }
-                } catch (const std::bad_cast& e) {
                 }
             }
         }
@@ -1088,16 +1091,18 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
         auto& turbine = *system_core.turbines.back();
 
 #ifdef HAVE_HYDROCHRONO
-        try {
-            auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine.elasto.foundation);
+        if (turbine.elasto.foundation) {
             try {
-                auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
-                auto& waves_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
-                floater.set_waves_hydrochrono(waves_model.waves);
+                auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine.elasto.foundation);
+                try {
+                    auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
+                    auto& waves_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
+                    floater.set_waves_hydrochrono(waves_model.waves);
+                } catch (const std::bad_cast& e) {
+                    throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
+                }
             } catch (const std::bad_cast& e) {
-                throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
             }
-        } catch (const std::bad_cast& e) {
         }
 #endif
 
