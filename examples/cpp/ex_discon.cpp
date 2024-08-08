@@ -1,12 +1,12 @@
 #include <seahowl/servo/controller_discon.h>
 
 int main(int argc, char* argv[]) {
-    std::cout << "Hello ROSCO\n";
+    std::cout << "Hello DISCON\n";
     seahowl::servo::DisconInterface discon_params;
 
     std::cout << "Initialize the controller\n";
     discon_params.ResetAll();
-    discon_params.SetINFILE(u8"../data/controller/DISCON.IN");
+    discon_params.SetINFILE(u8"../data/IEA15MW/controller/DISCON.IN");
 
     std::cout << "Call the controller\n";
     discon_params.Call();
