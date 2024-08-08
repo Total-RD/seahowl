@@ -390,9 +390,9 @@ void NodeElastoChrono::set_properties(const TowerReferencePointElasto& ref) {
     section->SetAxialRigidity(ref.stiffness_axial);
     section->SetXtorsionRigidity(ref.stiffness_torsion);
     // foreaft
-    section->SetZbendingRigidity(ref.stiffness_foreaft);
+    section->SetYbendingRigidity(ref.stiffness_foreaft);
     // sideside
-    section->SetYbendingRigidity(ref.stiffness_sideside);
+    section->SetZbendingRigidity(ref.stiffness_sideside);
     // damping
     chrono::fea::DampingCoefficients damping_coefficients;
     damping_coefficients.bx = ref.damping_coefficients[0];
