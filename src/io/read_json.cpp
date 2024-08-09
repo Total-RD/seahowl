@@ -86,6 +86,7 @@ class InputDataCSV : public InputData {
         std::map<int, std::string> csv_headers;
         std::string line, word;
         std::getline(csv_file, line);
+        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
         std::stringstream line_ss(line);
         int idx_header = 0;
         while (std::getline(line_ss, word, ',')) {
@@ -97,6 +98,7 @@ class InputDataCSV : public InputData {
         // data
         int idx_line = 1;
         while (std::getline(csv_file, line)) {
+            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
             std::stringstream line_ss(line);
             int idx_word = 0;
             while (std::getline(line_ss, word, ',')) {
