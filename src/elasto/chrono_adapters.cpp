@@ -335,6 +335,11 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
     auto mm = rot66 * ref.mass_matrix * rot66.transpose();
     auto sm = rot66 * ref.stiffness_matrix * rot66.transpose();
 
+    if (ref.damping_coefficients.size() != 5) {
+        throw std::runtime_error("Damping coefficients for blade must be a vector of length 5 (got " +
+                                 std::to_string(ref.damping_coefficients.size()) + ").");
+    }
+
     if (fpm == true) {
         auto sectionFPM = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>();
         section = sectionFPM;
@@ -394,6 +399,10 @@ void NodeElastoChrono::set_properties(const TowerReferencePointElasto& ref) {
     // sideside
     section->SetZbendingRigidity(ref.stiffness_sideside);
     // damping
+    if (ref.damping_coefficients.size() != 5) {
+        throw std::runtime_error("Damping coefficients for tower must be a vector of length 5 (got " +
+                                 std::to_string(ref.damping_coefficients.size()) + ").");
+    }
     chrono::fea::DampingCoefficients damping_coefficients;
     damping_coefficients.bx = ref.damping_coefficients[0];
     damping_coefficients.by = ref.damping_coefficients[1];
