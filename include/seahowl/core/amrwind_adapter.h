@@ -1,0 +1,120 @@
+#pragma once
+
+#include "seahowl/io/output_manager.h"
+#include "seahowl/core/system.h"
+#include "seahowl/aero/system_aero.h"
+#include "seahowl/elasto/system_elasto.h"
+
+#include <memory>
+#include <string>
+
+namespace seahowl {
+namespace core {
+
+struct OpFM_InputType {
+    float* pxVel;
+    int pxVel_Len;  // x position of velocity interface (seahowl) nodes [m]
+    float* pyVel;
+    int pyVel_Len;  // y position of velocity interface (seahowl) nodes [m]
+    float* pzVel;
+    int pzVel_Len;  // z position of velocity interface (seahowl) nodes [m]
+    float* pxForce;
+    int pxForce_Len;  // x position of actuator force nodes [m]
+    float* pyForce;
+    int pyForce_Len;  // y position of actuator force nodes [m]
+    float* pzForce;
+    int pzForce_Len;  // z position of actuator force nodes [m]
+    float* xdotForce;
+    int xdotForce_Len;  // x velocity of actuator force nodes [m]
+    float* ydotForce;
+    int ydotForce_Len;  // y velocity of actuator force nodes [m]
+    float* zdotForce;
+    int zdotForce_Len;  // z velocity of actuator force nodes [m]
+    float* pOrientation;
+    int pOrientation_Len;  // Direction cosine matrix to transform vectors from global frame of reference to actuator
+                           // force node frame of reference [-]
+
+    float* fx;
+    int fx_Len;  // normalized x force at actuator force nodes [N/kg/m^3]
+    float* fy;
+    int fy_Len;  // normalized y force at actuator force nodes [N/kg/m^3]
+    float* fz;
+    int fz_Len;  // normalized z force at actuator force nodes [N/kg/m^3]
+    float* momentx;
+    int momentx_Len;  // normalized x moment at actuator force nodes [Nm/kg/m^3]
+    float* momenty;
+    int momenty_Len;  // normalized y moment at actuator force nodes [Nm/kg/m^3]
+    float* momentz;
+    int momentz_Len;  // normalized z moment at actuator force nodes [Nm/kg/m^3]
+    float* forceNodesChord;
+    int forceNodesChord_Len;  // chord distribution at the actuator force nodes [m]
+};
+
+struct OpFM_OutputType {
+    float* u;
+    int u_Len;  // x velocity at interface (seahowl) nodes [m]
+    float* v;
+    int v_Len;  // y velocity at interface (seahowl) nodes [m]
+    float* w;
+    int w_Len;  // z velocity at interface (seahowl) nodes [m]
+    float* WriteOutput;
+    int WriteOutput_Len;  // Data to be written to an output file: see WriteOutputHdr for names of each variable [see
+                          // WriteOutputUnt]
+};
+
+struct SC_DX_InputType {
+    float* toSCglob;
+    int toSCglob_Len;
+    float* toSC;
+    int toSC_Len;
+};
+
+struct SC_DX_OutputType {
+    float* fromSCglob;
+    int fromSCglob_Len;
+    float* fromSC;
+    int fromSC_Len;
+};
+
+class AmrWindAdapter {
+  public:
+    seahowl::core::OpFM_InputType to_cfd;
+    seahowl::core::OpFM_OutputType from_cfd;
+
+    std::unique_ptr<System> system_core;
+    std::unique_ptr<seahowl::io::OutputManager> outputs;
+
+    double dt = 0.025;
+    double dt_output = 0.;
+    double duration = 1000.0;
+    bool is_initialized = false;
+
+    int numBlade = 3;
+    int numBladeNode = 50;
+    int numTowerNode = 10;
+
+    AmrWindAdapter();
+
+    void populate_from_file(const std::string& filepath);
+    void initialize_from_file(const std::string& filepath);
+    void initialize();
+    void init_OpFM_data(int* NumActForcePtsBlade,
+                        int* NumActForcePtsTower,
+                        OpFM_InputType* to_cfd,
+                        OpFM_OutputType* from_cfd);
+    void step();
+
+    void send_to_cfd(OpFM_InputType to_cfd);
+    void get_from_cfd(OpFM_OutputType from_cfd);
+
+  private:
+    std::unique_ptr<seahowl::elasto::SystemElasto> system_elasto;
+    std::unique_ptr<seahowl::aero::SystemAero> system_aero;
+    int nstep = 0;
+    double t_output_next = 0.0;
+    std::string main_filepath;
+    void AllocPAry(float* array, int size, const std::string& name);
+};
+
+}  // namespace core
+}  // namespace seahowl
