@@ -1,0 +1,35 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+list(APPEND CMAKE_MODULE_PATH "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_DATADIR@/cmake/Modules")
+
+set(SEAHOWL_ENABLE_VTK @SEAHOWL_ENABLE_VTK@)
+
+if (${SEAHOWL_ENABLE_VTK})
+    set(VTK_DIR @VTK_DIR@)
+    find_package(VTK QUIET REQUIRED)
+endif()
+
+set(Chrono_DIR @Chrono_DIR@)
+find_dependency(Chrono CONFIG REQUIRED)
+
+set(Eigen3_DIR @Eigen3_DIR@)
+
+set(fmt_DIR @fmt_DIR@)
+
+set(nlohmann_json_DIR @nlohmann_json_DIR@)
+
+set(spdlog_DIR @spdlog_DIR@)
+
+set(SEAHOWL_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/include")
+set(SEAHOWL_LIBRARY_DIRS "${PACKAGE_PREFIX_DIR}/lib")
+set(SEAHOWL_LIBRARIES "${PACKAGE_PREFIX_DIR}/lib/libseahowl_core.a")
+
+list(APPEND SEAHOWL_INCLUDE_DIRS "@SH_INCLUDE_DIRS@")
+
+include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+
+set(SEAHOWL_FOUND TRUE)
+
+check_required_components(SEAHOWL)
