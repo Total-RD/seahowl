@@ -169,6 +169,7 @@ set(SEAHOWL_CORE_SOURCES
     src/core/turbine.cpp
     src/core/system.cpp
     src/core/simulation.cpp
+    src/core/amrwind_adapter.cpp
 )
 set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/reference_point.h
@@ -181,6 +182,7 @@ set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/turbine.h
     include/seahowl/core/system.h
     include/seahowl/core/simulation.h
+    include/seahowl/core/amrwind_adapter.h
 )
 source_group(core FILES ${SEAHOWL_CORE_SOURCES} ${SEAHOWL_CORE_HEADERS})
 
@@ -477,3 +479,62 @@ if (SEAHOWL_ENABLE_PYTHON)
     target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
     set_target_properties(pyseahowl PROPERTIES OUTPUT_NAME seahowl)
 endif (SEAHOWL_ENABLE_PYTHON)
+
+# ====================
+# INSTALL & CONFIG FILE
+# ====================
+include(CMakePackageConfigHelpers)
+
+set(PROJECT_NAME "Seahowl")
+set(seahowl_lib_name "seahowl_core")
+set(seahowl_exe_name "seahowl_driver")
+set(seahowl_unit_test_exe_name "test_01")
+
+# set(SH_INCLUDE_DIRS "${EIGEN3_INCLUDE_DIR}")
+set(SH_INCLUDE_DIRS ${SH_INCLUDE_DIRS} "${CHRONO_INCLUDE_DIRS}")
+
+install(
+    TARGETS TARGETS ${seahowl_exe_name} ${seahowl_lib_name}
+    EXPORT SeahowlTargets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+if(SEAHOWL_ENABLE_UNIT_TESTS OR SEAHOWL_ENABLE_TESTS)
+    install(
+        TARGETS ${seahowl_unit_test_exe_name}
+        RUNTIME DESTINATION bin
+    )
+endif()
+
+install(
+    DIRECTORY ${PROJECT_SOURCE_DIR}/include
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+    FILES_MATCHING PATTERN "*.h"
+)
+
+install(
+    EXPORT SeahowlTargets
+    FILE SeahowlTargets.cmake
+    # NAMESPACE seahowl::
+    DESTINATION cmake/seahowl
+)
+
+configure_package_config_file(
+    cmake/SeahowlConfig.cmake.in
+    ${PROJECT_BINARY_DIR}/SeahowlConfig.cmake
+    INSTALL_DESTINATION cmake/seahowl
+)
+
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/SeahowlConfig.cmake
+    DESTINATION cmake/seahowl
+)
+
+export(
+    EXPORT SeahowlTargets
+    FILE SeahowlTargets.cmake
+    # NAMESPACE seahowl::
+)
