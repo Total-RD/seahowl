@@ -91,6 +91,17 @@ void AmrWindAdapter::populate_from_file(const std::string& filepath) {
     // numTowerNode = system_aero->turbines[0].tower->nodes.size();
     auto tower_discretisation = turbines_json_obj.at("tower").at("discretization").at("aero").get<std::vector<int>>();
     numTowerNode = tower_discretisation[0] + 1;
+
+    // blade length
+    auto filepath_blade = (main_path / blades_json[0].at("file").get<std::string>()).generic_string();
+
+    std::ifstream blades_json_file(filepath_blade);
+    json blades_json_obj;
+    blades_json_file >> blades_json_obj;
+    blades_json_file.close();
+
+    auto points = blades_json_obj.at("reference_points").get<json>();
+    bladeLength = points[points.size() - 1]["coordinates"][2];
 }
 
 void AmrWindAdapter::initialize() {
@@ -123,10 +134,10 @@ void AmrWindAdapter::initialize_from_file(const std::string& filepath) {
     spdlog::info("Initial setup time: {:.3}s.", sw_setup);
 }
 
-void AmrWindAdapter::init_OpFM_data(int* NumActForcePtsBlade,
-                                    int* NumActForcePtsTower,
-                                    OpFM_InputType* to_cfd,
-                                    OpFM_OutputType* from_cfd) {
+void AmrWindAdapter::init_OpFM(int* NumActForcePtsBlade,
+                               int* NumActForcePtsTower,
+                               seahowl::core::OpFM_InputType* to_cfd,
+                               seahowl::core::OpFM_OutputType* from_cfd) {
     /* Motion nodes from Seahowl */
 
     // Hub node (As the coupling between AMR-Wind and OpenFAST, hub is first point always)
@@ -237,7 +248,7 @@ void AmrWindAdapter::step() {
     }
 }
 
-void AmrWindAdapter::AllocPAry(float* array, int size, const std::string& name) {
+void AmrWindAdapter::AllocPAry(float*& array, int size, const std::string& name) {
     try {
         array = new float[size];
         // Initialize to zero
