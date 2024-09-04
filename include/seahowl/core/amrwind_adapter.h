@@ -78,9 +78,6 @@ struct SC_DX_OutputType {
 
 class AmrWindAdapter {
   public:
-    seahowl::core::OpFM_InputType to_cfd;
-    seahowl::core::OpFM_OutputType from_cfd;
-
     std::unique_ptr<System> system_core;
     std::unique_ptr<seahowl::io::OutputManager> outputs;
 
@@ -93,19 +90,23 @@ class AmrWindAdapter {
     int numBladeNode = 50;
     int numTowerNode = 10;
 
+    double bladeLength = 1.0;
+
     AmrWindAdapter();
 
     void populate_from_file(const std::string& filepath);
     void initialize_from_file(const std::string& filepath);
     void initialize();
-    void init_OpFM_data(int* NumActForcePtsBlade,
-                        int* NumActForcePtsTower,
-                        OpFM_InputType* to_cfd,
-                        OpFM_OutputType* from_cfd);
+
+    void init_OpFM(int* NumActForcePtsBlade,
+                   int* NumActForcePtsTower,
+                   seahowl::core::OpFM_InputType* to_cfd,
+                   seahowl::core::OpFM_OutputType* from_cfd);
+
     void step();
 
-    void send_to_cfd(OpFM_InputType to_cfd);
-    void get_from_cfd(OpFM_OutputType from_cfd);
+    void send_to_cfd(seahowl::core::OpFM_InputType to_cfd);
+    void get_from_cfd(seahowl::core::OpFM_OutputType from_cfd);
 
   private:
     std::unique_ptr<seahowl::elasto::SystemElasto> system_elasto;
@@ -113,7 +114,8 @@ class AmrWindAdapter {
     int nstep = 0;
     double t_output_next = 0.0;
     std::string main_filepath;
-    void AllocPAry(float* array, int size, const std::string& name);
+    void AllocPAry(float*& array, int size, const std::string& name);
+    void CreateActForceBlade();
 };
 
 }  // namespace core
