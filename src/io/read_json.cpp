@@ -348,6 +348,8 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         reference_point.stiffness_axial = EA;
         reference_point.stiffness_torsion = kt;
         reference_point.density = density_linear;
+        reference_point.inertia_foreaft = EI / young_modulus * density_linear;
+        reference_point.inertia_sideside = EI / young_modulus * density_linear;
 
         reference_point.damping_coefficients[0] = input_data->get("damping_z", ii);
         reference_point.damping_coefficients[1] = input_data->get("damping_y", ii);

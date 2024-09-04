@@ -366,14 +366,19 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
         section->SetCentroidY(ref.offset_elastic.y());
         section->SetCentroidZ(-ref.offset_elastic.x());
         // material properties
+        // see ChBeamSectionTimoshenkoAdvancedGenericFPM methods: SetMassMatrixFPM, SetStiffnessMatrixFPM
         section->SetMassPerUnitLength(mm(0, 0));
+        // inertias per unit length in this order: mIyy, mIzz, mIyz, mQy, mQz
+        section->SetInertiasPerUnitLength(mm(4, 4), mm(5, 5), -mm(4, 5), mm(0, 4), -mm(0, 5));
         // axial
-        section->SetAxialRigidity(sm(0, 0));
         section->SetXtorsionRigidity(sm(3, 3));
+        section->SetAxialRigidity(sm(0, 0));
         // flap
         section->SetYbendingRigidity(sm(4, 4));
+        section->SetYshearRigidity(sm(1, 1));
         // edge
         section->SetZbendingRigidity(sm(5, 5));
+        section->SetZshearRigidity(sm(2, 2));
         // damping
         chrono::fea::DampingCoefficients damping_coefficients;
         // damping coefficients: IEC -> Chrono convention
@@ -391,6 +396,7 @@ void NodeElastoChrono::set_properties(const TowerReferencePointElasto& ref) {
     section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric>();
     // material properties
     section->SetMassPerUnitLength(ref.density);
+    section->SetInertiasPerUnitLength(ref.inertia_foreaft, ref.inertia_sideside, 0.0, 0.0, 0.0);
     // axial
     section->SetAxialRigidity(ref.stiffness_axial);
     section->SetXtorsionRigidity(ref.stiffness_torsion);

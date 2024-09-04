@@ -71,6 +71,10 @@ struct TowerReferencePointElasto : ReferencePointElasto {
     double stiffness_sideside = 0.0;
     /** @brief Torsional stiffness of tower at reference point. */
     double stiffness_torsion = 0.0;
+    /** @brief Fore-aft inertia of tower at reference point. */
+    double inertia_foreaft = 0.0;
+    /** @brief Side-side inertia of tower at reference point. */
+    double inertia_sideside = 0.0;
     /** @brief Damping coefficients at reference point {along x, along y, along z, about x, mass-proportional}.*/
     std::vector<double> damping_coefficients{0.03, 0.03, 0.03, 0.06, 0.0};
 

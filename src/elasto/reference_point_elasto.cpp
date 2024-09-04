@@ -49,6 +49,8 @@ TowerReferencePointElasto TowerReferencePointElasto::operator*(const double fact
     new_point.stiffness_foreaft *= factor;
     new_point.stiffness_sideside *= factor;
     new_point.stiffness_torsion *= factor;
+    new_point.inertia_foreaft *= factor;
+    new_point.inertia_sideside *= factor;
     new_point.damping_coefficients[0] *= factor;
     new_point.damping_coefficients[1] *= factor;
     new_point.damping_coefficients[2] *= factor;
@@ -66,6 +68,8 @@ TowerReferencePointElasto TowerReferencePointElasto::operator+(const TowerRefere
     new_point.stiffness_foreaft += other.stiffness_foreaft;
     new_point.stiffness_sideside += other.stiffness_sideside;
     new_point.stiffness_torsion += other.stiffness_torsion;
+    new_point.inertia_foreaft += other.inertia_foreaft;
+    new_point.inertia_sideside += other.inertia_sideside;
     new_point.damping_coefficients[0] += other.damping_coefficients[0];
     new_point.damping_coefficients[1] += other.damping_coefficients[1];
     new_point.damping_coefficients[2] += other.damping_coefficients[2];

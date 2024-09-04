@@ -168,6 +168,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readwrite("stiffness_foreaft", &seahowl::elasto::TowerReferencePointElasto::stiffness_foreaft)
         .def_readwrite("stiffness_sideside", &seahowl::elasto::TowerReferencePointElasto::stiffness_sideside)
         .def_readwrite("stiffness_torsion", &seahowl::elasto::TowerReferencePointElasto::stiffness_torsion)
+        .def_readwrite("inertia_foreaft", &seahowl::elasto::TowerReferencePointElasto::inertia_foreaft)
+        .def_readwrite("inertia_sideside", &seahowl::elasto::TowerReferencePointElasto::inertia_sideside)
         .def_readwrite("damping_coefficients", &seahowl::elasto::TowerReferencePointElasto::damping_coefficients)
         .def(py::init<>());
 

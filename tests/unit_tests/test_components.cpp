@@ -141,6 +141,7 @@ TEST(test_blade, edgewise) {
 
     // blade
     auto blade = seahowl::elasto::BladeElastoFEA();
+    blade.fpm_mode = true;
     populate_blade_elasto_from_json((DATADIR / "blade.json").generic_string(), blade);
     // make 50 elements
     blade.discretization_fractions.clear();
@@ -157,12 +158,12 @@ TEST(test_blade, edgewise) {
 
     // test deflection
     system_elasto.do_statics(true, 10);
-    double deflection_edge = -0.954337;
+    double deflection_edge = -1.093264;
     ASSERT_NEAR(deflection_edge, blade.nodes.back()->get_position().z(), 1e-4);
     // flip blade
     blade.rotate(PI, Vector3d(0.0, 1.0, 0.0));
     system_elasto.do_statics(true, 10);
-    double deflection_edge2 = -1.197823;
+    double deflection_edge2 = -1.336049;
     ASSERT_NEAR(deflection_edge2, blade.nodes.back()->get_position().z(), 1e-4);
 
     // static position of blade tip
@@ -182,7 +183,7 @@ TEST(test_blade, edgewise) {
         if (time > 0.5) {
             blade.nodes.back()->reset_loads();
             if (blade.nodes.back()->get_position().z() < pos0 && pos_y > pos0) {
-                if (start_time == 0.0) {
+                if (start_time == 0.0 && npeaks == 0) {
                     start_time = time;
                 } else {
                     npeaks += 1;
@@ -197,7 +198,7 @@ TEST(test_blade, edgewise) {
     }
 
     // literature edgewise natural frequency for IEA15MW: 0.642Hz (1.558s)
-    double natural_period_ref = 1.343;
+    double natural_period_ref = 1.436667;
     ASSERT_NEAR(natural_period_ref, natural_period, 0.01);
 }
 
@@ -208,6 +209,7 @@ TEST(test_blade, flapwise) {
 
     // blade
     auto blade = seahowl::elasto::BladeElastoFEA();
+    blade.fpm_mode = true;
     populate_blade_elasto_from_json((DATADIR / "blade.json").generic_string(), blade);
     // make 50 elements
     blade.discretization_fractions.clear();
@@ -224,12 +226,12 @@ TEST(test_blade, flapwise) {
 
     // test deflection
     system_elasto.do_statics(true, 10);
-    double deflection_flap = 1.676042;
+    double deflection_flap = 1.628503;
     ASSERT_NEAR(deflection_flap, blade.nodes.back()->get_position().z(), 1e-4);
     // flip blade
     blade.rotate(PI, Vector3d(1.0, 0.0, 0.0));
     system_elasto.do_statics(true, 10);
-    double deflection_flap2 = -6.012171;
+    double deflection_flap2 = -6.059450;
     ASSERT_NEAR(deflection_flap2, blade.nodes.back()->get_position().z(), 1e-4);
 
     // static position of blade tip
@@ -249,7 +251,7 @@ TEST(test_blade, flapwise) {
         if (time > 0.5) {
             blade.nodes.back()->reset_loads();
             if (blade.nodes.back()->get_position().z() < pos0 && pos_y > pos0) {
-                if (start_time == 0.0) {
+                if (start_time == 0.0 && npeaks == 0) {
                     start_time = time;
                 } else {
                     npeaks += 1;
@@ -264,7 +266,7 @@ TEST(test_blade, flapwise) {
     }
 
     // literature flapwise natural frequency for IEA15MW: 0.555Hz (1.802s)
-    double natural_period_ref = 1.92;
+    double natural_period_ref = 1.980000;
     ASSERT_NEAR(natural_period_ref, natural_period, 0.01);
 }
 
@@ -413,7 +415,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.696608, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.697277, 1e-4);
 }
 
 TEST(test_turbine, rpm_initial_pitch_fpm) {
@@ -745,7 +747,7 @@ TEST(test_aerodyn, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.715747, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.716130, 1e-4);
 }
 #endif
 
@@ -879,6 +881,6 @@ TEST(test_inflowwind, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.686469, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.686779, 1e-4);
 }
 #endif
