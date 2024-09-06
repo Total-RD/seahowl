@@ -4,6 +4,7 @@
 #include "seahowl/elasto/system_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/aero/system_aero.h"
+#include "seahowl/aero/blade_aero.h"
 #include "seahowl/elasto/chrono_adapters.h"
 #include "seahowl/io/read_json.h"
 #include "seahowl/io/write_csv.h"
@@ -87,11 +88,6 @@ void AmrWindAdapter::populate_from_file(const std::string& filepath) {
     auto blade_discretisation = turbines_json_obj.at("rotor").at("discretization").at("aero").get<std::vector<int>>();
     numBladeNode = blade_discretisation[0] + 1;
 
-    // number of nodes on tower
-    // numTowerNode = system_aero->turbines[0].tower->nodes.size();
-    auto tower_discretisation = turbines_json_obj.at("tower").at("discretization").at("aero").get<std::vector<int>>();
-    numTowerNode = tower_discretisation[0] + 1;
-
     // blade length
     auto filepath_blade = (main_path / blades_json[0].at("file").get<std::string>()).generic_string();
 
@@ -102,6 +98,39 @@ void AmrWindAdapter::populate_from_file(const std::string& filepath) {
 
     auto points = blades_json_obj.at("reference_points").get<json>();
     bladeLength = points[points.size() - 1]["coordinates"][2];
+
+    // number of nodes on tower
+    // numTowerNode = system_aero->turbines[0].tower->nodes.size();
+    auto tower_discretisation = turbines_json_obj.at("tower").at("discretization").at("aero").get<std::vector<int>>();
+    numTowerNode = tower_discretisation[0] + 1;
+
+    // tower height
+    auto filepath_tower = (main_path / turbines_json_obj.at("tower").at("file").get<std::string>()).generic_string();
+
+    std::ifstream tower_csv_file;
+    tower_csv_file.open(filepath_tower);
+
+    std::string line, word;
+    std::getline(tower_csv_file, line);
+
+    double tower_discret_vect[numTowerNode];
+    int idx_line = 0;
+    while (std::getline(tower_csv_file, line)) {
+        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+        std::stringstream line_ss(line);
+        int idx_word = 0;
+        while (std::getline(line_ss, word, ',')) {
+            idx_word += 1;
+            if (idx_word == 3) {
+                tower_discret_vect[idx_line] = std::stod(word);
+                break;
+            }
+        }
+        idx_line += 1;
+    }
+
+    towerHeight = tower_discret_vect[numTowerNode - 1];
+    towerBaseHeight = tower_discret_vect[0];
 }
 
 void AmrWindAdapter::initialize() {
@@ -134,14 +163,13 @@ void AmrWindAdapter::initialize_from_file(const std::string& filepath) {
     spdlog::info("Initial setup time: {:.3}s.", sw_setup);
 }
 
-void AmrWindAdapter::init_OpFM(int* NumActForcePtsBlade,
-                               int* NumActForcePtsTower,
+void AmrWindAdapter::init_OpFM(int* numActForcePtsBlade,
+                               int* numActForcePtsTower,
                                seahowl::core::OpFM_InputType* to_cfd,
                                seahowl::core::OpFM_OutputType* from_cfd) {
     /* Motion nodes from Seahowl */
-
     // Hub node (As the coupling between AMR-Wind and OpenFAST, hub is first point always)
-    auto nNodesVel = 1;
+    nNodesVel = 1;
 
     // Blade nodes
     nNodesVel = nNodesVel + numBlade * numBladeNode;
@@ -168,15 +196,14 @@ void AmrWindAdapter::init_OpFM(int* NumActForcePtsBlade,
     AllocPAry(from_cfd->w, from_cfd->w_Len, "w");
 
     /* Actuator nodes from AMR-Wind */
-
     // Hub node
-    auto nNodesForce = 1;
+    nNodesForce = 1;
 
     // Blade nodes
-    nNodesForce = nNodesForce + numBlade * *NumActForcePtsBlade;
+    nNodesForce = nNodesForce + numBlade * *numActForcePtsBlade;
 
     // Tower nodes
-    nNodesForce = nNodesForce + *NumActForcePtsTower;
+    nNodesForce = nNodesForce + *numActForcePtsTower;
 
     // postion of AMR-Wind actuator nodes
     to_cfd->pxForce_Len = nNodesForce;
@@ -221,8 +248,26 @@ void AmrWindAdapter::init_OpFM(int* NumActForcePtsBlade,
 
     // chord distribution at AMR-Wind actuator nodes
     to_cfd->forceNodesChord_Len = nNodesForce;
-
     AllocPAry(to_cfd->forceNodesChord, to_cfd->forceNodesChord_Len, "forceNodesChord");
+
+    // location of actuator force nodes on blade
+    forceBldRnodes_Len = *numActForcePtsBlade;
+
+    AllocPAry(forceBldRnodes, *numActForcePtsBlade, "forceBldRnodes");
+
+    // location of actuator force nodes on tower
+    forceTwrHnodes_Len = *numActForcePtsTower;
+
+    AllocPAry(forceTwrHnodes, *numActForcePtsTower, "forceTwrHnodes");
+
+    // mapping
+    nMappings = numBlade;
+    if (*numActForcePtsTower > 0) {
+        nMappings = numBlade + 1;
+    }
+
+    // Create the blade and tower nodes
+    CreateActForceBladeTowerNodes();
 }
 
 void AmrWindAdapter::step() {
@@ -257,5 +302,50 @@ void AmrWindAdapter::AllocPAry(float*& array, int size, const std::string& name)
         }
     } catch (const std::bad_alloc&) {
         spdlog::error("Allocation failed for {}", name);
+    }
+}
+
+void AmrWindAdapter::CreateActForceBladeTowerNodes() {
+    // Blade: uniform distribution
+    // To add: Non-uniform distribution may be added in the future
+    auto dRforceNodes = bladeLength / (forceBldRnodes_Len - 1);
+    for (int i = 0; i < forceBldRnodes_Len; i++) {
+        forceBldRnodes[i] = i * dRforceNodes;
+    }
+
+    // Tower: uniform distribution
+    if (nMappings > numBlade) {
+        auto dRforceNodes = towerHeight / (forceTwrHnodes_Len - 1);
+        for (int i = 0; i < forceTwrHnodes_Len; i++) {
+            forceTwrHnodes[i] = i * dRforceNodes;
+        }
+    }
+}
+
+void AmrWindAdapter::InterpolateForceNodesChord(seahowl::core::OpFM_InputType* to_cfd) {
+    // Hub: 1st point. This step is not necessary since forceNodesChord at hub is set to 0.0 during initialization
+    to_cfd->forceNodesChord[0] = 0.0;
+
+    int iNode = 1;
+    auto turbine = system_aero->turbines[0];
+
+    // Blade: we use the same discretisation as Seahowl aero, no interpolation is needed
+    // To add: interpolation is needed if numActForcePtsBlade != numBladeNode
+    auto blades = turbine->rna.rotor->blades;
+
+    for (auto& blade : blades) {
+        auto nodes = blade->nodes;
+        for (int i = 0; i < nodes.size(); i++) {
+            to_cfd->forceNodesChord[iNode] = nodes[i].properties.chord;
+            iNode++;
+        }
+    }
+
+    // Tower
+    auto tower = turbine->tower;
+    auto nodes = tower.nodes;
+    for (int i = 0; i < nodes.size(); i++) {
+        to_cfd->forceNodesChord[iNode] = nodes[i].diameter;
+        iNode++;
     }
 }
