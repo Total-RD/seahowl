@@ -86,23 +86,56 @@ class AmrWindAdapter {
     double duration = 1000.0;
     bool is_initialized = false;
 
+    // air density to normailze the loads sent to AMR-Wind
+    double airDens = 1.225;
+
+    // number of blade
     int numBlade = 3;
+
+    // number of aero or elasto ? distretisation on seahowl
     int numBladeNode = 50;
     int numTowerNode = 10;
 
-    double bladeLength = 1.0;
+    double bladeLength = 240.0;
+    double towerHeight = 150.0;
+    double towerBaseHeight = 15.0;
+
+    // number of mapping
+    int nMappings;
+
+    // number of velocity nodes (seahowl nodes)
+    int nNodesVel;
+
+    // number of actuator force nodes (amrwind nodes)
+    int nNodesForce;
+
+    // location of actuator force nodes on blade
+    float* forceBldRnodes;
+    int forceBldRnodes_Len;
+
+    // location of actuator force nodes on tower
+    float* forceTwrHnodes;
+    int forceTwrHnodes_Len;
 
     AmrWindAdapter();
 
+    // populate seahowl turbine from input file
     void populate_from_file(const std::string& filepath);
+
+    // initialize seahowl turbine from input file
     void initialize_from_file(const std::string& filepath);
     void initialize();
 
-    void init_OpFM(int* NumActForcePtsBlade,
-                   int* NumActForcePtsTower,
+    // initialize CFD data structure
+    void init_OpFM(int* numActForcePtsBlade,
+                   int* numActForcePtsTower,
                    seahowl::core::OpFM_InputType* to_cfd,
                    seahowl::core::OpFM_OutputType* from_cfd);
 
+    // Interpolate the chord distribution to the force nodes
+    void InterpolateForceNodesChord(seahowl::core::OpFM_InputType* to_cfd);
+
+    // step function to move forward to next time step
     void step();
 
     void send_to_cfd(seahowl::core::OpFM_InputType to_cfd);
@@ -114,8 +147,15 @@ class AmrWindAdapter {
     int nstep = 0;
     double t_output_next = 0.0;
     std::string main_filepath;
+
+    // Initialize array required by AMR-Wind
     void AllocPAry(float*& array, int size, const std::string& name);
-    void CreateActForceBlade();
+
+    // Create the blade and tower nodes
+    void CreateActForceBladeTowerNodes();
+
+    // Create actuator point motion mesh
+    void CreateActForceMotionsMesh();
 };
 
 }  // namespace core
