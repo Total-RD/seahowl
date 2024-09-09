@@ -325,38 +325,11 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         auto density = input_data->get("density", ii);
         auto young_modulus = input_data->get("young_modulus", ii);
         auto poisson_ratio = input_data->get("poisson_ratio", ii);
-        auto shear_modulus = 0.5 * young_modulus / (1.0 + poisson_ratio);
-
-        // point-specific properties
         auto diameter = input_data->get("diameter", ii);
         auto thickness = input_data->get("thickness", ii);
-
-        // geometry info
-        auto d1 = diameter;
-        auto d2 = diameter - 2.0 * thickness;
-        auto area = PI * (pow(d1, 2) - pow(d2, 2)) / 4.0;
-        // linear density
-        auto density_linear = density * area;
-        // stiffnesses
-        auto EI = young_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 64.;  // bending
-        auto EA = young_modulus * area;                                  // axial
-        auto kt = shear_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 32.;  // torsion
-
-        // populate reference point
-        reference_point.stiffness_foreaft = EI;
-        reference_point.stiffness_sideside = EI;
-        reference_point.stiffness_axial = EA;
-        reference_point.stiffness_torsion = kt;
-        reference_point.density = density_linear;
-        reference_point.inertia_foreaft = EI / young_modulus * density_linear;
-        reference_point.inertia_sideside = EI / young_modulus * density_linear;
-
-        // shear leads to issues when tower is not finely discretized (wrong nat. freq.), and its effect is small enough
-        // to be neglected
-        reference_point.stiffness_foreaft_shear = 0.0;
-        reference_point.stiffness_sideside_shear = 0.0;
-        // reference_point.stiffness_foreaft_shear = shear_modulus * area;
-        // reference_point.stiffness_sideside_shear = shear_modulus * area;
+        // shear set to false as it leads to issues when tower is not finely discretized (wrong nat. freq.)
+        // its effect is usually small enough to be neglected here
+        reference_point.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
 
         reference_point.damping_coefficients[0] = input_data->get("damping_z", ii);
         reference_point.damping_coefficients[1] = input_data->get("damping_y", ii);

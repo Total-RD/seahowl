@@ -1,5 +1,7 @@
 #include "seahowl/elasto/reference_point_elasto.h"
 
+#include <spdlog/spdlog.h>
+
 using namespace seahowl::elasto;
 
 BladeReferencePointElasto::BladeReferencePointElasto() {}
@@ -81,6 +83,43 @@ TowerReferencePointElasto TowerReferencePointElasto::operator+(const TowerRefere
     new_point.damping_coefficients[4] += other.damping_coefficients[4];
     return new_point;
 };
+
+void TowerReferencePointElasto::set_properties_cylinder(double density_volume,
+                                                        double young_modulus,
+                                                        double poisson_ratio,
+                                                        double outer_diameter,
+                                                        double thickness,
+                                                        bool shear) {
+    auto shear_modulus = 0.5 * young_modulus / (1.0 + poisson_ratio);
+
+    // geometry info
+    auto d1 = outer_diameter;
+    auto d2 = outer_diameter - 2.0 * thickness;
+    auto area = PI * (pow(d1, 2) - pow(d2, 2)) / 4.0;
+    // linear density
+    auto density_linear = density_volume * area;
+    // stiffnesses
+    auto EI = young_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 64.;  // bending
+    auto EA = young_modulus * area;                                  // axial
+    auto kt = shear_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 32.;  // torsion
+
+    // populate reference point
+    stiffness_foreaft = EI;
+    stiffness_sideside = EI;
+    stiffness_axial = EA;
+    stiffness_torsion = kt;
+    density = density_linear;
+    inertia_foreaft = EI / young_modulus * density_volume;
+    inertia_sideside = EI / young_modulus * density_volume;
+
+    if (shear) {
+        stiffness_foreaft_shear = shear_modulus * area;
+        stiffness_sideside_shear = shear_modulus * area;
+    } else {
+        stiffness_foreaft_shear = 0.0;
+        stiffness_sideside_shear = 0.0;
+    }
+}
 
 ReferencePointElasto::ReferencePointElasto() {}
 

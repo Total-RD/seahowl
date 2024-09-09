@@ -89,6 +89,23 @@ struct TowerReferencePointElasto : ReferencePointElasto {
 
     TowerReferencePointElasto operator*(const double factor) const;
     TowerReferencePointElasto operator+(const TowerReferencePointElasto& other) const;
+
+    /**
+     * @brief Set properties for hollow cylinder.
+     *
+     * @param[in] density Density of material (kg/m3).
+     * @param[in] young_modulus Young's modulus of material (Pa).
+     * @param[in] poisson_ratio Poisson ratio of material (-).
+     * @param[in] outer_diameter Outer diameter of cylinder (m).
+     * @param[in] thickness Thickness of cylinder (m).
+     * @param[in] shear Whether to include shear or not.
+     */
+    void set_properties_cylinder(double density,
+                                 double young_modulus,
+                                 double poisson_ratio,
+                                 double outer_diameter,
+                                 double thickness,
+                                 bool shear = false);
 };
 
 }  // namespace elasto

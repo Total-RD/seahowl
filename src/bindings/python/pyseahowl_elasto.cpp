@@ -174,7 +174,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readwrite("inertia_foreaft", &seahowl::elasto::TowerReferencePointElasto::inertia_foreaft)
         .def_readwrite("inertia_sideside", &seahowl::elasto::TowerReferencePointElasto::inertia_sideside)
         .def_readwrite("damping_coefficients", &seahowl::elasto::TowerReferencePointElasto::damping_coefficients)
-        .def(py::init<>());
+        .def(py::init<>())
+        .def("set_properties_cylinder", &seahowl::elasto::TowerReferencePointElasto::set_properties_cylinder);
 
     // elasto/component_elasto.h
     py::class_<seahowl::elasto::ComponentElasto, std::shared_ptr<seahowl::elasto::ComponentElasto>>(m_elasto,
