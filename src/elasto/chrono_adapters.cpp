@@ -402,8 +402,10 @@ void NodeElastoChrono::set_properties(const TowerReferencePointElasto& ref) {
     section->SetXtorsionRigidity(ref.stiffness_torsion);
     // foreaft
     section->SetYbendingRigidity(ref.stiffness_foreaft);
+    section->SetYshearRigidity(ref.stiffness_foreaft_shear);
     // sideside
     section->SetZbendingRigidity(ref.stiffness_sideside);
+    section->SetZshearRigidity(ref.stiffness_sideside_shear);
     // damping
     if (ref.damping_coefficients.size() != 5) {
         throw std::runtime_error("Damping coefficients for tower must be a vector of length 5 (got " +

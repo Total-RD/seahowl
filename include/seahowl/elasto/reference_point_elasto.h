@@ -71,6 +71,10 @@ struct TowerReferencePointElasto : ReferencePointElasto {
     double stiffness_sideside = 0.0;
     /** @brief Torsional stiffness of tower at reference point. */
     double stiffness_torsion = 0.0;
+    /** @brief Fore-aft shear stiffness of tower at reference point. */
+    double stiffness_foreaft_shear = 0.0;
+    /** @brief Side-side shear stiffness of tower at reference point. */
+    double stiffness_sideside_shear = 0.0;
     /** @brief Fore-aft inertia of tower at reference point. */
     double inertia_foreaft = 0.0;
     /** @brief Side-side inertia of tower at reference point. */

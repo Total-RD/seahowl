@@ -351,6 +351,13 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         reference_point.inertia_foreaft = EI / young_modulus * density_linear;
         reference_point.inertia_sideside = EI / young_modulus * density_linear;
 
+        // shear leads to issues when tower is not finely discretized (wrong nat. freq.), and its effect is small enough
+        // to be neglected
+        reference_point.stiffness_foreaft_shear = 0.0;
+        reference_point.stiffness_sideside_shear = 0.0;
+        // reference_point.stiffness_foreaft_shear = shear_modulus * area;
+        // reference_point.stiffness_sideside_shear = shear_modulus * area;
+
         reference_point.damping_coefficients[0] = input_data->get("damping_z", ii);
         reference_point.damping_coefficients[1] = input_data->get("damping_y", ii);
         reference_point.damping_coefficients[2] = input_data->get("damping_x", ii);
