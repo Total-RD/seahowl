@@ -134,6 +134,80 @@ TEST(test_tower, mass) {
     ASSERT_NEAR(tower_mass, tower.get_mass(), 1.0);
 }
 
+TEST(test_tower, frequency) {
+    // system
+    auto system_elasto = SystemElastoChrono();
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
+
+    // tower
+    auto tower = seahowl::elasto::TowerElasto();
+    // properties
+    auto density = 7850.0;
+    auto young_modulus = 2.11e11;
+    auto poisson_ratio = 0.3;
+    auto diameter = 4.0;
+    auto thickness = 0.03;
+    // bottom
+    auto ref_point1 = seahowl::elasto::TowerReferencePointElasto();
+    ref_point1.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
+    ref_point1.coordinates = seahowl::Vector3d(0.0, 0.0, 0.0);
+    ref_point1.fraction = 0.0;
+    // top
+    auto ref_point2 = seahowl::elasto::TowerReferencePointElasto();
+    ref_point2.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
+    ref_point2.coordinates = seahowl::Vector3d(0.0, 0.0, 100.0);
+    ref_point2.fraction = 1.0;
+    //
+    tower.reference_points = {ref_point1, ref_point2};
+    tower.discretization_fractions = {20};
+    tower.build();
+    tower.assemble(system_elasto);
+    tower.nodes.front()->set_fixed(true);
+
+    system_elasto.do_statics(true, 0);
+
+    // check mass
+    double tower_mass = 293718.5;
+    ASSERT_NEAR(tower_mass, tower.get_mass(), 1.0);
+
+    // static position of tower top
+    double pos0 = tower.nodes.back()->get_position().x();
+
+    // check zero-crossings (static position of tower top)
+    int step = 0;
+    double pos_y = 0.0;
+    double dt = 0.01;
+    int npeaks = 0;
+    double natural_period = 0.0;
+    double time = 0.0;
+    double end_time = 10.0;
+    double start_time = 0.0;
+    tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
+    while (time < end_time) {
+        if (time > 0.5) {
+            tower.nodes.back()->set_force(Vector3d(0.0, 0.0, 0.0), false);
+            tower.nodes.back()->reset_loads();
+            if (tower.nodes.back()->get_position().x() < pos0 && pos_y > pos0) {
+                if (start_time == 0.0 && npeaks == 0) {
+                    start_time = time;
+                } else {
+                    npeaks += 1;
+                    natural_period = (time - start_time) / npeaks;
+                }
+            }
+        } else {
+            tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
+        }
+        pos_y = tower.nodes.back()->get_position().x();
+        system_elasto.step(dt);
+        time += dt;
+        step += 1;
+    }
+
+    double natural_period_ref = 2.493333;  // theory: 0.4062Hz (2.4618s), f1=1.875^2/2pi*sqrt(EI/(rho*A*L^4))
+    ASSERT_NEAR(natural_period_ref, natural_period, 0.01);
+}
+
 TEST(test_blade, edgewise) {
     // system
     auto system_elasto = SystemElastoChrono();
