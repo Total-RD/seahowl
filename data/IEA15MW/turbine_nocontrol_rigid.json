@@ -32,7 +32,6 @@
     ]
   },
   "rna": {
-    "initial_pitch_collective": 0,
     "file": "./rna.json"
   },
   "tower": {

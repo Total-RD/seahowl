@@ -617,7 +617,7 @@ void populate_turbine_from_json(const std::string& filepath,
             auto blade = std::make_shared<seahowl::core::Blade>(*blade_elasto, *blade_aero);
             populate_blade_from_json(filepath_blade, *blade);
             rotor_json.at("discretization").at("aero").get_to(blade->aero.discretization_fractions);
-            blade_json.at("initial_pitch").get_to(blade->elasto.pitch);
+            blade_elasto->pitch = blade_json.at("initial_pitch").get<double>() * PI / 180.0;
             blade_elasto->precone = blade_json.at("precone").get<double>() * PI / 180.0;
             // no precone if blade is rigid (assumed that blade is on rotor disc)
             if (rotor_json.at("type").get<std::string>() == "rigid") {
@@ -635,7 +635,6 @@ void populate_turbine_from_json(const std::string& filepath,
     // RNA
     auto filepath_rna = (DATADIR / rna_json.at("file").get<std::string>()).generic_string();
     populate_rna_from_json(filepath_rna, turbine.rna);
-    rna_json.at("initial_pitch_collective").get_to(turbine.elasto.rna.rotor->pitch_collective);
 
     // update info if rotor is disk
     if (rotor_json.at("type").get<std::string>() == "disk") {

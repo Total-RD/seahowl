@@ -880,7 +880,6 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                 ],
             },
             "rna": {
-                "initial_pitch_collective": 0.0,
                 "file": str(Path("./rna.json")),
             },
             "tower": {
