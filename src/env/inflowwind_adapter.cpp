@@ -37,6 +37,11 @@ void InflowWindAdapter::end() {
 }
 
 seahowl::Vector3d InflowWindAdapter::get_fluid_velocity(const seahowl::Vector3d& position, double time) const {
+    if (position.z() < zmin) {
+        // zmin is set for cases such as TurbSim that cannot generate wind field close or below z=0
+        return Vector3d(0.0, 0.0, 0.0);
+    }
+
     float* Pos_C = new float[3];
     for (int i = 0; i < 3; i++) {
         Pos_C[i] = position[i];

@@ -86,6 +86,9 @@ struct InflowWindLib {
 
 class InflowWindAdapter : public WindModel {
   public:
+    /** @brief Level below which returned velocity is (0.0, 0.0, 0.0), used for z<0 when using TurbSim for example. */
+    double zmin = 0.0;
+
     std::unique_ptr<InflowWindLib> pImpl;
 
     InflowWindAdapter(std::string InflowInfile);

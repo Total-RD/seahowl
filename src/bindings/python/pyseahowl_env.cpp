@@ -50,7 +50,8 @@ void initialize_pyseahowl_env(py::module& m) {
     // env/infflowwind_adapter.h
     py::class_<seahowl::env::InflowWindAdapter, std::shared_ptr<seahowl::env::InflowWindAdapter>,
                seahowl::env::WindModel>(m_env, "InflowWindAdapter")
-        .def(py::init<std::string&>());
+        .def(py::init<std::string&>())
+        .def_readwrite("zmin", &seahowl::env::InflowWindAdapter::zmin);
 #endif
 
     // env/wave_models.h
