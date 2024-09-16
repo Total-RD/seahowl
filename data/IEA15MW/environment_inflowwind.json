@@ -3,7 +3,8 @@
   "wind": {
     "type": "inflowwind",
     "options": {
-       "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat"
+       "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat",
+       "zmin": 5.0
     }
   },
   "sea": {

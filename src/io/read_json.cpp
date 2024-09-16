@@ -972,7 +972,15 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
         } else {
             throw std::runtime_error("InflowWind file not defined.");
         }
-        wind_model_ptr = std::make_shared<seahowl::env::InflowWindAdapter>(inflowwind_filepath);
+        auto ifw_model = std::make_shared<seahowl::env::InflowWindAdapter>(inflowwind_filepath);
+        wind_model_ptr = ifw_model;
+        if (wind_options.contains("zmin")) {
+            wind_options.at("zmin").get_to(ifw_model->zmin);
+        } else {
+            spdlog::warn(
+                "Minimum height for wind speed calculation not defined for InflowWind model, using default zmin={}.",
+                ifw_model->zmin);
+        }
 #else
         throw std::runtime_error(
             "InflowWind module in CMAKE options should be enabled if wind type 'inflowwind' selected.");
