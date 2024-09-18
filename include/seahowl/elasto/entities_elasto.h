@@ -287,6 +287,11 @@ class SpringLinear {
      * @param[in] damping_coefficient Damping coefficient (D).
      */
     virtual void set_damping_coefficient(double damping_coefficient) = 0;
+
+    /**
+     * @brief Returns force.
+     */
+    virtual double get_force() = 0;
 };
 
 /**

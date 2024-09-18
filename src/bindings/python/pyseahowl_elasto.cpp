@@ -67,6 +67,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("set_rest_length", &seahowl::elasto::SpringLinear::set_rest_length)
         .def("set_spring_coefficient", &seahowl::elasto::SpringLinear::set_spring_coefficient)
         .def("set_damping_coefficient", &seahowl::elasto::SpringLinear::set_damping_coefficient)
+        .def("get_force", &seahowl::elasto::SpringLinear::get_force)
         .def("initialize", &seahowl::elasto::SpringLinear::initialize)
         .def("initialize_with_anchors", &seahowl::elasto::SpringLinear::initialize_with_anchors);
     py::class_<seahowl::elasto::LinkMatrixStiffnessDamping,

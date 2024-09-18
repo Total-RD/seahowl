@@ -240,6 +240,7 @@ class SpringLinearChrono : public SpringLinear {
     virtual void set_rest_length(double rest_length) override;
     virtual void set_spring_coefficient(double spring_coefficient) override;
     virtual void set_damping_coefficient(double damping_coefficient) override;
+    virtual double get_force() override;
 };
 
 /**

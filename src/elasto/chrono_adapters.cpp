@@ -684,6 +684,10 @@ void SpringLinearChrono::set_damping_coefficient(double damping_coefficient) {
     chobj->SetDampingCoefficient(damping_coefficient);
 }
 
+double SpringLinearChrono::get_force() {
+    return chobj->GetForce();
+}
+
 LinkChrono::LinkChrono() {
     chobj = chrono_types::make_shared<chrono::ChLinkMateGeneric>();
     chobj->SetConstrainedCoords(true, true, true, true, true, true);
