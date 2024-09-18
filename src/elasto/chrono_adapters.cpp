@@ -165,6 +165,8 @@ Vector3d EntityDynamicChrono::get_rotational_acceleration(bool is_local) const {
 BodyElastoChrono::BodyElastoChrono() {
     chobj = chrono_types::make_shared<chrono::ChBody>();
     EntityDynamicChrono::chobj = chobj;
+    set_mass(0.0);
+    set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
 }
 
 void BodyElastoChrono::set_mass(double mass) {
