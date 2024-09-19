@@ -142,7 +142,8 @@ void RotorNacelleAssemblyElasto::build() {
     // align rotation
     body_shaft->set_rotation(rotor->body_hub->get_rotation());
     // massless body
-    body_shaft->set_mass(0.0);
+    body_shaft->set_mass(1e-6);
+    body_shaft->set_inertia_diagonal(Vector3d(1e-6, 1e-6, 1e-6));
     // link hub to shaft
     link_shaft_hub = std::make_unique<LinkChrono>();
     link_shaft_hub->initialize(*(rotor->body_hub.get()), *(body_shaft.get()));
@@ -166,6 +167,7 @@ void RotorNacelleAssemblyElasto::build() {
     body_yaw_bearing->set_position(Vector3d(0.0, 0.0, 0.0));
     body_yaw_bearing->set_rotation(rotation0);
     body_yaw_bearing->set_mass(nacelle.yaw_bearing_mass);
+    body_yaw_bearing->set_inertia_diagonal(Vector3d(1e-6, 1e-6, 1e-6));
     // link yaw bearing body to shaft body
     link_shaft_yaw_bearing = std::make_unique<LinkChrono>();
     link_shaft_yaw_bearing->initialize(*(body_shaft.get()), *(body_yaw_bearing.get()));

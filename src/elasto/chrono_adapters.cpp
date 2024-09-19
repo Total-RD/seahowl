@@ -853,6 +853,18 @@ void SystemElastoChrono::assemble() {
     // needed for some Chrono (e.g. for moorings or HydroChrono floater)
     chobj->Update();
 
+    // warnings for properties that were not set
+    int body_idx = 0;
+    for (auto& body : chobj->Get_bodylist()) {
+        if (body->GetMass() == 0) {
+            spdlog::warn("Body with mass 0.0 in elasto system (index of body: {}).", body_idx);
+        }
+        if (body->GetInertia().sum() == 0) {
+            spdlog::warn("Body with empty inertia matrix (sum 0.0) in elasto system (index of body: {}).", body_idx);
+        }
+        body_idx += 1;
+    }
+
     spdlog::debug("Finished assembly of system.");
 }
 
