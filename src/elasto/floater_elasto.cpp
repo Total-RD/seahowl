@@ -16,6 +16,7 @@ FloaterElasto::FloaterElasto() {
 void FloaterElasto::link_to_entity(const Entity& entity) {
     link_floater_entity->initialize(*body_main, entity);
     link_floater_entity->set_constraints(true, true, true, true, true, true);
+    is_linked = true;
 };
 
 void FloaterElasto::build() {
@@ -141,7 +142,9 @@ void FloaterElasto::assemble_this(seahowl::elasto::SystemElasto& system) {
         }
     }
 
-    system.add(*(link_floater_entity.get()));
+    if (is_linked) {
+        system.add(*(link_floater_entity.get()));
+    }
 
     // moorings
     mooring_system->assemble(system);

@@ -15,7 +15,6 @@ void TurbineElasto::assemble_this(SystemElasto& system) {
     // assemble foundation
     if (foundation) {
         foundation->assemble(system);
-        foundation->link_to_entity(*(tower.nodes.front().get()));
     }
     // assemble RNA
     rna.assemble(system);
@@ -36,14 +35,15 @@ void TurbineElasto::link_rna_tower(SystemElasto& system) {
 }
 
 void TurbineElasto::build() {
-    // build foundation
-    if (foundation) {
-        foundation->build();
-    }
     // build RNA
     rna.build();
     // build tower
     tower.build();
+    // build foundation
+    if (foundation) {
+        foundation->build();
+        foundation->link_to_entity(*(tower.nodes.front().get()));
+    }
 }
 
 void TurbineElasto::presetup(double fraction) {

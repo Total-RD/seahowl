@@ -121,6 +121,8 @@ class FloaterElasto : public FoundationElasto {
     std::map<std::string, std::deque<std::unique_ptr<seahowl::elasto::BodyElasto>>> fairlead_bodies;
     /** @brief Name of body for tower connection */
     std::string tower_connection_name = "";
+    /** @brief Whether floater is linked to entity or not. */
+    bool is_linked = false;
 
     virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;
 };
