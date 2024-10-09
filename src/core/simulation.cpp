@@ -67,12 +67,20 @@ void Simulation::initialize() {
     if (is_initialized) {
         throw std::runtime_error("Simulation was already initialized.");
     }
+    spdlog::stopwatch sw_setup;
 
+    // initialize outputs
     outputs->initialize();
 
+    // initialize system
     system_core->initialize(system_core->get_time(), dt);
 
+    // output everything at step iteration 0 (creates files and CSV headers)
+    outputs->output_all(0);
+
+    t_output_next = dt_output;
     is_initialized = true;
+    spdlog::info("Simulation initialized in {:.3}s.", sw_setup);
 }
 
 void Simulation::initialize_from_file(const std::string& filepath) {
@@ -81,15 +89,18 @@ void Simulation::initialize_from_file(const std::string& filepath) {
     }
     spdlog::stopwatch sw_setup;
 
+    // initialize outputs
     outputs->initialize();
 
+    // initialize system
     initialize_system_from_json(filepath, *system_core);
 
+    // output everything at step iteration 0 (creates files and CSV headers)
     outputs->output_all(0);
 
     t_output_next = dt_output;
     is_initialized = true;
-    spdlog::info("Initial setup time: {:.3}s.", sw_setup);
+    spdlog::info("Simulation initialized in {:.3}s.", sw_setup);
 };
 
 void Simulation::step() {
