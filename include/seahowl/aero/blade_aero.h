@@ -5,6 +5,8 @@
 #include "seahowl/aero/reference_point_aero.h"
 #include "seahowl/commons/component_fluid.h"
 
+#include <memory>
+
 namespace seahowl {
 
 /**@brief Aerodynamic module */
@@ -126,6 +128,8 @@ class BladeAero {
     double azimuth0 = 0.0;
     /** @brief Pitch of the blade (in radians). */
     double pitch = 0.0;
+    /** @brief Body at the root of the blade. */
+    std::unique_ptr<EntityDynamic> body_root;
 
     /**
      * @brief Constructor.

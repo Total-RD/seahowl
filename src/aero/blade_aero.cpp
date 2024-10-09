@@ -58,7 +58,9 @@ Vector3d BladeElementAero::get_offset_aero_absolute() const {
     return 0.5 * (node1.get_offset_aero_absolute() + node2.get_offset_aero_absolute());
 }
 
-BladeAero::BladeAero() {}
+BladeAero::BladeAero() {
+    body_root = std::make_unique<EntityDynamicEigen>();
+}
 
 void BladeAero::build() {
     // check that enough reference points were defined to create elements (at least 2)

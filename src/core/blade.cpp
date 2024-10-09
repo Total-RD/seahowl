@@ -91,6 +91,14 @@ void Blade::update_positions_aero() {
 
     // update pitch of blade for aero
     aero.pitch = elasto.pitch;
+
+    // update blade body root required by AeroDyn coupling
+    aero.body_root->set_rotation(elasto.body_root->get_rotation());
+    aero.body_root->set_position(elasto.body_root->get_position());
+    aero.body_root->set_velocity(elasto.body_root->get_velocity());
+    aero.body_root->set_rotational_velocity(elasto.body_root->get_rotational_velocity());
+    aero.body_root->set_acceleration(elasto.body_root->get_acceleration());
+    aero.body_root->set_rotational_acceleration(elasto.body_root->get_rotational_acceleration());
 }
 
 void Blade::update_loads_elasto() {
