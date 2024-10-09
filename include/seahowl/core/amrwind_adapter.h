@@ -135,11 +135,21 @@ class AmrWindAdapter {
     // Interpolate the chord distribution to the force nodes
     void InterpolateForceNodesChord(seahowl::core::OpFM_InputType* to_cfd);
 
+    // Create the actuator line force point mesh
+    // to do list
+    void CreateActForceMotionsMesh();
+
+    // set the positions
+    void SetOpFMPositions(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd);
+
+    // set the forces
+    void SetOpFMForces(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd);
+
     // step function to move forward to next time step
     void step();
 
-    void send_to_cfd(seahowl::core::OpFM_InputType to_cfd);
-    void get_from_cfd(seahowl::core::OpFM_OutputType from_cfd);
+    // void send_to_cfd(seahowl::core::OpFM_InputType to_cfd);
+    // void get_from_cfd(seahowl::core::OpFM_OutputType from_cfd);
 
   private:
     std::unique_ptr<seahowl::elasto::SystemElasto> system_elasto;
@@ -155,7 +165,7 @@ class AmrWindAdapter {
     void CreateActForceBladeTowerNodes();
 
     // Create actuator point motion mesh
-    void CreateActForceMotionsMesh();
+    // void CreateActForceMotionsMesh();
 };
 
 }  // namespace core

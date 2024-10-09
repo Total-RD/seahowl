@@ -349,3 +349,13 @@ void AmrWindAdapter::InterpolateForceNodesChord(seahowl::core::OpFM_InputType* t
         iNode++;
     }
 }
+
+void AmrWindAdapter::CreateActForceMotionsMesh() {
+    // To do list
+}
+
+// set the positions
+// void SetOpFMPositions(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {}
+
+// set the forces
+// void SetOpFMForces(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {}
