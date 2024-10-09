@@ -151,7 +151,8 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
         // added mass (with Cm = 1 + Ca)
         auto load_added_mass_fluid = fluid_density * area * acceleration_fluid;
         // auto appo = coefficients.added_mass_normal;
-        auto appo = interpolateCmBinarySearch(MacCamyFuchsTable, diameter);
+        auto appo = coefficients.interpolateCmBinarySearch(coefficients.MacCamyFuchsTable, diameter);
+        std::cout << "Diam " << diameter << "Coeff " << appo;
         auto load_added_mass_normal = fluid_density * area * appo * acceleration_relative_normal;
         auto load_added_mass_axial = fluid_density * area * coefficients.added_mass_axial * acceleration_relative_axial;
         // total inertia load
