@@ -28,9 +28,13 @@ struct HydroCoefficients {
     double inertia_factor = 1.0;
     /** @brief Factor for nodal acceleration (1.0 for default behavior). */
     double nodal_acceleration_factor = 1.0;
+    /** @brief MacCamy and Fuchs Empirical Table for large cylinders */
+    std::vector<std::pair<double, double>> MacCamyFuchsTable;
 
     HydroCoefficients operator*(const double factor) const;
     HydroCoefficients operator+(const HydroCoefficients& other) const;
+    std::vector<std::pair<double, double>> generateMacCamyFuchsTable();
+    double interpolateCmBinarySearch(const std::vector<std::pair<double, double>>& MCFTable, double D);
 };
 
 /**
