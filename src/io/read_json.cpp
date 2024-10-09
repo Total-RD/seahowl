@@ -314,6 +314,8 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
                              input_data->get("z", input_data->nrows - 1));
     double length = (pos1 - pos0).norm();
 
+    std::vector<double> young_modulus_list;
+    std::vector<double> poisson_ratio_list;
     // MAKE TOWER REFERENCE POINTS
     for (int ii = 0; ii < input_data->nrows; ii++) {
         auto reference_point = seahowl::elasto::TowerReferencePointElasto();
@@ -331,6 +333,9 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         // its effect is usually small enough to be neglected here
         reference_point.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
 
+        young_modulus_list.push_back(young_modulus);
+        poisson_ratio_list.push_back(poisson_ratio);
+
         reference_point.damping_coefficients[0] = input_data->get("damping_z", ii);
         reference_point.damping_coefficients[1] = input_data->get("damping_y", ii);
         reference_point.damping_coefficients[2] = input_data->get("damping_x", ii);
@@ -338,6 +343,46 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
 
         reference_points.push_back(reference_point);
     }
+
+    std::ofstream log_file("tower.log");  // Create and open the file
+
+    if (!log_file.is_open()) {
+        std::cout << "Error: Could not open or create log file: "
+                  << "tower.log" << std::endl;
+    }
+
+    log_file << "Log Report of Discretized Points:\n";
+    log_file << "---------------------------------\n";
+    log_file << "Point, "
+             << "Fraction, "
+             << "Young modulus, "
+             << "Poisson modulus, "
+             << "stiffness_foreaft, "
+             << "stiffness_sideside, "
+             << "stiffness_axial, "
+             << "stiffness_torsion, "
+             << "density, "
+             << "\n";
+    // Loop through each discretized point and log its properties
+    for (size_t ii = 0; ii < reference_points.size(); ++ii) {
+        const auto& point = reference_points[ii];
+
+        log_file << ii + 1 << ", ";
+        log_file << point.coordinates[0] << ", ";
+        log_file << point.coordinates[1] << ", ";
+        log_file << point.coordinates[2] << ",";
+        log_file << point.fraction << ",";
+        log_file << young_modulus_list[ii] << ", ";
+        log_file << poisson_ratio_list[ii] << ", ";
+
+        log_file << point.stiffness_foreaft << ", ";
+        log_file << point.stiffness_sideside << ", ";
+        log_file << point.stiffness_axial << ", ";
+        log_file << point.stiffness_torsion << ", ";
+        log_file << point.density << "\n";
+    }
+
+    log_file.close();  // Close the file after writing
 
     return reference_points;
 }
