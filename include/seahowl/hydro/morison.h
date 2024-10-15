@@ -34,8 +34,18 @@ struct HydroCoefficients {
     HydroCoefficients operator*(const double factor) const;
     HydroCoefficients operator+(const HydroCoefficients& other) const;
     std::vector<std::pair<double, double>> generateMacCamyFuchsTable();
-    double interpolateCmBinarySearch(const std::vector<std::pair<double, double>>& MCFTable, double D);
+    double interpolateCmBinarySearch(const env::FluidModel& fluid_model,
+                                     const std::vector<std::pair<double, double>>& MCFTable,
+                                     double D);
 };
+
+class MacCamyFuchsTable {
+    /** @brief MacCamy and Fuchs Empirical Table for large cylinders */
+  public:
+    /** @brief Wave period */
+    double tp = 0.0;
+};
+static MacCamyFuchsTable mytable;
 
 /**
  * @brief Morison node.

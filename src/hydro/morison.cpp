@@ -86,9 +86,39 @@ std::vector<std::pair<double, double>> HydroCoefficients::generateMacCamyFuchsTa
     return MCFTable;
 }
 
-double HydroCoefficients::interpolateCmBinarySearch(const std::vector<std::pair<double, double>>& MCFTable, double D) {
+double HydroCoefficients::interpolateCmBinarySearch(const env::FluidModel& fluid_model,
+                                                    const std::vector<std::pair<double, double>>& MCFTable,
+                                                    double D) {
+    // auto filepath_environment = (DATADIR /
+    // json_obj.at("environment").at("file").get<std::string>()).generic_string(); system_core.fluid_model
+    // env_model->fluid_model
+    // wave_model.waves = hydrochrono_waves;
+    // fluid_model.wave_model
+    // hydrochrono_waves->wave_model.waves
+    // regular_wave_omega_
+    // auto tp0 = fluid_model.wave_model.waves->regular_wave_omega_; //2 * PI /
+    // sea_options.at("wave_period").get<double>(); #ifdef HAVE_HYDROCHRONO
+    //     // fluid_model.wave_model = std::make_unique<seahowl::env::WaveModelHydroChrono>();
+    //     auto& fluid_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
+    // #endif
+
+    // std::ifstream file("data.json");
+    // if (!file.is_open()) {
+    //     std::cerr << "Could not open the file!" << std::endl;
+    //     return 1;
+    // }
+    // json j;
+    // file >> j;
+
+    auto tp = 10.0;
+
+    D = D / (1.56 * tp * tp);
+
+    // spdlog::critical("mon message")
+
     if (D < MCFTable.front().first || D > MCFTable.back().first) {
-        throw std::out_of_range("Diameter is outside the table range.");
+        // throw std::out_of_range("Diameter is outside the table range.");
+        spdlog::critical("Diameter is outside the table range. {} ", D);
     }
 
     size_t low = 0;
@@ -151,8 +181,8 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
         // added mass (with Cm = 1 + Ca)
         auto load_added_mass_fluid = fluid_density * area * acceleration_fluid;
         // auto appo = coefficients.added_mass_normal;
-        auto appo = coefficients.interpolateCmBinarySearch(coefficients.MacCamyFuchsTable, diameter);
-        std::cout << "Diam " << diameter << "Coeff " << appo;
+        auto appo = coefficients.interpolateCmBinarySearch(fluid_model, coefficients.MacCamyFuchsTable, diameter);
+        spdlog::critical("my Tp {} my Coeff. {}", mytable.tp, appo);
         auto load_added_mass_normal = fluid_density * area * appo * acceleration_relative_normal;
         auto load_added_mass_axial = fluid_density * area * coefficients.added_mass_axial * acceleration_relative_axial;
         // total inertia load
