@@ -45,7 +45,7 @@ class MacCamyFuchsTable {
     /** @brief Wave period */
     double tp = 0.0;
 };
-static MacCamyFuchsTable mytable;
+extern MacCamyFuchsTable mytable;
 
 /**
  * @brief Morison node.

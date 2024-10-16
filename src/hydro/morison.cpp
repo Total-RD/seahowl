@@ -11,6 +11,12 @@
 using namespace seahowl;
 using namespace seahowl::hydro;
 
+namespace seahowl {
+namespace hydro {
+MacCamyFuchsTable mytable;  // Definition of `mytable`
+}
+}  // namespace seahowl
+
 HydroCoefficients HydroCoefficients::operator*(const double factor) const {
     HydroCoefficients new_point = *this;
     new_point.drag_normal *= factor;
