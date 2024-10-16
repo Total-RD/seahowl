@@ -29,21 +29,23 @@ struct HydroCoefficients {
     /** @brief Factor for nodal acceleration (1.0 for default behavior). */
     double nodal_acceleration_factor = 1.0;
     /** @brief MacCamy and Fuchs Empirical Table for large cylinders */
-    std::vector<std::pair<double, double>> MacCamyFuchsTable;
 
     HydroCoefficients operator*(const double factor) const;
     HydroCoefficients operator+(const HydroCoefficients& other) const;
-    std::vector<std::pair<double, double>> generateMacCamyFuchsTable();
-    double interpolateCmBinarySearch(const env::FluidModel& fluid_model,
-                                     const std::vector<std::pair<double, double>>& MCFTable,
-                                     double D);
 };
 
 class MacCamyFuchsTable {
     /** @brief MacCamy and Fuchs Empirical Table for large cylinders */
   public:
+    MacCamyFuchsTable();
     /** @brief Wave period */
-    double tp = 0.0;
+    double wave_peak_period = 0.0;
+    /** @brief The MacCamy and Fuchs Empirical Table for large cylinders */
+    std::vector<std::pair<double, double>> MCFTable;
+    /** @brief Function to generate the MacCamy and Fuchs Empirical Table for large cylinders */
+    void generateMacCamyFuchsTable();
+    /** @brief Function to interpolate, per each morison element, the MacCamy and Fuchs Cm coefficient */
+    double interpolateCmBinarySearch(double D);
 };
 extern MacCamyFuchsTable mytable;
 

@@ -872,7 +872,8 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
                 wave_model.waves = hydrochrono_waves;
                 hydrochrono_waves->regular_wave_amplitude_ = sea_options.at("wave_height").get<double>() / 2.0;
                 hydrochrono_waves->regular_wave_omega_ = 2 * PI / sea_options.at("wave_period").get<double>();
-                // seahowl::hydro::mytable.tp = sea_options.at("wave_period");
+                seahowl::hydro::mytable = seahowl::hydro::MacCamyFuchsTable();
+                seahowl::hydro::mytable.wave_peak_period = sea_options.at("wave_period");
             } else if (wave_type == "irregular") {
                 auto params = IrregularWaveParams();
                 sea_options.at("num_bodies").get_to(params.num_bodies_);
@@ -892,8 +893,8 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
                 params.num_bodies_ = 1;
                 wave_model.waves = std::make_shared<IrregularWaves>(params);
                 seahowl::hydro::mytable = seahowl::hydro::MacCamyFuchsTable();
-                seahowl::hydro::mytable.tp = sea_options.at("wave_period");
-                spdlog::critical("my Tp at read_json {}", seahowl::hydro::mytable.tp);
+                seahowl::hydro::mytable.wave_peak_period = sea_options.at("wave_period");
+                spdlog::critical("my Tp at read_json {}", seahowl::hydro::mytable.wave_peak_period);
             } else {
                 throw std::runtime_error("Unrecognized wave type \"" + wave_type + "\" for HydroChrono.");
             }

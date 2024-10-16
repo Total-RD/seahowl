@@ -45,8 +45,6 @@ void TowerAero::build() {
         nodes.back().set_position(point.coordinates);
         nodes.back().diameter = point.diameter;
         nodes.back().coefficients = point.coefficients;
-        // create MacCamy and Fuch table for the normal added mass coefficients
-        nodes.back().coefficients.MacCamyFuchsTable = nodes.back().coefficients.generateMacCamyFuchsTable();
     }
     // elements
     elements.clear();

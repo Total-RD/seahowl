@@ -11,9 +11,12 @@
 using namespace seahowl;
 using namespace seahowl::hydro;
 
+seahowl::hydro::MacCamyFuchsTable::MacCamyFuchsTable() {
+    generateMacCamyFuchsTable();  //
+}
 namespace seahowl {
 namespace hydro {
-MacCamyFuchsTable mytable;  // Definition of `mytable`
+MacCamyFuchsTable mytable = MacCamyFuchsTable();
 }
 }  // namespace seahowl
 
@@ -44,7 +47,7 @@ HydroCoefficients HydroCoefficients::operator+(const HydroCoefficients& other) c
 MorisonNode::MorisonNode() {}
 
 // Function to generate the MacCamy-Fuchs table
-std::vector<std::pair<double, double>> HydroCoefficients::generateMacCamyFuchsTable() {
+void MacCamyFuchsTable::generateMacCamyFuchsTable() {
     // Create the lists of diameters (same as Python code)
     std::vector<double> DiamList1, DiamList2, DiamList3, DiamList4, DiamList;
 
@@ -64,7 +67,6 @@ std::vector<std::pair<double, double>> HydroCoefficients::generateMacCamyFuchsTa
     DiamList.insert(DiamList.end(), DiamList4.begin(), DiamList4.end());
 
     // Initialize the MacCamy-Fuchs table (vector of pairs)
-    std::vector<std::pair<double, double>> MCFTable;
     MCFTable.reserve(DiamList.size());
 
     // Loop through diameters and compute the associated added-mass coefficient
@@ -87,38 +89,14 @@ std::vector<std::pair<double, double>> HydroCoefficients::generateMacCamyFuchsTa
         // Store the pair: (D, Cm)
         MCFTable.emplace_back(D, Cm);
     }
-
-    // Return the table as a vector of pairs (diameter, inertia coefficient)
-    return MCFTable;
 }
 
-double HydroCoefficients::interpolateCmBinarySearch(const env::FluidModel& fluid_model,
-                                                    const std::vector<std::pair<double, double>>& MCFTable,
-                                                    double D) {
-    // auto filepath_environment = (DATADIR /
-    // json_obj.at("environment").at("file").get<std::string>()).generic_string(); system_core.fluid_model
-    // env_model->fluid_model
-    // wave_model.waves = hydrochrono_waves;
-    // fluid_model.wave_model
-    // hydrochrono_waves->wave_model.waves
-    // regular_wave_omega_
-    // auto tp0 = fluid_model.wave_model.waves->regular_wave_omega_; //2 * PI /
-    // sea_options.at("wave_period").get<double>(); #ifdef HAVE_HYDROCHRONO
-    //     // fluid_model.wave_model = std::make_unique<seahowl::env::WaveModelHydroChrono>();
-    //     auto& fluid_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
-    // #endif
+double MacCamyFuchsTable::interpolateCmBinarySearch(double D) {
+    if (wave_peak_period == 0.0) {
+        throw std::runtime_error("Trying to use MacCamy-Fuchs correction without defining a wave period.");
+    }
 
-    // std::ifstream file("data.json");
-    // if (!file.is_open()) {
-    //     std::cerr << "Could not open the file!" << std::endl;
-    //     return 1;
-    // }
-    // json j;
-    // file >> j;
-
-    auto tp = 10.0;
-
-    D = D / (1.56 * tp * tp);
+    D = D / (1.56 * wave_peak_period * wave_peak_period);
 
     // spdlog::critical("mon message")
 
@@ -186,10 +164,15 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
 
         // added mass (with Cm = 1 + Ca)
         auto load_added_mass_fluid = fluid_density * area * acceleration_fluid;
-        // auto appo = coefficients.added_mass_normal;
-        auto appo = coefficients.interpolateCmBinarySearch(fluid_model, coefficients.MacCamyFuchsTable, diameter);
-        spdlog::critical("my Tp {} my Coeff. {}", mytable.tp, appo);
-        auto load_added_mass_normal = fluid_density * area * appo * acceleration_relative_normal;
+        double coeff_added_mass_normal;
+
+        // Diffraction is relevant for dense fluids. For the air, the MacCamy and Fuchs correction not applicable.
+        if (fluid_density < 500.0) {
+            coeff_added_mass_normal = coefficients.added_mass_normal;
+        } else {
+            coeff_added_mass_normal = mytable.interpolateCmBinarySearch(diameter) - 1.0;
+        }
+        auto load_added_mass_normal = fluid_density * area * coeff_added_mass_normal * acceleration_relative_normal;
         auto load_added_mass_axial = fluid_density * area * coefficients.added_mass_axial * acceleration_relative_axial;
         // total inertia load
         auto load_inertia =
