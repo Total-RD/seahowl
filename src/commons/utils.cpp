@@ -82,8 +82,8 @@ double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
 
     if (y0 == -99 || x0 == -99) {
         spdlog::error("x = {}, y = {},", x, y);
-        spdlog::error("x_list = {},", x_list.transpose());
-        spdlog::error("y_list = {}.", y_list.transpose());
+        spdlog::error("x_list between {} and {},", x_list[0], x_list[x_list.size() - 1]);
+        spdlog::error("y_list between {} and {}.", y_list[0], y_list[y_list.size() - 1]);
         throw std::runtime_error("Bilinear interpolation failed: x or y not found in the coefficients list.");
     };
 
