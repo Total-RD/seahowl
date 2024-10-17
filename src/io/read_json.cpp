@@ -646,7 +646,13 @@ void populate_turbine_from_json(const std::string& filepath,
     populate_tower_from_json(filepath_tower, turbine.tower);
     tower_json.at("discretization").at("elasto").get_to(turbine.elasto.tower.discretization_fractions);
     tower_json.at("discretization").at("aero").get_to(turbine.aero.tower.discretization_fractions);
-
+    if (tower_json.at("options").contains("use_MacCamyFuchs_correction"))
+        tower_json.at("options")
+            .at("use_MacCamyFuchs_correction")
+            .get_to(turbine.aero.tower.use_MacCamyFuchs_correction);
+    else
+        spdlog::warn("MacCamyFuchs correction for tower/pile not defined in turbine.json, it is by default set to {}.",
+                     turbine.aero.tower.use_MacCamyFuchs_correction);
     // controller
     if (controller_json.at("type").get<std::string>() == "DISCON") {
         if (!controller_json.at("options").contains("libfile")) {
@@ -852,7 +858,6 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
         auto sea_json = environment_json.at("sea");
         env_model->fluid_model = std::make_shared<seahowl::env::WaveWindModel>();
         auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*env_model->fluid_model);
-
         // specific model options
         auto sea_type = sea_json.at("type").get<std::string>();
         if (sea_type == "still") {

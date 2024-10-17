@@ -37,6 +37,8 @@ class TowerAero : public ComponentFluid {
     std::vector<hydro::MorisonElement> elements;
     /** @brief Loads at center of tower elements. */
     std::vector<Vector3d> loads;
+    /** @brief MacCamy and Fuchs Correction for large cylinders, Flag. */
+    bool use_MacCamyFuchs_correction = true;
 
     /**
      * @brief Constructor.

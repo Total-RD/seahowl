@@ -19,6 +19,8 @@ class WaveModel : public FluidModel {
     Vector3d surface_normal{0.0, 0.0, 1.0};
     /** @brief Water depth. */
     double water_depth = 0.0;
+    /** @brief MacCamy-Fuchs correction flag. */
+    bool MacCamyFuchsflag = true;
 
     /**
      * @brief Returns whether position at time t in inside water.

@@ -167,11 +167,12 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
         double coeff_added_mass_normal;
 
         // Diffraction is relevant for dense fluids. For the air, the MacCamy and Fuchs correction not applicable.
-        if (fluid_density < 500.0) {
-            coeff_added_mass_normal = coefficients.added_mass_normal;
-        } else {
+        if (coefficients.use_MacCamyFuchs_correction && fluid_density > 500.0) {
             coeff_added_mass_normal = mytable.interpolateCmBinarySearch(diameter) - 1.0;
+        } else {
+            coeff_added_mass_normal = coefficients.added_mass_normal;
         }
+        spdlog::critical("my Cm  {}", coeff_added_mass_normal);
         auto load_added_mass_normal = fluid_density * area * coeff_added_mass_normal * acceleration_relative_normal;
         auto load_added_mass_axial = fluid_density * area * coefficients.added_mass_axial * acceleration_relative_axial;
         // total inertia load

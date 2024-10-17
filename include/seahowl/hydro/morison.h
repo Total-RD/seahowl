@@ -28,7 +28,8 @@ struct HydroCoefficients {
     double inertia_factor = 1.0;
     /** @brief Factor for nodal acceleration (1.0 for default behavior). */
     double nodal_acceleration_factor = 1.0;
-    /** @brief MacCamy and Fuchs Empirical Table for large cylinders */
+    /** @brief MacCamy and Fuchs Correction for large cylinders, Flag. */
+    bool use_MacCamyFuchs_correction = false;
 
     HydroCoefficients operator*(const double factor) const;
     HydroCoefficients operator+(const HydroCoefficients& other) const;

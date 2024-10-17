@@ -10,7 +10,9 @@ using namespace seahowl;
 using namespace seahowl::hydro;
 using seahowl::env::FluidModel;
 
-MooringHydro::MooringHydro() {}
+MooringHydro::MooringHydro() {
+    coefficients.use_MacCamyFuchs_correction = false;
+}
 
 void MooringHydro::set_length(double length) {
     this->length = length;

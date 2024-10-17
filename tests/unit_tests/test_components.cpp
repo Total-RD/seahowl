@@ -1078,3 +1078,9 @@ TEST(test_inflowwind, rpm_initial_pitch) {
     ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.686779, 1e-4);
 }
 #endif
+
+#ifdef HAVE_HYDROCHRONO
+TEST(test_inflowwind, rpm_initial_pitch) {
+    // general options
+}
+#endif
