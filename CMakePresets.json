@@ -1,0 +1,55 @@
+{
+	"version": 2,
+	"vendor": {
+		"seahowl" : {}
+	},
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 19,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "Linux SEAHOWL ALL",
+			"displayName": "default SEAHOWL",
+			"binaryDir": "${sourceDir}/build",
+			"generator": "Unix Makefiles",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release",
+				"BUILD_TESTING": "ON",
+				"CMAKE_PREFIX_PATH": "${sourceDir}/install",
+				"CMAKE_INSTALL_PREFIX" : "${sourceDir}/install",
+				"AERODYN_LIBRARY" : "${sourceDir}/install/lib/libaerodyn_inflow_c_binding.so",
+				"INFLOWWIND_LIBRARY" : "${sourceDir}/install/lib/libifw_c_binding.so",
+				"HDF5_DIR": "${sourceDir}/install/share/cmake",
+                "SEAHOWL_ENABLE_PYTHON" : "ON",
+                "SEAHOWL_ENABLE_IRRLICHT" : "ON", 
+				"SEAHOWL_ENABLE_HYDROCHRONO" : "ON",
+				"SEAHOWL_ENABLE_AERODYN" : "ON",
+				"SEAHOWL_ENABLE_INFLOWWIND" : "ON",
+				"SEAHOWL_ENABLE_TESTS" : "ON"
+			}
+		},
+		{
+			"name": "Linux SEAHOWL Debug",
+			"displayName": "default SEAHOWL Debug",
+			"binaryDir": "${sourceDir}/build",
+			"generator": "Unix Makefiles",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+				"BUILD_TESTING": "ON",
+				"CMAKE_PREFIX_PATH": "${sourceDir}/install",
+				"CMAKE_INSTALL_PREFIX" : "${sourceDir}/install",
+				"AERODYN_LIBRARY" : "${sourceDir}/install/lib/libaerodyn_inflow_c_binding.so",
+				"INFLOWWIND_LIBRARY" : "${sourceDir}/install/lib/libifw_c_binding.so",
+				"HDF5_DIR": "${sourceDir}/install/share/cmake",
+                "SEAHOWL_ENABLE_PYTHON" : "ON",
+                "SEAHOWL_ENABLE_IRRLICHT" : "ON", 
+				"SEAHOWL_ENABLE_HYDROCHRONO" : "ON",
+				"SEAHOWL_ENABLE_AERODYN" : "ON",
+				"SEAHOWL_ENABLE_INFLOWWIND" : "ON",
+				"SEAHOWL_ENABLE_TESTS" : "ON"
+			}
+		}
+	]
+}

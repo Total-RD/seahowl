@@ -136,7 +136,7 @@ endif()
 if(DEFINED ENV{SEAHOWL_DATADIR})
     set(SEAHOWL_DATADIR $ENV{SEAHOWL_DATADIR})
 else()
-    set(SEAHOWL_DATADIR "${PROJECT_SOURCE_DIR}/data")
+    set(SEAHOWL_DATADIR "${PROJECT_SOURCE_DIR}/data/IEA15MW")
 endif()
 
 # ================
