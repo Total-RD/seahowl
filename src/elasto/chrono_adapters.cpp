@@ -570,6 +570,8 @@ ElementBladeElastoChrono::ElementBladeElastoChrono() {
     chobj->SetTaperedSection(blade_section);
 }
 
+void ElementElastoChrono::update_properties() {}
+
 void ElementBladeElastoChrono::set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) {
     nodes.clear();
     nodes.push_back(node1);
@@ -587,6 +589,10 @@ void ElementBladeElastoChrono::set_prebend(const Quaternion& prebend) {
     // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
     auto prebend_ch = chrono::ChQuaternion<double>(prebend.w(), prebend.z(), prebend.y(), prebend.x());
     chobj->SetNodeBreferenceRot(prebend_ch);
+}
+
+void ElementBladeElastoChrono::update_properties() {
+    chobj->GetTaperedSection()->ComputeAverageSectionParameters();
 }
 
 ElementBladeElastoChronoFPM::ElementBladeElastoChronoFPM() {
@@ -618,6 +624,10 @@ void ElementBladeElastoChronoFPM::set_prebend(const Quaternion& prebend) {
     // switch from IEC standard (Z along blade) to chrono element coordinate system (X along element)
     auto prebend_ch = chrono::ChQuaternion<double>(prebend.w(), prebend.z(), prebend.y(), prebend.x());
     chobj->SetNodeBreferenceRot(prebend_ch);
+}
+
+void ElementBladeElastoChronoFPM::update_properties() {
+    chobj->GetTaperedSection()->ComputeAverageSectionParameters();
 }
 
 ElementMooringElastoChrono::ElementMooringElastoChrono() {

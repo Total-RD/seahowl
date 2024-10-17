@@ -102,6 +102,7 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
      */
     BladeElastoFEA();
 
+    virtual void presetup(double fraction) override;
     virtual void build() override;
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;

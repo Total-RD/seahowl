@@ -17,6 +17,12 @@ void RotorElasto::assemble_this(SystemElasto& system) {
     system.add(*(body_hub.get()));
 }
 
+void RotorElasto::presetup(double fraction) {
+    for (auto& blade : blades) {
+        blade->presetup(fraction);
+    }
+}
+
 void RotorElasto::build() {
     // build blades
     for (auto& blade : blades) {
@@ -120,6 +126,10 @@ RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {
     // link between yaw bearing body and shaft body
     link_shaft_yaw_bearing = std::make_unique<LinkChrono>();
     link_shaft_yaw_bearing->set_constraints(true, true, true, true, true, true);
+}
+
+void RotorNacelleAssemblyElasto::presetup(double fraction) {
+    rotor->presetup(fraction);
 }
 
 void RotorNacelleAssemblyElasto::assemble_this(SystemElasto& system) {

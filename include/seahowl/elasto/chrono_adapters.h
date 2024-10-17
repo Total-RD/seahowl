@@ -173,6 +173,7 @@ class ElementElastoChrono : public virtual ElementElasto {
     virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) override;
     virtual void evaluate_force_torque(double eta, Vector3d& force, Vector3d& torque) override;
     virtual double get_mass() override;
+    virtual void update_properties();
 };
 
 /**
@@ -186,6 +187,7 @@ class ElementBladeElastoChrono : public ElementElastoChrono, public ElementBlade
     ElementBladeElastoChrono();
     virtual void set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) override;
     virtual void set_prebend(const Quaternion& prebend) override;
+    virtual void update_properties() override;
 };
 
 /**
@@ -199,6 +201,7 @@ class ElementBladeElastoChronoFPM : public ElementElastoChrono, public ElementBl
     ElementBladeElastoChronoFPM();
     virtual void set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) override;
     virtual void set_prebend(const Quaternion& prebend) override;
+    virtual void update_properties() override;
 };
 
 /**

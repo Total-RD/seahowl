@@ -132,6 +132,21 @@ void BladeElastoFEA::update_root_constraint() {
     link_root_mount->initialize(*body_root, *body_mount);
 }
 
+void BladeElastoFEA::presetup(double fraction) {
+    for (int ii = 0; ii < nodes.size(); ii++) {
+        BladeReferencePointElasto ref = discretized_points[ii];
+        for (int jj = 0; jj < ref.damping_coefficients.size(); jj++) {
+            ref.damping_coefficients[jj] = (1.0 - fraction) + ref.damping_coefficients[jj] * fraction;
+        }
+        auto node = std::dynamic_pointer_cast<NodeElastoChrono>(nodes[ii]);
+        node->set_properties(ref);
+    }
+    for (auto& element : elements) {
+        std::dynamic_pointer_cast<ElementElastoChrono>(element)->update_properties();
+    }
+    spdlog::debug("Presetup for blade at fraction {} (relaxing damping to target value gradually).", fraction);
+}
+
 void BladeElastoFEA::build() {
     reset_bodies();
 

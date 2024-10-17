@@ -82,7 +82,7 @@ class RotorElasto : public ComponentElasto {
      * @brief Builds the rotor.
      */
     void build() override;
-
+    virtual void presetup(double fraction) override;
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;
     virtual double get_mass() const override;
@@ -166,6 +166,7 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
      */
     void build() override;
 
+    virtual void presetup(double fraction) override;
     void rotate(double angle, const Vector3d& axis) const override;     ///< @see ElastoComponent::rotate
     void translate(const Vector3d& translation_vector) const override;  ///< @see ElastoComponent::translate
     double get_mass() const override;                                   ///< @see ElastoComponent::get_mass
