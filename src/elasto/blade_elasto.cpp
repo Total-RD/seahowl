@@ -183,8 +183,8 @@ void BladeElastoFEA::evaluate_position_rotation(Vector3d& position,
 
 void BladeElastoFEA::apply_pitch_increment(double pitch_increment) {
     // apply pitch from root node direction and position
-    auto root_dir = nodes.front()->get_direction();
-    auto root_pos = nodes.front()->get_position();
+    auto root_dir = body_root->get_rotation() * Vector3d(0.0, 0.0, 1.0);
+    auto root_pos = body_root->get_position();
     translate(-root_pos);
     rotate(-pitch_increment, root_dir);
     translate(root_pos);
@@ -280,7 +280,6 @@ void BladeElastoRigid::build() {
 
 void BladeElastoRigid::assemble_this(SystemElasto& system) {
     BladeElasto::assemble_this(system);
-    system.add(*(body_root.get()));
     system.add(*(body_cog.get()));
 }
 
