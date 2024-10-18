@@ -25,12 +25,8 @@ void BladeElasto::apply_pitch_increment(double pitch_increment) {
     auto root_pos = body_root->get_position();
     translate(-root_pos);
     rotate(-pitch_increment, root_dir);
-    body_root->rotate(pitch_increment, root_dir);  // rotate body_root back to keep it in place
     translate(root_pos);
     pitch += pitch_increment;
-
-    // update blade-root constraint
-    update_root_constraint();
 }
 
 void BladeElasto::attach_blade_to_body(const BodyElasto& body) {
@@ -310,11 +306,11 @@ void BladeElastoRigid::update_root_constraint() {
 }
 
 seahowl::Vector3d BladeElastoRigid::get_blade_root_moment() const {
-    return link_root->get_reaction_torque() + body_root->get_torque();
+    return link_root->get_reaction_torque() + body_root->get_torque(true);
 }
 
 seahowl::Vector3d BladeElastoRigid::get_blade_root_force() const {
-    return link_root->get_reaction_force() + body_root->get_force();
+    return link_root->get_reaction_force() + body_root->get_force(true);
 }
 
 seahowl::EntityDynamicEigen BladeElastoRigid::get_entity_along_blade(double eta, int element_index) const {
@@ -332,8 +328,8 @@ seahowl::EntityDynamicEigen BladeElastoRigid::get_entity_along_blade(double eta,
     auto twist = seahowl::get_discretized_points(eta_vector, reference_points)[0].structural_twist;
 
     // rotation
-    auto twist_matrix = AngleAxisd(-twist, body_cog->get_rotation() * Vector3d(0.0, 0.0, 1.0));
-    auto rotation_matrix = twist_matrix * body_cog->get_rotation().toRotationMatrix();
+    auto twist_matrix = AngleAxisd(-twist, body_root->get_rotation() * Vector3d(0.0, 0.0, 1.0));
+    auto rotation_matrix = twist_matrix * body_root->get_rotation().toRotationMatrix();
     entity.set_rotation(Quaternion(rotation_matrix));
 
     // below has to be explicitly declared as Vector3d or there is an issue;
