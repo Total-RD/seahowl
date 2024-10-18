@@ -19,6 +19,20 @@ BladeElasto::BladeElasto() {
     link_blade->set_constraints(true, true, true, true, true, true);
 }
 
+void BladeElasto::apply_pitch_increment(double pitch_increment) {
+    // apply pitch from root node direction and position
+    auto root_dir = body_root->get_rotation() * Vector3d(0.0, 0.0, 1.0);
+    auto root_pos = body_root->get_position();
+    translate(-root_pos);
+    rotate(-pitch_increment, root_dir);
+    body_root->rotate(pitch_increment, root_dir);  // rotate body_root back to keep it in place
+    translate(root_pos);
+    pitch += pitch_increment;
+
+    // update blade-root constraint
+    update_root_constraint();
+}
+
 void BladeElasto::attach_blade_to_body(const BodyElasto& body) {
     is_mounted = true;
     link_blade->initialize(*body_root, body);
@@ -71,6 +85,11 @@ void BladeElastoFEA::translate(const Vector3d& translation_vector) const {
 double BladeElastoFEA::get_mass() const {
     // adding body_root for consistency even if mass is supposed to be zero.
     return ComponentElastoFEA::get_mass() + body_root->get_mass();
+}
+
+void BladeElastoFEA::update_root_constraint() {
+    // attach node to root body
+    link_root->initialize(*nodes[0], *body_root);
 }
 
 void BladeElastoFEA::build() {
@@ -126,8 +145,7 @@ void BladeElastoFEA::build() {
         build_elements_tapered_timoshenko();
     }
 
-    // attach node to root body
-    link_root->initialize(*nodes[0], *body_root);
+    update_root_constraint();
 };
 
 void BladeElastoFEA::build_elements_tapered_timoshenko() {
@@ -179,19 +197,6 @@ void BladeElastoFEA::evaluate_position_rotation(Vector3d& position,
                                                 int element_index,
                                                 double eta) const {
     elements[element_index]->evaluate_position_rotation(eta, position, rotation);
-}
-
-void BladeElastoFEA::apply_pitch_increment(double pitch_increment) {
-    // apply pitch from root node direction and position
-    auto root_dir = body_root->get_rotation() * Vector3d(0.0, 0.0, 1.0);
-    auto root_pos = body_root->get_position();
-    translate(-root_pos);
-    rotate(-pitch_increment, root_dir);
-    translate(root_pos);
-    pitch += pitch_increment;
-
-    // update blade-root constraint
-    link_root->initialize(*nodes[0], *body_root);
 }
 
 seahowl::Vector3d BladeElastoFEA::get_blade_root_moment() const {
@@ -273,9 +278,7 @@ void BladeElastoRigid::build() {
     body_root->set_inertia_diagonal(Vector3d(inertia_total, inertia_total, 0.0));
 
     // link root and cog
-    link_root = std::make_unique<LinkChrono>();
-    link_root->set_constraints(true, true, true, true, true, true);
-    link_root->initialize(*body_cog, *body_root);
+    update_root_constraint();
 }
 
 void BladeElastoRigid::assemble_this(SystemElasto& system) {
@@ -301,16 +304,8 @@ double BladeElastoRigid::get_mass() const {
     return body_cog->get_mass() + body_root->get_mass();
 }
 
-void BladeElastoRigid::apply_pitch_increment(double pitch_increment) {
-    // update rotation around local Z-axis
-    auto root_dir = body_root->get_rotation() * Vector3d(0.0, 0.0, 1.0);
-    auto root_pos = body_root->get_position();
-    translate(-root_pos);
-    rotate(-pitch_increment, root_dir);
-    translate(root_pos);
-    pitch += pitch_increment;
-
-    // update blade-root constraint
+void BladeElastoRigid::update_root_constraint() {
+    // attach node to root body
     link_root->initialize(*body_cog, *body_root);
 }
 
@@ -337,8 +332,8 @@ seahowl::EntityDynamicEigen BladeElastoRigid::get_entity_along_blade(double eta,
     auto twist = seahowl::get_discretized_points(eta_vector, reference_points)[0].structural_twist;
 
     // rotation
-    auto twist_matrix = AngleAxisd(-twist, body_root->get_rotation() * Vector3d(0.0, 0.0, 1.0));
-    auto rotation_matrix = twist_matrix * body_root->get_rotation().toRotationMatrix();
+    auto twist_matrix = AngleAxisd(-twist, body_cog->get_rotation() * Vector3d(0.0, 0.0, 1.0));
+    auto rotation_matrix = twist_matrix * body_cog->get_rotation().toRotationMatrix();
     entity.set_rotation(Quaternion(rotation_matrix));
 
     // below has to be explicitly declared as Vector3d or there is an issue;

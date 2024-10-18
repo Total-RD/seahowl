@@ -40,7 +40,7 @@ class BladeElasto : public virtual ComponentElasto {
      *
      * @param pitch_increment Pitch increment value (in radians).
      */
-    virtual void apply_pitch_increment(double pitch_increment) = 0;
+    virtual void apply_pitch_increment(double pitch_increment);
 
     /**
      * @brief Returns blade root moment.
@@ -67,6 +67,8 @@ class BladeElasto : public virtual ComponentElasto {
     bool is_mounted = false;
 
     virtual void assemble_this(SystemElasto& system) override;
+
+    virtual void update_root_constraint() = 0;
 };
 
 /**
@@ -99,7 +101,6 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
                                             int element_index,
                                             double eta) const override;
 
-    virtual void apply_pitch_increment(double pitch_increment) override;
     virtual Vector3d get_blade_root_moment() const override;
     virtual Vector3d get_blade_root_force() const override;
     virtual EntityDynamicEigen get_entity_along_blade(double eta, int element_index = 0) const override;
@@ -121,6 +122,8 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
      * @brief Builds the blade with FPM Timoshenko elements (6x6 mass and stiffness matrices).
      */
     void build_elements_tapered_timoshenko_fpm();
+
+    virtual void update_root_constraint() override;
 };
 
 /**
@@ -140,7 +143,6 @@ class BladeElastoRigid : public BladeElasto {
     virtual void translate(const Vector3d& translation_vector) const override;
     virtual double get_mass() const override;
 
-    virtual void apply_pitch_increment(double pitch_increment) override;
     virtual Vector3d get_blade_root_moment() const override;
     virtual Vector3d get_blade_root_force() const override;
     virtual EntityDynamicEigen get_entity_along_blade(double eta, int element_index = 0) const override;
@@ -158,6 +160,8 @@ class BladeElastoRigid : public BladeElasto {
     std::unique_ptr<BodyElastoChrono> body_cog;
 
     virtual void assemble_this(SystemElasto& system) override;
+
+    virtual void update_root_constraint() override;
 };
 
 }  // namespace elasto

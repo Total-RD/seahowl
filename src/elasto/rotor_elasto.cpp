@@ -52,6 +52,9 @@ void RotorElasto::build() {
 
         // apply initial pitch of blades
         apply_blade_pitch_increment(blade->pitch, ii);
+
+        // update blade-hub constraint
+        blade->attach_blade_to_body(*body_hub);
     }
 }
 
@@ -69,8 +72,6 @@ void RotorElasto::apply_blade_pitch_increment(double pitch_increment, int blade_
     }
     auto blade = blades[blade_index];
     blade->apply_pitch_increment(pitch_increment);
-    // update blade-hub constraint
-    blade->attach_blade_to_body(*body_hub);
 }
 
 void RotorElasto::rotate(double angle, const Vector3d& axis) const {
