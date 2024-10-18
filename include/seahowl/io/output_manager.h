@@ -30,7 +30,7 @@ class OutputManager {
 
   private:
     bool is_initialized = false;
-    std::string output_folder = ".";
+    std::string output_folder = "./output";
     seahowl::core::System& system_core;
 #ifdef HAVE_VTK
     std::unique_ptr<OutputSystemVTK> output_vtk;
