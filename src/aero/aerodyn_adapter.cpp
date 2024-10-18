@@ -150,19 +150,15 @@ void seahowl::aero::AeroDynAdapter::setMotionRoot(seahowl::aero::TurbineAero& tu
     float* bldRootAcc_C = new float[6 * nblades];
 
     for (int i = 0; i < nblades; i++) {
-        auto& bldRoot = turbine.rna.rotor->blades[i]->nodes[0];
-        auto bldRootPos = bldRoot.get_position();
+        auto& blade = turbine.rna.rotor->blades[i];
+        auto& bldRoot = blade->body_root;
+        auto bldRootPos = bldRoot->get_position();
+        auto bldRootOri = bldRoot->get_rotation().toRotationMatrix();
+        auto bldRootTranVel = bldRoot->get_velocity();
+        auto bldRootRotVel = bldRoot->get_rotational_velocity(false);  // in global frame
+        auto bldRootTranAcc = bldRoot->get_acceleration();
+        auto bldRootRotAcc = bldRoot->get_rotational_acceleration(false);  // in global frame
 
-        // remove twist at blade root (as required by AeroDyn)
-        auto bldRoot_twist = turbine.rna.rotor->blades[i]->reference_points[0].structural_twist;
-        auto bldRoot_axis = bldRoot.get_direction();
-        auto bldRoot_twist_matrix = AngleAxisd(bldRoot_twist, bldRoot_axis);
-        auto bldRootOri = bldRoot_twist_matrix * bldRoot.get_rotation().toRotationMatrix();
-
-        auto bldRootTranVel = bldRoot.get_velocity();
-        auto bldRootRotVel = bldRoot.get_rotational_velocity(false);  // in global frame
-        auto bldRootTranAcc = bldRoot.get_acceleration();
-        auto bldRootRotAcc = bldRoot.get_rotational_acceleration(false);  // in global frame
         for (int j = 0; j < 3; j++) {
             int p = i * 3 + j;
             int q = i * 6 + j;
