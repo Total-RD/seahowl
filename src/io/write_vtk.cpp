@@ -140,6 +140,8 @@ OutputSystemVTK::OutputSystemVTK(seahowl::core::System& system_core, const std::
 
 void OutputSystemVTK::initialize() {
     vtk_meshes.clear();
+
+    // iterate turbines
     for (auto [turbine_ptr, idx_turbine] = std::tuple{system_core.turbines.begin(), 0};
          turbine_ptr != system_core.turbines.end(); turbine_ptr++, idx_turbine++) {
         auto& turbine = *turbine_ptr;
@@ -147,13 +149,31 @@ void OutputSystemVTK::initialize() {
         for (auto [blade_ptr, idx_blade] = std::tuple{turbine->rna.blades.begin(), 0};
              blade_ptr != turbine->rna.blades.end(); blade_ptr++, idx_blade++) {
             auto& blade = *blade_ptr;
-            auto& post_blade = vtk_meshes.emplace_back(dynamic_cast<seahowl::elasto::BladeElastoFEA&>(blade->elasto));
-            post_blade.initialize(
-                (output_folder + "/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
-                    .c_str());
+            try {
+                auto& post_blade =
+                    vtk_meshes.emplace_back(dynamic_cast<seahowl::elasto::BladeElastoFEA&>(blade->elasto));
+                post_blade.initialize(
+                    (output_folder + "/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
+                        .c_str());
+            } catch (const std::exception& e) {
+                // do nothing if node blade EFA
+            }
         }
         auto& post_tower = vtk_meshes.emplace_back(turbine->tower.elasto);
         post_tower.initialize((output_folder + "/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
+    }
+
+    // iterate elasto components
+    for (auto [component_ptr, idx_component] = std::tuple{system_core.elasto.components.begin(), 0};
+         component_ptr != system_core.elasto.components.end(); component_ptr++, idx_component++) {
+        auto& component = *component_ptr;
+        try {
+            auto& post_component =
+                vtk_meshes.emplace_back(dynamic_cast<seahowl::elasto::ComponentElastoFEA&>(*component));
+            post_component.initialize((output_folder + "/component" + std::to_string(idx_component)).c_str());
+        } catch (const std::exception& e) {
+            // do nothing if node component elasto EFA
+        }
     }
 }
 
