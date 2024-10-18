@@ -70,7 +70,7 @@ void RotorElasto::apply_blade_pitch_increment(double pitch_increment, int blade_
     auto blade = blades[blade_index];
     blade->apply_pitch_increment(pitch_increment);
     // update blade-hub constraint
-    blade->attach_root_to_body(*body_hub);
+    blade->attach_blade_to_body(*body_hub);
 }
 
 void RotorElasto::rotate(double angle, const Vector3d& axis) const {
@@ -246,7 +246,7 @@ double RotorNacelleAssemblyElasto::get_axial_torque() const {
     // those links are already in the hub body reference frame
     auto react_torque = Vector3d(0.0, 0.0, 0.0);
     for (auto& blade : rotor->blades) {
-        react_torque += blade->link_root->get_reaction_torque();
+        react_torque += blade->link_blade->get_reaction_torque();
     }
     return react_torque.x();
 }

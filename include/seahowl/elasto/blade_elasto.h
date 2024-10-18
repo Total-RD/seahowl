@@ -12,8 +12,12 @@ namespace elasto {
  */
 class BladeElasto : public virtual ComponentElasto {
   public:
-    /** @brief Link between blade and body (usually hub). */
+    /** @brief Body at the root of the blade. */
+    std::unique_ptr<BodyElastoChrono> body_root;
+    /** @brief Link between blade and pitch axis body. */
     std::unique_ptr<Link> link_root;
+    /** @brief Link between blade and body (usually hub). */
+    std::unique_ptr<Link> link_blade;
     /** @brief Pitch of the blade (in radians). */
     double pitch = 0.0;
     /** @brief Initial azimuth of the blade relative to rotor azimuth (in radians). */
@@ -26,6 +30,10 @@ class BladeElasto : public virtual ComponentElasto {
     std::vector<double> discretization_fractions;
 
     BladeElasto();
+
+    virtual void rotate(double angle, const Vector3d& axis) const override;
+    virtual void translate(const Vector3d& translation_vector) const override;
+    virtual double get_mass() const override;
 
     /**
      * @brief Applies pitch increment to the blade (i.e. rotates the blade around its longitudinal axis).
@@ -52,7 +60,7 @@ class BladeElasto : public virtual ComponentElasto {
                                              double eta,
                                              const Vector3d& offset) = 0;
 
-    virtual void attach_root_to_body(const BodyElasto& body) = 0;
+    virtual void attach_blade_to_body(const BodyElasto& body);
 
   protected:
     /** @brief Whether the blade is mounted (e.g. on a rotor) or not. */
@@ -82,9 +90,9 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
     BladeElastoFEA();
 
     virtual void build() override;
-    using ComponentElastoFEA::rotate;
-    using ComponentElastoFEA::translate;
-    using ComponentElastoFEA::get_mass;
+    virtual void rotate(double angle, const Vector3d& axis) const override;
+    virtual void translate(const Vector3d& translation_vector) const override;
+    virtual double get_mass() const override;
 
     virtual void evaluate_position_rotation(Vector3d& position,
                                             Quaternion& rotation,
@@ -100,7 +108,6 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
                                              int element_index,
                                              double eta,
                                              const Vector3d& offset) override;
-    virtual void attach_root_to_body(const BodyElasto& body) override;
 
   private:
     virtual void assemble_this(SystemElasto& system) override;
@@ -143,17 +150,12 @@ class BladeElastoRigid : public BladeElasto {
                                              int element_index,
                                              double eta,
                                              const Vector3d& offset) override;
-    virtual void attach_root_to_body(const BodyElasto& body) override;
 
   private:
     /** @brief Length of the blade. */
     double length = 0.0;
-    /** @brief Body at the root of the blade. */
-    std::unique_ptr<BodyElastoChrono> body_root;
     /** @brief Body at the COG of the blade. */
     std::unique_ptr<BodyElastoChrono> body_cog;
-    /** @brief Link between bodies at the root and COG of the blade. */
-    std::unique_ptr<Link> link_cog_root;
 
     virtual void assemble_this(SystemElasto& system) override;
 };

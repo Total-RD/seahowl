@@ -209,7 +209,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("get_blade_root_force", &seahowl::elasto::BladeElasto::get_blade_root_force)
         .def("get_entity_along_blade", &seahowl::elasto::BladeElasto::get_entity_along_blade)
         .def("accumulate_load_along_blade", &seahowl::elasto::BladeElasto::accumulate_load_along_blade)
-        .def("attach_root_to_body", &seahowl::elasto::BladeElasto::attach_root_to_body);
+        .def("attach_blade_to_body", &seahowl::elasto::BladeElasto::attach_blade_to_body);
     py::class_<seahowl::elasto::BladeElastoFEA, std::shared_ptr<seahowl::elasto::BladeElastoFEA>,
                seahowl::elasto::BladeElasto, seahowl::elasto::ComponentElastoFEA>(m_elasto, "BladeElastoFEA")
         .def_readonly("discretized_points", &seahowl::elasto::BladeElastoFEA::discretized_points)
