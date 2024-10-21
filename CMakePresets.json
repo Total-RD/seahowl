@@ -1,55 +1,87 @@
 {
-	"version": 2,
-	"vendor": {
-		"seahowl" : {}
-	},
-	"cmakeMinimumRequired": {
-		"major": 3,
-		"minor": 19,
-		"patch": 0
-	},
-	"configurePresets": [
-		{
-			"name": "Linux SEAHOWL ALL",
-			"displayName": "default SEAHOWL",
-			"binaryDir": "${sourceDir}/build",
-			"generator": "Unix Makefiles",
-			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Release",
-				"BUILD_TESTING": "ON",
-				"CMAKE_PREFIX_PATH": "${sourceDir}/install",
-				"CMAKE_INSTALL_PREFIX" : "${sourceDir}/install",
-				"AERODYN_LIBRARY" : "${sourceDir}/install/lib/libaerodyn_inflow_c_binding.so",
-				"INFLOWWIND_LIBRARY" : "${sourceDir}/install/lib/libifw_c_binding.so",
-				"HDF5_DIR": "${sourceDir}/install/share/cmake",
-                "SEAHOWL_ENABLE_PYTHON" : "ON",
-                "SEAHOWL_ENABLE_IRRLICHT" : "ON", 
-				"SEAHOWL_ENABLE_HYDROCHRONO" : "ON",
-				"SEAHOWL_ENABLE_AERODYN" : "ON",
-				"SEAHOWL_ENABLE_INFLOWWIND" : "ON",
-				"SEAHOWL_ENABLE_TESTS" : "ON"
-			}
-		},
-		{
-			"name": "Linux SEAHOWL Debug",
-			"displayName": "default SEAHOWL Debug",
-			"binaryDir": "${sourceDir}/build",
-			"generator": "Unix Makefiles",
-			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Debug",
-				"BUILD_TESTING": "ON",
-				"CMAKE_PREFIX_PATH": "${sourceDir}/install",
-				"CMAKE_INSTALL_PREFIX" : "${sourceDir}/install",
-				"AERODYN_LIBRARY" : "${sourceDir}/install/lib/libaerodyn_inflow_c_binding.so",
-				"INFLOWWIND_LIBRARY" : "${sourceDir}/install/lib/libifw_c_binding.so",
-				"HDF5_DIR": "${sourceDir}/install/share/cmake",
-                "SEAHOWL_ENABLE_PYTHON" : "ON",
-                "SEAHOWL_ENABLE_IRRLICHT" : "ON", 
-				"SEAHOWL_ENABLE_HYDROCHRONO" : "ON",
-				"SEAHOWL_ENABLE_AERODYN" : "ON",
-				"SEAHOWL_ENABLE_INFLOWWIND" : "ON",
-				"SEAHOWL_ENABLE_TESTS" : "ON"
-			}
-		}
-	]
+  "version": 2,
+  "vendor": {
+    "seahowl": {}
+  },
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "Default SEAHOWL installations",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTING": "ON",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/install",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install",
+        "HDF5_DIR": "${sourceDir}/install/share/cmake",
+        "AERODYN_LIBRARY": "${sourceDir}/install/lib/libaerodyn_inflow_c_binding.so",
+        "INFLOWWIND_LIBRARY": "${sourceDir}/install/lib/libifw_c_binding.so"
+      }
+    },
+    {
+      "name": "full",
+      "inherits": "default",
+      "displayName": "Full SEAHOWL installation",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "SEAHOWL_ENABLE_BUILD": "ON",
+        "SEAHOWL_ENABLE_TESTS": "ON",
+        "SEAHOWL_ENABLE_EXAMPLES": "ON",
+        "SEAHOWL_ENABLE_PYTHON": "ON",
+        "SEAHOWL_ENABLE_HYDROCHRONO": "ON",
+        "SEAHOWL_ENABLE_AERODYN": "ON",
+        "SEAHOWL_ENABLE_INFLOWWIND": "ON",
+        "SEAHOWL_ENABLE_IRRLICHT": "OFF",
+        "SEAHOWL_ENABLE_VTK": "OFF",
+        "SEAHOWL_ENABLE_DOC": "OFF"
+      }
+    },
+    {
+      "name": "full viz",
+      "inherits": "full",
+      "displayName": "Full SEAHOWL installation with in situ visualization",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "SEAHOWL_ENABLE_IRRLICHT": "ON",
+        "SEAHOWL_ENABLE_VTK": "ON"
+      }
+    },
+    {
+      "name": "minimal",
+      "displayName": "Minimal SEAHOWL installation",
+      "inherits": "default",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "SEAHOWL_ENABLE_BUILD": "ON",
+        "SEAHOWL_ENABLE_TESTS": "OFF",
+        "SEAHOWL_ENABLE_EXAMPLES": "OFF",
+        "SEAHOWL_ENABLE_PYTHON": "OFF",
+        "SEAHOWL_ENABLE_HYDROCHRONO": "OFF",
+        "SEAHOWL_ENABLE_AERODYN": "OFF",
+        "SEAHOWL_ENABLE_INFLOWWIND": "OFF",
+        "SEAHOWL_ENABLE_VTK": "OFF",
+        "SEAHOWL_ENABLE_DOC": "OFF"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug SEAHOWL installation",
+      "inherits": "full viz",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  ]
 }
