@@ -573,6 +573,7 @@ TEST(test_turbine, rpm_initial_pitch) {
     // wind
     auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model.shear_coefficient = 0.12;
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -618,7 +619,7 @@ TEST(test_turbine, rpm_initial_pitch) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.698450, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.687975, 1e-4);
 }
 
 TEST(test_turbine, rpm_initial_pitch_fpm) {
@@ -632,6 +633,7 @@ TEST(test_turbine, rpm_initial_pitch_fpm) {
     // wind
     auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model.shear_coefficient = 0.12;
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -677,7 +679,7 @@ TEST(test_turbine, rpm_initial_pitch_fpm) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.701380, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.691299, 1e-4);
 }
 
 TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
@@ -691,6 +693,7 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
     // wind
     auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model.shear_coefficient = 0.12;
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -736,7 +739,7 @@ TEST(test_turbine, rpm_initial_pitch_rigid_rotor) {
         turbine.poststep(time, dt);
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.728150, 1e-4);
+    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.709388, 1e-4);
 }
 
 TEST(test_turbine, controller_target_rpm) {
@@ -750,6 +753,7 @@ TEST(test_turbine, controller_target_rpm) {
     // wind
     auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model.shear_coefficient = 0.12;
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -812,6 +816,7 @@ TEST(test_turbine, actuator_disk) {
     // wind
     auto wind_model = seahowl::env::ConstantWind();
     wind_model.set_wind_velocity(Vector3d(11.0, 0.0, 0.0));
+    wind_model.shear_coefficient = 0.12;
     // turbine
     double initial_pitch = 0.0 * seahowl::PI / 1000.0;
     // power target
@@ -901,8 +906,8 @@ TEST(test_aerodyn, rpm_initial_pitch) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = seahowl::env::ConstantWind();
-    wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    auto wind_model =
+        seahowl::env::InflowWindAdapter((DATADIR / "aerodyn/IEA-15-240-RWT_InflowWind.dat").generic_string());
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -965,6 +970,7 @@ TEST(test_turbine, multiturbines) {
     // wind
     auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
     wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model->shear_coefficient = 0.12;
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
