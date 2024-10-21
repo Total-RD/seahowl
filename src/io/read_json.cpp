@@ -1185,15 +1185,16 @@ void initialize_system_from_json(const std::string& filepath, seahowl::core::Sys
     // timestepping
     double dt = num_json.at("dt").get<double>();
 
+    system_core.initialize(system_core.get_time(), dt);
+
     // initialization
     // statics
     auto linear_step = statics_json.at("linear_step").get<bool>();
     auto nonlinear_steps = statics_json.at("nonlinear_steps").get<int>();
     if (linear_step && nonlinear_steps > 0) {
         system_core.elasto.do_statics(linear_step, nonlinear_steps);
+        system_core.poststep(system_core.get_time(), dt);  // poststep to update positions aero
     }
-
-    system_core.initialize(system_core.get_time(), dt);
 
     // apply presetup
     if (num_json.contains("presetup")) {
