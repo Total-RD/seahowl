@@ -29,7 +29,7 @@ Use cmake to configure :
 
 .. code-block:: bash
 
-   cmake .. --preset "Linux SEAHOWL ALL"
+   cmake .. --preset "full"
    make
 
 
