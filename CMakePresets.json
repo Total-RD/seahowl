@@ -19,9 +19,7 @@
         "BUILD_TESTING": "ON",
         "CMAKE_PREFIX_PATH": "${sourceDir}/install",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/install",
-        "HDF5_DIR": "${sourceDir}/install/share/cmake",
-        "AERODYN_LIBRARY": "${sourceDir}/install/lib/libaerodyn_inflow_c_binding.so",
-        "INFLOWWIND_LIBRARY": "${sourceDir}/install/lib/libifw_c_binding.so"
+        "HDF5_DIR": "${sourceDir}/install/share/cmake"
       }
     },
     {

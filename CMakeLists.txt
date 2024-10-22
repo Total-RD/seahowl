@@ -69,14 +69,14 @@ find_package(spdlog REQUIRED)
 
 # AeroDyn module
 if(SEAHOWL_ENABLE_AERODYN)
-    find_library(AERODYN aerodyn_inflow_c_binding)
+    find_library(AERODYN_LIBRARY aerodyn_inflow_c_binding)
     add_compile_definitions(SEAHOWL_HAVE_AERODYN=1)
     add_definitions("-DHAVE_AERODYN=1")
 endif(SEAHOWL_ENABLE_AERODYN)
 
 # InflowWind module
 if(SEAHOWL_ENABLE_INFLOWWIND)
-    find_library(INFLOWWIND ifw_c_binding)
+    find_library(INFLOWWIND_LIBRARY ifw_c_binding)
     add_compile_definitions(SEAHOWL_HAVE_INFLOWWIND=1)
     add_definitions("-DHAVE_INFLOWWIND=1")
 endif(SEAHOWL_ENABLE_INFLOWWIND)
@@ -385,11 +385,11 @@ if(SEAHOWL_ENABLE_VTK)
 endif(SEAHOWL_ENABLE_VTK)
 
 if (SEAHOWL_ENABLE_AERODYN)
-    target_link_libraries(seahowl_core PRIVATE ${AERODYN})
+    target_link_libraries(seahowl_core PRIVATE ${AERODYN_LIBRARY})
 endif (SEAHOWL_ENABLE_AERODYN)
 
 if (SEAHOWL_ENABLE_INFLOWWIND)
-    target_link_libraries(seahowl_core PRIVATE ${INFLOWWIND})
+    target_link_libraries(seahowl_core PRIVATE ${INFLOWWIND_LIBRARY})
 endif (SEAHOWL_ENABLE_INFLOWWIND)
 
 
