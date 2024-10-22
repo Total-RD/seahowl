@@ -50,7 +50,11 @@ void OutputManager::initialize() {
     }
     is_initialized = true;
 
+    // output initial logs
     output_initial_logs();
+
+    // output everything at step iteration 0 (creates files and CSV headers)
+    output_all(0);
 }
 
 void OutputManager::output_all(int step) {
