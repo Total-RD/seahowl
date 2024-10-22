@@ -56,19 +56,10 @@ void RotorElasto::build() {
 }
 
 void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
-    for (int ii = 0; ii < blades.size(); ii++) {
-        apply_blade_pitch_increment(pitch_increment, ii);
+    for (auto& blade : blades) {
+        blade->apply_pitch_increment(pitch_increment);
     }
     pitch_collective += pitch_increment;
-}
-
-void RotorElasto::apply_blade_pitch_increment(double pitch_increment, int blade_index) {
-    if (blade_index >= blades.size()) {
-        throw std::runtime_error("Cannot find blade index " + std::to_string(blade_index) +
-                                 " (number of blades: " + std::to_string(blades.size()) + ".");
-    }
-    auto blade = blades[blade_index];
-    blade->apply_pitch_increment(pitch_increment);
 }
 
 void RotorElasto::rotate(double angle, const Vector3d& axis) const {
