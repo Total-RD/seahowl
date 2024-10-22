@@ -344,46 +344,6 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         reference_points.push_back(reference_point);
     }
 
-    std::ofstream log_file("tower.log");  // Create and open the file
-
-    if (!log_file.is_open()) {
-        std::cout << "Error: Could not open or create log file: "
-                  << "tower.log" << std::endl;
-    }
-
-    log_file << "Log Report of Discretized Points:\n";
-    log_file << "---------------------------------\n";
-    log_file << "Point, "
-             << "Fraction, "
-             << "Young modulus, "
-             << "Poisson modulus, "
-             << "stiffness_foreaft, "
-             << "stiffness_sideside, "
-             << "stiffness_axial, "
-             << "stiffness_torsion, "
-             << "density, "
-             << "\n";
-    // Loop through each discretized point and log its properties
-    for (size_t ii = 0; ii < reference_points.size(); ++ii) {
-        const auto& point = reference_points[ii];
-
-        log_file << ii + 1 << ", ";
-        log_file << point.coordinates[0] << ", ";
-        log_file << point.coordinates[1] << ", ";
-        log_file << point.coordinates[2] << ",";
-        log_file << point.fraction << ",";
-        log_file << young_modulus_list[ii] << ", ";
-        log_file << poisson_ratio_list[ii] << ", ";
-
-        log_file << point.stiffness_foreaft << ", ";
-        log_file << point.stiffness_sideside << ", ";
-        log_file << point.stiffness_axial << ", ";
-        log_file << point.stiffness_torsion << ", ";
-        log_file << point.density << "\n";
-    }
-
-    log_file.close();  // Close the file after writing
-
     return reference_points;
 }
 

@@ -13,6 +13,7 @@
 
 #include <filesystem>  // C++17
 #include <sstream>
+#include <fstream>
 #include <iomanip>
 #include <spdlog/spdlog.h>
 
@@ -48,6 +49,8 @@ void OutputManager::initialize() {
         output_insitu->draw();
     }
     is_initialized = true;
+
+    output_initial_logs();
 }
 
 void OutputManager::output_all(int step) {
@@ -88,5 +91,61 @@ void OutputManager::output_all(int step) {
         }
 
         turbine_id += 1;
+    }
+}
+
+void OutputManager::output_initial_logs() {
+    std::string logs_folder = output_folder + "/logs";
+    spdlog::debug("Creating directory {} for logs.", logs_folder);
+    fs::create_directories(logs_folder);
+    // output
+    int turbine_id = 1;
+    for (auto& turbine_ptr : system_core.turbines) {
+        auto& turbine = *turbine_ptr;
+
+        /// @todo output tower points info from a method within TowerElasto object rather than here
+        std::ofstream tower_log_reference(logs_folder + "/turbine" + std::to_string(turbine_id) +
+                                          "_tower_points_reference.csv");  // Create and open the file
+        std::ofstream tower_log_discretized(logs_folder + "/turbine" + std::to_string(turbine_id) +
+                                            "_tower_points_discretized.csv");  // Create and open the file
+
+        // csv header
+        std::string tower_log_header =
+            "fraction,density_linear,stiffness_foreaft,stiffness_sideside,stiffness_axial,stiffness_torsion,stiffness_"
+            "foreaft_shear,stiffness_sideside_shear,inertia_foreaft,inertia_sideside,\n";
+        tower_log_reference << tower_log_header;
+        tower_log_discretized << tower_log_header;
+        // loop through reference points and log their properties
+        for (auto& point : turbine.elasto.tower.reference_points) {
+            tower_log_reference << point.fraction << ",";
+            tower_log_reference << point.density << ",";
+            tower_log_reference << point.stiffness_foreaft << ",";
+            tower_log_reference << point.stiffness_sideside << ",";
+            tower_log_reference << point.stiffness_axial << ",";
+            tower_log_reference << point.stiffness_torsion << ",";
+            tower_log_reference << point.stiffness_foreaft_shear << ",";
+            tower_log_reference << point.stiffness_sideside_shear << ",";
+            tower_log_reference << point.inertia_foreaft << ",";
+            tower_log_reference << point.inertia_sideside << ",";
+            tower_log_reference << "\n";
+        }
+        // loop through discretized point and log their properties
+        for (auto& point : turbine.elasto.tower.discretized_points) {
+            tower_log_discretized << point.fraction << ",";
+            tower_log_discretized << point.density << ",";
+            tower_log_discretized << point.stiffness_foreaft << ",";
+            tower_log_discretized << point.stiffness_sideside << ",";
+            tower_log_discretized << point.stiffness_axial << ",";
+            tower_log_discretized << point.stiffness_torsion << ",";
+            tower_log_discretized << point.stiffness_foreaft_shear << ",";
+            tower_log_discretized << point.stiffness_sideside_shear << ",";
+            tower_log_discretized << point.inertia_foreaft << ",";
+            tower_log_discretized << point.inertia_sideside << ",";
+            tower_log_discretized << "\n";
+        }
+
+        // close files
+        tower_log_reference.close();
+        tower_log_discretized.close();
     }
 }
