@@ -47,6 +47,11 @@ class BladeElasto : public virtual ComponentElasto {
     virtual void apply_pitch_increment(double pitch_increment);
 
     /**
+     * @brief Returns current pitch of blade.
+     */
+    double get_pitch() const;
+
+    /**
      * @brief Returns blade root moment.
      */
     virtual Vector3d get_blade_root_moment() const = 0;

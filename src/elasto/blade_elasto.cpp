@@ -43,6 +43,15 @@ void BladeElasto::apply_pitch_increment(double pitch_increment) {
     pitch += pitch_increment;
 }
 
+double BladeElasto::get_pitch() const {
+    // get angle between quaternions
+    auto qq = (body_root->get_rotation().conjugate() * body_mount->get_rotation()).normalized();
+    double angle0 = 2 * std::atan2(qq.vec().z(), qq.w());
+    // get angle between 0 and 2pi
+    double angle1 = fmod(angle0, 2 * PI);
+    return angle1;
+}
+
 void BladeElasto::attach_blade_to_body(const BodyElasto& body) {
     is_mounted = true;
     link_blade->initialize(*body_mount, body);

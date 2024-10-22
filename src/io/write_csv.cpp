@@ -140,7 +140,7 @@ void write_turbine_info_to_csv(std::string fileprefix, const seahowl::core::Syst
             }
             myfile << std::to_string(blade_azimuth);
             myfile << ",";
-            myfile << std::to_string(blade->elasto.pitch);
+            myfile << std::to_string(blade->elasto.get_pitch());
         }
         myfile << "\n";
         myfile.close();

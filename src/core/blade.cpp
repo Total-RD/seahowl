@@ -90,7 +90,7 @@ void Blade::update_positions_aero() {
     }
 
     // update pitch of blade for aero
-    aero.pitch = elasto.pitch;
+    aero.pitch = elasto.get_pitch();
 
     // update blade body root required by AeroDyn coupling
     aero.body_root->set_rotation(elasto.body_root->get_rotation());
