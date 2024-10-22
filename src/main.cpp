@@ -86,10 +86,10 @@ void run_simulation(int argc, char* argv[]) {
     apply_log_level(argc, argv);
 
     // path of main input file
-    auto filepath_main = fs::path(u8"../data/IEA15MW/main.json");
-    if (argc > 1) {
-        filepath_main = fs::path(argv[1]);
+    if (argc < 2) {
+        throw std::runtime_error("Driver: need to pass SEAHOWL main input file as first argument.");
     }
+    auto filepath_main = fs::path(argv[1]);
 
     auto simulation = seahowl::core::Simulation();
     simulation.populate_from_file(filepath_main.generic_string());
