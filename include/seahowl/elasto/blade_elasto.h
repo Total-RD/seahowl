@@ -14,8 +14,12 @@ class BladeElasto : public virtual ComponentElasto {
   public:
     /** @brief Body at the root of the blade. */
     std::unique_ptr<BodyElastoChrono> body_root;
+    /** @brief Body for mounting point of blade (to link to other structures, e.g. hub). */
+    std::unique_ptr<BodyElastoChrono> body_mount;
     /** @brief Link between blade and pitch axis body. */
     std::unique_ptr<Link> link_root;
+    /** @brief Link between blade root and mounting point. */
+    std::unique_ptr<Link> link_root_mount;
     /** @brief Link between blade and body (usually hub). */
     std::unique_ptr<Link> link_blade;
     /** @brief Pitch of the blade (in radians). */

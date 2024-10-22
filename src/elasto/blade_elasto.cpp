@@ -10,13 +10,25 @@
 using namespace seahowl::elasto;
 
 BladeElasto::BladeElasto() {
+    // body mount
+    body_mount = std::make_unique<BodyElastoChrono>();
+    body_mount->set_position(Vector3d(0.0, 0.0, 0.0));
+    body_mount->set_mass(0.0);
+    body_mount->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+    // body root
     body_root = std::make_unique<BodyElastoChrono>();
     body_root->set_position(Vector3d(0.0, 0.0, 0.0));
-    discretization_fractions = {0.0, 1.0};
+    body_root->set_mass(0.0);
+    body_root->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+    // links
     link_root = std::make_unique<LinkChrono>();
     link_root->set_constraints(true, true, true, true, true, true);
+    link_root_mount = std::make_unique<LinkChrono>();
+    link_root_mount->set_constraints(true, true, true, true, true, true);
     link_blade = std::make_unique<LinkChrono>();
     link_blade->set_constraints(true, true, true, true, true, true);
+    //
+    discretization_fractions = {0.0, 1.0};
 }
 
 void BladeElasto::apply_pitch_increment(double pitch_increment) {
@@ -25,18 +37,22 @@ void BladeElasto::apply_pitch_increment(double pitch_increment) {
     auto root_pos = body_root->get_position();
     translate(-root_pos);
     rotate(-pitch_increment, root_dir);
+    body_mount->rotate(pitch_increment, root_dir);  // rotate mounting point back
+    link_root_mount->initialize(*body_root, *body_mount);
     translate(root_pos);
     pitch += pitch_increment;
 }
 
 void BladeElasto::attach_blade_to_body(const BodyElasto& body) {
     is_mounted = true;
-    link_blade->initialize(*body_root, body);
+    link_blade->initialize(*body_mount, body);
 }
 
 void BladeElasto::assemble_this(SystemElasto& system) {
-    system.add(*(link_root.get()));
     system.add(*(body_root.get()));
+    system.add(*(link_root.get()));
+    system.add(*(body_mount.get()));
+    system.add(*(link_root_mount.get()));
     if (is_mounted) {
         system.add(*(link_blade.get()));
     }
@@ -45,16 +61,18 @@ void BladeElasto::assemble_this(SystemElasto& system) {
 void BladeElasto::rotate(double angle, const Vector3d& axis) const {
     // blade root
     body_root->rotate(angle, axis);
+    body_mount->rotate(angle, axis);
 }
 
 void BladeElasto::translate(const Vector3d& translation_vector) const {
     // blade root
     body_root->translate(translation_vector);
+    body_mount->translate(translation_vector);
 }
 
 double BladeElasto::get_mass() const {
     // adding body_root for consistency even if mass is supposed to be zero.
-    return body_root->get_mass();
+    return body_root->get_mass() + body_mount->get_mass();
 }
 
 BladeElastoFEA::BladeElastoFEA() {}
@@ -80,12 +98,14 @@ void BladeElastoFEA::translate(const Vector3d& translation_vector) const {
 
 double BladeElastoFEA::get_mass() const {
     // adding body_root for consistency even if mass is supposed to be zero.
-    return ComponentElastoFEA::get_mass() + body_root->get_mass();
+    return ComponentElastoFEA::get_mass() + BladeElasto::get_mass();
 }
 
 void BladeElastoFEA::update_root_constraint() {
     // attach node to root body
     link_root->initialize(*nodes[0], *body_root);
+    // attach root body to mounting point
+    link_root_mount->initialize(*body_root, *body_mount);
 }
 
 void BladeElastoFEA::build() {
@@ -268,9 +288,6 @@ void BladeElastoRigid::build() {
     body_cog->set_position(Vector3d(0., 0., z_pos));
     body_cog->set_mass(mass_total);
     body_cog->set_inertia_diagonal(Vector3d(0., 0., 0.));
-    // inertia of blade calculated from body root for rotation along local x and y
-    body_root->set_position(Vector3d(0., 0., 0.));
-    body_root->set_mass(0.);
     body_root->set_inertia_diagonal(Vector3d(inertia_total, inertia_total, 0.0));
 
     // link root and cog
@@ -297,12 +314,14 @@ void BladeElastoRigid::translate(const Vector3d& translation_vector) const {
 }
 
 double BladeElastoRigid::get_mass() const {
-    return body_cog->get_mass() + body_root->get_mass();
+    return BladeElasto::get_mass() + body_cog->get_mass();
 }
 
 void BladeElastoRigid::update_root_constraint() {
-    // attach node to root body
+    // attach COG body to root body
     link_root->initialize(*body_cog, *body_root);
+    // attach root body to mounting point
+    link_root_mount->initialize(*body_root, *body_mount);
 }
 
 seahowl::Vector3d BladeElastoRigid::get_blade_root_moment() const {
