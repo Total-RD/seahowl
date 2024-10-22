@@ -56,7 +56,7 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
         for (int index_blade = 0; index_blade < nblades; index_blade++) {
             auto& blade = *turbine.rna.elasto.rotor->blades[index_blade];
             // pitch
-            pImpl.SetPitchBlade(index_blade, blade.pitch);
+            pImpl.SetPitchBlade(index_blade, blade.get_pitch());
             // moment
             auto root_moment = blade.get_blade_root_moment();
             pImpl.SetRootMomentBlade(index_blade, root_moment[0], root_moment[1]);

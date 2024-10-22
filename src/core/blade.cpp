@@ -43,6 +43,7 @@ void Blade::build() {
     // build aero & elasto
     elasto.build();
     aero.build();
+    update_positions_aero();
 }
 
 void Blade::set_discretization_elasto(std::vector<double> fractions) {

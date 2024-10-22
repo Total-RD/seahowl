@@ -199,12 +199,12 @@ void initialize_pyseahowl_elasto(py::module& m) {
     // elasto/blade_elasto.h
     py::class_<seahowl::elasto::BladeElasto, std::shared_ptr<seahowl::elasto::BladeElasto>,
                seahowl::elasto::ComponentElasto>(m_elasto, "BladeElasto")
-        .def_readonly("pitch", &seahowl::elasto::BladeElasto::pitch)
         .def_readonly("azimuth0", &seahowl::elasto::BladeElasto::azimuth0)
         .def_readonly("precone", &seahowl::elasto::BladeElasto::precone)
         .def_readwrite("reference_points", &seahowl::elasto::BladeElasto::reference_points)
         .def_readwrite("discretization_fractions", &seahowl::elasto::BladeElasto::discretization_fractions)
         .def("apply_pitch_increment", &seahowl::elasto::BladeElasto::apply_pitch_increment)
+        .def("get_pitch", &seahowl::elasto::BladeElasto::get_pitch)
         .def("get_blade_root_moment", &seahowl::elasto::BladeElasto::get_blade_root_moment)
         .def("get_blade_root_force", &seahowl::elasto::BladeElasto::get_blade_root_force)
         .def("get_entity_along_blade", &seahowl::elasto::BladeElasto::get_entity_along_blade)

@@ -22,8 +22,8 @@ class BladeElasto : public virtual ComponentElasto {
     std::unique_ptr<Link> link_root_mount;
     /** @brief Link between blade and body (usually hub). */
     std::unique_ptr<Link> link_blade;
-    /** @brief Pitch of the blade (in radians). */
-    double pitch = 0.0;
+    /** @brief Initial pitch of the blade (in radians). */
+    double pitch0 = 0.0;
     /** @brief Initial azimuth of the blade relative to rotor azimuth (in radians). */
     double azimuth0 = 0.0;
     /** @brief Precone of the blade (in radians). */
@@ -78,6 +78,8 @@ class BladeElasto : public virtual ComponentElasto {
     virtual void assemble_this(SystemElasto& system) override;
 
     virtual void update_root_constraint() = 0;
+
+    void reset_bodies();
 };
 
 /**

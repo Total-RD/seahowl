@@ -12,14 +12,8 @@ using namespace seahowl::elasto;
 BladeElasto::BladeElasto() {
     // body mount
     body_mount = std::make_unique<BodyElastoChrono>();
-    body_mount->set_position(Vector3d(0.0, 0.0, 0.0));
-    body_mount->set_mass(0.0);
-    body_mount->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
     // body root
     body_root = std::make_unique<BodyElastoChrono>();
-    body_root->set_position(Vector3d(0.0, 0.0, 0.0));
-    body_root->set_mass(0.0);
-    body_root->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
     // links
     link_root = std::make_unique<LinkChrono>();
     link_root->set_constraints(true, true, true, true, true, true);
@@ -29,6 +23,7 @@ BladeElasto::BladeElasto() {
     link_blade->set_constraints(true, true, true, true, true, true);
     //
     discretization_fractions = {0.0, 1.0};
+    reset_bodies();
 }
 
 void BladeElasto::apply_pitch_increment(double pitch_increment) {
@@ -40,7 +35,6 @@ void BladeElasto::apply_pitch_increment(double pitch_increment) {
     body_mount->rotate(pitch_increment, root_dir);  // rotate mounting point back
     link_root_mount->initialize(*body_root, *body_mount);
     translate(root_pos);
-    pitch += pitch_increment;
 }
 
 double BladeElasto::get_pitch() const {
@@ -84,6 +78,19 @@ double BladeElasto::get_mass() const {
     return body_root->get_mass() + body_mount->get_mass();
 }
 
+void BladeElasto::reset_bodies() {
+    // body mount
+    body_mount->set_position(Vector3d(0.0, 0.0, 0.0));
+    body_mount->set_rotation(Quaternion(1.0, 0.0, 0.0, 0.0));
+    body_mount->set_mass(0.0);
+    body_mount->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+    // body root
+    body_root->set_position(Vector3d(0.0, 0.0, 0.0));
+    body_root->set_rotation(Quaternion(1.0, 0.0, 0.0, 0.0));
+    body_root->set_mass(0.0);
+    body_root->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+}
+
 BladeElastoFEA::BladeElastoFEA() {}
 
 void BladeElastoFEA::assemble_this(SystemElasto& system) {
@@ -118,6 +125,8 @@ void BladeElastoFEA::update_root_constraint() {
 }
 
 void BladeElastoFEA::build() {
+    reset_bodies();
+
     // check that enough reference points were defined to create elements (at least 2)
     if (reference_points.size() < 2) {
         throw std::runtime_error("Not enough elasto reference points defined for blade (" +
@@ -169,6 +178,9 @@ void BladeElastoFEA::build() {
     } else {
         build_elements_tapered_timoshenko();
     }
+
+    // apply initial pitch
+    apply_pitch_increment(pitch0);
 
     update_root_constraint();
 };
@@ -265,6 +277,8 @@ void BladeElastoFEA::accumulate_load_along_blade(const seahowl::Vector3d& load,
 BladeElastoRigid::BladeElastoRigid() {}
 
 void BladeElastoRigid::build() {
+    reset_bodies();
+
     body_cog = std::make_unique<BodyElastoChrono>();
     length = reference_points.back().coordinates.z();
 
@@ -298,6 +312,9 @@ void BladeElastoRigid::build() {
     body_cog->set_mass(mass_total);
     body_cog->set_inertia_diagonal(Vector3d(0., 0., 0.));
     body_root->set_inertia_diagonal(Vector3d(inertia_total, inertia_total, 0.0));
+
+    // apply initial pitch
+    apply_pitch_increment(pitch0);
 
     // link root and cog
     update_root_constraint();

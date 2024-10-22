@@ -82,7 +82,7 @@ void OutputManager::output_all(int step) {
         int nblades = turbine.rna.blades.size();
         if (nblades <= 3 && nblades > 0) {
             for (int ii = 0; ii < turbine.rna.blades.size(); ii++) {
-                output_sstring << ", pitch" << ii + 1 << ": " << turbine.rna.elasto.rotor->blades[ii]->pitch;
+                output_sstring << ", pitch" << ii + 1 << ": " << turbine.rna.elasto.rotor->blades[ii]->get_pitch();
             }
         } else {
             output_sstring << ", pitch: " << turbine.rna.elasto.rotor->pitch_collective;

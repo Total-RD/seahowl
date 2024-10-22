@@ -50,9 +50,6 @@ void RotorElasto::build() {
         blade->rotate(azimuth0,
                       Vector3d(1.0, 0.0, 0.0));  // X is the axis pointing towards nacelle for blade (IEC standard)
 
-        // apply initial pitch of blades
-        apply_blade_pitch_increment(blade->pitch, ii);
-
         // update blade-hub constraint
         blade->attach_blade_to_body(*body_hub);
     }
