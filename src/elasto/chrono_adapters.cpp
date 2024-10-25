@@ -22,6 +22,9 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 
+// default mass value for checking if ChBody mass was set.
+const double MASS_NOTSET_VALUE = -1.2345e-12;
+
 namespace seahowl {
 namespace elasto {
 
@@ -165,8 +168,8 @@ Vector3d EntityDynamicChrono::get_rotational_acceleration(bool is_local) const {
 BodyElastoChrono::BodyElastoChrono() {
     chobj = chrono_types::make_shared<chrono::ChBody>();
     EntityDynamicChrono::chobj = chobj;
-    set_mass(0.0);
-    set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+    set_mass(MASS_NOTSET_VALUE);
+    set_inertia_diagonal(Vector3d(MASS_NOTSET_VALUE, MASS_NOTSET_VALUE, MASS_NOTSET_VALUE));
 }
 
 void BodyElastoChrono::set_mass(double mass) {
@@ -856,11 +859,16 @@ void SystemElastoChrono::assemble() {
     // warnings for properties that were not set
     int body_idx = 0;
     for (auto& body : chobj->Get_bodylist()) {
-        if (body->GetMass() == 0) {
-            spdlog::warn("Body with mass 0.0 in elasto system (index of body: {}).", body_idx);
+        if (body->GetMass() == MASS_NOTSET_VALUE) {
+            spdlog::warn("Body (index {} in elasto system) mass was not set, making it massless.", body_idx);
+            body->SetMass(0.0);
         }
-        if (body->GetInertia().sum() == 0) {
-            spdlog::warn("Body with empty inertia matrix (sum 0.0) in elasto system (index of body: {}).", body_idx);
+        auto inertia_matrix = body->GetInertia();
+        if (inertia_matrix(0, 0) == inertia_matrix(1, 1) && inertia_matrix(1, 1) == inertia_matrix(2, 2) &&
+            inertia_matrix(2, 2) == MASS_NOTSET_VALUE && inertia_matrix.sum() == 3 * MASS_NOTSET_VALUE) {
+            spdlog::warn("Body (index {} in elasto system) inertia matrix mass was not set, making a null matrix.",
+                         body_idx);
+            body->SetInertiaXX(chrono::ChVector<double>(0.0, 0.0, 0.0));
         }
         body_idx += 1;
     }

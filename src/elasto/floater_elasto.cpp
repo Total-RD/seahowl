@@ -72,6 +72,8 @@ void FloaterElasto::add_fairlead(const Vector3d& position, const std::string& co
     fairlead_bodies[connected_body_name].push_back(std::make_unique<seahowl::elasto::BodyElastoChrono>());
     auto& fairlead = *(fairlead_bodies[connected_body_name].back());
     fairlead.set_position(position);
+    fairlead.set_mass(0.0);
+    fairlead.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
 
     // link
     fairlead_links[connected_body_name].push_back(std::make_unique<seahowl::elasto::LinkChrono>());

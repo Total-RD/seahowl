@@ -47,6 +47,7 @@
 #include <typeinfo>
 #include <filesystem>
 #include <spdlog/spdlog.h>
+
 namespace fs = std::filesystem;
 using std::filesystem::path;
 using std::filesystem::absolute;
@@ -808,6 +809,8 @@ void populate_turbine_from_json(const std::string& filepath,
                 floater_elasto.mooring_system->anchors.push_back(std::make_shared<seahowl::elasto::BodyElastoChrono>());
                 auto& anchor_body = *floater_elasto.mooring_system->anchors.back();
                 anchor_body.set_position(anchor_position);
+                anchor_body.set_mass(0.0);
+                anchor_body.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
                 anchor_body.set_fixed(true);
 
                 auto mooring_properties_json = get_json_from_file(
