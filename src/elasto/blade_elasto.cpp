@@ -91,6 +91,14 @@ void BladeElasto::reset_bodies() {
     body_root->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
 }
 
+seahowl::Vector3d BladeElasto::get_blade_root_moment() const {
+    return link_root->get_reaction_torque() + body_root->get_torque(true);
+}
+
+seahowl::Vector3d BladeElasto::get_blade_root_force() const {
+    return link_root->get_reaction_force() + body_root->get_force(true);
+}
+
 BladeElastoFEA::BladeElastoFEA() {}
 
 void BladeElastoFEA::assemble_this(SystemElasto& system) {
@@ -236,32 +244,6 @@ void BladeElastoFEA::evaluate_position_rotation(Vector3d& position,
     elements[element_index]->evaluate_position_rotation(eta, position, rotation);
 }
 
-seahowl::Vector3d BladeElastoFEA::get_blade_root_moment() const {
-    auto root_moment = elements[0]->get_torque(-1.0);
-    auto root_twist = reference_points[0].structural_twist;
-
-    // remove twist from blade root moment
-    auto x1 = root_moment.x();
-    auto y1 = root_moment.y();
-    auto x2 = cos(-root_twist) * x1 - sin(-root_twist) * y1;
-    auto y2 = sin(-root_twist) * x1 + cos(-root_twist) * y1;
-
-    return Vector3d(x2, y2, root_moment.z());
-}
-
-seahowl::Vector3d BladeElastoFEA::get_blade_root_force() const {
-    auto root_force = elements[0]->get_force(-1.0);
-    auto root_twist = reference_points[0].structural_twist;
-
-    // remove twist from blade root moment
-    auto x1 = root_force.x();
-    auto y1 = root_force.y();
-    auto x2 = cos(-root_twist) * x1 - sin(-root_twist) * y1;
-    auto y2 = sin(-root_twist) * x1 + cos(-root_twist) * y1;
-
-    return Vector3d(x2, y2, root_force.z());
-}
-
 seahowl::EntityDynamicEigen BladeElastoFEA::get_entity_along_blade(double eta, int element_index) const {
     return get_entity_along_component(eta, element_index);
 }
@@ -348,14 +330,6 @@ void BladeElastoRigid::update_root_constraint() {
     link_root->initialize(*body_cog, *body_root);
     // attach root body to mounting point
     link_root_mount->initialize(*body_root, *body_mount);
-}
-
-seahowl::Vector3d BladeElastoRigid::get_blade_root_moment() const {
-    return link_root->get_reaction_torque() + body_root->get_torque(true);
-}
-
-seahowl::Vector3d BladeElastoRigid::get_blade_root_force() const {
-    return link_root->get_reaction_force() + body_root->get_force(true);
 }
 
 seahowl::EntityDynamicEigen BladeElastoRigid::get_entity_along_blade(double eta, int element_index) const {
