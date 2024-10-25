@@ -59,7 +59,8 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
             pImpl.SetPitchBlade(index_blade, blade.get_pitch());
             // moment
             auto root_moment = blade.get_blade_root_moment();
-            pImpl.SetRootMomentBlade(index_blade, root_moment[0], root_moment[1]);
+            // pImpl.SetRootMomentBlade(index_blade, flap, edge);
+            pImpl.SetRootMomentBlade(index_blade, root_moment[1], root_moment[0]);
         }
     } else {
         pImpl.SetPitch(turbine.rna.elasto.rotor->pitch_collective);
@@ -102,7 +103,13 @@ void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const 
 
     update_turbine_variables(time, dt, turbine);
 
-    pImpl.SetAvrSWAP(27, 10.0);  // estimated wind speed (needs to be != 0 at init for it to work in ROSCO!)
+    // estimated wind speed (needs to be != 0 at init for it to work in ROSCO!)
+    pImpl.SetAvrSWAP(27, 10.0);
+
+    // Switch IPC on by default (seems to work for CPC as well).
+    // Switching it off leads to problems with ROSCO when IPC is used (individual blade pitch returned by ROSCO but no
+    // electrical torque anymore) Keeping it on works for CPC mode also (tested on ROSCO v2.9.0).
+    pImpl.SetAvrSWAP(28, 1.0);
 
     pImpl.Init(libfile);
 
