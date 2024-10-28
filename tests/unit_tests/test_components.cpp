@@ -16,6 +16,7 @@
 #include <seahowl/env/wind_models.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/commons/numerics.h>
+#include <seahowl/hydro/morison.h>
 
 #include <seahowl/io/read_json.h>
 
@@ -1079,8 +1080,46 @@ TEST(test_inflowwind, rpm_initial_pitch) {
 }
 #endif
 
-#ifdef HAVE_HYDROCHRONO
-TEST(test_inflowwind, rpm_initial_pitch) {
+TEST(Morison_test, MCF_Table_test) {
+    seahowl::hydro::MacCamyFuchsTable mytable = seahowl::hydro::MacCamyFuchsTable();
+    mytable.wave_peak_period = 10.0;
+
     // general options
+    seahowl::hydro::HydroCoefficients coefficients;
+    auto node1 = seahowl::hydro::MorisonNode();
+    coefficients.use_MacCamyFuchs_correction = true;
+
+    node1.coefficients = coefficients;
+
+    double lambda = 1.56 * mytable.wave_peak_period * mytable.wave_peak_period;
+
+    double DNV_table_X0 = 0.0018;
+    double DNV_table_Y0 = 2.003;
+    node1.diameter = 0.0018 * lambda;
+    double Table_Y0 = mytable.interpolateCmBinarySearch(node1.diameter);
+    ASSERT_NEAR(DNV_table_Y0, Table_Y0, 0.01);
+
+    double DNV_table_X2 = 0.128;
+    double DNV_table_Y2 = 2.060;
+    node1.diameter = 0.128 * lambda;
+    double Table_Y2 = mytable.interpolateCmBinarySearch(node1.diameter);
+    ASSERT_NEAR(DNV_table_Y2, Table_Y2, 0.01);
+
+    double DNV_table_X4 = 0.322;
+    double DNV_table_Y4 = 1.360;
+    node1.diameter = 0.322 * lambda;
+    double Table_Y4 = mytable.interpolateCmBinarySearch(node1.diameter);
+    ASSERT_NEAR(DNV_table_Y4, Table_Y4, 0.01);
+
+    double DNV_table_X6 = 0.576;
+    double DNV_table_Y6 = 0.655;
+    node1.diameter = 0.576 * lambda;
+    double Table_Y6 = mytable.interpolateCmBinarySearch(node1.diameter);
+    ASSERT_NEAR(DNV_table_Y6, Table_Y6, 0.01);
+
+    double DNV_table_X8 = 0.864;
+    double DNV_table_Y8 = 0.360;
+    node1.diameter = 0.864 * lambda;
+    double Table_Y8 = mytable.interpolateCmBinarySearch(node1.diameter);
+    ASSERT_NEAR(DNV_table_Y8, Table_Y8, 0.01);
 }
-#endif

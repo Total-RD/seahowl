@@ -96,7 +96,10 @@ double MacCamyFuchsTable::interpolateCmBinarySearch(double D) {
         throw std::runtime_error("Trying to use MacCamy-Fuchs correction without defining a wave period.");
     }
 
-    D = D / (1.56 * wave_peak_period * wave_peak_period);
+    // for MacCamyFuchs Table
+    // Wave dispersion relation ω^2=g.k.tanh(k.h), With k = wavenumber / h = water depth. In deep water, h -> + ∞ so
+    // tanh(k.h) -> +1 So in deep water, ω^2=g.k=g.2π/λ, It is equivalents to (2π)^2/T²=g.2π/λ, So λ=g/2π.T^2=1.562 T²
+    D = D / (1.562 * wave_peak_period * wave_peak_period);
 
     // spdlog::critical("mon message")
 
@@ -172,7 +175,6 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
         } else {
             coeff_added_mass_normal = coefficients.added_mass_normal;
         }
-        spdlog::critical("my Cm  {}", coeff_added_mass_normal);
         auto load_added_mass_normal = fluid_density * area * coeff_added_mass_normal * acceleration_relative_normal;
         auto load_added_mass_axial = fluid_density * area * coefficients.added_mass_axial * acceleration_relative_axial;
         // total inertia load
