@@ -51,6 +51,7 @@ class ConstantWind : public ShearedWind {
 
   protected:
     virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const override;
 };
 
 /**@brief Wind ramp model. */
@@ -85,6 +86,7 @@ class WindRamp : public ShearedWind {
 
   protected:
     virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const override;
 };
 
 }  // namespace env

@@ -55,6 +55,10 @@ seahowl::Vector3d InflowWindAdapter::get_fluid_velocity_this(const seahowl::Vect
     return velocity;
 }
 
+seahowl::Vector3d InflowWindAdapter::get_fluid_acceleration_this(const seahowl::Vector3d& position, double time) const {
+    return Vector3d(0.0, 0.0, 0.0);
+}
+
 void InflowWindLib::SetIFWINFILE(std::string name) {
     spdlog::info("Set InflowWind INFILE: {}.", name);
     IfWinputFileString = name;
