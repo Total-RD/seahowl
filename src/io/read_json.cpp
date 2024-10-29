@@ -655,6 +655,13 @@ void populate_turbine_from_json(const std::string& filepath,
             spdlog::warn(
                 "MacCamyFuchs correction for tower/pile not defined in turbine.json, it is by default set to {}.",
                 turbine.aero.tower.use_MacCamyFuchs_correction);
+
+        if (tower_json.at("options").contains("use_Cd_correction"))
+            tower_json.at("options").at("use_Cd_correction").get_to(turbine.aero.tower.use_Cd_correction);
+        else
+            spdlog::warn(
+                "Drag Coefficient correction for tower/pile not defined in turbine.json, it is by default set to {}.",
+                turbine.aero.tower.use_Cd_correction);
     }
     // controller
     if (controller_json.at("type").get<std::string>() == "DISCON") {
@@ -880,8 +887,8 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
                 wave_model.waves = hydrochrono_waves;
                 hydrochrono_waves->regular_wave_amplitude_ = sea_options.at("wave_height").get<double>() / 2.0;
                 hydrochrono_waves->regular_wave_omega_ = 2 * PI / sea_options.at("wave_period").get<double>();
-                seahowl::hydro::mytable = seahowl::hydro::MacCamyFuchsTable();
-                seahowl::hydro::mytable.wave_peak_period = sea_options.at("wave_period");
+                seahowl::hydro::myMCFtable = seahowl::hydro::MacCamyFuchsTable();
+                seahowl::hydro::myMCFtable.wave_peak_period = sea_options.at("wave_period");
             } else if (wave_type == "irregular") {
                 auto params = IrregularWaveParams();
                 sea_options.at("num_bodies").get_to(params.num_bodies_);
@@ -900,9 +907,8 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
                 params.ramp_duration_ = 0.0;
                 params.num_bodies_ = 1;
                 wave_model.waves = std::make_shared<IrregularWaves>(params);
-                seahowl::hydro::mytable = seahowl::hydro::MacCamyFuchsTable();
-                seahowl::hydro::mytable.wave_peak_period = sea_options.at("wave_period");
-                spdlog::critical("my Tp at read_json {}", seahowl::hydro::mytable.wave_peak_period);
+                seahowl::hydro::myMCFtable = seahowl::hydro::MacCamyFuchsTable();
+                seahowl::hydro::myMCFtable.wave_peak_period = sea_options.at("wave_period");
             } else {
                 throw std::runtime_error("Unrecognized wave type \"" + wave_type + "\" for HydroChrono.");
             }

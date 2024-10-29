@@ -46,6 +46,7 @@ void TowerAero::build() {
         nodes.back().diameter = point.diameter;
         nodes.back().coefficients = point.coefficients;
         nodes.back().coefficients.use_MacCamyFuchs_correction = use_MacCamyFuchs_correction;
+        nodes.back().coefficients.use_Cd_correction = use_Cd_correction;
     }
     // elements
     elements.clear();

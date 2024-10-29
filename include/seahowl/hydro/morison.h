@@ -30,6 +30,8 @@ struct HydroCoefficients {
     double nodal_acceleration_factor = 1.0;
     /** @brief MacCamy and Fuchs Correction for large cylinders, Flag. */
     bool use_MacCamyFuchs_correction = false;
+    /** @brief Cd Correction for large cylinders, Flag. */
+    bool use_Cd_correction = false;
 
     HydroCoefficients operator*(const double factor) const;
     HydroCoefficients operator+(const HydroCoefficients& other) const;
@@ -47,8 +49,12 @@ class MacCamyFuchsTable {
     void generateMacCamyFuchsTable();
     /** @brief Function to interpolate, per each morison element, the MacCamy and Fuchs Cm coefficient */
     double interpolateCmBinarySearch(double D);
+    /** @brief Function to interpolate, per each morison element, the coefficients to get the Cd */
+    double interpolate(double x, const std::vector<double>& xData, const std::vector<double>& yData);
+    /** @brief Function to interpolate the Cd */
+    double getCd(double diameter, double wave_period, double fluid_velocity);
 };
-extern MacCamyFuchsTable mytable;
+extern MacCamyFuchsTable myMCFtable;
 
 /**
  * @brief Morison node.

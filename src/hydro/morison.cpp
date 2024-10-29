@@ -16,7 +16,7 @@ seahowl::hydro::MacCamyFuchsTable::MacCamyFuchsTable() {
 }
 namespace seahowl {
 namespace hydro {
-MacCamyFuchsTable mytable = MacCamyFuchsTable();
+MacCamyFuchsTable myMCFtable = MacCamyFuchsTable();
 }
 }  // namespace seahowl
 
@@ -150,8 +150,16 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
     auto velocity_relative_normal = velocity_relative - velocity_relative_axial;
 
     // drag
-    auto load_drag_normal = 0.5 * fluid_density * coefficients.drag_normal * diameter *
-                            velocity_relative_normal.norm() * velocity_relative_normal;
+    double coeff_drag_normal;
+    if (coefficients.use_Cd_correction) {
+        double appo = myMCFtable.getCd(diameter, myMCFtable.wave_peak_period, velocity_relative_axial.norm());
+        coeff_drag_normal = appo;
+    } else {
+        coeff_drag_normal = coefficients.drag_normal;
+    }
+
+    auto load_drag_normal =
+        0.5 * fluid_density * coeff_drag_normal * diameter * velocity_relative_normal.norm() * velocity_relative_normal;
     auto load_drag_axial = 0.5 * fluid_density * coefficients.drag_axial * diameter * PI *
                            velocity_relative_axial.norm() * velocity_relative_axial;
     load += load_drag_normal + load_drag_axial;
@@ -171,7 +179,7 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
 
         // Diffraction is relevant for dense fluids. For the air, the MacCamy and Fuchs correction not applicable.
         if (coefficients.use_MacCamyFuchs_correction && fluid_density > 500.0) {
-            coeff_added_mass_normal = mytable.interpolateCmBinarySearch(diameter) - 1.0;
+            coeff_added_mass_normal = myMCFtable.interpolateCmBinarySearch(diameter) - 1.0;
         } else {
             coeff_added_mass_normal = coefficients.added_mass_normal;
         }
@@ -234,4 +242,57 @@ void MorisonPlate::compute_fluid_loads(const env::FluidModel& fluid_model, doubl
         // project in global direction
         load = load_drag_area * global_direction;
     }
+}
+
+// Linear interpolation function
+double MacCamyFuchsTable::interpolate(double x, const std::vector<double>& xData, const std::vector<double>& yData) {
+    if (xData.size() != yData.size())
+        throw std::invalid_argument("Data size mismatch");
+
+    for (size_t i = 1; i < xData.size(); ++i) {
+        if (x <= xData[i]) {
+            double t = (x - xData[i - 1]) / (xData[i] - xData[i - 1]);
+            return yData[i - 1] + t * (yData[i] - yData[i - 1]);
+        }
+    }
+    return yData.back();
+}
+
+// Compute drag coefficient based on given parameters
+double MacCamyFuchsTable::getCd(double diameter, double wave_period, double fluid_velocity) {
+    std::vector<double> points_KC_Cds_smooth;
+    std::vector<double> points_PHI_smooth;
+    std::vector<double> points_KC_Cds_rough;
+    std::vector<double> points_PHI_rough;
+
+    double k = 0.00005;  // [m], roughness for painted painted, not corroded
+
+    points_KC_Cds_smooth = {0.0, 1.25, 3.0, 18.0, 20.0, 40.0, 60.0, 1000.0};
+    points_PHI_smooth = {1.8, 0.3, 0.3, 1.3, 1.25, 1.1, 1.0, 1.0};
+    points_KC_Cds_rough = {0.0, 0.6, 2.0, 11.5, 20.0, 40.0, 60.0, 10000.0};
+    points_PHI_rough = {2.0, 0.45, 0.45, 1.47, 1.25, 1.1, 1.0, 1.0};
+
+    // Calculate Keulegan-Carpenter coefficient
+    double KC = fluid_velocity * wave_period / diameter;
+    // Calculate relative surface roughness
+    double kD = k / diameter;
+
+    double Cds, PHI;
+
+    // Select appropriate drag and amplification values based on roughness
+    if (kD <= 0.0001) {  // smooth
+        Cds = 0.65;
+        PHI = interpolate(KC / Cds, points_KC_Cds_smooth, points_PHI_smooth);
+    } else if (kD >= 0.01) {  // rough
+        Cds = 1.05;
+        PHI = interpolate(KC / Cds, points_KC_Cds_rough, points_PHI_rough);
+    } else {  // intermediate
+        Cds = (29.0 + 4 * std::log10(kD)) / 20.0;
+        double PHI_smooth = interpolate(KC / Cds, points_KC_Cds_smooth, points_PHI_smooth);
+        double PHI_rough = interpolate(KC / Cds, points_KC_Cds_rough, points_PHI_rough);
+        PHI = interpolate(Cds, {0.65, 1.05}, {PHI_smooth, PHI_rough});
+    }
+
+    // Compute drag coefficient
+    return Cds * PHI;
 }

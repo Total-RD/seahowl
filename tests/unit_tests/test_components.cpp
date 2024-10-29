@@ -17,6 +17,14 @@
 #include <seahowl/servo/controller.h>
 #include <seahowl/commons/numerics.h>
 #include <seahowl/hydro/morison.h>
+#include "seahowl/env/fluid_models.h"
+#include "seahowl/env/wave_models.h"
+#include "seahowl/env/combined_models.h"
+#ifdef HAVE_HYDROCHRONO
+    #include "seahowl/hydro/hydrochrono_adapter.h"
+    #include "seahowl/elasto/chrono_adapters.h"
+//#include <hydroc/hydro_forces.h>
+#endif
 
 #include <seahowl/io/read_json.h>
 
@@ -1123,3 +1131,90 @@ TEST(Morison_test, MCF_Table_test) {
     double Table_Y8 = mytable.interpolateCmBinarySearch(node1.diameter);
     ASSERT_NEAR(DNV_table_Y8, Table_Y8, 0.01);
 }
+
+TEST(Morison_test, Cd_Table) {
+    seahowl::hydro::MacCamyFuchsTable mytable = seahowl::hydro::MacCamyFuchsTable();
+    mytable.wave_peak_period = 10.0;
+
+    // general options
+    seahowl::hydro::HydroCoefficients coefficients;
+    auto node1 = seahowl::hydro::MorisonNode();
+    coefficients.use_Cd_correction = true;
+
+    node1.coefficients = coefficients;
+
+    double fluid_velocity = 0.08431;
+    node1.diameter = 8.1;
+    double CD1 = mytable.getCd(node1.diameter, mytable.wave_peak_period,
+                               fluid_velocity);  // double diameter, double wave_period, double fluid_velocity
+
+    double CD_ref = 1.045;
+    ASSERT_NEAR(CD_ref, CD1, 0.01);
+}
+
+// #ifdef HAVE_HYDROCHRONO
+// TEST(Morison_test, Morison_force) {
+
+//     auto Tp = 10.0;
+//     seahowl::hydro::MacCamyFuchsTable mytable = seahowl::hydro::MacCamyFuchsTable();
+//     mytable.wave_peak_period = Tp;
+
+//     seahowl::env::WaveWindModel fluid_model;
+//     fluid_model.wave_model = std::make_unique<seahowl::env::WaveModelHydroChrono>();
+//     fluid_model.wave_model.waves = std::make_shared<RegularWave>();
+//     fluid_model.wave_model.waves.regular_wave_amplitude_ = 5.0 / 2.0;
+//     fluid_model.wave_model.waves.regular_wave_omega_ = 2 * PI / Tp;
+//     fluid_model.wave_model.waves.mwl_ = 0.0;
+//     fluid_model.wave_model.waves.water_depth_ = 200.0;
+//     fluid_model.wave_model.density = 1025.0;
+//     fluid_model.wave_model.waves.Initialize();
+
+//     // tower
+//     auto tower_elasto = seahowl::elasto::TowerElasto();
+//     populate_tower_elasto_from_json((DATADIR / "tower_moorison.csv").generic_string(), tower_elasto);
+//     tower_elasto.discretization_fractions = {};
+//     tower_elasto.build();
+//     tower_elasto.assemble(tower_elasto);
+//     tower_elasto.nodes.front()->set_fixed(true);
+//     auto tower_aero = seahowl::aero::TowerAero();
+//     auto tower = seahowl::core::Tower(tower_elasto, tower_aero);
+//     // system
+//     auto system_elasto = SystemElastoChrono();
+//     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
+//     auto system_aero = seahowl::aero::SystemAero();
+//     // system core
+//     auto system_core = seahowl::core::System(system_elasto, system_aero);
+//     system_core.fluid_model = fluid_model.wave_model;
+
+// //     // check zero-crossings (static position of tower top)
+// //     int step = 0;
+// //     double pos_y = 0.0;
+// //     double dt = 0.01;
+// //     int npeaks = 0;
+// //     double natural_period = 0.0;
+// //     double time = 0.0;
+// //     double end_time = 10.0;
+// //     double start_time = 0.0;
+// //     tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
+// //     while (time < end_time) {
+// //         if (time > 0.5) {
+// //             tower.nodes.back()->reset_loads();
+// //             if (tower.nodes.back()->get_position().x() < pos0 && pos_y > pos0) {
+// //                 if (start_time == 0.0 && npeaks == 0) {
+// //                     start_time = time;
+// //                 } else {
+// //                     npeaks += 1;
+// //                     natural_period = (time - start_time) / npeaks;
+// //                 }
+// //             }
+// //         }
+// //         pos_y = tower.nodes.back()->get_position().x();
+// //         system_elasto.step(dt);
+// //         time += dt;
+// //         step += 1;
+// //     }
+
+//     // ASSERT_NEAR(DNV_table_Y0, Table_Y0, 0.01);
+
+// }
+// #endif

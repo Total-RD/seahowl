@@ -39,6 +39,8 @@ class TowerAero : public ComponentFluid {
     std::vector<Vector3d> loads;
     /** @brief MacCamy and Fuchs Correction for large cylinders, Flag. */
     bool use_MacCamyFuchs_correction = true;
+    /** @brief Cd Correction for large cylinders, Flag. */
+    bool use_Cd_correction;
 
     /**
      * @brief Constructor.
