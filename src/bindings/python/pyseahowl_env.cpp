@@ -21,7 +21,10 @@ void initialize_pyseahowl_env(py::module& m) {
 
     // env/fluid_models.h
     py::class_<seahowl::env::FluidModel, std::shared_ptr<seahowl::env::FluidModel>>(m_env, "FluidModel")
+        .def_readwrite("ramp_start", &seahowl::env::FluidModel::ramp_start)
+        .def_readwrite("ramp_end", &seahowl::env::FluidModel::ramp_end)
         .def("get_fluid_velocity", &seahowl::env::FluidModel::get_fluid_velocity)
+        .def("get_fluid_acceleration", &seahowl::env::FluidModel::get_fluid_acceleration)
         .def("get_fluid_density", &seahowl::env::FluidModel::get_fluid_density);
 
     // env/wind_models.h

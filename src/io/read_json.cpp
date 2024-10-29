@@ -983,6 +983,18 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
         env_model->fluid_model = std::move(wind_model_ptr);
     }
 
+    // apply ramp options
+    double ramp_start = 0.0;
+    double ramp_end = 0.0;
+    if (environment_json.contains("ramp_start")) {
+        environment_json.at("ramp_start").get_to(ramp_start);
+    }
+    if (environment_json.contains("ramp_end")) {
+        environment_json.at("ramp_end").get_to(ramp_end);
+    }
+    env_model->fluid_model->ramp_start = ramp_start;
+    env_model->fluid_model->ramp_end = ramp_end;
+
     // soil
     if (environment_json.contains("soil")) {
         auto soil_json = environment_json.at("soil");
