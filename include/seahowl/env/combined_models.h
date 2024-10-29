@@ -16,21 +16,17 @@ class WaveWindModel : public FluidModel {
     std::shared_ptr<WindModel> wind_model;
     std::shared_ptr<WaveModel> wave_model;
 
-    virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
-
-    virtual Vector3d get_fluid_acceleration(const Vector3d& position, double time) const override;
-
     virtual double get_fluid_density(const Vector3d& position, double time) const override;
+
+  protected:
+    virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const override;
 };
 
 class FluidSoilModel : public FluidModel, public SoilModel {
   public:
     std::shared_ptr<FluidModel> fluid_model;
     std::shared_ptr<SoilModel> soil_model;
-
-    virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
-
-    virtual Vector3d get_fluid_acceleration(const Vector3d& position, double time) const override;
 
     virtual double get_fluid_density(const Vector3d& position, double time) const override;
 
@@ -39,6 +35,10 @@ class FluidSoilModel : public FluidModel, public SoilModel {
     virtual Vector3d get_penetration_load(const EntityDynamic& entity,
                                           double contact_area,
                                           double entity_mass) const override;
+
+  protected:
+    virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const override;
 };
 
 }  // namespace env

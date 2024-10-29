@@ -13,7 +13,7 @@ bool WaveModel::is_in_water(const Vector3d& position, double time) const {
 
 StillWater::StillWater() {}
 
-Vector3d StillWater::get_fluid_velocity(const Vector3d& position, double time) const {
+Vector3d StillWater::get_fluid_velocity_this(const Vector3d& position, double time) const {
     if (is_in_water(position, time)) {
         return Vector3d(0.0, 0.0, 0.0);
     } else {
@@ -21,7 +21,7 @@ Vector3d StillWater::get_fluid_velocity(const Vector3d& position, double time) c
     }
 }
 
-Vector3d StillWater::get_fluid_acceleration(const Vector3d& position, double time) const {
+Vector3d StillWater::get_fluid_acceleration_this(const Vector3d& position, double time) const {
     if (is_in_water(position, time)) {
         return Vector3d(0.0, 0.0, 0.0);
     } else {
@@ -43,7 +43,7 @@ double StillWater::get_water_level(const Vector3d& position, double time) const 
 
 CurrentConstant::CurrentConstant() {}
 
-Vector3d CurrentConstant::get_fluid_velocity(const Vector3d& position, double time) const {
+Vector3d CurrentConstant::get_fluid_velocity_this(const Vector3d& position, double time) const {
     if (is_in_water(position, time)) {
         auto position_depth = position.dot(surface_normal) - mean_water_level;
         auto horizontal_velocity =
@@ -55,7 +55,7 @@ Vector3d CurrentConstant::get_fluid_velocity(const Vector3d& position, double ti
     }
 }
 
-Vector3d CurrentConstant::get_fluid_acceleration(const Vector3d& position, double time) const {
+Vector3d CurrentConstant::get_fluid_acceleration_this(const Vector3d& position, double time) const {
     if (is_in_water(position, time)) {
         return Vector3d(0.0, 0.0, 0.0);
     } else {

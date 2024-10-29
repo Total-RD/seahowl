@@ -49,13 +49,8 @@ class ConstantWind : public ShearedWind {
      */
     void set_wind_velocity(Vector3d velocity);
 
-    /**
-     * @brief Returns wind velocity at given coordinates.
-     *
-     * @param[in] position Position at which wind velocity is extracted.
-     * @param[in] time Time of simulation.
-     */
-    virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
+  protected:
+    virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const override;
 };
 
 /**@brief Wind ramp model. */
@@ -88,13 +83,8 @@ class WindRamp : public ShearedWind {
                        const Vector3d& velocity_end,
                        double time_end);
 
-    /**
-     * @brief Returns wind velocity at given coordinates.
-     *
-     * @param[in] position Position at which wind velocity is extracted.
-     * @param[in] time Time of simulation.
-     */
-    virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
+  protected:
+    virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const override;
 };
 
 }  // namespace env
