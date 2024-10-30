@@ -7,7 +7,7 @@ Vector3d FluidModel::get_fluid_velocity(const Vector3d& position, double time) c
     Vector3d velocity = get_fluid_velocity_this(position, time);
     if (time < ramp_end) {
         if (time > ramp_start) {
-            double ramp_fraction = time / (ramp_end - ramp_start);
+            double ramp_fraction = (time - ramp_start) / (ramp_end - ramp_start);
             velocity *= ramp_fraction;
         } else {
             velocity *= 0.0;
@@ -20,7 +20,7 @@ Vector3d FluidModel::get_fluid_acceleration(const Vector3d& position, double tim
     Vector3d acceleration = get_fluid_acceleration_this(position, time);
     if (time < ramp_end) {
         if (time > ramp_start) {
-            double ramp_fraction = time / (ramp_end - ramp_start);
+            double ramp_fraction = (time - ramp_start) / (ramp_end - ramp_start);
             acceleration *= ramp_fraction;
         } else {
             acceleration *= 0.0;
