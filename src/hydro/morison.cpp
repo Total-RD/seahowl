@@ -260,6 +260,10 @@ double MacCamyFuchsTable::interpolate(double x, const std::vector<double>& xData
 
 // Compute drag coefficient based on given parameters
 double MacCamyFuchsTable::getCd(double diameter, double wave_period, double fluid_velocity) {
+    /** @brief Return the hydrodynamic drag coefficient (Cd) for a given diameter (D), a given water period (t)
+    and a given local water velocity (Umax)
+    source: DNV-OS-J101, p75 */
+
     std::vector<double> points_KC_Cds_smooth;
     std::vector<double> points_PHI_smooth;
     std::vector<double> points_KC_Cds_rough;
