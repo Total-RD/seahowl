@@ -62,6 +62,8 @@ void initialize_pyseahowl_aero(py::module& m) {
         .def_readwrite("discretization_fractions", &seahowl::aero::TowerAero::discretization_fractions)
         .def_readwrite("reference_points", &seahowl::aero::TowerAero::reference_points)
         .def_readwrite("nodes", &seahowl::aero::TowerAero::nodes);
+    .def_readwrite("use_MacCamyFuchs_correction", &seahowl::aero::TowerAero::use_MacCamyFuchs_correction);
+    .def_readwrite("use_Cd_correction", &seahowl::aero::TowerAero::use_Cd_correction);
 
     // aero/turbine_aero.h
     py::class_<seahowl::aero::TurbineAero, std::shared_ptr<seahowl::aero::TurbineAero>, seahowl::ComponentFluid>(

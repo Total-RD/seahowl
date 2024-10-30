@@ -75,6 +75,8 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def("build", &seahowl::hydro::MooringHydro::build)
         .def("set_length", &seahowl::hydro::MooringHydro::set_length)
         .def("set_diameter", &seahowl::hydro::MooringHydro::set_diameter);
+    .def_readwrite("use_MacCamyFuchs_correction", &seahowl::hydro::MooringHydro::use_MacCamyFuchs_correction);
+    .def_readwrite("use_Cd_correction", &seahowl::hydro::MooringHydro::use_Cd_correction);
 
     py::class_<seahowl::hydro::MooringSystemHydro, std::shared_ptr<seahowl::hydro::MooringSystemHydro>,
                seahowl::ComponentFluid>(m_hydro, "MooringSystemHydro")

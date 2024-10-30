@@ -12,6 +12,7 @@ using seahowl::env::FluidModel;
 
 MooringHydro::MooringHydro() {
     coefficients.use_MacCamyFuchs_correction = false;
+    coefficients.use_Cd_correction = false;
 }
 
 void MooringHydro::set_length(double length) {

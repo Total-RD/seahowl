@@ -40,7 +40,7 @@ class TowerAero : public ComponentFluid {
     /** @brief MacCamy and Fuchs Correction for large cylinders, Flag. */
     bool use_MacCamyFuchs_correction = true;
     /** @brief Cd Correction for large cylinders, Flag. */
-    bool use_Cd_correction;
+    bool use_Cd_correction = true;
 
     /**
      * @brief Constructor.
