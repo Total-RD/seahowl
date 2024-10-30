@@ -1,5 +1,7 @@
 ﻿{
   "gravity": [0.0, 0.0, -9.81],
+  "ramp_start": 0.0,
+  "ramp_end": 0.0,
   "wind": {
     "type": "inflowwind",
     "options": {
