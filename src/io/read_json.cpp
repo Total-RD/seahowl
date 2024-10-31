@@ -1103,6 +1103,10 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
     spdlog::debug("Populating system from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
                   ").");
 
+    // environmental info
+    auto filepath_environment = (DATADIR / json_obj.at("environment").at("file").get<std::string>()).generic_string();
+    populate_environmental_conditions_from_json(filepath_environment, system_core);
+
     // turbines
     auto turbines_json = json_obj.at("turbines");
     for (int ii = 0; ii < turbines_json.size(); ii++) {
