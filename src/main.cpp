@@ -6,30 +6,18 @@
 #include <spdlog/pattern_formatter.h>
 #include <getopt.h>
 #include <unistd.h>
+#include <map>
 
 namespace fs = std::filesystem;
 
-void apply_log_level(int argc, char* argv[]) {
-    seahowl::set_log_level_global("info");
-
-    for (int i = 1; i < argc; ++i) { 
-        if (std::strcmp(argv[i], "--log-level") == 0 && i + 1 < argc) {
-            seahowl::set_log_level_global(argv[i + 1]);
-            break;
-        }
-    }
-    spdlog::info("Start SEAHOWL simulation.");
-}
-
-void apply_args(int argc, char* argv[], seahowl::core::Simulation& simulation) {
-    spdlog::info("Applying args.");
-
+void apply_args(int argc, char* argv[], std::map<std::string, char*>& options) {
     int opt;
     int option_index = 1;
 
     // Define long options
     static struct option long_options[] = {
         {"help", no_argument, 0, 'h'},
+        {"log-level", required_argument, 0, 1007},
         {"dt", required_argument, 0, 1000},
         {"duration", required_argument, 0, 1001},
         {"dt-output", required_argument, 0, 1002},
@@ -37,7 +25,6 @@ void apply_args(int argc, char* argv[], seahowl::core::Simulation& simulation) {
         {"gui", no_argument, 0, 1004},
         {"output-folder", required_argument, 0, 1005},
         {"env-file", required_argument, 0, 1006},
-        {"log-level", required_argument, 0, 1007},
         {0, 0, 0, 0}  // End marker
     };
 
@@ -45,6 +32,7 @@ void apply_args(int argc, char* argv[], seahowl::core::Simulation& simulation) {
         switch (opt) {
             case 'h':
                 spdlog::info(
+                    "\n"
                     "Usage: {} file_input [options]\n"
                     "Options:\n"
                     "  -h, --help            Show this help message\n"
@@ -59,63 +47,75 @@ void apply_args(int argc, char* argv[], seahowl::core::Simulation& simulation) {
                     argv[0]);
                 exit(0);
             case 1007:
-                break;   
+                seahowl::set_log_level_global(optarg);
+                options[long_options[option_index].name] = optarg;
+                break;
             case 1000:
-                spdlog::warn("Simulation variable override with {} = {}.", long_options[option_index].name, optarg);
-                simulation.dt = std::stod(optarg);
-                break;
             case 1001:
-                spdlog::warn("Simulation variable override with {} = {}.", long_options[option_index].name, optarg);
-                simulation.duration = std::stod(optarg);
-                break;
             case 1002:
-                spdlog::warn("Simulation variable override with {} = {}.", long_options[option_index].name, optarg);
-                simulation.dt_output = std::stod(optarg);
-                break;
             case 1003:
-                simulation.outputs->has_vtk = true;
-                break;
             case 1004:
-                simulation.outputs->has_gui = true;
-                break;
             case 1005:
-                spdlog::warn("Simulation variable override with {} = {}.", long_options[option_index].name, optarg);
-                simulation.outputs->set_output_folder(optarg);
-                break;
             case 1006:
-                spdlog::warn("Simulation variable override with {} = {}.",long_options[option_index].name, optarg);
-                populate_environmental_conditions_from_json(optarg, *simulation.system_core);
+                spdlog::warn("Simulation variable override with {} = {}.", long_options[option_index].name, optarg);
+                options[long_options[option_index].name] = optarg;
                 break;
             default:
                 spdlog::error("Unknown option.");
                 exit(1);
         }
     }
-
-    spdlog::info("Applied args.");
 }
 
 void run_simulation(int argc, char* argv[]) {
+    // std::map to store the options
+    std::map<std::string, char*> options;
 
-    // apply log level
-    apply_log_level(argc, argv);
-    
     // path of main input file
     auto filepath_main = fs::path();
     if (argc > 1 && strncmp(argv[1], "-", 1) != 0) {
         filepath_main = fs::absolute(fs::path(argv[1]));
-    }else{
-        throw std::runtime_error("Driver: need to pass SEAHOWL main input file as first argument.");
     }
-    
-    auto simulation = seahowl::core::Simulation();
-    simulation.populate_from_file(filepath_main.generic_string());
 
     // override values with command line arguments
-    apply_args(argc, argv, simulation);
-    
+    apply_args(argc, argv, options);
+
+    if (filepath_main.empty()) {
+        throw std::runtime_error("Driver: need to pass SEAHOWL main input file as first argument.");
+    }
+
+    auto simulation = seahowl::core::Simulation();
+
+    simulation.populate_from_file(filepath_main.generic_string());
+
+    if (options.find("output-folder") != options.end())
+        simulation.outputs->set_output_folder(options["output-folder"]);
+
+    if (options.find("log-level") != options.end())
+        seahowl::set_log_level_global(options["log-level"]);
+
+    if (options.find("dt") != options.end())
+        simulation.dt = std::stod(options["dt"]);
+
+    if (options.find("env-file") != options.end())
+        populate_environmental_conditions_from_json(options["env-file"], *simulation.system_core);
+
+    if (options.find("duration") != options.end())
+        simulation.duration = std::stod(options["duration"]);
+
+    if (options.find("dt-output") != options.end())
+        simulation.dt_output = std::stod(options["dt-output"]);
+
+    if (options.find("vtk") != options.end())
+        simulation.outputs->has_vtk = true;
+
+    if (options.find("gui") != options.end())
+        simulation.outputs->has_gui = true;
+
+    // override values with command line arguments
+
     simulation.initialize_from_file(filepath_main.generic_string());
- 
+
     simulation.run_all();
 }
 
