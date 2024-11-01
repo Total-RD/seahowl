@@ -51,7 +51,6 @@ void initialize_pyseahowl_core(py::module& m) {
         .def("initialize", &seahowl::core::Simulation::initialize)
         .def("initialize_from_file", &seahowl::core::Simulation::initialize_from_file)
         .def_readwrite("dt", &seahowl::core::Simulation::dt)
-        .def_readwrite("dt_output", &seahowl::core::Simulation::dt_output)
         .def_readwrite("duration", &seahowl::core::Simulation::duration)
         .def_property_readonly(
             "system_core", [](seahowl::core::Simulation& sim) { return sim.system_core.get(); },

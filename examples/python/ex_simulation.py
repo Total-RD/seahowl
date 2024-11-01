@@ -9,7 +9,7 @@ seahowl.set_log_level_global("info")  # log levels: critical, info, debug, warn,
 simulation = seahowl.core.Simulation()
 simulation.dt = 0.05
 simulation.duration = 200.0
-simulation.dt_output = 0.0
+simulation.outputs.dt_output = 0.0
 simulation.outputs.has_gui = True
 simulation.outputs.has_vtk = False
 simulation.outputs.has_csv = True

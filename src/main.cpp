@@ -104,7 +104,7 @@ void run_simulation(int argc, char* argv[]) {
         simulation.duration = std::stod(options["duration"]);
 
     if (options.find("dt-output") != options.end())
-        simulation.dt_output = std::stod(options["dt-output"]);
+        simulation.outputs->dt_output = std::stod(options["dt-output"]);
 
     if (options.find("vtk") != options.end())
         simulation.outputs->has_vtk = true;

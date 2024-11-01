@@ -22,6 +22,8 @@ namespace io {
  */
 class OutputManager {
   public:
+    /** @brief Time step for generating outputs. */
+    double dt_output = 0.0;
     /** @brief Whether manager outputs VTK files or not. */
     bool has_vtk = false;
     /** @brief Whether manager displays in situ visualization or not. */

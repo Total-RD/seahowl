@@ -47,6 +47,7 @@ void initialize_pyseahowl_io(py::module& m) {
         .def("set_output_folder", &seahowl::io::OutputManager::set_output_folder)
         .def("initialize", &seahowl::io::OutputManager::initialize)
         .def("output_all", &seahowl::io::OutputManager::output_all)
+        .def_readwrite("dt_output", &seahowl::io::OutputManager::dt_output)
         .def_readwrite("has_vtk", &seahowl::io::OutputManager::has_vtk)
         .def_readwrite("has_gui", &seahowl::io::OutputManager::has_gui)
         .def_readwrite("has_csv", &seahowl::io::OutputManager::has_csv);

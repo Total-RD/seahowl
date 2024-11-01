@@ -6,6 +6,9 @@
 #ifdef HAVE_IRRLICHT
     #include "seahowl/io/viz_insitu_irrlicht.h"
 #endif
+#ifdef HAVE_AERODYN
+    #include "seahowl/aero/aerodyn_adapter.h"
+#endif
 #include "seahowl/core/system.h"
 #include "seahowl/core/turbine.h"
 #include "seahowl/elasto/turbine_elasto.h"
@@ -34,6 +37,20 @@ void OutputManager::initialize() {
 #ifdef HAVE_VTK
         output_vtk = std::make_unique<OutputSystemVTK>(system_core, output_folder + "/vtk/");
         output_vtk->initialize();
+
+    #ifdef HAVE_AERODYN
+        for (auto& turbine : system_core.turbines) {
+            try {
+                // set VTK options if using AeroDyn
+                auto& turbine_aero = dynamic_cast<seahowl::aero::TurbineAeroDyn&>(turbine->aero);
+                turbine_aero.WrVTK = 2;
+                turbine_aero.WrVTK_dt = dt_output;
+            } catch (const std::bad_cast& e) {
+                // do nothing if not using AeroDyn
+            }
+        }
+    #endif
+
 #else
         spdlog::warn("Outputs: VTK is enabled but this feature was not compiled.");
 #endif

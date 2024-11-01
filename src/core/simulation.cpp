@@ -46,16 +46,14 @@ void Simulation::populate_from_file(const std::string& filepath) {
     // timestepping
     dt = num_json.at("dt").get<double>();
     duration = num_json.at("t_end").get<double>();
+
     // outputs
     auto outputs_json = json_obj.at("outputs");
-    dt_output = outputs_json.at("dt").get<double>();
+    outputs->dt_output = outputs_json.at("dt").get<double>();
     std::string output_folder = "./output";
     if (outputs_json.contains("folder")) {
         output_folder = outputs_json.at("folder").get<std::string>();
     }
-
-    // outputs
-    outputs = std::make_unique<seahowl::io::OutputManager>(*system_core);
     outputs->set_output_folder(output_folder);
     outputs->has_vtk = outputs_json.at("VTK").get<bool>();
     outputs->has_gui = outputs_json.at("gui").get<bool>();
@@ -75,7 +73,7 @@ void Simulation::initialize() {
     // initialize outputs
     outputs->initialize();
 
-    t_output_next = dt_output;
+    t_output_next = outputs->dt_output;
     is_initialized = true;
     spdlog::info("Simulation initialized in {:.3}s.", sw_setup);
 }
@@ -92,7 +90,7 @@ void Simulation::initialize_from_file(const std::string& filepath) {
     // initialize outputs
     outputs->initialize();
 
-    t_output_next = dt_output;
+    t_output_next = outputs->dt_output;
     is_initialized = true;
     spdlog::info("Simulation initialized in {:.3}s.", sw_setup);
 };
@@ -116,7 +114,7 @@ void Simulation::step() {
     if (system_core->get_time() >= (t_output_next - 1e-6)) {
         spdlog::info("time: {:.6}s, step: {}, stopwatch: {:.3}s", system_core->get_time(), nstep, sw_step);
         outputs->output_all(nstep);
-        t_output_next += dt_output;
+        t_output_next += outputs->dt_output;
     }
 }
 

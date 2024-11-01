@@ -17,7 +17,6 @@ class Simulation {
     std::unique_ptr<seahowl::io::OutputManager> outputs;
 
     double dt = 0.025;
-    double dt_output = 0.;
     double duration = 1000.0;
     bool is_initialized = false;
 
