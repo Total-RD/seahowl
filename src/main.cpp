@@ -31,20 +31,22 @@ void apply_args(int argc, char* argv[], std::map<std::string, char*>& options) {
     while ((opt = getopt_long(argc, argv, "h", long_options, &option_index)) != -1) {
         switch (opt) {
             case 'h':
-                spdlog::info(
-                    "\n"
-                    "Usage: {} file_input [options]\n"
-                    "Options:\n"
-                    "  -h, --help            Show this help message\n"
-                    "  --log-level           Set the log level critical|error|warning|info|debug|trace\n"
-                    "  --dt                  Set the time step\n"
-                    "  --duration            Set the duration\n"
-                    "  --dt-output           Set the output time step\n"
-                    "  --vtk                 Use VTK\n"
-                    "  --gui                 Use GUI\n"
-                    "  --output-folder       Set the output folder\n"
-                    "  --env-file            Set the environment file\n",
-                    argv[0]);
+            default:
+                spdlog::info("-------------------------------------------------");
+                spdlog::info("HOW TO USE SEAHOWL DRIVER");
+                spdlog::info("-------------------------------------------------");
+                spdlog::info("Usage: {} input_file [options]", argv[0]);
+                spdlog::info("Options:");
+                spdlog::info("  -h, --help            Display this help message");
+                spdlog::info("  --log-level           Set the log level (critical|error|warning|info|debug|trace)");
+                spdlog::info("  --dt                  Set the time step for the simulation");
+                spdlog::info("  --duration            Set the duration of the simulation");
+                spdlog::info("  --dt-output           Set the time step for generating outputs");
+                spdlog::info("  --vtk                 Generate VTK outputs");
+                spdlog::info("  --gui                 Display GUI (in situ visualization)");
+                spdlog::info("  --output-folder       Set the path of the folder for outputs");
+                spdlog::info("  --env-file            Set the environmental conditions file");
+                spdlog::info("-------------------------------------------------");
                 exit(0);
             case 1007:
                 seahowl::set_log_level_global(optarg);
@@ -60,9 +62,8 @@ void apply_args(int argc, char* argv[], std::map<std::string, char*>& options) {
                 spdlog::warn("Simulation variable override with {} = {}.", long_options[option_index].name, optarg);
                 options[long_options[option_index].name] = optarg;
                 break;
-            default:
-                spdlog::error("Unknown option.");
-                exit(1);
+            case '?':
+                throw std::runtime_error("Error in command line argument.");
         }
     }
 }
@@ -81,12 +82,14 @@ void run_simulation(int argc, char* argv[]) {
     apply_args(argc, argv, options);
 
     if (filepath_main.empty()) {
-        throw std::runtime_error("Driver: need to pass SEAHOWL main input file as first argument.");
+        throw std::runtime_error("SEAHOWL driver: pass main input file as first argument (or type --help).");
     }
 
     auto simulation = seahowl::core::Simulation();
 
     simulation.populate_from_file(filepath_main.generic_string());
+
+    // override values with command line arguments
 
     if (options.find("output-folder") != options.end())
         simulation.outputs->set_output_folder(options["output-folder"]);
@@ -111,8 +114,6 @@ void run_simulation(int argc, char* argv[]) {
 
     if (options.find("gui") != options.end())
         simulation.outputs->has_gui = true;
-
-    // override values with command line arguments
 
     simulation.initialize_from_file(filepath_main.generic_string());
 
