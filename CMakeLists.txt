@@ -8,7 +8,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 project(
     SEAHOWL
     VERSION 0.7.1
-    DESCRIPTION "SEAHOWL: Servo-Elasto-Aero-Hydro Offsore Wind Lab"
+    DESCRIPTION "Servo-Elasto-Aero-Hydro Offshore Wind Lab"
     LANGUAGES CXX
 )
 
@@ -24,6 +24,30 @@ list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/../Chrono/lib")
 
 # Add the cmake folder so the FindSphinx module is found
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
+# Retrieve date and time of build
+string(TIMESTAMP TODAY "%Y-%m-%d %H:%M:%S")
+set (SEAHOWL_BUILD_DATE ${TODAY})
+
+# Retrieve git commit hash (if any)
+execute_process(
+    COMMAND git describe --always --dirty
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE IS_GIT_REPOSITORY
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+if(IS_GIT_REPOSITORY)
+    execute_process(
+        COMMAND git describe --always --dirty
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE SEAHOWL_GIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+else()
+    set(SEAHOWL_GIT_HASH "N/A")
+endif()
+
 
 # =============
 # OPTIONS
@@ -90,14 +114,12 @@ if(SEAHOWL_ENABLE_VTK)
 endif(SEAHOWL_ENABLE_VTK)
 
 if(VTK_FOUND)
-    add_compile_definitions(SEAHOWL_HAVE_VTK=1)
     add_definitions("-DHAVE_VTK=1")
 endif()
 
 # HydroChrono potential flow library
 if(SEAHOWL_ENABLE_HYDROCHRONO)
     find_package(HydroChrono REQUIRED)
-    add_compile_definitions(SEAHOWL_HAVE_HYDROCHRONO=1)
     add_definitions("-DHAVE_HYDROCHRONO=1")
 endif(SEAHOWL_ENABLE_HYDROCHRONO)
 
@@ -349,7 +371,7 @@ set_target_properties(
 target_include_directories(
     seahowl_core
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS}
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHRONO_INCLUDE_DIRS} ${PROJECT_BINARY_DIR}
 )
 
 target_compile_features(
@@ -359,7 +381,19 @@ target_compile_features(
 
 target_compile_definitions(
     seahowl_core
-    PRIVATE "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\""
+    PRIVATE
+    CHRONO_DATA_DIR="${CHRONO_DATA_DIR}"
+    SEAHOWL_HAVE_HYDROCHRONO=$<BOOL:${SEAHOWL_ENABLE_HYDROCHRONO}>
+    SEAHOWL_HAVE_VTK=$<BOOL:${SEAHOWL_ENABLE_VTK}>
+    SEAHOWL_HAVE_AERODYN=$<BOOL:${SEAHOWL_ENABLE_AERODYN}>
+    SEAHOWL_HAVE_INFLOWWIND=$<BOOL:${SEAHOWL_ENABLE_INFLOWWIND}>
+    SEAHOWL_HAVE_IRRLICHT=$<BOOL:${SEAHOWL_ENABLE_IRRLICHT}>
+    SEAHOWL_CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+    SEAHOWL_NAME="${PROJECT_NAME}"
+    SEAHOWL_DESCRIPTION="${PROJECT_DESCRIPTION}"
+    SEAHOWL_VERSION="${SEAHOWL_VERSION}"
+    SEAHOWL_BUILD_DATE="${SEAHOWL_BUILD_DATE}"
+    SEAHOWL_GIT_HASH="${SEAHOWL_GIT_HASH}"
 )
 
 target_compile_options(

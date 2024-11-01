@@ -28,10 +28,9 @@ Simulation::Simulation() {
 
 void Simulation::populate_from_file(const std::string& filepath) {
     spdlog::stopwatch sw_setup;
-    spdlog::set_pattern("[%^%l%$] %v");
-    spdlog::info("**************************************************************");
-    spdlog::info("INITIAL SIMULATION SETUP.");
-    spdlog::info("**************************************************************");
+    spdlog::info("-------------------------------------------------");
+    spdlog::info("INITIAL SIMULATION SETUP");
+    spdlog::info("-------------------------------------------------");
 
     populate_system_from_json(filepath, *system_core);
 
@@ -119,12 +118,13 @@ void Simulation::step() {
 }
 
 void Simulation::run_all() {
-    spdlog::info("**************************************************************");
-    spdlog::info("MAIN SIMULATION LOOP.");
-    spdlog::info("**************************************************************");
+    spdlog::info("-------------------------------------------------");
+    spdlog::info("MAIN SIMULATION LOOP");
+    spdlog::info("-------------------------------------------------");
     spdlog::stopwatch sw_sim;
     while (system_core->get_time() < duration) {
         step();
     }
     spdlog::info("Finished simulation (runtime: {:.3}s).", sw_sim);
+    spdlog::info("-------------------------------------------------");
 }

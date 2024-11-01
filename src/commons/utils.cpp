@@ -3,6 +3,8 @@
 #include <string>
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
+#include <fmt/chrono.h>
+#include <iostream>
 
 void seahowl::set_log_level_global(const std::string& level) {
     if (level == "critical") {
@@ -101,4 +103,38 @@ double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
                 x_frac * y_frac * q22;
 
     return fP;
+}
+
+// With __attribute__((constructor)), this function will be called when the library is loaded
+__attribute__((constructor)) void printBanner() {
+    spdlog::set_pattern("[%^%l%$] %v");
+    auto now = std::chrono::system_clock::now();
+
+    spdlog::info("+-----------------------------------------------+");
+    spdlog::info("|       ___________   __ ______ _      ____     |");
+    spdlog::info("|      / __/ __/ _ | / // / __ \\ | /| / / /     |");
+    spdlog::info("|     _\\ \\/ _// __ |/ _  / /_/ / |/ |/ / /__    |");
+    spdlog::info("|    /___/___/_/ |_/_//_/\\____/|__/|__/____/    |");
+    spdlog::info("|                                               |");
+    spdlog::info("+-----------------------------------------------+");
+    spdlog::info("|   Servo-Elasto-Aero-Hydro Offshore Wind Lab   |");
+    spdlog::info("+-----------------------------------------------+");
+
+    spdlog::info("");
+    // library info
+    spdlog::info("SEAHOWL core library:");
+    spdlog::info("  |- version: v{}", SEAHOWL_VERSION);
+    spdlog::info("  |- git hash: {}", SEAHOWL_GIT_HASH);
+    spdlog::info("  |- build type: {}", SEAHOWL_CMAKE_BUILD_TYPE);
+    spdlog::info("  |- build date: {}", SEAHOWL_BUILD_DATE);
+    //
+    spdlog::info("Optional dependencies:");
+    spdlog::info("  |- HydroChrono: {}", (SEAHOWL_HAVE_HYDROCHRONO ? "yes" : "no"));
+    spdlog::info("  |- InflowWind: {}", (SEAHOWL_HAVE_INFLOWWIND ? "yes" : "no"));
+    spdlog::info("  |- AeroDyn: {}", (SEAHOWL_HAVE_AERODYN ? "yes" : "no"));
+    spdlog::info("  |- Irrlicht: {}", (SEAHOWL_HAVE_IRRLICHT ? "yes" : "no"));
+    spdlog::info("  |- VTK: {}", (SEAHOWL_HAVE_VTK ? "yes" : "no"));
+    //
+    spdlog::info("Loaded on {}.", now);
+    spdlog::info("");
 }
