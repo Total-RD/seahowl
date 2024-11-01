@@ -1058,32 +1058,6 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
     if (env_model->soil_model) {
         system_core.soil_model = env_model->soil_model;
     }
-
-    // environment
-#ifdef HAVE_HYDROCHRONO
-    if (environment_json.contains("sea")) {
-        auto sea_json = environment_json.at("sea");
-        auto sea_type = sea_json.at("type").get<std::string>();
-        if (sea_type == "HydroChrono" || sea_type == "hydrochrono") {
-            for (auto turbine : system_core.turbines) {
-                if (turbine->elasto.foundation) {
-                    try {
-                        auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine->elasto.foundation);
-                        try {
-                            auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
-                            auto& waves_model =
-                                dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
-                            floater.set_waves_hydrochrono(waves_model.waves);
-                        } catch (const std::bad_cast& e) {
-                            throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
-                        }
-                    } catch (const std::bad_cast& e) {
-                    }
-                }
-            }
-        }
-    }
-#endif
 }
 
 void populate_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {

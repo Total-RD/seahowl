@@ -6,9 +6,14 @@
 #include "seahowl/elasto/turbine_elasto.h"
 #include "seahowl/aero/turbine_aero.h"
 #include "seahowl/env/wind_models.h"
+#include "seahowl/env/wave_models.h"
+#include "seahowl/env/combined_models.h"
 #include "seahowl/core/blade.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/elasto/floater_elasto.h"
+#ifdef HAVE_HYDROCHRONO
+    #include "seahowl/hydro/hydrochrono_adapter.h"
+#endif
 
 #include <vector>
 #include <spdlog/spdlog.h>
@@ -37,6 +42,46 @@ void System::initialize_this(double time, double dt) {
     } else {
         spdlog::warn("Elasto system was already assembled, not reassembling.");
     }
+
+#ifdef HAVE_HYDROCHRONO
+    /// @todo replace this check with better handling (e.g. at initialization of floater by passing fluid model)
+    // Specific HydroChrono handling: need to pass waves from environment to HydroChrono floater.
+    // Needs to happen before initializing turbines
+    for (auto& turbine : turbines) {
+        if (turbine->elasto.foundation) {
+            try {
+                auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine->elasto.foundation);
+                try {
+                    spdlog::debug("Passing waves to HydroChrono floater model.");
+                    auto& wavewind_model = dynamic_cast<seahowl::env::WaveWindModel&>(*fluid_model);
+                    auto& waves_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*wavewind_model.wave_model);
+                    floater.set_waves_hydrochrono(waves_model.waves);
+                } catch (const std::bad_cast& e) {
+                    throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
+                }
+            } catch (const std::bad_cast& e) {
+                // do nothing if foundation is not a HydroChrono floater
+            }
+        }
+    }
+    // also need to check components
+    for (auto& component : components) {
+        try {
+            auto& floater_core = dynamic_cast<seahowl::core::Floater&>(*component);
+            auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(floater_core.elasto);
+            try {
+                spdlog::debug("Passing waves to HydroChrono floater model.");
+                auto& wavewind_model = dynamic_cast<seahowl::env::WaveWindModel&>(*fluid_model);
+                auto& waves_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*wavewind_model.wave_model);
+                floater.set_waves_hydrochrono(waves_model.waves);
+            } catch (const std::bad_cast& e) {
+                throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
+            }
+        } catch (const std::bad_cast& e) {
+            // do nothing if component is not a HydroChrono floater
+        }
+    }
+#endif
 
     // initialize all turbines
     for (auto& turbine : turbines) {
