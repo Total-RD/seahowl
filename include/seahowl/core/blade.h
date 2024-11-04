@@ -82,6 +82,13 @@ class Blade : public ComponentDynamic {
     virtual void build();
 
     /**
+     * @brief Applies pitch increment to the blade (i.e. rotates the blade around its longitudinal axis).
+     *
+     * @param pitch_increment Pitch increment value (in radians).
+     */
+    void apply_pitch_increment(double pitch_increment);
+
+    /**
      * @brief Sets the discretization fractions to use when building the elasto part of the blade.
      *
      * @param[in] fractions Normalized discretization fractions within [0, 1].

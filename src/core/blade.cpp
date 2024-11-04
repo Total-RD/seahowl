@@ -46,6 +46,13 @@ void Blade::build() {
     update_positions_aero();
 }
 
+void Blade::apply_pitch_increment(double pitch_increment) {
+    // pitch elasto part of blade
+    elasto.apply_pitch_increment(pitch_increment);
+    // update aero positions from pitched elasto blade
+    update_positions_aero();
+}
+
 void Blade::set_discretization_elasto(std::vector<double> fractions) {
     elasto.discretization_fractions = fractions;
 };
