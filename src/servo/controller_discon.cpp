@@ -347,7 +347,11 @@ void seahowl::servo::DisconInterface::Init(const std::string& libfile) {
         has_dll = true;
         // Load dynamic library and point to DISCON routine
 #ifdef __unix__
+    #ifdef __gnu_linux__
+        void* handler = dlmopen(LM_ID_NEWLM, libfile.c_str(), RTLD_LAZY);
+    #else
         void* handler = dlopen(libfile.c_str(), RTLD_LAZY);
+    #endif
         DISCON = (DISCON_routine)dlsym(handler, "DISCON");
 #endif
 #ifdef _WIN32

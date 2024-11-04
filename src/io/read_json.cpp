@@ -680,8 +680,12 @@ void populate_turbine_from_json(const std::string& filepath,
             libfilepath = path(DATADIR / libfilepath).generic_string();
             // copy libdiscon to temporary folder with new name in case there are several turbines
             check_file_exists(libfilepath);
+#ifdef __gnu_linux__
+// no need to copy and increment libdiscon.so on GNU, handled automatically with dlmopen
+#else
             // first copy libdiscon to tmp folder
             libfilepath = copy_file_and_increment(libfilepath, output_folder + "/tmp");
+#endif
         }
         auto infilepath = controller_json.at("options").at("infile").get<std::string>();
         if (infilepath != "") {
