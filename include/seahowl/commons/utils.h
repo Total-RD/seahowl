@@ -7,6 +7,8 @@
 
 namespace seahowl {
 
+extern bool LOG_LEVEL_SET;
+
 /**
  * @brief Set global logging level.
  *

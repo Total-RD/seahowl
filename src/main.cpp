@@ -49,6 +49,7 @@ void apply_args(int argc, char* argv[], std::map<std::string, char*>& options) {
                 spdlog::info("-------------------------------------------------");
                 exit(0);
             case 1007:
+                spdlog::warn("Simulation variable override with {} = {}.", long_options[option_index].name, optarg);
                 seahowl::set_log_level_global(optarg);
                 options[long_options[option_index].name] = optarg;
                 break;
@@ -93,9 +94,6 @@ void run_simulation(int argc, char* argv[]) {
 
     if (options.find("output-folder") != options.end())
         simulation.outputs->set_output_folder(options["output-folder"]);
-
-    if (options.find("log-level") != options.end())
-        seahowl::set_log_level_global(options["log-level"]);
 
     if (options.find("dt") != options.end())
         simulation.dt = std::stod(options["dt"]);

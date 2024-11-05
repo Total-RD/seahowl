@@ -1075,11 +1075,6 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
     if (outputs_json.contains("folder")) {
         output_folder = outputs_json.at("folder").get<std::string>();
     }
-    // logging
-    auto log_level = outputs_json.at("log_level").get<std::string>();
-    seahowl::set_log_level_global(log_level);
-    spdlog::debug("Populating system from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
-                  ").");
 
     // environmental info
     auto filepath_environment = (DATADIR / json_obj.at("environment").at("file").get<std::string>()).generic_string();

@@ -6,6 +6,8 @@
 #include <fmt/chrono.h>
 #include <iostream>
 
+bool seahowl::LOG_LEVEL_SET = false;
+
 void seahowl::set_log_level_global(const std::string& level) {
     if (level == "critical") {
         spdlog::set_level(spdlog::level::critical);
@@ -22,6 +24,7 @@ void seahowl::set_log_level_global(const std::string& level) {
     } else {
         throw std::runtime_error("Log level unknown: " + level + ".");
     }
+    seahowl::LOG_LEVEL_SET = true;
 }
 
 std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(

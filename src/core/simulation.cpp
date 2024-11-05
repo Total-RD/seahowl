@@ -8,6 +8,7 @@
 #include "seahowl/io/read_json.h"
 #include "seahowl/io/write_csv.h"
 #include "seahowl/io/output_manager.h"
+#include "seahowl/commons/utils.h"
 
 #include <fstream>
 #include <filesystem>  // C++17
@@ -28,11 +29,6 @@ Simulation::Simulation() {
 
 void Simulation::populate_from_file(const std::string& filepath) {
     spdlog::stopwatch sw_setup;
-    spdlog::info("-------------------------------------------------");
-    spdlog::info("INITIAL SIMULATION SETUP");
-    spdlog::info("-------------------------------------------------");
-
-    populate_system_from_json(filepath, *system_core);
 
     // get main file info
     std::ifstream json_file(filepath);
@@ -45,9 +41,14 @@ void Simulation::populate_from_file(const std::string& filepath) {
     // timestepping
     dt = num_json.at("dt").get<double>();
     duration = num_json.at("t_end").get<double>();
-
     // outputs
     auto outputs_json = json_obj.at("outputs");
+    if (!seahowl::LOG_LEVEL_SET) {
+        // logging
+        auto log_level = outputs_json.at("log_level").get<std::string>();
+        seahowl::set_log_level_global(log_level);
+    }
+    // output manager
     outputs->dt_output = outputs_json.at("dt").get<double>();
     std::string output_folder = "./output";
     if (outputs_json.contains("folder")) {
@@ -56,6 +57,12 @@ void Simulation::populate_from_file(const std::string& filepath) {
     outputs->set_output_folder(output_folder);
     outputs->has_vtk = outputs_json.at("VTK").get<bool>();
     outputs->has_gui = outputs_json.at("gui").get<bool>();
+
+    spdlog::info("-------------------------------------------------");
+    spdlog::info("INITIAL SIMULATION SETUP");
+    spdlog::info("-------------------------------------------------");
+
+    populate_system_from_json(filepath, *system_core);
 
     spdlog::debug("Populated system in {:.3}s.", sw_setup);
 }
