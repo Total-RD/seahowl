@@ -121,6 +121,8 @@ void Simulation::step() {
         spdlog::info("time: {:.6}s, step: {}, stopwatch: {:.3}s", system_core->get_time(), nstep, sw_step);
         outputs->output_all(nstep);
         t_output_next += outputs->dt_output;
+    } else {
+        spdlog::debug("time: {:.6}s, step: {}, stopwatch: {:.3}s", system_core->get_time(), nstep, sw_step);
     }
 }
 
