@@ -10,6 +10,7 @@
 #include <seahowl/core/rotor.h>
 #include <seahowl/core/blade.h>
 #include <seahowl/elasto/blade_elasto.h>
+#include <seahowl/aero/blade_aero.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/core/mooring.h>
@@ -117,7 +118,8 @@ void initialize_pyseahowl_core(py::module& m) {
                                                                                                              "Blade")
         .def("set_discretization_elasto", &seahowl::core::Blade::set_discretization_elasto)
         .def("set_discretization_aero", &seahowl::core::Blade::set_discretization_aero)
-        .def_property_readonly("elasto", [](seahowl::core::Blade& blade) { return &blade.elasto; });
+        .def_property_readonly("elasto", [](seahowl::core::Blade& blade) { return &blade.elasto; })
+        .def_property_readonly("aero", [](seahowl::core::Blade& blade) { return &blade.aero; });
 
     // core/system.h
     py::class_<seahowl::core::System, std::shared_ptr<seahowl::core::System>, seahowl::core::ComponentDynamic>(m_core,
