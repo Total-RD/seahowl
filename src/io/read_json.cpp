@@ -1091,35 +1091,6 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
         // get ref to turbine added last
         auto& turbine = *system_core.turbines.back();
 
-#ifdef HAVE_HYDROCHRONO
-        if (turbine.elasto.foundation) {
-            try {
-                auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine.elasto.foundation);
-                try {
-                    auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*system_core.fluid_model);
-                    auto& waves_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
-                    floater.set_waves_hydrochrono(waves_model.waves);
-                } catch (const std::bad_cast& e) {
-                    throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
-                }
-            } catch (const std::bad_cast& e) {
-            }
-        }
-#endif
-
-#ifdef HAVE_AERODYN
-        try {
-            // set VTK options if using AeroDyn
-            auto& turbine_aero = dynamic_cast<seahowl::aero::TurbineAeroDyn&>(turbine.aero);
-            if (outputs_json.at("VTK").get<bool>()) {
-                turbine_aero.WrVTK = 2;
-                turbine_aero.WrVTK_dt = outputs_json.at("dt").get<double>();
-            }
-        } catch (const std::bad_cast& e) {
-            // do nothing if not using AeroDyn
-        }
-#endif
-
         // rotate turbine to align tower with gravity vector
         auto v1 = Vector3d(-system_core.elasto.get_gravitational_acceleration()).normalized();
         auto v2 = (turbine.tower.elasto.nodes[1]->get_position() - turbine.tower.elasto.nodes[0]->get_position())
