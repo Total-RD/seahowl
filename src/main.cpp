@@ -70,6 +70,8 @@ void apply_args(int argc, char* argv[], std::map<std::string, char*>& options) {
 }
 
 void run_simulation(int argc, char* argv[]) {
+    spdlog::info("");
+    spdlog::info("Running SEAHOWL driver.");
     // std::map to store the options
     std::map<std::string, char*> options;
 

@@ -58,9 +58,11 @@ void Simulation::populate_from_file(const std::string& filepath) {
     outputs->has_vtk = outputs_json.at("VTK").get<bool>();
     outputs->has_gui = outputs_json.at("gui").get<bool>();
 
+    spdlog::info("");
     spdlog::info("-------------------------------------------------");
     spdlog::info("INITIAL SIMULATION SETUP");
     spdlog::info("-------------------------------------------------");
+    spdlog::info("");
 
     populate_system_from_json(filepath, *system_core);
 
@@ -127,9 +129,11 @@ void Simulation::step() {
 }
 
 void Simulation::run_all() {
+    spdlog::info("");
     spdlog::info("-------------------------------------------------");
     spdlog::info("MAIN SIMULATION LOOP");
     spdlog::info("-------------------------------------------------");
+    spdlog::info("");
     spdlog::stopwatch sw_sim;
     while (system_core->get_time() < duration) {
         step();

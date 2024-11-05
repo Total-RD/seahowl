@@ -130,6 +130,9 @@ __attribute__((constructor)) void printBanner() {
     spdlog::info("  |- git hash: {}", SEAHOWL_GIT_HASH);
     spdlog::info("  |- build type: {}", SEAHOWL_CMAKE_BUILD_TYPE);
     spdlog::info("  |- build date: {}", SEAHOWL_BUILD_DATE);
+    spdlog::info("  |- compiler: {}", SEAHOWL_COMPILER);
+    spdlog::info("  |- architecture: {}", SEAHOWL_BUILD_ARCHITECTURE);
+
     //
     spdlog::info("Optional dependencies:");
     spdlog::info("  |- HydroChrono: {}", (SEAHOWL_HAVE_HYDROCHRONO ? "yes" : "no"));
@@ -139,5 +142,4 @@ __attribute__((constructor)) void printBanner() {
     spdlog::info("  |- VTK: {}", (SEAHOWL_HAVE_VTK ? "yes" : "no"));
     //
     spdlog::info("Loaded on {}.", now);
-    spdlog::info("");
 }
