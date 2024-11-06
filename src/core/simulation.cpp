@@ -75,11 +75,14 @@ void Simulation::initialize() {
     }
     spdlog::stopwatch sw_setup;
 
-    // initialize outputs
-    outputs->initialize();
+    // pre-initialize outputs (sets output-related variable needed in system before initializing)
+    outputs->preinitialize();
 
     // initialize system
     system_core->initialize(system_core->get_time(), dt);
+
+    // initialize outputs (after initializing everything in system)
+    outputs->initialize();
 
     t_output_next = outputs->dt_output;
     is_initialized = true;
@@ -92,11 +95,14 @@ void Simulation::initialize_from_file(const std::string& filepath) {
     }
     spdlog::stopwatch sw_setup;
 
-    // initialize outputs
-    outputs->initialize();
+    // pre-initialize outputs (sets output-related variable needed in system before initializing)
+    outputs->preinitialize();
 
     // initialize system
     initialize_system_from_json(filepath, *system_core);
+
+    // initialize outputs (after initializing everything in system)
+    outputs->initialize();
 
     t_output_next = outputs->dt_output;
     is_initialized = true;

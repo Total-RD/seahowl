@@ -46,6 +46,14 @@ class OutputManager {
     void set_output_folder(const std::string& output_folder);
 
     /**
+     * @brief Pre-initializes outputs, needs to be called before system initialization.
+     *
+     * This is used to set some output-related that need to be set before initializing system.
+     * For example, the flag for AeroDyn's VTK output needs to be set before initializing TurbineAeoDyn.
+     */
+    void preinitialize();
+
+    /**
      * @brief Initializes outputs.
      */
     void initialize();

@@ -29,16 +29,9 @@ void OutputManager::set_output_folder(const std::string& output_folder) {
     this->output_folder = output_folder;
 }
 
-void OutputManager::initialize() {
-    // outputs
-    spdlog::debug("Creating directory {} for outputs.", output_folder);
-    fs::create_directories(output_folder);
+void OutputManager::preinitialize() {
     if (has_vtk) {
-#ifdef HAVE_VTK
-        output_vtk = std::make_unique<OutputSystemVTK>(system_core, output_folder + "/vtk/");
-        output_vtk->initialize();
-
-    #ifdef HAVE_AERODYN
+#ifdef HAVE_AERODYN
         for (auto& turbine : system_core.turbines) {
             try {
                 // set VTK options if using AeroDyn
@@ -49,8 +42,18 @@ void OutputManager::initialize() {
                 // do nothing if not using AeroDyn
             }
         }
-    #endif
+#endif
+    }
+}
 
+void OutputManager::initialize() {
+    // outputs
+    spdlog::debug("Creating directory {} for outputs.", output_folder);
+    fs::create_directories(output_folder);
+    if (has_vtk) {
+#ifdef HAVE_VTK
+        output_vtk = std::make_unique<OutputSystemVTK>(system_core, output_folder + "/vtk/");
+        output_vtk->initialize();
 #else
         spdlog::warn("Outputs: VTK is enabled but this feature was not compiled.");
 #endif
