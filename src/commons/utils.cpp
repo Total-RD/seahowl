@@ -3,8 +3,9 @@
 #include <string>
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
-#include <fmt/chrono.h>
 #include <iostream>
+#include <iomanip>
+#include <ctime>
 
 bool seahowl::LOG_LEVEL_SET = false;
 
@@ -111,7 +112,6 @@ double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
 // With __attribute__((constructor)), this function will be called when the library is loaded
 __attribute__((constructor)) void printBanner() {
     spdlog::set_pattern("[%^%l%$] %v");
-    auto now = std::chrono::system_clock::now();
 
     spdlog::info("+-----------------------------------------------+");
     spdlog::info("|       ___________   __ ______ _      ____     |");
@@ -141,5 +141,8 @@ __attribute__((constructor)) void printBanner() {
     spdlog::info("  |- Irrlicht: {}", (SEAHOWL_HAVE_IRRLICHT ? "yes" : "no"));
     spdlog::info("  |- VTK: {}", (SEAHOWL_HAVE_VTK ? "yes" : "no"));
     //
-    spdlog::info("Loaded on {}.", now);
+    // current_time
+    std::time_t now = std::time(nullptr);
+    std::tm* localTime = std::localtime(&now);
+    spdlog::info("Loaded on {}.", std::put_time(localTime, "%Y-%m-%d %H:%M:%S"));
 }
