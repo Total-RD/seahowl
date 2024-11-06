@@ -49,7 +49,7 @@ class TurbineElasto : public ComponentElasto {
      * towertop node and yaw bearing coordinates match each other.
      * The link between towertop node and yaw bearing is fixed.
      */
-    void link_rna_tower(seahowl::elasto::SystemElasto& system);
+    void link_rna_tower();
 
     /**
      * @brief Presetup of turbine.
