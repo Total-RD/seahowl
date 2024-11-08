@@ -46,8 +46,8 @@ TEST_F(Test_blade, mass_geometry) {
     }
     // Setup TestFwDataSet
     TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = ref_dir / "test_blade_mass_geometry.values.csv",
-                                .test_filepath = test_dir / "test_blade_mass_geometry.values.test.csv",
+                                .reference_filepath = (ref_dir / "test_blade_mass_geometry.values.csv").generic_string(),
+                                .test_filepath = (test_dir / "test_blade_mass_geometry.values.test.csv").generic_string(),
                                 .dimensions = {"values"}});
 
     // statics
@@ -62,8 +62,8 @@ TEST_F(Test_blade, mass_geometry) {
 TEST_F(Test_blade, edgewise) {
     // Setup TestFwDataSet
     TestFwDataSet test_datasetvalues({.debug = false,
-                                      .reference_filepath = ref_dir / "test_blade_edgewise.values.csv",
-                                      .test_filepath = test_dir / "test_blade_edgewise.values.test.csv",
+                                      .reference_filepath = (ref_dir / "test_blade_edgewise.values.csv").generic_string(),
+                                      .test_filepath = (test_dir / "test_blade_edgewise.values.test.csv").generic_string(),
                                       .dimensions = {"values"}});
 
     // system
@@ -116,8 +116,8 @@ TEST_F(Test_blade, edgewise) {
 
     // Setup TestFwDataSet
     TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = ref_dir / "test_blade_edgewise.csv",
-                                .test_filepath = test_dir / "test_blade_edgewise.test.csv",
+                                .reference_filepath = (ref_dir / "test_blade_edgewise.csv").generic_string(),
+                                .test_filepath = (test_dir / "test_blade_edgewise.test.csv").generic_string(),
                                 .dimensions = {"time", "natural_period"}});
 
     while (time < end_time) {
@@ -145,8 +145,8 @@ TEST_F(Test_blade, edgewise) {
 TEST_F(Test_blade, flapwise) {
     // Setup TestFwDataSet
     TestFwDataSet test_datasetvalues({.debug = false,
-                                      .reference_filepath = ref_dir / "test_blade_flapwise.values.csv",
-                                      .test_filepath = test_dir / "test_blade_flapwise.values.test.csv",
+                                      .reference_filepath = (ref_dir / "test_blade_flapwise.values.csv").generic_string(),
+                                      .test_filepath = (test_dir / "test_blade_flapwise.values.test.csv").generic_string(),
                                       .dimensions = {"value"}});
     // system
     auto system_elasto = SystemElastoChrono();
@@ -198,8 +198,8 @@ TEST_F(Test_blade, flapwise) {
 
     // Setup TestFwDataSet
     TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = ref_dir / "test_blade_flapwise.csv",
-                                .test_filepath = test_dir / "test_blade_flapwise.test.csv",
+                                .reference_filepath = (ref_dir / "test_blade_flapwise.csv").generic_string(),
+                                .test_filepath = (test_dir / "test_blade_flapwise.test.csv").generic_string(),
                                 .dimensions = {"time", "natural_period"}});
 
     while (time < end_time) {

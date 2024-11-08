@@ -25,8 +25,8 @@ class Test_bemt : public Fixture_components {
 TEST_F(Test_bemt, tower_shadow_check) {
     // Setup TestFwDataSet
     TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = ref_dir / "test_bemt_tower_shadow_check.csv",
-                                .test_filepath = test_dir / "test_bemt_tower_shadow_check.test.csv",
+                                .reference_filepath = (ref_dir / "test_bemt_tower_shadow_check.csv").generic_string(),
+                                .test_filepath = (test_dir / "test_bemt_tower_shadow_check.test.csv").generic_string(),
                                 .dimensions = {"x", "y", "z"}});
 
     // system

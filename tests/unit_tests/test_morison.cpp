@@ -20,8 +20,8 @@ TEST_F(Test_morison, MCF_Table) {
 
     // Setup TestFwDataSet
     TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = ref_dir / "test_morison_MCF_Table.values.csv",
-                                .test_filepath = test_dir / "test_morison_MCF_Table.values.test.csv",
+                                .reference_filepath = (ref_dir / "test_morison_MCF_Table.values.csv").generic_string(),
+                                .test_filepath = (test_dir / "test_morison_MCF_Table.values.test.csv").generic_string(),
                                 .dimensions = {"DNV_table Y"}});
 
     seahowl::hydro::MacCamyFuchsTable mytable = seahowl::hydro::MacCamyFuchsTable();
@@ -84,8 +84,8 @@ TEST_F(Test_morison, Cd_Table) {
 
     // Setup TestFwDataSet
     TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = ref_dir / "test_morison_Cd_Table.values.csv",
-                                .test_filepath = test_dir / "test_morison_Cd_Table.values.test.csv",
+                                .reference_filepath = (ref_dir / "test_morison_Cd_Table.values.csv").generic_string(),
+                                .test_filepath = (test_dir / "test_morison_Cd_Table.values.test.csv").generic_string(),
                                 .dimensions = {"Cd"}});
 
     seahowl::hydro::MacCamyFuchsTable mytable = seahowl::hydro::MacCamyFuchsTable();

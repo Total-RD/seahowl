@@ -40,9 +40,9 @@ target_compile_options(
 target_link_libraries(test_components
     PRIVATE
 	seahowl_core
-	GTest::gtest GTest::gtest_main GTest::gmock_main GTest::gmock Threads::Threads
+	GTest::gtest GTest::gtest_main GTest::gmock_main GTest::gmock Threads::Threads spdlog::spdlog
 )
-
+ 
 add_test(
 	NAME test_components
 	COMMAND $<TARGET_FILE:test_components> ${SEAHOWL_DATADIR}
