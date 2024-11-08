@@ -25,8 +25,8 @@ class Test_rotor : public Fixture_components {
 TEST_F(Test_rotor, mass) {
     // Setup TestFwDataSet
     TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = ref_dir / "test_rotor_mass.values.csv",
-                                .test_filepath = test_dir / "test_rotor_mass.values.test.csv",
+                                .reference_filepath = (ref_dir / "test_rotor_mass.values.csv").generic_string(),
+                                .test_filepath = (test_dir / "test_rotor_mass.values.test.csv").generic_string(),
                                 .dimensions = {"values"}});
 
     // system
