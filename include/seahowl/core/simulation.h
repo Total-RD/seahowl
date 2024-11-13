@@ -4,6 +4,7 @@
 #include "seahowl/core/system.h"
 #include "seahowl/aero/system_aero.h"
 #include "seahowl/elasto/system_elasto.h"
+#include <seahowl/io/config_manager.hpp>
 
 #include <memory>
 #include <string>
@@ -21,12 +22,14 @@ class Simulation {
     bool is_initialized = false;
 
     Simulation();
-
+  
     void populate_from_file(const std::string& filepath);
+    void populate_from_file();
     void initialize_from_file(const std::string& filepath);
     void initialize();
     void step();
     void run_all();
+    app::ConfigManager& getConfigManager();
 
   private:
     std::unique_ptr<seahowl::elasto::SystemElasto> system_elasto;
@@ -34,6 +37,7 @@ class Simulation {
     int nstep = 0;
     double t_output_next = 0.0;
     std::string main_filepath;
+    app::ConfigManager config;
 };
 
 }  // namespace core

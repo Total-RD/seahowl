@@ -34,6 +34,7 @@ class FluidSoilModel;
 #include <vector>
 #include <string>
 #include <memory>
+#include <seahowl/io/config_manager.hpp>
 
 /**
  * @brief Returns blade elasto reference points given a json file.
@@ -181,6 +182,22 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
  * @param[out] system_core System to populate.
  */
 void populate_system_from_json(const std::string& filepath_main, seahowl::core::System& system_core);
+
+/**
+ * @brief Populates System instance form config manager.
+ * @param[in] config Config manager.
+ * @param[out] system_core System to populate.
+ */
+void populate_system_from_config(const app::ConfigManager & config, seahowl::core::System& system_core);
+
+/**
+ * @brief Populates System instance given a json file.
+ *
+ * @param[in] filepath Path of the json file describing the system.
+ * @param[out] system_core System to populate.
+ * @param[out] output_folder Output folder.
+ */
+void populate_system(const std::string& filepath,seahowl::core::System& system_core,std::string& output_folder);
 
 /**
  * @brief Initializes (statics, presimulation, etc) System instance given a json file.

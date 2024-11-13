@@ -20,43 +20,59 @@ using namespace seahowl::core;
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
-Simulation::Simulation() {
+Simulation::Simulation()   
+    : config({
+        .envVarPrefix = "MYAPP_",
+        .jsonFilePath = "",
+        .variableSpecs = {"", {
+            {"numerics", {
+                {"dt"    , {} ,"Set the time step for the simulation", "double","0", true, true, true}, 
+                {"t_end" , {} ,"Set the duration of the simulation", "double","0", true, true, true},
+            },""},
+            {"outputs", {
+                {"dt"      , {} , "Set the time step for generating outputs", "double","0", true, true, true},
+                {"folder"  , {} , "Set the path of the folder for outputs", "string", "./output", true, true, true},
+                {"VTK"     , {} , "Generate VTK outputs", "bool"  ,"true" , true, true, true},
+                {"log_level", {} , "Set the log level (critical|error|warning|info|debug|trace)", "string", "default", true, true, true},
+                {"gui"    , {} , "Display GUI (in situ visualization)", "bool", "true", true, true, true},
+            }, ""},
+            {"environment", {
+                {"file"  , {} , "Set the environmental conditions file", "string", "", true, true, true},
+            }, ""},
+        }},
+    }) {
     system_elasto = std::make_unique<seahowl::elasto::SystemElastoChrono>();
     system_aero = std::make_unique<seahowl::aero::SystemAero>();
     system_core = std::make_unique<System>(*system_elasto, *system_aero);
-    outputs = std::make_unique<seahowl::io::OutputManager>(*system_core);
+    outputs = std::make_unique<seahowl::io::OutputManager>(*system_core);   
 }
 
 void Simulation::populate_from_file(const std::string& filepath) {
+     config.setJsonFilePath(filepath);
+     config.compute();
+     populate_from_file();
+}
+
+void Simulation::populate_from_file() {
     spdlog::stopwatch sw_setup;
-
-    // get main file info
-    std::ifstream json_file(filepath);
-    json json_obj;
-    json_file >> json_obj;
-    json_file.close();
-
-    // NUMERICS options
-    auto num_json = json_obj.at("numerics");
+    auto filepath=  config.getJsonFilePath();
+    
     // timestepping
-    dt = num_json.at("dt").get<double>();
-    duration = num_json.at("t_end").get<double>();
+    dt = config.getDouble("numerics.dt");
+    duration = config.getDouble("numerics.t_end");
+
     // outputs
-    auto outputs_json = json_obj.at("outputs");
     if (!seahowl::LOG_LEVEL_SET) {
         // logging
-        auto log_level = outputs_json.at("log_level").get<std::string>();
+        auto log_level = config.getString("outputs.log_level");
         seahowl::set_log_level_global(log_level);
     }
+
     // output manager
-    outputs->dt_output = outputs_json.at("dt").get<double>();
-    std::string output_folder = "./output";
-    if (outputs_json.contains("folder")) {
-        output_folder = outputs_json.at("folder").get<std::string>();
-    }
-    outputs->set_output_folder(output_folder);
-    outputs->has_vtk = outputs_json.at("VTK").get<bool>();
-    outputs->has_gui = outputs_json.at("gui").get<bool>();
+    outputs->dt_output =  config.getDouble("outputs.dt");
+    outputs->set_output_folder(config.getString("outputs.folder"));
+    outputs->has_vtk = config.getBool("outputs.VTK");
+    outputs->has_gui = config.getBool("outputs.gui");
 
     spdlog::info("");
     spdlog::info("-------------------------------------------------");
@@ -64,7 +80,7 @@ void Simulation::populate_from_file(const std::string& filepath) {
     spdlog::info("-------------------------------------------------");
     spdlog::info("");
 
-    populate_system_from_json(filepath, *system_core);
+    populate_system_from_config(config, *system_core);
 
     spdlog::debug("Populated system in {:.3}s.", sw_setup);
 }
@@ -146,4 +162,8 @@ void Simulation::run_all() {
     }
     spdlog::info("Finished simulation (runtime: {:.3}s).", sw_sim);
     spdlog::info("-------------------------------------------------");
+}
+
+app::ConfigManager& Simulation::getConfigManager() {
+    return config;
 }

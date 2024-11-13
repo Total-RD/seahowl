@@ -1069,7 +1069,6 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
 
 void populate_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
     auto DATADIR = path(filepath).parent_path();
-
     auto json_obj = get_json_from_file(filepath);
 
     // outputs
@@ -1082,6 +1081,28 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
     // environmental info
     auto filepath_environment = (DATADIR / json_obj.at("environment").at("file").get<std::string>()).generic_string();
     populate_environmental_conditions_from_json(filepath_environment, system_core);
+
+    populate_system(filepath, system_core, output_folder);
+}
+
+void populate_system_from_config(const app::ConfigManager & config, seahowl::core::System& system_core) {
+
+    auto DATADIR = path(config.getJsonFilePath()).parent_path();
+
+    // environmental info
+    auto filepath_environment = (DATADIR / config.getString("environment.file"));
+    populate_environmental_conditions_from_json(filepath_environment, system_core);
+    std::string output_folder = config.getString("outputs.folder");
+    populate_system(config.getJsonFilePath(), system_core, output_folder);
+    
+}
+
+void populate_system(const std::string& filepath,
+                     seahowl::core::System& system_core,
+                     std::string& output_folder) {
+    
+    auto DATADIR = path(filepath).parent_path();
+    auto json_obj = get_json_from_file(filepath);
 
     // turbines
     auto turbines_json = json_obj.at("turbines");
