@@ -9,10 +9,7 @@
 #include <map>
 #include <iostream>
 
-
-#include <seahowl/io/config_manager.hpp>
-
-
+#include <seahowl/io/config_manager.h>
 
 namespace fs = std::filesystem;
 
@@ -21,7 +18,7 @@ void run_simulation(int argc, char* argv[]) {
     spdlog::info("Running SEAHOWL driver.");
     // std::map to store the options
     std::map<std::string, char*> options;
-     
+
     // path of main input file
     auto filepath_main = fs::path();
 
@@ -30,11 +27,11 @@ void run_simulation(int argc, char* argv[]) {
     }
 
     auto simulation = seahowl::core::Simulation();
-    app::ConfigManager& config= simulation.getConfigManager();
+    app::ConfigManager& config = simulation.getConfigManager();
     config.setJsonFilePath(filepath_main);
 
     // Init
-    //config.printSpec();
+    // config.printSpec();
     config.compute(argc, argv);
     config.printCompute();
 
@@ -42,9 +39,9 @@ void run_simulation(int argc, char* argv[]) {
         throw std::runtime_error("SEAHOWL driver: pass main input file as first argument (or type --help).");
     }
 
-    simulation.populate_from_file();
+    simulation.populate_from_config();
 
-    simulation.initialize_from_file(filepath_main.generic_string());
+    simulation.initialize_from_config();
 
     simulation.run_all();
 }

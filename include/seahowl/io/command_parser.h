@@ -2,17 +2,15 @@
 
 #include <map>
 #include <string>
-#include <seahowl/io/config_manager.hpp>
-
+#include <seahowl/io/config_manager.h>
 
 class CommandLineParser {
-public:
-
+  public:
     /**
      * @brief Print the helper message.
      * @param cmdOptions Map of command options.
      */
-    static void printHelper( const std::map<std::string, app::SpecComputed>& cmdOptions);
+    static void printHelper(const std::map<std::string, app::SpecComputed>& cmdOptions);
 
     /**
      * @brief Parse the command line arguments.
@@ -20,10 +18,11 @@ public:
      * @param argv Array of arguments.
      * @param cmdOptions Map of command options.
      */
-    static std::map<std::string, std::string> parseArgs(int argc, char* argv[], const std::map<std::string, app::SpecComputed>& cmdOptions);
+    static std::map<std::string, std::string> parseArgs(int argc,
+                                                        char* argv[],
+                                                        const std::map<std::string, app::SpecComputed>& cmdOptions);
 
-private:
-
+  private:
     /**
      * @brief Check if the value is of the correct type.
      * @param value Value to check.
@@ -31,4 +30,3 @@ private:
      */
     static bool isValidType(const std::string& value, const std::string& type);
 };
-

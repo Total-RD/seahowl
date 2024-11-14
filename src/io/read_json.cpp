@@ -1085,8 +1085,7 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
     populate_system(filepath, system_core, output_folder);
 }
 
-void populate_system_from_config(const app::ConfigManager & config, seahowl::core::System& system_core) {
-
+void populate_system_from_config(const app::ConfigManager& config, seahowl::core::System& system_core) {
     auto DATADIR = path(config.getJsonFilePath()).parent_path();
 
     // environmental info
@@ -1094,13 +1093,9 @@ void populate_system_from_config(const app::ConfigManager & config, seahowl::cor
     populate_environmental_conditions_from_json(filepath_environment, system_core);
     std::string output_folder = config.getString("outputs.folder");
     populate_system(config.getJsonFilePath(), system_core, output_folder);
-    
 }
 
-void populate_system(const std::string& filepath,
-                     seahowl::core::System& system_core,
-                     std::string& output_folder) {
-    
+void populate_system(const std::string& filepath, seahowl::core::System& system_core, std::string& output_folder) {
     auto DATADIR = path(filepath).parent_path();
     auto json_obj = get_json_from_file(filepath);
 
@@ -1138,20 +1133,11 @@ void populate_system(const std::string& filepath,
     }
 }
 
-void initialize_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
+void initialize_system(const std::string& filepath, double dt, seahowl::core::System& system_core) {
     auto json_obj = get_json_from_file(filepath);
-
-    // assemble system if it was not already
-    if (!system_core.elasto.is_assembled) {
-        system_core.elasto.assemble();
-    }
-
-    // NUMERICS options
     auto num_json = json_obj.at("numerics");
     // intialization
     auto statics_json = num_json.at("statics");
-    // timestepping
-    double dt = num_json.at("dt").get<double>();
 
     system_core.initialize(system_core.get_time(), dt);
 
@@ -1183,4 +1169,30 @@ void initialize_system_from_json(const std::string& filepath, seahowl::core::Sys
     } else {
         spdlog::debug("No presim defined in json.");
     }
+}
+
+void initialize_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
+    auto json_obj = get_json_from_file(filepath);
+
+    // assemble system if it was not already
+    if (!system_core.elasto.is_assembled) {
+        system_core.elasto.assemble();
+    }
+
+    // NUMERICS options
+    auto num_json = json_obj.at("numerics");
+
+    // timestepping
+    double dt = num_json.at("dt").get<double>();
+
+    initialize_system(filepath, dt, system_core);
+}
+
+void initialize_system_from_config(const app::ConfigManager& config, seahowl::core::System& system_core) {
+    // assemble system if it was not already
+    if (!system_core.elasto.is_assembled) {
+        system_core.elasto.assemble();
+    }
+
+    initialize_system(config.getJsonFilePath(), config.getDouble("numerics.dt"), system_core);
 }

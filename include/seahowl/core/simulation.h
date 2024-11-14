@@ -4,7 +4,7 @@
 #include "seahowl/core/system.h"
 #include "seahowl/aero/system_aero.h"
 #include "seahowl/elasto/system_elasto.h"
-#include <seahowl/io/config_manager.hpp>
+#include <seahowl/io/config_manager.h>
 
 #include <memory>
 #include <string>
@@ -22,10 +22,11 @@ class Simulation {
     bool is_initialized = false;
 
     Simulation();
-  
+
     void populate_from_file(const std::string& filepath);
-    void populate_from_file();
+    void populate_from_config();
     void initialize_from_file(const std::string& filepath);
+    void initialize_from_config();
     void initialize();
     void step();
     void run_all();

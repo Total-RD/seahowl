@@ -1,6 +1,6 @@
-#include "seahowl/io/config_manager.hpp"
+#include "seahowl/io/config_manager.h"
 #include "seahowl/io/utils.hpp"
-#include "seahowl/io/command_parser.hpp"
+#include "seahowl/io/command_parser.h"
 
 #include <vector>
 #include <cctype>
@@ -10,7 +10,7 @@
 namespace app {
 
 class ConfigManagerImpl {
-public:
+  public:
     ConfigManagerOptions options_;
     std::map<std::string, SpecComputed> varspecs_;
     std::map<std::string, ValueComputed> vals_;
@@ -22,18 +22,18 @@ public:
 
     void linearize(const ConfigManagerVariableSpec& var, std::string prefix) {
         if (prefix.empty()) {
-            prefix = var.name;//utils::toLower(var.name);
+            prefix = var.name;  // utils::toLower(var.name);
         } else if (prefix == "_") {
             prefix = "";
         } else {
-            prefix += "." + var.name;//utils::toLower(var.name);
+            prefix += "." + var.name;  // utils::toLower(var.name);
         }
         if (var.children.empty()) {
             varspecs_[prefix] = {
                 var,
-                var.description, 
-                (var.hasEnvVar ? getVarEnvName(prefix) : ""), 
-                (var.hasConfigFileVar ? getVarConfigFileName(prefix) : ""), 
+                var.description,
+                (var.hasEnvVar ? getVarEnvName(prefix) : ""),
+                (var.hasConfigFileVar ? getVarConfigFileName(prefix) : ""),
                 (var.hasOptionVar ? getVarCommandOptionName(prefix) : ""),
             };
         } else {
@@ -70,7 +70,7 @@ public:
             vals_[key].value = value;
         }
     }
-    std::string  getValueToString(const std::string& key) {
+    std::string getValueToString(const std::string& key) {
         std::string type = varspecs_[key].spec.type;
         if (type == "int") {
             return std::to_string(vals_[key].intValue);
@@ -87,13 +87,13 @@ public:
         for (const auto& [key, var] : varspecs_) {
             // vals_[key] = {"default", var.spec.defaultValue};
             setValueFromString(key, "default", var.spec.defaultValue);
-        }        
+        }
     }
-    
+
     void loadEnvironmentVariables() {
         for (const auto& [key, var] : varspecs_) {
             if (var.spec.hasEnvVar && !var.envVar.empty()) {
-                const char* value = std::getenv(var.envVar.c_str());                
+                const char* value = std::getenv(var.envVar.c_str());
                 if (value != nullptr) {
                     setValueFromString(key, "env_var", value);
                 }
@@ -102,9 +102,8 @@ public:
     }
 
     void loadConfigFile() {
-        
         nlohmann::json jsonData;
-        
+
         // read file
         if (!options_.jsonFilePath.empty()) {
             // std::cout << "read file" << std::endl;
@@ -116,7 +115,7 @@ public:
             }
             ifile >> jsonData;
             ifile.close();
-        // read JSON data string
+            // read JSON data string
         } else if (!options_.jsonData.empty()) {
             jsonData = options_.jsonData;
         }
@@ -140,12 +139,12 @@ public:
                         }
                     } catch (nlohmann::json::out_of_range& e) {
                         std::cout << "ConfigManager : " << e.what() << std::endl;
-                    }                
+                    }
                 }
             }
         }
     }
-    
+
     void loadCommandOptions(int argc, char** argv) {
         auto cmdOptions = getKeysAndTypes();
         auto options = CommandLineParser::parseArgs(argc, argv, cmdOptions);
@@ -153,7 +152,7 @@ public:
             if (var.spec.hasOptionVar && !var.commandOptionVar.empty()) {
                 auto it = options.find(var.commandOptionVar);
                 if (it != options.end()) {
-                    setValueFromString(key, "cmd_option", (var.spec.type=="bool") ? "true" : it->second);
+                    setValueFromString(key, "cmd_option", it->second);
                 }
             }
         }
@@ -163,19 +162,17 @@ public:
         std::map<std::string, SpecComputed> keysAndTypes;
         for (const auto& [key, var] : varspecs_) {
             if (!var.commandOptionVar.empty()) {
-                keysAndTypes[var.commandOptionVar] = var; 
+                keysAndTypes[var.commandOptionVar] = var;
             }
         }
-        
+
         return keysAndTypes;
     }
-    
 };
 
 ConfigManager::ConfigManager() : ConfigManager(ConfigManagerOptions{}) {}
 ConfigManager::ConfigManager(const ConfigManagerOptions& options)
-    : pimpl_(std::make_unique<ConfigManagerImpl>(options))
-{}
+    : pimpl_(std::make_unique<ConfigManagerImpl>(options)) {}
 ConfigManager::~ConfigManager() = default;
 
 void ConfigManager::compute(int argc, char** argv) {
@@ -208,28 +205,21 @@ bool ConfigManager::getBool(const std::string& key) const {
     return pimpl_->vals_[key].boolValue;
 }
 
-
 bool ConfigManager::has(const std::string& key) const {
     return pimpl_->vals_.find(key) != pimpl_->vals_.end();
 }
 
 void ConfigManager::printSpec() const {
-
     std::cout << std::endl;
     std::cout << "ConfigManager : Configuration Specifications" << std::endl;
     std::vector<std::vector<std::string>> table = {};
     for (const auto& [key, var] : pimpl_->varspecs_) {
-        table.push_back({
-            key,
-            var.description,
-            var.spec.type,
-            var.spec.defaultValue,
-            var.envVar,
-            var.configFileVar,
-            var.commandOptionVar
-        });
+        table.push_back({key, var.description, var.spec.type, var.spec.defaultValue, var.envVar, var.configFileVar,
+                         var.commandOptionVar});
     }
-    utils::printTable({"Key", "Description", "Type", "0 - Default", "1 - Env Var", "2 - Config File Var", "3 - Cmd Option"}, table, 25);
+    utils::printTable(
+        {"Key", "Description", "Type", "0 - Default", "1 - Env Var", "2 - Config File Var", "3 - Cmd Option"}, table,
+        25);
 }
 
 void ConfigManager::printCompute() const {
@@ -252,18 +242,10 @@ void ConfigManager::setJsonFilePath(const std::string& newPath) {
     pimpl_->options_.jsonFilePath = newPath;
 }
 
-
 ConfigManagerPath ConfigManager::path(std::string prefix) {
     return ConfigManagerPath(*this, prefix);
 }
 
-
 // ConfigManagerPath
 
-
-
-
-
-
-
-} // namespace app
+}  // namespace app

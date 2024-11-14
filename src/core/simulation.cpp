@@ -20,43 +20,65 @@ using namespace seahowl::core;
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
-Simulation::Simulation()   
+Simulation::Simulation()
     : config({
-        .envVarPrefix = "MYAPP_",
-        .jsonFilePath = "",
-        .variableSpecs = {"", {
-            {"numerics", {
-                {"dt"    , {} ,"Set the time step for the simulation", "double","0", true, true, true}, 
-                {"t_end" , {} ,"Set the duration of the simulation", "double","0", true, true, true},
-            },""},
-            {"outputs", {
-                {"dt"      , {} , "Set the time step for generating outputs", "double","0", true, true, true},
-                {"folder"  , {} , "Set the path of the folder for outputs", "string", "./output", true, true, true},
-                {"VTK"     , {} , "Generate VTK outputs", "bool"  ,"true" , true, true, true},
-                {"log_level", {} , "Set the log level (critical|error|warning|info|debug|trace)", "string", "default", true, true, true},
-                {"gui"    , {} , "Display GUI (in situ visualization)", "bool", "true", true, true, true},
-            }, ""},
-            {"environment", {
-                {"file"  , {} , "Set the environmental conditions file", "string", "", true, true, true},
-            }, ""},
-        }},
-    }) {
+          .envVarPrefix = "MYAPP_",
+          .jsonFilePath = "",
+          .variableSpecs =
+              {"",
+               {
+                   {"numerics",
+                    {
+                        {"dt", {}, "Set the time step for the simulation", "double", "0", true, true, true},
+                        {"t_end", {}, "Set the duration of the simulation", "double", "0", true, true, true},
+                    },
+                    ""},
+                   {"outputs",
+                    {
+                        {"dt", {}, "Set the time step for generating outputs", "double", "0", true, true, true},
+                        {"folder",
+                         {},
+                         "Set the path of the folder for outputs",
+                         "string",
+                         "./output",
+                         true,
+                         true,
+                         true},
+                        {"VTK", {}, "Generate VTK outputs", "bool", "true", true, true, true},
+                        {"log_level",
+                         {},
+                         "Set the log level (critical|error|warning|info|debug|trace)",
+                         "string",
+                         "default",
+                         true,
+                         true,
+                         true},
+                        {"gui", {}, "Display GUI (in situ visualization)", "bool", "true", true, true, true},
+                    },
+                    ""},
+                   {"environment",
+                    {
+                        {"file", {}, "Set the environmental conditions file", "string", "", true, true, true},
+                    },
+                    ""},
+               }},
+      }) {
     system_elasto = std::make_unique<seahowl::elasto::SystemElastoChrono>();
     system_aero = std::make_unique<seahowl::aero::SystemAero>();
     system_core = std::make_unique<System>(*system_elasto, *system_aero);
-    outputs = std::make_unique<seahowl::io::OutputManager>(*system_core);   
+    outputs = std::make_unique<seahowl::io::OutputManager>(*system_core);
 }
 
 void Simulation::populate_from_file(const std::string& filepath) {
-     config.setJsonFilePath(filepath);
-     config.compute();
-     populate_from_file();
+    config.setJsonFilePath(filepath);
+    config.compute();
+    populate_from_config();
 }
 
-void Simulation::populate_from_file() {
+void Simulation::populate_from_config() {
     spdlog::stopwatch sw_setup;
-    auto filepath=  config.getJsonFilePath();
-    
+    auto filepath = config.getJsonFilePath();
+
     // timestepping
     dt = config.getDouble("numerics.dt");
     duration = config.getDouble("numerics.t_end");
@@ -69,7 +91,7 @@ void Simulation::populate_from_file() {
     }
 
     // output manager
-    outputs->dt_output =  config.getDouble("outputs.dt");
+    outputs->dt_output = config.getDouble("outputs.dt");
     outputs->set_output_folder(config.getString("outputs.folder"));
     outputs->has_vtk = config.getBool("outputs.VTK");
     outputs->has_gui = config.getBool("outputs.gui");
@@ -116,6 +138,26 @@ void Simulation::initialize_from_file(const std::string& filepath) {
 
     // initialize system
     initialize_system_from_json(filepath, *system_core);
+
+    // initialize outputs (after initializing everything in system)
+    outputs->initialize();
+
+    t_output_next = outputs->dt_output;
+    is_initialized = true;
+    spdlog::info("Simulation initialized in {:.3}s.", sw_setup);
+};
+
+void Simulation::initialize_from_config() {
+    if (is_initialized) {
+        throw std::runtime_error("Simulation was already initialized.");
+    }
+    spdlog::stopwatch sw_setup;
+
+    // pre-initialize outputs (sets output-related variable needed in system before initializing)
+    outputs->preinitialize();
+
+    // initialize system
+    initialize_system_from_config(config, *system_core);
 
     // initialize outputs (after initializing everything in system)
     outputs->initialize();

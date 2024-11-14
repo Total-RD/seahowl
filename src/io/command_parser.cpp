@@ -1,10 +1,9 @@
-#include "seahowl/io/command_parser.hpp"
+#include "seahowl/io/command_parser.h"
 #include <iostream>
 #include <string_view>
 #include <stdexcept>
 
-void CommandLineParser::printHelper( const std::map<std::string, app::SpecComputed>& cmdOptions) {
-
+void CommandLineParser::printHelper(const std::map<std::string, app::SpecComputed>& cmdOptions) {
     std::cout << "Usage: file_input [options]\n";
     std::cout << "Options:\n";
     std::cout << "  -h        Display this help message\n";
@@ -14,7 +13,8 @@ void CommandLineParser::printHelper( const std::map<std::string, app::SpecComput
     }
 }
 
-std::map<std::string, std::string> CommandLineParser::parseArgs(int argc, char* argv[], const std::map<std::string, app::SpecComputed>& cmdOptions) {
+std::map<std::string, std::string>
+CommandLineParser::parseArgs(int argc, char* argv[], const std::map<std::string, app::SpecComputed>& cmdOptions) {
     std::map<std::string, std::string> options;
 
     for (int i = 1; i < argc; i++) {
@@ -41,20 +41,21 @@ std::map<std::string, std::string> CommandLineParser::parseArgs(int argc, char* 
             // Check if there is a value in the next argument
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 value = argv[i + 1];
-                i++; // Skip the value in the next iteration
+                i++;  // Skip the value in the next iteration
 
                 // Check if the value matches the expected type
                 if (!isValidType(value, it->second.spec.type)) {
-                    std::cerr << "Error: Invalid value type for option '" << key << "'. Expected type: " << it->second.spec.type << "\n";
+                    std::cerr << "Error: Invalid value type for option '" << key
+                              << "'. Expected type: " << it->second.spec.type << "\n";
                     std::exit(EXIT_FAILURE);
                 }
             } else {
                 std::cerr << "Error: Missing value for option '" << key << "'\n";
-                std::exit(EXIT_FAILURE); 
+                std::exit(EXIT_FAILURE);
             }
 
             options[key] = value;
-        } 
+        }
     }
 
     return options;

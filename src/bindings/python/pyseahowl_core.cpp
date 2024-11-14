@@ -48,7 +48,7 @@ void initialize_pyseahowl_core(py::module& m) {
         .def(py::init<>())
         .def("run_all", &seahowl::core::Simulation::run_all)
         .def("step", &seahowl::core::Simulation::step)
-        .def("populate_from_file", static_cast<void (seahowl::core::Simulation::*)(const std::string&)>(&seahowl::core::Simulation::populate_from_file))
+        .def("populate_from_file", &seahowl::core::Simulation::populate_from_file)
         .def("initialize", &seahowl::core::Simulation::initialize)
         .def("initialize_from_file", &seahowl::core::Simulation::initialize_from_file)
         .def_readwrite("dt", &seahowl::core::Simulation::dt)

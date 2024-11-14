@@ -18,7 +18,7 @@ struct ConfigManagerVariableSpec {
     std::vector<ConfigManagerVariableSpec> children = {};
     std::string description = "";
     std::string type = "";
-    std::string defaultValue  = "";
+    std::string defaultValue = "";
     bool hasEnvVar = false;
     bool hasConfigFileVar = false;
     bool hasOptionVar = false;
@@ -55,22 +55,21 @@ struct ValueComputed {
     int intValue;
     double doubleValue;
     bool boolValue;
-   
 };
 
-class ConfigManagerPath; // Forward declaration 
+class ConfigManagerPath;  // Forward declaration
 
-class ConfigManagerImpl; // Forward declaration PIMPL
+class ConfigManagerImpl;  // Forward declaration PIMPL
 
 /**
  * @brief Configuration manager class.
  */
 class ConfigManager {
-public:
+  public:
     ConfigManager();
     explicit ConfigManager(const ConfigManagerOptions& options);
     ~ConfigManager();
-    
+
     /**
      * @brief Compute the configuration manager.
      * @param argc Number of arguments.
@@ -83,7 +82,7 @@ public:
     void compute();
     /**
      * @brief Print the specification of the configuration manager.
-     */        
+     */
     void printSpec() const;
     /**
      * @brief Print the computed values of the configuration manager.
@@ -133,27 +132,27 @@ public:
      */
     ConfigManagerPath path(std::string prefix);
 
-private:
-    std::unique_ptr<ConfigManagerImpl> pimpl_; // Pattern PIMPL
+  private:
+    std::unique_ptr<ConfigManagerImpl> pimpl_;  // Pattern PIMPL
 };
-
 
 /**
  * @brief Path class for convenience of accessing nested values.
  */
 class ConfigManagerPath {
-private:
+  private:
     ConfigManager* conf_;
     std::string prefix_;
-public:
-    ConfigManagerPath(ConfigManager& conf, std::string prefix) : conf_(&conf) , prefix_(prefix) {}
 
-    std::string get(const std::string& key)       const { return conf_->get(prefix_ + "." + key); };
+  public:
+    ConfigManagerPath(ConfigManager& conf, std::string prefix) : conf_(&conf), prefix_(prefix) {}
+
+    std::string get(const std::string& key) const { return conf_->get(prefix_ + "." + key); };
     std::string getString(const std::string& key) const { return conf_->getString(prefix_ + "." + key); };
-    int getInt(const std::string& key)            const { return conf_->getInt(prefix_ + "." + key); };
-    double getDouble(const std::string& key)      const { return conf_->getDouble(prefix_ + "." + key); };
-    bool getBool(const std::string& key)          const { return conf_->getBool(prefix_ + "." + key); };
-    bool has(const std::string& key)              const { return conf_->has(prefix_ + "." + key); };
+    int getInt(const std::string& key) const { return conf_->getInt(prefix_ + "." + key); };
+    double getDouble(const std::string& key) const { return conf_->getDouble(prefix_ + "." + key); };
+    bool getBool(const std::string& key) const { return conf_->getBool(prefix_ + "." + key); };
+    bool has(const std::string& key) const { return conf_->has(prefix_ + "." + key); };
 };
 
-}
+}  // namespace app
