@@ -42,7 +42,11 @@
       "elasto": [],
       "aero": [19]
     },
-    "file": "./tower.csv"
+    "file": "./tower.csv",
+    "options":{
+      "use_MacCamyFuchs_correction": false,
+      "use_Cd_correction": false
+    }
   },
   "controller": {
     "type": "DISCON",

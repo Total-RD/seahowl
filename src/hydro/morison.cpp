@@ -149,9 +149,8 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
 
     // drag
     double coeff_drag_normal;
-    if (coefficients.use_Cd_correction) {
-        double appo = myMCFtable.getCd(diameter, myMCFtable.wave_peak_period, velocity_relative_axial.norm());
-        coeff_drag_normal = appo;
+    if (coefficients.use_Cd_correction && fluid_density > 500.0) {
+        coeff_drag_normal = myMCFtable.getCd(diameter, myMCFtable.wave_peak_period, velocity_relative_axial.norm());
     } else {
         coeff_drag_normal = coefficients.drag_normal;
     }
