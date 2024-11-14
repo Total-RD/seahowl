@@ -1,5 +1,5 @@
 #include "seahowl/io/config_manager.h"
-#include "seahowl/io/utils.hpp"
+#include "seahowl/io/utils_config.h"
 #include "seahowl/io/command_parser.h"
 
 #include <vector>
