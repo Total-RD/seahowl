@@ -21,48 +21,36 @@ namespace fs = std::filesystem;
 using json = nlohmann::json;
 
 Simulation::Simulation()
-    : config({
-          .envVarPrefix = "MYAPP_",
-          .jsonFilePath = "",
-          .variableSpecs =
+    : config({"MYAPP_",  // envVarPrefix
+              "",        // iniFilePath
+              "",        // jsonFilePath
+              {},        // jsonData
+                         // variableSpecs
               {"",
-               {
-                   {"numerics",
-                    {
-                        {"dt", {}, "Set the time step for the simulation", "double", "0", true, true, true},
-                        {"t_end", {}, "Set the duration of the simulation", "double", "0", true, true, true},
-                    },
-                    ""},
-                   {"outputs",
-                    {
-                        {"dt", {}, "Set the time step for generating outputs", "double", "0", true, true, true},
-                        {"folder",
-                         {},
-                         "Set the path of the folder for outputs",
-                         "string",
-                         "./output",
-                         true,
-                         true,
-                         true},
-                        {"VTK", {}, "Generate VTK outputs", "bool", "true", true, true, true},
-                        {"log_level",
-                         {},
-                         "Set the log level (critical|error|warning|info|debug|trace)",
-                         "string",
-                         "default",
-                         true,
-                         true,
-                         true},
-                        {"gui", {}, "Display GUI (in situ visualization)", "bool", "true", true, true, true},
-                    },
-                    ""},
-                   {"environment",
-                    {
-                        {"file", {}, "Set the environmental conditions file", "string", "", true, true, true},
-                    },
-                    ""},
-               }},
-      }) {
+               {{"numerics",
+                 {
+                     {"dt", {}, "Set the time step for the simulation", "double", "0", true, true, true},
+                     {"t_end", {}, "Set the duration of the simulation", "double", "0", true, true, true},
+                 }},
+                {"outputs",
+                 {
+                     {"dt", {}, "Set the time step for generating outputs", "double", "0", true, true, true},
+                     {"folder", {}, "Set the path of the folder for outputs", "string", "./output", true, true, true},
+                     {"VTK", {}, "Generate VTK outputs", "bool", "true", true, true, true},
+                     {"log_level",
+                      {},
+                      "Set the log level (critical|error|warning|info|debug|trace)",
+                      "string",
+                      "default",
+                      true,
+                      true,
+                      true},
+                     {"gui", {}, "Display GUI (in situ visualization)", "bool", "true", true, true, true},
+                 }},
+                {"environment",
+                 {
+                     {"file", {}, "Set the environmental conditions file", "string", "", true, true, true},
+                 }}}}}) {
     system_elasto = std::make_unique<seahowl::elasto::SystemElastoChrono>();
     system_aero = std::make_unique<seahowl::aero::SystemAero>();
     system_core = std::make_unique<System>(*system_elasto, *system_aero);

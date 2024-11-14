@@ -4,8 +4,6 @@
 #include <filesystem>  // C++17
 #include <spdlog/spdlog.h>
 #include <spdlog/pattern_formatter.h>
-#include <getopt.h>
-#include <unistd.h>
 #include <map>
 #include <iostream>
 
@@ -28,7 +26,7 @@ void run_simulation(int argc, char* argv[]) {
 
     auto simulation = seahowl::core::Simulation();
     app::ConfigManager& config = simulation.getConfigManager();
-    config.setJsonFilePath(filepath_main);
+    config.setJsonFilePath(filepath_main.generic_string());
 
     // Init
     // config.printSpec();
