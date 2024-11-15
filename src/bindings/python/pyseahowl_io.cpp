@@ -35,7 +35,6 @@ void initialize_pyseahowl_io(py::module& m) {
     m_io.def("populate_environmental_conditions_from_json", &populate_environmental_conditions_from_json);
     m_io.def("get_environmental_model_from_json", &get_environmental_model_from_json);
     m_io.def("populate_system_from_json", &populate_system_from_json);
-    m_io.def("initialize_system_from_json", &initialize_system_from_json);
 
     // io/write_csv.h
     m_io.def("write_turbine_info_to_csv", &write_turbine_info_to_csv);

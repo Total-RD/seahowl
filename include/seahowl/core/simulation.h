@@ -25,7 +25,6 @@ class Simulation {
 
     void populate_from_file(const std::string& filepath);
     void populate_from_config();
-    void initialize_from_file(const std::string& filepath);
     void initialize_from_config();
     void initialize();
     void step();

@@ -1,5 +1,6 @@
 #include <seahowl/core/simulation.h>
 #include <seahowl/io/read_json.h>
+#include <seahowl/io/config_manager.h>
 
 #include <filesystem>  // C++17
 #include <spdlog/spdlog.h>
@@ -7,7 +8,6 @@
 #include <map>
 #include <iostream>
 
-#include <seahowl/io/config_manager.h>
 
 namespace fs = std::filesystem;
 

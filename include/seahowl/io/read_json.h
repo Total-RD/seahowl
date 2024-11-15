@@ -198,21 +198,3 @@ void populate_system_from_config(const app::ConfigManager& config, seahowl::core
  * @param[out] output_folder Output folder.
  */
 void populate_system(const std::string& filepath, seahowl::core::System& system_core, std::string& output_folder);
-
-/**
- * @brief Initializes (statics, presimulation, etc) System instance given a json file.
- * The system needs to be prepopulated before initialization.
- *
- * @param[in] filepath Path of the json file describing the system.
- * @param[out] system_core System to populate.
- */
-void initialize_system_from_json(const std::string& filepath, seahowl::core::System& system_core);
-
-/**
- * @brief Initializes (statics, presimulation, etc) System instance given a config manager.
- * The system needs to be prepopulated before initialization.
- *
- * @param[in] config Config manager.
- * @param[out] system_core System to populate.
- */
-void initialize_system_from_config(const app::ConfigManager& config, seahowl::core::System& system_core);

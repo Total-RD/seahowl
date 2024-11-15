@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <spdlog/spdlog.h>
+#include <spdlog/stopwatch.h>
 #include <map>
 #include <iostream>
 
@@ -185,6 +186,7 @@ void System::run_presimulation(double duration, double dt, bool fix_towers, bool
     }
     int nsteps = int(duration / dt);
     spdlog::info("Presimulation of simulation for {} steps with dt={} and presetup as {}.", nsteps, dt, with_presetup);
+    spdlog::stopwatch sw_presimulation;
 
     double time_init = get_time();
 
@@ -229,7 +231,7 @@ void System::run_presimulation(double duration, double dt, bool fix_towers, bool
         }
     }
 
-    spdlog::info("Presimulation finished.");
+    spdlog::info("Presimulation finished{:.3}s.", sw_presimulation);
 }
 
 void System::add(std::shared_ptr<Turbine> turbine) {

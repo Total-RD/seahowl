@@ -21,36 +21,56 @@ namespace fs = std::filesystem;
 using json = nlohmann::json;
 
 Simulation::Simulation()
-    : config({"MYAPP_",  // envVarPrefix
-              "",        // iniFilePath
-              "",        // jsonFilePath
-              {},        // jsonData
-                         // variableSpecs
-              {"",
-               {{"numerics",
-                 {
-                     {"dt", {}, "Set the time step for the simulation", "double", "0", true, true, true},
-                     {"t_end", {}, "Set the duration of the simulation", "double", "0", true, true, true},
-                 }},
-                {"outputs",
-                 {
-                     {"dt", {}, "Set the time step for generating outputs", "double", "0", true, true, true},
-                     {"folder", {}, "Set the path of the folder for outputs", "string", "./output", true, true, true},
-                     {"VTK", {}, "Generate VTK outputs", "bool", "true", true, true, true},
-                     {"log_level",
-                      {},
-                      "Set the log level (critical|error|warning|info|debug|trace)",
-                      "string",
-                      "default",
-                      true,
-                      true,
-                      true},
-                     {"gui", {}, "Display GUI (in situ visualization)", "bool", "true", true, true, true},
-                 }},
-                {"environment",
-                 {
-                     {"file", {}, "Set the environmental conditions file", "string", "", true, true, true},
-                 }}}}}) {
+    : config({
+          "SEAHOWL_",  // envVarPrefix
+          "",          // iniFilePath
+          "",          // jsonFilePath
+                       // variableSpecs
+          {"",
+           {
+               {"numerics",
+                {
+                    {"dt", {}, "Set the time step for the simulation", "double", "0", true, true, true},
+                    {"duration", {}, "Set the duration of the simulation", "double", "0", true, true, true},
+                    {"statics",
+                     {
+                         {"linear_step", {}, "Make a linear statics step", "bool", "false", true, true, true},
+                         {"nonlinear_steps", {}, "Make N nonlinear statics step", "int", "0", true, true, true},
+                     },
+                     ""},
+                    {"presimulation",
+                     {
+                         {"dt", {}, "Set the time step for the presimulation", "double", "0", true, true, true},
+                         {"duration", {}, "Set the duration of the presimulation", "double", "0", true, true, true},
+                         {"presetup", {}, "Include presetup during presimulation", "bool", "true", true, true, true},
+                         {"fix_towers", {}, "Include presetup during presimulation", "bool", "true", true, true, true},
+                     },
+                     ""},
+                },
+                ""},
+               {"outputs",
+                {
+                    {"dt", {}, "Set the time step for generating outputs", "double", "0", true, true, true},
+                    {"folder", {}, "Set the path of the folder for outputs", "string", "./output", true, true, true},
+                    {"VTK", {}, "Generate VTK outputs", "bool", "true", true, true, true},
+                    {"log_level",
+                     {},
+                     "Set the log level (critical|error|warning|info|debug|trace)",
+                     "string",
+                     "default",
+                     true,
+                     true,
+                     true},
+                    {"gui", {}, "Display GUI (in situ visualization)", "bool", "true", true, true, true},
+                },
+                ""},
+               {"environment",
+                {
+                    {"file", {}, "Set the environmental conditions file", "path", "", true, true, true},
+                },
+                ""},
+           }},
+      }) {
     system_elasto = std::make_unique<seahowl::elasto::SystemElastoChrono>();
     system_aero = std::make_unique<seahowl::aero::SystemAero>();
     system_core = std::make_unique<System>(*system_elasto, *system_aero);
@@ -69,7 +89,7 @@ void Simulation::populate_from_config() {
 
     // timestepping
     dt = config.getDouble("numerics.dt");
-    duration = config.getDouble("numerics.t_end");
+    duration = config.getDouble("numerics.duration");
 
     // outputs
     if (!seahowl::LOG_LEVEL_SET) {
@@ -115,50 +135,36 @@ void Simulation::initialize() {
     spdlog::info("Simulation initialized in {:.3}s.", sw_setup);
 }
 
-void Simulation::initialize_from_file(const std::string& filepath) {
-    if (is_initialized) {
-        throw std::runtime_error("Simulation was already initialized.");
-    }
-    spdlog::stopwatch sw_setup;
-
-    // pre-initialize outputs (sets output-related variable needed in system before initializing)
-    outputs->preinitialize();
-
-    // initialize system
-    initialize_system_from_json(filepath, *system_core);
-
-    // initialize outputs (after initializing everything in system)
-    outputs->initialize();
-
-    t_output_next = outputs->dt_output;
-    is_initialized = true;
-    spdlog::info("Simulation initialized in {:.3}s.", sw_setup);
-};
-
 void Simulation::initialize_from_config() {
-    if (is_initialized) {
-        throw std::runtime_error("Simulation was already initialized.");
+    initialize();
+
+    // initialization
+    // statics
+    auto linear_step = config.getBool("numerics.statics.linear_step");
+    auto nonlinear_steps = config.getInt("numerics.statics.nonlinear_steps");
+    if (linear_step && nonlinear_steps > 0) {
+        system_core->elasto.do_statics(linear_step, nonlinear_steps);
+        system_core->poststep(system_core->get_time(), dt);  // poststep to update positions aero
     }
-    spdlog::stopwatch sw_setup;
 
-    // pre-initialize outputs (sets output-related variable needed in system before initializing)
-    outputs->preinitialize();
-
-    // initialize system
-    initialize_system_from_config(config, *system_core);
-
-    // initialize outputs (after initializing everything in system)
-    outputs->initialize();
-
-    t_output_next = outputs->dt_output;
-    is_initialized = true;
-    spdlog::info("Simulation initialized in {:.3}s.", sw_setup);
+    // apply presetup
+    auto presimulation_duration = config.getDouble("numerics.presimulation.duration");
+    if (presimulation_duration > 0) {
+        auto presimulation_dt = config.getDouble("numerics.presimulation.dt");
+        auto do_presetup = config.getBool("numerics.presimulation.presetup");
+        auto fix_towers = config.getBool("numerics.presimulation.fix_towers");
+        system_core->run_presimulation(presimulation_duration, presimulation_dt, fix_towers, do_presetup);
+    }
 };
 
 void Simulation::step() {
     if (!is_initialized) {
         initialize();
     }
+    if (dt <= 0.0) {
+        throw std::runtime_error("Cannot make a simulation simulation with dt = " + std::to_string(dt) + ".");
+    }
+
     spdlog::stopwatch sw_step;
     // prestep
     system_core->prestep(system_core->get_time(), dt);
@@ -186,6 +192,11 @@ void Simulation::run_all() {
     spdlog::info("MAIN SIMULATION LOOP");
     spdlog::info("-------------------------------------------------");
     spdlog::info("");
+
+    if (duration <= 0.0) {
+        throw std::runtime_error("Cannot run a simulation with duration = " + std::to_string(duration) + ".");
+    }
+
     spdlog::stopwatch sw_sim;
     while (system_core->get_time() < duration) {
         step();

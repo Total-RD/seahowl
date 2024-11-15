@@ -50,7 +50,7 @@ void initialize_pyseahowl_core(py::module& m) {
         .def("step", &seahowl::core::Simulation::step)
         .def("populate_from_file", &seahowl::core::Simulation::populate_from_file)
         .def("initialize", &seahowl::core::Simulation::initialize)
-        .def("initialize_from_file", &seahowl::core::Simulation::initialize_from_file)
+        .def("initialize_from_config", &seahowl::core::Simulation::initialize_from_config)
         .def_readwrite("dt", &seahowl::core::Simulation::dt)
         .def_readwrite("duration", &seahowl::core::Simulation::duration)
         .def_property_readonly(

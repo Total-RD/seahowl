@@ -1,8 +1,7 @@
 ﻿{
   "numerics": {
     "dt": 0.05,
-    "t_end": 2000.0,
-    "presim_duration": 0.0,
+    "duration": 2000.0,
     "statics": {
       "linear_step": true,
       "nonlinear_steps": 10
