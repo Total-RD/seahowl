@@ -2,6 +2,9 @@
 #include <iostream>
 #include <string_view>
 #include <stdexcept>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 void CommandLineParser::printHelper(const std::map<std::string, app::SpecComputed>& cmdOptions) {
     std::cout << "Usage: file_input [options]\n";
@@ -49,6 +52,9 @@ CommandLineParser::parseArgs(int argc, char* argv[], const std::map<std::string,
                               << "'. Expected type: " << it->second.spec.type << "\n";
                     std::exit(EXIT_FAILURE);
                 }
+                if (it->second.spec.type == "path") {
+                    value = fs::current_path().append(value).string();
+                }
             } else {
                 std::cerr << "Error: Missing value for option '" << key << "'\n";
                 std::exit(EXIT_FAILURE);
@@ -71,7 +77,7 @@ bool CommandLineParser::isValidType(const std::string& value, const std::string&
             if (value != "true" && value != "false") {
                 return false;
             }
-        } else if (type == "string") {
+        } else if (type == "string" || type == "path") {
             // No validation needed for strings
         } else {
             return false;

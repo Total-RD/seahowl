@@ -6,6 +6,9 @@
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace app {
 
@@ -136,6 +139,10 @@ class ConfigManagerImpl {
                             vals_[key].boolValue = value.get<bool>();
                         } else {
                             vals_[key].value = value.get<std::string>();
+                            if (type == "path"){
+                                auto parent_path = fs::path(options_.jsonFilePath).parent_path();
+                                vals_[key].value = parent_path.append(vals_[key].value).string();
+                            }
                         }
                     } catch (nlohmann::json::out_of_range& e) {
                         std::cout << "ConfigManager : " << e.what() << std::endl;
