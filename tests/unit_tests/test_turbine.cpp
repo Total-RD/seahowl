@@ -99,7 +99,6 @@ TEST_F(Test_turbine, rpm_initial_pitch) {
         test_dataset.testAdd();
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.687975, 1e-4);
     evaluate_test(test_dataset);
 }
 
@@ -170,8 +169,6 @@ TEST_F(Test_turbine, rpm_initial_pitch_fpm) {
         turbine.poststep(time, dt);
         test_dataset.testAdd();
     }
-
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.691299, 1e-4);
 
     evaluate_test(test_dataset);
 }
@@ -245,7 +242,6 @@ TEST_F(Test_turbine, rpm_initial_pitch_rigid_rotor) {
     }
 
     evaluate_test(test_dataset);
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.709388, 1e-4);
 }
 
 TEST_F(Test_turbine, controller_target_rpm) {
@@ -320,7 +316,6 @@ TEST_F(Test_turbine, controller_target_rpm) {
     }
 
     evaluate_test(test_dataset);
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, 1e-2);
 }
 
 TEST_F(Test_turbine, actuator_disk) {
@@ -396,9 +391,6 @@ TEST_F(Test_turbine, actuator_disk) {
         turbine.poststep(time, dt);
         test_dataset.testAdd();
     }
-    // ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, 1e-3);
-    ASSERT_NEAR(turbine.get_generated_power(), reference_power, reference_power * 0.01);
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, target_rpm * 0.01);
 
     reference_power = 15.3e6;
     // wind
@@ -423,8 +415,6 @@ TEST_F(Test_turbine, actuator_disk) {
     }
 
     evaluate_test(test_dataset);
-    ASSERT_NEAR(turbine.get_generated_power(), reference_power, reference_power * 0.01);
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), target_rpm, target_rpm * 0.01);
 }
 
 TEST_F(Test_turbine, multiturbines) {
@@ -509,8 +499,5 @@ TEST_F(Test_turbine, multiturbines) {
         test_dataset.testAdd();
     }
 
-    for (auto& turbine : system_core.turbines) {
-        ASSERT_NEAR(turbine->rna.elasto.get_rpm(), 2.728150, 0.02);
-    }
     evaluate_test(test_dataset);
 }

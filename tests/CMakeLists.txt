@@ -5,11 +5,9 @@ find_package(Threads REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 
 set(TEST_FILES
-	unit_tests/test_aerodyn.cpp
 	unit_tests/test_bemt.cpp
 	unit_tests/test_blade.cpp
 	unit_tests/test_components.cpp
-	unit_tests/test_inflowwind.cpp
 	unit_tests/test_rotor.cpp
 	unit_tests/test_tower.cpp
 	unit_tests/test_turbine.cpp
@@ -17,6 +15,14 @@ set(TEST_FILES
 	unit_tests/tools/testfw_dataset.cpp
 	unit_tests/tools/csv.cpp
 )
+
+if(SEAHOWL_ENABLE_AERODYN)
+    list(APPEND TEST_FILES unit_tests/test_aerodyn.cpp)
+endif(SEAHOWL_ENABLE_AERODYN)
+
+if(SEAHOWL_ENABLE_INFLOWWIND)
+    list(APPEND TEST_FILES unit_tests/test_inflowwind.cpp)
+endif(SEAHOWL_ENABLE_INFLOWWIND)
 
 add_executable(test_components ${TEST_FILES} )
 
@@ -42,7 +48,7 @@ target_link_libraries(test_components
 	seahowl_core
 	GTest::gtest GTest::gtest_main GTest::gmock_main GTest::gmock Threads::Threads spdlog::spdlog
 )
- 
+
 add_test(
 	NAME test_components
 	COMMAND $<TARGET_FILE:test_components> ${SEAHOWL_DATADIR}

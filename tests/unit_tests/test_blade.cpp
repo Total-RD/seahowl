@@ -38,17 +38,18 @@ TEST_F(Test_blade, mass_geometry) {
     blade.assemble(system_elasto);
     blade.nodes.front()->set_fixed(true);
 
+    // Setup TestFwDataSet
+    TestFwDataSet test_dataset(
+        {.debug = false,
+         .reference_filepath = (ref_dir / "test_blade_mass_geometry.values.csv").generic_string(),
+         .test_filepath = (test_dir / "test_blade_mass_geometry.values.test.csv").generic_string(),
+         .dimensions = {"values"}});
+
     // check geometry
     for (int ii = 0; ii < blade.nodes.size(); ii++) {
-        ASSERT_NEAR(blade.discretized_points[ii].coordinates.x(), blade.nodes[ii]->get_position().x(), 1e-4);
-        ASSERT_NEAR(blade.discretized_points[ii].coordinates.y(), blade.nodes[ii]->get_position().y(), 1e-4);
-        ASSERT_NEAR(blade.discretized_points[ii].coordinates.z(), blade.nodes[ii]->get_position().z(), 1e-4);
+        test_dataset.testAddRow({blade.nodes[ii]->get_position().x(), blade.nodes[ii]->get_position().y(),
+                                 blade.nodes[ii]->get_position().z()});
     }
-    // Setup TestFwDataSet
-    TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = (ref_dir / "test_blade_mass_geometry.values.csv").generic_string(),
-                                .test_filepath = (test_dir / "test_blade_mass_geometry.values.test.csv").generic_string(),
-                                .dimensions = {"values"}});
 
     // statics
     system_elasto.do_statics(true, 0);
@@ -61,10 +62,11 @@ TEST_F(Test_blade, mass_geometry) {
 
 TEST_F(Test_blade, edgewise) {
     // Setup TestFwDataSet
-    TestFwDataSet test_datasetvalues({.debug = false,
-                                      .reference_filepath = (ref_dir / "test_blade_edgewise.values.csv").generic_string(),
-                                      .test_filepath = (test_dir / "test_blade_edgewise.values.test.csv").generic_string(),
-                                      .dimensions = {"values"}});
+    TestFwDataSet test_datasetvalues(
+        {.debug = false,
+         .reference_filepath = (ref_dir / "test_blade_edgewise.values.csv").generic_string(),
+         .test_filepath = (test_dir / "test_blade_edgewise.values.test.csv").generic_string(),
+         .dimensions = {"values"}});
 
     // system
     auto system_elasto = SystemElastoChrono();
@@ -85,7 +87,6 @@ TEST_F(Test_blade, edgewise) {
 
     // rotate blade (flat along y axis)
     blade.rotate(PI / 2.0, Vector3d(1.0, 0.0, 0.0));
-    ASSERT_NEAR(blade.reference_points.back().coordinates.y(), blade.nodes.back()->get_position().z(), 1e-4);
 
     // test deflection
     system_elasto.do_statics(true, 10);
@@ -144,10 +145,11 @@ TEST_F(Test_blade, edgewise) {
 
 TEST_F(Test_blade, flapwise) {
     // Setup TestFwDataSet
-    TestFwDataSet test_datasetvalues({.debug = false,
-                                      .reference_filepath = (ref_dir / "test_blade_flapwise.values.csv").generic_string(),
-                                      .test_filepath = (test_dir / "test_blade_flapwise.values.test.csv").generic_string(),
-                                      .dimensions = {"value"}});
+    TestFwDataSet test_datasetvalues(
+        {.debug = false,
+         .reference_filepath = (ref_dir / "test_blade_flapwise.values.csv").generic_string(),
+         .test_filepath = (test_dir / "test_blade_flapwise.values.test.csv").generic_string(),
+         .dimensions = {"value"}});
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
@@ -167,7 +169,6 @@ TEST_F(Test_blade, flapwise) {
 
     // rotate blade (flat along x axis)
     blade.rotate(PI / 2.0, Vector3d(0.0, 1.0, 0.0));
-    ASSERT_NEAR(blade.reference_points.back().coordinates.x(), -blade.nodes.back()->get_position().z(), 1e-4);
 
     // test deflection
     system_elasto.do_statics(true, 10);

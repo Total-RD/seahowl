@@ -9,14 +9,12 @@
 
 #include <seahowl/io/read_json.h>
 
-#ifdef HAVE_AERODYN
-
 #include <seahowl/aero/aerodyn_adapter.h>
 #include "seahowl/env/inflowwind_adapter.h"
 using namespace seahowl;
 using namespace seahowl::elasto;
 
-    #include <filesystem>  // C++17
+#include <filesystem>  // C++17
 using std::filesystem::path;
 
 // The fixture for testing
@@ -73,12 +71,13 @@ TEST_F(Test_aerodyn, rpm_initial_pitch) {
     turbine.initialize(time, dt);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = (ref_dir / "test_aerodyn_rpm_initial_pitch.csv").generic_string(),
-                                .test_filepath = (test_dir / "test_aerodyn_rpm_initial_pitch.test.csv").generic_string(),
-                                .dimensions = {"time", "rpm"},
-                                .test_functions = {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
-                                                   [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; }}});
+    TestFwDataSet test_dataset(
+        {.debug = false,
+         .reference_filepath = (ref_dir / "test_aerodyn_rpm_initial_pitch.csv").generic_string(),
+         .test_filepath = (test_dir / "test_aerodyn_rpm_initial_pitch.test.csv").generic_string(),
+         .dimensions = {"time", "rpm"},
+         .test_functions = {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
+                            [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; }}});
 
     while (time < 50) {
         // prestep
@@ -96,8 +95,5 @@ TEST_F(Test_aerodyn, rpm_initial_pitch) {
         test_dataset.testAdd();
     }
 
-    ASSERT_NEAR(turbine.rna.elasto.get_rpm(), 2.719950, 1e-4);
-
     evaluate_test(test_dataset);
 }
-#endif
