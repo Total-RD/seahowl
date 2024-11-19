@@ -7,12 +7,10 @@
 
 #include <seahowl/io/read_json.h>
 
-#ifdef HAVE_INFLOWWIND
+#include "seahowl/env/inflowwind_adapter.h"
+#include "seahowl/elasto/chrono_adapters.h"
 
-    #include "seahowl/env/inflowwind_adapter.h"
-    #include "seahowl/elasto/chrono_adapters.h"
-
-    #include <filesystem>  // C++17
+#include <filesystem>  // C++17
 using std::filesystem::path;
 
 using namespace seahowl;
@@ -97,4 +95,3 @@ TEST_F(Test_inflowwind, rpm_initial_pitch) {
 
     evaluate_test(test_dataset);
 }
-#endif

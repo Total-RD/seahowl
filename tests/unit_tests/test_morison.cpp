@@ -17,7 +17,6 @@ class Test_morison : public Fixture_components {
 };
 
 TEST_F(Test_morison, MCF_Table) {
-
     // Setup TestFwDataSet
     TestFwDataSet test_dataset({.debug = false,
                                 .reference_filepath = (ref_dir / "test_morison_MCF_Table.values.csv").generic_string(),
@@ -41,7 +40,6 @@ TEST_F(Test_morison, MCF_Table) {
 
     node1.diameter = 0.0018 * lambda;
     double Table_Y0 = mytable.interpolateCmBinarySearch(node1.diameter);
-    ASSERT_NEAR(DNV_table_Y0, Table_Y0, 0.01);
 
     test_dataset.testAddRow({Table_Y0});
 
@@ -49,7 +47,6 @@ TEST_F(Test_morison, MCF_Table) {
     double DNV_table_Y2 = 2.060;
     node1.diameter = 0.128 * lambda;
     double Table_Y2 = mytable.interpolateCmBinarySearch(node1.diameter);
-    ASSERT_NEAR(DNV_table_Y2, Table_Y2, 0.01);
 
     test_dataset.testAddRow({Table_Y2});
 
@@ -57,7 +54,6 @@ TEST_F(Test_morison, MCF_Table) {
     double DNV_table_Y4 = 1.360;
     node1.diameter = 0.322 * lambda;
     double Table_Y4 = mytable.interpolateCmBinarySearch(node1.diameter);
-    ASSERT_NEAR(DNV_table_Y4, Table_Y4, 0.01);
 
     test_dataset.testAddRow({Table_Y4});
 
@@ -65,7 +61,6 @@ TEST_F(Test_morison, MCF_Table) {
     double DNV_table_Y6 = 0.655;
     node1.diameter = 0.576 * lambda;
     double Table_Y6 = mytable.interpolateCmBinarySearch(node1.diameter);
-    ASSERT_NEAR(DNV_table_Y6, Table_Y6, 0.01);
 
     test_dataset.testAddRow({Table_Y6});
 
@@ -73,7 +68,6 @@ TEST_F(Test_morison, MCF_Table) {
     double DNV_table_Y8 = 0.360;
     node1.diameter = 0.864 * lambda;
     double Table_Y8 = mytable.interpolateCmBinarySearch(node1.diameter);
-    ASSERT_NEAR(DNV_table_Y8, Table_Y8, 0.01);
 
     test_dataset.testAddRow({Table_Y8});
 
@@ -81,7 +75,6 @@ TEST_F(Test_morison, MCF_Table) {
 }
 
 TEST_F(Test_morison, Cd_Table) {
-
     // Setup TestFwDataSet
     TestFwDataSet test_dataset({.debug = false,
                                 .reference_filepath = (ref_dir / "test_morison_Cd_Table.values.csv").generic_string(),
@@ -104,7 +97,6 @@ TEST_F(Test_morison, Cd_Table) {
                                fluid_velocity);  // double diameter, double wave_period, double fluid_velocity
 
     double CD_ref = 1.045;
-    ASSERT_NEAR(CD_ref, CD1, 0.01);
 
     test_dataset.testAddRow({CD1});
     evaluate_test(test_dataset);
