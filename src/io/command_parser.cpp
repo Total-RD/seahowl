@@ -11,8 +11,12 @@ void CommandLineParser::printHelper(const std::map<std::string, app::SpecCompute
     std::cout << "Options:\n";
     std::cout << "  -h        Display this help message\n";
     for (const auto& [key, var] : cmdOptions) {
+        auto type = var.spec.type;
+        if ( type == "path") {
+            type = "string";
+        }
         std::cout << "  --" << key << " <value> ";
-        std::cout << var.spec.description << " (" << var.spec.type << ")\n";
+        std::cout << var.spec.description << " (" << type << ")\n";
     }
 }
 
