@@ -11,6 +11,7 @@ set(TEST_FILES
 	unit_tests/test_rotor.cpp
 	unit_tests/test_tower.cpp
 	unit_tests/test_turbine.cpp
+	unit_tests/test_controller.cpp
 	unit_tests/test_morison.cpp
 	unit_tests/tools/test_framework_dataset.cpp
 	unit_tests/tools/csv.cpp

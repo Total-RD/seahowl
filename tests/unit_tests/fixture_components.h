@@ -13,7 +13,7 @@ class FixtureComponents : public ::testing::Test {
   protected:
     FixtureComponents() {
         DATADIR = absolute(path("../data/IEA15MW"));
-        spdlog::set_level(spdlog::level::debug);
+        spdlog::set_level(spdlog::level::info);
     }
 
     ~FixtureComponents() override {
