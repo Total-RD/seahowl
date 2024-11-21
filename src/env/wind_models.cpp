@@ -75,3 +75,5 @@ Vector3d WindRamp::get_fluid_acceleration_this(const Vector3d& position, double 
     }
     return acceleration;
 }
+
+InflowAmrWind::InflowAmrWind() {}

@@ -9,6 +9,7 @@
 #include "seahowl/io/read_json.h"
 #include "seahowl/io/write_csv.h"
 #include "seahowl/io/output_manager.h"
+#include "seahowl/env/wind_models.h"
 
 #include <fstream>
 #include <filesystem>  // C++17
@@ -22,6 +23,7 @@
 using namespace seahowl::core;
 namespace fs = std::filesystem;
 using json = nlohmann::json;
+using seahowl::Vector3d;
 
 AmrWindAdapter::AmrWindAdapter() {
     system_elasto = std::make_unique<seahowl::elasto::SystemElastoChrono>();
@@ -38,6 +40,22 @@ void AmrWindAdapter::populate_from_file(const std::string& filepath) {
     spdlog::info("**************************************************************");
 
     populate_system_from_json(filepath, *system_core);
+
+    auto fluid_model = std::make_shared<seahowl::env::InflowAmrWind>();
+    // auto& wind_model = dynamic_cast<seahowl::env::WindRamp&>(*wind_model_ptr);
+    system_core->fluid_model = fluid_model;
+
+    for (auto& turbine : system_aero->turbines) {
+        try {
+            auto& rotor = dynamic_cast<seahowl::aero::RotorAeroBEMT&>(*turbine->rna.rotor);
+            rotor.has_induction = false;
+            rotor.has_tip_loss = false;
+            rotor.has_hub_loss = false;
+            rotor.has_tower_shadow = false;
+        } catch (const std::bad_cast& e) {
+            // do nothing
+        }
+    }
 
     // get main file info
     std::ifstream json_file(filepath);
@@ -131,6 +149,17 @@ void AmrWindAdapter::populate_from_file(const std::string& filepath) {
 
     towerHeight = tower_discret_vect[numTowerNode - 1];
     towerBaseHeight = tower_discret_vect[0];
+
+    // inflow amrwind
+    auto wind_model = system_core->fluid_model;
+    auto init_nNodesVel = 1;
+    // Blade nodes
+    init_nNodesVel = init_nNodesVel + numBlade * numBladeNode;
+    // Tower nodes
+    init_nNodesVel = init_nNodesVel + numTowerNode;
+
+    wind_model->wind_velocities.resize(init_nNodesVel, Eigen::Vector3d::Zero());
+    wind_model->wind_positions.resize(init_nNodesVel, Eigen::Vector3d::Zero());
 }
 
 void AmrWindAdapter::initialize() {
@@ -152,6 +181,11 @@ void AmrWindAdapter::initialize_from_file(const std::string& filepath) {
     spdlog::stopwatch sw_setup;
 
     outputs->initialize();
+
+    std::cout << "SEAHOWL ENV from CFD 2 : " << system_core->fluid_model->wind_model_amrwind << std::endl;
+
+    std::cout << "SEAHOWL ENV from CFD 2 : "
+              << system_core->fluid_model->get_fluid_velocity(Vector3d(0.0, 0.0, 1.0), 1.0) << std::endl;
 
     initialize_system_from_json(filepath, *system_core);
 
@@ -268,13 +302,38 @@ void AmrWindAdapter::init_OpFM(int* numActForcePtsBlade,
 
     // Create the blade and tower nodes
     CreateActForceBladeTowerNodes();
+
+    // inflow amrwind
+    auto wind_model = system_core->fluid_model;
+
+    wind_model->u_Len = nNodesVel;
+    wind_model->v_Len = nNodesVel;
+    wind_model->w_Len = nNodesVel;
+
+    AllocPAry(wind_model->u, wind_model->u_Len, "u");
+    AllocPAry(wind_model->v, wind_model->v_Len, "v");
+    AllocPAry(wind_model->w, wind_model->w_Len, "w");
+
+    wind_model->pxVel_Len = nNodesVel;
+    wind_model->pyVel_Len = nNodesVel;
+    wind_model->pzVel_Len = nNodesVel;
+
+    AllocPAry(wind_model->pxVel, wind_model->pxVel_Len, "pxVel");
+    AllocPAry(wind_model->pyVel, wind_model->pyVel_Len, "pyVel");
+    AllocPAry(wind_model->pzVel, wind_model->pzVel_Len, "pzVel");
+
+    // wind_model->wind_velocities.resize(nNodesVel, Eigen::Vector3d::Zero());
+    // wind_model->wind_positions.resize(nNodesVel, Eigen::Vector3d::Zero());
 }
 
-void AmrWindAdapter::step() {
+void AmrWindAdapter::step(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {
     if (!is_initialized) {
         initialize();
     }
     spdlog::stopwatch sw_step;
+    //
+    SetOpFMPositions(to_cfd, from_cfd);
+
     // prestep
     system_core->prestep(system_core->get_time(), dt);
 
@@ -284,6 +343,8 @@ void AmrWindAdapter::step() {
 
     // poststep
     system_core->poststep(system_core->get_time(), dt);
+
+    SetOpFMForces(to_cfd, from_cfd);
 
     // output
     if (system_core->get_time() >= (t_output_next - 1e-6)) {
@@ -355,7 +416,239 @@ void AmrWindAdapter::CreateActForceMotionsMesh() {
 }
 
 // set the positions
-// void SetOpFMPositions(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {}
+void AmrWindAdapter::SetOpFMPositions(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {
+    auto turbine = system_aero->turbines[0];
+
+    // inflow amrwind
+    auto wind_model = system_core->fluid_model;
+
+    /* Hub */
+    // position of seahowl node
+    auto& hub = turbine->rna.rotor->body_hub;
+    auto hubPos = hub.get_position();
+
+    to_cfd->pxVel[0] = hubPos[0];
+    to_cfd->pyVel[0] = hubPos[1];
+    to_cfd->pzVel[0] = hubPos[2];
+
+    // position of actuator node
+    to_cfd->pxForce[0] = hubPos[0];
+    to_cfd->pyForce[0] = hubPos[1];
+    to_cfd->pzForce[0] = hubPos[2];
+
+    // orientation of actuator node
+    auto hubOri = hub.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+    to_cfd->pOrientation[0] = hubOri(0, 0);
+    to_cfd->pOrientation[1] = hubOri(0, 1);
+    to_cfd->pOrientation[2] = hubOri(0, 2);
+    to_cfd->pOrientation[3] = hubOri(1, 0);
+    to_cfd->pOrientation[4] = hubOri(1, 1);
+    to_cfd->pOrientation[5] = hubOri(1, 2);
+    to_cfd->pOrientation[6] = hubOri(2, 0);
+    to_cfd->pOrientation[7] = hubOri(2, 1);
+    to_cfd->pOrientation[8] = hubOri(2, 2);
+
+    // inflow from amrwind
+    wind_model->u[0] = from_cfd->u[0];
+    wind_model->v[0] = from_cfd->v[0];
+    wind_model->w[0] = from_cfd->w[0];
+
+    wind_model->wind_velocities[0] = Eigen::Vector3d(from_cfd->u[0], from_cfd->v[0], from_cfd->w[0]);
+    wind_model->wind_positions[0] = Eigen::Vector3d(to_cfd->pxVel[0], to_cfd->pyVel[0], to_cfd->pzVel[0]);
+
+    /* Blade */
+    int iNode = 1;
+
+    auto blades = turbine->rna.rotor->blades;
+    for (auto& blade : blades) {
+        auto nodes = blade->nodes;
+        for (int i = 0; i < nodes.size(); i++) {
+            auto nodePos = nodes[i].get_position();
+
+            // position of seahowl node
+            to_cfd->pxVel[iNode] = nodePos[0];
+            to_cfd->pyVel[iNode] = nodePos[1];
+            to_cfd->pzVel[iNode] = nodePos[2];
+
+            // position of actuator node
+            to_cfd->pxForce[iNode] = nodePos[0];
+            to_cfd->pyForce[iNode] = nodePos[1];
+            to_cfd->pzForce[iNode] = nodePos[2];
+
+            // velocity of actuator node
+            auto nodeVel = nodes[i].get_velocity();
+            to_cfd->xdotForce[iNode] = nodeVel[0];
+            to_cfd->ydotForce[iNode] = nodeVel[1];
+            to_cfd->zdotForce[iNode] = nodeVel[2];
+
+            // orientation of actuator node
+            auto nodeOri = nodes[i].get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+            to_cfd->pOrientation[iNode * 9] = nodeOri(0, 0);
+            to_cfd->pOrientation[iNode * 9 + 1] = nodeOri(0, 1);
+            to_cfd->pOrientation[iNode * 9 + 2] = nodeOri(0, 2);
+            to_cfd->pOrientation[iNode * 9 + 3] = nodeOri(1, 0);
+            to_cfd->pOrientation[iNode * 9 + 4] = nodeOri(1, 1);
+            to_cfd->pOrientation[iNode * 9 + 5] = nodeOri(1, 2);
+            to_cfd->pOrientation[iNode * 9 + 6] = nodeOri(2, 0);
+            to_cfd->pOrientation[iNode * 9 + 7] = nodeOri(2, 1);
+            to_cfd->pOrientation[iNode * 9 + 8] = nodeOri(2, 2);
+
+            // inflow from amrwind
+            wind_model->u[iNode] = from_cfd->u[iNode];
+            wind_model->v[iNode] = from_cfd->v[iNode];
+            wind_model->w[iNode] = from_cfd->w[iNode];
+
+            wind_model->wind_velocities[iNode] =
+                Eigen::Vector3d(from_cfd->u[iNode], from_cfd->v[iNode], from_cfd->w[iNode]);
+            wind_model->wind_positions[iNode] =
+                Eigen::Vector3d(to_cfd->pxVel[iNode], to_cfd->pyVel[iNode], to_cfd->pzVel[iNode]);
+
+            iNode++;
+        }
+    }
+
+    /* Tower */
+    auto tower = turbine->tower;
+    auto nodes = tower.nodes;
+    for (int i = 0; i < nodes.size(); i++) {
+        auto nodePos = nodes[i].get_position();
+
+        // position of seahowl node
+        to_cfd->pxVel[iNode] = nodePos[0];
+        to_cfd->pyVel[iNode] = nodePos[1];
+        to_cfd->pzVel[iNode] = nodePos[2];
+
+        // position of actuator node
+        to_cfd->pxForce[iNode] = nodePos[0];
+        to_cfd->pyForce[iNode] = nodePos[1];
+        to_cfd->pzForce[iNode] = nodePos[2];
+
+        // velocity of actuator node
+        auto nodeVel = nodes[i].get_velocity();
+        to_cfd->xdotForce[iNode] = nodeVel[0];
+        to_cfd->ydotForce[iNode] = nodeVel[1];
+        to_cfd->zdotForce[iNode] = nodeVel[2];
+
+        // orientation of actuator node
+        auto nodeOri = nodes[i].get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+        to_cfd->pOrientation[iNode * 9] = nodeOri(0, 0);
+        to_cfd->pOrientation[iNode * 9 + 1] = nodeOri(0, 1);
+        to_cfd->pOrientation[iNode * 9 + 2] = nodeOri(0, 2);
+        to_cfd->pOrientation[iNode * 9 + 3] = nodeOri(1, 0);
+        to_cfd->pOrientation[iNode * 9 + 4] = nodeOri(1, 1);
+        to_cfd->pOrientation[iNode * 9 + 5] = nodeOri(1, 2);
+        to_cfd->pOrientation[iNode * 9 + 6] = nodeOri(2, 0);
+        to_cfd->pOrientation[iNode * 9 + 7] = nodeOri(2, 1);
+        to_cfd->pOrientation[iNode * 9 + 8] = nodeOri(2, 2);
+
+        // inflow from amrwind
+        wind_model->u[iNode] = from_cfd->u[iNode];
+        wind_model->v[iNode] = from_cfd->v[iNode];
+        wind_model->w[iNode] = from_cfd->w[iNode];
+
+        wind_model->wind_velocities[iNode] =
+            Eigen::Vector3d(from_cfd->u[iNode], from_cfd->v[iNode], from_cfd->w[iNode]);
+        wind_model->wind_positions[iNode] =
+            Eigen::Vector3d(to_cfd->pxVel[iNode], to_cfd->pyVel[iNode], to_cfd->pzVel[iNode]);
+
+        iNode++;
+    }
+
+    wind_model->pxVel = to_cfd->pxVel;
+    wind_model->pyVel = to_cfd->pyVel;
+    wind_model->pzVel = to_cfd->pzVel;
+}
 
 // set the forces
-// void SetOpFMForces(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {}
+void AmrWindAdapter::SetOpFMForces(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {
+    auto turbine = system_aero->turbines[0];
+
+    /* Hub */
+    // position of seahowl node
+    auto& hub = turbine->rna.rotor->body_hub;
+    auto hubPos = hub.get_position();
+
+    to_cfd->fx[0] = 0.0;
+    to_cfd->fy[0] = 0.0;
+    to_cfd->fz[0] = 0.0;
+
+    to_cfd->momentx[0] = 0.0;
+    to_cfd->momenty[0] = 0.0;
+    to_cfd->momentz[0] = 0.0;
+
+    /* Blade */
+    int iNode = 1;
+
+    auto blades = turbine->rna.rotor->blades;
+    for (auto& blade : blades) {
+        auto nodes = blade->nodes;
+        for (int i = 0; i < nodes.size(); i++) {
+            to_cfd->fx[iNode] = blade->loads[i][0];
+            to_cfd->fy[iNode] = blade->loads[i][1];
+            to_cfd->fz[iNode] = blade->loads[i][2];
+
+            to_cfd->momentx[iNode] = blade->moments[i][0];
+            to_cfd->momenty[iNode] = blade->moments[i][1];
+            to_cfd->momentz[iNode] = blade->moments[i][2];
+
+            iNode++;
+        }
+    }
+
+    /* Tower */
+    auto tower = turbine->tower;
+    auto nodes = tower.nodes;
+    for (int i = 0; i < nodes.size(); i++) {
+        to_cfd->fx[iNode] = tower.loads[i][0];
+        to_cfd->fy[iNode] = tower.loads[i][1];
+        to_cfd->fz[iNode] = tower.loads[i][2];
+
+        to_cfd->momentx[iNode] = 0.0;
+        to_cfd->momenty[iNode] = 0.0;
+        to_cfd->momentz[iNode] = 0.0;
+
+        iNode++;
+    }
+}
+
+Vector3d seahowl::env::InflowAmrWind::get_fluid_velocity(const Vector3d& position, double time) const {
+    Vector3d wind_velocity;
+
+    // // position should match exactly ! to be checked
+    // auto it = std::find(wind_positions.begin(), wind_positions.end(), position);
+    // if (it != wind_positions.end()) {
+    //     int index = std::distance(wind_positions.begin(), it);
+    //     wind_velocity = wind_velocities[index];
+    // } else {
+    //     // throw std::runtime_error("Position not found in SEAHOWL and AMR-Wind coupling.");
+    //     spdlog::warn("Position not found in SEAHOWL and AMR-Wind coupling.");
+    //     std::cout << "Position is " << position.transpose() << std::endl;
+    //     wind_velocity = Vector3d::Zero();
+    // }
+
+    auto closest = wind_positions.begin();
+    double minDistance = (position - *closest).norm();
+
+    for (auto it = wind_positions.begin() + 1; it != wind_positions.end(); ++it) {
+        double distance = (position - *it).norm();
+        if (distance < minDistance) {
+            closest = it;
+            minDistance = distance;
+        }
+    }
+
+    if (minDistance < 1.0e-2) {
+        int index = std::distance(wind_positions.begin(), closest);
+        wind_velocity = wind_velocities[index];
+        // std::cout << "Position is " << position.transpose() << "; Closest position is " << *closest << "; minDis is "
+        // << minDistance << std::endl; std::cout << "Position is " << position.transpose() << "; Wind speed is " <<
+        // wind_velocity.transpose() << std::endl;
+    } else {
+        // throw std::runtime_error("Position not found in SEAHOWL and AMR-Wind coupling.");
+        spdlog::warn("Position not found in SEAHOWL and AMR-Wind coupling.");
+        // std::cout << "Position is " << position.transpose() << std::endl;
+        wind_velocity = Vector3d::Zero();
+    }
+
+    return wind_velocity;
+}

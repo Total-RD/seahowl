@@ -209,9 +209,12 @@ void RotorAeroBEMT::compute_fluid_loads(const FluidModel& wind_model, double tim
                 // get angle of airfoil (pitch + twist + torsion) from plane of bent blade
                 auto angle_airfoil = get_vector_angle_from_plane(node_normal, blade_tangent, -node_axis_projected);
 
+                auto local_velocity = local_velocity0;
                 // get induced velocity
-                auto local_velocity = get_induced_velocity(node, local_velocity0, angle_airfoil, blades.size(),
-                                                           has_tip_loss, has_hub_loss);
+                if (has_induction) {
+                    local_velocity = get_induced_velocity(node, local_velocity0, angle_airfoil, blades.size(),
+                                                          has_tip_loss, has_hub_loss);
+                }
 
                 // get coefficients from angle of attack
                 double phi = seahowl::aero::get_phi(local_velocity);

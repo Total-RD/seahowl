@@ -40,6 +40,30 @@ class FluidModel {
   protected:
     virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const = 0;
     virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const = 0;
+
+    /** @brief wind model from CFD */
+    int wind_model_amrwind = 1;
+
+    int get_amrwind_wind_model() { return wind_model_amrwind; }
+
+    void set_amrwind_wind_model(int status) { wind_model_amrwind = status; }
+
+    float* u;
+    int u_Len;  // x velocity at interface (seahowl) nodes [m]
+    float* v;
+    int v_Len;  // y velocity at interface (seahowl) nodes [m]
+    float* w;
+    int w_Len;  // z velocity at interface (seahowl) nodes [m]
+
+    float* pxVel;
+    int pxVel_Len;  // x position of velocity interface (seahowl) nodes [m]
+    float* pyVel;
+    int pyVel_Len;  // y position of velocity interface (seahowl) nodes [m]
+    float* pzVel;
+    int pzVel_Len;  // z position of velocity interface (seahowl) nodes [m]
+
+    std::vector<Vector3d> wind_velocities;
+    std::vector<Vector3d> wind_positions;
 };
 
 }  // namespace env
