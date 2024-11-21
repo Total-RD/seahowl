@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cctype>
+#include <algorithm>
 
 namespace utils {
 

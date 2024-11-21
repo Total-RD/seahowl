@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <filesystem>
+#include <nlohmann/json.hpp>
+
 
 namespace fs = std::filesystem;
 
@@ -108,20 +110,18 @@ class ConfigManagerImpl {
         nlohmann::json jsonData;
 
         // read file
-        if (!options_.jsonFilePath.empty()) {
-            // std::cout << "read file" << std::endl;
-            // read file
-            std::ifstream ifile(options_.jsonFilePath);
-            if (!ifile.is_open()) {
-                std::cout << "Failed to open config file\n";
-                return;
-            }
-            ifile >> jsonData;
-            ifile.close();
-            // read JSON data string
-        } else if (!options_.jsonData.empty()) {
-            jsonData = options_.jsonData;
+
+        // std::cout << "read file" << std::endl;
+        // read file
+        std::ifstream ifile(options_.jsonFilePath);
+        if (!ifile.is_open()) {
+            std::cout << "Failed to open config file\n";
+            return;
         }
+        ifile >> jsonData;
+        ifile.close();
+        // read JSON data string
+
         //
         if (!jsonData.empty()) {
             for (const auto& [key, var] : varspecs_) {

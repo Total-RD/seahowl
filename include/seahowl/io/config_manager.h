@@ -4,7 +4,6 @@
 #include <map>
 #include <vector>
 #include <memory>
-#include <nlohmann/json.hpp>
 // #include <optional>
 
 namespace app {
@@ -31,7 +30,6 @@ struct ConfigManagerOptions {
     std::string envVarPrefix = "";
     std::string iniFilePath = "";
     std::string jsonFilePath = "";
-    nlohmann::json jsonData = {};
     ConfigManagerVariableSpec variableSpecs = {};
 };
 
