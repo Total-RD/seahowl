@@ -355,7 +355,127 @@ void AmrWindAdapter::CreateActForceMotionsMesh() {
 }
 
 // set the positions
-// void SetOpFMPositions(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {}
+void AmrWindAdapter::SetOpFMPositions(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {
+    auto turbine = system_aero->turbines[0];
+
+    /* Hub */
+    // position of seahowl node
+    auto& hub = turbine->rna.rotor->body_hub;
+    auto hubPos = hub.get_position();
+
+    to_cfd->pxVel[0] = hubPos[0];
+    to_cfd->pyVel[0] = hubPos[1];
+    to_cfd->pzVel[0] = hubPos[2];
+
+    // position of actuator node
+    to_cfd->pxForce[0] = hubPos[0];
+    to_cfd->pyForce[0] = hubPos[1];
+    to_cfd->pzForce[0] = hubPos[2];
+
+    // orientation of actuator node
+    auto hubOri = hub.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+    to_cfd->pOrientation[0] = hubOri(0, 0);
+    to_cfd->pOrientation[1] = hubOri(0, 1);
+    to_cfd->pOrientation[2] = hubOri(0, 2);
+    to_cfd->pOrientation[3] = hubOri(1, 0);
+    to_cfd->pOrientation[4] = hubOri(1, 1);
+    to_cfd->pOrientation[5] = hubOri(1, 2);
+    to_cfd->pOrientation[6] = hubOri(2, 0);
+    to_cfd->pOrientation[7] = hubOri(2, 1);
+    to_cfd->pOrientation[8] = hubOri(2, 2);
+
+    /* Blade */
+    int iNode = 1;
+
+    auto blades = turbine->rna.rotor->blades;
+    for (auto& blade : blades) {
+        auto nodes = blade->nodes;
+        for (int i = 0; i < nodes.size(); i++) {
+            auto nodePos = nodes[i].get_position();
+
+            // position of seahowl node
+            to_cfd->pxVel[iNode] = nodePos[0];
+            to_cfd->pyVel[iNode] = nodePos[1];
+            to_cfd->pzVel[iNode] = nodePos[2];
+
+            // position of actuator node
+            to_cfd->pxForce[iNode] = nodePos[0];
+            to_cfd->pyForce[iNode] = nodePos[1];
+            to_cfd->pzForce[iNode] = nodePos[2];
+
+            // velocity of actuator node
+            auto nodeVel = nodes[i].get_velocity();
+            to_cfd->xdotForce[iNode] = nodeVel[0];
+            to_cfd->ydotForce[iNode] = nodeVel[1];
+            to_cfd->zdotForce[iNode] = nodeVel[2];
+
+            // orientation of actuator node
+            auto nodeOri = nodes[i].get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+            to_cfd->pOrientation[iNode * 9] = nodeOri(0, 0);
+            to_cfd->pOrientation[iNode * 9 + 1] = nodeOri(0, 1);
+            to_cfd->pOrientation[iNode * 9 + 2] = nodeOri(0, 2);
+            to_cfd->pOrientation[iNode * 9 + 3] = nodeOri(1, 0);
+            to_cfd->pOrientation[iNode * 9 + 4] = nodeOri(1, 1);
+            to_cfd->pOrientation[iNode * 9 + 5] = nodeOri(1, 2);
+            to_cfd->pOrientation[iNode * 9 + 6] = nodeOri(2, 0);
+            to_cfd->pOrientation[iNode * 9 + 7] = nodeOri(2, 1);
+            to_cfd->pOrientation[iNode * 9 + 8] = nodeOri(2, 2);
+
+            iNode++;
+        }
+    }
+
+    /* Tower */
+    auto tower = turbine->tower;
+    auto nodes = tower.nodes;
+    for (int i = 0; i < nodes.size(); i++) {
+        auto nodePos = nodes[i].get_position();
+
+        // position of seahowl node
+        to_cfd->pxVel[iNode] = nodePos[0];
+        to_cfd->pyVel[iNode] = nodePos[1];
+        to_cfd->pzVel[iNode] = nodePos[2];
+
+        // position of actuator node
+        to_cfd->pxForce[iNode] = nodePos[0];
+        to_cfd->pyForce[iNode] = nodePos[1];
+        to_cfd->pzForce[iNode] = nodePos[2];
+
+        // velocity of actuator node
+        auto nodeVel = nodes[i].get_velocity();
+        to_cfd->xdotForce[iNode] = nodeVel[0];
+        to_cfd->ydotForce[iNode] = nodeVel[1];
+        to_cfd->zdotForce[iNode] = nodeVel[2];
+
+        // orientation of actuator node
+        auto nodeOri = nodes[i].get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
+        to_cfd->pOrientation[iNode * 9] = nodeOri(0, 0);
+        to_cfd->pOrientation[iNode * 9 + 1] = nodeOri(0, 1);
+        to_cfd->pOrientation[iNode * 9 + 2] = nodeOri(0, 2);
+        to_cfd->pOrientation[iNode * 9 + 3] = nodeOri(1, 0);
+        to_cfd->pOrientation[iNode * 9 + 4] = nodeOri(1, 1);
+        to_cfd->pOrientation[iNode * 9 + 5] = nodeOri(1, 2);
+        to_cfd->pOrientation[iNode * 9 + 6] = nodeOri(2, 0);
+        to_cfd->pOrientation[iNode * 9 + 7] = nodeOri(2, 1);
+        to_cfd->pOrientation[iNode * 9 + 8] = nodeOri(2, 2);
+
+        iNode++;
+    }
+}
 
 // set the forces
-// void SetOpFMForces(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {}
+void AmrWindAdapter::SetOpFMForces(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {
+    auto turbine = system_aero->turbines[0];
+
+    /* Hub */
+    // position of seahowl node
+    auto& hub = turbine->rna.rotor->body_hub;
+    auto hubPos = hub.get_position();
+
+    to_cfd->fx[0] = 0.0;
+    to_cfd->fy[0] = 0.0;
+    to_cfd->fz[0] = 0.0;
+
+    to_cfd->pyVel[0] = hubPos[1];
+    to_cfd->pzVel[0] = hubPos[2];
+}
