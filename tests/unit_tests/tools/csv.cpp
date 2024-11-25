@@ -10,7 +10,7 @@
 
 using namespace std;
 
-vector<vector<double>> CSVRead(const string& filename, bool hasHeader) {
+vector<vector<double>> csv_read(const string& filename, bool hasHeader) {
     vector<vector<double>> data;  // Variable to store all the rows of data
     ifstream file(filename);
 
@@ -47,7 +47,7 @@ vector<vector<double>> CSVRead(const string& filename, bool hasHeader) {
     return data;
 }
 
-void CSVWrite(const string& filename, const vector<vector<double>>& data, vector<string> headers) {
+void csv_write(const string& filename, const vector<vector<double>>& data, vector<string> headers) {
     ofstream file(filename);
 
     if (!file.is_open()) {

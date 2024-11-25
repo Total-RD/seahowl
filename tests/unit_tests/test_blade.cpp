@@ -1,11 +1,11 @@
 
-#include <gtest/gtest.h>
-#include <seahowl/elasto/chrono_adapters.h>
-#include <seahowl/elasto/blade_elasto.h>
 #include "fixture_components.h"
 
+#include <seahowl/elasto/chrono_adapters.h>
+#include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/io/read_json.h>
 
+#include <gtest/gtest.h>
 #include <filesystem>  // C++17
 using std::filesystem::path;
 
@@ -13,15 +13,15 @@ using namespace seahowl;
 using namespace seahowl::elasto;
 
 // The fixture for testing
-class Test_blade : public Fixture_components {
+class TestBlade : public FixtureComponents {
   protected:
-    Test_blade() : Fixture_components() {
+    TestBlade() : FixtureComponents() {
         ref_dir /= "test_blade/ref";
         test_dir /= "test_blade/test";
     }
 };
 
-TEST_F(Test_blade, mass_geometry) {
+TEST_F(TestBlade, mass_geometry) {
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
@@ -39,7 +39,7 @@ TEST_F(Test_blade, mass_geometry) {
     blade.nodes.front()->set_fixed(true);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset(
+    TestFrameworkDataset test_dataset(
         {.debug = false,
          .reference_filepath = (ref_dir / "test_blade_mass_geometry.values.csv").generic_string(),
          .test_filepath = (test_dir / "test_blade_mass_geometry.values.test.csv").generic_string(),
@@ -47,22 +47,22 @@ TEST_F(Test_blade, mass_geometry) {
 
     // check geometry
     for (int ii = 0; ii < blade.nodes.size(); ii++) {
-        test_dataset.testAddRow({blade.nodes[ii]->get_position().x(), blade.nodes[ii]->get_position().y(),
-                                 blade.nodes[ii]->get_position().z()});
+        test_dataset.add_row_data({blade.nodes[ii]->get_position().x(), blade.nodes[ii]->get_position().y(),
+                                   blade.nodes[ii]->get_position().z()});
     }
 
     // statics
     system_elasto.do_statics(true, 0);
 
     // check mass
-    test_dataset.testAddRow({blade.get_mass()});
+    test_dataset.add_row_data({blade.get_mass()});
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
 
-TEST_F(Test_blade, edgewise) {
+TEST_F(TestBlade, edgewise) {
     // Setup TestFwDataSet
-    TestFwDataSet test_datasetvalues(
+    TestFrameworkDataset test_datasetvalues(
         {.debug = false,
          .reference_filepath = (ref_dir / "test_blade_edgewise.values.csv").generic_string(),
          .test_filepath = (test_dir / "test_blade_edgewise.values.test.csv").generic_string(),
@@ -91,15 +91,15 @@ TEST_F(Test_blade, edgewise) {
     // test deflection
     system_elasto.do_statics(true, 10);
 
-    test_datasetvalues.testAddRow({blade.nodes.back()->get_position().z()});
+    test_datasetvalues.add_row_data({blade.nodes.back()->get_position().z()});
 
     // flip blade
     blade.rotate(PI, Vector3d(0.0, 1.0, 0.0));
     system_elasto.do_statics(true, 10);
 
-    test_datasetvalues.testAddRow({blade.nodes.back()->get_position().z()});
+    test_datasetvalues.add_row_data({blade.nodes.back()->get_position().z()});
 
-    evaluate_test(test_datasetvalues);
+    EvaluateTest(test_datasetvalues);
 
     // static position of blade tip
     double pos0 = blade.nodes.back()->get_position().z();
@@ -116,10 +116,10 @@ TEST_F(Test_blade, edgewise) {
     blade.nodes.back()->set_force(Vector3d(0.0, 0.0, 1000.0), false);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = (ref_dir / "test_blade_edgewise.csv").generic_string(),
-                                .test_filepath = (test_dir / "test_blade_edgewise.test.csv").generic_string(),
-                                .dimensions = {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset({.debug = false,
+                                       .reference_filepath = (ref_dir / "test_blade_edgewise.csv").generic_string(),
+                                       .test_filepath = (test_dir / "test_blade_edgewise.test.csv").generic_string(),
+                                       .dimensions = {"time", "natural_period"}});
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -130,7 +130,7 @@ TEST_F(Test_blade, edgewise) {
                 } else {
                     npeaks += 1;
                     natural_period = (time - start_time) / npeaks;
-                    test_dataset.testAddRow({time, natural_period});
+                    test_dataset.add_row_data({time, natural_period});
                 }
             }
         }
@@ -140,12 +140,12 @@ TEST_F(Test_blade, edgewise) {
         step += 1;
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
 
-TEST_F(Test_blade, flapwise) {
+TEST_F(TestBlade, flapwise) {
     // Setup TestFwDataSet
-    TestFwDataSet test_datasetvalues(
+    TestFrameworkDataset test_datasetvalues(
         {.debug = false,
          .reference_filepath = (ref_dir / "test_blade_flapwise.values.csv").generic_string(),
          .test_filepath = (test_dir / "test_blade_flapwise.values.test.csv").generic_string(),
@@ -173,15 +173,15 @@ TEST_F(Test_blade, flapwise) {
     // test deflection
     system_elasto.do_statics(true, 10);
 
-    test_datasetvalues.testAddRow({blade.nodes.back()->get_position().z()});
+    test_datasetvalues.add_row_data({blade.nodes.back()->get_position().z()});
 
     // flip blade
     blade.rotate(PI, Vector3d(1.0, 0.0, 0.0));
     system_elasto.do_statics(true, 10);
 
-    test_datasetvalues.testAddRow({blade.nodes.back()->get_position().z()});
+    test_datasetvalues.add_row_data({blade.nodes.back()->get_position().z()});
 
-    evaluate_test(test_datasetvalues);
+    EvaluateTest(test_datasetvalues);
 
     // static position of blade tip
     double pos0 = blade.nodes.back()->get_position().z();
@@ -198,10 +198,10 @@ TEST_F(Test_blade, flapwise) {
     blade.nodes.back()->set_force(Vector3d(0.0, 0.0, 1000.0), false);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = (ref_dir / "test_blade_flapwise.csv").generic_string(),
-                                .test_filepath = (test_dir / "test_blade_flapwise.test.csv").generic_string(),
-                                .dimensions = {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset({.debug = false,
+                                       .reference_filepath = (ref_dir / "test_blade_flapwise.csv").generic_string(),
+                                       .test_filepath = (test_dir / "test_blade_flapwise.test.csv").generic_string(),
+                                       .dimensions = {"time", "natural_period"}});
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -212,7 +212,7 @@ TEST_F(Test_blade, flapwise) {
                 } else {
                     npeaks += 1;
                     natural_period = (time - start_time) / npeaks;
-                    test_dataset.testAddRow({time, natural_period});
+                    test_dataset.add_row_data({time, natural_period});
                 }
             }
         }
@@ -222,5 +222,5 @@ TEST_F(Test_blade, flapwise) {
         step += 1;
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }

@@ -5,7 +5,7 @@
 #include <tuple>
 #include <vector>
 
-class TestFwDataSet {
+class TestFrameworkDataset {
   private:
     bool debug;
     std::string reference_filepath;
@@ -26,7 +26,7 @@ class TestFwDataSet {
         std::vector<std::function<std::vector<double>()>> test_functions = {};
     };
 
-    TestFwDataSet(const Options& options)
+    TestFrameworkDataset(const Options& options)
         : debug(options.debug),
           reference_filepath(options.reference_filepath),
           test_filepath(options.test_filepath),
@@ -34,11 +34,11 @@ class TestFwDataSet {
           test_functions(options.test_functions) {}
 
     // Fill test data
-    void testDataSet(const std::vector<std::vector<double>>& data);
-    void testAddRow(const std::vector<double>& data);
-    void testAdd();
+    void set_dataset(const std::vector<std::vector<double>>& data);
+    void add_row_data(const std::vector<double>& data);
+    void add_row();
 
     // Compare
-    std::tuple<std::string, std::vector<std::vector<double>>> differencesCalculate();
-    std::tuple<std::string, int> differencesErrCount(const double& abs_error, const double& rel_error);
+    std::tuple<std::string, std::vector<std::vector<double>>> calculate_differences();
+    std::tuple<std::string, int> count_errors(const double& abs_error, const double& rel_error);
 };

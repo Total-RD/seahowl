@@ -1,15 +1,14 @@
-#include <gtest/gtest.h>
+#include "fixture_components.h"
+
 #include <seahowl/commons/numerics.h>
 #include <seahowl/aero/turbine_aero.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/servo/controller.h>
-#include "fixture_components.h"
-
 #include <seahowl/io/read_json.h>
+#include <seahowl/env/inflowwind_adapter.h>
+#include <seahowl/elasto/chrono_adapters.h>
 
-#include "seahowl/env/inflowwind_adapter.h"
-#include "seahowl/elasto/chrono_adapters.h"
-
+#include <gtest/gtest.h>
 #include <filesystem>  // C++17
 using std::filesystem::path;
 
@@ -17,15 +16,15 @@ using namespace seahowl;
 using namespace seahowl::elasto;
 
 // The fixture for testing
-class Test_inflowwind : public Fixture_components {
+class TestInflowWind : public FixtureComponents {
   protected:
-    Test_inflowwind() : Fixture_components() {
+    TestInflowWind() : FixtureComponents() {
         ref_dir /= "test_inflowwind/ref";
         test_dir /= "test_inflowwind/test";
     }
 };
 
-TEST_F(Test_inflowwind, rpm_initial_pitch) {
+TEST_F(TestInflowWind, rpm_initial_pitch) {
     // general options
     bool visualization_on = true;
     bool statics_prestep = true;
@@ -69,7 +68,7 @@ TEST_F(Test_inflowwind, rpm_initial_pitch) {
     turbine.initialize(time, dt);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset(
+    TestFrameworkDataset test_dataset(
         {.debug = false,
          .reference_filepath = (ref_dir / "test_inflowwind_rpm_initial_pitch.csv").generic_string(),
          .test_filepath = (test_dir / "test_inflowwind_rpm_initial_pitch.test.csv").generic_string(),
@@ -90,8 +89,8 @@ TEST_F(Test_inflowwind, rpm_initial_pitch) {
 
         // poststep
         turbine.poststep(time, dt);
-        test_dataset.testAdd();
+        test_dataset.add_row();
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }

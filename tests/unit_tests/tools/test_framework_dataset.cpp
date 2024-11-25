@@ -1,4 +1,4 @@
-#include "testfw_dataset.hpp"
+#include "test_framework_dataset.h"
 
 #include <filesystem>
 #include <iostream>
@@ -10,7 +10,7 @@
 
 #include "csv.hpp"
 
-void printData(const vector<vector<double>>& data) {
+void print_data(const vector<vector<double>>& data) {
     ostringstream oss;
     for (const auto& row : data) {
         for (const auto& val : row) {
@@ -21,15 +21,15 @@ void printData(const vector<vector<double>>& data) {
     spdlog::debug(oss.str());
 }
 
-void TestFwDataSet::testDataSet(const vector<vector<double>>& data) {
+void TestFrameworkDataset::set_dataset(const vector<vector<double>>& data) {
     test_data = data;
 }
 
-void TestFwDataSet::testAddRow(const vector<double>& row) {
+void TestFrameworkDataset::add_row_data(const vector<double>& row) {
     test_data.push_back(row);
 }
 
-void TestFwDataSet::testAdd() {
+void TestFrameworkDataset::add_row() {
     vector<double> row = {};
     for (auto test_function : test_functions) {
         vector<double> res = test_function();
@@ -38,7 +38,7 @@ void TestFwDataSet::testAdd() {
     test_data.push_back(row);
 }
 
-tuple<string, vector<vector<double>>> TestFwDataSet::differencesCalculate() {
+tuple<string, vector<vector<double>>> TestFrameworkDataset::calculate_differences() {
     string error = "";
     vector<vector<double>> result;
 
@@ -61,17 +61,17 @@ tuple<string, vector<vector<double>>> TestFwDataSet::differencesCalculate() {
     if (debug) {
         spdlog::debug("Writing Test data " + test_file);
     }
-    CSVWrite(test_file, test_data, dimensions);
+    csv_write(test_file, test_data, dimensions);
 
     // Read reference file
-    reference_data = CSVRead(reference_filepath, !dimensions.empty());
+    reference_data = csv_read(reference_filepath, !dimensions.empty());
 
     // Debug
     if (debug) {
         spdlog::debug("Reference data:");
-        printData(reference_data);
+        print_data(reference_data);
         spdlog::debug("Test data:");
-        printData(test_data);
+        print_data(test_data);
     }
 
     // Compare dimensions
@@ -94,19 +94,19 @@ tuple<string, vector<vector<double>>> TestFwDataSet::differencesCalculate() {
 
     if (debug) {
         spdlog::debug("Differences:");
-        printData(result);
+        print_data(result);
     }
 
     return make_tuple(error, result);
 }
 
-tuple<string, int> TestFwDataSet::differencesErrCount(const double& rel_error, const double& abs_error) {
+tuple<string, int> TestFrameworkDataset::count_errors(const double& rel_error, const double& abs_error) {
     string error = "";
     int result = 0;
 
     // calculate differences
     vector<vector<double>> differences;
-    tie(error, differences) = differencesCalculate();
+    tie(error, differences) = calculate_differences();
     if (!error.empty()) {
         return make_tuple(error, result);
     }

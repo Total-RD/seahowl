@@ -1,3 +1,5 @@
+#include "fixture_components.h"
+
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
 #include <seahowl/elasto/chrono_adapters.h>
@@ -8,9 +10,6 @@
 #include <seahowl/core/system.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/aero/system_aero.h>
-#include "tools/testfw_dataset.hpp"
-#include "fixture_components.h"
-
 #include <seahowl/io/read_json.h>
 
 #include <filesystem>  // C++17
@@ -20,15 +19,15 @@ using namespace seahowl;
 using namespace seahowl::elasto;
 
 // The fixture for testing
-class Test_turbine : public Fixture_components {
+class TestTurbine : public FixtureComponents {
   protected:
-    Test_turbine() : Fixture_components() {
+    TestTurbine() : FixtureComponents() {
         ref_dir /= "test_turbine/ref";
         test_dir /= "test_turbine/test";
     }
 };
 
-TEST_F(Test_turbine, rpm_initial_pitch) {
+TEST_F(TestTurbine, rpm_initial_pitch) {
     // general options
     bool visualization_on = true;
     bool statics_prestep = true;
@@ -72,7 +71,7 @@ TEST_F(Test_turbine, rpm_initial_pitch) {
     turbine.initialize(time, dt);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset(
+    TestFrameworkDataset test_dataset(
         {.debug = false,
          .reference_filepath = (ref_dir / "test_turbine_rpm_initial_pitch.csv").generic_string(),
          .test_filepath = (test_dir / "test_turbine_rpm_initial_pitch.test.csv").generic_string(),
@@ -96,13 +95,13 @@ TEST_F(Test_turbine, rpm_initial_pitch) {
 
         // poststep
         turbine.poststep(time, dt);
-        test_dataset.testAdd();
+        test_dataset.add_row();
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
 
-TEST_F(Test_turbine, rpm_initial_pitch_fpm) {
+TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
     // general options
     bool visualization_on = true;
     bool statics_prestep = true;
@@ -146,7 +145,7 @@ TEST_F(Test_turbine, rpm_initial_pitch_fpm) {
     turbine.initialize(time, dt);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset(
+    TestFrameworkDataset test_dataset(
         {.debug = false,
          .reference_filepath = (ref_dir / "test_turbine_rpm_initial_pitch_fpm.csv").generic_string(),
          .test_filepath = (test_dir / "test_turbine_rpm_initial_pitch_fpm.test.csv").generic_string(),
@@ -167,13 +166,13 @@ TEST_F(Test_turbine, rpm_initial_pitch_fpm) {
 
         // poststep
         turbine.poststep(time, dt);
-        test_dataset.testAdd();
+        test_dataset.add_row();
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
 
-TEST_F(Test_turbine, rpm_initial_pitch_rigid_rotor) {
+TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
     // general options
     bool visualization_on = true;
     bool statics_prestep = true;
@@ -217,7 +216,7 @@ TEST_F(Test_turbine, rpm_initial_pitch_rigid_rotor) {
     turbine.initialize(time, dt);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset(
+    TestFrameworkDataset test_dataset(
         {.debug = false,
          .reference_filepath = (ref_dir / "test_turbine_rpm_initial_pitch_rigid_rotor.csv").generic_string(),
          .test_filepath = (test_dir / "test_turbine_rpm_initial_pitch_rigid_rotor.test.csv").generic_string(),
@@ -238,13 +237,13 @@ TEST_F(Test_turbine, rpm_initial_pitch_rigid_rotor) {
 
         // poststep
         turbine.poststep(time, dt);
-        test_dataset.testAdd();
+        test_dataset.add_row();
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
 
-TEST_F(Test_turbine, controller_target_rpm) {
+TEST_F(TestTurbine, controller_target_rpm) {
     // general options
     bool visualization_on = true;
     bool statics_prestep = true;
@@ -291,7 +290,7 @@ TEST_F(Test_turbine, controller_target_rpm) {
     turbine.initialize(time, dt);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset(
+    TestFrameworkDataset test_dataset(
         {.debug = false,
          .reference_filepath = (ref_dir / "test_turbine_controller_target_rpm.csv").generic_string(),
          .test_filepath = (test_dir / "test_turbine_controller_target_rpm.test.csv").generic_string(),
@@ -312,13 +311,13 @@ TEST_F(Test_turbine, controller_target_rpm) {
 
         // poststep
         turbine.poststep(time, dt);
-        test_dataset.testAdd();
+        test_dataset.add_row();
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
 
-TEST_F(Test_turbine, actuator_disk) {
+TEST_F(TestTurbine, actuator_disk) {
     // general options
     bool visualization_on = true;
     bool statics_prestep = true;
@@ -367,7 +366,7 @@ TEST_F(Test_turbine, actuator_disk) {
     turbine.initialize(time, dt);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset(
+    TestFrameworkDataset test_dataset(
         {.debug = false,
          .reference_filepath = (ref_dir / "test_turbine_actuator_disk.csv").generic_string(),
          .test_filepath = (test_dir / "test_turbine_actuator_disk.test.csv").generic_string(),
@@ -389,7 +388,7 @@ TEST_F(Test_turbine, actuator_disk) {
 
         // poststep
         turbine.poststep(time, dt);
-        test_dataset.testAdd();
+        test_dataset.add_row();
     }
 
     reference_power = 15.3e6;
@@ -411,13 +410,13 @@ TEST_F(Test_turbine, actuator_disk) {
 
         // poststep
         turbine.poststep(time, dt);
-        test_dataset.testAdd();
+        test_dataset.add_row();
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
 
-TEST_F(Test_turbine, multiturbines) {
+TEST_F(TestTurbine, multiturbines) {
     // general options
     bool visualization_on = true;
     bool statics_prestep = true;
@@ -475,7 +474,7 @@ TEST_F(Test_turbine, multiturbines) {
     system_core.initialize(time, dt);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset(
+    TestFrameworkDataset test_dataset(
         {.debug = false,
          .reference_filepath = (ref_dir / "test_turbine_multiturbines.csv").generic_string(),
          .test_filepath = (test_dir / "test_turbine_multiturbines.test.csv").generic_string(),
@@ -496,8 +495,8 @@ TEST_F(Test_turbine, multiturbines) {
 
         // poststep
         system_core.poststep(time, dt);
-        test_dataset.testAdd();
+        test_dataset.add_row();
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
