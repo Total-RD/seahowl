@@ -1,3 +1,5 @@
+#include "fixture_components.h"
+
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
 #include <seahowl/core/simulation.h>
@@ -5,9 +7,6 @@
 #include <seahowl/core/turbine.h>
 #include <seahowl/core/system.h>
 #include <seahowl/elasto/blade_elasto.h>
-#include "tools/testfw_dataset.hpp"
-#include "fixture_components.h"
-
 #include <seahowl/io/read_json.h>
 
 #include <filesystem>  // C++17
@@ -17,15 +16,15 @@ using namespace seahowl;
 using namespace seahowl::elasto;
 
 // The fixture for testing
-class Test_controller : public Fixture_components {
+class TestController : public FixtureComponents {
   protected:
-    Test_controller() : Fixture_components() {
+    TestController() : FixtureComponents() {
         ref_dir /= "test_controller/ref";
         test_dir /= "test_controller/test";
     }
 };
 
-TEST_F(Test_controller, IEA15) {
+TEST_F(TestController, IEA15) {
     // wind speeds to test at different times: pairs are (time, speed)
     std::vector<std::pair<double, double>> time_speed_vector;
     time_speed_vector.push_back(std::make_pair(0.0, 8.0));
@@ -66,7 +65,7 @@ TEST_F(Test_controller, IEA15) {
     simulation.initialize();
 
     // instantiate test dataset class (custom CSV)
-    TestFwDataSet test_dataset(
+    TestFrameworkDataset test_dataset(
         {.debug = false,
          .reference_filepath = ref_dir / "test_controller.csv",
          .test_filepath = test_dir / "test_controller.test.csv",
@@ -80,7 +79,7 @@ TEST_F(Test_controller, IEA15) {
          }});
 
     // output values at time = 0
-    test_dataset.testAdd();
+    test_dataset.add_row();
 
     // simulation loop
     size_t istep = 0;
@@ -101,10 +100,10 @@ TEST_F(Test_controller, IEA15) {
 
         // check if time to store results
         if ((int)round(1.0 / simulation.dt)) {
-            test_dataset.testAdd();
+            test_dataset.add_row();
         }
     }
 
     // compare ref and test CSVs
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }

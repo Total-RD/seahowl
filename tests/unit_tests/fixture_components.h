@@ -1,21 +1,22 @@
 #pragma once
 
+#include "tools/test_framework_dataset.h"
+
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
-#include <filesystem> 
-#include "tools/testfw_dataset.hpp"
+#include <filesystem>
 
 using std::filesystem::path;
 
 // The fixture for testing
-class Fixture_components : public ::testing::Test {
+class FixtureComponents : public ::testing::Test {
   protected:
-    Fixture_components() {
+    FixtureComponents() {
         DATADIR = absolute(path("../data/IEA15MW"));
         spdlog::set_level(spdlog::level::debug);
     }
 
-    ~Fixture_components() override {
+    ~FixtureComponents() override {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
@@ -32,8 +33,8 @@ class Fixture_components : public ::testing::Test {
         // before the destructor).
     }
 
-    void evaluate_test(TestFwDataSet& test_dataset) {
-        auto [error, result] = test_dataset.differencesErrCount(rel_error, abs_error);
+    void EvaluateTest(TestFrameworkDataset& test_dataset) {
+        auto [error, result] = test_dataset.count_errors(rel_error, abs_error);
         if (error.empty()) {
             spdlog::info(" Tests Report : nb errors = " + std::to_string(result));
         } else {

@@ -1,12 +1,11 @@
-#include <gtest/gtest.h>
-#include <spdlog/spdlog.h>
-#include <seahowl/elasto/chrono_adapters.h>
-#include <seahowl/elasto/blade_elasto.h>
-
-#include <seahowl/io/read_json.h>
-#include "tools/testfw_dataset.hpp"
 #include "fixture_components.h"
 
+#include <seahowl/elasto/chrono_adapters.h>
+#include <seahowl/elasto/blade_elasto.h>
+#include <seahowl/io/read_json.h>
+
+#include <gtest/gtest.h>
+#include <spdlog/spdlog.h>
 #include <filesystem>  // C++17
 using std::filesystem::path;
 
@@ -14,20 +13,20 @@ using namespace seahowl;
 using namespace seahowl::elasto;
 
 // The fixture for testing
-class Test_rotor : public Fixture_components {
+class TestRotor : public FixtureComponents {
   protected:
-    Test_rotor() : Fixture_components() {
+    TestRotor() : FixtureComponents() {
         ref_dir /= "test_rotor/ref";
         test_dir /= "test_rotor/test";
     }
 };
 
-TEST_F(Test_rotor, mass) {
+TEST_F(TestRotor, mass) {
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = (ref_dir / "test_rotor_mass.values.csv").generic_string(),
-                                .test_filepath = (test_dir / "test_rotor_mass.values.test.csv").generic_string(),
-                                .dimensions = {"values"}});
+    TestFrameworkDataset test_dataset({.debug = false,
+                                       .reference_filepath = (ref_dir / "test_rotor_mass.values.csv").generic_string(),
+                                       .test_filepath = (test_dir / "test_rotor_mass.values.test.csv").generic_string(),
+                                       .dimensions = {"values"}});
 
     // system
     auto system_elasto = SystemElastoChrono();
@@ -53,7 +52,7 @@ TEST_F(Test_rotor, mass) {
 
     system_elasto.do_statics(true, 0);
 
-    test_dataset.testAddRow({rna.get_mass()});
+    test_dataset.add_row_data({rna.get_mass()});
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }

@@ -1,9 +1,10 @@
-#include <gtest/gtest.h>
+#include "fixture_components.h"
+
 #include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/commons/numerics.h>
 #include <seahowl/io/read_json.h>
-#include "fixture_components.h"
 
+#include <gtest/gtest.h>
 #include <filesystem>  // C++17
 using std::filesystem::path;
 
@@ -11,15 +12,15 @@ using namespace seahowl;
 using namespace seahowl::elasto;
 
 // The fixture for testing
-class Test_tower : public Fixture_components {
+class TestTower : public FixtureComponents {
   protected:
-    Test_tower() : Fixture_components() {
+    TestTower() : FixtureComponents() {
         ref_dir /= "test_tower/ref";
         test_dir /= "test_tower/test";
     }
 };
 
-TEST_F(Test_tower, mass) {
+TEST_F(TestTower, mass) {
     // system
     auto system_elasto = SystemElastoChrono();
 
@@ -32,17 +33,17 @@ TEST_F(Test_tower, mass) {
     system_elasto.do_statics(true, 0);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = (ref_dir / "test_tower_mass.values.csv").generic_string(),
-                                .test_filepath = (test_dir / "test_tower_mass.values.test.csv").generic_string(),
-                                .dimensions = {"values"}});
+    TestFrameworkDataset test_dataset({.debug = false,
+                                       .reference_filepath = (ref_dir / "test_tower_mass.values.csv").generic_string(),
+                                       .test_filepath = (test_dir / "test_tower_mass.values.test.csv").generic_string(),
+                                       .dimensions = {"values"}});
 
-    test_dataset.testAddRow({tower.get_mass()});
+    test_dataset.add_row_data({tower.get_mass()});
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
 
-TEST_F(Test_tower, frequency) {
+TEST_F(TestTower, frequency) {
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
@@ -58,15 +59,16 @@ TEST_F(Test_tower, frequency) {
     system_elasto.do_statics(true, 0);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_datasetvalues({.debug = false,
-                                      .reference_filepath = (ref_dir / "test_tower_frequency.values.csv").generic_string(),
-                                      .test_filepath = (test_dir / "test_tower_frequency.values.test.csv").generic_string(),
-                                      .dimensions = {"values"}});
+    TestFrameworkDataset test_datasetvalues(
+        {.debug = false,
+         .reference_filepath = (ref_dir / "test_tower_frequency.values.csv").generic_string(),
+         .test_filepath = (test_dir / "test_tower_frequency.values.test.csv").generic_string(),
+         .dimensions = {"values"}});
 
     // check mass
-    test_datasetvalues.testAddRow({tower.get_mass()});
+    test_datasetvalues.add_row_data({tower.get_mass()});
 
-    evaluate_test(test_datasetvalues);
+    EvaluateTest(test_datasetvalues);
 
     // static position of tower top
     double pos0 = tower.nodes.back()->get_position().x();
@@ -83,10 +85,10 @@ TEST_F(Test_tower, frequency) {
     tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = (ref_dir / "test_tower_frequency.csv").generic_string(),
-                                .test_filepath = (test_dir / "test_tower_frequency.test.csv").generic_string(),
-                                .dimensions = {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset({.debug = false,
+                                       .reference_filepath = (ref_dir / "test_tower_frequency.csv").generic_string(),
+                                       .test_filepath = (test_dir / "test_tower_frequency.test.csv").generic_string(),
+                                       .dimensions = {"time", "natural_period"}});
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -97,7 +99,7 @@ TEST_F(Test_tower, frequency) {
                 } else {
                     npeaks += 1;
                     natural_period = (time - start_time) / npeaks;
-                    test_dataset.testAddRow({time, natural_period});
+                    test_dataset.add_row_data({time, natural_period});
                 }
             }
         }
@@ -107,10 +109,10 @@ TEST_F(Test_tower, frequency) {
         step += 1;
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
 
-TEST_F(Test_tower, cylinder_frequency) {
+TEST_F(TestTower, cylinder_frequency) {
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
@@ -143,15 +145,16 @@ TEST_F(Test_tower, cylinder_frequency) {
     system_elasto.do_statics(true, 0);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_datasetvalues({.debug = false,
-                                      .reference_filepath = (ref_dir / "test_tower_cylinder_frequency.values.csv").generic_string(),
-                                      .test_filepath = (test_dir / "test_tower_cylinder_frequency.values.test.csv").generic_string(),
-                                      .dimensions = {"values"}});
+    TestFrameworkDataset test_datasetvalues(
+        {.debug = false,
+         .reference_filepath = (ref_dir / "test_tower_cylinder_frequency.values.csv").generic_string(),
+         .test_filepath = (test_dir / "test_tower_cylinder_frequency.values.test.csv").generic_string(),
+         .dimensions = {"values"}});
 
     // check mass
-    test_datasetvalues.testAddRow({tower.get_mass()});
+    test_datasetvalues.add_row_data({tower.get_mass()});
 
-    evaluate_test(test_datasetvalues);
+    EvaluateTest(test_datasetvalues);
 
     // static position of tower top
     double pos0 = tower.nodes.back()->get_position().x();
@@ -168,10 +171,11 @@ TEST_F(Test_tower, cylinder_frequency) {
     tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = (ref_dir / "test_tower_cylinder_frequency.csv").generic_string(),
-                                .test_filepath = (test_dir / "test_tower_cylinder_frequency.test.csv").generic_string(),
-                                .dimensions = {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset(
+        {.debug = false,
+         .reference_filepath = (ref_dir / "test_tower_cylinder_frequency.csv").generic_string(),
+         .test_filepath = (test_dir / "test_tower_cylinder_frequency.test.csv").generic_string(),
+         .dimensions = {"time", "natural_period"}});
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -182,7 +186,7 @@ TEST_F(Test_tower, cylinder_frequency) {
                 } else {
                     npeaks += 1;
                     natural_period = (time - start_time) / npeaks;
-                    test_dataset.testAddRow({time, natural_period});
+                    test_dataset.add_row_data({time, natural_period});
                 }
             }
         }
@@ -192,10 +196,10 @@ TEST_F(Test_tower, cylinder_frequency) {
         step += 1;
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
 
-TEST_F(Test_tower, conical_frequency) {
+TEST_F(TestTower, conical_frequency) {
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
@@ -226,15 +230,16 @@ TEST_F(Test_tower, conical_frequency) {
     system_elasto.do_statics(true, 0);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_datasetvalues({.debug = false,
-                                      .reference_filepath = (ref_dir / "test_tower_conical_frequency.values.csv").generic_string(),
-                                      .test_filepath = (test_dir / "test_tower_conical_frequency.values.test.csv").generic_string(),
-                                      .dimensions = {"values"}});
+    TestFrameworkDataset test_datasetvalues(
+        {.debug = false,
+         .reference_filepath = (ref_dir / "test_tower_conical_frequency.values.csv").generic_string(),
+         .test_filepath = (test_dir / "test_tower_conical_frequency.values.test.csv").generic_string(),
+         .dimensions = {"values"}});
 
     // check mass
-    test_datasetvalues.testAddRow({tower.get_mass()});
+    test_datasetvalues.add_row_data({tower.get_mass()});
 
-    evaluate_test(test_datasetvalues);
+    EvaluateTest(test_datasetvalues);
 
     // static position of tower top
     double pos0 = tower.nodes.back()->get_position().x();
@@ -251,10 +256,11 @@ TEST_F(Test_tower, conical_frequency) {
     tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
 
     // Setup TestFwDataSet
-    TestFwDataSet test_dataset({.debug = false,
-                                .reference_filepath = (ref_dir / "test_tower_conical_frequency.csv").generic_string(),
-                                .test_filepath = (test_dir / "test_tower_conical_frequency.test.csv").generic_string(),
-                                .dimensions = {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset(
+        {.debug = false,
+         .reference_filepath = (ref_dir / "test_tower_conical_frequency.csv").generic_string(),
+         .test_filepath = (test_dir / "test_tower_conical_frequency.test.csv").generic_string(),
+         .dimensions = {"time", "natural_period"}});
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -265,7 +271,7 @@ TEST_F(Test_tower, conical_frequency) {
                 } else {
                     npeaks += 1;
                     natural_period = (time - start_time) / npeaks;
-                    test_dataset.testAddRow({time, natural_period});
+                    test_dataset.add_row_data({time, natural_period});
                 }
             }
         }
@@ -275,5 +281,5 @@ TEST_F(Test_tower, conical_frequency) {
         step += 1;
     }
 
-    evaluate_test(test_dataset);
+    EvaluateTest(test_dataset);
 }
