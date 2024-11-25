@@ -65,18 +65,21 @@ TEST_F(TestController, IEA15) {
     simulation.initialize();
 
     // instantiate test dataset class (custom CSV)
-    TestFrameworkDataset test_dataset(
-        {false,
-         (ref_dir / "test_controller.csv").generic_string(),
-         (test_dir / "test_controller.test.csv").generic_string(),
-         {"time", "power", "pitch_blade1", "pitch_blade2", "pitch_blade3"},
-         {
-             [&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
-             [&turbine]() -> std::vector<double> { return {turbine.get_generated_power()}; },
-             [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.rotor->blades[0]->get_pitch()}; },
-             [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.rotor->blades[1]->get_pitch()}; },
-             [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.rotor->blades[2]->get_pitch()}; },
-         }});
+    TestFrameworkDataset test_dataset({false, (ref_dir / "test_controller.csv").generic_string(),
+                                       (test_dir / "test_controller.test.csv").generic_string()});
+    test_dataset.add_test_function("time",
+                                   [&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; });
+    test_dataset.add_test_function("power",
+                                   [&turbine]() -> std::vector<double> { return {turbine.get_generated_power()}; });
+    test_dataset.add_test_function("pitch_blade1", [&turbine]() -> std::vector<double> {
+        return {turbine.rna.elasto.rotor->blades[0]->get_pitch()};
+    });
+    test_dataset.add_test_function("pitch_blade2", [&turbine]() -> std::vector<double> {
+        return {turbine.rna.elasto.rotor->blades[1]->get_pitch()};
+    });
+    test_dataset.add_test_function("pitch_blade3", [&turbine]() -> std::vector<double> {
+        return {turbine.rna.elasto.rotor->blades[2]->get_pitch()};
+    });
 
     // output values at time = 0
     test_dataset.add_row();

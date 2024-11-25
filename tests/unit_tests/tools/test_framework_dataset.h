@@ -4,13 +4,15 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <map>
 
 class TestFrameworkDataset {
   private:
     bool debug;
     std::string reference_filepath;
     std::string test_filepath;
-    std::vector<std::function<std::vector<double>()>> test_functions;
+    std::map<std::string, std::function<std::vector<double>()>> test_functions_map;
+    std::vector<std::string> test_functions_names = {};
     //
     std::vector<std::string> dimensions = {};
     //
@@ -23,7 +25,7 @@ class TestFrameworkDataset {
         std::string reference_filepath;
         std::string test_filepath = "";
         std::vector<std::string> dimensions = {};
-        std::vector<std::function<std::vector<double>()>> test_functions = {};
+        std::map<std::string, std::function<std::vector<double>()>> test_functions;
     };
 
     TestFrameworkDataset(const Options& options)
@@ -31,10 +33,12 @@ class TestFrameworkDataset {
           reference_filepath(options.reference_filepath),
           test_filepath(options.test_filepath),
           dimensions(options.dimensions),
-          test_functions(options.test_functions) {}
+          test_functions_map(options.test_functions) {}
 
     // Fill test data
     void set_dataset(const std::vector<std::vector<double>>& data);
+    void add_test_function(const std::string& name, std::function<std::vector<double>()> test_function);
+    void add_test_function(const std::string& name, std::function<double()> test_function);
     void add_row_data(const std::vector<double>& data);
     void add_row();
 

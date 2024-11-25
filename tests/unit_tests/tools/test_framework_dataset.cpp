@@ -26,14 +26,24 @@ void TestFrameworkDataset::set_dataset(const vector<vector<double>>& data) {
     test_data = data;
 }
 
+void TestFrameworkDataset::add_test_function(const std::string& name,
+                                             std::function<std::vector<double>()> test_function) {
+    test_functions_names.push_back(name);
+    test_functions_map.insert({name, test_function});
+}
+
+void TestFrameworkDataset::add_test_function(const std::string& name, std::function<double()> test_function) {
+    test_functions_map.insert({name, [&test_function]() -> std::vector<double> { return {test_function()}; }});
+}
+
 void TestFrameworkDataset::add_row_data(const vector<double>& row) {
     test_data.push_back(row);
 }
 
 void TestFrameworkDataset::add_row() {
     vector<double> row = {};
-    for (auto test_function : test_functions) {
-        vector<double> res = test_function();
+    for (auto const& test_function_name : test_functions_names) {
+        vector<double> res = test_functions_map[test_function_name]();
         row.insert(row.end(), res.begin(), res.end());
     }
     test_data.push_back(row);
@@ -62,6 +72,14 @@ tuple<string, vector<vector<double>>> TestFrameworkDataset::calculate_difference
     if (debug) {
         spdlog::debug("Writing Test data " + test_file);
     }
+
+    if (dimensions.empty()) {
+        dimensions.clear();
+        for (auto const& test_function_name : test_functions_names) {
+            dimensions.push_back(test_function_name);
+        }
+    }
+
     csv_write(test_file, test_data, dimensions);
 
     // Read reference file
