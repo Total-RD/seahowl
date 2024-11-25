@@ -108,11 +108,6 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
     virtual void translate(const Vector3d& translation_vector) const override;
     virtual double get_mass() const override;
 
-    virtual void evaluate_position_rotation(Vector3d& position,
-                                            Quaternion& rotation,
-                                            int element_index,
-                                            double eta) const override;
-
     virtual EntityDynamicEigen get_entity_along_blade(double eta, int element_index = 0) const override;
     virtual void accumulate_load_along_blade(const Vector3d& load,
                                              const seahowl::Vector3d& moment,

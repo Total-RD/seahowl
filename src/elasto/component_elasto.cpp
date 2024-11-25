@@ -96,6 +96,13 @@ void ComponentElastoFEA::evaluate_position_rotation(Vector3d& position,
     auto& element = elements[element_index];
 
     element->evaluate_position_rotation(eta, position, rotation);
+
+    // interpolate quaternion between nodes
+    // otherwise we have averaged values for rotation on Timoshenko elements
+    auto rot1 = element->nodes[0]->get_rotation();
+    auto rot2 = element->nodes[1]->get_rotation();
+    // slerp with t in [0; 1] vs element eta in [-1; 1]
+    rotation = rot1.slerp((eta + 1.0) / 2.0, rot2);
 }
 
 void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,

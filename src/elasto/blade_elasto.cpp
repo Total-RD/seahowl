@@ -252,13 +252,6 @@ void BladeElastoFEA::build_elements_tapered_timoshenko_fpm() {
     }
 }
 
-void BladeElastoFEA::evaluate_position_rotation(Vector3d& position,
-                                                Quaternion& rotation,
-                                                int element_index,
-                                                double eta) const {
-    elements[element_index]->evaluate_position_rotation(eta, position, rotation);
-}
-
 seahowl::EntityDynamicEigen BladeElastoFEA::get_entity_along_blade(double eta, int element_index) const {
     return get_entity_along_component(eta, element_index);
 }
