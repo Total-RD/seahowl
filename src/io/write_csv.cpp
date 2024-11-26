@@ -13,9 +13,11 @@
 #include <fstream>
 #include <string>
 #include <spdlog/spdlog.h>
+#include <filesystem>  // C++17
 
 using seahowl::PI;
 using namespace seahowl::io;
+namespace fs = std::filesystem;
 
 CustomCSV::CustomCSV(const std::string& csv_filepath) : csv_filepath(csv_filepath) {}
 
@@ -39,6 +41,10 @@ void CustomCSV::add_function(const std::string& name, std::function<double()> fu
 void CustomCSV::write_row() {
     std::string row_string = "";
     std::string header = "";  // only used if CSV is uninitialized
+    if (!is_initialized) {
+        auto fspath = fs::path(csv_filepath);
+        fs::create_directories(fspath.parent_path());
+    }
     for (auto const& function_pair : functions) {
         auto values = function_pair.second();
         size_t ivalue = 0;

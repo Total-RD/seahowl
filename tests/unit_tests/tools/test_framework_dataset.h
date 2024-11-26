@@ -30,4 +30,6 @@ class TestFrameworkDataset {
     // Compare
     std::tuple<std::string, std::vector<std::vector<double>>> calculate_differences();
     std::tuple<std::string, int> count_errors(const double& abs_error, const double& rel_error);
+
+    void copy_test_to_reference();
 };

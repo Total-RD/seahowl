@@ -40,6 +40,9 @@ class FixtureComponents : public ::testing::Test {
         } else {
             spdlog::error("Tests Report ERROR : " + error);
         }
+        if (dump_test_to_reference) {
+            test_dataset.copy_test_to_reference();
+        }
         ASSERT_EQ(result, 0);
         ASSERT_FALSE(!error.empty());
     }
@@ -49,4 +52,5 @@ class FixtureComponents : public ::testing::Test {
     path test_dir = absolute(path("../tests/unit_tests/data"));
     double rel_error = 1e-2;
     double abs_error = 1e-6;
+    bool dump_test_to_reference = false;
 };

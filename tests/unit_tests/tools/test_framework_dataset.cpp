@@ -11,6 +11,8 @@
 
 #include "csv.hpp"
 
+namespace fs = std::filesystem;
+
 void print_data(const vector<vector<double>>& data) {
     ostringstream oss;
     for (const auto& row : data) {
@@ -97,4 +99,10 @@ tuple<string, int> TestFrameworkDataset::count_errors(const double& rel_error, c
     }
 
     return make_tuple(error, result);
+}
+
+void TestFrameworkDataset::copy_test_to_reference() {
+    spdlog::warn("Copying test data ({}) to reference data ({}).", test_filepath, reference_filepath);
+    fs::create_directories(fs::path(reference_filepath).parent_path());  // create ref folder if it does not exist
+    fs::copy(test_filepath, reference_filepath, fs::copy_options::update_existing);
 }
