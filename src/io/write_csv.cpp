@@ -3,9 +3,11 @@
 #include "seahowl/core/system.h"
 #include "seahowl/core/turbine.h"
 #include "seahowl/core/blade.h"
+#include "seahowl/core/floater.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/elasto/tower_elasto.h"
 #include "seahowl/elasto/rotor_elasto.h"
+#include "seahowl/elasto/floater_elasto.h"
 #include "seahowl/aero/blade_aero.h"
 #include "seahowl/env/wind_models.h"
 #include "seahowl/servo/controller.h"
@@ -30,6 +32,14 @@ void CustomCSV::add_function(const std::string& name, std::function<seahowl::Vec
         std::pair<std::string, std::function<std::vector<double>()>>(name, [function]() -> std::vector<double> {
             auto vec = function();
             return {vec.x(), vec.y(), vec.z()};
+        }));
+}
+
+void CustomCSV::add_function(const std::string& name, std::function<seahowl::Quaternion()> function) {
+    functions.push_back(
+        std::pair<std::string, std::function<std::vector<double>()>>(name, [function]() -> std::vector<double> {
+            auto quat = function();
+            return {quat.w(), quat.x(), quat.y(), quat.z()};
         }));
 }
 
@@ -92,10 +102,12 @@ void CustomCSV::write_row() {
 
 void CustomCSV::add_basic_turbine_info(const seahowl::core::Turbine& turbine, const seahowl::core::System& system) {
     add_function("time (s)", [&system]() { return system.get_time(); });
-    add_function("wind (m/s)", [&system, &turbine]() {
-        return system.fluid_model->get_fluid_velocity(turbine.rna.elasto.rotor->body_hub->get_position(),
-                                                      system.get_time());
-    });
+    if (system.fluid_model) {
+        add_function("wind (m/s)", [&system, &turbine]() {
+            return system.fluid_model->get_fluid_velocity(turbine.rna.elasto.rotor->body_hub->get_position(),
+                                                          system.get_time());
+        });
+    }
     add_function("rpm", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
     add_function("power (W)", [&turbine]() { return turbine.get_generated_power(); });
     add_function("pitch collective (rad)", [&turbine]() { return turbine.rna.elasto.rotor->pitch_collective; });
@@ -107,7 +119,7 @@ void CustomCSV::add_basic_turbine_info(const seahowl::core::Turbine& turbine, co
     add_function("tower base force", [&turbine]() { return turbine.tower.elasto.get_tower_base_force(); });
     add_function("tower top moment", [&turbine]() { return turbine.tower.elasto.get_tower_top_moment(); });
     add_function("tower top force", [&turbine]() { return turbine.tower.elasto.get_tower_top_force(); });
-    for (int idx_blade = 0; idx_blade < turbine.rna.blades.size(); idx_blade++) {
+    for (size_t idx_blade = 0; idx_blade < turbine.rna.blades.size(); idx_blade++) {
         auto& blade = *turbine.rna.blades[idx_blade];
         add_function("blade" + std::to_string(idx_blade + 1) + " wind (m/s)",
                      [&blade]() { return blade.aero.get_average_wind_velocity(); });
@@ -125,5 +137,28 @@ void CustomCSV::add_basic_turbine_info(const seahowl::core::Turbine& turbine, co
         });
         add_function("blade" + std::to_string(idx_blade + 1) + " pitch (rad)",
                      [&blade]() { return blade.elasto.get_pitch(); });
+    }
+    if (turbine.foundation) {
+        try {
+            auto& floater = dynamic_cast<seahowl::core::Floater&>(*turbine.foundation);
+            auto& floater_elasto = floater.elasto;
+            add_function("floater position (m)",
+                         [&floater_elasto]() { return floater_elasto.body_main->get_position(); });
+            add_function("floater quaternion w",
+                         [&floater_elasto]() { return floater_elasto.body_main->get_rotation().w(); });
+            add_function("floater quaternion x",
+                         [&floater_elasto]() { return floater_elasto.body_main->get_rotation().x(); });
+            add_function("floater quaternion y",
+                         [&floater_elasto]() { return floater_elasto.body_main->get_rotation().y(); });
+            add_function("floater quaternion z",
+                         [&floater_elasto]() { return floater_elasto.body_main->get_rotation().z(); });
+            for (size_t idx_mooring = 0; idx_mooring < floater_elasto.mooring_system->moorings.size(); idx_mooring++) {
+                auto& mooring = *floater_elasto.mooring_system->moorings[idx_mooring];
+                add_function("mooring" + std::to_string(idx_mooring + 1) + " fairlead tension (N)",
+                             [&mooring]() { return mooring.get_tension_fairlead(); });
+            }
+        } catch (const std::bad_cast& e) {
+            // do nothing if no floater
+        }
     }
 }

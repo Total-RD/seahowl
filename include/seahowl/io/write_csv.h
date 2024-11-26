@@ -49,6 +49,14 @@ class CustomCSV {
      * @brief Adds function to output variables in CSV rows.
      *
      * @param[in] name Name (header) for the outputted variable(s).
+     * @param[in] function Function to call in order to output variables (must return a seahowl::Quaternion).
+     */
+    void add_function(const std::string& name, std::function<seahowl::Quaternion()> function);
+
+    /**
+     * @brief Adds function to output variables in CSV rows.
+     *
+     * @param[in] name Name (header) for the outputted variable(s).
      * @param[in] function Function to call in order to output variables (must return a double).
      */
     void add_function(const std::string& name, std::function<double()> function);
