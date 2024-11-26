@@ -67,22 +67,19 @@ TEST_F(TestController, IEA15) {
     // instantiate test dataset class (custom CSV)
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_controller.csv").generic_string(),
                                        (test_dir / "test_controller.test.csv").generic_string()});
-    test_dataset.add_test_function("time",
-                                   [&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; });
-    test_dataset.add_test_function("power",
-                                   [&turbine]() -> std::vector<double> { return {turbine.get_generated_power()}; });
-    test_dataset.add_test_function("pitch_blade1", [&turbine]() -> std::vector<double> {
-        return {turbine.rna.elasto.rotor->blades[0]->get_pitch()};
-    });
-    test_dataset.add_test_function("pitch_blade2", [&turbine]() -> std::vector<double> {
-        return {turbine.rna.elasto.rotor->blades[1]->get_pitch()};
-    });
-    test_dataset.add_test_function("pitch_blade3", [&turbine]() -> std::vector<double> {
-        return {turbine.rna.elasto.rotor->blades[2]->get_pitch()};
-    });
+    test_dataset.test_csv.add_function(
+        "time (s)", [&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; });
+    test_dataset.test_csv.add_function("power (W)",
+                                       [&turbine]() -> std::vector<double> { return {turbine.get_generated_power()}; });
+    for (size_t idx_blade = 0; idx_blade < turbine.rna.elasto.rotor->blades.size(); idx_blade++) {
+        test_dataset.test_csv.add_function("pitch blade" + std::to_string(idx_blade + 1) + " (rad)",
+                                           [&turbine, idx_blade]() -> std::vector<double> {
+                                               return {turbine.rna.elasto.rotor->blades[idx_blade]->get_pitch()};
+                                           });
+    }
 
     // output values at time = 0
-    test_dataset.add_row();
+    test_dataset.test_csv.write_row();
 
     // simulation loop
     size_t istep = 0;
@@ -103,7 +100,7 @@ TEST_F(TestController, IEA15) {
 
         // check if time to store results
         if ((int)round(1.0 / simulation.dt)) {
-            test_dataset.add_row();
+            test_dataset.test_csv.write_row();
         }
     }
 

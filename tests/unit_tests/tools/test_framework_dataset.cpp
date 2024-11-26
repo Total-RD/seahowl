@@ -22,68 +22,19 @@ void print_data(const vector<vector<double>>& data) {
     spdlog::debug(oss.str());
 }
 
-void TestFrameworkDataset::set_dataset(const vector<vector<double>>& data) {
-    test_data = data;
-}
-
-void TestFrameworkDataset::add_test_function(const std::string& name,
-                                             std::function<std::vector<double>()> test_function) {
-    test_functions_names.push_back(name);
-    test_functions_map.insert({name, test_function});
-}
-
-void TestFrameworkDataset::add_test_function(const std::string& name, std::function<double()> test_function) {
-    test_functions_map.insert({name, [&test_function]() -> std::vector<double> { return {test_function()}; }});
-}
-
-void TestFrameworkDataset::add_row_data(const vector<double>& row) {
-    test_data.push_back(row);
-}
-
-void TestFrameworkDataset::add_row() {
-    vector<double> row = {};
-    for (auto const& test_function_name : test_functions_names) {
-        vector<double> res = test_functions_map[test_function_name]();
-        row.insert(row.end(), res.begin(), res.end());
-    }
-    test_data.push_back(row);
-}
+TestFrameworkDataset::TestFrameworkDataset(const Options& options)
+    : debug(options.debug),
+      reference_filepath(options.reference_filepath),
+      test_filepath(options.test_filepath),
+      test_csv(options.test_filepath) {}
 
 tuple<string, vector<vector<double>>> TestFrameworkDataset::calculate_differences() {
     string error = "";
     vector<vector<double>> result;
 
-    // Write test file
-    string test_file = test_filepath;
-    if (test_file.empty()) {
-        filesystem::path path(reference_filepath);
-        test_file = path.stem().string() + ".test.csv";
-    } else {
-        filesystem::path path(test_file);
-        filesystem::path directory = path.parent_path();
-        if (!filesystem::exists(directory)) {
-            filesystem::create_directories(directory);
-        } else {
-            if (filesystem::exists(test_file)) {
-                filesystem::remove(test_file);
-            }
-        }
-    }
-    if (debug) {
-        spdlog::debug("Writing Test data " + test_file);
-    }
-
-    if (dimensions.empty()) {
-        dimensions.clear();
-        for (auto const& test_function_name : test_functions_names) {
-            dimensions.push_back(test_function_name);
-        }
-    }
-
-    csv_write(test_file, test_data, dimensions);
-
     // Read reference file
-    reference_data = csv_read(reference_filepath, !dimensions.empty());
+    test_data = csv_read(test_filepath, true);
+    reference_data = csv_read(reference_filepath, true);
 
     // Debug
     if (debug) {

@@ -22,12 +22,6 @@ class TestRotor : public FixtureComponents {
 };
 
 TEST_F(TestRotor, mass) {
-    // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({false,
-                                       (ref_dir / "test_rotor_mass.values.csv").generic_string(),
-                                       (test_dir / "test_rotor_mass.values.test.csv").generic_string(),
-                                       {"values"}});
-
     // system
     auto system_elasto = SystemElastoChrono();
 
@@ -52,7 +46,11 @@ TEST_F(TestRotor, mass) {
 
     system_elasto.do_statics(true, 0);
 
-    test_dataset.add_row_data({rna.get_mass()});
-
-    EvaluateTest(test_dataset);
+    // test mass
+    TestFrameworkDataset test_dataset_mass({.debug = false,
+                                            .reference_filepath = (ref_dir / "test_rotor_mass.csv").generic_string(),
+                                            .test_filepath = (test_dir / "test_rotor_mass.test.csv").generic_string()});
+    test_dataset_mass.test_csv.add_function("mass (kg)", [&rna] { return rna.get_mass(); });
+    test_dataset_mass.test_csv.write_row();
+    EvaluateTest(test_dataset_mass);
 }

@@ -32,15 +32,12 @@ TEST_F(TestTower, mass) {
 
     system_elasto.do_statics(true, 0);
 
-    // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({false,
-                                       (ref_dir / "test_tower_mass.values.csv").generic_string(),
-                                       (test_dir / "test_tower_mass.values.test.csv").generic_string(),
-                                       {"values"}});
-
-    test_dataset.add_row_data({tower.get_mass()});
-
-    EvaluateTest(test_dataset);
+    // test mass
+    TestFrameworkDataset test_dataset_mass({false, (ref_dir / "test_tower_mass.csv").generic_string(),
+                                            (test_dir / "test_tower_mass.test.csv").generic_string()});
+    test_dataset_mass.test_csv.add_function("mass (kg)", [&tower] { return tower.get_mass(); });
+    test_dataset_mass.test_csv.write_row();
+    EvaluateTest(test_dataset_mass);
 }
 
 TEST_F(TestTower, frequency) {
@@ -58,17 +55,6 @@ TEST_F(TestTower, frequency) {
 
     system_elasto.do_statics(true, 0);
 
-    // Setup TestFwDataSet
-    TestFrameworkDataset test_datasetvalues({false,
-                                             (ref_dir / "test_tower_frequency.values.csv").generic_string(),
-                                             (test_dir / "test_tower_frequency.values.test.csv").generic_string(),
-                                             {"values"}});
-
-    // check mass
-    test_datasetvalues.add_row_data({tower.get_mass()});
-
-    EvaluateTest(test_datasetvalues);
-
     // static position of tower top
     double pos0 = tower.nodes.back()->get_position().x();
 
@@ -84,10 +70,10 @@ TEST_F(TestTower, frequency) {
     tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
 
     // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({false,
-                                       (ref_dir / "test_tower_frequency.csv").generic_string(),
-                                       (test_dir / "test_tower_frequency.test.csv").generic_string(),
-                                       {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_frequency.csv").generic_string(),
+                                       (test_dir / "test_tower_frequency.test.csv").generic_string()});
+    test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
+    test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -98,7 +84,7 @@ TEST_F(TestTower, frequency) {
                 } else {
                     npeaks += 1;
                     natural_period = (time - start_time) / npeaks;
-                    test_dataset.add_row_data({time, natural_period});
+                    test_dataset.test_csv.write_row();
                 }
             }
         }
@@ -143,18 +129,6 @@ TEST_F(TestTower, cylinder_frequency) {
 
     system_elasto.do_statics(true, 0);
 
-    // Setup TestFwDataSet
-    TestFrameworkDataset test_datasetvalues(
-        {false,
-         (ref_dir / "test_tower_cylinder_frequency.values.csv").generic_string(),
-         (test_dir / "test_tower_cylinder_frequency.values.test.csv").generic_string(),
-         {"values"}});
-
-    // check mass
-    test_datasetvalues.add_row_data({tower.get_mass()});
-
-    EvaluateTest(test_datasetvalues);
-
     // static position of tower top
     double pos0 = tower.nodes.back()->get_position().x();
 
@@ -170,10 +144,10 @@ TEST_F(TestTower, cylinder_frequency) {
     tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
 
     // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({false,
-                                       (ref_dir / "test_tower_cylinder_frequency.csv").generic_string(),
-                                       (test_dir / "test_tower_cylinder_frequency.test.csv").generic_string(),
-                                       {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_cylinder_frequency.csv").generic_string(),
+                                       (test_dir / "test_tower_cylinder_frequency.test.csv").generic_string()});
+    test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
+    test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -184,7 +158,7 @@ TEST_F(TestTower, cylinder_frequency) {
                 } else {
                     npeaks += 1;
                     natural_period = (time - start_time) / npeaks;
-                    test_dataset.add_row_data({time, natural_period});
+                    test_dataset.test_csv.write_row();
                 }
             }
         }
@@ -227,18 +201,6 @@ TEST_F(TestTower, conical_frequency) {
 
     system_elasto.do_statics(true, 0);
 
-    // Setup TestFwDataSet
-    TestFrameworkDataset test_datasetvalues(
-        {false,
-         (ref_dir / "test_tower_conical_frequency.values.csv").generic_string(),
-         (test_dir / "test_tower_conical_frequency.values.test.csv").generic_string(),
-         {"values"}});
-
-    // check mass
-    test_datasetvalues.add_row_data({tower.get_mass()});
-
-    EvaluateTest(test_datasetvalues);
-
     // static position of tower top
     double pos0 = tower.nodes.back()->get_position().x();
 
@@ -254,10 +216,10 @@ TEST_F(TestTower, conical_frequency) {
     tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
 
     // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({false,
-                                       (ref_dir / "test_tower_conical_frequency.csv").generic_string(),
-                                       (test_dir / "test_tower_conical_frequency.test.csv").generic_string(),
-                                       {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_conical_frequency.csv").generic_string(),
+                                       (test_dir / "test_tower_conical_frequency.test.csv").generic_string()});
+    test_dataset.test_csv.add_function("time", [&system_elasto] { return system_elasto.get_time(); });
+    test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -268,7 +230,7 @@ TEST_F(TestTower, conical_frequency) {
                 } else {
                     npeaks += 1;
                     natural_period = (time - start_time) / npeaks;
-                    test_dataset.add_row_data({time, natural_period});
+                    test_dataset.test_csv.write_row();
                 }
             }
         }
