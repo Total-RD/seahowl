@@ -4,6 +4,23 @@
 
 using namespace seahowl;
 
+Vector3d Entity::get_rpy_angles() const {
+    auto rot = get_rotation();
+    auto qw = rot.w();
+    auto qx = rot.x();
+    auto qy = rot.y();
+    auto qz = rot.z();
+    // roll
+    auto roll = std::atan2(2 * (qw * qx + qy * qz), 1 - 2 * (qx * qx + qy * qy));
+    // pitch
+    auto pitch = 2 * std::atan2(std::sqrt(1 + 2 * (qw * qy - qx * qz)), std::sqrt(1 - 2 * (qw * qy - qx * qz))) -
+                 seahowl::PI / 2;
+    // yaw
+    auto yaw = std::atan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz));
+
+    return seahowl::Vector3d(roll, pitch, yaw);
+}
+
 void Entity::rotate(double angle, const Vector3d& axis) {
     auto rotation = AngleAxisd(angle, axis);
     auto new_position = rotation * get_position();

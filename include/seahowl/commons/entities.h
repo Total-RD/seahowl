@@ -4,6 +4,8 @@
 #pragma warning(disable : 4250)
 
 #include "seahowl/commons/numerics.h"
+#include <spdlog/spdlog.h>
+#include <unsupported/Eigen/EulerAngles>
 
 namespace seahowl {
 
@@ -35,6 +37,11 @@ class Entity {
      * @brief Returns rotation of entity.
      */
     virtual Quaternion get_rotation() const = 0;
+
+    /**
+     * @brief Returns RPY (roll-pitch-yaw) angles of entity.
+     */
+    virtual Vector3d get_rpy_angles() const;
 
     /**
      * @brief Returns direction of entity (local Z-axis projected in global frame).

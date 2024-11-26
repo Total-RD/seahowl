@@ -142,23 +142,18 @@ void CustomCSV::add_basic_turbine_info(const seahowl::core::Turbine& turbine, co
         try {
             auto& floater = dynamic_cast<seahowl::core::Floater&>(*turbine.foundation);
             auto& floater_elasto = floater.elasto;
-            add_function("floater position (m)",
-                         [&floater_elasto]() { return floater_elasto.body_main->get_position(); });
-            add_function("floater quaternion w",
-                         [&floater_elasto]() { return floater_elasto.body_main->get_rotation().w(); });
-            add_function("floater quaternion x",
-                         [&floater_elasto]() { return floater_elasto.body_main->get_rotation().x(); });
-            add_function("floater quaternion y",
-                         [&floater_elasto]() { return floater_elasto.body_main->get_rotation().y(); });
-            add_function("floater quaternion z",
-                         [&floater_elasto]() { return floater_elasto.body_main->get_rotation().z(); });
+            add_function("floater rotation (rad)",
+                         [&floater_elasto]() { return floater_elasto.body_main->get_rpy_angles(); });
             for (size_t idx_mooring = 0; idx_mooring < floater_elasto.mooring_system->moorings.size(); idx_mooring++) {
                 auto& mooring = *floater_elasto.mooring_system->moorings[idx_mooring];
                 add_function("mooring" + std::to_string(idx_mooring + 1) + " fairlead tension (N)",
                              [&mooring]() { return mooring.get_tension_fairlead(); });
             }
         } catch (const std::bad_cast& e) {
+            spdlog::critical("nope");
             // do nothing if no floater
         }
+    } else {
+        spdlog::critical("nope2");
     }
 }
