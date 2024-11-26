@@ -73,6 +73,14 @@ void OutputManager::initialize() {
     // output initial logs
     output_initial_logs();
 
+    if (has_csv) {
+        for (int idx_turbine = 0; idx_turbine < system_core.turbines.size(); idx_turbine++) {
+            custom_csv_list.push_back(std::make_unique<CustomCSV>(output_folder + "/turbine" +
+                                                                  std::to_string(idx_turbine + 1) + "_output.csv"));
+            custom_csv_list.back()->add_basic_turbine_info(*system_core.turbines[idx_turbine], system_core);
+        }
+    }
+
     // output everything at step iteration 0 (creates files and CSV headers)
     output_all(0);
 }
@@ -111,7 +119,9 @@ void OutputManager::output_all(int step) {
 
         if (has_csv) {
             // output info in file
-            write_turbine_info_to_csv(output_folder + "/turbine" + std::to_string(turbine_id) + "_output", system_core);
+            for (auto& custom_csv : custom_csv_list) {
+                custom_csv->write_row();
+            }
         }
 
         turbine_id += 1;

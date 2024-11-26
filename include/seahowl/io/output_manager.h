@@ -1,6 +1,7 @@
 #pragma once
 
 #include "seahowl/io/viz_insitu.h"
+#include "seahowl/io/write_csv.h"
 #ifdef HAVE_VTK
     #include "seahowl/io/write_vtk.h"
 #endif
@@ -74,6 +75,7 @@ class OutputManager {
     bool is_initialized = false;
     std::string output_folder = "./output";
     seahowl::core::System& system_core;
+    std::vector<std::unique_ptr<CustomCSV>> custom_csv_list;
 #ifdef HAVE_VTK
     std::unique_ptr<OutputSystemVTK> output_vtk;
 #endif

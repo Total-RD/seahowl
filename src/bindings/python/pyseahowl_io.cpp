@@ -36,9 +36,6 @@ void initialize_pyseahowl_io(py::module& m) {
     m_io.def("get_environmental_model_from_json", &seahowl::io::get_environmental_model_from_json);
     m_io.def("populate_system_from_json", &seahowl::io::populate_system_from_json);
 
-    // io/write_csv.h
-    m_io.def("write_turbine_info_to_csv", &write_turbine_info_to_csv);
-
     // io/output_manager.h
     py::class_<seahowl::io::OutputManager, std::shared_ptr<seahowl::io::OutputManager>>(m_io, "OutputManager")
         .def(py::init<seahowl::core::System&>())
