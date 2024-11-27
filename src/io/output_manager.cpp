@@ -11,8 +11,16 @@
 #endif
 #include "seahowl/core/system.h"
 #include "seahowl/core/turbine.h"
+#include "seahowl/core/blade.h"
+#include "seahowl/core/floater.h"
 #include "seahowl/elasto/turbine_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
+#include "seahowl/elasto/tower_elasto.h"
+#include "seahowl/elasto/rotor_elasto.h"
+#include "seahowl/elasto/floater_elasto.h"
+#include "seahowl/aero/blade_aero.h"
+#include "seahowl/env/wind_models.h"
+#include "seahowl/servo/controller.h"
 
 #include <filesystem>  // C++17
 #include <sstream>
@@ -20,8 +28,64 @@
 #include <iomanip>
 #include <spdlog/spdlog.h>
 
+using seahowl::PI;
 using namespace seahowl::io;
 namespace fs = std::filesystem;
+
+/**
+ * @brief Adds functions for outputting basic infos of a turbine.
+ *
+ * @param[in] custom_csv CustomCSV to which info is outputted.
+ * @param[in] turbine Turbine class from which variables are outputted.
+ */
+void add_basic_turbine_info_to_csv(seahowl::io::CustomCSV& custom_csv, seahowl::core::Turbine& turbine) {
+    custom_csv.add_function("rpm", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
+    custom_csv.add_function("power (W)", [&turbine]() { return turbine.get_generated_power(); });
+    custom_csv.add_function("pitch collective (rad)",
+                            [&turbine]() { return turbine.rna.elasto.rotor->pitch_collective; });
+    custom_csv.add_function("torque elec (Nm)", [&turbine]() { return turbine.controller->get_torque_elec(); });
+    custom_csv.add_function("axial thrust (N)", [&turbine]() { return turbine.rna.elasto.get_axial_thrust(); });
+    custom_csv.add_function("axial torque (Nm)", [&turbine]() { return turbine.rna.elasto.get_axial_torque(); });
+    custom_csv.add_function("rotor azimuth (rad)", [&turbine]() { return turbine.rna.elasto.get_azimuth(); });
+    custom_csv.add_function("tower base moment", [&turbine]() { return turbine.tower.elasto.get_tower_base_moment(); });
+    custom_csv.add_function("tower base force", [&turbine]() { return turbine.tower.elasto.get_tower_base_force(); });
+    custom_csv.add_function("tower top moment", [&turbine]() { return turbine.tower.elasto.get_tower_top_moment(); });
+    custom_csv.add_function("tower top force", [&turbine]() { return turbine.tower.elasto.get_tower_top_force(); });
+    for (size_t idx_blade = 0; idx_blade < turbine.rna.blades.size(); idx_blade++) {
+        auto& blade = *turbine.rna.blades[idx_blade];
+        custom_csv.add_function("blade" + std::to_string(idx_blade + 1) + " wind (m/s)",
+                                [&blade]() { return blade.aero.get_average_wind_velocity(); });
+        custom_csv.add_function("blade" + std::to_string(idx_blade + 1) + " wind load (N)",
+                                [&blade]() { return blade.aero.get_total_load(); });
+        custom_csv.add_function("blade" + std::to_string(idx_blade + 1) + " root moment (Nm)",
+                                [&blade]() { return blade.elasto.get_blade_root_moment(); });
+        custom_csv.add_function("blade" + std::to_string(idx_blade + 1) + " azimuth (rad)", [&blade, &turbine]() {
+            // check that blade_azimuth is between pi and -pi
+            auto blade_azimuth = blade.elasto.azimuth0 + turbine.rna.elasto.get_azimuth();
+            if (blade_azimuth < -PI || blade_azimuth > PI) {
+                blade_azimuth = abs(std::fmod((blade_azimuth + 3 * PI), 2 * PI)) - PI;
+            }
+            return blade_azimuth;
+        });
+        custom_csv.add_function("blade" + std::to_string(idx_blade + 1) + " pitch (rad)",
+                                [&blade]() { return blade.elasto.get_pitch(); });
+    }
+    if (turbine.foundation) {
+        try {
+            auto& floater = dynamic_cast<seahowl::core::Floater&>(*turbine.foundation);
+            auto& floater_elasto = floater.elasto;
+            custom_csv.add_function("floater rotation (rad)",
+                                    [&floater_elasto]() { return floater_elasto.body_main->get_rpy_angles(); });
+            for (size_t idx_mooring = 0; idx_mooring < floater_elasto.mooring_system->moorings.size(); idx_mooring++) {
+                auto& mooring = *floater_elasto.mooring_system->moorings[idx_mooring];
+                custom_csv.add_function("mooring" + std::to_string(idx_mooring + 1) + " fairlead tension (N)",
+                                        [&mooring]() { return mooring.get_tension_fairlead(); });
+            }
+        } catch (const std::bad_cast& e) {
+            // do nothing if no floater
+        }
+    }
+}
 
 OutputManager::OutputManager(seahowl::core::System& system_core) : system_core(system_core) {}
 
@@ -77,7 +141,17 @@ void OutputManager::initialize() {
         for (int idx_turbine = 0; idx_turbine < system_core.turbines.size(); idx_turbine++) {
             custom_csv_list.push_back(std::make_unique<CustomCSV>(output_folder + "/turbine" +
                                                                   std::to_string(idx_turbine + 1) + "_output.csv"));
-            custom_csv_list.back()->add_basic_turbine_info(*system_core.turbines[idx_turbine], system_core);
+            auto& custom_csv = *custom_csv_list.back();
+            auto& system_core = this->system_core;
+            auto& turbine = *system_core.turbines[idx_turbine];
+            custom_csv.add_function("time (s)", [system_core]() { return system_core.get_time(); });
+            if (system_core.fluid_model) {
+                custom_csv.add_function("wind (m/s)", [&system_core, &turbine]() {
+                    return system_core.fluid_model->get_fluid_velocity(
+                        turbine.rna.elasto.rotor->body_hub->get_position(), system_core.get_time());
+                });
+            }
+            add_basic_turbine_info_to_csv(custom_csv, turbine);
         }
     }
 

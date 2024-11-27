@@ -66,14 +66,6 @@ class CustomCSV {
      */
     void write_row();
 
-    /**
-     * @brief Adds functions for outputting basic infos of a turbine.
-     *
-     * @param[in] turbine Turbine class from which variables are outputted.
-     * @param[in] system System from which the turbine belongs (needed to output time info).
-     */
-    void add_basic_turbine_info(const seahowl::core::Turbine& turbine, const seahowl::core::System& system);
-
   private:
     /** @brief CSV filepath. */
     std::string csv_filepath = "";
