@@ -1,4 +1,8 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/functional.h>
+#include <pybind11/eigen.h>
+#include <pybind11/stl.h>
+#include <spdlog/spdlog.h>
 
 #include <seahowl/io/read_json.h>
 #include <seahowl/core/blade.h>
@@ -42,8 +46,37 @@ void initialize_pyseahowl_io(py::module& m) {
         .def("set_output_folder", &seahowl::io::OutputManager::set_output_folder)
         .def("initialize", &seahowl::io::OutputManager::initialize)
         .def("output_all", &seahowl::io::OutputManager::output_all)
+        .def("create_new_csv", &seahowl::io::OutputManager::create_new_csv, py::return_value_policy::reference_internal)
         .def_readwrite("dt_output", &seahowl::io::OutputManager::dt_output)
         .def_readwrite("has_vtk", &seahowl::io::OutputManager::has_vtk)
         .def_readwrite("has_gui", &seahowl::io::OutputManager::has_gui)
         .def_readwrite("has_csv", &seahowl::io::OutputManager::has_csv);
+
+    // io/write_csv.h
+    py::class_<seahowl::io::CustomCSV, std::shared_ptr<seahowl::io::CustomCSV>>(m_io, "CustomCSV")
+        .def(py::init<const std::string&>())
+        .def("add_function",
+             [](seahowl::io::CustomCSV& custom_csv, const std::string& name, py::object& pyfunction) {
+                 bool added_function = false;
+                 try {
+                     std::function<std::vector<double>()> cfunction =
+                         pyfunction.cast<std::function<std::vector<double>()>>();
+                     auto vec = cfunction();
+                     custom_csv.add_function(name, cfunction);
+                     added_function = true;
+                 } catch (const std::runtime_error& e) {
+                     try {
+                         std::function<double()> cfunction = pyfunction.cast<std::function<double()>>();
+                         auto vec = cfunction();
+                         custom_csv.add_function(name, cfunction);
+                         added_function = true;
+                     } catch (const std::runtime_error& e) {
+                         spdlog::error(e.what());
+                     }
+                 }
+                 if (!added_function) {
+                     spdlog::error("Could not add function with header \"{}\" to CustomCSV", name);
+                 }
+             })
+        .def("write_row", &seahowl::io::CustomCSV::write_row);
 }
