@@ -54,16 +54,23 @@ void CustomCSV::write_row() {
         for (auto value : values) {
             row_string.append(std::to_string(value)).append(",");
             if (!is_initialized) {
+                if (values.size() == 0) {
+                    throw std::runtime_error("CustomCSV: no value outputted for \"" + function_pair.first + "\".");
+                }
                 if (values.size() == 1) {
                     header.append(function_pair.first).append(",");
-                } else if (values.size() == 3) {
+                } else {
                     std::string dim = "";
-                    if (ivalue == 0) {
-                        dim = "x";
-                    } else if (ivalue == 1) {
-                        dim = "y";
-                    } else if (ivalue == 2) {
-                        dim = "z";
+                    if (values.size() == 3) {
+                        if (ivalue == 0) {
+                            dim = "x";
+                        } else if (ivalue == 1) {
+                            dim = "y";
+                        } else if (ivalue == 2) {
+                            dim = "z";
+                        }
+                    } else {
+                        dim = "dim" + std::to_string(ivalue);
                     }
                     size_t pos = function_pair.first.find("(");
                     if (pos != std::string::npos) {
@@ -72,8 +79,6 @@ void CustomCSV::write_row() {
                     } else {
                         header.append(function_pair.first).append(" " + dim).append(",");
                     }
-                } else if (values.size() > 3) {
-                    header.append(function_pair.first).append(" " + std::to_string(ivalue)).append(",");
                 }
             }
             ivalue += 1;
