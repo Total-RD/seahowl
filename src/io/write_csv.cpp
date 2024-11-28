@@ -41,8 +41,12 @@ void CustomCSV::write_row() {
     std::string row_string = "";
     std::string header = "";  // only used if CSV is uninitialized
     if (!is_initialized) {
+        // create directories if necessary
         auto fspath = fs::path(csv_filepath);
-        fs::create_directories(fspath.parent_path());
+        auto fspath_parent = fspath.parent_path();
+        if (!fspath_parent.empty()) {
+            fs::create_directories(fspath_parent);
+        }
     }
     for (auto const& function_pair : functions) {
         auto values = function_pair.second();

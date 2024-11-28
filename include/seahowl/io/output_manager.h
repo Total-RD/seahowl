@@ -71,11 +71,18 @@ class OutputManager {
      */
     void output_initial_logs();
 
+    /**
+     * @brief Adds and returns a reference to a new CustomCSV in the list of CSVs.
+     *
+     * @param csv_filename Name (or path) of custom CSV, relative to output_folder.
+     */
+    seahowl::io::CustomCSV& create_new_csv(const std::string& csv_filepath);
+
   private:
     bool is_initialized = false;
     std::string output_folder = "./output";
     seahowl::core::System& system_core;
-    std::vector<std::unique_ptr<CustomCSV>> custom_csv_list;
+    std::vector<CustomCSV> custom_csv_list;
 #ifdef HAVE_VTK
     std::unique_ptr<OutputSystemVTK> output_vtk;
 #endif

@@ -113,6 +113,9 @@ void OutputManager::preinitialize() {
 void OutputManager::initialize() {
     // outputs
     spdlog::debug("Creating directory {} for outputs.", output_folder);
+    if (output_folder.empty()) {
+        output_folder = fs::current_path();
+    }
     fs::create_directories(output_folder);
     if (has_vtk) {
 #ifdef HAVE_VTK
@@ -139,9 +142,8 @@ void OutputManager::initialize() {
 
     if (has_csv) {
         for (int idx_turbine = 0; idx_turbine < system_core.turbines.size(); idx_turbine++) {
-            custom_csv_list.push_back(std::make_unique<CustomCSV>(output_folder + "/turbine" +
-                                                                  std::to_string(idx_turbine + 1) + "_output.csv"));
-            auto& custom_csv = *custom_csv_list.back();
+            auto& custom_csv =
+                create_new_csv(output_folder + "/turbine" + std::to_string(idx_turbine + 1) + "_output.csv");
             auto& system_core = this->system_core;
             auto& turbine = *system_core.turbines[idx_turbine];
             custom_csv.add_function("time (s)", [system_core]() { return system_core.get_time(); });
@@ -171,6 +173,10 @@ void OutputManager::output_all(int step) {
     if (has_gui) {
         output_insitu->draw();
     }
+    // output info in CSV file if any CustomCSV was created
+    for (auto& custom_csv : custom_csv_list) {
+        custom_csv.write_row();
+    }
 
     // output
     int turbine_id = 1;
@@ -191,20 +197,13 @@ void OutputManager::output_all(int step) {
         }
         spdlog::info(output_sstring.str());
 
-        if (has_csv) {
-            // output info in file
-            for (auto& custom_csv : custom_csv_list) {
-                custom_csv->write_row();
-            }
-        }
-
         turbine_id += 1;
     }
 }
 
 void OutputManager::output_initial_logs() {
-    std::string logs_folder = output_folder + "/logs";
-    spdlog::debug("Creating directory {} for logs.", logs_folder);
+    std::string logs_folder = fs::path(output_folder) / "logs";
+    spdlog::debug("Creating initial logs in {}.", logs_folder);
     fs::create_directories(logs_folder);
     // output
     int turbine_id = 1;
@@ -256,4 +255,10 @@ void OutputManager::output_initial_logs() {
         tower_log_reference.close();
         tower_log_discretized.close();
     }
+}
+
+seahowl::io::CustomCSV& OutputManager::create_new_csv(const std::string& csv_filename) {
+    auto csv_filepath = (fs::path(output_folder) / csv_filename).generic_string();
+    custom_csv_list.push_back(CustomCSV(csv_filepath));
+    return custom_csv_list.back();
 }

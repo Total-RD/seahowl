@@ -22,7 +22,7 @@ void check_file_exists(const std::string& filepath) {
 }
 
 std::string copy_file_and_increment(const std::string& filepath, const std::string& destination_dir) {
-    if (!fs::exists(destination_dir)) {
+    if (!destination_dir.empty()) {
         fs::create_directories(destination_dir);
     }
     fs::path pfilepath = fs::path(filepath);
