@@ -63,7 +63,7 @@ namespace seahowl {
 namespace io {
 
 json get_json_from_file(const std::string& filepath) {
-    check_file_exists(filepath);
+    utils::check_file_exists(filepath);
     std::ifstream json_file(filepath);
     json json_obj;
     json_file >> json_obj;
@@ -83,7 +83,7 @@ class InputDataCSV : public InputData {
 
   public:
     void open(const std::string& filepath) override {
-        check_file_exists(filepath);
+        utils::check_file_exists(filepath);
         // open file
         std::ifstream csv_file;
         csv_file.open(filepath);
@@ -137,7 +137,7 @@ class InputDataJSON : public InputData {
 
   public:
     void open(const std::string& filepath) override {
-        check_file_exists(filepath);
+        utils::check_file_exists(filepath);
         std::ifstream json_file(filepath);
         json_file >> json_data;
         json_file.close();
@@ -390,7 +390,7 @@ void populate_tower_elasto_from_json(const std::string& filepath, seahowl::elast
 }
 
 void populate_tower_aero_from_json(const std::string& filepath, seahowl::aero::TowerAero& tower) {
-    check_file_exists(filepath);
+    utils::check_file_exists(filepath);
     tower.reference_points = get_tower_aero_reference_points_from_json(filepath);
 }
 
@@ -683,12 +683,12 @@ void populate_turbine_from_json(const std::string& filepath,
             // path
             libfilepath = path(DATADIR / libfilepath).generic_string();
             // copy libdiscon to temporary folder with new name in case there are several turbines
-            check_file_exists(libfilepath);
+            utils::check_file_exists(libfilepath);
 #ifdef __gnu_linux__
 // no need to copy and increment libdiscon.so on GNU, handled automatically with dlmopen
 #else
             // first copy libdiscon to tmp folder
-            libfilepath = copy_file_and_increment(libfilepath, output_folder + "/tmp");
+            libfilepath = utils::copy_file_and_increment(libfilepath, output_folder + "/tmp");
 #endif
         }
         auto infilepath = controller_json.at("options").at("infile").get<std::string>();
