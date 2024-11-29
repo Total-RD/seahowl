@@ -6,7 +6,7 @@
 
 namespace fs = std::filesystem;
 
-void CommandLineParser::printHelper(const std::map<std::string, app::SpecComputed>& cmdOptions) {
+void CommandLineParser::print_helper(const std::map<std::string, app::SpecComputed>& cmdOptions) {
     std::cout << "Usage: file_input [options]\n";
     std::cout << "Options:\n";
     std::cout << "  -h        Display this help message\n";
@@ -21,7 +21,7 @@ void CommandLineParser::printHelper(const std::map<std::string, app::SpecCompute
 }
 
 std::map<std::string, std::string>
-CommandLineParser::parseArgs(int argc, char* argv[], const std::map<std::string, app::SpecComputed>& cmdOptions) {
+CommandLineParser::parse_args(int argc, char* argv[], const std::map<std::string, app::SpecComputed>& cmdOptions) {
     std::map<std::string, std::string> options;
 
     for (int i = 1; i < argc; i++) {
@@ -29,7 +29,7 @@ CommandLineParser::parseArgs(int argc, char* argv[], const std::map<std::string,
 
         // Check if the argument is "-h"
         if (arg == "-h") {
-            printHelper(cmdOptions);
+            print_helper(cmdOptions);
             std::exit(EXIT_SUCCESS);
         }
 
@@ -51,7 +51,7 @@ CommandLineParser::parseArgs(int argc, char* argv[], const std::map<std::string,
                 i++;  // Skip the value in the next iteration
 
                 // Check if the value matches the expected type
-                if (!isValidType(value, it->second.spec.type)) {
+                if (!is_valid_type(value, it->second.spec.type)) {
                     std::cerr << "Error: Invalid value type for option '" << key
                               << "'. Expected type: " << it->second.spec.type << "\n";
                     std::exit(EXIT_FAILURE);
@@ -71,7 +71,7 @@ CommandLineParser::parseArgs(int argc, char* argv[], const std::map<std::string,
     return options;
 }
 
-bool CommandLineParser::isValidType(const std::string& value, const std::string& type) {
+bool CommandLineParser::is_valid_type(const std::string& value, const std::string& type) {
     try {
         if (type == "int") {
             std::stoi(value);

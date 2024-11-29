@@ -8,19 +8,19 @@
 
 namespace utils {
 
-std::string toUpper(const std::string& input) {
+std::string to_upper(const std::string& input) {
     std::string result = input;
     std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) { return std::toupper(c); });
     return result;
 }
 
-std::string toLower(const std::string& input) {
+std::string to_lower(const std::string& input) {
     std::string result = input;
     std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) { return std::tolower(c); });
     return result;
 }
 
-std::string replaceAll(std::string str, char from, char to) {
+std::string replace_all(std::string str, char from, char to) {
     for (size_t i = 0; i < str.length(); ++i) {
         if (str[i] == from) {
             str[i] = to;
@@ -37,7 +37,7 @@ std::string trim(const std::string& str) {
     return str.substr(first, (last - first + 1));
 }
 
-std::string camelToKebab(const std::string& camelCase) {
+std::string camel_to_kebab(const std::string& camelCase) {
     std::string kebabCase;
     for (char ch : camelCase) {
         if (std::isupper(ch)) {
@@ -52,7 +52,7 @@ std::string camelToKebab(const std::string& camelCase) {
     return kebabCase;
 };
 
-std::string camelToUpper(const std::string& camelCase) {
+std::string camel_to_upper(const std::string& camelCase) {
     std::string upperCase;
     for (char ch : camelCase) {
         if (std::isupper(ch)) {
@@ -64,9 +64,9 @@ std::string camelToUpper(const std::string& camelCase) {
 };
 
 // cout print table
-void printTable(const std::vector<std::string>& headers,
-                const std::vector<std::vector<std::string>>& rows,
-                int columnWidth) {
+void print_table(const std::vector<std::string>& headers,
+                 const std::vector<std::vector<std::string>>& rows,
+                 int columnWidth) {
     // Separator line
     std::cout << std::string((columnWidth + 1) * headers.size(), '-') << std::endl;
     // Headers
@@ -104,7 +104,7 @@ void printTable(const std::vector<std::string>& headers,
 // TODO : ??
 // - Short options (single dash)
 // - Help text generation
-std::map<std::string, std::string> parseArgs(int argc, char* argv[]) {
+std::map<std::string, std::string> parse_args(int argc, char* argv[]) {
     std::map<std::string, std::string> options;
 
     for (int i = 1; i < argc; i++) {

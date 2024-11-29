@@ -78,31 +78,31 @@ Simulation::Simulation()
 }
 
 void Simulation::populate_from_file(const std::string& filepath) {
-    config.setJsonFilePath(filepath);
+    config.set_json_filepath(filepath);
     config.compute();
     populate_from_config();
 }
 
 void Simulation::populate_from_config() {
     spdlog::stopwatch sw_setup;
-    auto filepath = config.getJsonFilePath();
+    auto filepath = config.get_json_filepath();
 
     // timestepping
-    dt = config.getDouble("numerics.dt");
-    duration = config.getDouble("numerics.duration");
+    dt = config.get_double("numerics.dt");
+    duration = config.get_double("numerics.duration");
 
     // outputs
     if (!seahowl::LOG_LEVEL_SET) {
         // logging
-        auto log_level = config.getString("outputs.log_level");
+        auto log_level = config.get_string("outputs.log_level");
         seahowl::set_log_level_global(log_level);
     }
 
     // output manager
-    outputs->dt_output = config.getDouble("outputs.dt");
-    outputs->set_output_folder(config.getString("outputs.folder"));
-    outputs->has_vtk = config.getBool("outputs.VTK");
-    outputs->has_gui = config.getBool("outputs.gui");
+    outputs->dt_output = config.get_double("outputs.dt");
+    outputs->set_output_folder(config.get_string("outputs.folder"));
+    outputs->has_vtk = config.get_bool("outputs.VTK");
+    outputs->has_gui = config.get_bool("outputs.gui");
 
     spdlog::info("");
     spdlog::info("-------------------------------------------------");
@@ -140,19 +140,19 @@ void Simulation::initialize_from_config() {
 
     // initialization
     // statics
-    auto linear_step = config.getBool("numerics.statics.linear_step");
-    auto nonlinear_steps = config.getInt("numerics.statics.nonlinear_steps");
+    auto linear_step = config.get_bool("numerics.statics.linear_step");
+    auto nonlinear_steps = config.get_int("numerics.statics.nonlinear_steps");
     if (linear_step && nonlinear_steps > 0) {
         system_core->elasto.do_statics(linear_step, nonlinear_steps);
         system_core->poststep(system_core->get_time(), dt);  // poststep to update positions aero
     }
 
     // apply presetup
-    auto presimulation_duration = config.getDouble("numerics.presimulation.duration");
+    auto presimulation_duration = config.get_double("numerics.presimulation.duration");
     if (presimulation_duration > 0) {
-        auto presimulation_dt = config.getDouble("numerics.presimulation.dt");
-        auto do_presetup = config.getBool("numerics.presimulation.presetup");
-        auto fix_towers = config.getBool("numerics.presimulation.fix_towers");
+        auto presimulation_dt = config.get_double("numerics.presimulation.dt");
+        auto do_presetup = config.get_bool("numerics.presimulation.presetup");
+        auto fix_towers = config.get_bool("numerics.presimulation.fix_towers");
         system_core->run_presimulation(presimulation_duration, presimulation_dt, fix_towers, do_presetup);
     }
 };

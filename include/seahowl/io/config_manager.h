@@ -18,19 +18,19 @@ struct ConfigManagerVariableSpec {
     std::string description = "";
     std::string type = "";
     std::string defaultValue = "";
-    bool hasEnvVar = false;
-    bool hasConfigFileVar = false;
-    bool hasOptionVar = false;
+    bool has_env_var = false;
+    bool has_config_file_var = false;
+    bool has_option_var = false;
 };
 
 /**
  * @brief Options for the configuration manager.
  */
 struct ConfigManagerOptions {
-    std::string envVarPrefix = "";
-    std::string iniFilePath = "";
-    std::string jsonFilePath = "";
-    ConfigManagerVariableSpec variableSpecs = {};
+    std::string env_var_prefix = "";
+    std::string ini_filepath = "";
+    std::string json_filepath = "";
+    ConfigManagerVariableSpec variable_specs = {};
 };
 
 /**
@@ -39,9 +39,9 @@ struct ConfigManagerOptions {
 struct SpecComputed {
     ConfigManagerVariableSpec spec;
     std::string description = "";
-    std::string envVar = "";
-    std::string configFileVar = "";
-    std::string commandOptionVar = "";
+    std::string env_var = "";
+    std::string config_file_var = "";
+    std::string command_option_var = "";
 };
 
 /**
@@ -50,9 +50,9 @@ struct SpecComputed {
 struct ValueComputed {
     std::string origin = "";
     std::string value;
-    int intValue;
-    double doubleValue;
-    bool boolValue;
+    int int_value;
+    double double_value;
+    bool bool_value;
 };
 
 class ConfigManagerPath;  // Forward declaration
@@ -81,11 +81,11 @@ class ConfigManager {
     /**
      * @brief Print the specification of the configuration manager.
      */
-    void printSpec() const;
+    void print_spec() const;
     /**
      * @brief Print the computed values of the configuration manager.
      */
-    void printCompute() const;
+    void print_compute() const;
     /**
      * @brief Get the value of a key.
      * @param key Key to get the value of.
@@ -95,22 +95,22 @@ class ConfigManager {
      * @brief Get the string value of a key.
      * @param key Key to get the value of.
      */
-    std::string getString(const std::string& key) const;
+    std::string get_string(const std::string& key) const;
     /**
      * @brief Get the integer value of a key.
      * @param key Key to get the value of.
      */
-    int getInt(const std::string& key) const;
+    int get_int(const std::string& key) const;
     /**
      * @brief Get the double value of a key.
      * @param key Key to get the value of.
      */
-    double getDouble(const std::string& key) const;
+    double get_double(const std::string& key) const;
     /**
      * @brief Get the boolean value of a key.
      * @param key Key to get the value of.
      */
-    bool getBool(const std::string& key) const;
+    bool get_bool(const std::string& key) const;
     /**
      * @brief Check if a key exists.
      * @param key Key to check.
@@ -119,12 +119,12 @@ class ConfigManager {
     /**
      * @brief Get the JSON file path.
      */
-    std::string getJsonFilePath() const;
+    std::string get_json_filepath() const;
     /**
      * @brief Set the JSON file path.
      * @param newPath New path to set.
      */
-    void setJsonFilePath(const std::string& newPath);
+    void set_json_filepath(const std::string& newPath);
     /**
      * @brief Get the JSON data.
      */
@@ -146,10 +146,10 @@ class ConfigManagerPath {
     ConfigManagerPath(ConfigManager& conf, std::string prefix) : conf_(&conf), prefix_(prefix) {}
 
     std::string get(const std::string& key) const { return conf_->get(prefix_ + "." + key); };
-    std::string getString(const std::string& key) const { return conf_->getString(prefix_ + "." + key); };
-    int getInt(const std::string& key) const { return conf_->getInt(prefix_ + "." + key); };
-    double getDouble(const std::string& key) const { return conf_->getDouble(prefix_ + "." + key); };
-    bool getBool(const std::string& key) const { return conf_->getBool(prefix_ + "." + key); };
+    std::string get_string(const std::string& key) const { return conf_->get_string(prefix_ + "." + key); };
+    int get_int(const std::string& key) const { return conf_->get_int(prefix_ + "." + key); };
+    double get_double(const std::string& key) const { return conf_->get_double(prefix_ + "." + key); };
+    bool get_bool(const std::string& key) const { return conf_->get_bool(prefix_ + "." + key); };
     bool has(const std::string& key) const { return conf_->has(prefix_ + "." + key); };
 };
 

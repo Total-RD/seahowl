@@ -1086,12 +1086,11 @@ void populate_system_from_json(const std::string& filepath, seahowl::core::Syste
 }
 
 void populate_system_from_config(const app::ConfigManager& config, seahowl::core::System& system_core) {
-
     // environmental info
-    auto filepath_environment = config.getString("environment.file");
+    auto filepath_environment = config.get_string("environment.file");
     populate_environmental_conditions_from_json(filepath_environment, system_core);
-    std::string output_folder = config.getString("outputs.folder");
-    populate_system(config.getJsonFilePath(), system_core, output_folder);
+    std::string output_folder = config.get_string("outputs.folder");
+    populate_system(config.get_json_filepath(), system_core, output_folder);
 }
 
 void populate_system(const std::string& filepath, seahowl::core::System& system_core, std::string& output_folder) {

@@ -31,12 +31,12 @@ void run_simulation(int argc, char* argv[]) {
 
     auto simulation = seahowl::core::Simulation();
     app::ConfigManager& config = simulation.getConfigManager();
-    config.setJsonFilePath(filepath_main);
+    config.set_json_filepath(filepath_main);
 
     // Init
     // config.printSpec();
     config.compute(argc, argv);
-    config.printCompute();
+    config.print_compute();
 
     if (filepath_main.empty()) {
         throw std::runtime_error("SEAHOWL driver: pass main input file as first argument.");
