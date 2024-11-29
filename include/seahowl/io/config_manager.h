@@ -6,6 +6,8 @@
 #include <memory>
 // #include <optional>
 
+namespace seahowl {
+namespace io {
 namespace app {
 
 // ConfigManager
@@ -154,3 +156,5 @@ class ConfigManagerPath {
 };
 
 }  // namespace app
+}  // namespace io
+}  // namespace seahowl

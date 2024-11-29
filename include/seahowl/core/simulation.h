@@ -29,7 +29,7 @@ class Simulation {
     void initialize();
     void step();
     void run_all();
-    app::ConfigManager& getConfigManager();
+    seahowl::io::app::ConfigManager& getConfigManager();
 
   private:
     std::unique_ptr<seahowl::elasto::SystemElasto> system_elasto;
@@ -37,7 +37,7 @@ class Simulation {
     int nstep = 0;
     double t_output_next = 0.0;
     std::string main_filepath;
-    app::ConfigManager config;
+    seahowl::io::app::ConfigManager config;
 };
 
 }  // namespace core

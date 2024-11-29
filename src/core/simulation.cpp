@@ -110,7 +110,7 @@ void Simulation::populate_from_config() {
     spdlog::info("-------------------------------------------------");
     spdlog::info("");
 
-    populate_system_from_config(config, *system_core);
+    seahowl::io::populate_system_from_config(config, *system_core);
 
     spdlog::debug("Populated system in {:.3}s.", sw_setup);
 }
@@ -205,6 +205,6 @@ void Simulation::run_all() {
     spdlog::info("-------------------------------------------------");
 }
 
-app::ConfigManager& Simulation::getConfigManager() {
+seahowl::io::app::ConfigManager& Simulation::getConfigManager() {
     return config;
 }

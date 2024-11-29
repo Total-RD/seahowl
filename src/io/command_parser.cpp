@@ -5,8 +5,9 @@
 #include <filesystem>
 
 namespace fs = std::filesystem;
+using namespace seahowl::io::app;
 
-void CommandLineParser::print_helper(const std::map<std::string, app::SpecComputed>& cmdOptions) {
+void CommandLineParser::print_helper(const std::map<std::string, SpecComputed>& cmdOptions) {
     std::cout << "Usage: file_input [options]\n";
     std::cout << "Options:\n";
     std::cout << "  -h        Display this help message\n";
@@ -21,7 +22,7 @@ void CommandLineParser::print_helper(const std::map<std::string, app::SpecComput
 }
 
 std::map<std::string, std::string>
-CommandLineParser::parse_args(int argc, char* argv[], const std::map<std::string, app::SpecComputed>& cmdOptions) {
+CommandLineParser::parse_args(int argc, char* argv[], const std::map<std::string, SpecComputed>& cmdOptions) {
     std::map<std::string, std::string> options;
 
     for (int i = 1; i < argc; i++) {

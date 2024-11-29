@@ -4,6 +4,10 @@
 #include <string>
 #include <seahowl/io/config_manager.h>
 
+namespace seahowl {
+namespace io {
+namespace app {
+
 class CommandLineParser {
   public:
     /**
@@ -30,3 +34,7 @@ class CommandLineParser {
      */
     static bool is_valid_type(const std::string& value, const std::string& type);
 };
+
+}  // namespace app
+}  // namespace io
+}  // namespace seahowl

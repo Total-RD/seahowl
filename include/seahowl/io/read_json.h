@@ -36,6 +36,9 @@ class FluidSoilModel;
 #include <memory>
 #include <seahowl/io/config_manager.h>
 
+namespace seahowl {
+namespace io {
+
 /**
  * @brief Returns blade elasto reference points given a json file.
  *
@@ -198,3 +201,6 @@ void populate_system_from_config(const app::ConfigManager& config, seahowl::core
  * @param[out] output_folder Output folder.
  */
 void populate_system(const std::string& filepath, seahowl::core::System& system_core, std::string& output_folder);
+
+}  // namespace io
+}  // namespace seahowl

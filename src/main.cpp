@@ -30,7 +30,7 @@ void run_simulation(int argc, char* argv[]) {
     }
 
     auto simulation = seahowl::core::Simulation();
-    app::ConfigManager& config = simulation.getConfigManager();
+    seahowl::io::app::ConfigManager& config = simulation.getConfigManager();
     config.set_json_filepath(filepath_main);
 
     // Init

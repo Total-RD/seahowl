@@ -59,6 +59,9 @@ using seahowl::Vector3d;
 using seahowl::Vector2d;
 using seahowl::PI;
 
+namespace seahowl {
+namespace io {
+
 json get_json_from_file(const std::string& filepath) {
     check_file_exists(filepath);
     std::ifstream json_file(filepath);
@@ -1130,3 +1133,6 @@ void populate_system(const std::string& filepath, seahowl::core::System& system_
         }
     }
 }
+
+}  // namespace io
+}  // namespace seahowl

@@ -23,18 +23,18 @@ void initialize_pyseahowl_io(py::module& m) {
     auto m_io = m.def_submodule("io", "Inpout/output submodule.");
 
     // io/read_json.h
-    m_io.def("populate_blade_from_json", &populate_blade_from_json);
-    m_io.def("populate_blade_elasto_from_json", &populate_blade_elasto_from_json);
-    m_io.def("populate_blade_aero_from_json", &populate_blade_aero_from_json);
-    m_io.def("populate_tower_from_json", &populate_tower_from_json);
-    m_io.def("populate_tower_elasto_from_json", &populate_tower_elasto_from_json);
-    m_io.def("populate_tower_aero_from_json", &populate_tower_aero_from_json);
-    m_io.def("populate_rna_from_json", &populate_rna_from_json);
-    m_io.def("populate_turbine_from_json", &populate_turbine_from_json);
-    m_io.def("add_turbine_to_system_from_json", &add_turbine_to_system_from_json);
-    m_io.def("populate_environmental_conditions_from_json", &populate_environmental_conditions_from_json);
-    m_io.def("get_environmental_model_from_json", &get_environmental_model_from_json);
-    m_io.def("populate_system_from_json", &populate_system_from_json);
+    m_io.def("populate_blade_from_json", &seahowl::io::populate_blade_from_json);
+    m_io.def("populate_blade_elasto_from_json", &seahowl::io::populate_blade_elasto_from_json);
+    m_io.def("populate_blade_aero_from_json", &seahowl::io::populate_blade_aero_from_json);
+    m_io.def("populate_tower_from_json", &seahowl::io::populate_tower_from_json);
+    m_io.def("populate_tower_elasto_from_json", &seahowl::io::populate_tower_elasto_from_json);
+    m_io.def("populate_tower_aero_from_json", &seahowl::io::populate_tower_aero_from_json);
+    m_io.def("populate_rna_from_json", &seahowl::io::populate_rna_from_json);
+    m_io.def("populate_turbine_from_json", &seahowl::io::populate_turbine_from_json);
+    m_io.def("add_turbine_to_system_from_json", &seahowl::io::add_turbine_to_system_from_json);
+    m_io.def("populate_environmental_conditions_from_json", &seahowl::io::populate_environmental_conditions_from_json);
+    m_io.def("get_environmental_model_from_json", &seahowl::io::get_environmental_model_from_json);
+    m_io.def("populate_system_from_json", &seahowl::io::populate_system_from_json);
 
     // io/write_csv.h
     m_io.def("write_turbine_info_to_csv", &write_turbine_info_to_csv);

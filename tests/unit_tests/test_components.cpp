@@ -36,8 +36,9 @@
     #include "seahowl/env/inflowwind_adapter.h"
 #endif
 
-using namespace seahowl::elasto;
 using namespace seahowl;
+using namespace seahowl::elasto;
+using namespace seahowl::io;
 
 #include <filesystem>  // C++17
 #include <cstdlib>

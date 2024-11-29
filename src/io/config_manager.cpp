@@ -12,6 +12,8 @@
 
 namespace fs = std::filesystem;
 
+namespace seahowl {
+namespace io {
 namespace app {
 
 class ConfigManagerImpl {
@@ -256,3 +258,5 @@ ConfigManagerPath ConfigManager::path(std::string prefix) {
 // ConfigManagerPath
 
 }  // namespace app
+}  // namespace io
+}  // namespace seahowl

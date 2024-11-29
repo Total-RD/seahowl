@@ -6,6 +6,8 @@
 #include <cctype>
 #include <algorithm>
 
+namespace seahowl {
+namespace io {
 namespace utils {
 
 std::string to_upper(const std::string& input) {
@@ -129,3 +131,5 @@ std::map<std::string, std::string> parse_args(int argc, char* argv[]) {
 }
 
 }  // namespace utils
+}  // namespace io
+}  // namespace seahowl
