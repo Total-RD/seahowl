@@ -8,7 +8,6 @@
 #include <map>
 #include <iostream>
 
-
 namespace fs = std::filesystem;
 
 void run_simulation(int argc, char* argv[]) {
@@ -18,15 +17,21 @@ void run_simulation(int argc, char* argv[]) {
     std::map<std::string, char*> options;
 
     // path of main input file
-    auto filepath_main = fs::path();
+    std::string filepath_main;
 
     if (argc > 1 && strncmp(argv[1], "-", 1) != 0) {
-        filepath_main = fs::absolute(fs::path(argv[1]));
+        // check if first argument is an option or the main input file
+        filepath_main = argv[1];
+        if (filepath_main.empty() || !fs::exists(filepath_main)) {
+            // check if main input file exists
+            throw std::runtime_error("SEAHOWL driver: main input file not found: " + filepath_main +
+                                     " (absolute: " + fs::absolute(filepath_main).generic_string() + ").");
+        }
     }
 
     auto simulation = seahowl::core::Simulation();
     app::ConfigManager& config = simulation.getConfigManager();
-    config.setJsonFilePath(filepath_main.generic_string());
+    config.setJsonFilePath(filepath_main);
 
     // Init
     // config.printSpec();
@@ -34,7 +39,7 @@ void run_simulation(int argc, char* argv[]) {
     config.printCompute();
 
     if (filepath_main.empty()) {
-        throw std::runtime_error("SEAHOWL driver: pass main input file as first argument (or type --help).");
+        throw std::runtime_error("SEAHOWL driver: pass main input file as first argument.");
     }
 
     simulation.populate_from_config();
