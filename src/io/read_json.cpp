@@ -619,7 +619,7 @@ void populate_turbine_from_json(const std::string& filepath,
         aero_options.at("hub_loss").get_to(rotor_aero->has_hub_loss);
         aero_options.at("tip_loss").get_to(rotor_aero->has_tip_loss);
         aero_options.at("tower_shadow").get_to(rotor_aero->has_tower_shadow);
-
+        aero_options.at("induction").get_to(rotor_aero->has_induction);
     } else if (aero_json.at("solver").get<std::string>() == "disk") {
         spdlog::info("Aerodynamic model: Actuator Disk Theory.");
         if (rotor_json.at("type").get<std::string>() != "disk") {

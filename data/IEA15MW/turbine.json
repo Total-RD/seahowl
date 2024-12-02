@@ -4,7 +4,8 @@
     "options": {
       "hub_loss": true,
       "tip_loss": true,
-      "tower_shadow": true
+      "tower_shadow": true,
+      "induction": true
     }
   },
   "rotor": {

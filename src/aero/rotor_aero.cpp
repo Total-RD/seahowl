@@ -133,6 +133,8 @@ void RotorAeroBEMT::compute_radii_distances_solidity() {
 }
 
 void RotorAeroBEMT::compute_fluid_loads(const FluidModel& wind_model, double time) {
+    double tol = 1e-6;
+
     compute_radii_distances_solidity();
 
     auto hub_position = body_hub.get_position();
@@ -162,9 +164,6 @@ void RotorAeroBEMT::compute_fluid_loads(const FluidModel& wind_model, double tim
             auto node_position = node.get_position();
             auto node_rotation = node.get_rotation();
             auto node_velocity = node.get_velocity();
-            auto node_normal = node_rotation * Vector3d(1.0, 0.0, 0.0);
-            auto node_tangent = node_rotation * Vector3d(0.0, 1.0, 0.0);
-            auto node_axis = node_rotation * Vector3d(0.0, 0.0, 1.0);
 
             // fluid density
             double density = wind_model.get_fluid_density(node_position, time);
@@ -179,45 +178,69 @@ void RotorAeroBEMT::compute_fluid_loads(const FluidModel& wind_model, double tim
             // relative velocity
             auto global_velocity = Vector3d(wind_velocity - node_velocity);
 
-            // get normal vector of bent blade
-            // assume shear along blade for sweep
-            auto angle_z = get_vector_angle_from_plane(node_axis, disk_normal, disk_tangent);
-            auto blade_normal_sheared = AngleAxisd(angle_z, disk_tangent) * disk_normal;
-            // unsheared
-            auto node_axis_projected = project_vector_to_plane(node_axis, disk_normal).normalized();
-            auto blade_tangent = node_axis_projected.cross(disk_normal);
-            auto blade_normal = node_axis.cross(blade_tangent);
+            double angle_airfoil = 0.0;
 
-            // make coordinate system to use for BEMT
-            auto global_normal = blade_normal_sheared;
-            auto global_tangent = disk_tangent;
-            auto global_axis = global_normal.cross(global_tangent);
+            Vector3d global_normal;           // normal of airfoil
+            Vector3d global_tangent;          // tangent of airfoil
+            Vector3d global_axis;             // axis of blade at airfoil
+            Vector2d local_velocity_airfoil;  // local velocity at airfoil
 
-            // uninduced local velocity (2D)
-            // frame perpendicular to rotor disc
-            // x airfoil: tangential velocity (tangential to chord, pointing towards tail of airfoil) --> y IEC
-            // y airfoil: normal velocity (normal to chord, pointing up) --> x IEC
-            double local_velocity_normal0 = global_velocity.dot(global_normal);
-            double local_velocity_tangent0 = global_velocity.dot(global_tangent);
-            auto local_velocity0 = Vector2d(local_velocity_tangent0, local_velocity_normal0);
+            if (has_induction) {  // project airfoil on rotor disk and apply induction
+                auto node_normal = node_rotation * Vector3d(1.0, 0.0, 0.0);
+                auto node_tangent = node_rotation * Vector3d(0.0, 1.0, 0.0);
+                auto node_axis = node_rotation * Vector3d(0.0, 0.0, 1.0);
+                // get normal vector of bent blade
+                // assume shear along blade for sweep
+                auto angle_z = get_vector_angle_from_plane(node_axis, disk_normal, disk_tangent);
+                auto blade_normal_sheared = AngleAxisd(angle_z, disk_tangent) * disk_normal;
+                // unsheared
+                auto node_axis_projected = project_vector_to_plane(node_axis, disk_normal).normalized();
+                auto blade_tangent = node_axis_projected.cross(disk_normal);
+                auto blade_normal = node_axis.cross(blade_tangent);
 
-            double tol = 1e-6;
-            if (local_velocity0.norm() < tol || (node.distance_from_tip < tol && has_tip_loss) ||
-                (node.distance_from_hub < tol && has_hub_loss)) {
-                node.load = Vector3d(0.0, 0.0, 0.0);
-            } else {
-                // get angle of airfoil (pitch + twist + torsion) from plane of bent blade
-                auto angle_airfoil = get_vector_angle_from_plane(node_normal, blade_tangent, -node_axis_projected);
+                // make coordinate system to use for BEMT
+                global_normal = blade_normal_sheared;
+                global_tangent = disk_tangent;
+                global_axis = global_normal.cross(global_tangent);
 
-                auto local_velocity = local_velocity0;
-                // get induced velocity
-                if (has_induction) {
-                    local_velocity = get_induced_velocity(node, local_velocity0, angle_airfoil, blades.size(),
-                                                          has_tip_loss, has_hub_loss);
+                // uninduced local velocity (2D)
+                // frame perpendicular to rotor disc
+                // x airfoil: tangential velocity (tangential to chord, pointing towards tail of airfoil) --> y IEC
+                // y airfoil: normal velocity (normal to chord, pointing up) --> x IEC
+                double local_velocity_normal0 = global_velocity.dot(global_normal);
+                double local_velocity_tangent0 = global_velocity.dot(global_tangent);
+                local_velocity_airfoil = Vector2d(local_velocity_tangent0, local_velocity_normal0);
+
+                if (local_velocity_airfoil.norm() < tol || (node.distance_from_tip < tol && has_tip_loss) ||
+                    (node.distance_from_hub < tol && has_hub_loss)) {
+                    // consider velocity to be zero in this case (no load)
+                    local_velocity_airfoil = Vector2d(0.0, 0.0);
+                } else {
+                    // get angle of airfoil (pitch + twist + torsion) from plane of bent blade
+                    angle_airfoil = get_vector_angle_from_plane(node_normal, blade_tangent, -node_axis_projected);
+                    // get induced velocity
+                    local_velocity_airfoil = get_induced_velocity(node, local_velocity_airfoil, angle_airfoil,
+                                                                  blades.size(), has_tip_loss, has_hub_loss);
                 }
+            } else {  // no projection of airfoil and no induction
+                global_normal = node_rotation * Vector3d(1.0, 0.0, 0.0);
+                global_tangent = node_rotation * Vector3d(0.0, 1.0, 0.0);
+                global_axis = node_rotation * Vector3d(0.0, 0.0, 1.0);
+                // uninduced local velocity (2D)
+                // x airfoil: tangential velocity (tangential to chord, pointing towards tail of airfoil) --> y IEC
+                // y airfoil: normal velocity (normal to chord, pointing up) --> x IEC
+                double local_velocity_normal0 = global_velocity.dot(global_normal);
+                double local_velocity_tangent0 = global_velocity.dot(global_tangent);
+                local_velocity_airfoil = Vector2d(local_velocity_tangent0, local_velocity_normal0);
+            }
 
+            if (local_velocity_airfoil.norm() < tol) {
+                // return no load or moment if wind speed norm is below tolerance
+                node.load = Vector3d(0.0, 0.0, 0.0);
+                node.moment = Vector3d(0.0, 0.0, 0.0);
+            } else {
                 // get coefficients from angle of attack
-                double phi = seahowl::aero::get_phi(local_velocity);
+                double phi = seahowl::aero::get_phi(local_velocity_airfoil);
                 double alpha = seahowl::aero::get_alpha_from_phi(phi, angle_airfoil);
                 auto coefficients =
                     seahowl::aero::get_aero_coefficients_from_alpha(alpha, node.properties.airfoil_properties);
@@ -233,7 +256,7 @@ void RotorAeroBEMT::compute_fluid_loads(const FluidModel& wind_model, double tim
                 double ct = -cl * sin_phi + cd * cos_phi;
 
                 // calculate drag and lift force
-                auto vel = local_velocity.norm();
+                auto vel = local_velocity_airfoil.norm();
                 auto chord = node.properties.chord;
                 auto load_n = 0.5 * density * vel * vel * chord * cn;
                 auto load_t = 0.5 * density * vel * vel * chord * ct;
@@ -242,18 +265,18 @@ void RotorAeroBEMT::compute_fluid_loads(const FluidModel& wind_model, double tim
                 // transform from local to global load
                 node.load = global_normal * load_n + global_tangent * load_t;
                 node.moment = global_axis * moment;
+                node.relative_velocity_induced =
+                    global_normal * local_velocity_airfoil.y() + global_tangent * local_velocity_airfoil.x();
 
                 // store info about fluid velocity
                 node.wind_velocity = wind_velocity;
                 node.wind_velocity_shadowed = wind_velocity;
-                node.relative_velocity_induced =
-                    global_normal * local_velocity.y() + global_tangent * local_velocity.x();
             }
-        }
-        // update loads of blade
-        for (int ii = 0; ii < blade->elements.size(); ii++) {
-            blade->loads[ii] = blade->elements[ii].get_load();
-            blade->moments[ii] = blade->elements[ii].get_moment();
+            // update loads of blade
+            for (int ii = 0; ii < blade->elements.size(); ii++) {
+                blade->loads[ii] = blade->elements[ii].get_load();
+                blade->moments[ii] = blade->elements[ii].get_moment();
+            }
         }
     }
 }
