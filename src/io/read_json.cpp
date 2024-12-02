@@ -624,6 +624,8 @@ void populate_turbine_from_json(const std::string& filepath,
     // RNA
     auto filepath_rna = (DATADIR / rna_json.at("file").get<std::string>()).generic_string();
     populate_rna_from_json(filepath_rna, turbine.rna);
+    auto yaw_rna = rna_json.at("initial_yaw").get<double>() * PI / 180.0;
+    turbine.rna.elasto.yaw0 = yaw_rna;
 
     // update info if rotor is disk
     if (rotor_json.at("type").get<std::string>() == "disk") {

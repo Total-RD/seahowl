@@ -98,7 +98,8 @@ void OutputManager::output_all(int step) {
         // send info to logger
         std::stringstream output_sstring;
         output_sstring << "    turbine " << turbine_id << " info -> rpm: " << std::setprecision(3)
-                       << turbine.rna.elasto.get_rpm() << ", power: " << turbine.get_generated_power();
+                       << turbine.rna.elasto.get_rpm() << ", power: " << turbine.get_generated_power()
+                       << ", yaw: " << turbine.rna.elasto.get_yaw();
         int nblades = turbine.rna.blades.size();
         if (nblades <= 3 && nblades > 0) {
             for (int ii = 0; ii < turbine.rna.blades.size(); ii++) {

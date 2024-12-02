@@ -126,6 +126,9 @@ class RotorElasto : public ComponentElasto {
  */
 class RotorNacelleAssemblyElasto : public ComponentElasto {
   public:
+    /** @brief Initial yaw of the RNA (in radians). */
+    double yaw0 = 0.0;
+
     // RNA components
     //
     /** @brief Rotor. */
@@ -136,6 +139,8 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     std::unique_ptr<seahowl::elasto::BodyElasto> body_nacelle;
     /** @brief Yaw bearing rigid body. */
     std::unique_ptr<seahowl::elasto::BodyElasto> body_yaw_bearing;
+    /** @brief Body for mounting point of RNA (to link to other structures, e.g. tower). */
+    std::unique_ptr<seahowl::elasto::BodyElasto> body_mount;
 
     // links
     //
@@ -145,8 +150,10 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     std::unique_ptr<Link> link_shaft_nacelle;
     /** @brief Link between shaft and yaw bearing (fixed). */
     std::unique_ptr<Link> link_shaft_yaw_bearing;
-    /** @brief Link between towertop (if any) and yaw bearing (fixed). */
-    std::unique_ptr<Link> link_towertop_yaw_bearing;
+    /** @brief Link between yaw bearing and mounting point (fixed). */
+    std::unique_ptr<Link> link_yaw_bearing_mount;
+    /** @brief Link between towertop (if any) and mounting point (fixed). */
+    std::unique_ptr<Link> link_towertop_mount;
     ///@}
 
     // reference properties
@@ -207,6 +214,18 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
      * @brief Returns the electrical torque applied on the rotor.
      */
     double get_electrical_torque() const;
+
+    /**
+     * @brief Applies yaw increment to the RNA (i.e. rotates the RNA around its mounting points).
+     *
+     * @param yaw_increment Yaw increment value (in radians).
+     */
+    void apply_yaw_increment(double yaw_increment);
+
+    /**
+     * @brief Returns current of the RNA.
+     */
+    double get_yaw() const;
 
   protected:
     virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;

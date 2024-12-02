@@ -235,6 +235,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("get_electrical_torque", &seahowl::elasto::RotorNacelleAssemblyElasto::get_electrical_torque)
         .def("get_axial_torque", &seahowl::elasto::RotorNacelleAssemblyElasto::get_axial_torque)
         .def("get_azimuth", &seahowl::elasto::RotorNacelleAssemblyElasto::get_azimuth)
+        .def("apply_yaw_increment", &seahowl::elasto::RotorNacelleAssemblyElasto::apply_yaw_increment)
+        .def("get_yaw", &seahowl::elasto::RotorNacelleAssemblyElasto::get_yaw)
         .def_property_readonly(
             "rotor", [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.rotor.get(); },
             py::return_value_policy::reference_internal)
@@ -249,6 +251,9 @@ void initialize_pyseahowl_elasto(py::module& m) {
             [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.body_yaw_bearing.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
+            "body_mount", [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.body_mount.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
             "link_shaft_hub", [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_shaft_hub.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
@@ -260,8 +265,12 @@ void initialize_pyseahowl_elasto(py::module& m) {
             [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_shaft_yaw_bearing.get(); },
             py::return_value_policy::reference_internal)
         .def_property_readonly(
-            "link_shaft_yaw_bearing",
-            [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_towertop_yaw_bearing.get(); },
+            "link_towertop_mount",
+            [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_towertop_mount.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "link_yaw_bearing_mount",
+            [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.link_yaw_bearing_mount.get(); },
             py::return_value_policy::reference_internal);
 
     // elasto/tower_elasto.h

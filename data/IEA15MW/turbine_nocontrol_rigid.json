@@ -32,6 +32,7 @@
     ]
   },
   "rna": {
+    "initial_yaw": 0.0,
     "file": "./rna.json"
   },
   "tower": {

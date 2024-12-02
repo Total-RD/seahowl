@@ -126,6 +126,12 @@ RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {
     // link between yaw bearing body and shaft body
     link_shaft_yaw_bearing = std::make_unique<LinkChrono>();
     link_shaft_yaw_bearing->set_constraints(true, true, true, true, true, true);
+
+    // mounting point
+    body_mount = std::make_unique<BodyElastoChrono>();
+    // link between yaw bearing body and shaft body
+    link_yaw_bearing_mount = std::make_unique<LinkChrono>();
+    link_yaw_bearing_mount->set_constraints(true, true, true, true, true, true);
 }
 
 void RotorNacelleAssemblyElasto::presetup(double fraction) {
@@ -140,6 +146,8 @@ void RotorNacelleAssemblyElasto::assemble_this(SystemElasto& system) {
     system.add(*(link_shaft_nacelle.get()));
     system.add(*(body_yaw_bearing.get()));
     system.add(*(link_shaft_yaw_bearing.get()));
+    system.add(*(body_mount.get()));
+    system.add(*(link_yaw_bearing_mount.get()));
 }
 
 void RotorNacelleAssemblyElasto::build() {
@@ -179,6 +187,19 @@ void RotorNacelleAssemblyElasto::build() {
     body_yaw_bearing->set_inertia_diagonal(Vector3d(1e-6, 1e-6, 1e-6));
     // link yaw bearing body to shaft body
     link_shaft_yaw_bearing->initialize(*(body_shaft.get()), *(body_yaw_bearing.get()));
+
+    // mounting point
+    body_mount->set_position(Vector3d(0.0, 0.0, 0.0));
+    body_mount->set_rotation(rotation0);
+    body_mount->set_mass(0.0);
+    body_mount->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+    // link mount to yaw bearing
+    link_yaw_bearing_mount->initialize(*(body_yaw_bearing.get()), *(body_mount.get()));
+
+    // apply initial yaw increment
+    if (yaw0 != 0.0) {
+        apply_yaw_increment(yaw0);
+    }
 }
 
 void RotorNacelleAssemblyElasto::rotate(double angle, const Vector3d& axis) const {
@@ -191,6 +212,8 @@ void RotorNacelleAssemblyElasto::rotate(double angle, const Vector3d& axis) cons
     body_nacelle->rotate(angle, axis);
     // yaw bearing
     body_yaw_bearing->rotate(angle, axis);
+    // mounting point
+    body_mount->rotate(angle, axis);
 }
 
 void RotorNacelleAssemblyElasto::translate(const Vector3d& translation_vector) const {
@@ -200,8 +223,10 @@ void RotorNacelleAssemblyElasto::translate(const Vector3d& translation_vector) c
     body_shaft->translate(translation_vector);
     // nacelle
     body_nacelle->translate(translation_vector);
-    // yaw_bearing
+    // yaw bearing
     body_yaw_bearing->translate(translation_vector);
+    // mounting point
+    body_mount->translate(translation_vector);
 }
 
 double RotorNacelleAssemblyElasto::get_mass() const {
@@ -212,8 +237,10 @@ double RotorNacelleAssemblyElasto::get_mass() const {
     total_mass += body_shaft->get_mass();
     // nacelle
     total_mass += body_nacelle->get_mass();
-    // yaw_bearing
+    // yaw bearing
     total_mass += body_yaw_bearing->get_mass();
+    // mounting point
+    total_mass += body_mount->get_mass();
     return total_mass;
 }
 
@@ -266,4 +293,24 @@ void RotorNacelleAssemblyElasto::accumulate_electrical_torque(double torque) {
 
 double RotorNacelleAssemblyElasto::get_electrical_torque() const {
     return torque_elec_accumulated;
+}
+
+void RotorNacelleAssemblyElasto::apply_yaw_increment(double yaw_increment) {
+    // apply pitch from root node direction and position
+    auto root_dir = body_mount->get_rotation() * Vector3d(0.0, 0.0, 1.0);
+    auto root_pos = body_mount->get_position();
+    translate(-root_pos);
+    rotate(yaw_increment, root_dir);
+    body_mount->rotate(-yaw_increment, root_dir);  // rotate mounting point back
+    link_yaw_bearing_mount->initialize(*body_yaw_bearing, *body_mount);
+    translate(root_pos);
+}
+
+double RotorNacelleAssemblyElasto::get_yaw() const {
+    // get angle between quaternions
+    auto qq = (body_yaw_bearing->get_rotation().conjugate() * body_mount->get_rotation()).normalized();
+    double angle0 = 2 * std::atan2(qq.vec().z(), qq.w());
+    // get angle between 0 and 2pi
+    double angle1 = fmod(angle0, 2 * PI);
+    return angle1;
 }
