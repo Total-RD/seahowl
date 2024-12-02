@@ -194,7 +194,11 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readonly("elements", &seahowl::elasto::ComponentElastoFEA::elements)
         .def_readwrite("discretization_fractions", &seahowl::elasto::ComponentElastoFEA::discretization_fractions)
         .def("evaluate_position_rotation", &seahowl::elasto::ComponentElastoFEA::evaluate_position_rotation)
-        .def("accumulate_element_load", &seahowl::elasto::ComponentElastoFEA::accumulate_element_load);
+        .def("evaluate_position_rotation_slerp", &seahowl::elasto::ComponentElastoFEA::evaluate_position_rotation_slerp)
+        .def("accumulate_element_load", &seahowl::elasto::ComponentElastoFEA::accumulate_element_load)
+        .def("get_entity_along_component", &seahowl::elasto::ComponentElastoFEA::get_entity_along_component)
+        .def("get_entity_along_component_slerp",
+             &seahowl::elasto::ComponentElastoFEA::get_entity_along_component_slerp);
 
     // elasto/blade_elasto.h
     py::class_<seahowl::elasto::BladeElasto, std::shared_ptr<seahowl::elasto::BladeElasto>,

@@ -12,6 +12,14 @@
 using namespace seahowl::elasto;
 using namespace seahowl;
 
+Quaternion interpolate_node_rotation_slerp(ElementElasto& element, double eta) {
+    // interpolate quaternion between nodes
+    auto rot1 = element.nodes[0]->get_rotation();
+    auto rot2 = element.nodes[1]->get_rotation();
+    // slerp with t in [0; 1] vs element eta in [-1; 1]
+    return rot1.slerp((eta + 1.0) / 2.0, rot2);
+}
+
 void ComponentElasto::assemble(SystemElasto& system) {
     spdlog::debug("Assembly of component: {}.", std::string(typeid(*this).name()));
     if (is_assembled) {
@@ -96,13 +104,16 @@ void ComponentElastoFEA::evaluate_position_rotation(Vector3d& position,
     auto& element = elements[element_index];
 
     element->evaluate_position_rotation(eta, position, rotation);
+}
 
-    // interpolate quaternion between nodes
-    // otherwise we have averaged values for rotation on Timoshenko elements
-    auto rot1 = element->nodes[0]->get_rotation();
-    auto rot2 = element->nodes[1]->get_rotation();
-    // slerp with t in [0; 1] vs element eta in [-1; 1]
-    rotation = rot1.slerp((eta + 1.0) / 2.0, rot2);
+void ComponentElastoFEA::evaluate_position_rotation_slerp(Vector3d& position,
+                                                          Quaternion& rotation,
+                                                          int element_index,
+                                                          double eta) const {
+    evaluate_position_rotation(position, rotation, element_index, eta);
+    // interpolate quaternion
+    auto& element = elements[element_index];
+    rotation = interpolate_node_rotation_slerp(*element, eta);
 }
 
 void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
@@ -225,6 +236,16 @@ seahowl::EntityDynamicEigen ComponentElastoFEA::get_entity_along_component(doubl
     entity.set_acceleration(weight1 * node1->get_acceleration() + weight2 * node2->get_acceleration());
     entity.set_rotational_acceleration(weight1 * node1->get_rotational_acceleration() +
                                        weight2 * node2->get_rotational_acceleration());
+
+    return entity;
+}
+
+seahowl::EntityDynamicEigen ComponentElastoFEA::get_entity_along_component_slerp(double eta, int element_index) const {
+    auto entity = get_entity_along_component(eta, element_index);
+
+    // interpolate quaternion
+    auto& element = elements[element_index];
+    entity.set_rotation(interpolate_node_rotation_slerp(*element, eta));
 
     return entity;
 }

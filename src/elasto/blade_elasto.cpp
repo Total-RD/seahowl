@@ -253,7 +253,7 @@ void BladeElastoFEA::build_elements_tapered_timoshenko_fpm() {
 }
 
 seahowl::EntityDynamicEigen BladeElastoFEA::get_entity_along_blade(double eta, int element_index) const {
-    return get_entity_along_component(eta, element_index);
+    return get_entity_along_component_slerp(eta, element_index);
 }
 
 void BladeElastoFEA::accumulate_load_along_blade(const seahowl::Vector3d& load,

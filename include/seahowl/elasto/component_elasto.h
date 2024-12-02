@@ -121,6 +121,19 @@ class ComponentElastoFEA : public virtual ComponentElasto {
                                             double eta) const;
 
     /**
+     * @brief Evaluates the position and rotation (interpolated with slerp) given the abscissa of an element.
+     *
+     * @param[out] position Position vector to use for evaluation (will be overwritten).
+     * @param[out] rotation Rotation quaternion to use for evaluation (will be overwritten).
+     * @param[in] element_index Index of the element on which the evaluation is undertaken.
+     * @param[in] eta Abscissa of the element within the range [-1, +1], with -1 at node1 and +1 at node2.
+     */
+    virtual void evaluate_position_rotation_slerp(Vector3d& position,
+                                                  Quaternion& rotation,
+                                                  int element_index,
+                                                  double eta) const;
+
+    /**
      * @brief Accumulates load on a given FEA element.
      *
      * @param[in] load Load vector to accumulate.
@@ -176,12 +189,20 @@ class ComponentElastoFEA : public virtual ComponentElasto {
     std::vector<Vector3d> get_nodes_loads() const;
 
     /**
-     * @brief Returns zntity along component.
+     * @brief Returns entity along component.
      *
      * @param[in] eta Normalized abscissa between node1 and node2 of element.
      * @param[in] element Element index.
      */
     seahowl::EntityDynamicEigen get_entity_along_component(double eta, int element_index) const;
+
+    /**
+     * @brief Returns entity along component (with rotation interpolated using slerp).
+     *
+     * @param[in] eta Normalized abscissa between node1 and node2 of element.
+     * @param[in] element Element index.
+     */
+    seahowl::EntityDynamicEigen get_entity_along_component_slerp(double eta, int element_index) const;
 
   protected:
     /**

@@ -81,7 +81,7 @@ void Tower::update_positions_aero() {
         // update position and rotation of aero elements
         int elasto_element_index = mapping_aero2elasto_nodes[ii].index;
         double eta = mapping_aero2elasto_nodes[ii].eta;
-        auto entity = elasto.get_entity_along_component(eta, elasto_element_index);
+        auto entity = elasto.get_entity_along_component_slerp(eta, elasto_element_index);
         node_aero.set_rotation(entity.get_rotation());
         node_aero.set_position(entity.get_position());
         node_aero.set_velocity(entity.get_velocity());
