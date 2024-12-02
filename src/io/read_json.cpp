@@ -950,6 +950,24 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
     // wind
     auto wind_json = environment_json.at("wind");
     std::shared_ptr<seahowl::env::WindModel> wind_model_ptr;
+
+    // auto &fluid_model = *system_core.fluid_model;
+
+    // std::cout << "SEAHOWL ENV from CFD 0 : "  << std::endl;
+
+    // auto *wind_model_amrwind = &system_core.fluid_model->wind_model_amrwind;
+
+    // int status = fluid_model.get_amrwind_wind_model();
+    // std::cout << "SEAHOWL ENV from CFD 1 : " << status << std::endl;
+
+    // if (fluid_model.wind_model_amrwind == 1) {
+    //     spdlog::info("Wind conditions: AMR-Wind.");
+    //     wind_model_ptr = std::make_shared<seahowl::env::InflowAmrWind>();
+    //     auto& wind_model = dynamic_cast<seahowl::env::InflowAmrWind&>(*wind_model_ptr);
+    //     auto wind_options = wind_json.at("options");
+    //     wind_model.density = wind_json.at("air_density").get<double>();
+    // }
+    // else {
     if (wind_json.at("type").get<std::string>() == "ramp") {
         spdlog::info("Wind conditions: wind ramp.");
         wind_model_ptr = std::make_shared<seahowl::env::WindRamp>();
@@ -988,6 +1006,7 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
     } else {
         env_model->fluid_model = std::move(wind_model_ptr);
     }
+    // }
 
     // soil
     if (environment_json.contains("soil")) {

@@ -53,6 +53,8 @@ class RotorAeroBEMT : public RotorAero {
     bool has_hub_loss = true;
     /** Whether to take tower shadow into account or not. */
     bool has_tower_shadow = true;
+    /** @brief Flag to use induction: true if CFD used. */
+    bool has_induction = true;
 
     RotorAeroBEMT(TowerAero& tower_ref);
 

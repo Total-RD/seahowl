@@ -63,3 +63,5 @@ Vector3d WindRamp::get_fluid_velocity(const Vector3d& position, double time) con
     velocity = get_sheared_wind_velocity(velocity, position, direction_gravity, shear_coefficient, reference_height);
     return velocity;
 }
+
+InflowAmrWind::InflowAmrWind() {}

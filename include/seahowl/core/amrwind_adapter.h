@@ -146,7 +146,7 @@ class AmrWindAdapter {
     void SetOpFMForces(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd);
 
     // step function to move forward to next time step
-    void step();
+    void step(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd);
 
     // void send_to_cfd(seahowl::core::OpFM_InputType to_cfd);
     // void get_from_cfd(seahowl::core::OpFM_OutputType from_cfd);
