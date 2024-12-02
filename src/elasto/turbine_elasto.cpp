@@ -20,7 +20,7 @@ void TurbineElasto::assemble_this(SystemElasto& system) {
     rna.assemble(system);
     // assemble tower
     tower.assemble(system);
-    system.add(*(rna.link_towertop_mount.get()));
+    system.add(*rna.link_towertop_mount);
 }
 
 void TurbineElasto::link_rna_tower() {
@@ -28,7 +28,7 @@ void TurbineElasto::link_rna_tower() {
     // translate RNA center of origin to towertop
     rna.translate(towertop_node->get_position() - rna.body_mount->get_position());
     rna.link_towertop_mount = std::make_unique<LinkChrono>();
-    rna.link_towertop_mount->initialize(*(towertop_node.get()), *(rna.body_mount.get()));
+    rna.link_towertop_mount->initialize(*towertop_node, *rna.body_mount);
     rna.link_towertop_mount->set_constraints(true, true, true, true, true, true);
 }
 
@@ -42,7 +42,7 @@ void TurbineElasto::build() {
     // build foundation
     if (foundation) {
         foundation->build();
-        foundation->link_to_entity(*(tower.nodes.front().get()));
+        foundation->link_to_entity(*tower.nodes.front());
     }
 }
 

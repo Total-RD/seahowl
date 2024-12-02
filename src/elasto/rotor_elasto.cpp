@@ -14,7 +14,7 @@ void RotorElasto::assemble_this(SystemElasto& system) {
     for (auto& blade : blades) {
         blade->assemble(system);
     }
-    system.add(*(body_hub.get()));
+    system.add(*body_hub);
 }
 
 void RotorElasto::presetup(double fraction) {
@@ -140,14 +140,14 @@ void RotorNacelleAssemblyElasto::presetup(double fraction) {
 
 void RotorNacelleAssemblyElasto::assemble_this(SystemElasto& system) {
     rotor->assemble(system);
-    system.add(*(body_shaft.get()));
-    system.add(*(link_shaft_hub.get()));
-    system.add(*(body_nacelle.get()));
-    system.add(*(link_shaft_nacelle.get()));
-    system.add(*(body_yaw_bearing.get()));
-    system.add(*(link_shaft_yaw_bearing.get()));
-    system.add(*(body_mount.get()));
-    system.add(*(link_yaw_bearing_mount.get()));
+    system.add(*body_shaft);
+    system.add(*link_shaft_hub);
+    system.add(*body_nacelle);
+    system.add(*link_shaft_nacelle);
+    system.add(*body_yaw_bearing);
+    system.add(*link_shaft_yaw_bearing);
+    system.add(*body_mount);
+    system.add(*link_yaw_bearing_mount);
 }
 
 void RotorNacelleAssemblyElasto::build() {
@@ -166,9 +166,9 @@ void RotorNacelleAssemblyElasto::build() {
     // align rotation
     body_shaft->set_rotation(rotor->body_hub->get_rotation());
     // shaft
-    body_shaft->set_mass(1e-6);
-    body_shaft->set_inertia_diagonal(Vector3d(1e-6, 1e-6, 1e-6));
-    link_shaft_hub->initialize(*(rotor->body_hub.get()), *(body_shaft.get()));
+    body_shaft->set_mass(0.0);
+    body_shaft->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+    link_shaft_hub->initialize(*rotor->body_hub, *body_shaft);
 
     // nacelle
     body_nacelle->set_position(nacelle.center_of_mass);
@@ -178,15 +178,15 @@ void RotorNacelleAssemblyElasto::build() {
     ///@todo  change to full 3x3 inertia matrix
     body_nacelle->set_inertia_diagonal(Vector3d(0.0, 0.0, nacelle.inertia));
     // link nacelle body to shaft body
-    link_shaft_nacelle->initialize(*(body_nacelle.get()), *(body_shaft.get()));
+    link_shaft_nacelle->initialize(*body_nacelle, *body_shaft);
 
     // yaw bearing
     body_yaw_bearing->set_position(Vector3d(0.0, 0.0, 0.0));
     body_yaw_bearing->set_rotation(rotation0);
     body_yaw_bearing->set_mass(nacelle.yaw_bearing_mass);
-    body_yaw_bearing->set_inertia_diagonal(Vector3d(1e-6, 1e-6, 1e-6));
+    body_yaw_bearing->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
     // link yaw bearing body to shaft body
-    link_shaft_yaw_bearing->initialize(*(body_shaft.get()), *(body_yaw_bearing.get()));
+    link_shaft_yaw_bearing->initialize(*body_shaft, *body_yaw_bearing);
 
     // mounting point
     body_mount->set_position(Vector3d(0.0, 0.0, 0.0));
@@ -194,7 +194,7 @@ void RotorNacelleAssemblyElasto::build() {
     body_mount->set_mass(0.0);
     body_mount->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
     // link mount to yaw bearing
-    link_yaw_bearing_mount->initialize(*(body_yaw_bearing.get()), *(body_mount.get()));
+    link_yaw_bearing_mount->initialize(*body_yaw_bearing, *body_mount);
 
     // apply initial yaw increment
     if (yaw0 != 0.0) {
@@ -312,5 +312,10 @@ double RotorNacelleAssemblyElasto::get_yaw() const {
     double angle0 = 2 * std::atan2(qq.vec().z(), qq.w());
     // get angle between 0 and 2pi
     double angle1 = fmod(angle0, 2 * PI);
-    return angle1;
+    return -angle1;
+}
+
+void RotorNacelleAssemblyElasto::set_fixed_yaw(bool is_fixed) {
+    link_yaw_bearing_mount->set_constraints(true, true, true, true, true, is_fixed);
+    link_yaw_bearing_mount->initialize(*body_yaw_bearing, *body_mount);
 }

@@ -227,6 +227,13 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
      */
     double get_yaw() const;
 
+    /**
+     * @brief Sets whether the RNA is considered fixed or free to yaw (without control).
+     *
+     * @param is_fixed Whether RNA is fixed in yaw or not.
+     */
+    void set_fixed_yaw(bool is_fixed);
+
   protected:
     virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;
 
