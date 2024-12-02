@@ -234,12 +234,28 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
      */
     void set_fixed_yaw(bool is_fixed);
 
+    /**
+     * @brief Attaches RNA to body on mounting point.
+     *
+     * @param body Body on which the RNA is attached.
+     */
+    void attach_rna_to_body(const BodyElasto& body);
+
+    /**
+     * @brief Attaches RNA to node on mounting point.
+     *
+     * @param node Node on which the RNA is attached.
+     */
+    void attach_rna_to_node(const NodeElasto& node);
+
   protected:
     virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;
 
   private:
     /** @brief Accumulated Electrical torque on the rotor.*/
     double torque_elec_accumulated;
+    /** @brief Whether the RNA is mounted (e.g. on a tower) or not. */
+    bool is_mounted = false;
 };
 
 }  // namespace elasto

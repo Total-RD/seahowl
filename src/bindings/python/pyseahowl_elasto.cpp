@@ -238,6 +238,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("apply_yaw_increment", &seahowl::elasto::RotorNacelleAssemblyElasto::apply_yaw_increment)
         .def("get_yaw", &seahowl::elasto::RotorNacelleAssemblyElasto::get_yaw)
         .def("set_fixed_yaw", &seahowl::elasto::RotorNacelleAssemblyElasto::set_fixed_yaw)
+        .def("attach_rna_to_body", &seahowl::elasto::RotorNacelleAssemblyElasto::attach_rna_to_body)
+        .def("attach_rna_to_node", &seahowl::elasto::RotorNacelleAssemblyElasto::attach_rna_to_node)
         .def_property_readonly(
             "rotor", [](seahowl::elasto::RotorNacelleAssemblyElasto& rna) { return rna.rotor.get(); },
             py::return_value_policy::reference_internal)

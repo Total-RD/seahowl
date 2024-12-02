@@ -132,6 +132,10 @@ RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {
     // link between yaw bearing body and shaft body
     link_yaw_bearing_mount = std::make_unique<LinkChrono>();
     link_yaw_bearing_mount->set_constraints(true, true, true, true, true, true);
+
+    // RNA link
+    link_towertop_mount = std::make_unique<LinkChrono>();
+    link_towertop_mount->set_constraints(true, true, true, true, true, true);
 }
 
 void RotorNacelleAssemblyElasto::presetup(double fraction) {
@@ -148,6 +152,9 @@ void RotorNacelleAssemblyElasto::assemble_this(SystemElasto& system) {
     system.add(*link_shaft_yaw_bearing);
     system.add(*body_mount);
     system.add(*link_yaw_bearing_mount);
+    if (is_mounted) {
+        system.add(*link_towertop_mount);
+    }
 }
 
 void RotorNacelleAssemblyElasto::build() {
@@ -318,4 +325,14 @@ double RotorNacelleAssemblyElasto::get_yaw() const {
 void RotorNacelleAssemblyElasto::set_fixed_yaw(bool is_fixed) {
     link_yaw_bearing_mount->set_constraints(true, true, true, true, true, is_fixed);
     link_yaw_bearing_mount->initialize(*body_yaw_bearing, *body_mount);
+}
+
+void RotorNacelleAssemblyElasto::attach_rna_to_body(const BodyElasto& body) {
+    is_mounted = true;
+    link_towertop_mount->initialize(*body_mount, body);
+}
+
+void RotorNacelleAssemblyElasto::attach_rna_to_node(const NodeElasto& node) {
+    is_mounted = true;
+    link_towertop_mount->initialize(*body_mount, node);
 }

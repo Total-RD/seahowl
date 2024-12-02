@@ -43,15 +43,6 @@ class TurbineElasto : public ComponentElasto {
     TurbineElasto();
 
     /**
-     * @brief Links RNA to tower.
-     *
-     * This function links the towertop node to the yaw bearing rigid body by translating the RNA so that the tower
-     * towertop node and yaw bearing coordinates match each other.
-     * The link between towertop node and yaw bearing is fixed.
-     */
-    void link_rna_tower();
-
-    /**
      * @brief Presetup of turbine.
      *
      * @param[in] fraction Fraction of presetup phase, starting at 0.0 and ending at 1.0.
