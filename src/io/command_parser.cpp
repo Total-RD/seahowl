@@ -1,24 +1,27 @@
 #include "seahowl/io/command_parser.h"
-#include <iostream>
+#include "seahowl/io/utils_io.h"
+
 #include <string_view>
 #include <stdexcept>
 #include <filesystem>
+#include <spdlog/spdlog.h>
 
 namespace fs = std::filesystem;
 using namespace seahowl::io::app;
 
 void CommandLineParser::print_helper(const std::map<std::string, SpecComputed>& cmdOptions) {
-    std::cout << "Usage: file_input [options]\n";
-    std::cout << "Options:\n";
-    std::cout << "  -h        Display this help message\n";
+    spdlog::info("Usage: [seahowl_driver] file_input [options]");
+    spdlog::info("Command line options:");
+    std::vector<std::vector<std::string>> table = {};
+    table.push_back({"--help (-h)", "Display this help message."});
     for (const auto& [key, var] : cmdOptions) {
         auto type = var.spec.type;
-        if ( type == "path") {
+        if (type == "path") {
             type = "string";
         }
-        std::cout << "  --" << key << " <value> ";
-        std::cout << var.spec.description << " (" << type << ")\n";
+        table.push_back({"--" + key + " <value>", var.description + " (" + type + ")."});
     }
+    utils::print_table({"Key", "Description"}, table, 52);
 }
 
 std::map<std::string, std::string>
@@ -28,8 +31,8 @@ CommandLineParser::parse_args(int argc, char* argv[], const std::map<std::string
     for (int i = 1; i < argc; i++) {
         std::string_view arg(argv[i]);
 
-        // Check if the argument is "-h"
-        if (arg == "-h") {
+        // Check if the argument is for printing help message
+        if (arg == "-h" || arg == "--help") {
             print_helper(cmdOptions);
             std::exit(EXIT_SUCCESS);
         }
@@ -42,7 +45,7 @@ CommandLineParser::parse_args(int argc, char* argv[], const std::map<std::string
             // Check if the key is valid
             auto it = cmdOptions.find(key);
             if (it == cmdOptions.end()) {
-                std::cerr << "Error: Invalid option '" << key << "'\n";
+                spdlog::critical("Invalid command line option '--{}'.", key);
                 std::exit(EXIT_FAILURE);
             }
 
@@ -53,15 +56,15 @@ CommandLineParser::parse_args(int argc, char* argv[], const std::map<std::string
 
                 // Check if the value matches the expected type
                 if (!is_valid_type(value, it->second.spec.type)) {
-                    std::cerr << "Error: Invalid value type for option '" << key
-                              << "'. Expected type: " << it->second.spec.type << "\n";
+                    spdlog::critical("Invalid value type for command line option '--{}'. Expected type: {}.", key,
+                                     it->second.spec.type);
                     std::exit(EXIT_FAILURE);
                 }
                 if (it->second.spec.type == "path") {
                     value = fs::current_path().append(value).string();
                 }
             } else {
-                std::cerr << "Error: Missing value for option '" << key << "'\n";
+                spdlog::critical("Missing value for command line option '--{}'.", key);
                 std::exit(EXIT_FAILURE);
             }
 

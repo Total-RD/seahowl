@@ -55,7 +55,7 @@ Simulation::Simulation()
                     {"VTK", {}, "Generate VTK outputs", "bool", "true", true, true, true},
                     {"log_level",
                      {},
-                     "Set the log level (critical|error|warning|info|debug|trace)",
+                     "Set log level (critical|error|warn|info|debug|trace)",
                      "string",
                      "default",
                      true,

@@ -2,10 +2,12 @@
 
 #include <filesystem>
 #include <string>
+#include <sstream>
 #include <algorithm>
 #include <iostream>
 #include <vector>
 #include <map>
+#include <spdlog/spdlog.h>
 
 namespace fs = std::filesystem;
 
@@ -106,33 +108,43 @@ void print_table(const std::vector<std::string>& headers,
                  const std::vector<std::vector<std::string>>& rows,
                  int column_width) {
     // Separator line
-    std::cout << std::string((column_width + 1) * headers.size(), '-') << std::endl;
+
+    std::stringstream output_sstring;
+    output_sstring << std::string((column_width)*headers.size(), '-');
+    spdlog::info(output_sstring.str());
+    output_sstring.str("");
     // Headers
     for (const auto& header : headers) {
         if (header.length() > column_width) {
-            std::cout << std::setw(column_width) << std::left << header.substr(0, column_width - 1) + "."
-                      << " ";
+            output_sstring << std::setw(column_width) << std::left << header.substr(0, column_width - 1) + "."
+                           << " ";
         } else {
-            std::cout << std::setw(column_width) << std::left << header << " ";
+            output_sstring << std::setw(column_width) << std::left << header << " ";
         }
     }
-    std::cout << std::endl;
+    spdlog::info(output_sstring.str());
+    output_sstring.str("");
     // Separator line
-    std::cout << std::string((column_width + 1) * headers.size(), '-') << std::endl;
+    output_sstring << std::string((column_width)*headers.size(), '-');
+    spdlog::info(output_sstring.str());
+    output_sstring.str("");
     // rows
     for (const auto& row : rows) {
         for (const auto& item : row) {
             if (item.length() > column_width) {
-                std::cout << std::setw(column_width) << std::left << item.substr(0, column_width - 1) + "."
-                          << " ";
+                output_sstring << std::setw(column_width) << std::left << item.substr(0, column_width - 1) + "."
+                               << " ";
             } else {
-                std::cout << std::setw(column_width) << std::left << item << " ";
+                output_sstring << std::setw(column_width) << std::left << item << " ";
             }
         }
-        std::cout << std::endl;
+        spdlog::info(output_sstring.str());
+        output_sstring.str("");
     }
     // Separator line
-    std::cout << std::string((column_width + 1) * headers.size(), '-') << std::endl;
+    output_sstring << std::string((column_width)*headers.size(), '-');
+    spdlog::info(output_sstring.str());
+    output_sstring.str("");
 }
 
 std::map<std::string, std::string> parse_args(int argc, char* argv[]) {

@@ -5,10 +5,10 @@
 #include <vector>
 #include <cctype>
 #include <cstdlib>
-#include <iostream>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 namespace fs = std::filesystem;
 
@@ -117,7 +117,7 @@ class ConfigManagerImpl {
         // read file
         std::ifstream ifile(options_.json_filepath);
         if (!ifile.is_open()) {
-            std::cout << "Failed to open config file\n";
+            spdlog::warn("Failed to open JSON config file.");
             return;
         }
         ifile >> jsonData;
@@ -147,7 +147,7 @@ class ConfigManagerImpl {
                             }
                         }
                     } catch (nlohmann::json::out_of_range& e) {
-                        std::cout << "ConfigManager : " << e.what() << std::endl;
+                        spdlog::warn("ConfigManager: {}.", e.what());
                     }
                 }
             }
@@ -219,8 +219,8 @@ bool ConfigManager::has(const std::string& key) const {
 }
 
 void ConfigManager::print_spec() const {
-    std::cout << std::endl;
-    std::cout << "ConfigManager : Configuration Specifications" << std::endl;
+    spdlog::info("");
+    spdlog::info("ConfigManager : Configuration Specifications");
     std::vector<std::vector<std::string>> table = {};
     for (const auto& [key, var] : pimpl_->varspecs_) {
         table.push_back({key, var.description, var.spec.type, var.spec.defaultValue, var.env_var, var.config_file_var,
@@ -232,13 +232,13 @@ void ConfigManager::print_spec() const {
 }
 
 void ConfigManager::print_compute() const {
-    std::cout << std::endl;
-    std::cout << "ConfigManager : Configuration Data" << std::endl;
+    spdlog::info("");
+    spdlog::info("ConfigManager: Configuration Data");
     std::vector<std::vector<std::string>> table = {};
     for (const auto& [key, var] : pimpl_->vals_) {
         table.push_back({key, pimpl_->get_value_from_string(key), var.origin});
     }
-    utils::print_table({"Variable", "Value", "Origin"}, table, 25);
+    utils::print_table({"Variable", "Value", "Origin"}, table, 35);
 }
 
 // Méthode pour accéder à jsonFilePath
