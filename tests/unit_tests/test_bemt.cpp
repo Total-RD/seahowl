@@ -25,10 +25,10 @@ class TestBEMT : public FixtureComponents {
 TEST_F(TestBEMT, tower_shadow_check) {
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_bemt_tower_shadow_check.csv").generic_string(),
-         .test_filepath = (test_dir / "test_bemt_tower_shadow_check.test.csv").generic_string(),
-         .dimensions = {"x", "y", "z"}});
+        {false,
+         (ref_dir / "test_bemt_tower_shadow_check.csv").generic_string(),
+         (test_dir / "test_bemt_tower_shadow_check.test.csv").generic_string(),
+         {"x", "y", "z"}});
 
     // system
     auto system_elasto = SystemElastoChrono();

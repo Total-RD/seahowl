@@ -23,10 +23,10 @@ class TestRotor : public FixtureComponents {
 
 TEST_F(TestRotor, mass) {
     // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({.debug = false,
-                                       .reference_filepath = (ref_dir / "test_rotor_mass.values.csv").generic_string(),
-                                       .test_filepath = (test_dir / "test_rotor_mass.values.test.csv").generic_string(),
-                                       .dimensions = {"values"}});
+    TestFrameworkDataset test_dataset({false,
+                                       (ref_dir / "test_rotor_mass.values.csv").generic_string(),
+                                       (test_dir / "test_rotor_mass.values.test.csv").generic_string(),
+                                       {"values"}});
 
     // system
     auto system_elasto = SystemElastoChrono();

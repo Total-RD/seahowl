@@ -66,11 +66,11 @@ TEST_F(TestController, IEA15) {
 
     // instantiate test dataset class (custom CSV)
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = ref_dir / "test_controller.csv",
-         .test_filepath = test_dir / "test_controller.test.csv",
-         .dimensions = {"time", "power", "pitch_blade1", "pitch_blade2", "pitch_blade3"},
-         .test_functions = {
+        {false,
+         (ref_dir / "test_controller.csv").generic_string(),
+         (test_dir / "test_controller.test.csv").generic_string(),
+         {"time", "power", "pitch_blade1", "pitch_blade2", "pitch_blade3"},
+         {
              [&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
              [&turbine]() -> std::vector<double> { return {turbine.get_generated_power()}; },
              [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.rotor->blades[0]->get_pitch()}; },
