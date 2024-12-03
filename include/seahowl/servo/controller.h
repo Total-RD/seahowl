@@ -17,9 +17,11 @@ namespace servo {
 class Controller {
   public:
     /** @brief Whether pitch control is applied or not. */
-    bool has_pitch_control;
+    bool has_pitch_control = false;
     /** @brief Whether torque control is applied or not. */
-    bool has_torque_control;
+    bool has_torque_control = false;
+    /** @brief Whether yaw control is applied or not. */
+    bool has_yaw_control = false;
 
     /**
      * @brief Constructor.
@@ -69,6 +71,13 @@ class Controller {
      * @param[in] index_blade Index of blade (0, 1, or 2).
      */
     virtual double get_pitch_blade(int index_blade) const;
+
+    /**
+     * @brief Returns yaw rate to apply to yaw bearing.
+     *
+     * @param[in] yaw_rate Yaw rate (rad/s).
+     */
+    virtual double get_yaw_rate() const;
 };
 
 /**

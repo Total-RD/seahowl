@@ -58,6 +58,14 @@ void Turbine::apply_control(double time, double dt) {
             }
         }
     }
+
+    // apply yaw control from controller
+    if (controller->has_yaw_control) {
+        auto yaw_rate = controller->get_yaw_rate();
+        auto yaw_increment = yaw_rate * dt;
+        rna.elasto.apply_yaw_increment(yaw_increment);
+        rna.update_positions_aero();
+    }
 }
 
 void Turbine::prestep(double time, double dt) {

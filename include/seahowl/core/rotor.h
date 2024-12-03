@@ -78,6 +78,14 @@ class RotorNacelleAssembly : public ComponentDynamic {
      */
     void build() override;
 
+    /**
+     * @brief Returns yaw error.
+     *
+     * The yaw error is defined as the angle bteween the rotor disk normal vector to the rotor-disk-averaged relative
+     * wind velocity, both projected on global X-Y plane.
+     */
+    double get_yaw_error() const;
+
   private:
     /**
      * @brief Initialize RNA, called before starting the simulation.

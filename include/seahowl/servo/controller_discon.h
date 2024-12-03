@@ -124,6 +124,12 @@ class DisconInterface {
     void SetNumberOfBlades(size_t nblades);
 
     /// <summary>
+    /// Helper to set yaw error of the RNA
+    /// </summary>
+    /// <param name="yaw_error">The yaw error (rad).</param>
+    void SetYawError(double yaw_error);
+
+    /// <summary>
     /// Set Value in avrSWAP array of DISCON
     /// </summary>
     /// <param name="index">Index Fortran. (eg +1 compared to C)</param>
@@ -240,6 +246,13 @@ class ControllerDISCON : public Controller {
      * @param[in] index_blade Index of blade (0, 1, or 2).
      */
     virtual double get_pitch_blade(int index_blade) const override;
+
+    /**
+     * @brief Returns yaw rate to apply to yaw bearing.
+     *
+     * @param[in] yaw_rate Yaw rate (rad/s).
+     */
+    virtual double get_yaw_rate() const override;
 
   private:
     /** @brief Filepath of dynamic library (for DISCON routine). */

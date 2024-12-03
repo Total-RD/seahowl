@@ -19,7 +19,7 @@ void TurbineAero::build() {
 void TurbineAero::initialize(double time, double dt) {}
 
 void TurbineAero::compute_fluid_loads(const FluidModel& wind_model, double time) {
-    rna.rotor->compute_fluid_loads(wind_model, time);
+    rna.compute_fluid_loads(wind_model, time);
     tower.compute_fluid_loads(wind_model, time);
     if (foundation) {
         foundation->compute_fluid_loads(wind_model, time);

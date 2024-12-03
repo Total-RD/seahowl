@@ -38,9 +38,18 @@ class RotorAero : public ComponentFluid {
     double azimuth = 0.0;
     /** @brief Collective pitch of blades (in radians). */
     double pitch_collective = 0.0;
+    /** @brief Disk averaged wind speed. */
+    Vector3d disk_averaged_wind_velocity{0.0, 0.0, 0.0};
 
     virtual void initialize() = 0;
     virtual void compute_fluid_loads(const env::FluidModel& fluid_model, double time) = 0;
+
+    /**
+     * @brief Computes disk-averaged wind velocity.
+     *
+     * The disk-averaged wind velocity is computed by averaging the wind velocity along all blade.
+     */
+    void compute_disk_averaged_wind_velocity(const env::FluidModel& fluid_model, double time);
 };
 
 class RotorAeroBEMT : public RotorAero {

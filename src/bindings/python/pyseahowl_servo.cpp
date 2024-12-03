@@ -16,6 +16,7 @@ void initialize_pyseahowl_servo(py::module& m) {
     py::class_<seahowl::servo::Controller, std::shared_ptr<seahowl::servo::Controller>>(m_servo, "Controller")
         .def_readwrite("has_pitch_control", &seahowl::servo::Controller::has_pitch_control)
         .def_readwrite("has_torque_control", &seahowl::servo::Controller::has_torque_control)
+        .def_readwrite("has_yaw_control", &seahowl::servo::Controller::has_yaw_control)
         .def("initialize", &seahowl::servo::Controller::initialize)
         .def("step", &seahowl::servo::Controller::step)
         .def("poststep", &seahowl::servo::Controller::poststep)

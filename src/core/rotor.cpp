@@ -10,6 +10,7 @@
 #include <vector>
 #include <spdlog/spdlog.h>
 
+using namespace seahowl;
 using namespace seahowl::core;
 using namespace seahowl::elasto;
 using namespace seahowl::aero;
@@ -50,7 +51,7 @@ void RotorNacelleAssembly::poststep(double time, double dt) {
 }
 
 void RotorNacelleAssembly::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
-    aero.rotor->compute_fluid_loads(fluid_model, time);
+    aero.compute_fluid_loads(fluid_model, time);
 }
 
 void RotorNacelleAssembly::update_positions_aero() {
@@ -81,4 +82,30 @@ void RotorNacelleAssembly::build() {
     update_positions_aero();
     // build aero
     aero.build();
+}
+
+Vector3d project_vector_to_plane2(const Vector3d& vec, const Vector3d& plane_normal) {
+    auto vec_projected = (vec - (vec.dot(plane_normal)) * plane_normal);
+    return vec_projected;
+}
+
+double RotorNacelleAssembly::get_yaw_error() const {
+    auto tol = 1e-6;
+    if (aero.rotor->disk_averaged_wind_velocity.norm() < tol) {
+        // if wind velocity is zero, return no yaw error
+        return 0.0;
+    }
+
+    // disk normal vector
+    auto global_z = Vector3d(0.0, 0.0, 1.0);
+    auto disk_normal = elasto.rotor->body_hub->get_rotation() * Vector3d(1.0, 0.0, 0.0);
+    auto disk_normal_projected = project_vector_to_plane2(disk_normal, global_z).normalized();
+
+    // wind vector
+    auto disk_wind_relative = aero.rotor->disk_averaged_wind_velocity - aero.rotor->body_hub.get_velocity();
+    auto disk_wind_projected = project_vector_to_plane2(disk_wind_relative, global_z).normalized();
+
+    auto yaw_error = atan2(disk_normal_projected.cross(disk_wind_projected).dot(global_z),
+                           disk_wind_projected.dot(disk_normal_projected));
+    return yaw_error;
 }

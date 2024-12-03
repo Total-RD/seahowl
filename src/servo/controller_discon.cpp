@@ -19,6 +19,7 @@ seahowl::servo::ControllerDISCON::ControllerDISCON(const std::string& infile, co
     : libfile(libfile) {
     has_pitch_control = true;
     has_torque_control = true;
+    has_yaw_control = true;
 
     pImpl.ResetAll();
     pImpl.SetINFILE(infile);
@@ -78,6 +79,9 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
     pImpl.SetNacelleRotationalAcceleration(nacelle_acceleration_rotational[0], nacelle_acceleration_rotational[1],
                                            nacelle_acceleration_rotational[2]);
 
+    // yaw error
+    pImpl.SetYawError(turbine.rna.get_yaw_error());
+
     // generator
     // speed
     auto omega_generator = turbine.get_generator_rpm() * (2 * PI / 60.0);
@@ -111,6 +115,9 @@ void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const 
     // electrical torque anymore) Keeping it on works for CPC mode also (tested on ROSCO v2.9.0).
     pImpl.SetAvrSWAP(28, 1.0);
 
+    // yaw rate control
+    pImpl.SetAvrSWAP(29, 0.0);
+
     pImpl.Init(libfile);
 
     spdlog::debug("Finished initialization of DISCON controller.");
@@ -142,6 +149,12 @@ double seahowl::servo::ControllerDISCON::get_pitch_blade(int index_blade) const 
             throw std::runtime_error("DISCON: index of blade can only be (0, 1, 2).");
     }
     return pitch;
+}
+
+double seahowl::servo::ControllerDISCON::get_yaw_rate() const {
+    double yaw_rate = pImpl.GetAvrSWAP(48);
+
+    return yaw_rate;
 }
 
 /**@brief Discon controller */
@@ -501,6 +514,10 @@ void seahowl::servo::DisconInterface::SetShaftPower(double power) {
 
 void seahowl::servo::DisconInterface::SetNumberOfBlades(size_t nblades) {
     SetAvrSWAP(61, nblades);
+}
+
+void seahowl::servo::DisconInterface::SetYawError(double yaw_error) {
+    SetAvrSWAP(24, yaw_error);
 }
 
 void seahowl::servo::DisconInterface::SetAvrSWAP(size_t index, float value) {

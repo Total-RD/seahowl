@@ -8,10 +8,7 @@
 
 using namespace seahowl::servo;
 
-Controller::Controller() {
-    has_pitch_control = false;
-    has_torque_control = false;
-}
+Controller::Controller() {}
 
 void Controller::initialize(double time, double dt, const seahowl::core::Turbine& turbine) {}
 
@@ -28,6 +25,10 @@ double Controller::get_collective_pitch() const {
 }
 
 double Controller::get_pitch_blade(int index_blade) const {
+    return 0.0;
+}
+
+double Controller::get_yaw_rate() const {
     return 0.0;
 }
 

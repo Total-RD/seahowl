@@ -51,9 +51,23 @@ seahowl::Vector2d DiskCoefficients::get_disk_coefficients_from_table(double TSR,
     return results;
 }
 
+void RotorAero::compute_disk_averaged_wind_velocity(const FluidModel& fluid_model, double time) {
+    disk_averaged_wind_velocity = fluid_model.get_fluid_velocity(body_hub.get_position(), time);
+    size_t npoints = 1;
+    for (auto& blade : blades) {
+        for (auto& node : blade->nodes) {
+            node.get_position();
+            disk_averaged_wind_velocity += fluid_model.get_fluid_velocity(node.get_position(), time);
+            npoints += 1;
+        }
+    }
+    disk_averaged_wind_velocity /= npoints;
+}
+
 RotorNacelleAssemblyAero::RotorNacelleAssemblyAero() {}
 
 void RotorNacelleAssemblyAero::compute_fluid_loads(const FluidModel& wind_model, double time) {
+    rotor->compute_disk_averaged_wind_velocity(wind_model, time);
     rotor->compute_fluid_loads(wind_model, time);
 }
 
@@ -251,10 +265,8 @@ void RotorAeroDisk::compute_fluid_loads(const FluidModel& wind_model, double tim
     auto pos_hub = body_hub.get_position();
     auto vel_hub = body_hub.get_velocity();
     double density = wind_model.get_fluid_density(pos_hub, time);
-    // get fluid relative velocity
-    auto wind_velocity = wind_model.get_fluid_velocity(pos_hub, time);
 
-    auto global_velocity = Vector3d(wind_velocity - vel_hub);
+    auto global_velocity = Vector3d(disk_averaged_wind_velocity - vel_hub);
     // project in disc frame
     auto local_velocity_disc = (body_hub.get_rotation().inverse() * global_velocity).x();
 
