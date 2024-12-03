@@ -33,10 +33,10 @@ TEST_F(TestTower, mass) {
     system_elasto.do_statics(true, 0);
 
     // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({.debug = false,
-                                       .reference_filepath = (ref_dir / "test_tower_mass.values.csv").generic_string(),
-                                       .test_filepath = (test_dir / "test_tower_mass.values.test.csv").generic_string(),
-                                       .dimensions = {"values"}});
+    TestFrameworkDataset test_dataset({false,
+                                       (ref_dir / "test_tower_mass.values.csv").generic_string(),
+                                       (test_dir / "test_tower_mass.values.test.csv").generic_string(),
+                                       {"values"}});
 
     test_dataset.add_row_data({tower.get_mass()});
 
@@ -60,10 +60,10 @@ TEST_F(TestTower, frequency) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_datasetvalues(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_tower_frequency.values.csv").generic_string(),
-         .test_filepath = (test_dir / "test_tower_frequency.values.test.csv").generic_string(),
-         .dimensions = {"values"}});
+        {false,
+         (ref_dir / "test_tower_frequency.values.csv").generic_string(),
+         (test_dir / "test_tower_frequency.values.test.csv").generic_string(),
+         {"values"}});
 
     // check mass
     test_datasetvalues.add_row_data({tower.get_mass()});
@@ -85,10 +85,10 @@ TEST_F(TestTower, frequency) {
     tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
 
     // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({.debug = false,
-                                       .reference_filepath = (ref_dir / "test_tower_frequency.csv").generic_string(),
-                                       .test_filepath = (test_dir / "test_tower_frequency.test.csv").generic_string(),
-                                       .dimensions = {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset({false,
+                                       (ref_dir / "test_tower_frequency.csv").generic_string(),
+                                       (test_dir / "test_tower_frequency.test.csv").generic_string(),
+                                       {"time", "natural_period"}});
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -146,10 +146,10 @@ TEST_F(TestTower, cylinder_frequency) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_datasetvalues(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_tower_cylinder_frequency.values.csv").generic_string(),
-         .test_filepath = (test_dir / "test_tower_cylinder_frequency.values.test.csv").generic_string(),
-         .dimensions = {"values"}});
+        {false,
+         (ref_dir / "test_tower_cylinder_frequency.values.csv").generic_string(),
+         (test_dir / "test_tower_cylinder_frequency.values.test.csv").generic_string(),
+         {"values"}});
 
     // check mass
     test_datasetvalues.add_row_data({tower.get_mass()});
@@ -172,10 +172,10 @@ TEST_F(TestTower, cylinder_frequency) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_tower_cylinder_frequency.csv").generic_string(),
-         .test_filepath = (test_dir / "test_tower_cylinder_frequency.test.csv").generic_string(),
-         .dimensions = {"time", "natural_period"}});
+        {false,
+         (ref_dir / "test_tower_cylinder_frequency.csv").generic_string(),
+         (test_dir / "test_tower_cylinder_frequency.test.csv").generic_string(),
+         {"time", "natural_period"}});
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -231,10 +231,10 @@ TEST_F(TestTower, conical_frequency) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_datasetvalues(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_tower_conical_frequency.values.csv").generic_string(),
-         .test_filepath = (test_dir / "test_tower_conical_frequency.values.test.csv").generic_string(),
-         .dimensions = {"values"}});
+        {false,
+         (ref_dir / "test_tower_conical_frequency.values.csv").generic_string(),
+         (test_dir / "test_tower_conical_frequency.values.test.csv").generic_string(),
+         {"values"}});
 
     // check mass
     test_datasetvalues.add_row_data({tower.get_mass()});
@@ -257,10 +257,10 @@ TEST_F(TestTower, conical_frequency) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_tower_conical_frequency.csv").generic_string(),
-         .test_filepath = (test_dir / "test_tower_conical_frequency.test.csv").generic_string(),
-         .dimensions = {"time", "natural_period"}});
+        {false,
+         (ref_dir / "test_tower_conical_frequency.csv").generic_string(),
+         (test_dir / "test_tower_conical_frequency.test.csv").generic_string(),
+         {"time", "natural_period"}});
 
     while (time < end_time) {
         if (time > 0.5) {

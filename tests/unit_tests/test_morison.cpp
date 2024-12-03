@@ -20,10 +20,10 @@ class TestMorison : public FixtureComponents {
 TEST_F(TestMorison, MCF_Table) {
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_morison_MCF_Table.values.csv").generic_string(),
-         .test_filepath = (test_dir / "test_morison_MCF_Table.values.test.csv").generic_string(),
-         .dimensions = {"DNV_table Y"}});
+        {false,
+         (ref_dir / "test_morison_MCF_Table.values.csv").generic_string(),
+         (test_dir / "test_morison_MCF_Table.values.test.csv").generic_string(),
+         {"DNV_table Y"}});
 
     seahowl::hydro::MacCamyFuchsTable mytable = seahowl::hydro::MacCamyFuchsTable();
     mytable.wave_peak_period = 10.0;
@@ -79,10 +79,10 @@ TEST_F(TestMorison, MCF_Table) {
 TEST_F(TestMorison, Cd_Table) {
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_morison_Cd_Table.values.csv").generic_string(),
-         .test_filepath = (test_dir / "test_morison_Cd_Table.values.test.csv").generic_string(),
-         .dimensions = {"Cd"}});
+        {false,
+         (ref_dir / "test_morison_Cd_Table.values.csv").generic_string(),
+         (test_dir / "test_morison_Cd_Table.values.test.csv").generic_string(),
+         {"Cd"}});
 
     seahowl::hydro::MacCamyFuchsTable mytable = seahowl::hydro::MacCamyFuchsTable();
     mytable.wave_peak_period = 10.0;

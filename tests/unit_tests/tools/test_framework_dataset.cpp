@@ -7,6 +7,7 @@
 #include <vector>
 #include <cmath>
 #include <spdlog/spdlog.h>
+#include <sstream>
 
 #include "csv.hpp"
 

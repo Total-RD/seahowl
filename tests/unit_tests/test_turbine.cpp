@@ -72,13 +72,13 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_turbine_rpm_initial_pitch.csv").generic_string(),
-         .test_filepath = (test_dir / "test_turbine_rpm_initial_pitch.test.csv").generic_string(),
-         .dimensions = {"time", "rpm", "axial_torque"},
-         .test_functions = {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
-                            [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; },
-                            [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_axial_torque()}; }}
+        {false,
+         (ref_dir / "test_turbine_rpm_initial_pitch.csv").generic_string(),
+         (test_dir / "test_turbine_rpm_initial_pitch.test.csv").generic_string(),
+         {"time", "rpm", "axial_torque"},
+         {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
+          [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; },
+          [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_axial_torque()}; }}
 
         });
 
@@ -146,12 +146,12 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_turbine_rpm_initial_pitch_fpm.csv").generic_string(),
-         .test_filepath = (test_dir / "test_turbine_rpm_initial_pitch_fpm.test.csv").generic_string(),
-         .dimensions = {"time", "rpm"},
-         .test_functions = {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
-                            [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; }}});
+        {false,
+         (ref_dir / "test_turbine_rpm_initial_pitch_fpm.csv").generic_string(),
+         (test_dir / "test_turbine_rpm_initial_pitch_fpm.test.csv").generic_string(),
+         {"time", "rpm"},
+         {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
+          [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; }}});
 
     while (time < 50) {
         // prestep
@@ -217,12 +217,12 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_turbine_rpm_initial_pitch_rigid_rotor.csv").generic_string(),
-         .test_filepath = (test_dir / "test_turbine_rpm_initial_pitch_rigid_rotor.test.csv").generic_string(),
-         .dimensions = {"time", "rpm"},
-         .test_functions = {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
-                            [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; }}});
+        {false,
+         (ref_dir / "test_turbine_rpm_initial_pitch_rigid_rotor.csv").generic_string(),
+         (test_dir / "test_turbine_rpm_initial_pitch_rigid_rotor.test.csv").generic_string(),
+         {"time", "rpm"},
+         {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
+          [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; }}});
 
     while (time < 50) {
         // prestep
@@ -291,12 +291,12 @@ TEST_F(TestTurbine, controller_target_rpm) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_turbine_controller_target_rpm.csv").generic_string(),
-         .test_filepath = (test_dir / "test_turbine_controller_target_rpm.test.csv").generic_string(),
-         .dimensions = {"time", "rpm"},
-         .test_functions = {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
-                            [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; }}});
+        {false,
+         (ref_dir / "test_turbine_controller_target_rpm.csv").generic_string(),
+         (test_dir / "test_turbine_controller_target_rpm.test.csv").generic_string(),
+         {"time", "rpm"},
+         {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
+          [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; }}});
 
     while (time < 100) {
         // prestep
@@ -367,13 +367,13 @@ TEST_F(TestTurbine, actuator_disk) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_turbine_actuator_disk.csv").generic_string(),
-         .test_filepath = (test_dir / "test_turbine_actuator_disk.test.csv").generic_string(),
-         .dimensions = {"time", "rpm", "generated_power"},
-         .test_functions = {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
-                            [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; },
-                            [&turbine]() -> std::vector<double> { return {turbine.get_generated_power()}; }}});
+        {false,
+         (ref_dir / "test_turbine_actuator_disk.csv").generic_string(),
+         (test_dir / "test_turbine_actuator_disk.test.csv").generic_string(),
+         {"time", "rpm", "generated_power"},
+         {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
+          [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; },
+          [&turbine]() -> std::vector<double> { return {turbine.get_generated_power()}; }}});
 
     while (time < 100) {
         // prestep
@@ -475,11 +475,11 @@ TEST_F(TestTurbine, multiturbines) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_turbine_multiturbines.csv").generic_string(),
-         .test_filepath = (test_dir / "test_turbine_multiturbines.test.csv").generic_string(),
-         .dimensions = {"time", "rpm turb0", "rpm turb1", "rpm turb2"},
-         .test_functions = {
+        {false,
+         (ref_dir / "test_turbine_multiturbines.csv").generic_string(),
+         (test_dir / "test_turbine_multiturbines.test.csv").generic_string(),
+         {"time", "rpm turb0", "rpm turb1", "rpm turb2"},
+         {
              [&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
              [&system_core]() -> std::vector<double> { return {system_core.turbines[0]->rna.elasto.get_rpm()}; },
              [&system_core]() -> std::vector<double> { return {system_core.turbines[1]->rna.elasto.get_rpm()}; },

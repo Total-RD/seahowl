@@ -40,10 +40,10 @@ TEST_F(TestBlade, mass_geometry) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_blade_mass_geometry.values.csv").generic_string(),
-         .test_filepath = (test_dir / "test_blade_mass_geometry.values.test.csv").generic_string(),
-         .dimensions = {"values"}});
+        {false,
+         (ref_dir / "test_blade_mass_geometry.values.csv").generic_string(),
+         (test_dir / "test_blade_mass_geometry.values.test.csv").generic_string(),
+         {"values"}});
 
     // check geometry
     for (int ii = 0; ii < blade.nodes.size(); ii++) {
@@ -63,10 +63,10 @@ TEST_F(TestBlade, mass_geometry) {
 TEST_F(TestBlade, edgewise) {
     // Setup TestFwDataSet
     TestFrameworkDataset test_datasetvalues(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_blade_edgewise.values.csv").generic_string(),
-         .test_filepath = (test_dir / "test_blade_edgewise.values.test.csv").generic_string(),
-         .dimensions = {"values"}});
+        {false,
+         (ref_dir / "test_blade_edgewise.values.csv").generic_string(),
+         (test_dir / "test_blade_edgewise.values.test.csv").generic_string(),
+         {"values"}});
 
     // system
     auto system_elasto = SystemElastoChrono();
@@ -116,10 +116,10 @@ TEST_F(TestBlade, edgewise) {
     blade.nodes.back()->set_force(Vector3d(0.0, 0.0, 1000.0), false);
 
     // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({.debug = false,
-                                       .reference_filepath = (ref_dir / "test_blade_edgewise.csv").generic_string(),
-                                       .test_filepath = (test_dir / "test_blade_edgewise.test.csv").generic_string(),
-                                       .dimensions = {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset({false,
+                                       (ref_dir / "test_blade_edgewise.csv").generic_string(),
+                                       (test_dir / "test_blade_edgewise.test.csv").generic_string(),
+                                       {"time", "natural_period"}});
 
     while (time < end_time) {
         if (time > 0.5) {
@@ -146,10 +146,10 @@ TEST_F(TestBlade, edgewise) {
 TEST_F(TestBlade, flapwise) {
     // Setup TestFwDataSet
     TestFrameworkDataset test_datasetvalues(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_blade_flapwise.values.csv").generic_string(),
-         .test_filepath = (test_dir / "test_blade_flapwise.values.test.csv").generic_string(),
-         .dimensions = {"value"}});
+        {false,
+         (ref_dir / "test_blade_flapwise.values.csv").generic_string(),
+         (test_dir / "test_blade_flapwise.values.test.csv").generic_string(),
+         {"value"}});
     // system
     auto system_elasto = SystemElastoChrono();
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
@@ -198,10 +198,10 @@ TEST_F(TestBlade, flapwise) {
     blade.nodes.back()->set_force(Vector3d(0.0, 0.0, 1000.0), false);
 
     // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({.debug = false,
-                                       .reference_filepath = (ref_dir / "test_blade_flapwise.csv").generic_string(),
-                                       .test_filepath = (test_dir / "test_blade_flapwise.test.csv").generic_string(),
-                                       .dimensions = {"time", "natural_period"}});
+    TestFrameworkDataset test_dataset({false,
+                                       (ref_dir / "test_blade_flapwise.csv").generic_string(),
+                                       (test_dir / "test_blade_flapwise.test.csv").generic_string(),
+                                       {"time", "natural_period"}});
 
     while (time < end_time) {
         if (time > 0.5) {

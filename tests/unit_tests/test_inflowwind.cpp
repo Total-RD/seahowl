@@ -69,12 +69,12 @@ TEST_F(TestInflowWind, rpm_initial_pitch) {
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
-        {.debug = false,
-         .reference_filepath = (ref_dir / "test_inflowwind_rpm_initial_pitch.csv").generic_string(),
-         .test_filepath = (test_dir / "test_inflowwind_rpm_initial_pitch.test.csv").generic_string(),
-         .dimensions = {"time", "rpm"},
-         .test_functions = {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
-                            [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; }}});
+        {false,
+         (ref_dir / "test_inflowwind_rpm_initial_pitch.csv").generic_string(),
+         (test_dir / "test_inflowwind_rpm_initial_pitch.test.csv").generic_string(),
+         {"time", "rpm"},
+         {[&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; },
+          [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; }}});
 
     while (time < 50) {
         // prestep
