@@ -13,13 +13,14 @@
       "name": "default",
       "displayName": "Default SEAHOWL installations",
       "binaryDir": "${sourceDir}/build",
-      "generator": "Unix Makefiles",
+      "generator": "Ninja",
       "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_BUILD_TYPE": "Release",
         "BUILD_TESTING": "ON",
         "CMAKE_PREFIX_PATH": "${sourceDir}/install",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install",
-        "HDF5_DIR": "${sourceDir}/install/share/cmake"
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install"
+        
       }
     },
     {
@@ -27,7 +28,7 @@
       "inherits": "default",
       "displayName": "Full SEAHOWL installation",
       "binaryDir": "${sourceDir}/build",
-      "generator": "Unix Makefiles",
+      "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "SEAHOWL_ENABLE_BUILD": "ON",
@@ -47,7 +48,7 @@
       "inherits": "full",
       "displayName": "Full SEAHOWL installation with in situ visualization",
       "binaryDir": "${sourceDir}/build",
-      "generator": "Unix Makefiles",
+      "generator": "Ninja",
       "cacheVariables": {
         "SEAHOWL_ENABLE_IRRLICHT": "ON",
         "SEAHOWL_ENABLE_VTK": "ON"
@@ -58,7 +59,7 @@
       "displayName": "Minimal SEAHOWL installation",
       "inherits": "default",
       "binaryDir": "${sourceDir}/build",
-      "generator": "Unix Makefiles",
+      "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "SEAHOWL_ENABLE_BUILD": "ON",
@@ -76,7 +77,7 @@
       "name": "debug",
       "displayName": "Debug SEAHOWL installation",
       "inherits": "full viz",
-      "generator": "Unix Makefiles",
+      "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }

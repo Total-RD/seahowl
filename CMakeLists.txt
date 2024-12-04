@@ -329,6 +329,7 @@ set(SEAHOWL_IO_HEADERS
 	include/seahowl/io/viz_insitu.h
 	include/seahowl/io/output_manager.h
     include/seahowl/io/config_manager.h
+    include/seahowl/io/utils_config.h
     include/seahowl/io/command_parser.h
 )
 if(SEAHOWL_ENABLE_VTK)
