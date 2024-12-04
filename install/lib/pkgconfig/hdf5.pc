@@ -1,0 +1,14 @@
+prefix=/home/jerome/DEV/DEV_TOTAL/BASH/seahowl/install
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: hdf5
+Description: HDF5 (Hierarchical Data Format 5) Software Library
+Version: 1.10.8
+
+Cflags: -I${includedir}
+Libs: -L${libdir} 
+Requires: 
+Libs.private:  -lm -ldl  -lhdf5
+Requires.private: 
