@@ -11,6 +11,7 @@ using std::filesystem::path;
 
 using namespace seahowl;
 using namespace seahowl::elasto;
+using namespace seahowl::io;
 
 // The fixture for testing
 class TestRotor : public FixtureComponents {

@@ -10,6 +10,7 @@
 #include <seahowl/env/inflowwind_adapter.h>
 using namespace seahowl;
 using namespace seahowl::elasto;
+using namespace seahowl::io;
 
 #include <gtest/gtest.h>
 #include <memory>
