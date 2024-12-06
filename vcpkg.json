@@ -3,6 +3,23 @@
       "spdlog",
       "nlohmann-json",
       "eigen3", 
-      "gtest"
+      "gtest",
+      {
+          "name": "hdf5",
+          "version>=": "1.10.8"
+      },
+      {
+          "name": "chrono",
+          "version>=": "8.0.0"
+      },
+      {
+          "name": "hydrochrono",
+          "version>=": "0.2.2"
+      },
+      {
+          "name": "openfast",
+          "version>=": "main"
+      }
+
     ]
 }

@@ -11,14 +11,6 @@
     {
       "name": "vcpkg-cmake-config",
       "host": true
-    },
-    {
-      "name": "eigen3",
-      "host": true
-    },
-    {
-      "name": "irrlicht",
-      "host": true
-    }
+    } 
   ]
 }
