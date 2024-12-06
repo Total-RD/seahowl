@@ -1,7 +1,7 @@
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
-    URL ssh://git@forge-02.cesgenslab.cloud:2222/total-seahowl-test/chrono-v8-0-0.git
-    REF 8458cf49c625df378182bdd5f8b5ce71b85d942f
+    URL https://github.com/projectchrono/chrono.git
+    REF 30cd3f2702cb58182e46d5b2724d2d2850a50e21
 )
  
 vcpkg_cmake_configure(
@@ -12,7 +12,7 @@ vcpkg_cmake_configure(
         -DENABLE_HDF5=OFF 
         -DENABLE_MODULE_POSTPROCESS=OFF 
         -DENABLE_MODULE_PYTHON=OFF 
-        -DENABLE_MODULE_IRRLICHT=ON 
+        -DENABLE_MODULE_IRRLICHT=OFF 
         -DENABLE_MODULE_VEHICLE=OFF 
         -DENABLE_MODULE_MULTICORE=OFF 
         -DENABLE_MODULE_OPENGL=OFF 

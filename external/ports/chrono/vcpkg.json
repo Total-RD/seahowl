@@ -1,8 +1,8 @@
 {
-  "name": "openfast",
-  "version-string": "main",
+  "name": "chrono",
+  "version-string": "8.0.0",
   "description": "",
-  "homepage": "https://github.com/HDFGroup/hdf5",
+  "homepage": "https://projectchrono.org",
   "dependencies" : [
     {
       "name": "vcpkg-cmake",
@@ -11,6 +11,6 @@
     {
       "name": "vcpkg-cmake-config",
       "host": true
-    }
+    } 
   ]
 }

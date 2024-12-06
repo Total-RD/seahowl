@@ -419,7 +419,7 @@ dependency_process_compile_install() {
             # Build
             cd "$build_dir" &&
             echo "  cmake ..."  && 
-            cmake  -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"  $OPTION -DCMAKE_INSTALL_PREFIX=../../../install .. &&
+            cmake  -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"  $OPTION -DCMAKE_INSTALL_PREFIX=../../../../install .. &&
             echo "  make ..." &&
             make -j $OPTION_MAKE_JOBS_NUMBER &&
             echo "  install ..." &&

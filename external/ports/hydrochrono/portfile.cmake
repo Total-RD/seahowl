@@ -1,13 +1,14 @@
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL https://github.com/NREL/HydroChrono.git
-    REF a75320358a481eb7d0123be4d444b6e0367d3941
+    REF 43439c3b6dae2d195a7eb8e1dde440d406ca0e07
 )
  
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
         -DCMAKE_BUILD_TYPE=Release
+        -DHYDROCHRONO_ENABLE_IRRLICHT=OFF
         
 )
 vcpkg_cmake_install()

@@ -1,8 +1,8 @@
 {
   "name": "hydrochrono",
-  "version-string": "0.2.2",
+  "version-string": "0.2.3",
   "description": "",
-  "homepage": "https://github.com/HDFGroup/hdf5",
+  "homepage": "https://nrel.github.io/HydroChrono",
   "dependencies" : [
     {
       "name": "vcpkg-cmake",
