@@ -1,6 +1,6 @@
 {
   "name": "openfast",
-  "version-string": "main",
+  "version": "3.5.2",
   "description": "",
   "homepage": "https://www.nrel.gov/wind/nwtc/openfast.html",
   "dependencies" : [
@@ -11,6 +11,14 @@
     {
       "name": "vcpkg-cmake-config",
       "host": true
+    },
+    {
+      "name": "blas",
+      "version>=": "2023-04-14"
+    },
+    {
+      "name": "lapack",
+      "version>=": "2023-06-10"
     }
   ]
 }

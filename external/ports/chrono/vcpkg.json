@@ -11,6 +11,10 @@
     {
       "name": "vcpkg-cmake-config",
       "host": true
-    } 
+    },
+    {
+      "name": "eigen3",
+      "version>=": "3.4.0"
+    }
   ]
 }

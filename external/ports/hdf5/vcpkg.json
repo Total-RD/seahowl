@@ -1,6 +1,6 @@
 {
   "name": "hdf5",
-  "version-string": "1.10.8",
+  "version": "1.10.8",
   "description": "",
   "homepage": "https://github.com/HDFGroup/hdf5",
   "dependencies" : [

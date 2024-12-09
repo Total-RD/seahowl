@@ -1,25 +1,40 @@
 {
-    "dependencies": [
-      "spdlog",
-      "nlohmann-json",
-      "eigen3", 
-      "gtest",
-      {
-          "name": "hdf5",
-          "version>=": "1.10.8"
-      },
-      {
-          "name": "chrono",
-          "version>=": "8.0.0"
-      },
-      {
-          "name": "hydrochrono",
-          "version>=": "0.2.2"
-      },
-      {
-          "name": "openfast",
-          "version>=": "main"
-      }
-
-    ]
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    },
+    {
+      "name": "eigen3",
+      "version>=": "3.4.0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.3"
+    },
+    {
+      "name": "spdlog",
+      "version>=": "1.15.0"
+    },
+    {
+      "name": "gtest",
+      "version>=": "1.15.2"
+    },
+    {
+      "name": "chrono",
+      "version>=": "8.0.0"
+    },
+    {
+      "name": "hydrochrono",
+      "version>=": "0.2.3"
+    },
+    {
+      "name": "openfast",
+      "version>=": "3.5.2"
+    }
+  ]
 }
