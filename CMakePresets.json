@@ -19,8 +19,8 @@
         "CMAKE_BUILD_TYPE": "Release",
         "BUILD_TESTING": "ON",
         "CMAKE_PREFIX_PATH": "${sourceDir}/install",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install"
-        
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install",
+        "VCPKG_MANIFEST_DIR": "${sourceDir}/external/vcpkg"
       }
     },
     {

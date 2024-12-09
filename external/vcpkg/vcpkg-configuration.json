@@ -12,6 +12,6 @@
     }
   ],
   "overlay-ports": [
-    "./external/ports"
+    "./ports"
   ]
 }
