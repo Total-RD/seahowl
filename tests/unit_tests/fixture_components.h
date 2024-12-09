@@ -12,7 +12,11 @@ using std::filesystem::path;
 class FixtureComponents : public ::testing::Test {
   protected:
     FixtureComponents() {
-        DATADIR = absolute(path("../data/IEA15MW"));
+        #ifdef SEAHOWL_DATADIR
+            DATADIR = path(SEAHOWL_DATADIR);
+        #else
+            spdlog::error("SEAHOWL_DATADIR not defined for tests");
+        #endif
         spdlog::set_level(spdlog::level::info);
     }
 

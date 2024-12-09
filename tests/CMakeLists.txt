@@ -4,6 +4,12 @@ find_package(Threads REQUIRED)
 
 find_package(GTest CONFIG REQUIRED)
 
+if(DEFINED ENV{SEAHOWL_DATADIR})
+    set(SEAHOWL_DATADIR_VALUE $ENV{SEAHOWL_DATADIR})
+    message(STATUS "Test SEAHOWL_DATADIR: ${SEAHOWL_DATADIR_VALUE}")
+    add_definitions(-DSEAHOWL_DATADIR="${SEAHOWL_DATADIR_VALUE}")
+endif()
+
 set(TEST_FILES
 	unit_tests/test_bemt.cpp
 	unit_tests/test_blade.cpp
