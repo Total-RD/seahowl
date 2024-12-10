@@ -48,6 +48,10 @@ else()
     set(SEAHOWL_GIT_HASH "N/A")
 endif()
 
+# set default SEAHOWL_DATADIR
+set(SEAHOWL_DATADIR_VALUE ${PROJECT_SOURCE_DIR}/data)
+message(STATUS "SEAHOWL_DATADIR set to: ${SEAHOWL_DATADIR_VALUE}")
+add_definitions(-DSEAHOWL_DATADIR="${SEAHOWL_DATADIR_VALUE}")
 
 # =============
 # OPTIONS

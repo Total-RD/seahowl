@@ -12,12 +12,35 @@ using std::filesystem::path;
 class FixtureComponents : public ::testing::Test {
   protected:
     FixtureComponents() {
-        #ifdef SEAHOWL_DATADIR
-            DATADIR = path(SEAHOWL_DATADIR);
-        #else
-            spdlog::error("SEAHOWL_DATADIR not defined for tests");
-        #endif
         spdlog::set_level(spdlog::level::info);
+
+        // set data directory root
+        char* const env_datadir = std::getenv("SEAHOWL_DATADIR");
+        if (env_datadir == NULL) {
+#ifdef SEAHOWL_DATADIR
+            DATADIR = path(SEAHOWL_DATADIR);
+#else
+            spdlog::critical("SEAHOWL_DATADIR not defined (need to set environment variable).");
+            std::exit(EXIT_FAILURE);
+#endif
+        } else {
+            DATADIR = path(env_datadir);
+        }
+
+        // set test directories roots
+        char* const env_testdir = std::getenv("SEAHOWL_TESTDIR");
+        if (env_testdir == NULL) {
+#ifdef SEAHOWL_TESTDIR
+            TESTDIR = path(SEAHOWL_TESTDIR);
+#else
+            spdlog::critical("SEAHOWL_TESTDIR not defined (need to set environment variable).");
+            std::exit(EXIT_FAILURE);
+#endif
+        } else {
+            TESTDIR = path(env_testdir);
+        }
+        ref_dir = path(TESTDIR) / "unit_tests/data";
+        test_dir = path(TESTDIR) / "unit_tests/data";
     }
 
     ~FixtureComponents() override {
@@ -49,8 +72,9 @@ class FixtureComponents : public ::testing::Test {
     }
 
     path DATADIR;
-    path ref_dir = absolute(path("../tests/unit_tests/data"));
-    path test_dir = absolute(path("../tests/unit_tests/data"));
+    path TESTDIR;
+    path ref_dir;
+    path test_dir;
     double rel_error = 1e-2;
     double abs_error = 1e-6;
 };

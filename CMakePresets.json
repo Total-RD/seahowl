@@ -20,11 +20,7 @@
         "CMAKE_PREFIX_PATH": "${sourceDir}/install",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/install",
         "HDF5_DIR": "${sourceDir}/install/share/cmake"
-      },
-      "environment": {
-        "SEAHOWL_DATADIR": "${sourceDir}/data/IEA15MW"
       }
-
     },
     {
       "name": "full",

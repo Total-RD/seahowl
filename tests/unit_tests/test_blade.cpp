@@ -29,7 +29,7 @@ TEST_F(TestBlade, mass_geometry) {
     // blade
     auto blade = seahowl::elasto::BladeElastoFEA();
     blade.reference_points =
-        seahowl::io::get_blade_elasto_reference_points_from_json((DATADIR / "blade.json").generic_string());
+        seahowl::io::get_blade_elasto_reference_points_from_json((DATADIR / "IEA15MW/blade.json").generic_string());
     // make 50 elements
     blade.discretization_fractions.clear();
     for (int ii = 0; ii < 51; ii++) {
@@ -74,7 +74,7 @@ TEST_F(TestBlade, edgewise) {
     // blade
     auto blade = seahowl::elasto::BladeElastoFEA();
     blade.fpm_mode = true;
-    seahowl::io::populate_blade_elasto_from_json((DATADIR / "blade.json").generic_string(), blade);
+    seahowl::io::populate_blade_elasto_from_json((DATADIR / "IEA15MW/blade.json").generic_string(), blade);
     // make 50 elements
     blade.discretization_fractions.clear();
     for (int ii = 0; ii < 51; ii++) {
@@ -155,7 +155,7 @@ TEST_F(TestBlade, flapwise) {
     // blade
     auto blade = seahowl::elasto::BladeElastoFEA();
     blade.fpm_mode = true;
-    seahowl::io::populate_blade_elasto_from_json((DATADIR / "blade.json").generic_string(), blade);
+    seahowl::io::populate_blade_elasto_from_json((DATADIR / "IEA15MW/blade.json").generic_string(), blade);
     // make 50 elements
     blade.discretization_fractions.clear();
     for (int ii = 0; ii < 51; ii++) {
