@@ -12,7 +12,7 @@
     {
       "name": "default",
       "displayName": "Default SEAHOWL installations",
-      "binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/build",
       "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
@@ -78,6 +78,24 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "full",
+      "configurePreset": "full"
+    },
+    {
+      "name": "full_viz",
+      "configurePreset": "full_viz"
+    },
+    {
+      "name": "minimal",
+      "configurePreset": "minimal"
     }
   ]
 }
