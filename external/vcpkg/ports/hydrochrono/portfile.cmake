@@ -4,6 +4,8 @@ vcpkg_from_git(
     REF 43439c3b6dae2d195a7eb8e1dde440d406ca0e07
 )
 
+set(VCPKG_BUILD_TYPE release)
+
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS

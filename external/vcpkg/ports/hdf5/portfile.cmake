@@ -6,17 +6,19 @@ vcpkg_from_github(
     HEAD_REF master
 )
 
+set(VCPKG_BUILD_TYPE release)
+
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
         -DHDF5_INSTALL_CMAKE_DIR=share/hdf5
         -DBUILD_SHARED_LIBS=OFF
         -DHDF5_BUILD_CPP_LIB=ON
+        -DHDF5_BUILD_TOOLS=OFF
         -DHDF5_ENABLE_CXX=ON
-        -DVCPKG_BUILD_TYPE=release
 )
+
 vcpkg_cmake_install()
 vcpkg_cmake_config_fixup()
-vcpkg_copy_tools(TOOL_NAMES mirror_server mirror_server_stop h5copy h5diff h5dump h5ls h5stat gif2h5 h52gif h5clear h5debug
-h5format_convert h5jam h5unjam h5mkgrp h5repack h5repart h5watch h5import h5perf_serial
+vcpkg_copy_tools(TOOL_NAMES mirror_server mirror_server_stop 
 AUTO_CLEAN)
