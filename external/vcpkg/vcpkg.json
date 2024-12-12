@@ -35,6 +35,14 @@
     {
       "name": "openfast",
       "version>=": "3.5.2"
+    },
+    {
+      "name": "pybind11",
+      "version>=": "2.13.6"
+    },
+    {
+      "name": "vcpkg-tool-ninja",
+      "version>=": "2022-03-31"
     }
   ]
 }

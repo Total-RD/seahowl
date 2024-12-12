@@ -18,7 +18,10 @@
     },
     {
       "name": "hdf5",
-      "version>=": "1.10.8"
+      "version>=": "1.14.4.3",
+      "features": [
+        "cpp"
+      ]
     }
   ]
 }
