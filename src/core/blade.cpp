@@ -43,7 +43,6 @@ void Blade::build() {
     // build aero & elasto
     elasto.build();
     aero.build();
-    update_positions_aero();
 }
 
 void Blade::apply_pitch_increment(double pitch_increment) {

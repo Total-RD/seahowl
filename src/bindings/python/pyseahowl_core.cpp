@@ -116,6 +116,7 @@ void initialize_pyseahowl_core(py::module& m) {
     // core/blade.h
     py::class_<seahowl::core::Blade, std::shared_ptr<seahowl::core::Blade>, seahowl::core::ComponentDynamic>(m_core,
                                                                                                              "Blade")
+        .def(py::init<seahowl::elasto::BladeElasto&, seahowl::aero::BladeAero&>())
         .def("apply_pitch_increment", &seahowl::core::Blade::apply_pitch_increment)
         .def("set_discretization_elasto", &seahowl::core::Blade::set_discretization_elasto)
         .def("set_discretization_aero", &seahowl::core::Blade::set_discretization_aero)
