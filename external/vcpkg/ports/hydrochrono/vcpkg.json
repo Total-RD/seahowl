@@ -1,6 +1,6 @@
 {
   "name": "hydrochrono",
-  "version-string": "0.2.3",
+  "version-string": "0.2.4",
   "description": "",
   "homepage": "https://nrel.github.io/HydroChrono",
   "dependencies": [

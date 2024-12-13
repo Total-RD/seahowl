@@ -77,7 +77,7 @@ Physics
 
 - AeroDyn: https://github.com/Total-RD/openfast4seahowl
 - InflowWind: https://github.com/Total-RD/openfast4seahowl
-- HydroChrono (v0.2.1): https://github.com/NREL/HydroChrono
+- HydroChrono (v0.2.4): https://github.com/NREL/HydroChrono
 
 Documentation
 ^^^^^^^^^^^^^
