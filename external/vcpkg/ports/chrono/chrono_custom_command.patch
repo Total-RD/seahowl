@@ -1,0 +1,67 @@
+diff --git a/src/chrono_irrlicht/CMakeLists.txt b/src/chrono_irrlicht/CMakeLists.txt
+index acffe0cb6..9a188a5bc 100644
+--- a/src/chrono_irrlicht/CMakeLists.txt
++++ b/src/chrono_irrlicht/CMakeLists.txt
+@@ -168,34 +168,34 @@ endif()
+ # appropriate directory (depending on the build type); however, we use
+ # copy_if_different.
+ 
+-IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+-
+-  IF(DEFINED ENV{CONDA_BUILD})
+-    SET(CH_IRRLICHT_DLL "$ENV{PREFIX}/Library/bin/Irrlicht.dll")
+-  ELSEIF("${CH_COMPILER}" STREQUAL "COMPILER_MSVC")
+-    SET(CH_IRRLICHT_DLL "${IRRLICHT_ROOT}/bin/Win32-VisualStudio/Irrlicht.dll")
+-  ELSEIF("${CH_COMPILER}" STREQUAL "COMPILER_MSVC_X64")
+-    SET(CH_IRRLICHT_DLL "${IRRLICHT_ROOT}/bin/Win64-VisualStudio/Irrlicht.dll")
+-  ENDIF()
+-
+-  ADD_CUSTOM_COMMAND(
+-    TARGET ChronoEngine_irrlicht POST_BUILD
+-    COMMAND ${CMAKE_COMMAND} -E make_directory
+-            "${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>"
+-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+-            "${CH_IRRLICHT_DLL}"
+-            "${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>"
+-    MAIN_DEPENDENCY ChronoEngine_irrlicht
+-    COMMENT "Copying Irrlicht DLL..."
+-  )
+-
+-  # copy the Irrlicht dll into the installed package to be on the safe side 
+-  install(FILES "${CH_IRRLICHT_DLL}" DESTINATION bin)
+-
+-  # Make variable visible from outside this directory
+-  SET(CH_IRRLICHT_DLL "${CH_IRRLICHT_DLL}" PARENT_SCOPE)
+-
+-ENDIF()
++#IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
++#
++#  IF(DEFINED ENV{CONDA_BUILD})
++#    SET(CH_IRRLICHT_DLL "$ENV{PREFIX}/Library/bin/Irrlicht.dll")
++#  ELSEIF("${CH_COMPILER}" STREQUAL "COMPILER_MSVC")
++#    SET(CH_IRRLICHT_DLL "${IRRLICHT_ROOT}/bin/Win32-VisualStudio/Irrlicht.dll")
++#  ELSEIF("${CH_COMPILER}" STREQUAL "COMPILER_MSVC_X64")
++#    SET(CH_IRRLICHT_DLL "${IRRLICHT_ROOT}/bin/Win64-VisualStudio/Irrlicht.dll")
++#  ENDIF()
++#
++#  ADD_CUSTOM_COMMAND(
++#    TARGET ChronoEngine_irrlicht POST_BUILD
++#    COMMAND ${CMAKE_COMMAND} -E make_directory
++#            "${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>"
++#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
++#            "${CH_IRRLICHT_DLL}"
++#            "${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>"
++#    MAIN_DEPENDENCY ChronoEngine_irrlicht
++#    COMMENT "Copying Irrlicht DLL..."
++#  )
++#
++#  # copy the Irrlicht dll into the installed package to be on the safe side 
++#  install(FILES "${CH_IRRLICHT_DLL}" DESTINATION bin)
++#
++#  # Make variable visible from outside this directory
++#  SET(CH_IRRLICHT_DLL "${CH_IRRLICHT_DLL}" PARENT_SCOPE)
++#
++#ENDIF()
+ 
+ #-------------------------------------------------------------------------------
+ # Install the ChronoEngine_irrlicht library

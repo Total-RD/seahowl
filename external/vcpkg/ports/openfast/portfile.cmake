@@ -6,14 +6,11 @@ vcpkg_from_git(
     REF db2ceb82e2592dc2d013cb1217a37a4a3b23cf52
 )
 
-set(VCPKG_BUILD_TYPE release)
-
 vcpkg_find_fortran(FORTRAN_CMAKE)
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
-        -DCMAKE_BUILD_TYPE=Release
         ${FORTRAN_CMAKE}
 )
 vcpkg_cmake_install()

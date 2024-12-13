@@ -2,9 +2,16 @@ vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL https://github.com/projectchrono/chrono.git
     REF 30cd3f2702cb58182e46d5b2724d2d2850a50e21
+    PATCHES
+      "chrono_custom_command.patch"
 )
 
-set(VCPKG_BUILD_TYPE release)
+if(VCPKG_BUILD_TYPE STREQUAL "Debug")
+    set(IRRLICHT_ROOT "${_VCPKG_INSTALLED_DIR}/${TARGET_TRIPLET}/debug")
+else()
+    set(IRRLICHT_ROOT "${_VCPKG_INSTALLED_DIR}/${TARGET_TRIPLET}")
+endif()
+
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
@@ -22,20 +29,15 @@ vcpkg_cmake_configure(
         -DENABLE_MODULE_SYNCHRONO=OFF
         -DENABLE_MODULE_CSHARP=OFF
         -DENABLE_MODULE_COSIMULATION=OFF
-        -DCMAKE_BUILD_TYPE=Release
 
         # hack needed explicitly because of the way IRRLICHT_ROOT is set in Chrono 8.0.0
-        -DIRRLICHT_ROOT="${_VCPKG_INSTALLED_DIR}/${TARGET_TRIPLET}"
+        -DIRRLICHT_ROOT="${IRRLICHT_ROOT}"
 )
 
-# hack needed for Windows as Irrlicht DLLs are copied automatically in chrono_irrlicht CMakeLists
-# this needs to be fixed within Chrono source to remove the hack
-if(VCPKG_TARGET_IS_WINDOWS)
-    file(MAKE_DIRECTORY ${_VCPKG_INSTALLED_DIR}/${TARGET_TRIPLET}/bin/Win32-VisualStudio)
-    file(MAKE_DIRECTORY ${_VCPKG_INSTALLED_DIR}/${TARGET_TRIPLET}/bin/Win64-VisualStudio)
-    file(COPY ${_VCPKG_INSTALLED_DIR}/${TARGET_TRIPLET}/bin/Irrlicht.dll DESTINATION ${_VCPKG_INSTALLED_DIR}/${TARGET_TRIPLET}/bin/Win32-VisualStudio)
-    file(COPY ${_VCPKG_INSTALLED_DIR}/${TARGET_TRIPLET}/bin/Irrlicht.dll DESTINATION ${_VCPKG_INSTALLED_DIR}/${TARGET_TRIPLET}/bin/Win64-VisualStudio)
-endif()
 
 vcpkg_cmake_install()
+
+# Force create debug/share/chrono
+file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/debug/share/chrono")
+
 vcpkg_cmake_config_fixup()
