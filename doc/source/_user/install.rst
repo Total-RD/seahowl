@@ -8,35 +8,38 @@ Installing SEAHOWL
 ******************
 
 
-Quick install
+VCPKG Install
 =============
 
-After installing the `prerequisites`_ (and optional `dependencies`_, if any), clone the SEAHOWL repository:
+This is the recommended approach for installing SEAHOWL. Clone the repository:
 
 .. code-block:: bash
 
    git clone https://github.com/Total-RD/seahowl
    cd seahowl
 
-Make a directory where the library will be built:
+Set up vcpkg on your environment.
+Build and install SEAHOWL (and its dependencies) in a ``./build`` folder:
 
 .. code-block:: bash
 
-   mkdir build
-   cd build
+   cmake --preset full
+   cmake --build --preset full
 
-Use cmake to configure :
+Some dependencies might be needed on some architectures for the build to go through. For example, on Ubuntu (select as needed):
 
 .. code-block:: bash
 
-   cmake .. --preset "full"
-   make
+  sudo apt-get build-essential  # essential tools for building packages
+  sudo apt-get install pkg-config  # dependency of vcpkg
+  sudo apt-get install autoconf automake autoconf-archive  # for python vcpkg
+  sudo apt-get install libgl1-mesa-dev libxxf86vm-dev libglut-dev  # for irrlicht vcpkg
+  sudo apt-get install gfortran  # for OpenFAST vcpkg
+  sudo apt-get install vtk9  # if VTK is enabled as a dependency
 
 
-.. _prerequisites:
-
-Prerequisites
-=============
+Bash Install
+==============
 
 Non-optional prerequisites include Eigen3 (linear algebra library), nlohmann-json (JSON reader), spdlog (logging library) and Project Chrono (multibody and finite elements library).
 
@@ -46,17 +49,33 @@ The development versions of Eigen3, nlohmann-json and spdlog can be easily insta
 
    sudo apt install libeigen3-dev nlohmann-json3-dev libspdlog-dev
 
-The supported version of Project Chrono for SEAHOWL is 8.0.0. To install used the following commands:
+Project Chrono can be installed automatically into an ``./install`` folder using the following commands:
 
 .. code-block:: bash
 
    cd external
-   ./dep-install.sh -d chrono
+   ./external/bash/dep-install.sh -d chrono
 
-This script build the Chrono library.
+Other optional dependencies for a more complete install can be easily installed on Ubuntu as follows:
 
+.. code-block:: bash
 
-.. _dependencies:
+   sudo apt install pybind11-dev libblas-dev liblapack-dev libirrlicht-dev vtk9
+
+Once this is done, the usual cmake process can be used to build the process. First create a build folder:
+
+.. code-block:: bash
+
+   mkdir build
+   cd build
+
+Then build the project:
+
+.. code-block:: bash
+
+   cmake .. -DCMAKE_INSTALL_PREFIX=../install
+   make
+
 
 Dependencies
 ============
@@ -103,8 +122,6 @@ Python bindings
 - pybind11 (Version 2.10.4): https://github.com/pybind/pybind11
 
 
-
-
 ***************************
 Installing optional modules
 ***************************
@@ -116,7 +133,7 @@ Add pybind11 to your current python installation.
 
 .. code-block:: bash
 
-   pip install pybind11
+   pip install pybind11[global]
 
 Go into your build directory and enable python bindings option:
 
@@ -131,12 +148,9 @@ Test your installation by opening a terminal (in the build directory):
 .. code-block:: python
 
    import seahowl
-   system_elasto = seahowl.elasto.SystemElastoChrono()
-   system_aero = seahowl.aero.SystemAero()
-   system_core = seahowl.core.System(system_elasto, system_aero)
 
-You can add the build directory to your `PYTHONPATH` in order to use pyseahowl anywhere.
-Adding the following line to your .bashrc (or equivalent file for your favorite terminal) will ensure that pyseahowl will be usable everytime you open a new terminal:
+You can add the build directory to your `PYTHONPATH` in order to use seahowl from anywhere in Python.
+Adding the following line to your .bashrc (or equivalent file for your favorite terminal) will ensure that seahowl will be found everytime you open a new terminal:
 
 .. code-block:: bash
 

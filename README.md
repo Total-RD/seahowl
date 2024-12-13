@@ -2,6 +2,21 @@
 
 SEAHOWL is a time domain multi-physics simulation framework for onshore, offshore, and floating wind turbines.
 
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Total-RD/seahowl
+cd seahowl
+```
+
+Install SEAHOWL and all its dependencies through vcpkg in a `./build` folder:
+
+```bash
+cmake --preset full
+cmake --build --preset full
+```
 
 ## Usage
 
@@ -23,31 +38,14 @@ If you compiled the python bindings and added them to your `PYTHONPATH`, you can
 ```python
 import seahowl
 
-# make system
-system_elasto = seahowl.elasto.SystemElastoChrono()
-system_aero = seahowl.aero.SystemAero()
-system_core = seahowl.core.System(system_elasto, system_aero)
+# make simulation object
+simulation = seahowl.core.Simulation()
+simulation.populate_from_file("../data/IEA15MW/main.json")
+simulation.initialize_from_config()
 
-# populate and initialize system from json file
-filepath = "./data/IEA15MW/main.json"
-seahowl.io.populate_system_from_json(filepath, system_core)
-seahowl.io.initialize_system_from_json(filepath, system_core)
-
-# run simulation loop
-dt = 0.05
-t_sim = 0.
-while system_core.get_time() < 200:
-    # make a time step
-    system_core.prestep(t_sim, dt)
-    system_core.step(dt)
-    system_core.poststep(t_sim, dt)
-
-    t_sim = system_core.get_time()
-
-    # print info about turbine
-    print("time: {t_sim:.3f}, rpm: {rpm:.3f}, pitch: {pitch:.3f}".format(
-        t_sim=t_sim,
-        rpm=system_core.turbines[0].rna.elasto.get_rpm(),
-        pitch=system_core.turbines[0].rna.elasto.rotor.pitch_collective,
-    ))
+# simulation loop
+while simulation.system_core.get_time() < simulation.duration:
+    simulation.step()
 ```
+
+Other examples of Python bindings usage are available in [./examples/python/](./examples/python/)
