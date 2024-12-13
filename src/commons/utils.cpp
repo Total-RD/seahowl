@@ -125,20 +125,42 @@ void print_banner() {
     spdlog::info("");
     // library info
     spdlog::info("SEAHOWL core library:");
+#ifdef SEAHOWL_VERSION
     spdlog::info("  |- version: v{}", SEAHOWL_VERSION);
+#endif
+#ifdef SEAHOWL_GIT_HASH
     spdlog::info("  |- git hash: {}", SEAHOWL_GIT_HASH);
+#endif
+#ifdef SEAHOWL_CMAKE_BUILD_TYPE
     spdlog::info("  |- build type: {}", SEAHOWL_CMAKE_BUILD_TYPE);
+#endif
+#ifdef SEAHOWL_BUILD_DATE
     spdlog::info("  |- build date: {}", SEAHOWL_BUILD_DATE);
+#endif
+#ifdef SEAHOWL_COMPILER
     spdlog::info("  |- compiler: {}", SEAHOWL_COMPILER);
+#endif
+#ifdef SEAHOWL_BUILD_ARCHITECTURE
     spdlog::info("  |- architecture: {}", SEAHOWL_BUILD_ARCHITECTURE);
+#endif
 
     //
     spdlog::info("Optional dependencies:");
+#ifdef SEAHOWL_HAVE_HYDROCHRONO
     spdlog::info("  |- HydroChrono: {}", (SEAHOWL_HAVE_HYDROCHRONO ? "yes" : "no"));
+#endif
+#ifdef SEAHOWL_HAVE_INFLOWWIND
     spdlog::info("  |- InflowWind: {}", (SEAHOWL_HAVE_INFLOWWIND ? "yes" : "no"));
+#endif
+#ifdef SEAHOWL_HAVE_AERODYN
     spdlog::info("  |- AeroDyn: {}", (SEAHOWL_HAVE_AERODYN ? "yes" : "no"));
+#endif
+#ifdef SEAHOWL_HAVE_IRRLICHT
     spdlog::info("  |- Irrlicht: {}", (SEAHOWL_HAVE_IRRLICHT ? "yes" : "no"));
+#endif
+#ifdef SEAHOWL_HAVE_VTK
     spdlog::info("  |- VTK: {}", (SEAHOWL_HAVE_VTK ? "yes" : "no"));
+#endif
     //
     // current_time
     std::ostringstream oss;
