@@ -39,7 +39,7 @@ namespace fs = std::filesystem;
  * @param[in] turbine Turbine class from which variables are outputted.
  */
 void add_basic_turbine_info_to_csv(seahowl::io::CustomCSV& custom_csv, seahowl::core::Turbine& turbine) {
-    custom_csv.add_function("rpm", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
+    custom_csv.add_function("rpm (-)", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
     custom_csv.add_function("power (W)", [&turbine]() { return turbine.get_generated_power(); });
     custom_csv.add_function("pitch collective (rad)",
                             [&turbine]() { return turbine.rna.elasto.rotor->pitch_collective; });
@@ -47,10 +47,13 @@ void add_basic_turbine_info_to_csv(seahowl::io::CustomCSV& custom_csv, seahowl::
     custom_csv.add_function("axial thrust (N)", [&turbine]() { return turbine.rna.elasto.get_axial_thrust(); });
     custom_csv.add_function("axial torque (Nm)", [&turbine]() { return turbine.rna.elasto.get_axial_torque(); });
     custom_csv.add_function("rotor azimuth (rad)", [&turbine]() { return turbine.rna.elasto.get_azimuth(); });
-    custom_csv.add_function("tower base moment", [&turbine]() { return turbine.tower.elasto.get_tower_base_moment(); });
-    custom_csv.add_function("tower base force", [&turbine]() { return turbine.tower.elasto.get_tower_base_force(); });
-    custom_csv.add_function("tower top moment", [&turbine]() { return turbine.tower.elasto.get_tower_top_moment(); });
-    custom_csv.add_function("tower top force", [&turbine]() { return turbine.tower.elasto.get_tower_top_force(); });
+    custom_csv.add_function("tower base moment (Nm)",
+                            [&turbine]() { return turbine.tower.elasto.get_tower_base_moment(); });
+    custom_csv.add_function("tower base force (N)",
+                            [&turbine]() { return turbine.tower.elasto.get_tower_base_force(); });
+    custom_csv.add_function("tower top moment (Nm)",
+                            [&turbine]() { return turbine.tower.elasto.get_tower_top_moment(); });
+    custom_csv.add_function("tower top force (N)", [&turbine]() { return turbine.tower.elasto.get_tower_top_force(); });
     for (size_t idx_blade = 0; idx_blade < turbine.rna.blades.size(); idx_blade++) {
         auto& blade = *turbine.rna.blades[idx_blade];
         custom_csv.add_function("blade" + std::to_string(idx_blade + 1) + " wind (m/s)",
