@@ -11,25 +11,38 @@
   "configurePresets": [
     {
       "name": "default",
-      "displayName": "Default SEAHOWL installations",
+      "displayName": "Default SEAHOWL installation",
       "binaryDir": "${sourceDir}/build",
       "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_BUILD_TYPE": "Release",
         "BUILD_TESTING": "ON",
-        "CMAKE_PREFIX_PATH": "${sourceDir}/install",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_MANIFEST_DIR": "${sourceDir}/external/vcpkg"
+      }
+    },
+    {
+      "name": "debug",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "default/debug",
+      "inherits": "default",
+      "displayName": "Default SEAHOWL installation (Debug)",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
       "name": "full",
       "inherits": "default",
       "displayName": "Full SEAHOWL installation",
-      "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
         "SEAHOWL_ENABLE_BUILD": "ON",
         "SEAHOWL_ENABLE_TESTS": "ON",
         "SEAHOWL_ENABLE_EXAMPLES": "ON",
@@ -43,31 +56,42 @@
       }
     },
     {
+      "name": "full/debug",
+      "inherits": ["debug", "full"],
+      "displayName": "Full SEAHOWL installation (Debug)"
+    },
+    {
       "name": "full_viz",
       "inherits": "full",
       "displayName": "Full SEAHOWL installation with in situ visualization",
-      "generator": "Ninja",
       "cacheVariables": {
         "SEAHOWL_ENABLE_IRRLICHT": "ON"
       }
     },
     {
+      "name": "full_viz/debug",
+      "inherits": ["debug", "full_viz"],
+      "displayName": "Full SEAHOWL installation with in situ visualization (Debug)"
+    },
+    {
       "name": "full_vtk",
       "inherits": "full_viz",
       "displayName": "Full SEAHOWL installation with VTK and in situ visualization",
-      "generator": "Ninja",
       "cacheVariables": {
         "SEAHOWL_ENABLE_IRRLICHT": "ON",
         "SEAHOWL_ENABLE_VTK": "ON"
       }
     },
     {
+      "name": "full_vtk/debug",
+      "inherits": ["debug", "full_vtk"],
+      "displayName": "Full SEAHOWL installation with VTK and in situ visualization (Debug)"
+    },
+    {
       "name": "minimal",
       "displayName": "Minimal SEAHOWL installation",
       "inherits": "default",
-      "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
         "SEAHOWL_ENABLE_BUILD": "ON",
         "SEAHOWL_ENABLE_TESTS": "OFF",
         "SEAHOWL_ENABLE_EXAMPLES": "OFF",
@@ -80,31 +104,9 @@
       }
     },
     {
-      "name": "debug",
-      "displayName": "Debug SEAHOWL installation",
-      "inherits": "full_viz",
-      "generator": "Ninja",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "default",
-      "configurePreset": "default"
-    },
-    {
-      "name": "full",
-      "configurePreset": "full"
-    },
-    {
-      "name": "full_viz",
-      "configurePreset": "full_viz"
-    },
-    {
-      "name": "minimal",
-      "configurePreset": "minimal"
+      "name": "minimal/debug",
+      "inherits": ["debug", "minimal"],
+      "displayName": "Minimal SEAHOWL installation (Debug)"
     }
   ]
 }

@@ -3,13 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-SEAHOWL: Servo-Elasto-Aero-Hydro Offshore Wind Lab
-##################################################
-
-Introduction
-============
-
-Numerical simulation of Floating Offshore Wind Turbines (FOWTs).
+.. include:: ../../README.md
+      :parser: myst_parser.sphinx_
 
 
 Table of Contents
@@ -41,3 +36,9 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. include:: ../../README.md
+   :parser: myst_parser.sphinx_
+   :start-after: <!-- index.rst content start -->
+
+hello

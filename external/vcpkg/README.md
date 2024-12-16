@@ -18,11 +18,17 @@ This README provides a step-by-step guide to using `vcpkg` with a generic setup 
      ```
 
 2. **Setup Environment** :
-   - Add `vcpkg` to your environment path for easier access:
+   - Add `vcpkg` to your environment path for easier access (assuming you are inside the vcpkg folder):
      ```bash
-     export VCPKG_ROOT=/path_to/vcpkg
-     export PATH=$PATH:/path_to/vcpkg (Optional)
+     export VCPKG_ROOT==$(pwd)
+     export PATH=\$PATH:=$(pwd)
      ```
+   - Add it also to your .bashrc to have it automatically loaded when opening a new session
+     ```bash
+       echo "export VCPKG_ROOT=$(pwd)" >> ~/.bashrc
+       echo "export PATH=\$PATH:$(pwd)" >> ~/.bashrc
+     ```
+
 
 ## Directory Structure
 
