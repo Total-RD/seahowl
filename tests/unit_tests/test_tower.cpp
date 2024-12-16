@@ -218,7 +218,7 @@ TEST_F(TestTower, conical_frequency) {
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_conical_frequency.csv").generic_string(),
                                        (test_dir / "test_tower_conical_frequency.test.csv").generic_string()});
-    test_dataset.test_csv.add_function("time", [&system_elasto] { return system_elasto.get_time(); });
+    test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
 
     while (time < end_time) {
