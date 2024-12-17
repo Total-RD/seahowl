@@ -168,7 +168,20 @@ make
 
 ### Python bindings
 
-Build SEAHOWL with ``SEAHOWL_ENABLE_PYTHON`` as ``ON``. You can then add the build directory to your ``PYTHONPATH`` so that the Python executable used to build the bindings can ``import seahowl`` from anywhere.
+Build SEAHOWL with ``SEAHOWL_ENABLE_PYTHON`` as ``ON``. SEAHOWL use a embeded Python in a virtual environement in the directory ``__env__``, to activate this virtual environement :
+
+#### Linux
+
+```bash
+ source source __env__/bin/activate
+```
+#### Windows
+
+```bash
+ .__env__/Script/activate
+```
+
+You can then add the build directory to your ``PYTHONPATH`` so that the Python executable used to build the bindings can ``import seahowl`` from anywhere.
 Adding the following line to your .bashrc (or equivalent file for your favorite terminal) ensures that seahowl will be found everytime you open a new terminal:
 
 ```bash

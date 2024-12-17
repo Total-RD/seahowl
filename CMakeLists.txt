@@ -538,18 +538,10 @@ if (SEAHOWL_ENABLE_PYTHON)
     target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
     set_target_properties(pyseahowl PROPERTIES OUTPUT_NAME seahowl)
 
-    if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-        set(ACTIVATE_PY "./${CMAKE_HOME_DIRECTORY}/__env__/bin/activate")
-    else()
-        set(ACTIVATE_PY "source ${CMAKE_HOME_DIRECTORY}/__env__/bin/activate")
-    endif()
-
     add_custom_command(
         TARGET pyseahowl
         POST_BUILD
-        COMMAND bash -c "${Python_EXECUTABLE} -m venv ${CMAKE_HOME_DIRECTORY}/__env__"
-        COMMAND bash -c ${ACTIVATE_PY}
-        COMMAND bash -c "pip install sphinx sphinx-rtd-theme matplotlib myst-parser"
+        COMMAND ${Python_EXECUTABLE} -m venv ${CMAKE_HOME_DIRECTORY}/__env__
     )
 
 endif (SEAHOWL_ENABLE_PYTHON)
