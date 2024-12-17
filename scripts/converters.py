@@ -474,10 +474,17 @@ def merge_beamdyn2aerodyn(beamdyn_json, aerodyn_json, save_directory=None):
     )
     merged_json["reference_points"] = reference_points
     for reference_point in merged_json["reference_points"]:
-        reference_point["offset_aero"] = (
+        offset_aero = (
             np.array(reference_point["coordinates_aero"])
             - np.array(reference_point["coordinates"])
-        ).tolist()[:2]
+        )[:2]
+        twist = reference_point["twist"] * np.pi / 180.0
+        rot_matrix = np.array(
+            [[np.cos(twist), -np.sin(twist)], [np.sin(twist), np.cos(twist)]]
+        )
+        offset_aero = rot_matrix.dot(offset_aero)
+        reference_point["offset_aero"] = offset_aero.tolist()
+        del reference_point["coordinates_aero"]
 
     # save to file
     if save_directory is not None:

@@ -243,10 +243,10 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
         reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
         if (point.contains("offset_aero")) {
             auto oa = point.at("offset_aero").get<std::vector<double>>();
-            // remove structural twist (offset aero is expressed with twist already applied)
-            auto offset3D = seahowl::AngleAxisd(reference_point.structural_twist, Vector3d(0.0, 0.0, 1.0)) *
-                            Vector3d(oa[0], oa[1], 0.0);
-            reference_point.offset_aero = Vector2d(offset3D[0], offset3D[1]);
+            if (oa.size() != 2) {
+                throw std::runtime_error("Offsets aero along blade have to be vectors of length 2.");
+            }
+            reference_point.offset_aero = Vector2d(oa[0], oa[1]);
         }
 
         if (point.contains("chord")) {
