@@ -534,7 +534,7 @@ if (SEAHOWL_ENABLE_PYTHON)
         ${PYSEAHOWL_DIR}/pyseahowl_io.cpp
     )
 	target_compile_features(pyseahowl PRIVATE cxx_std_17)
-    target_link_libraries(pyseahowl PRIVATE seahowl_core)
+    target_link_libraries(pyseahowl PRIVATE seahowl_core spdlog::spdlog)
     target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
     set_target_properties(pyseahowl PROPERTIES OUTPUT_NAME seahowl)
 endif (SEAHOWL_ENABLE_PYTHON)

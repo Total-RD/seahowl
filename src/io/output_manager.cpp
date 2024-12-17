@@ -118,7 +118,7 @@ void OutputManager::preinitialize() {
 void OutputManager::initialize() {
     // outputs
     if (output_folder.empty()) {
-        output_folder = fs::current_path();
+        output_folder = fs::current_path().generic_string();
     }
     spdlog::debug("Creating directory {} for outputs.", output_folder);
     fs::create_directories(output_folder);
@@ -208,7 +208,7 @@ void OutputManager::output_all(int step) {
 }
 
 void OutputManager::output_initial_logs() {
-    std::string logs_folder = fs::path(output_folder) / "logs";
+    std::string logs_folder = (fs::path(output_folder) / "logs").generic_string();
     spdlog::debug("Creating initial logs in {}.", logs_folder);
     fs::create_directories(logs_folder);
     // output

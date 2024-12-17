@@ -47,9 +47,8 @@ TEST_F(TestRotor, mass) {
     system_elasto.do_statics(true, 0);
 
     // test mass
-    TestFrameworkDataset test_dataset_mass({.debug = false,
-                                            .reference_filepath = (ref_dir / "test_rotor_mass.csv").generic_string(),
-                                            .test_filepath = (test_dir / "test_rotor_mass.test.csv").generic_string()});
+    TestFrameworkDataset test_dataset_mass({false, (ref_dir / "test_rotor_mass.csv").generic_string(),
+                                            (test_dir / "test_rotor_mass.test.csv").generic_string()});
     test_dataset_mass.test_csv.add_function("mass (kg)", [&rna] { return rna.get_mass(); });
     test_dataset_mass.test_csv.write_row();
     EvaluateTest(test_dataset_mass);
