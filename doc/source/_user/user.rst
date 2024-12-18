@@ -25,13 +25,26 @@ In this file, the following is set: global numerical options, output options, en
 * **numerics**: (dict)
 
    * **dt**: (float) the time stepping value for the simulation [s].
-   * **t_end**: (float) the ending time of the simulation [s].
+   * **duration**: (float) the duration of the simulation [s].
+   * **statics**: (dict)
+
+      * **linear_step**: (bool) linear statics step (true/false).
+      * **linear_step**: (float) Number of nonlinear statics step.
+
+   * **presimulation**: (dict)
+
+      * **dt**: (float) the time stepping value for the presimulation [s].
+      * **duration**: (float) the duration of the presimulation [s].
+      * **presetup**: (bool) presetup during presimulation (true/false), e.g. mooring stretching, blade damping.
+      * **fix_tower**: (float) fix tower bottoms during presimulation (true/false).
 
 * **outputs**: (dict)
 
    * **dt**: (float) the time stepping value for outputs of the simulation [s].
-   * **VTK**: (bool) whether VTK will be part of outputs or not.
+   * **folder**: (str) Path to the folder for outputs.
+   * **VTK**: (bool) output VTK (true/false).
    * **log_level**: (string) global log level ("critical", "error", "warning", "info", "debug", "trace").
+   * **gui**: (bool) in situ visualization (true/false).
 
 * **environment**: (dict)
 
@@ -113,10 +126,10 @@ For discretization of blades and tower, it is possible to either use an ordered 
    * **type**: (string) type of rotor ("fea", "rigid", "disk").
    * **options**: (dict) options specific to type of rotor.
 
-      * **discretization**: (dict)
+   * **discretization**: (dict)
 
-   * **elasto**: (array of floats) discretization fractions (between 0 and 1) for elasto part of blade.
-   * **aero**: (array of floats) discretization fractions (between 0 and 1) for aero part of blade.
+      * **elasto**: (array of floats) discretization fractions (between 0 and 1) for elasto part of blade.
+      * **aero**: (array of floats) discretization fractions (between 0 and 1) for aero part of blade.
 
    * **blades**: (list)
 
@@ -126,15 +139,15 @@ For discretization of blades and tower, it is possible to either use an ordered 
 
 * **rna**: (dict)
 
-   * **initial_pitch_collective**: initial collective pitch of blades [deg].
+   * **initial_yaw**: initial yaw of the RNA [deg].
    * **file**: file path of RNA file (relative to this file path).
 
 * **tower**: (dict)
 
    * **discretization**: (dict)
 
-   * **elasto**: (array of floats) discretization fractions (between 0 and 1) for elasto part of blade.
-   * **aero**: (array of floats) discretization fractions (between 0 and 1) for aero part of blade.
+      * **elasto**: (array of floats) discretization fractions (between 0 and 1) for elasto part of blade.
+      * **aero**: (array of floats) discretization fractions (between 0 and 1) for aero part of blade.
 
    * **file**: file path of tower file (relative to this file path).
 
@@ -212,15 +225,15 @@ The RNA input file contains properties of the hub, the shaft, the nacelle, and t
 
 * **nacelle**: (dict)
 
-   * **inertia**: (float) inertia of nacelle [kg.m2].
+   * **inertia**: (3x3 matrix of floats) inertia of nacelle [kg-m2].
    * **mass**: (float) mass of nacelle [kg]
-   * **CM**: (array of floats of length 3) center of mass offset from towertop [m].
+   * **position_from_towertop**: (array of floats of length 3) center of mass offset from towertop [m].
    * **yaw_bearing_mass**: mass of yaw bearing [kg].
 
 * **drivetrain**: (dict)
 
    * **generator_efficiency**: (float) generator efficiency [%].
-   * **generator_inertia**: (float) generator inertia [kg.m2].
+   * **generator_inertia**: (float) generator inertia [kg-m2].
    * **gearbox_ratio**: (float) gearbox ratio [-].
    * **gearbox_efficiency**: (float) geabox efficiency [%].
 
@@ -228,9 +241,9 @@ The RNA input file contains properties of the hub, the shaft, the nacelle, and t
 
    * **radius**: (float) radius of hub [m].
    * **overhang**: (float) overhang of hub [m].
-   * **inertia**: (float) inertia of hub [kg.m2].
+   * **inertia**: (3x3 matrix of floats) inertia of hub [kg-m2].
    * **mass**: (float) mass of hub [kg].
-   * **CM**: (float) offset of center of mass of hub [m].
+   * **position_from_apex**: (array of floats of length 3) offset of center of mass of hub [m].
 
 
 .. literalinclude:: ../../../data/IEA15MW/rna.json
@@ -245,14 +258,37 @@ Floater input file
 
 The floater input file contains information for the floater and its mooring system. It is only used if the "floater" key is in the turbine input file.
 
+* **position**: (array of floats of length 3) center of gravity of floater [m].
 * **mass**: (float) total mass of floater [kg].
-* **cog**: (array of floats of length 3) center of gravity of floater [m].
-* **inertia**: (3x3 matrix of floats) inertia of floater [kg.m2].
-* **type**: (string) type of floater (only "HydroChrono" available).
-* **options**:
+* **inertia**: (3x3 matrix of floats) inertia of floater [kg-m2].
+* **damping_matrix**: (6x6 matrix of floats) viscous damping matrix of floater [N/(m/s),N/(rad/s),N-m/(m/s),N-m/(rad/s)].
+* **type**: (string) type of floater (e.g. "HydroChrono").
+* **options**: (dict)
 
    * **file**: (string) file path of hydro .h5 file for HydroChrono,
-   * **name**: (string) name of body/floater in .h5 file
+
+* **bodies**: (list of dict) list of bodies of the floater (linked to main body).
+
+   * **name**: (string) name of body/floater (can match name in .h5 file if using HydroChrono)
+   * **position**: (array of floats of length 3) center of gravity of floater [m].
+   * **mass**: (float) total mass of floater [kg].
+   * **inertia**: (3x3 matrix of floats) inertia of floater [kg-m2].
+
+* **moorings**: (list of dict) list of moorings of the floater.
+
+   * **connected_body_name**: (string) name of body where the mooring fairlead is connected.
+   * **length**: (float) length of the mooring line [m].
+   * **line_properties**: (string) path to mooring line properties file.
+   * **fairlead_position**: (array of floats of length 3) position of fairlead [m].
+   * **relative_fairlead**: (bool) fairlead position expressed relative to connected body position (true/false).
+   * **anchor_position**: (array of floats of length 3) position of anchor [m].
+   * **relative_anchor**: (bool) anchor position expressed relative to connected body position (true/false).
+   * **rotation_axis**: (array of floats of length 3) axis around which to rotate the mooring [-].
+   * **rotation_angle**: (float) angle to rotate the mooring [deg].
+   * **discretization**: (dict)
+
+      * **elasto**: (array of floats) discretization fractions (between 0 and 1) for elasto part of mooring [-].
+      * **hydro**: (array of floats) discretization fractions (between 0 and 1) for hydro part of mooring [-].
 
 
 .. literalinclude:: ../../../data/IEA15MW/floater.json
@@ -269,7 +305,7 @@ The tower input file is a CSV or JSON reference file that should be defined only
 All the options such as discretization of the tower during runtime are defined in the turbine input file.
 Only *reference* points are defined in this file, and interpolation between them wil be used if it does not match the chosen numerical discretization during the simulation.
 
-* **x**, **y**, **z**: (float) position of reference point [m]
+* **position_x**, **position_y**, **position_z**: (float) position of reference point [m]
 * **diameter**: (float) diameter of tower at reference point [m]
 * **thickness**: (float) thickness of tower at reference point [m]
 * **density**: (float) linear density of tower at reference point [kg/m]
@@ -281,6 +317,14 @@ Only *reference* points are defined in this file, and interpolation between them
    :language: json
    :linenos:
    :lines: -3
+   :caption: Tower input file example (truncated)
+
+Alternatively, the tower can also be defined in a JSON format as input as follows:
+
+.. literalinclude:: ../../../data/IEA15MW/tower.json
+   :language: json
+   :linenos:
+   :lines: -20
    :caption: Tower input file example (truncated)
 
 
@@ -298,13 +342,18 @@ elasto properties (the twist along the main axis, the 6x6 mass matrix, and the 6
 and the aero properties (the airfoil filepath, the chord length, and the aerodynamic offset if any).
 The airfoil filepath is only used built-in BEMT is used for aerodynamics.
 
-* **damping_coefficients**: (array of floats of length 4) damping coefficients of blade.
+* **global_variables**: (dict) values to apply to all reference points (unless defined in reference point).
+
+   * **damping_coefficients**: (array of floats of length 4) damping coefficients of blade.
+   * **offset_gravity**: (array of floats of length 2) Gravity offset [m].
+   * **offset_elastic**: (array of floats of length 2) Elastic offset [m].
+
 * **reference_points**: (list of dict) list of reference points.
 
    * **coordinates**: (array of floats of length 3) coordinates of reference point (IEC standard) [m].
    * **twist**: (float) structural twist of blade at reference point [deg].
-   * **mass_matrix**: (6x6 matrix of floats) mass matrix of blade at reference point [kg/m].
-   * **stiffness_matrix**: (6x6 matrix of floats) stiffness matrix of blade at reference point [N.m2].
+   * **mass_matrix**: (6x6 matrix of floats) mass matrix of blade at reference point [kg/m, (kg-m2)/m].
+   * **stiffness_matrix**: (6x6 matrix of floats) stiffness matrix of blade at reference point [(N/m)/m, (N/rad)/m, (N-m/m)/m, (N-m/rad)/m].
    * **chord**: (float) chord length of blade at reference point [m].
    * **airfoil_file**: (string) file path of airfoil file (relative to this file path).
 
