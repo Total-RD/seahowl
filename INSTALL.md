@@ -29,14 +29,12 @@ git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
 ./bootstrap-vcpkg.sh
 export VCPKG_ROOT=$(pwd)
-export PATH=\$PATH:$(pwd)
 ```
 
-For convenience, you can add the environment variables for vcpkg to your `.bashrc` file so it will be found when you open new terminals. To do so, run the following from within the vcpkg folder:
+For convenience, you can add the environment variables for vcpkg to your `.bashrc` file (adapt to your shell if needed, for example `.zshrc` for zsh) so it will be found when you open new terminals. To do so, run the following from within the vcpkg folder:
 
 ```bash
 echo "export VCPKG_ROOT=$(pwd)" >> ~/.bashrc
-echo "export PATH=\$PATH:$(pwd)" >> ~/.bashrc
 ```
 
 Note that this assumes a Linux environment. If you have issues with installing vcpkg, see [here](external/vcpkg/README.md) or refer to the official vcpkg documentation for setting it up on your environment.
@@ -69,7 +67,7 @@ cmake --build build/debug
 Extra system dependencies might be needed on some architectures for the build to go through. For example, some of these system packages will be required on Ubuntu (select as needed):
 
 ```bash
-sudo apt build-essential  # essential tools for building packages
+sudo apt build-essential cmake  # essential tools for building packages
 sudo apt install pkg-config  # dependency of vcpkg
 sudo apt install autoconf automake autoconf-archive  # for python vcpkg
 sudo apt install libgl1-mesa-dev libxxf86vm-dev libglut-dev  # for irrlicht vcpkg
