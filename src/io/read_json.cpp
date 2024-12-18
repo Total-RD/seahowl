@@ -71,6 +71,28 @@ json get_json_from_file(const std::string& filepath) {
     return json_obj;
 }
 
+Eigen::MatrixX<double> get_matrix_from_vector_of_vectors(std::vector<std::vector<double>> matvec) {
+    int mat_nrows = matvec.size();
+    int mat_ncols = 0;
+    for (int irow = 0; irow < matvec.size(); irow++) {
+        mat_ncols = matvec[0].size();
+        if (matvec[irow].size() != mat_ncols) {
+            throw std::runtime_error(
+                "Matrix does not have a consistant number of columns: " + std::to_string(mat_ncols) +
+                " columns at row 1 and " + std::to_string(matvec[irow].size()) + " columns at row " +
+                std::to_string(irow + 1) + ".");
+        }
+    }
+    Eigen::MatrixX<double> mat(mat_nrows, mat_ncols);
+    for (int irow = 0; irow < mat_nrows; irow++) {
+        for (int icol = 0; icol < mat_ncols; icol++) {
+            mat(irow, icol) = matvec[irow][icol];
+            mat(irow, icol) = matvec[irow][icol];
+        }
+    }
+    return mat;
+}
+
 class InputData {
   public:
     int nrows = 0;
@@ -261,25 +283,7 @@ class InputDataJSON : public InputData {
             throw std::runtime_error("Could not find '" + key + "' in JSON file " + filepath + ".");
         }
 
-        int mat_nrows = matvec.size();
-        int mat_ncols = 0;
-        for (int irow = 0; irow < matvec.size(); irow++) {
-            mat_ncols = matvec[0].size();
-            if (matvec[irow].size() != mat_ncols) {
-                throw std::runtime_error("Matrix '" + key + "' changed number of columns from " +
-                                         std::to_string(mat_ncols) + " at row 1 to " +
-                                         std::to_string(matvec[irow].size()) + " at row " + std::to_string(irow) +
-                                         " in JSON file " + filepath + ".");
-            }
-        }
-        Eigen::MatrixX<double> mat(mat_nrows, mat_ncols);
-        for (int irow = 0; irow < mat_nrows; irow++) {
-            for (int icol = 0; icol < mat_ncols; icol++) {
-                mat(irow, icol) = matvec[irow][icol];
-                mat(irow, icol) = matvec[irow][icol];
-            }
-        }
-        return mat;
+        return get_matrix_from_vector_of_vectors(matvec);
     }
 };
 
@@ -497,7 +501,8 @@ void populate_rna_elasto_from_json(const std::string& filepath, seahowl::elasto:
     auto cm_hub = hub.at("position_from_apex").get<std::vector<double>>();
     rna.rotor->hub.position_from_apex = Vector3d(cm_hub[0], cm_hub[1], cm_hub[2]);
     hub.at("mass").get_to(rna.rotor->hub.mass);
-    hub.at("inertia").get_to(rna.rotor->hub.inertia);
+    auto hub_inertia = hub.at("inertia").get<std::vector<std::vector<double>>>();
+    rna.rotor->hub.inertia = get_matrix_from_vector_of_vectors(hub_inertia);
     hub.at("overhang").get_to(rna.rotor->hub.overhang);
     hub.at("radius").get_to(rna.rotor->hub.radius);
     // nacelle
@@ -508,7 +513,8 @@ void populate_rna_elasto_from_json(const std::string& filepath, seahowl::elasto:
     }
     rna.nacelle.position_from_towertop = Vector3d(cm_nac[0], cm_nac[1], cm_nac[2]);
     nacelle.at("mass").get_to(rna.nacelle.mass);
-    nacelle.at("inertia").get_to(rna.nacelle.inertia);
+    auto nacelle_inertia = nacelle.at("inertia").get<std::vector<std::vector<double>>>();
+    rna.nacelle.inertia = get_matrix_from_vector_of_vectors(nacelle_inertia);
     nacelle.at("yaw_bearing_mass").get_to(rna.nacelle.yaw_bearing_mass);
     // shaft
     auto shaft = json_obj.at("shaft");
@@ -729,7 +735,7 @@ void populate_turbine_from_json(const std::string& filepath,
             throw std::runtime_error("The \"mass_blades\" key (rotor options) must be given for rigid/disk rotors.");
         }
         auto blades_inertia = rotor_options.at("inertia_blades").get<double>();
-        turbine.rna.elasto.rotor->hub.inertia += blades_inertia;
+        turbine.rna.elasto.rotor->hub.inertia(0, 0) += blades_inertia;
         auto blades_mass = rotor_options.at("mass_blades").get<double>();
         turbine.rna.elasto.rotor->hub.mass += blades_mass;
         if (!rotor_options.contains("radius")) {
@@ -812,7 +818,7 @@ void populate_turbine_from_json(const std::string& filepath,
     // add inertia of generator to hub directly
     double drivetrain_inertia;
     drivetrain.at("generator_inertia").get_to(drivetrain_inertia);
-    turbine.rna.elasto.rotor->hub.inertia += drivetrain_inertia;
+    turbine.rna.elasto.rotor->hub.inertia(0, 0) += drivetrain_inertia;
 
     if (json_obj.contains("floater")) {
         auto& turbine_elasto = turbine.elasto;

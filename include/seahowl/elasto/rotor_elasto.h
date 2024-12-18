@@ -27,7 +27,7 @@ struct HubProperties {
     /** @brief Mass of the hub. */
     double mass = 0.0;
     /** @brief Inertia of the hub. */
-    double inertia = 0.0;
+    Eigen::Matrix<double, 3, 3> inertia = Eigen::Matrix<double, 3, 3>::Zero();
     /** @brief Overhang of the hub (horizontal distance from towertop). */
     double overhang = 0.0;
     /** @brief Radius of hub (from hub apex to hub edge in rotor plane). */
@@ -42,8 +42,8 @@ struct NacelleProperties {
     Vector3d position_from_towertop{0.0, 0.0, 0.0};
     /** @brief Mass of the nacelle. */
     double mass = 0.0;
-    /** @brief Inertia of the nacelle (@todo include 3x3 inertia). */
-    double inertia = 0.0;
+    /** @brief Inertia of the nacelle. */
+    Eigen::Matrix<double, 3, 3> inertia = Eigen::Matrix<double, 3, 3>::Zero();
     /** @brief Yaw bearing mass. */
     double yaw_bearing_mass = 0.0;
 };

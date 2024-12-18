@@ -35,7 +35,7 @@ void RotorElasto::build() {
     body_hub = std::make_unique<BodyElastoChrono>();
     // mass and inertia
     body_hub->set_mass(hub.mass);
-    body_hub->set_inertia_diagonal(Vector3d(hub.inertia, 0., 0.));
+    body_hub->set_inertia_matrix(hub.inertia);
     body_hub->set_position(hub.position_from_apex);
     body_hub->set_rotation(rotation0);
 
@@ -183,7 +183,7 @@ void RotorNacelleAssemblyElasto::build() {
     // mass and inertia
     body_nacelle->set_mass(nacelle.mass);
     ///@todo  change to full 3x3 inertia matrix
-    body_nacelle->set_inertia_diagonal(Vector3d(0.0, 0.0, nacelle.inertia));
+    body_nacelle->set_inertia_matrix(nacelle.inertia);
     // link nacelle body to shaft body
     link_shaft_nacelle->initialize(*body_nacelle, *body_shaft);
 

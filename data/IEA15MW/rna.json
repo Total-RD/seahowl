@@ -5,13 +5,13 @@
   },
   "nacelle": {
     "yaw_bearing_mass": 28280.0,
-    "inertia": 24240914.0,
+    "inertia": [
+      [0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.0],
+      [0.0, 0.0, 24240914.0]
+    ],
     "mass": 646895.0,
-    "position_from_towertop": [
-      -4.7201,
-      0.0,
-      4.2751
-    ]
+    "position_from_towertop": [-4.7201, 0.0, 4.2751]
   },
   "drivetrain": {
     "generator_efficiency": 95.756,
@@ -22,12 +22,12 @@
   "hub": {
     "radius": 3.97,
     "overhang": -12.098,
-    "inertia": 973520.0,
+    "inertia": [
+      [973520.0, 0.0, 0.0],
+      [0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.0]
+    ],
     "mass": 69360.0,
-    "position_from_apex": [
-      0.0,
-      0.0,
-      0.0
-    ]
+    "position_from_apex": [0.0, 0.0, 0.0]
   }
 }

@@ -40,13 +40,13 @@ struct BladeReferencePointElasto : ReferencePointElasto {
     /** @brief Offset (x, y) for the center of gravity of blade at reference point. */
     Vector2d offset_gravity{0.0, 0.0};
     /** @brief Stiffness matrix of blade at reference point. */
-    Eigen::Matrix<double, 6, 6> stiffness_matrix;
+    Eigen::Matrix<double, 6, 6> stiffness_matrix = Eigen::Matrix<double, 6, 6>::Zero();
     /** @brief Mass matrix of blade at reference point. */
-    Eigen::Matrix<double, 6, 6> mass_matrix;
+    Eigen::Matrix<double, 6, 6> mass_matrix = Eigen::Matrix<double, 6, 6>::Zero();
     /** @brief Structural twist angle of blade at reference point. */
     double structural_twist = 0.0;
     /** @brief Damping coefficients at reference point {along x, along y, along z, about x, mass-proportional}.*/
-    std::vector<double> damping_coefficients{0.03, 0.03, 0.03, 0.06, 0.0};
+    std::vector<double> damping_coefficients{0.0, 0.0, 0.0, 0.0, 0.0};
 
     /**
      * @brief Constructor.
@@ -80,7 +80,7 @@ struct TowerReferencePointElasto : ReferencePointElasto {
     /** @brief Side-side inertia of tower at reference point. */
     double inertia_sideside = 0.0;
     /** @brief Damping coefficients at reference point {along x, along y, along z, about x, mass-proportional}.*/
-    std::vector<double> damping_coefficients{0.03, 0.03, 0.03, 0.06, 0.0};
+    std::vector<double> damping_coefficients{0.0, 0.0, 0.0, 0.0, 0.0};
 
     /**
      * @brief Constructor.
