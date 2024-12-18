@@ -22,8 +22,8 @@ namespace elasto {
  * @brief Hub properties.
  */
 struct HubProperties {
-    /** @brief Center of mass (COM/COG) offset. */
-    double center_of_mass = 0.0;
+    /** @brief Center of mass (COM/COG) position relative to rotor apex (in rotor reference frame). */
+    Vector3d position_from_apex{0.0, 0.0, 0.0};
     /** @brief Mass of the hub. */
     double mass = 0.0;
     /** @brief Inertia of the hub. */
@@ -38,8 +38,8 @@ struct HubProperties {
  * @brief Nacelle properties.
  */
 struct NacelleProperties {
-    /** @brief Center of mass (COM/COG). */
-    Vector3d center_of_mass{0.0, 0.0, 0.0};
+    /** @brief Center of mass (COM/COG) position from towertop (in towertop reference frame). */
+    Vector3d position_from_towertop{0.0, 0.0, 0.0};
     /** @brief Mass of the nacelle. */
     double mass = 0.0;
     /** @brief Inertia of the nacelle (@todo include 3x3 inertia). */

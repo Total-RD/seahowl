@@ -494,18 +494,19 @@ void populate_rna_elasto_from_json(const std::string& filepath, seahowl::elasto:
     //
     // hub
     auto hub = json_obj.at("hub");
-    hub.at("CM").get_to(rna.rotor->hub.center_of_mass);
+    auto cm_hub = hub.at("position_from_apex").get<std::vector<double>>();
+    rna.rotor->hub.position_from_apex = Vector3d(cm_hub[0], cm_hub[1], cm_hub[2]);
     hub.at("mass").get_to(rna.rotor->hub.mass);
     hub.at("inertia").get_to(rna.rotor->hub.inertia);
     hub.at("overhang").get_to(rna.rotor->hub.overhang);
     hub.at("radius").get_to(rna.rotor->hub.radius);
     // nacelle
     auto nacelle = json_obj.at("nacelle");
-    auto cm = nacelle.at("CM").get<std::vector<double>>();
-    if (cm.size() != 3) {
+    auto cm_nac = nacelle.at("position_from_towertop").get<std::vector<double>>();
+    if (cm_nac.size() != 3) {
         throw std::runtime_error("Center of mass of nacelle has to be vector of length 3.");
     }
-    rna.nacelle.center_of_mass = Vector3d(cm[0], cm[1], cm[2]);
+    rna.nacelle.position_from_towertop = Vector3d(cm_nac[0], cm_nac[1], cm_nac[2]);
     nacelle.at("mass").get_to(rna.nacelle.mass);
     nacelle.at("inertia").get_to(rna.nacelle.inertia);
     nacelle.at("yaw_bearing_mass").get_to(rna.nacelle.yaw_bearing_mass);

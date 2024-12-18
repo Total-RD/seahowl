@@ -36,7 +36,7 @@ void RotorElasto::build() {
     // mass and inertia
     body_hub->set_mass(hub.mass);
     body_hub->set_inertia_diagonal(Vector3d(hub.inertia, 0., 0.));
-    body_hub->set_position(Vector3d(hub.center_of_mass, 0.0, 0.0));
+    body_hub->set_position(hub.position_from_apex);
     body_hub->set_rotation(rotation0);
 
     // blades
@@ -178,7 +178,7 @@ void RotorNacelleAssemblyElasto::build() {
     link_shaft_hub->initialize(*rotor->body_hub, *body_shaft);
 
     // nacelle
-    body_nacelle->set_position(nacelle.center_of_mass);
+    body_nacelle->set_position(nacelle.position_from_towertop);
     body_nacelle->set_rotation(rotation0);
     // mass and inertia
     body_nacelle->set_mass(nacelle.mass);
