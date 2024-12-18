@@ -97,6 +97,63 @@ TEST_F(TestTower, frequency) {
     EvaluateTest(test_dataset);
 }
 
+TEST_F(TestTower, frequency_json) {
+    // system
+    auto system_elasto = SystemElastoChrono();
+    system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
+
+    // tower
+    auto tower = seahowl::elasto::TowerElasto();
+    seahowl::io::populate_tower_elasto_from_json((DATADIR / "IEA15MW/tower.json").generic_string(), tower);
+    tower.discretization_fractions = {};
+    tower.build();
+    tower.assemble(system_elasto);
+    tower.nodes.front()->set_fixed(true);
+
+    system_elasto.do_statics(true, 0);
+
+    // static position of tower top
+    double pos0 = tower.nodes.back()->get_position().x();
+
+    // check zero-crossings (static position of tower top)
+    int step = 0;
+    double pos_y = 0.0;
+    double dt = 0.01;
+    int npeaks = 0;
+    double natural_period = 0.0;
+    double time = 0.0;
+    double end_time = 10.0;
+    double start_time = 0.0;
+    tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
+
+    // Setup TestFwDataSet
+    TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_frequency.csv").generic_string(),
+                                       (test_dir / "test_tower_frequency_json.test.csv").generic_string()});
+    test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
+    test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
+
+    while (time < end_time) {
+        if (time > 0.5) {
+            tower.nodes.back()->reset_loads();
+            if (tower.nodes.back()->get_position().x() < pos0 && pos_y > pos0) {
+                if (start_time == 0.0 && npeaks == 0) {
+                    start_time = time;
+                } else {
+                    npeaks += 1;
+                    natural_period = (time - start_time) / npeaks;
+                    test_dataset.test_csv.write_row();
+                }
+            }
+        }
+        pos_y = tower.nodes.back()->get_position().x();
+        system_elasto.step(dt);
+        time += dt;
+        step += 1;
+    }
+
+    EvaluateTest(test_dataset);
+}
+
 TEST_F(TestTower, cylinder_frequency) {
     // system
     auto system_elasto = SystemElastoChrono();

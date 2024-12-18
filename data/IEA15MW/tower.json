@@ -1,0 +1,97 @@
+{
+  "global_variables": {
+    "density": 7850.0,
+    "young_modulus": 210000000000.0,
+    "poisson_ratio": 0.3,
+    "drag_coefficient_normal": 0.5,
+    "drag_coefficient_axial": 0.0,
+    "added_mass_coefficient_normal": 0.0,
+    "added_mass_coefficient_axial": 0.0,
+    "buoyancy_factor": 0.0,
+    "damping_x": 0.02,
+    "damping_y": 0.02,
+    "damping_z": 0.02,
+    "damping_t": 0.02
+  },
+  "reference_points": [{
+    "position": [0.0, 0.0, 15.0],
+    "diameter": 9.471528,
+    "thickness": 0.044367
+  }, {
+    "position": [0.0, 0.0, 28.0],
+    "diameter": 9.471528,
+    "thickness": 0.044367
+  }, {
+    "position": [0.0, 0.0, 28.001],
+    "diameter": 9.470995,
+    "thickness": 0.040952
+  }, {
+    "position": [0.0, 0.0, 41.0],
+    "diameter": 9.400957,
+    "thickness": 0.040952
+  }, {
+    "position": [0.0, 0.0, 41.001],
+    "diameter": 9.400487,
+    "thickness": 0.037945
+  }, {
+    "position": [0.0, 0.0, 54.0],
+    "diameter": 8.943347,
+    "thickness": 0.037945
+  }, {
+    "position": [0.0, 0.0, 54.001],
+    "diameter": 8.943068,
+    "thickness": 0.036162
+  }, {
+    "position": [0.0, 0.0, 67.0],
+    "diameter": 8.365728,
+    "thickness": 0.036162
+  }, {
+    "position": [0.0, 0.0, 67.001],
+    "diameter": 8.365467,
+    "thickness": 0.034495
+  }, {
+    "position": [0.0, 0.0, 80.0],
+    "diameter": 7.719982,
+    "thickness": 0.034495
+  }, {
+    "position": [0.0, 0.0, 80.001],
+    "diameter": 7.7197,
+    "thickness": 0.03269
+  }, {
+    "position": [0.0, 0.0, 93.0],
+    "diameter": 6.999444,
+    "thickness": 0.03269
+  }, {
+    "position": [0.0, 0.0, 93.001],
+    "diameter": 6.999113,
+    "thickness": 0.030569
+  }, {
+    "position": [0.0, 0.0, 106.0],
+    "diameter": 6.543865,
+    "thickness": 0.030569
+  }, {
+    "position": [0.0, 0.0, 106.001],
+    "diameter": 6.543303,
+    "thickness": 0.02697
+  }, {
+    "position": [0.0, 0.0, 119.0],
+    "diameter": 6.390923,
+    "thickness": 0.02697
+  }, {
+    "position": [0.0, 0.0, 119.001],
+    "diameter": 6.390364,
+    "thickness": 0.023395
+  }, {
+    "position": [0.0, 0.0, 132.0],
+    "diameter": 6.223788,
+    "thickness": 0.023395
+  }, {
+    "position": [0.0, 0.0, 132.001],
+    "diameter": 6.224345,
+    "thickness": 0.026958
+  }, {
+    "position": [0.0, 0.0, 144.386],
+    "diameter": 6.156199,
+    "thickness": 0.026958
+  }]
+}
