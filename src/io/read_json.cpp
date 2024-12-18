@@ -926,7 +926,7 @@ void populate_turbine_from_json(const std::string& filepath,
                     dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*floater_elasto.mooring_system->moorings.back());
                 mooring_json.at("length").get_to(mooring_elasto.length);
                 mooring_properties_json.at("diameter").get_to(mooring_elasto.diameter);
-                mooring_json.at("discretization_elasto").get_to(mooring_elasto.discretization_fractions);
+                mooring_json.at("discretization").at("elasto").get_to(mooring_elasto.discretization_fractions);
                 mooring_properties_json.at("stiffness_axial").get_to(mooring_elasto.stiffness_axial);
                 mooring_properties_json.at("stiffness_bending").get_to(mooring_elasto.stiffness_bending);
                 mooring_properties_json.at("density_linear").get_to(mooring_elasto.density_linear);
@@ -936,7 +936,7 @@ void populate_turbine_from_json(const std::string& filepath,
                 auto& mooring_hydro = *floater_hydro.mooring_system->moorings.back();
                 mooring_json.at("length").get_to(mooring_hydro.length);
                 mooring_properties_json.at("diameter").get_to(mooring_hydro.diameter);
-                mooring_json.at("discretization_hydro").get_to(mooring_hydro.discretization_fractions);
+                mooring_json.at("discretization").at("hydro").get_to(mooring_hydro.discretization_fractions);
                 mooring_properties_json.at("drag_coefficient_normal").get_to(mooring_hydro.coefficients.drag_normal);
                 mooring_properties_json.at("drag_coefficient_axial").get_to(mooring_hydro.coefficients.drag_axial);
                 mooring_properties_json.at("added_mass_coefficient_normal")

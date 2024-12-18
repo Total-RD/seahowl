@@ -52,7 +52,7 @@ Simulation::Simulation()
                 {
                     {"dt", {}, "Set the time step for generating outputs", "double", "0", true, true, true},
                     {"folder", {}, "Set the path of the folder for outputs", "string", "./output", true, true, true},
-                    {"VTK", {}, "Generate VTK outputs", "bool", "true", true, true, true},
+                    {"vtk", {}, "Generate VTK outputs", "bool", "true", true, true, true},
                     {"log_level",
                      {},
                      "Set log level (critical|error|warn|info|debug|trace)",
