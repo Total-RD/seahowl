@@ -8,9 +8,22 @@ import numpy as np
 import copy
 import argparse
 import shutil
+import warnings
 
+# JSON dump options
 options = jsbeautifier.default_options
 options.indent_size = 2
+
+TOL_FRACTION_DECIMALS = 8
+TOL_FRACTION_RELATIVE = 1e-5
+
+
+# format warning messages
+def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
+    return "%s:%s: %s: %s\n" % (filename, lineno, category.__name__, message)
+
+
+warnings.formatwarning = warning_on_one_line
 
 
 def save_json(json_dict, path):
@@ -34,7 +47,7 @@ def save_csv(header, array, path):
     np.savetxt(path, array, header=header, delimiter=",", comments="", fmt=fmt)
 
 
-def merge_interpolate_points(json_points1, json_points2):
+def merge_interpolate_points(json_points1, json_points2, tol_fraction_relative=1e-3):
     # get fractions as lists
     fractions1 = list()
     fractions2 = list()
@@ -42,9 +55,8 @@ def merge_interpolate_points(json_points1, json_points2):
         fractions1.append(point["fraction"])
     for point in json_points2:
         fractions2.append(point["fraction"])
-    tol = 6
-    fractions1 = np.round(fractions1, tol)
-    fractions2 = np.round(fractions2, tol)
+    fractions1 = np.round(fractions1, TOL_FRACTION_DECIMALS)
+    fractions2 = np.round(fractions2, TOL_FRACTION_DECIMALS)
 
     fractions = np.union1d(fractions1, fractions2)
 
@@ -53,8 +65,9 @@ def merge_interpolate_points(json_points1, json_points2):
     merged_points = list()
     for idx, fraction in enumerate(fractions):
         interp = False  # interpolate a point ?
+
+        point1 = copy.deepcopy(json_points1[idx1])
         if fraction == fractions1[idx1]:
-            point1 = copy.deepcopy(json_points1[idx1])
             idx1 += 1
         else:
             interp = True
@@ -63,13 +76,12 @@ def merge_interpolate_points(json_points1, json_points2):
             coeff2 = 1.0 - (fractions1[idx1] - fraction) / frange
             interp1 = json_points1[idx1 - 1]
             interp2 = json_points1[idx1]
-            point1 = copy.deepcopy(json_points1[idx1])
             interp_point = point1  # pointer to point1
             if idx > len(fractions) and fractions[idx + 1] > fractions1[idx1]:
                 idx1 += 1
 
+        point2 = copy.deepcopy(json_points2[idx2])
         if fraction == fractions2[idx2]:
-            point2 = copy.deepcopy(json_points2[idx2])
             idx2 += 1
         else:
             interp = True
@@ -78,7 +90,6 @@ def merge_interpolate_points(json_points1, json_points2):
             coeff2 = 1.0 - (fractions2[idx2] - fraction) / frange
             interp1 = json_points2[idx2 - 1]
             interp2 = json_points2[idx2]
-            point2 = copy.deepcopy(json_points2[idx2])
             interp_point = point2  # pointer to point1
             if idx > len(fractions) and fractions[idx + 1] > fractions2[idx2]:
                 idx2 += 1
@@ -119,6 +130,15 @@ def merge_interpolate_points(json_points1, json_points2):
 
         # add point to list
         merged_points.append(point)
+
+    previous_fraction = -1.0
+    idx_to_delete = list()
+    for ii, point in reversed(list(enumerate(merged_points))):
+        if ii != 0 and ii != len(merged_points) - 1:
+            if abs(point["fraction"] - previous_fraction) < tol_fraction_relative:
+                del merged_points[ii]
+            else:
+                previous_fraction = point["fraction"]
 
     return merged_points
 
@@ -246,6 +266,12 @@ def convert_aerodyn_files(
 def convert_beamdyn_file(filename, save_directory=None):
     filepath = Path(filename)
     beamdyn_json = dict()
+    # add default options
+    beamdyn_json["global_variables"] = {}
+    beamdyn_json["global_variables"]["damping_coefficients"] = [0.03, 0.03, 0.03, 0.06]
+    beamdyn_json["global_variables"]["offset_gravity"] = [0.0, 0.0]
+    beamdyn_json["global_variables"]["offset_elastic"] = [0.0, 0.0]
+
     reference_points = list()
     fractions = list()
     with open(filepath, "r") as f:
@@ -276,12 +302,10 @@ def convert_beamdyn_file(filename, save_directory=None):
 
     beamdyn_json["discretization_elasto"] = fractions
 
-    # add default options
-    beamdyn_json["damping_coefficients"] = [0.03, 0.03, 0.03, 0.06]
-
     reference_points = merge_interpolate_points(
         json_points1=reference_points,
         json_points2=blade_elasto_json["reference_points"],
+        tol_fraction_relative=TOL_FRACTION_RELATIVE,
     )
     beamdyn_json["reference_points"] = reference_points
 
@@ -428,6 +452,16 @@ def convert_beamdyn_blade_file(filename, save_directory=None):
 def convert_elastodyn_blade_file(filename, blade_length, save_directory=None):
     filepath = Path(filename)
     elastodyn_json = dict()
+    elastodyn_json["global_variables"] = {}
+    elastodyn_json["global_variables"]["damping_coefficients"] = [
+        0.03,
+        0.03,
+        0.03,
+        0.06,
+    ]
+    elastodyn_json["global_variables"]["offset_gravity"] = [0.0, 0.0]
+    elastodyn_json["global_variables"]["offset_elastic"] = [0.0, 0.0]
+
     fractions = list()
     with open(filepath, "r") as f:
         lines = f.readlines()
@@ -453,9 +487,7 @@ def convert_elastodyn_blade_file(filename, blade_length, save_directory=None):
 
     elastodyn_json["reference_points"] = points
 
-    # add default options
     elastodyn_json["discretization_elasto"] = fractions
-    elastodyn_json["damping_coefficients"] = [0.03, 0.03, 0.03, 0.06]
 
     if save_directory is not None:
         fullpath = Path(save_directory) / filepath.with_suffix(".json")
@@ -464,28 +496,63 @@ def convert_elastodyn_blade_file(filename, blade_length, save_directory=None):
     return elastodyn_json
 
 
-def merge_beamdyn2aerodyn(beamdyn_json, aerodyn_json, save_directory=None):
-    merged_json = copy.deepcopy(beamdyn_json)
+def merge_elasto_aero_blade(
+    elasto_json, aero_json, save_directory=None, prebend_from_aero=False
+):
+    if prebend_from_aero:
+        print("here")
+        warnings.warn(
+            f"Using prebend from aero file for elasto part, this can lead to inaccurate aero offsets (e.g. with non-zero component along X axis). Output in directory: {save_directory}.",
+            RuntimeWarning,
+        )
+    aero_fractions = [
+        round(point["fraction"], TOL_FRACTION_DECIMALS)
+        for point in aero_json["reference_points"]
+    ]
+    merged_json = copy.deepcopy(elasto_json)
     merged_json.pop("discretization_aero", None)
     merged_json.pop("discretization_elasto", None)
     reference_points = merge_interpolate_points(
-        json_points1=beamdyn_json["reference_points"],
-        json_points2=aerodyn_json["reference_points"],
+        json_points1=elasto_json["reference_points"],
+        json_points2=aero_json["reference_points"],
+        tol_fraction_relative=0.0,
     )
     merged_json["reference_points"] = reference_points
+    idx_aero_point = 0
     for reference_point in merged_json["reference_points"]:
-        offset_aero = (
-            np.array(reference_point["coordinates_aero"])
-            - np.array(reference_point["coordinates"])
-        )[:2]
-        twist = reference_point["twist"] * np.pi / 180.0
-        rot_matrix = np.array(
-            [[np.cos(twist), -np.sin(twist)], [np.sin(twist), np.cos(twist)]]
-        )
-        offset_aero = rot_matrix.dot(offset_aero)
-        reference_point["offset_aero"] = offset_aero.tolist()
+        if prebend_from_aero is True:
+            # take prebend from aero coordinates
+            reference_point["coordinates"][0] = reference_point["coordinates_aero"][0]
+
+        # only calculate aero offsets on points with aero coordinates originally
+        if round(reference_point["fraction"], TOL_FRACTION_DECIMALS) in aero_fractions:
+            aero_point = aero_json["reference_points"][idx_aero_point]
+            offset_aero = (
+                np.array(aero_point["coordinates_aero"])
+                - np.array(reference_point["coordinates"])
+            )[:2]
+            # detwist offset (twisted in AeroDyn)
+            twist = reference_point["twist"] * np.pi / 180.0
+            rot_matrix = np.array(
+                [[np.cos(twist), -np.sin(twist)], [np.sin(twist), np.cos(twist)]]
+            )
+            offset_aero = rot_matrix.dot(offset_aero)
+
+            # add offset aero to this point
+            # reference_point["offset_aero"] = offset_aero.tolist()
+            aero_point["offset_aero"] = offset_aero.tolist()
+            del aero_point["coordinates_aero"]
+            idx_aero_point += 1
+
         del reference_point["coordinates_aero"]
 
+    reference_points = merge_interpolate_points(
+        json_points1=merged_json["reference_points"],
+        json_points2=aero_json["reference_points"],
+        tol_fraction_relative=TOL_FRACTION_RELATIVE,
+    )
+
+    merged_json["reference_points"] = reference_points
     # save to file
     if save_directory is not None:
         fullpath = Path(save_directory) / "blade.json"
@@ -530,8 +597,8 @@ def convert_elastodyn_tower_file(
     assert npoints != 0, "Could not find tower ElastoDyn info in given file."
     start_idx = 19
 
-    header = "x,y,z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient,damping_x,damping_y,damping_z,damping_t"
-    csv_array = np.zeros([npoints, len(header.split(","))])
+    header = "position_x,position_y,position_z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient_normal,drag_coefficient_axial,added_mass_coefficient_normal,added_mass_coefficient_axial,buoyancy_factor,damping_x,damping_y,damping_z,damping_t,"
+    csv_array = np.zeros([npoints, len(header.split(",")) - 1])
     # assume basic steel properties and cylinder shape
     young_modulus = 210e9
     density = 7850
@@ -562,10 +629,14 @@ def convert_elastodyn_tower_file(
             round(base_height + fraction * (height - base_height), 6),
             round(diameter_outer, 6),
             round(thickness, 6),
-            density_linear,
+            density,
             young_modulus,
             poisson_ratio,
             drag_coefficient,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
             0.02,
             0.02,
             0.02,
@@ -589,7 +660,7 @@ def convert_elastodyn_rna_file(
     rna_json["precones"] = list()
     rna_json["shaft"] = dict()
     rna_json["nacelle"] = dict()
-    rna_json["nacelle"]["CM"] = [0, 0, 0]
+    rna_json["nacelle"]["position_from_towertop"] = [0, 0, 0]
     rna_json["drivetrain"] = dict()
     rna_json["hub"] = dict()
 
@@ -615,13 +686,17 @@ def convert_elastodyn_rna_file(
                 elif words[1] == "NacMass":
                     rna_json["nacelle"]["mass"] = float(words[0])
                 elif words[1] == "NacYIner":
-                    rna_json["nacelle"]["inertia"] = float(words[0])
+                    rna_json["nacelle"]["inertia"] = [
+                        [0.0, 0.0, 0.0],
+                        [0.0, 0.0, 0.0],
+                        [0.0, 0.0, float(words[0])],
+                    ]
                 elif words[1] == "NacCMxn":
-                    rna_json["nacelle"]["CM"][0] = float(words[0])
+                    rna_json["nacelle"]["position_from_towertop"][0] = float(words[0])
                 elif words[1] == "NacCMyn":
-                    rna_json["nacelle"]["CM"][1] = float(words[0])
+                    rna_json["nacelle"]["position_from_towertop"][1] = float(words[0])
                 elif words[1] == "NacCMzn":
-                    rna_json["nacelle"]["CM"][2] = float(words[0])
+                    rna_json["nacelle"]["position_from_towertop"][2] = float(words[0])
                 elif words[1] == "YawBrMass":
                     rna_json["nacelle"]["yaw_bearing_mass"] = float(words[0])
                 # drivetrain
@@ -637,11 +712,15 @@ def convert_elastodyn_rna_file(
                 elif words[1] == "HubMass":
                     rna_json["hub"]["mass"] = float(words[0])
                 elif words[1] == "HubIner":
-                    rna_json["hub"]["inertia"] = float(words[0])
+                    rna_json["hub"]["inertia"] = [
+                        [float(words[0]), 0.0, 0.0],
+                        [0.0, 0.0, 0.0],
+                        [0.0, 0.0, 0.0],
+                    ]
                 elif words[1] == "OverHang":
                     rna_json["hub"]["overhang"] = float(words[0])
                 elif words[1] == "HubCM":
-                    rna_json["hub"]["CM"] = float(words[0])
+                    rna_json["hub"]["position_from_apex"] = [float(words[0]), 0.0, 0.0]
 
     # extra info from servo file
     if servodyn_filename is not None:
@@ -664,21 +743,27 @@ def convert_elastodyn_rna_file(
     return rna_json
 
 
-def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
+def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=False):
     filepath = Path(filename)
     filedir = filepath.parents[0]
 
     # main json with default values to overwrite when parsing OpenFAST files
     main_json = {
         "numerics": {
-            "dt": 0.1,
-            "t_end": 2000.0,
+            "dt": 0.025,
+            "duration": 200.0,
             "statics": {
                 "linear_step": True,
                 "nonlinear_steps": 10,
             },
+            "presimulation": {
+                "dt": 0.025,
+                "duration": 0.0,
+                "presetup": True,
+                "fix_towers": True,
+            },
         },
-        "outputs": {"dt": 0.1, "VTK": False, "log_level": "info", "gui": False},
+        "outputs": {"dt": 0.1, "vtk": False, "log_level": "info", "gui": False},
         "environment": {"file": "./environment.json"},
         "turbines": [
             {
@@ -713,14 +798,16 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
         npoints = 0
         blade_length = 0
         blade_elasto_json = None
+        has_beamdyn = False
         for ii, line in enumerate(lines):
             words = line.split()
             # Main
             if len(words) > 1:
                 if words[1] == "DT":
                     main_json["numerics"]["dt"] = float(words[0])
+                    main_json["numerics"]["presimulation"]["dt"] = float(words[0])
                 elif words[1] == "TMax":
-                    main_json["numerics"]["t_end"] = float(words[0])
+                    main_json["numerics"]["duration"] = float(words[0])
                 elif words[1] == "Gravity":
                     environment_json["gravity"][2] = -float(words[0])
                 elif words[1] == "AirDens":
@@ -728,8 +815,11 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                 elif words[1] == "WrVTK":
                     if float(words[0]) != 0.0:
                         main_json["outputs"]["VTK"] = True
-                elif words[1] == "VTK_fps":
-                    main_json["outputs"]["dt"] = 1.0 / float(words[0])
+                elif words[1] == "DT_Out":
+                    if "default" in words[0]:
+                        main_json["outputs"]["dt"] = main_json["numerics"]["dt"]
+                    else:
+                        main_json["outputs"]["dt"] = 1.0 / float(words[0])
                 # ElastoDyn
                 elif words[1] == "EDFile":
                     path_ED = filedir / words[0].replace('"', "")
@@ -759,11 +849,18 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                         save_directory=save_directory,
                     )
                     if blade_elasto_json is None:
-                        blade_elasto_json = convert_elastodyn_blade_file(
-                            filename=path_ED_blade,
-                            save_directory=None,
-                            blade_length=blade_length,
-                        )
+                        if Path(path_ED_blade).exists():
+                            blade_elasto_json = convert_elastodyn_blade_file(
+                                filename=path_ED_blade,
+                                save_directory=None,
+                                blade_length=blade_length,
+                            )
+                        else:
+                            warnings.warn(
+                                f"Warning: File does not exist: {path_ED_blade}, ignoring.",
+                                RuntimeWarning,
+                            )
+
                 elif words[1] == "TwrFile":
                     path_ED_tower = filedir / words[0].replace('"', "")
                     tower_elasto_json = {}
@@ -776,7 +873,7 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                     )
 
                 # BeamDyn
-                elif words[1] == "BDBldFile(1)" and use_beamdyn is True:
+                elif words[1] == "BDBldFile(1)" and not use_elastodyn_blade:
                     if (
                         words[0] != '""'
                         and words[0] != '"unused"'
@@ -786,6 +883,7 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                         blade_elasto_json = convert_beamdyn_file(
                             filename=path_BD, save_directory=None
                         )
+                        has_beamdyn = True
                 # AeroDyn
                 elif words[1] == "AeroFile":
                     path_AD = filedir / words[0].replace('"', "")
@@ -807,10 +905,21 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
         )
 
         # blade
-        blade_json = merge_beamdyn2aerodyn(
-            beamdyn_json=blade_elasto_json,
-            aerodyn_json=blade_aero_json,
+        prebend_from_aero = use_elastodyn_blade or (
+            not has_beamdyn
+        )  # when using ElastoDyn, get prebend from AeroDyn
+        if prebend_from_aero:
+            warnings.warn(
+                f"Using ElastoDyn for blades, retrieving prebend from AeroDyn positions and assuming no sweep (case: {filename}). It is preferable to use BeamDyn input files when available.",
+                RuntimeWarning,
+            )
+        if blade_elasto_json is None:
+            raise RuntimeError(f"Did not find any blade file for case {filename}.")
+        blade_json = merge_elasto_aero_blade(
+            elasto_json=blade_elasto_json,
+            aero_json=blade_aero_json,
             save_directory=save_directory,
+            prebend_from_aero=prebend_from_aero,
         )
 
         # turbine
@@ -840,6 +949,12 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                         "libfile": "./controller/libdiscon.so",
                     }
                     # open DISCON file
+                    if not Path(path_DISCON).exists():
+                        warnings.warn(
+                            f"File does not exist: {path_DISCON}, ignoring.",
+                            RuntimeWarning,
+                        )
+                        break
                     with open(path_DISCON, "r") as f2:
                         lines2 = f2.readlines()
                         for jj, line2 in enumerate(lines2):
@@ -857,7 +972,8 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                                 )
                                 # replace path of PerFile i new DISCON file
                                 lines2[jj] = lines2[jj].replace(
-                                    words2[0].replace('"', ""), str(path_PerFile.name)
+                                    words2[0].replace('"', ""),
+                                    str(path_PerFile.name),
                                 )
                                 break
                         with open(Path(save_directory) / path_DISCON_new, "w") as f3:
@@ -887,6 +1003,7 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                 ],
             },
             "rna": {
+                "initial_yaw": 0.0,
                 "file": str(Path("./rna.json")),
             },
             "tower": {
@@ -895,6 +1012,10 @@ def convert_openfast_fst(filename, save_directory=None, use_beamdyn=True):
                     "aero": [],
                 },
                 "file": str(Path("./tower.csv")),
+                "options": {
+                    "use_MacCamyFuchs_correction": False,
+                    "use_Cd_correction": False,
+                },
             },
             "controller": controller_json,
         }
@@ -934,5 +1055,5 @@ if __name__ == "__main__":
 
     # convert files
     convert_openfast_fst(
-        filename=filename, save_directory=save_directory, use_beamdyn=True
+        filename=filename, save_directory=save_directory, use_elastodyn_blade=False
     )
