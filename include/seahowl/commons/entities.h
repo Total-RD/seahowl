@@ -128,6 +128,11 @@ class EntityDynamic : public virtual Entity {
      * @brief Returns rotational acceleration of entity (global reference frame).
      */
     virtual Vector3d get_rotational_acceleration(bool is_local = true) const = 0;
+
+    /**
+     * @brief Ensure a virtual destructor
+     */
+    virtual ~EntityDynamic() = default;
 };
 
 /**
