@@ -74,15 +74,22 @@ json get_json_from_file(const std::string& filepath) {
 class InputData {
   public:
     int nrows = 0;
+    std::string filepath;
     virtual void open(const std::string& filepath) = 0;
     virtual double get(const std::string& key, int row) = 0;
+    virtual Vector3d get_vector3(const std::string& key, int row) = 0;
+    virtual Vector2d get_vector2(const std::string& key, int row) = 0;
+    virtual std::vector<double> get_vector_std(size_t length, const std::string& key, int row) = 0;
+    virtual std::string get_string(const std::string& key, int row) = 0;
+    virtual Eigen::MatrixX<double> get_matrix(const std::string& key, int row) = 0;
 };
 
 class InputDataCSV : public InputData {
-    std::map<std::string, std::vector<double>> csv_data;
+    std::map<std::string, std::vector<std::string>> csv_data;
 
   public:
     void open(const std::string& filepath) override {
+        this->filepath = filepath;
         utils::check_file_exists(filepath);
         // open file
         std::ifstream csv_file;
@@ -108,7 +115,7 @@ class InputDataCSV : public InputData {
             std::stringstream line_ss(line);
             int idx_word = 0;
             while (std::getline(line_ss, word, ',')) {
-                csv_data[csv_headers[idx_word]].push_back(std::stod(word));
+                csv_data[csv_headers[idx_word]].push_back(word);
                 idx_word += 1;
             }
             idx_line += 1;
@@ -125,26 +132,155 @@ class InputDataCSV : public InputData {
 
     double get(const std::string& key, int row) override {
         if (csv_data.count(key) > 0) {
-            return csv_data[key][row];
+            return std::stod(csv_data[key][row]);
         } else {
-            throw std::runtime_error("Header " + key + " does not exist in CSV file.");
+            throw std::runtime_error("Header " + key + " does not exist in CSV file " + filepath + ".");
         }
+    }
+
+    Vector3d get_vector3(const std::string& key, int row) override {
+        std::vector<double> vec;
+        std::vector<std::string> dim_keys = {key + "_x", key + "_y", key + "_z"};
+        for (auto& dim_key : dim_keys) {
+            if (csv_data.count(dim_key) > 0) {
+                vec.push_back(std::stod(csv_data[dim_key][row]));
+            } else {
+                throw std::runtime_error("Could not find '" + dim_key + "' in CSV file " + filepath + ".");
+            }
+        }
+        return Vector3d(vec[0], vec[1], vec[2]);
+    }
+
+    Vector2d get_vector2(const std::string& key, int row) override {
+        std::vector<double> vec;
+        std::vector<std::string> dim_keys = {key + "_x", key + "_y"};
+        for (auto& dim_key : dim_keys) {
+            if (csv_data.count(dim_key) > 0) {
+                vec.push_back(std::stod(csv_data[dim_key][row]));
+            } else {
+                throw std::runtime_error("Could not find '" + dim_key + "' in CSV file " + filepath + ".");
+            }
+        }
+        return Vector2d(vec[0], vec[1]);
+    }
+
+    std::vector<double> get_vector_std(size_t length, const std::string& key, int row) override {
+        std::vector<double> vec;
+        std::vector<std::string> dim_keys;
+        for (size_t ii = 0; ii < length; ii++) {
+            dim_keys.push_back(key + "_dim" + std::to_string(ii + 1));
+        }
+        for (auto& dim_key : dim_keys) {
+            if (csv_data.count(dim_key) > 0) {
+                vec.push_back(std::stod(csv_data[dim_key][row]));
+            } else {
+                throw std::runtime_error("Could not find '" + dim_key + "' in CSV file " + filepath + ".");
+            }
+        }
+        return vec;
+    }
+
+    std::string get_string(const std::string& key, int row) override { return csv_data[key][row]; }
+
+    Eigen::MatrixX<double> get_matrix(const std::string& key, int row) override {
+        throw std::runtime_error("Cannot get matrix '" + key + "' from CSV file.");
     }
 };
 
 class InputDataJSON : public InputData {
-    json json_data;
+    json json_rows;
+    json json_globals;
 
   public:
     void open(const std::string& filepath) override {
+        this->filepath = filepath;
         utils::check_file_exists(filepath);
         std::ifstream json_file(filepath);
+        json json_data;
         json_file >> json_data;
         json_file.close();
-        nrows = json_data.size();
+        json_globals = json_data["global_variables"];
+        json_rows = json_data["reference_points"];
+        nrows = json_rows.size();
     }
 
-    double get(const std::string& key, int row) override { return json_data[row].at(key).get<double>(); }
+    double get(const std::string& key, int row) override {
+        if (json_rows[row].contains(key)) {
+            return json_rows[row].at(key).get<double>();
+        } else if (json_globals.contains(key)) {
+            return json_globals.at(key).get<double>();
+        } else {
+            throw std::runtime_error("Could not find '" + key + "' in JSON file " + filepath + ".");
+        }
+    }
+
+    Vector3d get_vector3(const std::string& key, int row) override {
+        auto vec = get_vector_std(3, key, row);
+        if (vec.size() != 3) {
+            throw std::runtime_error("Key '" + key + "' has to be a vector of length 3 in JSON file " + filepath + ".");
+        }
+        return Vector3d(vec[0], vec[1], vec[2]);
+    }
+
+    Vector2d get_vector2(const std::string& key, int row) override {
+        auto vec = get_vector_std(2, key, row);
+        if (vec.size() != 2) {
+            throw std::runtime_error("Key '" + key + "' has to be a vector of length 2 in JSON file " + filepath + ".");
+        }
+        return Vector2d(vec[0], vec[1]);
+    }
+
+    std::vector<double> get_vector_std(size_t length, const std::string& key, int row) override {
+        std::vector<double> vec;
+        if (json_rows[row].contains(key)) {
+            return json_rows[row].at(key).get<std::vector<double>>();
+        } else if (json_globals.contains(key)) {
+            return json_globals.at(key).get<std::vector<double>>();
+        } else {
+            throw std::runtime_error("Could not find '" + key + "' in JSON file " + filepath + ".");
+        }
+    }
+
+    std::string get_string(const std::string& key, int row) override {
+        std::string str;
+        if (json_rows[row].contains(key)) {
+            return json_rows[row].at(key).get<std::string>();
+        } else if (json_globals.contains(key)) {
+            return json_globals.at(key).get<std::string>();
+        } else {
+            throw std::runtime_error("Could not find '" + key + "' in JSON file " + filepath + ".");
+        }
+    }
+    Eigen::MatrixX<double> get_matrix(const std::string& key, int row) override {
+        std::vector<std::vector<double>> matvec;
+        if (json_rows[row].contains(key)) {
+            matvec = json_rows[row].at(key).get<std::vector<std::vector<double>>>();
+        } else if (json_globals.contains(key)) {
+            matvec = json_globals.at(key).get<std::vector<std::vector<double>>>();
+        } else {
+            throw std::runtime_error("Could not find '" + key + "' in JSON file " + filepath + ".");
+        }
+
+        int mat_nrows = matvec.size();
+        int mat_ncols = 0;
+        for (int irow = 0; irow < matvec.size(); irow++) {
+            mat_ncols = matvec[0].size();
+            if (matvec[irow].size() != mat_ncols) {
+                throw std::runtime_error("Matrix '" + key + "' changed number of columns from " +
+                                         std::to_string(mat_ncols) + " at row 1 to " +
+                                         std::to_string(matvec[irow].size()) + " at row " + std::to_string(irow) +
+                                         " in JSON file " + filepath + ".");
+            }
+        }
+        Eigen::MatrixX<double> mat(mat_nrows, mat_ncols);
+        for (int irow = 0; irow < mat_nrows; irow++) {
+            for (int icol = 0; icol < mat_ncols; icol++) {
+                mat(irow, icol) = matvec[irow][icol];
+                mat(irow, icol) = matvec[irow][icol];
+            }
+        }
+        return mat;
+    }
 };
 
 std::shared_ptr<InputData> get_input_data(const std::string& filepath) {
@@ -163,52 +299,23 @@ std::shared_ptr<InputData> get_input_data(const std::string& filepath) {
 
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
     const std::string& filepath) {
-    auto json_obj = get_json_from_file(filepath);
+    auto input_data = get_input_data(filepath);
 
     // EXTRACT INFO
     std::vector<seahowl::elasto::BladeReferencePointElasto> reference_points;
 
-    auto points = json_obj.at("reference_points").get<json>();
-    auto damping_coefficients = json_obj.at("damping_coefficients").get<std::vector<double>>();
-    if (damping_coefficients.size() != 4) {
-        throw std::runtime_error("Damping coefficients of blade has to be vector of length 4.");
-    }
-
-    double blade_length = points[points.size() - 1]["coordinates"][2];
-    for (size_t ii = 0; ii < points.size(); ii++) {
-        auto& point = points[ii];
+    double blade_length = input_data->get_vector3("coordinates", input_data->nrows - 1).z();
+    for (size_t ii = 0; ii < input_data->nrows; ii++) {
         auto reference_point = seahowl::elasto::BladeReferencePointElasto();
 
-        auto coords = point.at("coordinates").get<std::vector<double>>();
-        if (coords.size() != 3) {
-            throw std::runtime_error("Coordinates along blade have to be vectors of length 3.");
-        }
-        reference_point.fraction = coords[2] / blade_length;
-        reference_point.coordinates = Vector3d(coords[0], coords[1], coords[2]);
-        if (point.contains("offset_gravity")) {
-            auto og = point.at("offsets_gravity").get<std::vector<double>>();
-            reference_point.offset_gravity = Vector2d(og[0], og[1]);
-        }
-        if (point.contains("offset_elastic")) {
-            auto oe = point.at("offsets_elastic").get<std::vector<double>>();
-            reference_point.offset_elastic = Vector2d(oe[0], oe[1]);
-        }
-
-        auto sm = point.at("stiffness_matrix").get<std::vector<std::vector<double>>>();
-        auto mm = point.at("mass_matrix").get<std::vector<std::vector<double>>>();
-        if (sm.size() != 6 || mm.size() != 6) {
-            throw std::runtime_error("Mass and stiffness matrices along blade have to be defined as 6x6 matrices.");
-        }
-        for (int irow = 0; irow < 6; irow++) {
-            if (sm[irow].size() != 6 || mm[irow].size() != 6) {
-                throw std::runtime_error("Mass and stiffness matrices along blade have to be defined as 6x6 matrices.");
-            }
-            for (int icol = 0; icol < 6; icol++) {
-                reference_point.mass_matrix(irow, icol) = mm[irow][icol];
-                reference_point.stiffness_matrix(irow, icol) = sm[irow][icol];
-            }
-        }
-        reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
+        reference_point.coordinates = input_data->get_vector3("coordinates", ii);
+        reference_point.fraction = reference_point.coordinates.z() / blade_length;
+        reference_point.offset_gravity = input_data->get_vector2("offset_gravity", ii);
+        reference_point.offset_elastic = input_data->get_vector2("offset_elastic", ii);
+        reference_point.structural_twist = input_data->get("twist", ii) * PI / 180.0;
+        reference_point.mass_matrix = input_data->get_matrix("mass_matrix", ii);
+        reference_point.stiffness_matrix = input_data->get_matrix("stiffness_matrix", ii);
+        auto damping_coefficients = input_data->get_vector_std(4, "damping_coefficients", ii);
         reference_point.damping_coefficients[0] = damping_coefficients[0];
         reference_point.damping_coefficients[1] = damping_coefficients[1];
         reference_point.damping_coefficients[2] = damping_coefficients[2];
@@ -222,41 +329,25 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
 
 std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_json(
     const std::string& filepath) {
-    auto json_obj = get_json_from_file(filepath);
+    auto input_data = get_input_data(filepath);
 
     // EXTRACT INFO
     std::vector<seahowl::aero::BladeReferencePointAero> reference_points;
 
-    auto points = json_obj.at("reference_points").get<json>();
-
-    double blade_length = points[points.size() - 1]["coordinates"][2];
-    for (size_t ii = 0; ii < points.size(); ii++) {
-        auto& point = points[ii];
+    double blade_length = input_data->get_vector3("coordinates", input_data->nrows - 1).z();
+    for (size_t ii = 0; ii < input_data->nrows; ii++) {
         auto reference_point = seahowl::aero::BladeReferencePointAero();
 
-        auto coords = point.at("coordinates").get<std::vector<double>>();
-        if (coords.size() != 3) {
-            throw std::runtime_error("Coordinates along blade have to be vectors of length 3.");
-        }
-        reference_point.fraction = coords[2] / blade_length;
-        reference_point.coordinates = Vector3d(coords[0], coords[1], coords[2]);
-        reference_point.structural_twist = point.at("twist").get<double>() * PI / 180.0;
-        if (point.contains("offset_aero")) {
-            auto oa = point.at("offset_aero").get<std::vector<double>>();
-            if (oa.size() != 2) {
-                throw std::runtime_error("Offsets aero along blade have to be vectors of length 2.");
-            }
-            reference_point.offset_aero = Vector2d(oa[0], oa[1]);
-        }
-
-        if (point.contains("chord")) {
-            reference_point.chord = point["chord"];
-        }
+        reference_point.coordinates = input_data->get_vector3("coordinates", ii);
+        reference_point.fraction = reference_point.coordinates.z() / blade_length;
+        reference_point.structural_twist = input_data->get("twist", ii) * PI / 180.0;
+        reference_point.offset_aero = input_data->get_vector2("offset_aero", ii);
+        reference_point.chord = input_data->get("chord", ii);
 
         // populate json object
-        if (point.contains("airfoil_file") && !point["airfoil_file"].get<std::string>().empty()) {
+        if (!input_data->get_string("airfoil_file", ii).empty()) {
             auto main_directory = fs::path(filepath).parent_path();
-            auto airfoil_filename = point.at("airfoil_file").get<std::string>();
+            auto airfoil_filename = input_data->get_string("airfoil_file", ii);
             auto airfoil_filepath = main_directory / airfoil_filename;
 
             auto json_airfoil = get_json_from_file(airfoil_filepath.u8string());
@@ -314,9 +405,8 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
 
     // EXTRACT INFO
     std::vector<seahowl::elasto::TowerReferencePointElasto> reference_points;
-    Vector3d pos0 = Vector3d(input_data->get("x", 0), input_data->get("y", 0), input_data->get("z", 0));
-    Vector3d pos1 = Vector3d(input_data->get("x", input_data->nrows - 1), input_data->get("y", input_data->nrows - 1),
-                             input_data->get("z", input_data->nrows - 1));
+    Vector3d pos0 = input_data->get_vector3("position", 0);
+    Vector3d pos1 = input_data->get_vector3("position", input_data->nrows - 1);
     double length = (pos1 - pos0).norm();
 
     std::vector<double> young_modulus_list;
@@ -324,8 +414,7 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
     // MAKE TOWER REFERENCE POINTS
     for (int ii = 0; ii < input_data->nrows; ii++) {
         auto reference_point = seahowl::elasto::TowerReferencePointElasto();
-        reference_point.coordinates =
-            Vector3d(input_data->get("x", ii), input_data->get("y", ii), input_data->get("z", ii));
+        reference_point.coordinates = input_data->get_vector3("position", ii);
         reference_point.fraction = (reference_point.coordinates - pos0).norm() / length;
 
         // general properties
@@ -357,17 +446,15 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
     auto input_data = get_input_data(filepath);
 
     // EXTRACT INFO
-    Vector3d pos0 = Vector3d(input_data->get("x", 0), input_data->get("y", 0), input_data->get("z", 0));
-    Vector3d pos1 = Vector3d(input_data->get("x", input_data->nrows - 1), input_data->get("y", input_data->nrows - 1),
-                             input_data->get("z", input_data->nrows - 1));
+    Vector3d pos0 = input_data->get_vector3("position", 0);
+    Vector3d pos1 = input_data->get_vector3("position", input_data->nrows - 1);
     double length = (pos1 - pos0).norm();
 
     // MAKE TOWER REFERENCE POINTS
     std::vector<seahowl::aero::TowerReferencePointAero> reference_points;
     for (int ii = 0; ii < input_data->nrows; ii++) {
         auto reference_point = seahowl::aero::TowerReferencePointAero();
-        reference_point.coordinates =
-            Vector3d(input_data->get("x", ii), input_data->get("y", ii), input_data->get("z", ii));
+        reference_point.coordinates = input_data->get_vector3("position", ii);
         reference_point.fraction = (reference_point.coordinates - pos0).norm() / length;
 
         reference_point.diameter = input_data->get("diameter", ii);
