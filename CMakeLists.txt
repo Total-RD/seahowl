@@ -532,11 +532,15 @@ if (SEAHOWL_ENABLE_PYTHON)
     target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
     set_target_properties(pyseahowl PROPERTIES OUTPUT_NAME seahowl)
 
-    add_custom_command(
-        TARGET pyseahowl
-        POST_BUILD
-        COMMAND ${Python_EXECUTABLE} -m venv ${CMAKE_HOME_DIRECTORY}/__env__
-    )
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+        add_custom_command(
+            TARGET pyseahowl
+            POST_BUILD
+            COMMAND ${Python_EXECUTABLE} -m venv ${CMAKE_HOME_DIRECTORY}/__env__
+            COMMAND bash -c "${CMAKE_HOME_DIRECTORY}/__env__/bin/pip install sphinx sphinx-rtd-theme matplotlib myst-parser"
+        )
+    endif()
 
 endif (SEAHOWL_ENABLE_PYTHON)
 
