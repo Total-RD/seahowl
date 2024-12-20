@@ -373,7 +373,7 @@ TEST_F(TestTurbine, actuator_disk) {
                                        [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; });
     test_dataset.test_csv.add_function("power (W)",
                                        [&turbine]() -> std::vector<double> { return {turbine.get_generated_power()}; });
-
+    int count = 0;
     while (time < 100) {
         // prestep
         // compute forces
@@ -387,7 +387,11 @@ TEST_F(TestTurbine, actuator_disk) {
 
         // poststep
         turbine.poststep(time, dt);
-        test_dataset.test_csv.write_row();
+        if (count == 5) {
+            test_dataset.test_csv.write_row();
+            count = 0;
+        }
+        count += 1;
     }
 
     reference_power = 15.3e6;
@@ -396,6 +400,8 @@ TEST_F(TestTurbine, actuator_disk) {
     // turbine
     initial_pitch = 11.0 * seahowl::PI / 180.0;
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
+
+    count = 0;
     while (time < 200) {
         // prestep
         // compute forces
@@ -409,7 +415,11 @@ TEST_F(TestTurbine, actuator_disk) {
 
         // poststep
         turbine.poststep(time, dt);
-        test_dataset.test_csv.write_row();
+        if (count == 5) {
+            test_dataset.test_csv.write_row();
+            count = 0;
+        }
+        count += 1;
     }
 
     EvaluateTest(test_dataset);

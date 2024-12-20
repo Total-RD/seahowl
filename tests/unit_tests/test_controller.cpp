@@ -108,3 +108,83 @@ TEST_F(TestController, IEA15) {
     // compare ref and test CSVs
     EvaluateTest(test_dataset);
 }
+
+TEST_F(TestController, actuator_disk) {
+    // general options
+    bool visualization_on = true;
+    bool statics_prestep = true;
+    // solver
+    auto verbose = false;
+    // timestepping
+    double dt = 0.05;
+    double simul_time = 350.0;
+    // wind ramp
+    auto wind_model = seahowl::env::WindRamp();
+    const Vector3d wind_in(5.0, 0.0, 0.0);
+    const Vector3d wind_end(15.0, 0.0, 0.0);
+    wind_model.set_wind_ramp(wind_in, 0.0, wind_end, 250.0);
+
+    wind_model.shear_coefficient = 0.12;
+    // turbine
+    double initial_pitch = 0.0 * seahowl::PI / 1000.0;
+
+    // system
+    auto system_elasto = SystemElastoChrono();
+    auto system_chrono = system_elasto.chobj;
+
+    // turbine
+    auto turbine_elasto = seahowl::elasto::TurbineElasto();
+    auto turbine_aero = seahowl::aero::TurbineAero();
+    auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
+    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/turbine_disk.json").generic_string(), turbine);
+
+    turbine.build();
+    turbine.elasto.assemble(system_elasto);
+    turbine.tower.elasto.nodes.front()->set_fixed(true);
+
+    // statics
+    if (statics_prestep) {
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
+        system_elasto.do_statics(true, 10);
+        turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
+    }
+
+    double time = 0.0;
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
+    turbine.initialize(time, dt);
+
+    // Setup TestFwDataSet
+    TestFrameworkDataset test_dataset({false, (ref_dir / "test_controller_actuator_disk.csv").generic_string(),
+                                       (test_dir / "test_controller_actuator_disk.test.csv").generic_string()});
+
+    test_dataset.test_csv.add_function(
+        "time (s)", [&system_elasto]() -> std::vector<double> { return {system_elasto.get_time()}; });
+
+    test_dataset.test_csv.add_function("rpm (-)",
+                                       [&turbine]() -> std::vector<double> { return {turbine.rna.elasto.get_rpm()}; });
+    test_dataset.test_csv.add_function("power (W)",
+                                       [&turbine]() -> std::vector<double> { return {turbine.get_generated_power()}; });
+
+    int count = 0;
+    while (time < simul_time) {
+        // prestep
+        // compute forces
+        turbine.apply_control(time, dt);
+        turbine.aero.compute_fluid_loads(wind_model, time);
+        // prestep (accumulates loads from aero to elasto)
+        turbine.prestep(time, dt);
+
+        system_elasto.step(dt);
+        time += dt;
+
+        // poststep
+        turbine.poststep(time, dt);
+        if (count == 10) {
+            test_dataset.test_csv.write_row();
+            count = 0;
+        }
+        count += 1;
+    }
+
+    EvaluateTest(test_dataset);
+}
