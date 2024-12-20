@@ -7,5 +7,6 @@ This file lists the entities and individuals having contributed to the code of S
 - Matteo Capaldo (@mattcapa) matteo.capaldo@totalenergies.com
 - Wenchao Yu (@wenchaoyu) wenchao.yu@totalenergies.com
 - Maxime Pallud (@MaxPal) maxime.pallud@totalenergies.com
+- Jerome Lucas (@lucasjerome) jerome.lucas@cesgenslab.fr
 
 If you have contributed and your name is not listed, please feel free to submit a pull request to add your information. All contributions are appreciated, big and small!
