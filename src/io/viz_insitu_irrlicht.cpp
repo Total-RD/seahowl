@@ -21,7 +21,7 @@ VisualizationInSituIrrlicht::VisualizationInSituIrrlicht() {
     application_irrlicht->Initialize();
     application_irrlicht->SetCameraVertical(chrono::CameraVerticalDir::Z);
     auto DATADIR = fs::absolute(fs::path(u8"../data"));
-    auto logoname = (DATADIR / ".." / "doc" / "source" / "totalenergies_alpha.png").generic_string();
+    auto logoname = (DATADIR / ".." / "doc" / "source" / "_static" / "totalenergies_alpha.png").generic_string();
     application_irrlicht->AddLogo(logoname);
 }
 

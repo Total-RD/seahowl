@@ -43,24 +43,28 @@ find_package(Doxygen
     REQUIRED dot
     OPTIONAL_COMPONENTS mscgen dia)
 
-set(DOXYGEN_PROJECT_BRIEF "Servo-Elasto-Aero-Hydro Offshore Wind Lab")
-set(DOXYGEN_QUIET YES)
-set(DOXYGEN_USE_MATHJAX YES)
-set(DOXYGEN_HIDE_UNDOC_MEMBERS NO)
-set(DOXYGEN_HIDE_UNDOC_CLASSES NO)
-set(DOXYGEN_GENERATE_TODOLIST YES)
-set(DOXYGEN_EXTRACT_STATIC YES)
-set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
-set(DOXYGEN_GENERATE_HTML YES)
-set(DOXYGEN_GENERATE_MAN NO)
-set(DOXYGEN_IMAGE_PATH ${SPHINX_SOURCE}/_static/images)
+    if (DOXYGEN_FOUND)
 
-doxygen_add_docs(
-    doxygen
-    ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}/include
-    COMMENT "Generate HTML pages"
-)
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.out)
+  
+    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+    message("Doxygen build started")
+  
+    add_custom_target( doxygen
+      COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      COMMENT "Generating documentation (Doxygen)"
+      VERBATIM
+    )
+  
+    install(
+      DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/doc/html
+      DESTINATION doxygen
+    )
+  else (DOXYGEN_FOUND)
+    message("Doxygen needs to be install. You can use `sudo apt install doxygen` on ubuntu")
+  endif (DOXYGEN_FOUND)
 
 
 add_custom_target(documentation ALL DEPENDS Sphinx doxygen)
