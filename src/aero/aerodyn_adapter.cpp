@@ -360,6 +360,29 @@ void seahowl::aero::AeroDynInflowLib::SetAeroLoads(float* meshFrcAllBlades) {
     MeshFrc = meshFrcAllBlades;
 }
 
+/* FIXME: add routines
+void seahowl::aero::AeroDynInflowLib::PreInit() {
+    ADI_C_PreInit() 
+}
+
+void seahowl::aero::AeroDynInflowLib::SetupRotor() {
+    ADI_C_SetupRotor() 
+}
+
+void seahowl::aero::AeroDynInflowLib::SetRotorMotion() {
+    ADI_C_SetRotorMotion() 
+}
+
+void seahowl::aero::AeroDynInflowLib::GetRotorLoads() {
+    ADI_C_GetRotorLoads() 
+}
+
+void seahowl::aero::AeroDynInflowLib::GetDiskAvgVel() {
+    ADI_C_GetDiskAvgVel() 
+}
+*/
+
+
 void seahowl::aero::AeroDynInflowLib::Init() {
     const char* ADinputFile = ADinputFileString.c_str();
     const char* IfWinputFile = IfWinputFileString.c_str();
@@ -396,21 +419,21 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     wrOuts = 0;     // wrOuts -- file format for writing outputs
     DT_Outs = 0.0;  // DT_Outs -- timestep for outputs to file
 
-    AeroDyn_Inflow_C_Init(ADinputFilePassed, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed, &IfWinputFile,
-                          IfWinputFileStringLength, OutRootName, gravity, defFldDens, defKinVisc, defSpdSound, defPatm,
-                          defPvap, WtrDpth, MSL2SWL, AeroProjMod, InterpOrder, DT, TMax, storeHHVel, TransposeDCM,
-                          WrVTK, WrVTK_Type, WrVTK_dt, VTKNacDim, VTKHubRad, wrOuts, DT_Outs, HubPos, HubOri, NacPos,
-                          NacOri, NumBlades, BldRootPos, BldRootOri, NumMeshPts, MeshPos, MeshOri, NumChannels,
-                          OutputChannelNames, OutputChannelUnits, ErrStat, ErrMsg);
+    ADI_C_Init(ADinputFilePassed, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed, &IfWinputFile,
+               IfWinputFileStringLength, OutRootName, gravity, defFldDens, defKinVisc, defSpdSound, defPatm,
+               defPvap, WtrDpth, MSL2SWL, AeroProjMod, InterpOrder, DT, TMax, storeHHVel, TransposeDCM,
+               WrVTK, WrVTK_Type, WrVTK_dt, VTKNacDim, VTKHubRad, wrOuts, DT_Outs, HubPos, HubOri, NacPos,
+               NacOri, NumBlades, BldRootPos, BldRootOri, NumMeshPts, MeshPos, MeshOri, NumChannels,
+               OutputChannelNames, OutputChannelUnits, ErrStat, ErrMsg);
 
     CheckError();
 }
 
 void seahowl::aero::AeroDynInflowLib::Calcul() {
     float* MeshFrc_C = new float[6 * NumMeshPts];
-    AeroDyn_Inflow_C_CalcOutput(Time, HubPos, HubOri, HubVel, HubAcc, NacPos, NacOri, NacVel, NacAcc, BldRootPos,
-                                BldRootOri, BldRootVel, BldRootAcc, NumMeshPts, MeshPos, MeshOri, MeshVel, MeshAcc,
-                                MeshFrc_C, OutputChannelValues, ErrStat, ErrMsg);
+    ADI_C_CalcOutput(Time, HubPos, HubOri, HubVel, HubAcc, NacPos, NacOri, NacVel, NacAcc, BldRootPos,
+                     BldRootOri, BldRootVel, BldRootAcc, NumMeshPts, MeshPos, MeshOri, MeshVel, MeshAcc,
+                     MeshFrc_C, OutputChannelValues, ErrStat, ErrMsg);
 
     SetAeroLoads(MeshFrc_C);
 
@@ -418,15 +441,15 @@ void seahowl::aero::AeroDynInflowLib::Calcul() {
 }
 
 void seahowl::aero::AeroDynInflowLib::Update() {
-    AeroDyn_Inflow_C_UpdateStates(TimeLast, Time, HubPos, HubOri, HubVel, HubAcc, NacPos, NacOri, NacVel, NacAcc,
-                                  BldRootPos, BldRootOri, BldRootVel, BldRootAcc, NumMeshPts, MeshPos, MeshOri, MeshVel,
-                                  MeshAcc, ErrStat, ErrMsg);
+    ADI_C_UpdateStates(TimeLast, Time, HubPos, HubOri, HubVel, HubAcc, NacPos, NacOri, NacVel, NacAcc,
+                       BldRootPos, BldRootOri, BldRootVel, BldRootAcc, NumMeshPts, MeshPos, MeshOri, MeshVel,
+                       MeshAcc, ErrStat, ErrMsg);
 
     CheckError();
 }
 
 void seahowl::aero::AeroDynInflowLib::End() {
-    AeroDyn_Inflow_C_End(ErrStat, ErrMsg);
+    ADI_C_End(ErrStat, ErrMsg);
     CheckError();
 
     // delete [] hubPos_C, hubOri_C, hubVel_C, hubAcc_C;
