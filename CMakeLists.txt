@@ -532,13 +532,25 @@ if (SEAHOWL_ENABLE_PYTHON)
     target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
     set_target_properties(pyseahowl PROPERTIES OUTPUT_NAME seahowl)
 
-    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
-        add_custom_command(
-            TARGET pyseahowl
-            POST_BUILD
+    execute_process(
             COMMAND ${Python_EXECUTABLE} -m venv ${CMAKE_HOME_DIRECTORY}/__env__
-            COMMAND bash -c "${CMAKE_HOME_DIRECTORY}/__env__/bin/pip install sphinx sphinx-rtd-theme matplotlib myst-parser"
+            RESULT_VARIABLE result
+    )
+
+    if(result)
+        message(FATAL_ERROR "Failed to create virtual environment")
+    endif()
+
+    set(LAUNCH_PIP "pip install sphinx sphinx-rtd-theme matplotlib myst-parser > ${CMAKE_HOME_DIRECTORY}/build/pip_install.log")
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+        set(ACTIVATE_PY "source ${CMAKE_HOME_DIRECTORY}/__env__/bin/activate")
+        execute_process(
+            COMMAND bash -c "${ACTIVATE_PY} && ${LAUNCH_PIP}"
+        )
+    else()
+        set(ACTIVATE_PY "${CMAKE_HOME_DIRECTORY}/__env__/Scripts/activate.bat")
+        execute_process(
+            COMMAND cmd.exe /c "${ACTIVATE_PY} && ${LAUNCH_PIP}"
         )
     endif()
 
