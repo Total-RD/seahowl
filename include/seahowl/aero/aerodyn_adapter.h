@@ -26,11 +26,25 @@ void ADI_C_PreInit(int& NumTurbines_C,
                    int& DebugLevel_in,
                    int& ErrStat_C,
                    char* ErrMsg_C);
-/*
-void seahowl::aero::AeroDynInflowLib::SetupRotor() {
-void ADI_C_SetupRotor()
-}
 
+void ADI_C_SetupRotor(int& iWT_c,
+                      bool& TurbineIsHAWT_c,
+                      float* TurbOrigin_C,
+                      float* HubPos_C,
+                      double* HubOri_C,
+                      float* NacPos_C,
+                      double* NacOri_C,
+                      int& NumBlades_C,
+                      float* BldRootPos_C,
+                      double* BldRootOri_C,
+                      int& NumMeshPts_C,
+                      float* InitMeshPos_C,
+                      double* InitMeshOri_C,
+                      int* MeshPtToBladeNum_C,
+                      int& ErrStat_C,
+                      char* ErrMsg_C);
+
+/*
 void seahowl::aero::AeroDynInflowLib::SetRotorMotion() {
 void ADI_C_SetRotorMotion()
 }
@@ -182,6 +196,13 @@ struct AeroDynInflowLib {
     // Input file string length
     int ADinputFileStringLength;
     int IfWinputFileStringLength;
+
+    bool TurbineIsHAWT = true;
+    int NumTurbines = 1;
+    int PointLoadOutput_in = 1;
+    int DebugLevel_in = 1;
+    float* TurbOrigin;
+    int* MeshPtToBladeNum;
 
     /*  OutRootName
      *  If HD writes a file (echo, summary, or other),

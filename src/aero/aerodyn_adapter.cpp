@@ -32,6 +32,24 @@ void seahowl::aero::AeroDynAdapter::initialize(double time, double dt, seahowl::
     pImpl.SetTimeStep(dt);
     pImpl.SetTime(time);
     update_turbine_variables(turbine);
+
+    // init blade indexing on AeroDyn mesh
+    // this should be moved in a separate function
+    int npoints = 0;
+    for (auto& blade : turbine.rna.rotor->blades) {
+        npoints += blade->nodes.size();
+    }
+    pImpl.MeshPtToBladeNum = new int[npoints];
+    int idx_blade = 0;
+    for (auto& blade : turbine.rna.rotor->blades) {
+        int idx_node = 0;
+        for (auto& node : blade->nodes) {
+            pImpl.MeshPtToBladeNum[idx_node] = idx_blade + 1;
+            idx_node += 1;
+        }
+        idx_blade += 1;
+    }
+
     pImpl.Init();
 }
 
@@ -418,18 +436,19 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     wrOuts = 0;     // wrOuts -- file format for writing outputs
     DT_Outs = 0.0;  // DT_Outs -- timestep for outputs to file
 
-    int NumTurbines_C = 1;
-    int PointLoadOutput_in = 1;
-    int DebugLevel_in = 1;
-    ADI_C_PreInit(NumTurbines_C, TransposeDCM, PointLoadOutput_in, DebugLevel_in, ErrStat, ErrMsg);
+    ADI_C_PreInit(NumTurbines, TransposeDCM, PointLoadOutput_in, DebugLevel_in, ErrStat, ErrMsg);
 
-    char OutVTKDir_C[1024] = "./output";  // to change to actual output folder from SEAHOWL OutputManager
+    int iWT_c = 1;
+    TurbOrigin = new float[3]{0.0, 0.0, 0.0};
 
+    ADI_C_SetupRotor(iWT_c, TurbineIsHAWT, TurbOrigin, HubPos, HubOri, NacPos, NacOri, NumBlades, BldRootPos,
+                     BldRootOri, NumMeshPts, MeshPos, MeshOri, MeshPtToBladeNum, ErrStat, ErrMsg);
+
+    char OutVTKDir[1024] = "./output";  // to change to actual output folder from SEAHOWL OutputManager
     ADI_C_Init(ADinputFilePassed, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed, &IfWinputFile,
-               IfWinputFileStringLength, OutRootName, OutVTKDir_C, gravity, defFldDens, defKinVisc, defSpdSound,
-               defPatm, defPvap, WtrDpth, MSL2SWL, InterpOrder, DT, TMax, storeHHVel, WrVTK, WrVTK_Type, WrVTK_dt,
-               VTKNacDim, VTKHubRad, wrOuts, DT_Outs, NumChannels, OutputChannelNames, OutputChannelUnits, ErrStat,
-               ErrMsg);
+               IfWinputFileStringLength, OutRootName, OutVTKDir, gravity, defFldDens, defKinVisc, defSpdSound, defPatm,
+               defPvap, WtrDpth, MSL2SWL, InterpOrder, DT, TMax, storeHHVel, WrVTK, WrVTK_Type, WrVTK_dt, VTKNacDim,
+               VTKHubRad, wrOuts, DT_Outs, NumChannels, OutputChannelNames, OutputChannelUnits, ErrStat, ErrMsg);
 
     CheckError();
 }
