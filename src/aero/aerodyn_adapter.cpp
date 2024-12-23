@@ -438,11 +438,10 @@ void seahowl::aero::AeroDynInflowLib::Init() {
 
     ADI_C_PreInit(NumTurbines, TransposeDCM, PointLoadOutput_in, DebugLevel_in, ErrStat, ErrMsg);
 
-    int iWT_c = 1;
     TurbOrigin = new float[3]{0.0, 0.0, 0.0};
 
-    ADI_C_SetupRotor(iWT_c, TurbineIsHAWT, TurbOrigin, HubPos, HubOri, NacPos, NacOri, NumBlades, BldRootPos,
-                     BldRootOri, NumMeshPts, MeshPos, MeshOri, MeshPtToBladeNum, ErrStat, ErrMsg);
+    ADI_C_SetupRotor(iWT, TurbineIsHAWT, TurbOrigin, HubPos, HubOri, NacPos, NacOri, NumBlades, BldRootPos, BldRootOri,
+                     NumMeshPts, MeshPos, MeshOri, MeshPtToBladeNum, ErrStat, ErrMsg);
 
     char OutVTKDir[1024] = "./output";  // to change to actual output folder from SEAHOWL OutputManager
     ADI_C_Init(ADinputFilePassed, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed, &IfWinputFile,
@@ -454,20 +453,19 @@ void seahowl::aero::AeroDynInflowLib::Init() {
 }
 
 void seahowl::aero::AeroDynInflowLib::Calcul() {
-    float* MeshFrc_C = new float[6 * NumMeshPts];
-    ADI_C_CalcOutput(Time, HubPos, HubOri, HubVel, HubAcc, NacPos, NacOri, NacVel, NacAcc, BldRootPos, BldRootOri,
-                     BldRootVel, BldRootAcc, NumMeshPts, MeshPos, MeshOri, MeshVel, MeshAcc, MeshFrc_C,
-                     OutputChannelValues, ErrStat, ErrMsg);
+    float* OutputChannelValues = new float[6 * NumMeshPts];
+    ADI_C_CalcOutput(Time, OutputChannelValues, ErrStat, ErrMsg);
 
-    SetAeroLoads(MeshFrc_C);
+    SetAeroLoads(OutputChannelValues);
 
     CheckError();
 }
 
 void seahowl::aero::AeroDynInflowLib::Update() {
-    ADI_C_UpdateStates(TimeLast, Time, HubPos, HubOri, HubVel, HubAcc, NacPos, NacOri, NacVel, NacAcc, BldRootPos,
-                       BldRootOri, BldRootVel, BldRootAcc, NumMeshPts, MeshPos, MeshOri, MeshVel, MeshAcc, ErrStat,
-                       ErrMsg);
+    ADI_C_SetRotorMotion(iWT, HubPos, HubOri, HubVel, HubAcc, NacPos, NacOri, NacVel, NacAcc, BldRootPos, BldRootOri,
+                         BldRootVel, BldRootAcc, NumMeshPts, MeshPos, MeshOri, MeshVel, MeshAcc, ErrStat, ErrMsg);
+
+    ADI_C_UpdateStates(TimeLast, Time, ErrStat, ErrMsg);
 
     CheckError();
 }

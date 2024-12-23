@@ -44,11 +44,28 @@ void ADI_C_SetupRotor(int& iWT_c,
                       int& ErrStat_C,
                       char* ErrMsg_C);
 
-/*
-void seahowl::aero::AeroDynInflowLib::SetRotorMotion() {
-void ADI_C_SetRotorMotion()
-}
+void ADI_C_SetRotorMotion(int& iWT_c,
+                          float* HubPos_C,
+                          double* HubOri_C,
+                          float* HubVel_C,
+                          float* HubAcc_C,
+                          float* NacPos_C,
+                          double* NacOri_C,
+                          float* NacVel_C,
+                          float* NacAcc_C,
+                          float* BldRootPos_C,
+                          double* BldRootOri_C,
+                          float* BldRootVel_C,
+                          float* BldRootAcc_C,
+                          int& NumMeshPts_C,
+                          float* MeshPos_C,
+                          double* MeshOri_C,
+                          float* MeshVel_C,
+                          float* MeshAcc_C,
+                          int& ErrStat_C,
+                          char* ErrMsg_C);
 
+/*
 void seahowl::aero::AeroDynInflowLib::GetRotorLoads() {
 void ADI_C_GetRotorLoads()
 }
@@ -91,50 +108,9 @@ void ADI_C_Init(bool& ADinputFilePassed,
                 int& ErrStat_C,
                 char* ErrMsg_C);
 
-void ADI_C_CalcOutput(double& Time_C,
-                      float* HubPos_C,
-                      double* HubOri_C,
-                      float* HubVel_C,
-                      float* HubAcc_C,
-                      float* NacPos_C,
-                      double* NacOri_C,
-                      float* NacVel_C,
-                      float* NacAcc_C,
-                      float* BldRootPos_C,
-                      double* BldRootOri_C,
-                      float* BldRootVel_C,
-                      float* BldRootAcc_C,
-                      int& NumMeshPts_C,
-                      float* MeshPos_C,
-                      double* MeshOri_C,
-                      float* MeshVel_C,
-                      float* MeshAcc_C,
-                      float* MeshFrc_C,
-                      float* OutputChannelValues_C,
-                      int& ErrStat_C,
-                      char* ErrMsg_C);
+void ADI_C_CalcOutput(double& Time_C, float* OutputChannelValues_C, int& ErrStat_C, char* ErrMsg_C);
 
-void ADI_C_UpdateStates(double& Time_C,
-                        double& TimeNext_C,
-                        float* HubPos_C,
-                        double* HubOri_C,
-                        float* HubVel_C,
-                        float* HubAcc_C,
-                        float* NacPos_C,
-                        double* NacOri_C,
-                        float* NacVel_C,
-                        float* NacAcc_C,
-                        float* BldRootPos_C,
-                        double* BldRootOri_C,
-                        float* BldRootVel_C,
-                        float* BldRootAcc_C,
-                        int& NumMeshPts_C,
-                        float* MeshPos_C,
-                        double* MeshOri_C,
-                        float* MeshVel_C,
-                        float* MeshAcc_C,
-                        int& ErrStat_C,
-                        char* ErrMsg_C);
+void ADI_C_UpdateStates(double& Time_C, double& TimeNext_C, int& ErrStat_C, char* ErrMsg_C);
 
 void ADI_C_End(int& ErrStat_C, char* ErrMsg_C);
 }
@@ -199,6 +175,7 @@ struct AeroDynInflowLib {
 
     bool TurbineIsHAWT = true;
     int NumTurbines = 1;
+    int iWT = 1;
     int PointLoadOutput_in = 1;
     int DebugLevel_in = 1;
     float* TurbOrigin;
