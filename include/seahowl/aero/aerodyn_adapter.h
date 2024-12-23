@@ -20,25 +20,27 @@ class FluidModel;
 /// </summary>
 extern "C" {
 
-/* FIXME: add routines
-void seahowl::aero::AeroDynInflowLib::PreInit() {
-void ADI_C_PreInit() 
-}
-
+void ADI_C_PreInit(int& NumTurbines_C,
+                   bool& TransposeDCM_in,
+                   int& PointLoadOutput_in,
+                   int& DebugLevel_in,
+                   int& ErrStat_C,
+                   char* ErrMsg_C);
+/*
 void seahowl::aero::AeroDynInflowLib::SetupRotor() {
-void ADI_C_SetupRotor() 
+void ADI_C_SetupRotor()
 }
 
 void seahowl::aero::AeroDynInflowLib::SetRotorMotion() {
-void ADI_C_SetRotorMotion() 
+void ADI_C_SetRotorMotion()
 }
 
 void seahowl::aero::AeroDynInflowLib::GetRotorLoads() {
-void ADI_C_GetRotorLoads() 
+void ADI_C_GetRotorLoads()
 }
 
 void seahowl::aero::AeroDynInflowLib::GetDiskAvgVel() {
-void ADI_C_GetDiskAvgVel() 
+void ADI_C_GetDiskAvgVel()
 }
 */
 
@@ -49,6 +51,7 @@ void ADI_C_Init(bool& ADinputFilePassed,
                 const char** IfWinputFileString_C,
                 int& IfWinputFileStringLength_C,
                 char* OutRootName_C,
+                char* OutVTKDir_C,
                 float& gravity_C,
                 float& defFldDens_C,
                 float& defKinVisc_C,
@@ -57,12 +60,10 @@ void ADI_C_Init(bool& ADinputFilePassed,
                 float& defPvap_C,
                 float& WtrDpth_C,
                 float& MSL2SWL_C,
-                int& AeroProjMod_C,
                 int& InterpOrder_C,
                 double& DT_C,
                 double& TMax_C,
                 bool& storeHHVel,
-                bool& TransposeDCM_in,
                 int& WrVTK_in,
                 int& WrVTK_inType,
                 double& WrVTK_dt,
@@ -70,16 +71,6 @@ void ADI_C_Init(bool& ADinputFilePassed,
                 float& VTKHubRad_in,
                 int& wrOuts_C,
                 double& DT_Outs_C,
-                float* HubPos_C,
-                double* HubOri_C,
-                float* NacPos_C,
-                double* NacOri_C,
-                int& NumBlades_C,
-                float* BldRootPos_C,
-                double* BldRootOri_C,
-                int& NumMeshPts_C,
-                float* InitMeshPos_C,
-                double* InitMeshOri_C,
                 int& NumChannels_C,
                 char* OutputChannelNames_C,
                 char* OutputChannelUnits_C,
