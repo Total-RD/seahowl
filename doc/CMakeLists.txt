@@ -3,7 +3,11 @@
 # ===================
 
 # Specify the path to the SPHINX installation
-set(SPHINX_EXECUTABLE "${CMAKE_HOME_DIRECTORY}/__env__/bin/sphinx-build")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(SPHINX_EXECUTABLE "${CMAKE_HOME_DIRECTORY}/__env__/bin/sphinx-build")
+else()
+  set(SPHINX_EXECUTABLE "${CMAKE_HOME_DIRECTORY}/__env__/Scripts/sphinx-build")
+endif()
 
 find_package(Sphinx)
 
@@ -28,14 +32,14 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         set(LAUNCH_SPHINX bash)
 
 else()
-        set(ACTIVATE_PY "${CMAKE_HOME_DIRECTORY}/__env__/Scripts/activate.bat")
+        set(ACTIVATE_PY "${CMAKE_HOME_DIRECTORY}/__env__/Scripts/activate")
         file(WRITE ${CMAKE_BINARY_DIR}/run_sphinx.bat
-        "export PYTHONPATH=${CMAKE_HOME_DIRECTORY}/build:$PYTHONPATH\n"
-        "${ACTIVATE_PY}\n"
-        "${SPHINX_EXECUTABLE} -a -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}\n"
+        "set PYTHONPATH=${CMAKE_HOME_DIRECTORY}/build/${CMAKE_BUILD_TYPE};%PYTHONPATH%\n"
+        "call ${ACTIVATE_PY}\n"
+        "call ${SPHINX_EXECUTABLE} -a -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}\n"
         )
         set(FILE_SPHINX ${CMAKE_BINARY_DIR}/run_sphinx.bat)
-        set(LAUNCH_SPHINX cmd)
+        set(LAUNCH_SPHINX cmd.exe /c)
 endif()
 
 # Make the script executable

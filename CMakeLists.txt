@@ -533,7 +533,15 @@ if (SEAHOWL_ENABLE_PYTHON)
     set_target_properties(pyseahowl PROPERTIES OUTPUT_NAME seahowl)
 
     execute_process(
-            COMMAND ${Python_EXECUTABLE} -m venv ${CMAKE_HOME_DIRECTORY}/__env__
+            COMMAND ${Python_EXECUTABLE} -m ensurepip
+            RESULT_VARIABLE result
+    )
+    execute_process(
+            COMMAND ${Python_EXECUTABLE} -m pip install virtualenv
+            RESULT_VARIABLE result
+    )
+    execute_process(
+            COMMAND ${Python_EXECUTABLE} -m virtualenv ${CMAKE_HOME_DIRECTORY}/__env__
             RESULT_VARIABLE result
     )
 
@@ -548,7 +556,7 @@ if (SEAHOWL_ENABLE_PYTHON)
             COMMAND bash -c "${ACTIVATE_PY} && ${LAUNCH_PIP}"
         )
     else()
-        set(ACTIVATE_PY "${CMAKE_HOME_DIRECTORY}/__env__/Scripts/activate.bat")
+        set(ACTIVATE_PY "${CMAKE_HOME_DIRECTORY}/__env__/Scripts/activate")
         execute_process(
             COMMAND cmd.exe /c "${ACTIVATE_PY} && ${LAUNCH_PIP}"
         )
