@@ -190,14 +190,7 @@ export PYTHONPATH=/path/to/your/seahowl/build/directory:$PYTHONPATH
 
 ### Documentation
 
-To build the Sphinx documentation, the following needs to be installed on your Python environment:
-
-```bash
-pip install sphinx sphinx-rtd-theme matplotlib myst-parser
-```
-
-Additionally, for the Doxygen part of the documentation:
-
+To build the Doxygen documentation, the following needs to be installed on your environment:
 ```bash
 sudo apt install doxygen graphviz
 ```
