@@ -536,31 +536,45 @@ if (SEAHOWL_ENABLE_PYTHON)
             COMMAND ${Python_EXECUTABLE} -m ensurepip
             RESULT_VARIABLE result
     )
+
+    if(result)
+        message(FATAL_ERROR "Failed to install pip")
+    endif()
+
     execute_process(
             COMMAND ${Python_EXECUTABLE} -m pip install virtualenv
             RESULT_VARIABLE result
     )
-    execute_process(
-            COMMAND ${Python_EXECUTABLE} -m virtualenv ${CMAKE_HOME_DIRECTORY}/__env__
-            RESULT_VARIABLE result
-    )
+
+    if(result)
+        message(FATAL_ERROR "Failed to install virtualenv")
+    endif()
+
+    if(NOT EXISTS ${CMAKE_HOME_DIRECTORY}/__env__/pyvenv.cfg)
+        execute_process(
+                COMMAND ${Python_EXECUTABLE} -m virtualenv ${CMAKE_HOME_DIRECTORY}/__env__
+                RESULT_VARIABLE result
+        )
+    endif()
 
     if(result)
         message(FATAL_ERROR "Failed to create virtual environment")
     endif()
 
-    set(LAUNCH_PIP "pip install sphinx sphinx-rtd-theme matplotlib myst-parser > ${CMAKE_HOME_DIRECTORY}/build/pip_install.log")
+    set(CMD_PIP "pip install sphinx sphinx-rtd-theme matplotlib myst-parser pre-commit")
+    set(CMD_PRECOMMIT "pre-commit install")
+
     if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         set(ACTIVATE_PY "source ${CMAKE_HOME_DIRECTORY}/__env__/bin/activate")
-        execute_process(
-            COMMAND bash -c "${ACTIVATE_PY} && ${LAUNCH_PIP}"
-        )
+        set(LAUNCH_PIP bash -c)
     else()
         set(ACTIVATE_PY "${CMAKE_HOME_DIRECTORY}/__env__/Scripts/activate")
-        execute_process(
-            COMMAND cmd.exe /c "${ACTIVATE_PY} && ${LAUNCH_PIP}"
-        )
+        set(LAUNCH_PIP cmd.exe /c)
     endif()
+
+    execute_process(
+            COMMAND ${LAUNCH_PIP} "${ACTIVATE_PY} && ${CMD_PIP} && ${CMD_PRECOMMIT}"
+        )
 
 endif (SEAHOWL_ENABLE_PYTHON)
 
