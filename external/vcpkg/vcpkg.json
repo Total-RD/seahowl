@@ -25,6 +25,10 @@
       "version>=": "1.15.2"
     },
     {
+      "name": "rosco",
+      "version>=": "2.9.5"
+    },
+    {
       "name": "chrono",
       "version>=": "8.0.0"
     },
