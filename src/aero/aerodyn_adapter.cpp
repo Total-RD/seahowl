@@ -60,15 +60,14 @@ void ADI_C_SetRotorMotion(int& iWT_c,
                           int& ErrStat_C,
                           char* ErrMsg_C);
 
-/*
-void seahowl::aero::AeroDynInflowLib::GetRotorLoads() {
-void ADI_C_GetRotorLoads()
-}
+void ADI_C_GetRotorLoads(int& iWT_C,
+                         int& NumMeshPts_C,
+                         float* MeshFrc_C,
+                         float* HHVel_C,
+                         int& ErrStat_C,
+                         char* ErrMsg_C);
 
-void seahowl::aero::AeroDynInflowLib::GetDiskAvgVel() {
-void ADI_C_GetDiskAvgVel()
-}
-*/
+void ADI_C_GetDiskAvgVel(int& iWT_C, float* DiskAvgVel_C, int& ErrStat_C, char* ErrMsg_C);
 
 void ADI_C_Init(bool& ADinputFilePassed,
                 const char** ADinputFileString_C,
@@ -147,7 +146,7 @@ struct seahowl::aero::AeroDynInflowLib {
     int NumTurbines = 1;
     int iWT = 1;
     int PointLoadOutput_in = 1;
-    int DebugLevel_in = 1;
+    int DebugLevel_in = 0;
     float* TurbOrigin;
     int* MeshPtToBladeNum;
 
@@ -186,6 +185,7 @@ struct seahowl::aero::AeroDynInflowLib {
 
     // flags
     bool storeHHVel = false;
+    float* HHVel;
     bool TransposeDCM = false;
 
     // VTK
@@ -284,12 +284,8 @@ void seahowl::aero::AeroDynAdapter::initialize(double time, double dt, seahowl::
 void seahowl::aero::AeroDynAdapter::compute_loads(double time, seahowl::aero::TurbineAero& turbine) {
     pImpl->set_time(time);
     update_turbine_variables(turbine);
-    if (time > 0.) {
-        pImpl->Update();
-        pImpl->Calcul();
-    } else {
-        pImpl->Calcul();
-    }
+    pImpl->Update();
+    pImpl->Calcul();
 }
 
 void seahowl::aero::AeroDynAdapter::end() {
@@ -450,6 +446,7 @@ void seahowl::aero::AeroDynInflowLib::initialize_arrays(int NumBlades, int NumMe
     //
     this->NumBlades = NumBlades;
     this->NumMeshPts = NumMeshPts;
+    HHVel = new float[3];
 
     // hub
     HubPos = new float[3];
@@ -536,7 +533,8 @@ void seahowl::aero::AeroDynInflowLib::Calcul() {
     ADI_C_CalcOutput(Time, OutputChannelValues, ErrStat, ErrMsg);
     CheckError();
 
-    // ADI_C_GetRotorLoads(...);
+    ADI_C_GetRotorLoads(iWT, NumMeshPts, MeshFrc, HHVel, ErrStat, ErrMsg);
+    CheckError();
 }
 
 void seahowl::aero::AeroDynInflowLib::Update() {
