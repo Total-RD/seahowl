@@ -29,7 +29,8 @@ struct AeroDynInflowLib;
 class AeroDynAdapter {
   public:
     std::unique_ptr<seahowl::aero::AeroDynInflowLib> pImpl;
-    std::vector<Vector3d> loads;
+    std::vector<Vector3d> forces_aerodyn;
+    std::vector<Vector3d> moments_aerodyn;
 
     AeroDynAdapter();
     AeroDynAdapter(std::string AerodynInfile, std::string InflowInfile);
@@ -66,7 +67,8 @@ class TurbineAeroDyn : public TurbineAero {
 
 class RotorAeroDyn : public RotorAeroBEMT {
   public:
-    float* loads_aerodyn;
+    std::vector<Vector3d> forces_aerodyn;
+    std::vector<Vector3d> moments_aerodyn;
 
     RotorAeroDyn(TowerAero& tower_ref);
     virtual void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;

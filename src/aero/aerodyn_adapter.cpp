@@ -286,6 +286,16 @@ void seahowl::aero::AeroDynAdapter::compute_loads(double time, seahowl::aero::Tu
     update_turbine_variables(turbine);
     pImpl->Update();
     pImpl->Calcul();
+
+    // get loads from AeroDyn
+    forces_aerodyn.clear();
+    moments_aerodyn.clear();
+    for (int ii = 0; ii < pImpl->NumMeshPts; ii++) {
+        forces_aerodyn.push_back(
+            Vector3d(pImpl->MeshFrc[ii * 6], pImpl->MeshFrc[ii * 6 + 1], pImpl->MeshFrc[ii * 6 + 2]));
+        moments_aerodyn.push_back(
+            Vector3d(pImpl->MeshFrc[ii * 6 + 3], pImpl->MeshFrc[ii * 6 + 4], pImpl->MeshFrc[ii * 6 + 5]));
+    }
 }
 
 void seahowl::aero::AeroDynAdapter::end() {
@@ -573,8 +583,27 @@ void seahowl::aero::TurbineAeroDyn::initialize(double time, double dt) {
 }
 
 void seahowl::aero::TurbineAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_model, double time) {
+    // call AeroDyn to compute loads
     aerodyn.compute_loads(time, *this);
-    dynamic_cast<seahowl::aero::RotorAeroDyn&>(*rna.rotor).loads_aerodyn = aerodyn.pImpl->MeshFrc;
+
+    // transfer loads from AeroDyn to SEAHOWL rotor
+    auto& rotor = dynamic_cast<seahowl::aero::RotorAeroDyn&>(*rna.rotor);
+    int count_node = 0;
+    for (auto& blade : rotor.blades) {
+        // first attach loads from AeroDyn to aero nodes
+        for (auto& node : blade->nodes) {
+            node.load = aerodyn.forces_aerodyn[count_node];
+            node.moment = aerodyn.moments_aerodyn[count_node];
+            count_node += 1;
+        }
+        // then update loads of aero elements
+        for (int ii = 0; ii < blade->elements.size(); ii++) {
+            blade->loads[ii] = blade->elements[ii].get_load();
+            blade->moments[ii] = blade->elements[ii].get_moment();
+        }
+    }
+    
+    // compute loads on rest of turbine
     rna.compute_fluid_loads(wind_model, time);
     if (foundation) {
         foundation->compute_fluid_loads(wind_model, time);
@@ -584,22 +613,5 @@ void seahowl::aero::TurbineAeroDyn::compute_fluid_loads(const seahowl::env::Flui
 seahowl::aero::RotorAeroDyn::RotorAeroDyn(TowerAero& tower_ref) : RotorAeroBEMT(tower_ref) {}
 
 void seahowl::aero::RotorAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_model, double time) {
-    // get loads from AeroDyn
-    int count_blade = -1;
-    for (auto& blade : blades) {
-        count_blade += 1;
-        int count_node = -1;
-        for (auto& node : blade->nodes) {
-            count_node += 1;
-            // store load in global frame
-            int pp = (count_blade * (blade->elements.size() + 1) + count_node) * 6;
-            node.load = Vector3d(loads_aerodyn[pp], loads_aerodyn[pp + 1], loads_aerodyn[pp + 2]);
-            node.moment = Vector3d(loads_aerodyn[pp + 3], loads_aerodyn[pp + 4], loads_aerodyn[pp + 5]);
-        }
-        // update loads of blade
-        for (int ii = 0; ii < blade->elements.size(); ii++) {
-            blade->loads[ii] = blade->elements[ii].get_load();
-            blade->moments[ii] = blade->elements[ii].get_moment();
-        }
-    }
+    // nothing happening here (see TurbineAeroDyn::compute_fluid_loads)
 }
