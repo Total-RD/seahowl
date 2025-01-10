@@ -4,8 +4,6 @@
 #pragma warning(disable : 4250)
 
 #include "seahowl/commons/numerics.h"
-#include <spdlog/spdlog.h>
-#include <unsupported/Eigen/EulerAngles>
 
 namespace seahowl {
 
