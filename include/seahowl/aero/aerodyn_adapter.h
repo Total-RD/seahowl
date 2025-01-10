@@ -15,17 +15,19 @@ class FluidModel;
 }  // namespace env
 }  // namespace seahowl
 
-/// <summary>
-/// Aerodyn module in OpenFAST
-/// </summary>
-
 namespace seahowl {
 
 namespace aero {
 
 // forward declare (defined in .cpp file)
+/**
+ * @brief Interface to AeroDyn library.
+ */
 struct AeroDynInflowLib;
 
+/**
+ * @brief Adapter to AeroDyn library.
+ */
 class AeroDynAdapter {
   public:
     std::unique_ptr<seahowl::aero::AeroDynInflowLib> pImpl;
@@ -49,6 +51,9 @@ class AeroDynAdapter {
     void update_mesh_motion(seahowl::aero::TurbineAero& turbine);
 };
 
+/**
+ * @brief Wind turbine with aero loads computed from AeroDyn.
+ */
 class TurbineAeroDyn : public TurbineAero {
   public:
     /** @brief AeroDyn adapter. */
@@ -65,11 +70,11 @@ class TurbineAeroDyn : public TurbineAero {
     void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
 };
 
+/**
+ * @brief Rotor with aero loads computed from AeroDyn.
+ */
 class RotorAeroDyn : public RotorAeroBEMT {
   public:
-    std::vector<Vector3d> forces_aerodyn;
-    std::vector<Vector3d> moments_aerodyn;
-
     RotorAeroDyn(TowerAero& tower_ref);
     virtual void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
 };
