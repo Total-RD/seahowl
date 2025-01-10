@@ -550,9 +550,9 @@ if (SEAHOWL_ENABLE_PYTHON)
         message(FATAL_ERROR "Failed to install virtualenv")
     endif()
 
-    if(NOT EXISTS ${CMAKE_HOME_DIRECTORY}/__env__/pyvenv.cfg)
+    if(NOT EXISTS ${CMAKE_BINARY_DIR}/__env__/pyvenv.cfg)
         execute_process(
-                COMMAND ${Python_EXECUTABLE} -m virtualenv ${CMAKE_HOME_DIRECTORY}/__env__
+                COMMAND ${Python_EXECUTABLE} -m virtualenv ${CMAKE_BINARY_DIR}/__env__
                 RESULT_VARIABLE result
         )
     endif()
@@ -565,10 +565,10 @@ if (SEAHOWL_ENABLE_PYTHON)
     set(CMD_PRECOMMIT "pre-commit install")
 
     if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-        set(ACTIVATE_PY "source ${CMAKE_HOME_DIRECTORY}/__env__/bin/activate")
+        set(ACTIVATE_PY "source ${CMAKE_BINARY_DIR}/__env__/bin/activate")
         set(LAUNCH_PIP bash -c)
     else()
-        set(ACTIVATE_PY "${CMAKE_HOME_DIRECTORY}/__env__/Scripts/activate")
+        set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/__env__/Scripts/activate")
         set(LAUNCH_PIP cmd.exe /c)
     endif()
 
@@ -582,9 +582,7 @@ endif (SEAHOWL_ENABLE_PYTHON)
 # ====================
 # DOCUMENTATION
 # ====================
-if(SEAHOWL_ENABLE_DOC)
-    add_subdirectory(doc)
-endif(SEAHOWL_ENABLE_DOC)
+add_subdirectory(doc)
 
 # ===========================
 # Copy the DISCON library

@@ -4,9 +4,9 @@
 
 # Specify the path to the SPHINX installation
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(SPHINX_EXECUTABLE "${CMAKE_HOME_DIRECTORY}/__env__/bin/sphinx-build")
+  set(SPHINX_EXECUTABLE "${CMAKE_BINARY_DIR}/__env__/bin/sphinx-build")
 else()
-  set(SPHINX_EXECUTABLE "${CMAKE_HOME_DIRECTORY}/__env__/Scripts/sphinx-build")
+  set(SPHINX_EXECUTABLE "${CMAKE_BINARY_DIR}/__env__/Scripts/sphinx-build")
 endif()
 
 find_package(Sphinx)
@@ -21,10 +21,10 @@ set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/user)
 set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-        set(ACTIVATE_PY "${CMAKE_HOME_DIRECTORY}/__env__/bin/activate")
+        set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/__env__/bin/activate")
         file(WRITE ${CMAKE_BINARY_DIR}/run_sphinx.sh
         "#!/bin/bash\n"
-        "export PYTHONPATH=${CMAKE_HOME_DIRECTORY}/build:$PYTHONPATH\n"
+        "export PYTHONPATH=${CMAKE_BINARY_DIR}:$PYTHONPATH\n"
         "source ${ACTIVATE_PY}\n"
         "${SPHINX_EXECUTABLE} -a -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}\n"
         )
@@ -32,9 +32,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         set(LAUNCH_SPHINX bash)
 
 else()
-        set(ACTIVATE_PY "${CMAKE_HOME_DIRECTORY}/__env__/Scripts/activate")
+        set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/__env__/Scripts/activate")
         file(WRITE ${CMAKE_BINARY_DIR}/run_sphinx.bat
-        "set PYTHONPATH=${CMAKE_HOME_DIRECTORY}/build/${CMAKE_BUILD_TYPE};%PYTHONPATH%\n"
+        "set PYTHONPATH=${CMAKE_BINARY_DIR};%PYTHONPATH%\n"
         "call ${ACTIVATE_PY}\n"
         "call ${SPHINX_EXECUTABLE} -a -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}\n"
         )
@@ -80,20 +80,24 @@ find_package(Doxygen
     )
 
     install(
-      DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/doc/html
+      DIRECTORY ${CMAKE_BINARY_DIR}/doc/html
       DESTINATION doxygen
     )
   else (DOXYGEN_FOUND)
     message("Doxygen needs to be install. You can use `sudo apt install doxygen` on ubuntu")
   endif (DOXYGEN_FOUND)
 
+if(SEAHOWL_ENABLE_DOC)
+  add_custom_target(docs ALL DEPENDS Sphinx doxygen)
+else(SEAHOWL_ENABLE_DOC)
+  add_custom_target(docs DEPENDS Sphinx doxygen)
+endif(SEAHOWL_ENABLE_DOC)
 
-add_custom_target(documentation ALL DEPENDS Sphinx doxygen)
-add_dependencies(documentation pyseahowl)
+add_dependencies(docs pyseahowl)
 
 # For MSVC IDE
 set_target_properties(
-        Sphinx documentation doxygen
+    Sphinx docs doxygen
 
 		PROPERTIES
 
