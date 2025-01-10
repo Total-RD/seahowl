@@ -62,11 +62,13 @@ option(SEAHOWL_ENABLE_TESTS "Enable tests" OFF)
 option(SEAHOWL_ENABLE_DOC "Generate html documentation" OFF)
 option(SEAHOWL_ENABLE_BUILD "Build library and drivers" ON)
 option(SEAHOWL_ENABLE_PYTHON "Enable python binding" OFF)
+option(SEAHOWL_ENABLE_VIRTUALENV "Enable Python virtual env" OFF)
 option(SEAHOWL_ENABLE_EXAMPLES "Enable examples" ON)
 option(SEAHOWL_ENABLE_VTK "Enable VTK Library for output" OFF)
 option(SEAHOWL_ENABLE_AERODYN "Enable AeroDyn module" OFF)
 option(SEAHOWL_ENABLE_INFLOWWIND "Enable InflowWind module" OFF)
 option(SEAHOWL_ENABLE_HYDROCHRONO "Enable HydroChrono library" OFF)
+
 
 # =======================
 # External libraries
@@ -528,53 +530,56 @@ if (SEAHOWL_ENABLE_PYTHON)
         ${PYSEAHOWL_DIR}/pyseahowl_io.cpp
     )
 	target_compile_features(pyseahowl PRIVATE cxx_std_17)
-    target_link_libraries(pyseahowl PRIVATE seahowl_core)
+    target_link_libraries(pyseahowl PRIVATE seahowl_core pybind11::embed)
     target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
     set_target_properties(pyseahowl PROPERTIES OUTPUT_NAME seahowl)
 
-    execute_process(
-            COMMAND ${Python_EXECUTABLE} -m ensurepip
-            RESULT_VARIABLE result
-    )
 
-    if(result)
-        message(FATAL_ERROR "Failed to install pip")
-    endif()
-
-    execute_process(
-            COMMAND ${Python_EXECUTABLE} -m pip install virtualenv
-            RESULT_VARIABLE result
-    )
-
-    if(result)
-        message(FATAL_ERROR "Failed to install virtualenv")
-    endif()
-
-    if(NOT EXISTS ${CMAKE_BINARY_DIR}/__env__/pyvenv.cfg)
+    IF(SEAHOWL_ENABLE_VIRTUALENV)
         execute_process(
-                COMMAND ${Python_EXECUTABLE} -m virtualenv ${CMAKE_BINARY_DIR}/__env__
+                COMMAND ${Python_EXECUTABLE} -m ensurepip
                 RESULT_VARIABLE result
         )
-    endif()
 
-    if(result)
-        message(FATAL_ERROR "Failed to create virtual environment")
-    endif()
+        if(result)
+            message(FATAL_ERROR "Failed to install pip")
+        endif()
 
-    set(CMD_PIP "pip install sphinx sphinx-rtd-theme matplotlib myst-parser pre-commit")
-    set(CMD_PRECOMMIT "pre-commit install")
-
-    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-        set(ACTIVATE_PY "source ${CMAKE_BINARY_DIR}/__env__/bin/activate")
-        set(LAUNCH_PIP bash -c)
-    else()
-        set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/__env__/Scripts/activate")
-        set(LAUNCH_PIP cmd.exe /c)
-    endif()
-
-    execute_process(
-            COMMAND ${LAUNCH_PIP} "${ACTIVATE_PY} && ${CMD_PIP} && ${CMD_PRECOMMIT}"
+        execute_process(
+                COMMAND ${Python_EXECUTABLE} -m pip install virtualenv
+                RESULT_VARIABLE result
         )
+
+        if(result)
+            message(FATAL_ERROR "Failed to install virtualenv")
+        endif()
+
+        if(NOT EXISTS ${CMAKE_BINARY_DIR}/__env__/pyvenv.cfg)
+            execute_process(
+                    COMMAND ${Python_EXECUTABLE} -m virtualenv ${CMAKE_BINARY_DIR}/__env__
+                    RESULT_VARIABLE result
+            )
+        endif()
+
+        if(result)
+            message(FATAL_ERROR "Failed to create virtual environment")
+        endif()
+
+        set(CMD_PIP "pip install sphinx sphinx-rtd-theme matplotlib myst-parser pre-commit")
+        set(CMD_PRECOMMIT "pre-commit install")
+
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+            set(ACTIVATE_PY "source ${CMAKE_BINARY_DIR}/__env__/bin/activate")
+            set(LAUNCH_PIP bash -c)
+        else()
+            set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/__env__/Scripts/activate")
+            set(LAUNCH_PIP cmd.exe /c)
+        endif()
+
+        execute_process(
+                COMMAND ${LAUNCH_PIP} "${ACTIVATE_PY} && ${CMD_PIP} && ${CMD_PRECOMMIT}"
+            )
+    endif(SEAHOWL_ENABLE_VIRTUALENV)
 
 endif (SEAHOWL_ENABLE_PYTHON)
 
