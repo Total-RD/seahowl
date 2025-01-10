@@ -34,7 +34,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 else()
         set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/__env__/Scripts/activate")
         file(WRITE ${CMAKE_BINARY_DIR}/run_sphinx.bat
-        "set PYTHONPATH=${CMAKE_BINARY_DIR};%PYTHONPATH%\n"
+        "set PYTHONPATH=${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE};%PYTHONPATH%\n"
         "call ${ACTIVATE_PY}\n"
         "call ${SPHINX_EXECUTABLE} -a -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}\n"
         )
