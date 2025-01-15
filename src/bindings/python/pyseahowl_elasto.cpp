@@ -50,6 +50,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("evaluate_force_torque", &seahowl::elasto::ElementElasto::evaluate_force_torque)
         .def("get_force", &seahowl::elasto::ElementElasto::get_force)
         .def("get_torque", &seahowl::elasto::ElementElasto::get_torque)
+        .def("get_position", &seahowl::elasto::ElementElasto::get_position)
+        .def("get_rotation", &seahowl::elasto::ElementElasto::get_rotation)
         .def("get_mass", &seahowl::elasto::ElementElasto::get_mass);
     py::class_<seahowl::elasto::ElementBladeElasto, std::shared_ptr<seahowl::elasto::ElementBladeElasto>,
                seahowl::elasto::ElementElasto>(m_elasto, "ElementBladeElasto")
