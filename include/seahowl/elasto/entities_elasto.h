@@ -169,6 +169,30 @@ class ElementElasto {
     virtual void evaluate_force_torque(double eta, Vector3d& force, Vector3d& torque) = 0;
 
     /**
+     * @brief Returns position of point within element.
+     *
+     * param[in] eta Normalized abscissa along element within range [-1, +1].
+     */
+    Vector3d get_position(double eta) {
+        auto position = Vector3d(0.0, 0.0, 0.0);
+        auto rotation = Quaternion(0.0, 0.0, 0.0, 0.0);
+        evaluate_position_rotation(eta, position, rotation);
+        return position;
+    };
+
+    /**
+     * @brief Returns rotation of point within element.
+     *
+     * param[in] eta Normalized abscissa along element within range [-1, +1].
+     */
+    Quaternion get_rotation(double eta) {
+        auto position = Vector3d(0.0, 0.0, 0.0);
+        auto rotation = Quaternion(0.0, 0.0, 0.0, 0.0);
+        evaluate_position_rotation(eta, position, rotation);
+        return rotation;
+    };
+
+    /**
      * @brief Returns force of point within element.
      *
      * param[in] eta Normalized abscissa along element within range [-1, +1].
