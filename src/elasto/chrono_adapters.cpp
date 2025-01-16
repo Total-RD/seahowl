@@ -17,6 +17,7 @@
 #include <chrono/fea/ChMesh.h>
 #include <chrono/physics/ChSystemSMC.h>
 #include <chrono/solver/ChDirectSolverLS.h>
+#include <chrono/physics/ChLinkMotorRotationAngle.h>
 
 #include <vector>
 #include <memory>
@@ -1066,6 +1067,61 @@ Vector3d LinkChronoCable::get_reaction_torque() const {
     return ch2vec(chobj->Get_react_torque());
 }
 
+class ChFunctionArray : public chrono::ChFunction {
+  public:
+    std::vector<double> time_array{0.0, 0.0};
+    std::vector<double> values_array{0.0, 0.0};
+
+    virtual ChFunctionArray* Clone() const override { return new ChFunctionArray(*this); }
+
+    virtual double Get_y(double x) const override {
+        if (x >= time_array.back()) {
+            return values_array.back();
+        } else if (x <= time_array.front()) {
+            return values_array.front();
+        } else {
+            for (int ii = 0; ii < time_array.size() - 1; ii++) {
+                if (time_array[ii] <= x && time_array[ii + 1] >= x) {
+                    auto t1 = time_array[ii];
+                    auto v1 = values_array[ii];
+                    auto t2 = time_array[ii + 1];
+                    auto v2 = values_array[ii + 1];
+                    return (v1 + (v2 - v1) * (x - t1) / (t2 - t1));
+                }
+            }
+            // throw error if value not found
+            throw std::runtime_error("Cannot find value from time array in ChFunctionArray.");
+        }
+    }
+};
+
+ActuatorRotationChrono::ActuatorRotationChrono() {
+    chobj = std::make_shared<chrono::ChLinkMotorRotationAngle>();
+    chfunc = std::make_shared<ChFunctionArray>();
+    chobj->SetMotorFunction(chfunc);
+}
+
+void ActuatorRotationChrono::initialize(const Entity& entity1, const Entity& entity2, const Vector3d& rotation_axis) {
+    auto body1 = dynamic_cast<const BodyElastoChrono&>(entity1);
+    auto body2 = dynamic_cast<const BodyElastoChrono&>(entity2);
+
+    // create a frame that has its Z axis aligned to rotation_axis
+    auto chaxis = chrono::Vector(rotation_axis[0], rotation_axis[1], rotation_axis[2]).GetNormalized();
+    auto chzero = chrono::Vector(0.0, 0.0, 0.0);
+    // chaxis relative to body1
+    auto rotation_axis_rel1 = body2.get_rotation().inverse() * body1.get_rotation() * rotation_axis;
+    auto chaxis_rel1 =
+        chrono::Vector(rotation_axis_rel1[0], rotation_axis_rel1[1], rotation_axis_rel1[2]).GetNormalized();
+
+    chobj->Initialize(body1.chobj, body2.chobj, true, chzero, chzero, chaxis, chaxis);
+}
+
+void ActuatorRotationChrono::set_timeseries(const std::vector<double>& time_array,
+                                            const std::vector<double>& values_array) {
+    std::dynamic_pointer_cast<ChFunctionArray>(chfunc)->time_array = time_array;
+    std::dynamic_pointer_cast<ChFunctionArray>(chfunc)->values_array = values_array;
+}
+
 LinkMatrixStiffnessDampingChrono::LinkMatrixStiffnessDampingChrono() {
     // empty stiffness and damping matrices
     stiffness_matrix = Eigen::Matrix<double, 6, 6>::Zero();
@@ -1267,4 +1323,8 @@ void SystemElastoChrono::add(LinkMatrixStiffnessDamping& link) {
 
 void SystemElastoChrono::add(SpringLinear& spring) {
     chobj->Add(dynamic_cast<SpringLinearChrono&>(spring).chobj);
+}
+
+void SystemElastoChrono::add(ActuatorRotation& actuator) {
+    chobj->Add(dynamic_cast<ActuatorRotationChrono&>(actuator).chobj);
 }

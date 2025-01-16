@@ -31,11 +31,13 @@ class ChLinkBase;
 class ChLinkPointPoint;
 class ChLinkPointFrame;
 class ChLinkMateGeneric;
+class ChLinkMotorRotationAngle;
 class ChLinkTSDA;
 class ChLoadBodyBodyBushingGeneric;
 class ChSystem;
 class ChLoadLocal66;
 class ChLoadContainer;
+class ChFunction;
 namespace fea {
 class ChNodeFEAbase;
 class ChNodeFEAxyzrot;
@@ -274,7 +276,7 @@ class SpringLinearChrono : public SpringLinear {
 /**
  * @brief Chrono link class.
  */
-class LinkChrono : public Link, public LinkChronoBase {
+class LinkChrono : public virtual Link, public LinkChronoBase {
   public:
     /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::ChLinkMateGeneric> chobj;
@@ -318,6 +320,20 @@ class LinkMatrixStiffnessDampingChrono : public LinkMatrixStiffnessDamping {
     void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& damping_matrix) override;
 };
 
+class ActuatorRotationChrono : public virtual ActuatorRotation {
+  public:
+    /** @brief Pointer to underlying Chrono object. */
+    std::shared_ptr<chrono::ChLinkMotorRotationAngle> chobj;
+
+    ActuatorRotationChrono();
+    void initialize(const Entity& entity1, const Entity& entity2, const Vector3d& rotation_axis) override;
+    void set_timeseries(const std::vector<double>& time_array, const std::vector<double>& values_array) override;
+
+  private:
+    /** @brief Function piloting the actuator. */
+    std::shared_ptr<chrono::ChFunction> chfunc;
+};
+
 /**
  * @brief Chrono elasto mesh class.
  */
@@ -355,6 +371,7 @@ class SystemElastoChrono : public SystemElasto {
     virtual void add(Link& link) override;
     virtual void add(LinkMatrixStiffnessDamping& link) override;
     virtual void add(SpringLinear& spring) override;
+    virtual void add(ActuatorRotation& actuator) override;
 };
 
 }  // namespace elasto

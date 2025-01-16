@@ -49,13 +49,28 @@ void Turbine::apply_control(double time, double dt) {
             // individual pitch only works with rotors from 1 to 3 blades
             for (int idx_blade = 0; idx_blade < rna.blades.size(); idx_blade++) {
                 auto& blade = *rna.blades[idx_blade];
-                auto blade_pitch_increment = controller->get_pitch_blade(idx_blade) - blade.elasto.get_pitch();
-                blade.apply_pitch_increment(blade_pitch_increment);
+                if (blade.elasto.has_actuator_dynamics) {
+                    std::vector<double> time_array{time, time + dt};
+                    std::vector<double> angle_array{blade.elasto.get_pitch(), controller->get_pitch_blade(idx_blade)};
+                    blade.elasto.actuator_pitch->set_timeseries(time_array, angle_array);
+                } else {
+                    auto blade_pitch_increment = controller->get_pitch_blade(idx_blade) - blade.elasto.get_pitch();
+                    blade.apply_pitch_increment(blade_pitch_increment);
+                }
             }
         } else {
             // collective pitch for more than 3 blades or 0 blade (e.g. actuator disk)
-            auto collective_pitch_increment = controller->get_collective_pitch() - rna.elasto.rotor->pitch_collective;
-            rna.elasto.rotor->apply_collective_pitch_increment(collective_pitch_increment);
+            for (auto& blade : rna.blades) {
+                if (blade->elasto.has_actuator_dynamics) {
+                    std::vector<double> time_array{time, time + dt};
+                    std::vector<double> angle_array{blade->elasto.get_pitch(), controller->get_collective_pitch()};
+                    blade->elasto.actuator_pitch->set_timeseries(time_array, angle_array);
+                } else {
+                    auto collective_pitch_increment =
+                        controller->get_collective_pitch() - rna.elasto.rotor->pitch_collective;
+                    rna.elasto.rotor->apply_collective_pitch_increment(collective_pitch_increment);
+                }
+            }
         }
         // store collective pitch value from controller for information purposes
         // (even if pitch was applied individually to blades)

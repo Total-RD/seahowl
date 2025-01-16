@@ -20,6 +20,10 @@ class BladeElasto : public virtual ComponentElasto {
     std::unique_ptr<Link> link_root;
     /** @brief Link between blade root and mounting point. */
     std::unique_ptr<Link> link_root_mount;
+    /** @brief Actuator for pitch dynamics. */
+    std::unique_ptr<ActuatorRotation> actuator_pitch;
+    /** @brief Whether actuator dynamics (motor) is used for pitching. */
+    bool has_actuator_dynamics = true;
     /** @brief Link between blade and body (usually hub). */
     std::unique_ptr<Link> link_blade;
     /** @brief Initial pitch of the blade (in radians). */
@@ -77,7 +81,7 @@ class BladeElasto : public virtual ComponentElasto {
 
     virtual void assemble_this(SystemElasto& system) override;
 
-    virtual void update_root_constraint() = 0;
+    void update_root_constraint();
 
     void reset_bodies();
 };
@@ -127,8 +131,6 @@ class BladeElastoFEA : public BladeElasto, public ComponentElastoFEA {
      * @brief Builds the blade with FPM Timoshenko elements (6x6 mass and stiffness matrices).
      */
     void build_elements_tapered_timoshenko_fpm();
-
-    virtual void update_root_constraint() override;
 };
 
 /**
@@ -163,8 +165,6 @@ class BladeElastoRigid : public BladeElasto {
     std::unique_ptr<BodyElastoChrono> body_cog;
 
     virtual void assemble_this(SystemElasto& system) override;
-
-    virtual void update_root_constraint() override;
 };
 
 }  // namespace elasto

@@ -433,6 +433,29 @@ class LinkMatrixStiffnessDamping {
 };
 
 /**
+ * @brief Actuator class for imposing rotation between two bodies.
+ */
+class ActuatorRotation {
+  public:
+    /**
+     * @brief Initialization of actuator.
+     *
+     * @param[in] entity1 First entity (body) to link with actuator.
+     * @param[in] entity2 Second entity (body) to link with actuator.
+     * @param[in] rotation_axis Rotation axis of actuator, relative to body2 coordinate system.
+     */
+    virtual void initialize(const Entity& entity1, const Entity& entity2, const Vector3d& rotation_axis) = 0;
+
+    /**
+     * @brief Sets timeseries for actuator.
+     *
+     * @param[in] time_array Time array.
+     * @param[in] values_array Values array (angles).
+     */
+    virtual void set_timeseries(const std::vector<double>& time_array, const std::vector<double>& values_array) = 0;
+};
+
+/**
  * @brief Elasto mesh base class.
  */
 class MeshElasto {

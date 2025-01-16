@@ -113,6 +113,13 @@ class SystemElasto {
     virtual void add(SpringLinear& spring) = 0;
 
     /**
+     * @brief Adds actuator to system.
+     *
+     * @param[in] actuator Actuator to add to system.
+     */
+    virtual void add(ActuatorRotation& actuator) = 0;
+
+    /**
      * @brief Adds component to system.
      *
      * @param[in] component Component to add to system.

@@ -19,6 +19,7 @@ BladeElasto::BladeElasto() {
     link_root->set_constraints(true, true, true, true, true, true);
     link_root_mount = std::make_unique<LinkChrono>();
     link_root_mount->set_constraints(true, true, true, true, true, true);
+    actuator_pitch = std::make_unique<ActuatorRotationChrono>();
     link_blade = std::make_unique<LinkChrono>();
     link_blade->set_constraints(true, true, true, true, true, true);
     //
@@ -55,7 +56,11 @@ void BladeElasto::assemble_this(SystemElasto& system) {
     system.add(*(body_root.get()));
     system.add(*(link_root.get()));
     system.add(*(body_mount.get()));
-    system.add(*(link_root_mount.get()));
+    if (has_actuator_dynamics) {
+        system.add(*(actuator_pitch.get()));
+    } else {
+        system.add(*(link_root_mount));
+    }
     if (is_mounted) {
         system.add(*(link_blade.get()));
     }
@@ -99,6 +104,15 @@ seahowl::Vector3d BladeElasto::get_blade_root_force() const {
     return link_root->get_reaction_force() + body_root->get_force(true);
 }
 
+void BladeElasto::update_root_constraint() {
+    // attach COG body to root body
+    link_root_mount->initialize(*body_root, *body_mount);
+    // attach root body to mounting point
+    actuator_pitch->initialize(*body_root, *body_mount, Vector3d(-1.0, 0.0, 0.0));
+    // set initial pitch
+    actuator_pitch->set_timeseries(std::vector<double>{0.0, 0.0}, std::vector<double>{get_pitch(), get_pitch()});
+}
+
 BladeElastoFEA::BladeElastoFEA() {}
 
 void BladeElastoFEA::assemble_this(SystemElasto& system) {
@@ -123,13 +137,6 @@ void BladeElastoFEA::translate(const Vector3d& translation_vector) const {
 double BladeElastoFEA::get_mass() const {
     // adding body_root for consistency even if mass is supposed to be zero.
     return ComponentElastoFEA::get_mass() + BladeElasto::get_mass();
-}
-
-void BladeElastoFEA::update_root_constraint() {
-    // attach node to root body
-    link_root->initialize(*nodes[0], *body_root);
-    // attach root body to mounting point
-    link_root_mount->initialize(*body_root, *body_mount);
 }
 
 void BladeElastoFEA::presetup(double fraction) {
@@ -202,9 +209,11 @@ void BladeElastoFEA::build() {
         build_elements_tapered_timoshenko();
     }
 
+    // attach node to root body
+    link_root->initialize(*nodes[0], *body_root);
+
     // apply initial pitch
     apply_pitch_increment(pitch0);
-
     update_root_constraint();
 };
 
@@ -303,10 +312,11 @@ void BladeElastoRigid::build() {
     body_cog->set_inertia_diagonal(Vector3d(0., 0., 0.));
     body_root->set_inertia_diagonal(Vector3d(inertia_total, inertia_total, 0.0));
 
+    // attach COG body to root body
+    link_root->initialize(*body_cog, *body_root);
+
     // apply initial pitch
     apply_pitch_increment(pitch0);
-
-    // link root and cog
     update_root_constraint();
 }
 
@@ -331,13 +341,6 @@ void BladeElastoRigid::translate(const Vector3d& translation_vector) const {
 
 double BladeElastoRigid::get_mass() const {
     return BladeElasto::get_mass() + body_cog->get_mass();
-}
-
-void BladeElastoRigid::update_root_constraint() {
-    // attach COG body to root body
-    link_root->initialize(*body_cog, *body_root);
-    // attach root body to mounting point
-    link_root_mount->initialize(*body_root, *body_mount);
 }
 
 seahowl::EntityDynamicEigen BladeElastoRigid::get_entity_along_blade(double eta, int element_index) const {
