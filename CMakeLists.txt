@@ -603,3 +603,53 @@ set(DESTINATION_PATH "${SEAHOWL_DATADIR}/controller")
 
 file(COPY ${LIBRARY_PATH} DESTINATION ${DESTINATION_PATH})
 file(RENAME "${DESTINATION_PATH}/${LIB_FILE_NAME}" "${DESTINATION_PATH}/libdiscon.so")
+
+
+# Configuration de l'installation
+install(TARGETS seahowl_driver
+        RUNTIME DESTINATION bin)
+
+#install(DIRECTORY ${CMAKE_BINARY_DIR}/doc/html
+#        DESTINATION doc/doxygen)
+
+# Installation des fichiers de documentation
+#install(DIRECTORY ${CMAKE_BINARY_DIR}/doc/user
+#        DESTINATION doc/sphinx)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set(FILTER "*.so")
+else()
+    set(FILTER "*.dll")
+endif()
+
+file(GLOB LIST_DLL "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${FILTER}")
+file(GLOB LIST_PYD "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/*.pyd")
+list(APPEND LIST_DLL ${LIST_PYD})
+
+install(FILES ${LIST_DLL}
+        DESTINATION bin)
+
+install(DIRECTORY ${SEAHOWL_DATADIR}
+        DESTINATION data)
+
+install(DIRECTORY ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/python3
+        DESTINATION bin)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+        set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.sh)
+        file(WRITE ${FILE_INITPY}
+        "#!/bin/bash\n"
+        "SCRIPT_DIR=$(dirname "$(realpath "$0")")\n"
+        "$SCRIPT_DIR/python3/python3 -m virtualenv __env__ \n"
+        )
+else()
+        set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.bat)
+        file(WRITE ${FILE_INITPY}
+        "set SCRIPT_DIR=%~dp0\n"
+        "%SCRIPT_DIR%python3/python.exe -m virtualenv __env__ \n"
+        )
+endif()
+
+install(FILES ${FILE_INITPY}
+        DESTINATION bin)

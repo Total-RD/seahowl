@@ -79,10 +79,6 @@ find_package(Doxygen
       VERBATIM
     )
 
-    install(
-      DIRECTORY ${CMAKE_BINARY_DIR}/doc/html
-      DESTINATION doxygen
-    )
   else (DOXYGEN_FOUND)
     message("Doxygen needs to be install. You can use `sudo apt install doxygen` on ubuntu")
   endif (DOXYGEN_FOUND)
