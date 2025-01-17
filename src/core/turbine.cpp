@@ -45,18 +45,21 @@ void Turbine::apply_control(double time, double dt) {
 
     // apply pitch from controller
     if (controller->has_pitch_control) {
-        auto collective_pitch_increment = controller->get_collective_pitch() - rna.elasto.rotor->pitch_collective;
-        rna.elasto.rotor->apply_collective_pitch_increment(collective_pitch_increment);
-        if (rna.blades.size() <= 3) {
-            // individual pitch only works with up to 3 blades
+        if (rna.blades.size() >= 1 && rna.blades.size() <= 3) {
+            // individual pitch only works with rotors from 1 to 3 blades
             for (int idx_blade = 0; idx_blade < rna.blades.size(); idx_blade++) {
                 auto& blade = *rna.blades[idx_blade];
-                // individual pitch increment difference with collective pitch increment that was already applied
-                auto blade_pitch_increment =
-                    (controller->get_pitch_blade(idx_blade) - collective_pitch_increment) - blade.elasto.get_pitch();
+                auto blade_pitch_increment = controller->get_pitch_blade(idx_blade) - blade.elasto.get_pitch();
                 blade.apply_pitch_increment(blade_pitch_increment);
             }
+        } else {
+            // collective pitch for more than 3 blades or 0 blade (e.g. actuator disk)
+            auto collective_pitch_increment = controller->get_collective_pitch() - rna.elasto.rotor->pitch_collective;
+            rna.elasto.rotor->apply_collective_pitch_increment(collective_pitch_increment);
         }
+        // store collective pitch value from controller for information purposes
+        // (even if pitch was applied individually to blades)
+        rna.elasto.rotor->pitch_collective = controller->get_collective_pitch();
     }
 
     // apply yaw control from controller
