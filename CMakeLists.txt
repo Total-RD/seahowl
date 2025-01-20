@@ -604,43 +604,48 @@ set(DESTINATION_PATH "${SEAHOWL_DATADIR}/controller")
 file(COPY ${LIBRARY_PATH} DESTINATION ${DESTINATION_PATH})
 file(RENAME "${DESTINATION_PATH}/${LIB_FILE_NAME}" "${DESTINATION_PATH}/libdiscon.so")
 
-
-# Configuration de l'installation
+# ===========================
+# INSTALL
+# ===========================
 install(TARGETS seahowl_driver
         RUNTIME DESTINATION bin)
 
-#install(DIRECTORY ${CMAKE_BINARY_DIR}/doc/html
-#        DESTINATION doc/doxygen)
+set_target_properties(seahowl_driver PROPERTIES
+                      INSTALL_RPATH "$ORIGIN"
+                      BUILD_RPATH "$ORIGIN"
+                      )
+install(TARGETS pyseahowl
+        LIBRARY DESTINATION bin)
 
-# Installation des fichiers de documentation
-#install(DIRECTORY ${CMAKE_BINARY_DIR}/doc/user
-#        DESTINATION doc/sphinx)
+set_target_properties(pyseahowl PROPERTIES
+                      INSTALL_RPATH "$ORIGIN"
+                      BUILD_RPATH "$ORIGIN"
+                      )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(FILTER "*.so")
+    INSTALL(CODE "
+            include(BundleUtilities)
+            fixup_bundle(\"${CMAKE_INSTALL_PREFIX}/bin/seahowl_driver\" \"\" \"${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib\")
+            " DESTINATION bin COMPONENT Runtime)
 else()
-    set(FILTER "*.dll")
+    file(GLOB LIST_DLL "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/*.dll")
+    install(FILES ${LIST_DLL}
+            DESTINATION bin)
 endif()
-
-file(GLOB LIST_DLL "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${FILTER}")
-file(GLOB LIST_PYD "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/*.pyd")
-list(APPEND LIST_DLL ${LIST_PYD})
-
-install(FILES ${LIST_DLL}
-        DESTINATION bin)
 
 install(DIRECTORY ${SEAHOWL_DATADIR}
         DESTINATION data)
 
 install(DIRECTORY ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/python3
-        DESTINATION bin)
+        DESTINATION bin
+        USE_SOURCE_PERMISSIONS)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
         set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.sh)
         file(WRITE ${FILE_INITPY}
         "#!/bin/bash\n"
-        "SCRIPT_DIR=$(dirname "$(realpath "$0")")\n"
+        "SCRIPT_DIR=$(dirname \"$(realpath \"$0\")\")\n"
         "$SCRIPT_DIR/python3/python3 -m virtualenv __env__ \n"
         )
 else()
@@ -651,5 +656,8 @@ else()
         )
 endif()
 
+file(CHMOD ${FILE_INITPY} FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
 install(FILES ${FILE_INITPY}
-        DESTINATION bin)
+        DESTINATION bin
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
