@@ -22,6 +22,8 @@ This is the recommended approach for building and installing SEAHOWL.
 
 ### Installing vcpkg
 
+#### Linux
+
 First clone the vcpkg repository where you want, and then set it up as follows:
 
 ```bash
@@ -37,10 +39,25 @@ For convenience, you can add the environment variables for vcpkg to your `.bashr
 echo "export VCPKG_ROOT=$(pwd)" >> ~/.bashrc
 ```
 
-Note that this assumes a Linux environment. If you have issues with installing vcpkg, see [here](external/vcpkg/README.md) or refer to the official vcpkg documentation for setting it up on your environment.
+If you have issues with installing vcpkg, see [here](external/vcpkg/README.md) or refer to the official vcpkg documentation for setting it up on your environment.
 
+#### Windows
+
+First clone the vcpkg repository where you want, and then set it up as follows:
+
+```bash
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.bat
+set VCPKG_ROOT=$(pwd)
+```
+For convenience, you can add the environment variables for vcpkg to your user environment variables so it will be found when you open new terminals.
+
+If you have issues with installing vcpkg, see [here](external/vcpkg/README.md) or refer to the official vcpkg documentation for setting it up on your environment.
 
 ### Installing SEAHOWL
+
+#### Linux
 
 From within the `seahowl` folder that you cloned earlier, build and install SEAHOWL and its dependencies in a ``build`` folder as follows:
 
@@ -51,18 +68,39 @@ cmake --build build
 
 Other presets are available, such as ``minimal`` for a minimal install with only essential dependencies, ``full_viz`` for an install including in situ visualization, ``full_vtk`` for an install with VTK output feature.
 
+#### Windows
+From within the `seahowl` folder that you cloned earlier, build and install SEAHOWL and its dependencies in a ``build`` folder as follows:
+
+> **Note:** Ensure that Visual Studio is installed on your environment.
+
+```bash
+cmake -G "Visual Studio 17 2022" --preset full
+MSBuild.exe ./build/SEAHOWL.sln /p:Configuration=Release
+```
+
+Other presets are available, such as ``minimal`` for a minimal install with only essential dependencies, ``full_viz`` for an install including in situ visualization, ``full_vtk`` for an install with VTK output feature.
 
 ### Installing a debug version of SEAHOWL
 
+
 Adding a ``/debug`` suffix (e.g. ``full/debug``) to the presets will instead install a Debug version of the preset into the folder ``build/debug``. For a debug installation, the process becomes:
+
+#### Linux
 
 ```bash
 cmake --preset full/debug
 cmake --build build/debug
 ```
+#### Windows
 
+```bash
+cmake -G "Visual Studio 17 2022" --preset full/debug
+MSBuild.exe ./build/SEAHOWL.sln /p:Configuration=Debug
+```
 
 ### Troubleshooting
+
+#### Linux
 
 Extra system dependencies might be needed on some architectures for the build to go through. For example, some of these system packages will be required on Ubuntu (select as needed):
 
@@ -81,8 +119,9 @@ It therefore has to be installed manually if the VTK dependency is activated in 
 sudo apt install libvtk9-dev  # if VTK is enabled as a dependency
 ```
 
-
 ## Bash install
+
+> **Note:** Only for Linux environment.
 
 ### Installing dependencies
 
@@ -175,22 +214,62 @@ Build SEAHOWL with ``SEAHOWL_ENABLE_PYTHON`` as ``ON``. SEAHOWL use a embeded Py
 ```bash
  source source __env__/bin/activate
 ```
-#### Windows
-
-```bash
- .__env__/Script/activate
-```
-
 You can then add the build directory to your ``PYTHONPATH`` so that the Python executable used to build the bindings can ``import seahowl`` from anywhere.
 Adding the following line to your .bashrc (or equivalent file for your favorite terminal) ensures that seahowl will be found everytime you open a new terminal:
 
 ```bash
 export PYTHONPATH=/path/to/your/seahowl/build/directory:$PYTHONPATH
 ```
+#### Windows
+
+```bash
+ .__env__/Script/activate
+```
+You can then add the build directory to your ``PYTHONPATH`` so that the Python executable used to build the bindings can ``import seahowl`` from anywhere.
+
+```bash
+set PYTHONPATH=/path/to/your/seahowl/build/directory;%PYTHONPATH%
+```
+For convenience, you can add the environment variables PYTHONPATH to your user environment variables.
 
 ### Documentation
+
+#### Linux
 
 To build the Doxygen documentation, the following needs to be installed on your environment:
 ```bash
 sudo apt install doxygen graphviz
+```
+#### Windows
+
+To install Doxygen on a Windows environment, you can follow these steps:
+
+- Step 1: Download Doxygen
+    Go to the Doxygen download page (https://www.doxygen.nl/download.html).
+    Download the Windows installer
+- Step 2: Install Doxygen
+    Run the downloaded installer.
+    Follow the installation instructions. You can choose the default options.
+- Step 3: Add Doxygen to the System Path
+- Step 4: Install Graphviz (Optional, but recommended for generating diagrams)
+    Go to the Graphviz download page.
+    Download the Windows installer (graphviz-<version>.msi).
+    Run the downloaded installer and follow the installation instructions.
+    Add the Graphviz bin directory to the system path (similar to how you added Doxygen).
+
+### Delivery
+
+To create a delivery version of SEAHOWL, you can use the automatic install process, which installs the necessary files into the `install` directory.
+
+#### Linux
+
+```bash
+cd build
+ninja install
+```
+#### Windows
+
+```bash
+cd build
+cmake --install . --config Release
 ```
