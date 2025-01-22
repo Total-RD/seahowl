@@ -393,8 +393,8 @@ void seahowl::aero::AeroDynAdapter::initialize(double time, double dt, seahowl::
 
     // associate points to blade idx
     int idx_blade = 0;
+    int idx_node = 0;      // Index into the MeshPttoBladeNum array [0:(total number of nodes on all blades)-1]
     for (auto& blade : turbine.rna.rotor->blades) {
-        int idx_node = 0;
         for (auto& node : blade->nodes) {
             pImpl->MeshPtToBladeNum[idx_node] = idx_blade + 1;
             idx_node += 1;
