@@ -538,13 +538,31 @@ void AmrWindAdapter::SetOpFMForces(seahowl::core::OpFM_InputType* to_cfd, seahow
     for (auto& blade : blades) {
         auto nodes = blade->nodes;
         for (int i = 0; i < nodes.size(); i++) {
-            to_cfd->fx[iNode] = blade->loads[i][0];
-            to_cfd->fy[iNode] = blade->loads[i][1];
-            to_cfd->fz[iNode] = blade->loads[i][2];
+            if (i == 0) {
+                to_cfd->fx[iNode] = 0.5 * blade->loads[i][0];
+                to_cfd->fy[iNode] = 0.5 * blade->loads[i][1];
+                to_cfd->fz[iNode] = 0.5 * blade->loads[i][2];
 
-            to_cfd->momentx[iNode] = blade->moments[i][0];
-            to_cfd->momenty[iNode] = blade->moments[i][1];
-            to_cfd->momentz[iNode] = blade->moments[i][2];
+                to_cfd->momentx[iNode] = 0.5 * blade->moments[i][0];
+                to_cfd->momenty[iNode] = 0.5 * blade->moments[i][1];
+                to_cfd->momentz[iNode] = 0.5 * blade->moments[i][2];
+            } else if (i == (nodes.size() - 1)) {
+                to_cfd->fx[iNode] = 0.5 * blade->loads[i - 1][0];
+                to_cfd->fy[iNode] = 0.5 * blade->loads[i - 1][1];
+                to_cfd->fz[iNode] = 0.5 * blade->loads[i - 1][2];
+
+                to_cfd->momentx[iNode] = 0.5 * blade->moments[i - 1][0];
+                to_cfd->momenty[iNode] = 0.5 * blade->moments[i - 1][1];
+                to_cfd->momentz[iNode] = 0.5 * blade->moments[i - 1][2];
+            } else {
+                to_cfd->fx[iNode] = 0.5 * (blade->loads[i - 1][0] + blade->loads[i][0]);
+                to_cfd->fy[iNode] = 0.5 * (blade->loads[i - 1][1] + blade->loads[i][1]);
+                to_cfd->fz[iNode] = 0.5 * (blade->loads[i - 1][2] + blade->loads[i][2]);
+
+                to_cfd->momentx[iNode] = 0.5 * (blade->moments[i - 1][0] + blade->moments[i][0]);
+                to_cfd->momenty[iNode] = 0.5 * (blade->moments[i - 1][1] + blade->moments[i][1]);
+                to_cfd->momentz[iNode] = 0.5 * (blade->moments[i - 1][2] + blade->moments[i][2]);
+            }
 
             iNode++;
         }
