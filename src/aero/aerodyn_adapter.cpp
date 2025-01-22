@@ -76,7 +76,7 @@ void ADI_C_Init(bool& ADinputFilePassed,
                 const char** IfWinputFileString_C,
                 int& IfWinputFileStringLength_C,
                 char* OutRootName_C,
-                const char** OutVTKDir_C,
+                char* OutVTKDir_C,
                 float& gravity_C,
                 float& defFldDens_C,
                 float& defKinVisc_C,
@@ -122,6 +122,7 @@ struct seahowl::aero::AeroDynInflowLib {
     void set_aerodyn_infile(const std::string& name);
     void set_inflowwind_infile(const std::string& name);
     void set_outfile_name(const std::string& name);
+    void set_outvtk_dir(const std::string& name);
 
     void initialize_arrays(int NumBlades, int NumMeshPts);
     void set_time(double time);
@@ -147,7 +148,7 @@ struct seahowl::aero::AeroDynInflowLib {
     bool TurbineIsHAWT = true;
     int NumTurbines = 1;
     int iWT = 1;
-    int PointLoadOutput_in = 1;
+    int PointLoadOutput_in = 0;  // 0 for distributed loads, 1 for point loads
     int DebugLevel_in = 0;
     float* TurbOrigin = new float[3]{0.0};
     int* MeshPtToBladeNum;
@@ -157,6 +158,11 @@ struct seahowl::aero::AeroDynInflowLib {
      *  use this for the root of the file name.
      */
     char OutRootName[1024];
+
+    /*  OutVTKDir
+     *  If writing VTK files, put them here
+     */
+    char OutVTKDir[1024];
 
     // Initial environmental conditions
     // bool MHK = false; //MHK turbine type switch -- disabled for now
@@ -194,7 +200,7 @@ struct seahowl::aero::AeroDynInflowLib {
     int WrVTK = 0;                             // default of no vtk output
     int WrVTK_Type = 1;                        // default of surface meshes
     double WrVTK_dt;                           // vtk save time step
-    std::string OutVTKDirString = "./output";  // to change to actual output folder from SEAHOWL OutputManager
+//    std::string OutVTKDirString = "./output";  // to change to actual output folder from SEAHOWL OutputManager
     float* VTKNacDim =
         new float[6]{0,     -4.2751, -4.2751, 12,
                      8.552, 8.552};  // default nacelle dimension for VTK surface rendering [x0,y0,z0,Lx,Ly,Lz] (m)
@@ -282,6 +288,11 @@ void seahowl::aero::AeroDynInflowLib::set_outfile_name(const std::string& name) 
     strcpy(OutRootName, name.c_str());
 }
 
+void seahowl::aero::AeroDynInflowLib::set_outvtk_dir(const std::string& name) {
+    spdlog::debug("Set AeroDyn/InflowWind output directory: {}.", name);
+    strcpy(OutVTKDir, name.c_str());
+}
+
 void seahowl::aero::AeroDynInflowLib::set_time(double time) {
     Time = time;
     TimeLast = Time - DT;
@@ -311,7 +322,6 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     // input files
     const char* ADinputFile = ADinputFileString.c_str();
     const char* IfWinputFile = IfWinputFileString.c_str();
-    const char* OutVTKDir = OutVTKDirString.c_str();
 
     ADI_C_PreInit(NumTurbines, TransposeDCM, PointLoadOutput_in, DebugLevel_in, ErrStat, ErrMsg);
     CheckError();
@@ -321,7 +331,7 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     CheckError();
 
     ADI_C_Init(ADinputFilePassed, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed, &IfWinputFile,
-               IfWinputFileStringLength, OutRootName, &OutVTKDir, gravity, defFldDens, defKinVisc, defSpdSound, defPatm,
+               IfWinputFileStringLength, OutRootName, OutVTKDir, gravity, defFldDens, defKinVisc, defSpdSound, defPatm,
                defPvap, WtrDpth, MSL2SWL, InterpOrder, DT, TMax, storeHHVel, WrVTK, WrVTK_Type, WrVTK_dt, VTKNacDim,
                VTKHubRad, wrOuts, DT_Outs, NumChannels, OutputChannelNames, OutputChannelUnits, ErrStat, ErrMsg);
     CheckError();
@@ -355,6 +365,7 @@ seahowl::aero::AeroDynAdapter::AeroDynAdapter() {
     pImpl->ADinputFilePassed = false;
     pImpl->IfWinputFilePassed = false;
     pImpl->set_outfile_name("Turbine");
+    pImpl->set_outvtk_dir("output/vtk-ADI");
 }
 
 seahowl::aero::AeroDynAdapter::~AeroDynAdapter() {}
