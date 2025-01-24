@@ -16,6 +16,7 @@
       "elasto": [49],
       "aero": [49]
     },
+    "pitch_actuator_dynamics": true,
     "blades": [
       {
         "file": "../base/blade.json",

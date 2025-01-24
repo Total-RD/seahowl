@@ -1122,6 +1122,10 @@ void ActuatorRotationChrono::set_timeseries(const std::vector<double>& time_arra
     std::dynamic_pointer_cast<ChFunctionArray>(chfunc)->values_array = values_array;
 }
 
+double ActuatorRotationChrono::get_value(double time) {
+    return std::dynamic_pointer_cast<ChFunctionArray>(chfunc)->Get_y(time);
+}
+
 LinkMatrixStiffnessDampingChrono::LinkMatrixStiffnessDampingChrono() {
     // empty stiffness and damping matrices
     stiffness_matrix = Eigen::Matrix<double, 6, 6>::Zero();

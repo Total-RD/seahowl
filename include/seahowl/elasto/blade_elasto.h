@@ -23,7 +23,7 @@ class BladeElasto : public virtual ComponentElasto {
     /** @brief Actuator for pitch dynamics. */
     std::unique_ptr<ActuatorRotation> actuator_pitch;
     /** @brief Whether actuator dynamics (motor) is used for pitching. */
-    bool has_actuator_dynamics = true;
+    bool has_pitch_actuator_dynamics = true;
     /** @brief Link between blade and body (usually hub). */
     std::unique_ptr<Link> link_blade;
     /** @brief Initial pitch of the blade (in radians). */

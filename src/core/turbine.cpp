@@ -49,7 +49,7 @@ void Turbine::apply_control(double time, double dt) {
             // individual pitch only works with rotors from 1 to 3 blades
             for (int idx_blade = 0; idx_blade < rna.blades.size(); idx_blade++) {
                 auto& blade = *rna.blades[idx_blade];
-                if (blade.elasto.has_actuator_dynamics) {
+                if (blade.elasto.has_pitch_actuator_dynamics) {
                     std::vector<double> time_array{time, time + dt};
                     std::vector<double> angle_array{blade.elasto.get_pitch(), controller->get_pitch_blade(idx_blade)};
                     blade.elasto.actuator_pitch->set_timeseries(time_array, angle_array);
@@ -61,7 +61,7 @@ void Turbine::apply_control(double time, double dt) {
         } else {
             // collective pitch for more than 3 blades or 0 blade (e.g. actuator disk)
             for (auto& blade : rna.blades) {
-                if (blade->elasto.has_actuator_dynamics) {
+                if (blade->elasto.has_pitch_actuator_dynamics) {
                     std::vector<double> time_array{time, time + dt};
                     std::vector<double> angle_array{blade->elasto.get_pitch(), controller->get_collective_pitch()};
                     blade->elasto.actuator_pitch->set_timeseries(time_array, angle_array);

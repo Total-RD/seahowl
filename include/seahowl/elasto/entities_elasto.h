@@ -453,6 +453,13 @@ class ActuatorRotation {
      * @param[in] values_array Values array (angles).
      */
     virtual void set_timeseries(const std::vector<double>& time_array, const std::vector<double>& values_array) = 0;
+
+    /**
+     * @brief Returns value for actuator at given time.
+     *
+     * @param[in] time Time value.
+     */
+    virtual double get_value(double time) = 0;
 };
 
 /**

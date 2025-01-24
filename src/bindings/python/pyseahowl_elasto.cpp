@@ -87,7 +87,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
     py::class_<seahowl::elasto::ActuatorRotation, std::shared_ptr<seahowl::elasto::ActuatorRotation>>(
         m_elasto, "ActuatorRotation")
         .def("initialize", &seahowl::elasto::ActuatorRotation::initialize)
-        .def("set_timeseries", &seahowl::elasto::ActuatorRotation::set_timeseries);
+        .def("set_timeseries", &seahowl::elasto::ActuatorRotation::set_timeseries)
+        .def("get_value", &seahowl::elasto::ActuatorRotation::get_value);
     py::class_<seahowl::elasto::MeshElasto, std::shared_ptr<seahowl::elasto::MeshElasto>>(m_elasto, "MeshElasto");
     py::class_<seahowl::elasto::SystemElasto, std::shared_ptr<seahowl::elasto::SystemElasto>>(m_elasto, "SystemElasto")
         .def("step", &seahowl::elasto::SystemElasto::step)

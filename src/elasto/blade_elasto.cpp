@@ -36,6 +36,17 @@ void BladeElasto::apply_pitch_increment(double pitch_increment) {
     body_mount->rotate(pitch_increment, root_dir);  // rotate mounting point back
     link_root_mount->initialize(*body_root, *body_mount);
     translate(root_pos);
+
+    // update actuator pitch timeseries in case it is used
+    if (has_pitch_actuator_dynamics) {
+        if (is_assembled) {
+            spdlog::warn(
+                "Blade pitch has been incremented instantaneously by {} degrees, resetting dynamic pitch actuator to "
+                "current pitch value ({} degrees) as a constant over time.",
+                pitch_increment * 180 / seahowl::PI, get_pitch() * 180 / seahowl::PI);
+        }
+        actuator_pitch->set_timeseries(std::vector<double>{0.0, 0.0}, std::vector<double>{get_pitch(), get_pitch()});
+    }
 }
 
 double BladeElasto::get_pitch() const {
@@ -56,7 +67,7 @@ void BladeElasto::assemble_this(SystemElasto& system) {
     system.add(*(body_root.get()));
     system.add(*(link_root.get()));
     system.add(*(body_mount.get()));
-    if (has_actuator_dynamics) {
+    if (has_pitch_actuator_dynamics) {
         system.add(*(actuator_pitch.get()));
     } else {
         system.add(*(link_root_mount));

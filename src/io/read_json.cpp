@@ -708,6 +708,10 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
             if (rotor_json.at("type").get<std::string>() == "rigid") {
                 blade_elasto->precone = 0.0;
             }
+
+            // pitch actuator dynamics
+            rotor_json.at("pitch_actuator_dynamics").get_to(blade_elasto->has_pitch_actuator_dynamics);
+
             blades_elasto.push_back(blade_elasto);
             blades_aero.push_back(blade_aero);
             blades.push_back(blade);

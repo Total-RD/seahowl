@@ -328,6 +328,7 @@ class ActuatorRotationChrono : public virtual ActuatorRotation {
     ActuatorRotationChrono();
     void initialize(const Entity& entity1, const Entity& entity2, const Vector3d& rotation_axis) override;
     void set_timeseries(const std::vector<double>& time_array, const std::vector<double>& values_array) override;
+    double get_value(double time) override;
 
   private:
     /** @brief Function piloting the actuator. */
