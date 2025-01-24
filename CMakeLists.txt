@@ -654,8 +654,16 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
             fixup_bundle(\"${CMAKE_INSTALL_PREFIX}/bin/seahowl_driver\" \"\" \"${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib\")
             " DESTINATION bin COMPONENT Runtime)
 else()
-    set(FILTER_FILE ${CMAKE_BINARY_DIR}/*.dll)
-    file(GLOB LIST_DLL ${FILTER_FILE})
+
+    if (${CMAKE_GENERATOR} MATCHES "Ninja")
+        set(FILTER_FILE ${CMAKE_BINARY_DIR}/*.dll)
+        file(GLOB LIST_DLL ${FILTER_FILE})
+    else()
+        set(FILTER_FILE1 ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+        set(FILTER_FILE ${FILTER_FILE1}/*.dll)
+        file(GLOB LIST_DLL ${FILTER_FILE})
+    endif()
+
     install(FILES ${LIST_DLL}
             DESTINATION bin)
 endif()
