@@ -52,6 +52,15 @@ class Tower : public virtual ComponentDynamic {
     Tower(seahowl::elasto::TowerElasto& elasto, seahowl::aero::TowerAero& aero);
 
     /**
+     * @brief Instantiates tower for communication between elasto and aero components.
+     * This version keeps a shared pointer of each component in memory.
+     *
+     * @param[in] elasto Elastodynamic tower model.
+     * @param[in] aero Aerodynamic tower model.
+     */
+    Tower(std::shared_ptr<seahowl::elasto::TowerElasto> elasto, std::shared_ptr<seahowl::aero::TowerAero> aero);
+
+    /**
      * @brief Prestep for tower, called before elastodynamic stepping.
      *
      * Updates aero loads on elasto component.
@@ -111,6 +120,11 @@ class Tower : public virtual ComponentDynamic {
     void update_loads_elasto();
 
   private:
+    // Only for memory management, never accessed (reference to underlying object is accessed instead).
+    std::shared_ptr<seahowl::elasto::TowerElasto> elasto_shared_ptr;
+    // Only for memory management, never accessed (reference to underlying object is accessed instead).
+    std::shared_ptr<seahowl::aero::TowerAero> aero_shared_ptr;
+
     /**
      * @brief Initialize tower, called before starting the simulation.
      *

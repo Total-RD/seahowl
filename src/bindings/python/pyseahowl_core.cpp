@@ -80,7 +80,7 @@ void initialize_pyseahowl_core(py::module& m) {
     // core/tower.h
     py::class_<seahowl::core::Tower, std::shared_ptr<seahowl::core::Tower>, seahowl::core::ComponentDynamic>(m_core,
                                                                                                              "Tower")
-        .def(py::init<seahowl::elasto::TowerElasto&, seahowl::aero::TowerAero&>())
+        .def(py::init<std::shared_ptr<seahowl::elasto::TowerElasto>, std::shared_ptr<seahowl::aero::TowerAero>>())
         .def_property_readonly("elasto", [](seahowl::core::Tower& tower) { return &tower.elasto; })
         .def_property_readonly("aero", [](seahowl::core::Tower& tower) { return &tower.aero; });
 
