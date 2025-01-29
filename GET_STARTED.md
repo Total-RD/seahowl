@@ -16,45 +16,21 @@ An `output` folder containing all the outputs will be automatically created.
 
 ### Using Python
 
-#### Python Virtual Environment
+#### Python Version
 
-Initialize the Python environment by following the steps below.
+Python version 3.11.10 is required.
 
-##### Linux
-```bash
-cd bin
-./init_pyseahowl.sh
-```
-
-##### Windows
-```bash
-cd bin
-./init_pyseahowl.bat
-```
-
-#### Activating the Virtual Environment
-
-SEAHOWL uses an embedded Python in a virtual environment located in the `__env__` directory. To activate this virtual environment, follow the instructions for your operating system:
+Add the build directory to your `PYTHONPATH` so that the Python executable can import `seahowl` from anywhere.
 
 ##### Linux
 
-```bash
-cd bin
-source __env__/bin/activate
-```
-
-Add the build directory to your `PYTHONPATH` so that the Python executable can import `seahowl` from anywhere. Add the following line to your `.bashrc` (or equivalent file for your terminal) to ensure `seahowl` is found every time you open a new terminal:
+Add the following line to your `.bashrc` (or equivalent file for your terminal) to ensure `seahowl` is found every time you open a new terminal:
 
 ```bash
 export PYTHONPATH=/path/to/your/seahowl/build/directory:$PYTHONPATH
 ```
 
 ##### Windows
-
-```bash
-cd bin
-.__env__/Scripts/activate
-```
 
 Add the build directory to your `PYTHONPATH` so that the Python executable can import `seahowl` from anywhere:
 
