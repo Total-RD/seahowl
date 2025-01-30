@@ -1,5 +1,6 @@
 #include "seahowl/core/amrwind_adapter.h"
 
+#include "seahowl/core/simulation.h"
 #include "seahowl/core/system.h"
 #include "seahowl/elasto/system_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
@@ -26,10 +27,7 @@ using json = nlohmann::json;
 using seahowl::Vector3d;
 
 AmrWindAdapter::AmrWindAdapter() {
-    system_elasto = std::make_unique<seahowl::elasto::SystemElastoChrono>();
-    system_aero = std::make_unique<seahowl::aero::SystemAero>();
-    system_core = std::make_unique<System>(*system_elasto, *system_aero);
-    outputs = std::make_unique<seahowl::io::OutputManager>(*system_core);
+    simulation = std::make_unique<seahowl::core::Simulation>();
 }
 
 void AmrWindAdapter::populate_from_file(const std::string& filepath) {
@@ -39,13 +37,14 @@ void AmrWindAdapter::populate_from_file(const std::string& filepath) {
     spdlog::info("INITIAL AmrWindAdapter SETUP.");
     spdlog::info("**************************************************************");
 
-    populate_system_from_json(filepath, *system_core);
+    simulation->populate_from_file(filepath);
+    // simulation->initialize_from_config();
 
     auto fluid_model = std::make_shared<seahowl::env::InflowAmrWind>();
     // auto& wind_model = dynamic_cast<seahowl::env::WindRamp&>(*wind_model_ptr);
-    system_core->fluid_model = fluid_model;
+    simulation->system_core->fluid_model = fluid_model;
 
-    for (auto& turbine : system_aero->turbines) {
+    for (auto& turbine : simulation->system_core->aero.turbines) {
         try {
             auto& rotor = dynamic_cast<seahowl::aero::RotorAeroBEMT&>(*turbine->rna.rotor);
             rotor.has_induction = false;
@@ -53,7 +52,7 @@ void AmrWindAdapter::populate_from_file(const std::string& filepath) {
             rotor.has_hub_loss = false;
             rotor.has_tower_shadow = false;
         } catch (const std::bad_cast& e) {
-            // do nothing
+            throw std::runtime_error("Need to use RotorAeroBEMT when using SEAHOWL in AMR-Wind.");
         }
     }
 
@@ -63,24 +62,9 @@ void AmrWindAdapter::populate_from_file(const std::string& filepath) {
     json_file >> json_obj;
     json_file.close();
 
-    // NUMERICS options
-    auto num_json = json_obj.at("numerics");
     // timestepping
-    dt = num_json.at("dt").get<double>();
-    duration = num_json.at("t_end").get<double>();
-    // outputs
-    auto outputs_json = json_obj.at("outputs");
-    dt_output = outputs_json.at("dt").get<double>();
-    std::string output_folder = "./output";
-    if (outputs_json.contains("folder")) {
-        output_folder = outputs_json.at("folder").get<std::string>();
-    }
-
-    // outputs
-    outputs = std::make_unique<seahowl::io::OutputManager>(*system_core);
-    outputs->set_output_folder(output_folder);
-    outputs->has_vtk = outputs_json.at("VTK").get<bool>();
-    outputs->has_gui = outputs_json.at("gui").get<bool>();
+    dt = simulation->dt;
+    duration = simulation->duration;
 
     spdlog::debug("Populated system in {:.3}s.", sw_setup);
 
@@ -151,7 +135,7 @@ void AmrWindAdapter::populate_from_file(const std::string& filepath) {
     towerBaseHeight = tower_discret_vect[0];
 
     // inflow amrwind
-    auto wind_model = system_core->fluid_model;
+    auto wind_model = simulation->system_core->fluid_model;
     auto init_nNodesVel = 1;
     // Blade nodes
     init_nNodesVel = init_nNodesVel + numBlade * numBladeNode;
@@ -167,9 +151,7 @@ void AmrWindAdapter::initialize() {
         throw std::runtime_error("AmrWindAdapter was already initialized.");
     }
 
-    outputs->initialize();
-
-    system_core->initialize(system_core->get_time(), dt);
+    simulation->initialize();
 
     is_initialized = true;
 }
@@ -180,21 +162,9 @@ void AmrWindAdapter::initialize_from_file(const std::string& filepath) {
     }
     spdlog::stopwatch sw_setup;
 
-    outputs->initialize();
-
-    std::cout << "SEAHOWL ENV from CFD 2 : " << system_core->fluid_model->wind_model_amrwind << std::endl;
-
-    std::cout << "SEAHOWL ENV from CFD 2 : "
-              << system_core->fluid_model->get_fluid_velocity(Vector3d(0.0, 0.0, 1.0), 1.0) << std::endl;
-
-    initialize_system_from_json(filepath, *system_core);
-
-    outputs->output_all(0);
-
-    t_output_next = dt_output;
+    simulation->initialize_from_config();
 
     is_initialized = true;
-    spdlog::info("Initial setup time: {:.3}s.", sw_setup);
 }
 
 void AmrWindAdapter::init_OpFM(int* numActForcePtsBlade,
@@ -304,7 +274,7 @@ void AmrWindAdapter::init_OpFM(int* numActForcePtsBlade,
     CreateActForceBladeTowerNodes();
 
     // inflow amrwind
-    auto wind_model = system_core->fluid_model;
+    auto wind_model = simulation->system_core->fluid_model;
 
     wind_model->u_Len = nNodesVel;
     wind_model->v_Len = nNodesVel;
@@ -334,24 +304,9 @@ void AmrWindAdapter::step(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::
     //
     SetOpFMPositions(to_cfd, from_cfd);
 
-    // prestep
-    system_core->prestep(system_core->get_time(), dt);
-
-    // step
-    system_core->step(dt);
-    nstep += 1;
-
-    // poststep
-    system_core->poststep(system_core->get_time(), dt);
+    simulation->step();
 
     SetOpFMForces(to_cfd, from_cfd);
-
-    // output
-    if (system_core->get_time() >= (t_output_next - 1e-6)) {
-        spdlog::info("time: {:.6}s, step: {}, stopwatch: {:.3}s", system_core->get_time(), nstep, sw_step);
-        outputs->output_all(nstep);
-        t_output_next += dt_output;
-    }
 }
 
 void AmrWindAdapter::AllocPAry(float*& array, int size, const std::string& name) {
@@ -388,7 +343,7 @@ void AmrWindAdapter::InterpolateForceNodesChord(seahowl::core::OpFM_InputType* t
     to_cfd->forceNodesChord[0] = 0.0;
 
     int iNode = 1;
-    auto turbine = system_aero->turbines[0];
+    auto turbine = simulation->system_core->aero.turbines[0];
 
     // Blade: we use the same discretisation as Seahowl aero, no interpolation is needed
     // To add: interpolation is needed if numActForcePtsBlade != numBladeNode
@@ -417,10 +372,10 @@ void AmrWindAdapter::CreateActForceMotionsMesh() {
 
 // set the positions
 void AmrWindAdapter::SetOpFMPositions(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {
-    auto turbine = system_aero->turbines[0];
+    auto turbine = simulation->system_core->aero.turbines[0];
 
     // inflow amrwind
-    auto wind_model = system_core->fluid_model;
+    auto wind_model = simulation->system_core->fluid_model;
 
     /* Hub */
     // position of seahowl node
@@ -561,7 +516,7 @@ void AmrWindAdapter::SetOpFMPositions(seahowl::core::OpFM_InputType* to_cfd, sea
 
 // set the forces
 void AmrWindAdapter::SetOpFMForces(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {
-    auto turbine = system_aero->turbines[0];
+    auto turbine = simulation->system_core->aero.turbines[0];
 
     /* Hub */
     // position of seahowl node
@@ -611,7 +566,7 @@ void AmrWindAdapter::SetOpFMForces(seahowl::core::OpFM_InputType* to_cfd, seahow
     }
 }
 
-Vector3d seahowl::env::InflowAmrWind::get_fluid_velocity(const Vector3d& position, double time) const {
+Vector3d seahowl::env::InflowAmrWind::get_fluid_velocity_this(const Vector3d& position, double time) const {
     Vector3d wind_velocity;
 
     // // position should match exactly ! to be checked
@@ -650,5 +605,10 @@ Vector3d seahowl::env::InflowAmrWind::get_fluid_velocity(const Vector3d& positio
         wind_velocity = Vector3d::Zero();
     }
 
+    return wind_velocity;
+}
+
+Vector3d seahowl::env::InflowAmrWind::get_fluid_acceleration_this(const Vector3d& position, double time) const {
+    Vector3d wind_velocity = Vector3d::Zero();
     return wind_velocity;
 }

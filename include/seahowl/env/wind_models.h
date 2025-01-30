@@ -99,13 +99,9 @@ class InflowAmrWind : public WindModel {
      */
     InflowAmrWind();
 
-    /**
-     * @brief Returns wind velocity at given coordinates.
-     *
-     * @param[in] position Position at which wind velocity is extracted.
-     * @param[in] time Time of simulation.
-     */
-    virtual Vector3d get_fluid_velocity(const Vector3d& position, double time) const override;
+  protected:
+    virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const override;
 };
 
 }  // namespace env

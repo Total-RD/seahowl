@@ -37,10 +37,6 @@ class FluidModel {
      */
     virtual Vector3d get_fluid_acceleration(const Vector3d& position, double time) const;
 
-  protected:
-    virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const = 0;
-    virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const = 0;
-
     /** @brief wind model from CFD */
     int wind_model_amrwind = 1;
 
@@ -64,6 +60,10 @@ class FluidModel {
 
     std::vector<Vector3d> wind_velocities;
     std::vector<Vector3d> wind_positions;
+
+  protected:
+    virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const = 0;
+    virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const = 0;
 };
 
 }  // namespace env

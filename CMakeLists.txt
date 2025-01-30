@@ -549,7 +549,7 @@ include(CMakePackageConfigHelpers)
 set(PROJECT_NAME "Seahowl")
 set(seahowl_lib_name "seahowl_core")
 set(seahowl_exe_name "seahowl_driver")
-set(seahowl_unit_test_exe_name "test_01")
+set(seahowl_unit_test_exe_name "test_components")
 
 # set(SH_INCLUDE_DIRS "${EIGEN3_INCLUDE_DIR}")
 set(SH_INCLUDE_DIRS ${SH_INCLUDE_DIRS} "${CHRONO_INCLUDE_DIRS}")

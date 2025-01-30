@@ -1,5 +1,6 @@
 #pragma once
 
+#include "seahowl/core/simulation.h"
 #include "seahowl/io/output_manager.h"
 #include "seahowl/core/system.h"
 #include "seahowl/aero/system_aero.h"
@@ -78,8 +79,7 @@ struct SC_DX_OutputType {
 
 class AmrWindAdapter {
   public:
-    std::unique_ptr<System> system_core;
-    std::unique_ptr<seahowl::io::OutputManager> outputs;
+    std::unique_ptr<seahowl::core::Simulation> simulation;
 
     double dt = 0.025;
     double dt_output = 0.;
@@ -152,10 +152,7 @@ class AmrWindAdapter {
     // void get_from_cfd(seahowl::core::OpFM_OutputType from_cfd);
 
   private:
-    std::unique_ptr<seahowl::elasto::SystemElasto> system_elasto;
-    std::unique_ptr<seahowl::aero::SystemAero> system_aero;
     int nstep = 0;
-    double t_output_next = 0.0;
     std::string main_filepath;
 
     // Initialize array required by AMR-Wind
