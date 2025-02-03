@@ -7,7 +7,6 @@
 #include <seahowl/servo/controller.h>
 #include <seahowl/io/read_json.h>
 #include <seahowl/aero/aerodyn_adapter.h>
-#include <seahowl/env/inflowwind_adapter.h>
 using namespace seahowl;
 using namespace seahowl::elasto;
 
@@ -33,8 +32,10 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
     auto verbose = false;
     // timestepping
     double dt = 0.1;
-    // wind
-    auto wind_model = seahowl::env::InflowWindAdapter((DATADIR / "IEA15MW/env/InflowWind.dat").generic_string());
+    // wind (this is essentially ignored for the rotor as AeroDyn uses InflowWind input)
+    auto wind_model = seahowl::env::ConstantWind();
+    wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model.shear_coefficient = 0.12;
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -57,6 +58,10 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
     turbine.build();
     turbine.elasto.assemble(system_elasto);
 
+    double time = 0.0;
+    turbine.initialize(time, dt);
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
+
     // statics
     if (statics_prestep) {
         turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, true, true, true);
@@ -64,9 +69,7 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
         turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
 
-    double time = 0.0;
-    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
-    turbine.initialize(time, dt);
+    turbine.poststep(0.0, dt);  // to update positions aero after statics step
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_aerodyn_rpm_initial_pitch.csv").generic_string(),
