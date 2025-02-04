@@ -112,19 +112,16 @@ class ConfigManagerImpl {
         nlohmann::json jsonData;
 
         // read file
-
-        // std::cout << "read file" << std::endl;
-        // read file
         std::ifstream ifile(options_.json_filepath);
         if (!ifile.is_open()) {
-            spdlog::warn("Failed to open JSON config file.");
+            throw std::runtime_error("SEAHOWL driver: main input file not found: " + options_.json_filepath +
+                                     " (absolute: " + fs::absolute(options_.json_filepath).generic_string() + ").");
             return;
         }
         ifile >> jsonData;
         ifile.close();
         // read JSON data string
 
-        //
         if (!jsonData.empty()) {
             for (const auto& [key, var] : varspecs_) {
                 if (var.spec.has_config_file_var && !var.config_file_var.empty()) {
