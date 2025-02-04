@@ -587,7 +587,9 @@ endif (SEAHOWL_ENABLE_PYTHON)
 # ====================
 # DOCUMENTATION
 # ====================
-add_subdirectory(doc)
+if(SEAHOWL_ENABLE_DOC)
+    add_subdirectory(doc)
+endif(SEAHOWL_ENABLE_DOC)
 
 # ===========================
 # Copy the DISCON library

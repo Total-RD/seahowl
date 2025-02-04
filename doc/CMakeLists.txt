@@ -90,22 +90,13 @@ else(SEAHOWL_ENABLE_PYTHON)
   set(TARGET_DOC doxygen)
 endif(SEAHOWL_ENABLE_PYTHON)
 
-if(SEAHOWL_ENABLE_DOC)
-    add_custom_target(docs ALL DEPENDS ${TARGET_DOC})
-    if(SEAHOWL_ENABLE_PYTHON)
-      add_dependencies(docs pyseahowl)
-      # For MSVC IDE
-      set_target_properties(
-        docs ${TARGET_DOC}
-        PROPERTIES
-        FOLDER DOC
-      )
-    endif(SEAHOWL_ENABLE_PYTHON)
-else(SEAHOWL_ENABLE_DOC)
-    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-      add_custom_target(docs DEPENDS ${TARGET_DOC})
-      if(SEAHOWL_ENABLE_PYTHON)
-        add_dependencies(docs pyseahowl)
-      endif(SEAHOWL_ENABLE_PYTHON)
-    endif()
-endif(SEAHOWL_ENABLE_DOC)
+add_custom_target(docs DEPENDS ${TARGET_DOC})
+if(SEAHOWL_ENABLE_PYTHON)
+  add_dependencies(docs pyseahowl)
+  # For MSVC IDE
+  set_target_properties(
+    docs ${TARGET_DOC}
+    PROPERTIES
+    FOLDER DOC
+  )
+endif(SEAHOWL_ENABLE_PYTHON)
