@@ -622,8 +622,48 @@ if(SEAHOWL_ENABLE_PYTHON)
             LIBRARY DESTINATION bin)
 
     set_target_properties(pyseahowl PROPERTIES
-                          INSTALL_RPATH "$ORIGIN"
-                          BUILD_RPATH "$ORIGIN")
+                        INSTALL_RPATH "$ORIGIN"
+                        BUILD_RPATH "$ORIGIN")
+
+    install(DIRECTORY ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/python3
+                        DESTINATION bin
+                        USE_SOURCE_PERMISSIONS)
+
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+        set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.sh)
+        file(WRITE ${FILE_INITPY}
+            "#!/bin/bash\n"
+            "SCRIPT_DIR=$(dirname \"$(realpath \"$0\")\")\n"
+            "$SCRIPT_DIR/python3/python3 -m virtualenv __env__ \n"
+            "source $SCRIPT_DIR/__env__/bin/activate\n"
+            "export PYTHONPATH=$SCRIPT_DIR:$PYTHONPATH\n")
+    else()
+        set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.bat)
+        file(WRITE ${FILE_INITPY}
+            "set SCRIPT_DIR=%~dp0\n"
+            "%SCRIPT_DIR%python3/python.exe -m virtualenv %SCRIPT_DIR%__env__\n"
+            "call %SCRIPT_DIR%__env__/Scripts/activate\n"
+            "set PYTHONPATH=%SCRIPT_DIR%;%PYTHONPATH%\n"
+            "cmd /K\n")
+        set(FILE_INITPYPS ${CMAKE_BINARY_DIR}/init_pyseahowl.ps1)
+            file(WRITE ${FILE_INITPYPS}
+                "$SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Definition\n"
+                "& \"$SCRIPT_DIR\\python3\\python.exe\" -m virtualenv \"$SCRIPT_DIR\\__env__\"\n"
+                "& \"$SCRIPT_DIR\\__env__\\Scripts\\Activate.ps1\"\n"
+                "$env:PYTHONPATH = \"$SCRIPT_DIR;$env:PYTHONPATH\"\n")
+
+        file(CHMOD ${FILE_INITPYPS} FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+        install(FILES ${FILE_INITPYPS}
+            DESTINATION bin
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
+    endif()
+
+    file(CHMOD ${FILE_INITPY} FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+    install(FILES ${FILE_INITPY}
+        DESTINATION bin
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
 
 endif(SEAHOWL_ENABLE_PYTHON)
 
