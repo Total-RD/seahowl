@@ -594,17 +594,23 @@ endif(SEAHOWL_ENABLE_DOC)
 # ===========================
 # Copy the DISCON library
 # ===========================
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(LIB_FILE_NAME "libdiscon.so")
-else()
-    set(LIB_FILE_NAME "libdiscon.dll")
+if (VCPKG_APPLOCAL_DEPS)
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+        set(LIB_FILE_NAME "libdiscon.so")
+    else()
+        set(LIB_FILE_NAME "libdiscon.dll")
+    endif()
+
+    set(LIBRARY_PATH "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/${LIB_FILE_NAME}")
+    set(DESTINATION_PATH "${SEAHOWL_DATADIR}/controller")
+
+    if(EXISTS ${LIBRARY_PATH})
+        file(COPY ${LIBRARY_PATH} DESTINATION ${DESTINATION_PATH})
+        file(RENAME "${DESTINATION_PATH}/${LIB_FILE_NAME}" "${DESTINATION_PATH}/libdiscon.so")
+    else()
+        message(WARNING "Library ${LIBRARY_PATH} does not exist.")
+    endif()
 endif()
-
-set(LIBRARY_PATH "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/${LIB_FILE_NAME}")
-set(DESTINATION_PATH "${SEAHOWL_DATADIR}/controller")
-
-file(COPY ${LIBRARY_PATH} DESTINATION ${DESTINATION_PATH})
-file(RENAME "${DESTINATION_PATH}/${LIB_FILE_NAME}" "${DESTINATION_PATH}/libdiscon.so")
 
 # ===========================
 # INSTALL
