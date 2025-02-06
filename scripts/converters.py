@@ -104,12 +104,13 @@ def merge_interpolate_points(json_points1, json_points2, tol_fraction_decimals=-
 
                 # if string
                 if isinstance(val1, str) and isinstance(val2, str):
-                    if val1 == val2:
-                        # only copy if they are the same
-                        interp_point[key] = val1
-                    else:
-                        # otherwise, empty string
-                        interp_point[key] = ""
+                    interp_point[key] = ""  # no extra airfoil points added
+                    # if val1 == val2:
+                    #     # only copy if they are the same
+                    #     interp_point[key] = val1
+                    # else:
+                    #     # otherwise, empty string
+                    #     interp_point[key] = ""
                 else:
                     # if list, convert to ndarray for interpolation
                     is_list = False
@@ -791,13 +792,18 @@ def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=Fals
                 "fix_towers": True,
             },
         },
-        "outputs": {"dt": 0.1, "vtk": False, "log_level": "info", "gui": False},
+        "outputs": {
+            "dt": 0.1,
+            "folder": "./output",
+            "vtk": False,
+            "log_level": "info",
+            "gui": False,
+        },
         "environment": {"file": "./environment.json"},
         "turbines": [
             {
                 "translation": [0, 0, 0],
                 "rotation": 0,
-                "use_aerodyn": False,
                 "file": str(Path("./turbine.json")),
             }
         ],
