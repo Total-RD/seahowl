@@ -197,10 +197,10 @@ struct seahowl::aero::AeroDynInflowLib {
     bool TransposeDCM = false;
 
     // VTK
-    int WrVTK = 0;                             // default of no vtk output
-    int WrVTK_Type = 1;                        // default of surface meshes
-    double WrVTK_dt;                           // vtk save time step
-//    std::string OutVTKDirString = "./output";  // to change to actual output folder from SEAHOWL OutputManager
+    int WrVTK = 0;       // default of no vtk output
+    int WrVTK_Type = 1;  // default of surface meshes
+    double WrVTK_dt;     // vtk save time step
+    //    std::string OutVTKDirString = "./output";  // to change to actual output folder from SEAHOWL OutputManager
     float* VTKNacDim =
         new float[6]{0,     -4.2751, -4.2751, 12,
                      8.552, 8.552};  // default nacelle dimension for VTK surface rendering [x0,y0,z0,Lx,Ly,Lz] (m)
@@ -263,11 +263,11 @@ void seahowl::aero::AeroDynInflowLib::CheckError() {
     if (ErrStat == 0) {
         return;
     } else if (ErrStat == 1) {
-        spdlog::info("AeroDyn/InflowWind INFO: {}.", ErrMsg);
+        spdlog::info("AeroDyn INFO: {}.", ErrMsg);
     } else if (ErrStat == 2) {
-        spdlog::warn("AeroDyn/InflowWind WARNING: {}", ErrMsg);
+        spdlog::warn("AeroDyn WARNING: {}", ErrMsg);
     } else {
-        spdlog::error("AeroDyn/InflowWind ERROR: {}.", ErrMsg);
+        throw std::runtime_error("AeroDyn ERROR: " + std::string(ErrMsg));
     }
 }
 
@@ -393,7 +393,7 @@ void seahowl::aero::AeroDynAdapter::initialize(double time, double dt, seahowl::
 
     // associate points to blade idx
     int idx_blade = 0;
-    int idx_node = 0;      // Index into the MeshPttoBladeNum array [0:(total number of nodes on all blades)-1]
+    int idx_node = 0;  // Index into the MeshPttoBladeNum array [0:(total number of nodes on all blades)-1]
     for (auto& blade : turbine.rna.rotor->blades) {
         for (auto& node : blade->nodes) {
             pImpl->MeshPtToBladeNum[idx_node] = idx_blade + 1;

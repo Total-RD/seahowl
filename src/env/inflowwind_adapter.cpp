@@ -73,7 +73,7 @@ void InflowWindLib::CheckError() {
     } else if (ErrStat == 2) {
         spdlog::warn("InflowWind WARNING: {}.", ErrMsg);
     } else {
-        spdlog::error("InflowWind ERROR: {}.", ErrMsg);
+        throw std::runtime_error("InflowWind ERROR: " + std::string(ErrMsg));
     }
 }
 
