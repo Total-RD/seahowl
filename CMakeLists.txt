@@ -697,5 +697,10 @@ endif()
 install(DIRECTORY ${SEAHOWL_DATADIR}
         DESTINATION data)
 
-install(FILES ${PROJECT_SOURCE_DIR}/GET_STARTED.md
+#copy the README.md file to the install directory
+install(FILES ${PROJECT_SOURCE_DIR}/doc/source/_user/using_package.md
         DESTINATION .)
+#rename the using_package.md file to README.md
+install(CODE "
+        file(RENAME \"${CMAKE_INSTALL_PREFIX}/using_package.md\" \"${CMAKE_INSTALL_PREFIX}/README.md\")
+    ")
