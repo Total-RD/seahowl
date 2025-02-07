@@ -554,9 +554,9 @@ if (SEAHOWL_ENABLE_PYTHON)
             message(FATAL_ERROR "Failed to install virtualenv")
         endif()
 
-        if(NOT EXISTS ${CMAKE_BINARY_DIR}/__env__/pyvenv.cfg)
+        if(NOT EXISTS ${CMAKE_BINARY_DIR}/.venv/pyvenv.cfg)
             execute_process(
-                    COMMAND ${Python_EXECUTABLE} -m virtualenv ${CMAKE_BINARY_DIR}/__env__
+                    COMMAND ${Python_EXECUTABLE} -m virtualenv ${CMAKE_BINARY_DIR}/.venv
                     RESULT_VARIABLE result
             )
         endif()
@@ -569,10 +569,10 @@ if (SEAHOWL_ENABLE_PYTHON)
         set(CMD_PRECOMMIT "pre-commit install")
 
         if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-            set(ACTIVATE_PY "source ${CMAKE_BINARY_DIR}/__env__/bin/activate")
+            set(ACTIVATE_PY "source ${CMAKE_BINARY_DIR}/.venv/bin/activate")
             set(LAUNCH_PIP bash -c)
         else()
-            set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/__env__/Scripts/activate")
+            set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/.venv/Scripts/activate")
             set(LAUNCH_PIP cmd.exe /c)
         endif()
 
@@ -639,23 +639,24 @@ if(SEAHOWL_ENABLE_PYTHON)
         set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.sh)
         file(WRITE ${FILE_INITPY}
             "#!/bin/bash\n"
-            "SCRIPT_DIR=$(dirname \"$(realpath \"$0\")\")\n"
-            "$SCRIPT_DIR/python3/python3 -m virtualenv __env__ \n"
-            "source $SCRIPT_DIR/__env__/bin/activate\n"
+            "SCRIPT_DIR=$(cd \"$(dirname \"\${BASH_SOURCE}\")\" && pwd)\n"
+            "$SCRIPT_DIR/python3/python3 -m virtualenv .venv \n"
+            "CALL_DIR=$(pwd)\n"
+            "source $CALL_DIR/.venv/bin/activate\n"
             "export PYTHONPATH=$SCRIPT_DIR:$PYTHONPATH\n")
     else()
         set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.bat)
         file(WRITE ${FILE_INITPY}
             "set SCRIPT_DIR=%~dp0\n"
-            "%SCRIPT_DIR%python3/python.exe -m virtualenv %SCRIPT_DIR%__env__\n"
-            "call %SCRIPT_DIR%__env__/Scripts/activate\n"
+            "%SCRIPT_DIR%python3/python.exe -m virtualenv %SCRIPT_DIR%.venv\n"
+            "call %SCRIPT_DIR%.venv/Scripts/activate\n"
             "set PYTHONPATH=%SCRIPT_DIR%;%PYTHONPATH%\n"
             "cmd /K\n")
         set(FILE_INITPYPS ${CMAKE_BINARY_DIR}/init_pyseahowl.ps1)
             file(WRITE ${FILE_INITPYPS}
                 "$SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Definition\n"
-                "& \"$SCRIPT_DIR\\python3\\python.exe\" -m virtualenv \"$SCRIPT_DIR\\__env__\"\n"
-                "& \"$SCRIPT_DIR\\__env__\\Scripts\\Activate.ps1\"\n"
+                "& \"$SCRIPT_DIR\\python3\\python.exe\" -m virtualenv \"$SCRIPT_DIR\\.venv\"\n"
+                "& \"$SCRIPT_DIR\\.venv\\Scripts\\Activate.ps1\"\n"
                 "$env:PYTHONPATH = \"$SCRIPT_DIR;$env:PYTHONPATH\"\n")
 
         file(CHMOD ${FILE_INITPYPS} FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)

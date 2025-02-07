@@ -5,9 +5,9 @@
 if(SEAHOWL_ENABLE_PYTHON)
   # Specify the path to the SPHINX installation
   if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(SPHINX_EXECUTABLE "${CMAKE_BINARY_DIR}/__env__/bin/sphinx-build")
+    set(SPHINX_EXECUTABLE "${CMAKE_BINARY_DIR}/.venv/bin/sphinx-build")
   else()
-    set(SPHINX_EXECUTABLE "${CMAKE_BINARY_DIR}/__env__/Scripts/sphinx-build")
+    set(SPHINX_EXECUTABLE "${CMAKE_BINARY_DIR}/.venv/Scripts/sphinx-build")
   endif()
 
   find_package(Sphinx)
@@ -22,7 +22,7 @@ if(SEAHOWL_ENABLE_PYTHON)
   set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 
   if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-          set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/__env__/bin/activate")
+          set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/.venv/bin/activate")
           file(WRITE ${CMAKE_BINARY_DIR}/run_sphinx.sh
           "#!/bin/bash\n"
           "export PYTHONPATH=${CMAKE_BINARY_DIR}:$PYTHONPATH\n"
@@ -33,7 +33,7 @@ if(SEAHOWL_ENABLE_PYTHON)
           set(LAUNCH_SPHINX bash)
 
   else()
-          set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/__env__/Scripts/activate")
+          set(ACTIVATE_PY "${CMAKE_BINARY_DIR}/.venv/Scripts/activate")
           file(WRITE ${CMAKE_BINARY_DIR}/run_sphinx.bat
           "set PYTHONPATH=${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE};%PYTHONPATH%\n"
           "call ${ACTIVATE_PY}\n"
