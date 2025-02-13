@@ -149,6 +149,16 @@ class ComponentElastoFEA : public virtual ComponentElasto {
                                  const Vector3d& offset);
 
     /**
+     * @brief Accumulates added mass matrix on a given FEA element.
+     *
+     * @param[in] matrix Added mass matrix to accumulate.
+     * @param[in] element_index Index of the element on which the load is accumulated.
+     * @param[in] eta Abscissa of the element within the range [-1, +1], with -1 at node1 and +1 at node2.
+     * @param[in] offset Offset from given abscissa along longitudinal axis of element.
+     */
+    void accumulate_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix, int element_index, double eta);
+
+    /**
      * @brief Returns all nodes positions (global frame of reference).
      */
     std::vector<Vector3d> get_nodes_positions() const;

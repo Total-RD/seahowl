@@ -152,6 +152,34 @@ void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
     node1->accumulate_torque(moment1 + (position + offset - node1->get_position()).cross(load1), false);
 }
 
+void ComponentElastoFEA::accumulate_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix,
+                                                int element_index,
+                                                double eta) {
+    // sanity check
+    if (element_index >= elements.size() || element_index < 0) {
+        throw std::runtime_error("Element index " + std::to_string(element_index) +
+                                 " does not exist (number of elements: " + std::to_string(elements.size()) + ").");
+    }
+
+    // get position and rotation
+    Vector3d position{0.0, 0.0, 0.0};
+    Quaternion rotation{0.0, 0.0, 0.0, 0.0};
+    evaluate_position_rotation(position, rotation, element_index, eta);
+
+    // apply loads
+    auto& element = elements[element_index];
+    // load on first node
+    double weight0 = 0.5 * abs(eta - 1);
+    auto node0 = element->nodes[0];
+    // load in global reference
+    node0->set_added_mass_matrix(node0->get_added_mass_matrix() + matrix * weight0);
+    // load on second node
+    double weight1 = 0.5 * abs(eta + 1);
+    auto node1 = element->nodes[1];
+    // load in global reference
+    node1->set_added_mass_matrix(node1->get_added_mass_matrix() + matrix * weight1);
+}
+
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_positions() const {
     std::vector<Vector3d> positions;
     for (auto& node : nodes) {

@@ -100,7 +100,10 @@ void Tower::update_loads_elasto() {
     }
     auto offset = Vector3d(0.0, 0.0, 0.0);
     for (int ii = 0; ii < aero.loads.size(); ii++) {
-        elasto.accumulate_element_load(aero.loads[ii], Vector3d(0.0, 0.0, 0.0), mapping_aero2elasto_elements[ii].index,
-                                       mapping_aero2elasto_elements[ii].eta, offset);
+        elasto.accumulate_element_load(aero.loads_noacc[ii], Vector3d(0.0, 0.0, 0.0),
+                                       mapping_aero2elasto_elements[ii].index, mapping_aero2elasto_elements[ii].eta,
+                                       offset);
+        elasto.accumulate_mass_matrix(aero.added_mass_matrices[ii], mapping_aero2elasto_elements[ii].index,
+                                      mapping_aero2elasto_elements[ii].eta);
     }
 }

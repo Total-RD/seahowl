@@ -37,6 +37,8 @@ class TowerAero : public ComponentFluid {
     std::vector<hydro::MorisonElement> elements;
     /** @brief Loads at center of tower elements. */
     std::vector<Vector3d> loads;
+    /** @brief Loads without component from structural acceleration at center of tower elements. */
+    std::vector<Vector3d> loads_noacc;
     /** @brief Added mass matrices at center of tower elements. */
     std::vector<Eigen::Matrix<double, 6, 6>> added_mass_matrices;
     /** @brief MacCamy and Fuchs Correction for large cylinders, Flag. */

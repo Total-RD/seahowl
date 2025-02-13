@@ -65,6 +65,18 @@ class EntityLoadable : public virtual EntityDynamic {
      * @param[in] is_local Whether the torque is applied from local or global reference frame.
      */
     virtual void accumulate_torque(const Vector3d& torque, bool is_local = true) = 0;
+
+    /**
+     * @brief Sets added mass matrix of body.
+     *
+     * @param[in] matrix Added mass matrix.
+     */
+    virtual void set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) = 0;
+
+    /**
+     * @brief Returns added mass matrix of body.
+     */
+    virtual Eigen::Matrix<double, 6, 6> get_added_mass_matrix() const = 0;
 };
 
 /**
@@ -121,6 +133,18 @@ class BodyElasto : public virtual EntityLoadable {
  */
 class NodeElasto : public virtual EntityLoadable {
   public:
+    /**
+     * @brief Sets mass of node.
+     *
+     * @param[in] mass Mass of node.
+     */
+    virtual void set_mass(double mass) = 0;
+
+    /**
+     * @brief Get mass of node.
+     */
+    virtual double get_mass() = 0;
+
     /**
      * @brief Fix node in space.
      *

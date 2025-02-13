@@ -53,6 +53,11 @@ class TowerElasto : public ComponentElastoFEA {
      */
     Vector3d get_tower_top_force() const;
 
+    /**
+     * @brief Resets accumulated loads at nodes of tower component.
+     */
+    virtual void reset_loads() override;
+
   private:
     /**
      * @brief Builds the blade with Timoshenko elements (lineic density, foreaft stiffness, sideside stiffness).

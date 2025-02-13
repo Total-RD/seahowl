@@ -65,8 +65,8 @@ class MorisonNode : public EntityDynamicEigen {
     HydroCoefficients coefficients;
     /** @brief Load calculated at node. */
     Vector3d load{0.0, 0.0, 0.0};
-    /** @brief Load from fluid acceleration. */
-    Vector3d load_fluid{0.0, 0.0, 0.0};
+    /** @brief Load from without component from structural acceleration. */
+    Vector3d load_noacc{0.0, 0.0, 0.0};
     /** @brief Added mass matrix (actually linear density). */
     Eigen::Matrix<double, 6, 6> added_mass_matrix = Eigen::Matrix<double, 6, 6>::Zero();
     /** @brief Diameter at node. */
@@ -100,7 +100,12 @@ class MorisonElement {
     Vector3d get_load() const;
 
     /**
-     * @brief Returns integrated load at center of element.
+     * @brief Returns integrated load (without component from structural acceleration) at center of element.
+     */
+    Vector3d get_load_noacc() const;
+
+    /**
+     * @brief Returns added mass matrix at center of element.
      */
     Eigen::Matrix<double, 6, 6> get_added_mass_matrix() const;
 

@@ -132,7 +132,7 @@ double MacCamyFuchsTable::interpolateCmBinarySearch(double D) {
 void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double time) {
     // reset total load
     load = Vector3d(0.0, 0.0, 0.0);
-    load_fluid = Vector3d(0.0, 0.0, 0.0);
+    load_noacc = Vector3d(0.0, 0.0, 0.0);
     added_mass_matrix.setZero();
 
     auto position = get_position();
@@ -161,7 +161,7 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
         0.5 * fluid_density * coeff_drag_normal * diameter * velocity_relative_normal.norm() * velocity_relative_normal;
     auto load_drag_axial = 0.5 * fluid_density * coefficients.drag_axial * diameter * PI *
                            velocity_relative_axial.norm() * velocity_relative_axial;
-    load_fluid += load_drag_normal + load_drag_axial;
+    load_noacc += load_drag_normal + load_drag_axial;
 
     if (coefficients.inertia_factor != 0.0) {
         // fluid acceleration
@@ -185,7 +185,7 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
                                      (acceleration_fluid + coeff_added_mass_normal * acceleration_fluid_normal +
                                       coefficients.added_mass_axial * acceleration_fluid_axial);
 
-        load_fluid += load_added_mass_fluid * coefficients.inertia_factor;
+        load_noacc += load_added_mass_fluid * coefficients.inertia_factor;
 
         added_mass_matrix(0, 0) = fluid_density * area * coeff_added_mass_normal;
         added_mass_matrix(1, 1) = fluid_density * area * coeff_added_mass_normal;
@@ -200,8 +200,8 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
     // buoyancy
     Vector3d gravitational_acceleration{0.0, 0.0, -9.81};
     auto load_buoyancy = fluid_density * area * (-gravitational_acceleration);
-    load_fluid += load_buoyancy * coefficients.buoyancy_factor;
-    load += load_fluid;
+    load_noacc += load_buoyancy * coefficients.buoyancy_factor;
+    load += load_noacc;
 }
 
 MorisonElement::MorisonElement(const MorisonNode& node1, const MorisonNode& node2) : node1(node1), node2(node2) {
@@ -210,6 +210,10 @@ MorisonElement::MorisonElement(const MorisonNode& node1, const MorisonNode& node
 
 Vector3d MorisonElement::get_load() const {
     return 0.5 * (node1.load + node2.load) * length;
+}
+
+Vector3d MorisonElement::get_load_noacc() const {
+    return 0.5 * (node1.load_noacc + node2.load_noacc) * length;
 }
 
 Eigen::Matrix<double, 6, 6> MorisonElement::get_added_mass_matrix() const {

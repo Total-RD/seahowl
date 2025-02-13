@@ -48,7 +48,11 @@ void TowerElasto::build() {
     build_nodes(discretized_points0);
     // apply properties
     for (int ii = 0; ii < nodes.size(); ii++) {
-        std::dynamic_pointer_cast<NodeElastoChrono>(nodes[ii])->set_properties(discretized_points[ii]);
+        auto& node = nodes[ii];
+        std::dynamic_pointer_cast<NodeElastoChrono>(node)->set_properties(discretized_points[ii]);
+
+        // initialize added mass matrices to zero
+        node->set_added_mass_matrix(Eigen::Matrix<double, 6, 6>::Zero());
     }
 
     build_elements_tapered_timoshenko();
@@ -87,3 +91,11 @@ seahowl::Vector3d TowerElasto::get_tower_base_force() const {
 seahowl::Vector3d TowerElasto::get_tower_top_force() const {
     return elements.back()->get_force(1.0);
 }
+
+void TowerElasto::reset_loads() {
+    ComponentElastoFEA::reset_loads();
+    for (auto& node : nodes) {
+        // reinitialize added mass matrices to zero
+        node->set_added_mass_matrix(Eigen::Matrix<double, 6, 6>::Zero());
+    }
+};
