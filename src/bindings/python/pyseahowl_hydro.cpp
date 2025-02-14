@@ -43,6 +43,7 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def(py::init<>())
         .def("compute_fluid_loads", &seahowl::hydro::MorisonNode::compute_fluid_loads)
         .def_readwrite("load", &seahowl::hydro::MorisonNode::load)
+        .def_readwrite("load_noacc", &seahowl::hydro::MorisonNode::load_noacc)
         .def_readwrite("diameter", &seahowl::hydro::MorisonNode::diameter)
         .def_readwrite("coefficients", &seahowl::hydro::MorisonNode::coefficients);
     py::class_<seahowl::hydro::MorisonElement, std::shared_ptr<seahowl::hydro::MorisonElement>>(m_hydro,

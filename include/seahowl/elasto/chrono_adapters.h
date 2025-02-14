@@ -98,6 +98,8 @@ class BodyElastoChrono : public BodyElasto, public EntityDynamicChrono {
     virtual double get_mass() override;
     virtual void set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
     virtual Eigen::Matrix<double, 6, 6> get_added_mass_matrix() const override;
+    virtual void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
+    virtual Eigen::Matrix<double, 6, 6> get_damping_matrix() const override;
 };
 
 class NodeElastoChronoBase {
@@ -133,6 +135,8 @@ class NodeElastoChrono : public NodeElasto, public EntityDynamicChrono, public N
     virtual double get_mass() override;
     virtual void set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
     virtual Eigen::Matrix<double, 6, 6> get_added_mass_matrix() const override;
+    virtual void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
+    virtual Eigen::Matrix<double, 6, 6> get_damping_matrix() const override;
     void set_properties(const BladeReferencePointElasto& ref, bool fpm = false);
     void set_properties(const TowerReferencePointElasto& ref);
 };
@@ -159,6 +163,8 @@ class NodeElastoChronoD : public NodeElasto, public NodeElastoChronoBase {
     virtual double get_mass() override;
     virtual void set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
     virtual Eigen::Matrix<double, 6, 6> get_added_mass_matrix() const override;
+    virtual void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
+    virtual Eigen::Matrix<double, 6, 6> get_damping_matrix() const override;
 
     virtual void set_position(const Vector3d& position) override;
     virtual Vector3d get_position() const override;

@@ -67,16 +67,28 @@ class EntityLoadable : public virtual EntityDynamic {
     virtual void accumulate_torque(const Vector3d& torque, bool is_local = true) = 0;
 
     /**
-     * @brief Sets added mass matrix of body.
+     * @brief Sets added mass matrix of entity.
      *
      * @param[in] matrix Added mass matrix.
      */
     virtual void set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) = 0;
 
     /**
-     * @brief Returns added mass matrix of body.
+     * @brief Returns added mass matrix of entity.
      */
     virtual Eigen::Matrix<double, 6, 6> get_added_mass_matrix() const = 0;
+
+    /**
+     * @brief Sets damping matrix of entity.
+     *
+     * @param[in] matrix Damping matrix.
+     */
+    virtual void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) = 0;
+
+    /**
+     * @brief Returns damping matrix of entity.
+     */
+    virtual Eigen::Matrix<double, 6, 6> get_damping_matrix() const = 0;
 };
 
 /**

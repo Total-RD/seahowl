@@ -146,14 +146,9 @@ class ChLoadLocal66 : public ChLoadCustom {
     virtual ChLoadLocal66* Clone() const override { return new ChLoadLocal66(*this); }
 
     void SetAddedMassMatrix(const ChMatrixDynamic<double>& matrix) { added_mass_matrix = matrix; }
-
     void SetDampingMatrix(const ChMatrixDynamic<double>& matrix) { damping_matrix = matrix; }
-
-    void SetStiffnessMatrix(const ChMatrixDynamic<double>& matrix) { stiffness_matrix = matrix; }
-
     ChMatrixDynamic<double> GetAddedMassMatrix() const { return added_mass_matrix; }
     ChMatrixDynamic<double> GetDampingMatrix() const { return damping_matrix; }
-    ChMatrixDynamic<double> GetStiffnessMatrix() const { return stiffness_matrix; }
 
     // nothing happening here
     virtual void ComputeQ(ChState* state_x, ChStateDelta* state_w) override{};
@@ -190,8 +185,8 @@ class ChLoadLocal66 : public ChLoadCustom {
         // damping matrix terms (6x6)
         jacobians->R = rot66 * (damping_matrix * rot66.inverse());
 
-        // stiffness matrix terms (6x6)
-        jacobians->K = rot66 * (stiffness_matrix * rot66.inverse());
+        // stiffness matrix terms (6x6) - keeping it to zero here
+        jacobians->K = Eigen::Matrix<double, 6, 6>::Zero();
     };
 
     virtual void LoadIntLoadResidual_Mv(ChVectorDynamic<>& R, const ChVectorDynamic<>& w, const double c) override {
@@ -399,6 +394,21 @@ Eigen::Matrix<double, 6, 6> BodyElastoChrono::get_added_mass_matrix() const {
     return chload66->GetAddedMassMatrix();
 }
 
+void BodyElastoChrono::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
+    if (!chload66) {
+        chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
+    }
+    chload66->SetDampingMatrix(matrix);
+};
+
+Eigen::Matrix<double, 6, 6> BodyElastoChrono::get_damping_matrix() const {
+    if (!chload66) {
+        throw std::runtime_error("Cannot get damping matrix for " + std::string(typeid(*this).name()) +
+                                 ", it was not set.");
+    }
+    return chload66->GetDampingMatrix();
+}
+
 NodeElastoChrono::NodeElastoChrono(const Vector3d& position, const Quaternion& rotation) {
     chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(
         chrono::ChFrame<>(vec2ch(position), node_iec2ch(rotation)));
@@ -486,7 +496,23 @@ Eigen::Matrix<double, 6, 6> NodeElastoChrono::get_added_mass_matrix() const {
         throw std::runtime_error("Cannot get added mass matrix for " + std::string(typeid(*this).name()) +
                                  ", it was not set.");
     }
-    return rot66_iec2ch.transpose() * chload66->GetAddedMassMatrix() * rot66_iec2ch;
+    return rot66_iec2ch.inverse() * chload66->GetAddedMassMatrix() * rot66_iec2ch;
+}
+
+void NodeElastoChrono::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
+    if (!chload66) {
+        chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
+    }
+    auto mm = rot66_iec2ch * matrix * rot66_iec2ch.inverse();
+    chload66->SetDampingMatrix(mm);
+};
+
+Eigen::Matrix<double, 6, 6> NodeElastoChrono::get_damping_matrix() const {
+    if (!chload66) {
+        throw std::runtime_error("Cannot get damping matrix for " + std::string(typeid(*this).name()) +
+                                 ", it was not set.");
+    }
+    return rot66_iec2ch.inverse() * chload66->GetDampingMatrix() * rot66_iec2ch;
 }
 
 void NodeElastoChrono::set_fixed(bool is_fixed) {
@@ -661,6 +687,18 @@ void NodeElastoChronoD::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>&
 Eigen::Matrix<double, 6, 6> NodeElastoChronoD::get_added_mass_matrix() const {
     if (!chload66) {
         throw std::runtime_error("Cannot get added mass matrix for " + std::string(typeid(*this).name()) +
+                                 ", it was not set.");
+    }
+}
+
+void NodeElastoChronoD::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
+    throw std::runtime_error("Cannot set damping matrix for " + std::string(typeid(*this).name()) +
+                             ", not implemented for cable nodes.");
+};
+
+Eigen::Matrix<double, 6, 6> NodeElastoChronoD::get_damping_matrix() const {
+    if (!chload66) {
+        throw std::runtime_error("Cannot get damping matrix for " + std::string(typeid(*this).name()) +
                                  ", it was not set.");
     }
 }

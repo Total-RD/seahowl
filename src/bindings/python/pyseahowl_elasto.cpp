@@ -32,7 +32,9 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("accumulate_force", &seahowl::elasto::EntityLoadable::accumulate_force)
         .def("accumulate_torque", &seahowl::elasto::EntityLoadable::accumulate_torque)
         .def("set_added_mass_matrix", &seahowl::elasto::EntityLoadable::set_added_mass_matrix)
-        .def("get_added_mass_matrix", &seahowl::elasto::EntityLoadable::get_added_mass_matrix);
+        .def("get_added_mass_matrix", &seahowl::elasto::EntityLoadable::get_added_mass_matrix)
+        .def("set_damping_matrix", &seahowl::elasto::EntityLoadable::set_damping_matrix)
+        .def("get_damping_matrix", &seahowl::elasto::EntityLoadable::get_damping_matrix);
     py::class_<seahowl::elasto::BodyElasto, std::shared_ptr<seahowl::elasto::BodyElasto>,
                seahowl::elasto::EntityLoadable>(m_elasto, "BodyElasto", pybind11::multiple_inheritance())
         .def("set_mass", &seahowl::elasto::BodyElasto::set_mass)
