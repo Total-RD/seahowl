@@ -21,6 +21,7 @@
 #include <vector>
 #include <memory>
 #include <spdlog/spdlog.h>
+#include <typeinfo>
 
 // default mass value for checking if ChBody mass was set.
 const double MASS_NOTSET_VALUE = -1.2345e-12;
@@ -125,23 +126,24 @@ Eigen::Matrix<double, 6, 6> get_iec2ch_rotation_matrix() {
 Eigen::Matrix<double, 6, 6> rot66_iec2ch = get_iec2ch_rotation_matrix();
 
 namespace chrono {
+
 /**
- * @brief Derived Chrono load class for using 6x6 added mass, damping, and stiffness matrices.
+ * @brief Derived Chrono load class for using local 6x6 added mass, damping, and stiffness matrices.
  *
  * (inspired by HydroChrono's ChLoadCustomMultiple implementation, see Chrono and HydroChrono sources for details).
+ * Note: damping matrix here is not equivalent to applying a damping depending on current velocity of a body, this needs
+ to be done explicitly outside of this class.
  */
-class ChLoadAddedMass66 : public ChLoadCustom {
+class ChLoadLocal66 : public ChLoadCustom {
   public:
-    ChLoadAddedMass66(std::shared_ptr<ChLoadable> mloadable) : ChLoadCustom(mloadable) {
-        added_mass_matrix.setZero(6, 6);
-        damping_matrix.setZero(6, 6);
-        stiffness_matrix.setZero(6, 6);
-    };
+    ChLoadLocal66(std::shared_ptr<ChBody> mloadable) : ChLoadCustom(mloadable) { body_frame = mloadable; }
+
+    ChLoadLocal66(std::shared_ptr<fea::ChNodeFEAxyzrot> mloadable) : ChLoadCustom(mloadable) { body_frame = mloadable; }
 
     /**
      * @brief "Virtual" copy constructor (covariant return type). Required from chrono inheritance.
      */
-    virtual ChLoadAddedMass66* Clone() const override { return new ChLoadAddedMass66(*this); }
+    virtual ChLoadLocal66* Clone() const override { return new ChLoadLocal66(*this); }
 
     void SetAddedMassMatrix(const ChMatrixDynamic<double>& matrix) { added_mass_matrix = matrix; }
 
@@ -162,12 +164,34 @@ class ChLoadAddedMass66 : public ChLoadCustom {
                                  ChMatrixRef mK,
                                  ChMatrixRef mR,
                                  ChMatrixRef mM) override {
-        // mass matrix (6x6)
+        // sanity check
+        if (this->LoadGet_ndof_w() != 6) {
+            throw std::runtime_error("6x6 added mass matrix only works with entities with 6 DOFs.");
+        }
+        if (!body_frame) {
+            throw std::runtime_error("6x6 added mass matrix needs to have a body frame attached.");
+        }
+
         jacobians->M = added_mass_matrix;
+
+        // matrices expressed in local system --> transformation needed
+        // Chrono sends:
+        // - translation components in global system
+        // - rotattion components in global system
+        Eigen::Matrix<double, 6, 6> rot66 = Eigen::Matrix<double, 6, 6>::Zero();
+        ChMatrix33<> rot33(body_frame->GetRot());
+        Eigen::Matrix<double, 3, 3> rotI = Eigen::Matrix<double, 3, 3>::Identity();
+        rot66.block<3, 3>(0, 0) = rot33.block(0, 0, 3, 3);
+        rot66.block<3, 3>(3, 3) = rotI.block(0, 0, 3, 3);
+
+        // mass matrix(6x6)
+        jacobians->M = rot66 * added_mass_matrix * rot66.inverse();
+
         // damping matrix terms (6x6)
-        jacobians->R = damping_matrix;
+        jacobians->R = rot66 * damping_matrix * rot66.inverse();
+
         // stiffness matrix terms (6x6)
-        jacobians->K = stiffness_matrix;
+        jacobians->K = rot66 * stiffness_matrix * rot66.inverse();
     };
 
     virtual void LoadIntLoadResidual_Mv(ChVectorDynamic<>& R, const ChVectorDynamic<>& w, const double c) override {
@@ -187,8 +211,10 @@ class ChLoadAddedMass66 : public ChLoadCustom {
                 }
             }
         }
+
         // do computation R=c*M*v
         grouped_cMv = c * this->jacobians->M * grouped_w;
+
         rowQ = 0;
         for (int i = 0; i < loadable->GetSubBlocks(); ++i) {
             if (loadable->IsSubBlockActive(i)) {
@@ -204,9 +230,11 @@ class ChLoadAddedMass66 : public ChLoadCustom {
     virtual bool IsStiff() override { return true; }  // this to force the use of the inertial M, R and K matrices
 
   private:
-    ChMatrixDynamic<double> added_mass_matrix;
-    ChMatrixDynamic<double> damping_matrix;
-    ChMatrixDynamic<double> stiffness_matrix;
+    ChMatrixDynamic<double> added_mass_matrix = Eigen::Matrix<double, 6, 6>::Zero();
+    ChMatrixDynamic<double> damping_matrix = Eigen::Matrix<double, 6, 6>::Zero();
+    ChMatrixDynamic<double> stiffness_matrix = Eigen::Matrix<double, 6, 6>::Zero();
+
+    std::shared_ptr<ChBodyFrame> body_frame;
 };
 
 }  // namespace chrono
@@ -358,12 +386,16 @@ double BodyElastoChrono::get_mass() {
 
 void BodyElastoChrono::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
     if (!chload66) {
-        chload66 = std::make_shared<chrono::ChLoadAddedMass66>(chobj);
+        chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
     }
     chload66->SetAddedMassMatrix(matrix);
 };
 
 Eigen::Matrix<double, 6, 6> BodyElastoChrono::get_added_mass_matrix() const {
+    if (!chload66) {
+        throw std::runtime_error("Cannot get added mass matrix for " + std::string(typeid(*this).name()) +
+                                 ", it was not set.");
+    }
     return chload66->GetAddedMassMatrix();
 }
 
@@ -442,7 +474,7 @@ double NodeElastoChrono::get_mass() {
 
 void NodeElastoChrono::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
     if (!chload66) {
-        chload66 = std::make_shared<chrono::ChLoadAddedMass66>(chobj);
+        chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
     }
     // Convert from IEC convention to Chrono convention.
     auto mm = rot66_iec2ch * matrix * rot66_iec2ch.transpose();
@@ -450,6 +482,10 @@ void NodeElastoChrono::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& 
 };
 
 Eigen::Matrix<double, 6, 6> NodeElastoChrono::get_added_mass_matrix() const {
+    if (!chload66) {
+        throw std::runtime_error("Cannot get added mass matrix for " + std::string(typeid(*this).name()) +
+                                 ", it was not set.");
+    }
     return rot66_iec2ch.transpose() * chload66->GetAddedMassMatrix() * rot66_iec2ch;
 }
 
@@ -618,16 +654,15 @@ double NodeElastoChronoD::get_mass() {
 }
 
 void NodeElastoChronoD::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
-    if (!chload66) {
-        chload66 = std::make_shared<chrono::ChLoadAddedMass66>(chobj);
-    }
-    // Convert from IEC convention to Chrono convention.
-    auto mm = rot66_iec2ch * matrix * rot66_iec2ch.transpose();
-    chload66->SetAddedMassMatrix(mm);
+    throw std::runtime_error("Cannot set added mass matrix for " + std::string(typeid(*this).name()) +
+                             ", not implemented for cable nodes.");
 };
 
 Eigen::Matrix<double, 6, 6> NodeElastoChronoD::get_added_mass_matrix() const {
-    return chload66->GetAddedMassMatrix();
+    if (!chload66) {
+        throw std::runtime_error("Cannot get added mass matrix for " + std::string(typeid(*this).name()) +
+                                 ", it was not set.");
+    }
 }
 
 void NodeElastoChronoD::set_fixed(bool is_fixed) {

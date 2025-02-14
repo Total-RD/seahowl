@@ -34,7 +34,7 @@ class ChLinkMateGeneric;
 class ChLinkTSDA;
 class ChLoadBodyBodyBushingGeneric;
 class ChSystem;
-class ChLoadAddedMass66;
+class ChLoadLocal66;
 class ChLoadContainer;
 namespace fea {
 class ChNodeFEAbase;
@@ -79,7 +79,7 @@ class BodyElastoChrono : public BodyElasto, public EntityDynamicChrono {
   public:
     /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::ChBody> chobj;
-    std::shared_ptr<chrono::ChLoadAddedMass66> chload66;
+    std::shared_ptr<chrono::ChLoadLocal66> chload66;
 
     BodyElastoChrono();
     virtual void set_mass(double mass) override;
@@ -104,7 +104,7 @@ class NodeElastoChronoBase {
   public:
     /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::fea::ChNodeFEAbase> chobj;
-    std::shared_ptr<chrono::ChLoadAddedMass66> chload66;
+    std::shared_ptr<chrono::ChLoadLocal66> chload66;
 };
 
 /**
