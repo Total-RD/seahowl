@@ -172,7 +172,7 @@ class ChLoadLocal66 : public ChLoadCustom {
         // matrices expressed in local system --> transformation needed
         // Chrono sends:
         // - translation components in global system
-        // - rotattion components in global system
+        // - rotation components in global system
         Eigen::Matrix<double, 6, 6> rot66 = Eigen::Matrix<double, 6, 6>::Zero();
         ChMatrix33<> rot33(body_frame->GetRot());
         Eigen::Matrix<double, 3, 3> rotI = Eigen::Matrix<double, 3, 3>::Identity();
@@ -300,6 +300,7 @@ Vector3d EntityDynamicChrono::get_rotational_acceleration(bool is_local) const {
 
 BodyElastoChrono::BodyElastoChrono() {
     chobj = chrono_types::make_shared<chrono::ChBody>();
+    chloadcontainer = chrono_types::make_shared<chrono::ChLoadContainer>();
     EntityDynamicChrono::chobj = chobj;
     set_mass(MASS_NOTSET_VALUE);
     set_inertia_diagonal(Vector3d(MASS_NOTSET_VALUE, MASS_NOTSET_VALUE, MASS_NOTSET_VALUE));
@@ -382,6 +383,7 @@ double BodyElastoChrono::get_mass() {
 void BodyElastoChrono::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
     if (!chload66) {
         chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
+        chloadcontainer->Add(chload66);
     }
     chload66->SetAddedMassMatrix(matrix);
 };
@@ -397,6 +399,7 @@ Eigen::Matrix<double, 6, 6> BodyElastoChrono::get_added_mass_matrix() const {
 void BodyElastoChrono::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
     if (!chload66) {
         chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
+        chloadcontainer->Add(chload66);
     }
     chload66->SetDampingMatrix(matrix);
 };
@@ -407,6 +410,10 @@ Eigen::Matrix<double, 6, 6> BodyElastoChrono::get_damping_matrix() const {
                                  ", it was not set.");
     }
     return chload66->GetDampingMatrix();
+}
+
+NodeElastoChronoBase::NodeElastoChronoBase() {
+    chloadcontainer = chrono_types::make_shared<chrono::ChLoadContainer>();
 }
 
 NodeElastoChrono::NodeElastoChrono(const Vector3d& position, const Quaternion& rotation) {
@@ -485,6 +492,7 @@ double NodeElastoChrono::get_mass() {
 void NodeElastoChrono::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
     if (!chload66) {
         chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
+        chloadcontainer->Add(chload66);
     }
     // Convert from IEC convention to Chrono convention.
     auto mm = rot66_iec2ch * (matrix * rot66_iec2ch.transpose());
@@ -502,6 +510,7 @@ Eigen::Matrix<double, 6, 6> NodeElastoChrono::get_added_mass_matrix() const {
 void NodeElastoChrono::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
     if (!chload66) {
         chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
+        chloadcontainer->Add(chload66);
     }
     auto mm = rot66_iec2ch * matrix * rot66_iec2ch.inverse();
     chload66->SetDampingMatrix(mm);
@@ -1038,14 +1047,17 @@ void LinkMatrixStiffnessDampingChrono::set_damping_matrix(const Eigen::Matrix<do
 
 MeshElastoChrono::MeshElastoChrono() {
     chobj = chrono_types::make_shared<chrono::fea::ChMesh>();
-    chloadcontainer = chrono_types::make_shared<chrono::ChLoadContainer>();
+    chloadcontainers.clear();
 }
 
 void MeshElastoChrono::add(NodeElasto& node) {
     auto& ref = dynamic_cast<NodeElastoChronoBase&>(node);
     chobj->AddNode(ref.chobj);
-    if (ref.chload66) {
-        chloadcontainer->Add(ref.chload66);
+    chloadcontainers.push_back(ref.chloadcontainer);
+
+    // if mesh was already added to system, add container to system directly
+    if (chobj->GetSystem() != nullptr) {
+        chobj->GetSystem()->Add(ref.chloadcontainer);
     }
 }
 
@@ -1182,14 +1194,17 @@ void SystemElastoChrono::set_gravitational_acceleration(const Vector3d& gravitat
 void SystemElastoChrono::add(BodyElasto& body) {
     auto& ref = dynamic_cast<BodyElastoChrono&>(body);
     chobj->Add(ref.chobj);
-    if (ref.chload66) {
-        chloadcontainer->Add(ref.chload66);
-    }
+    chobj->Add(ref.chloadcontainer);
 }
 
 void SystemElastoChrono::add(MeshElasto& mesh) {
-    chobj->Add(dynamic_cast<MeshElastoChrono&>(mesh).chobj);
-    chobj->Add(dynamic_cast<MeshElastoChrono&>(mesh).chloadcontainer);
+    auto& mesh_chrono = dynamic_cast<MeshElastoChrono&>(mesh);
+    chobj->Add(mesh_chrono.chobj);
+
+    // add all existing load containers to system
+    for (auto& container : mesh_chrono.chloadcontainers) {
+        chobj->Add(container);
+    }
 }
 
 void SystemElastoChrono::add(Link& link) {

@@ -80,6 +80,7 @@ class BodyElastoChrono : public BodyElasto, public EntityDynamicChrono {
     /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::ChBody> chobj;
     std::shared_ptr<chrono::ChLoadLocal66> chload66;
+    std::shared_ptr<chrono::ChLoadContainer> chloadcontainer;
 
     BodyElastoChrono();
     virtual void set_mass(double mass) override;
@@ -107,6 +108,9 @@ class NodeElastoChronoBase {
     /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::fea::ChNodeFEAbase> chobj;
     std::shared_ptr<chrono::ChLoadLocal66> chload66;
+    std::shared_ptr<chrono::ChLoadContainer> chloadcontainer;
+
+    NodeElastoChronoBase();
 };
 
 /**
@@ -315,7 +319,7 @@ class MeshElastoChrono : public MeshElasto {
   public:
     /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::fea::ChMesh> chobj;
-    std::shared_ptr<chrono::ChLoadContainer> chloadcontainer;
+    std::vector<std::shared_ptr<chrono::ChLoadContainer>> chloadcontainers;
 
     MeshElastoChrono();
     virtual void add(NodeElasto& node) override;
