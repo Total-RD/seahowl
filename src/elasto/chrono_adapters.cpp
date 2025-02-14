@@ -185,13 +185,13 @@ class ChLoadLocal66 : public ChLoadCustom {
         rot66.block<3, 3>(3, 3) = rotI.block(0, 0, 3, 3);
 
         // mass matrix(6x6)
-        jacobians->M = rot66 * added_mass_matrix * rot66.inverse();
+        jacobians->M = rot66 * (added_mass_matrix * rot66.inverse());
 
         // damping matrix terms (6x6)
-        jacobians->R = rot66 * damping_matrix * rot66.inverse();
+        jacobians->R = rot66 * (damping_matrix * rot66.inverse());
 
         // stiffness matrix terms (6x6)
-        jacobians->K = rot66 * stiffness_matrix * rot66.inverse();
+        jacobians->K = rot66 * (stiffness_matrix * rot66.inverse());
     };
 
     virtual void LoadIntLoadResidual_Mv(ChVectorDynamic<>& R, const ChVectorDynamic<>& w, const double c) override {
@@ -477,7 +477,7 @@ void NodeElastoChrono::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& 
         chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
     }
     // Convert from IEC convention to Chrono convention.
-    auto mm = rot66_iec2ch * matrix * rot66_iec2ch.transpose();
+    auto mm = rot66_iec2ch * (matrix * rot66_iec2ch.transpose());
     chload66->SetAddedMassMatrix(mm);
 };
 
@@ -499,8 +499,8 @@ bool NodeElastoChrono::is_fixed() const {
 
 void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool fpm) {
     // Convert from IEC convention to Chrono convention.
-    auto mm = rot66_iec2ch * ref.mass_matrix * rot66_iec2ch.transpose();
-    auto sm = rot66_iec2ch * ref.stiffness_matrix * rot66_iec2ch.transpose();
+    auto mm = rot66_iec2ch * (ref.mass_matrix * rot66_iec2ch.transpose());
+    auto sm = rot66_iec2ch * (ref.stiffness_matrix * rot66_iec2ch.transpose());
 
     if (ref.damping_coefficients.size() != 5) {
         throw std::runtime_error("Damping coefficients for blade must be a vector of length 5 (got " +
