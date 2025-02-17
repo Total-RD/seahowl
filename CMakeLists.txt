@@ -213,7 +213,9 @@ set(SEAHOWL_CORE_HEADERS
     include/seahowl/core/rotor.h
     include/seahowl/core/tower.h
     include/seahowl/core/mooring.h
+    include/seahowl/core/foundation.h
     include/seahowl/core/floater.h
+    include/seahowl/core/monopile.h
     include/seahowl/core/turbine.h
     include/seahowl/core/system.h
     include/seahowl/core/simulation.h
@@ -240,8 +242,10 @@ set(SEAHOWL_ELASTO_HEADERS
     include/seahowl/elasto/reference_point_elasto.h
     include/seahowl/elasto/rotor_elasto.h
     include/seahowl/elasto/tower_elasto.h
+    include/seahowl/elasto/foundation_elasto.h
     include/seahowl/elasto/floater_elasto.h
     include/seahowl/elasto/mooring_elasto.h
+    include/seahowl/elasto/monopile_elasto.h
     include/seahowl/elasto/turbine_elasto.h
     include/seahowl/elasto/chrono_adapters.h
 )

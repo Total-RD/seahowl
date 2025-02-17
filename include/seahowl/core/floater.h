@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "seahowl/commons/utils.h"  // for DiscretizationPoint
-#include "seahowl/core/component.h"
+#include "seahowl/core/foundation.h"
 #include "seahowl/core/mooring.h"
 
 // forward declarations
@@ -22,8 +22,6 @@ class FloaterHydro;
 
 namespace seahowl {
 namespace core {
-
-class Foundation : public ComponentDynamic {};
 
 /**
  * @brief Floater of wind turbine, with both elasto and hydro components.
