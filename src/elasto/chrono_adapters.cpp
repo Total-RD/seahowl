@@ -128,11 +128,7 @@ Eigen::Matrix<double, 6, 6> rot66_iec2ch = get_iec2ch_rotation_matrix();
 namespace chrono {
 
 /**
- * @brief Derived Chrono load class for using local 6x6 added mass, damping, and stiffness matrices.
- *
- * (inspired by HydroChrono's ChLoadCustomMultiple implementation, see Chrono and HydroChrono sources for details).
- * Note: damping matrix here is not equivalent to applying a damping depending on current velocity of a body, this needs
- to be done explicitly outside of this class.
+ * @brief Derived Chrono load class for using local 6x6 added mass and damping matrices.
  */
 class ChLoadLocal66 : public ChLoadCustom {
   public:
@@ -150,8 +146,36 @@ class ChLoadLocal66 : public ChLoadCustom {
     ChMatrixDynamic<double> GetAddedMassMatrix() const { return added_mass_matrix; }
     ChMatrixDynamic<double> GetDampingMatrix() const { return damping_matrix; }
 
-    // nothing happening here
-    virtual void ComputeQ(ChState* state_x, ChStateDelta* state_w) override{};
+    // compute external forces manually
+    virtual void ComputeQ(ChState* state_x, ChStateDelta* state_w) override {
+        // sanity check
+        if (this->LoadGet_ndof_w() != 6) {
+            throw std::runtime_error("6x6 added mass matrix only works with entities with 6 DOFs.");
+        }
+
+        // matrices expressed in local system --> transformation needed
+        // Chrono sends:
+        // - translation components in global system
+        // - rotation components in global system
+        Eigen::Matrix<double, 6, 6> rot66 = Eigen::Matrix<double, 6, 6>::Zero();
+        ChMatrix33<> rot33(body_frame->GetRot());
+        Eigen::Matrix<double, 3, 3> rotI = Eigen::Matrix<double, 3, 3>::Identity();
+        rot66.block<3, 3>(0, 0) = rot33.block(0, 0, 3, 3);
+        rot66.block<3, 3>(3, 3) = rotI.block(0, 0, 3, 3);
+
+        // reset load_Q
+        load_Q = ChVectorDynamic<>(this->LoadGet_ndof_w()).setZero();
+
+        // damping force
+        auto vv = body_frame->GetPos_dt();
+        auto rv = body_frame->GetWvel_loc();
+        ChVectorDynamic<> vvv(this->LoadGet_ndof_w());
+        for (int ii = 0; ii < 3; ii++) {
+            vvv[ii] = vv[ii];
+            vvv[ii + 3] = rv[ii];
+        }
+        load_Q += -rot66 * (damping_matrix * (rot66.inverse() * vvv));
+    };
 
     // compute jacobians manually
     virtual void ComputeJacobian(ChState* state_x,
@@ -159,16 +183,6 @@ class ChLoadLocal66 : public ChLoadCustom {
                                  ChMatrixRef mK,
                                  ChMatrixRef mR,
                                  ChMatrixRef mM) override {
-        // sanity check
-        if (this->LoadGet_ndof_w() != 6) {
-            throw std::runtime_error("6x6 added mass matrix only works with entities with 6 DOFs.");
-        }
-        if (!body_frame) {
-            throw std::runtime_error("6x6 added mass matrix needs to have a body frame attached.");
-        }
-
-        jacobians->M = added_mass_matrix;
-
         // matrices expressed in local system --> transformation needed
         // Chrono sends:
         // - translation components in global system
@@ -227,7 +241,6 @@ class ChLoadLocal66 : public ChLoadCustom {
   private:
     ChMatrixDynamic<double> added_mass_matrix = Eigen::Matrix<double, 6, 6>::Zero();
     ChMatrixDynamic<double> damping_matrix = Eigen::Matrix<double, 6, 6>::Zero();
-    ChMatrixDynamic<double> stiffness_matrix = Eigen::Matrix<double, 6, 6>::Zero();
 
     std::shared_ptr<ChBodyFrame> body_frame;
 };
