@@ -5,7 +5,9 @@
 #include <seahowl/commons/component_fluid.h>
 #include <seahowl/hydro/morison.h>
 #include <seahowl/hydro/mooring_hydro.h>
+#include <seahowl/hydro/foundation_fluid.h>
 #include <seahowl/hydro/floater_hydro.h>
+#include <seahowl/hydro/monopile_hydro.h>
 #ifdef HAVE_HYDROCHRONO
     #include <seahowl/hydro/hydrochrono_adapter.h>
 #endif
@@ -86,7 +88,7 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def("add_mooring", &seahowl::hydro::MooringSystemHydro::add_mooring)
         .def("build", &seahowl::hydro::MooringSystemHydro::build);
 
-    // hydro/floater_hydro.h
+    // hydro/foundation_fluid.h
     py::class_<seahowl::hydro::FoundationFluid, std::shared_ptr<seahowl::hydro::FoundationFluid>,
                seahowl::ComponentFluid>(m_hydro, "FoundationFluid");
 
@@ -97,4 +99,9 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def_property_readonly(
             "mooring_system", [](seahowl::hydro::FloaterHydro& floater) { return floater.mooring_system.get(); },
             py::return_value_policy::reference_internal);
+
+    // hydro/monopile_hydro.h
+    py::class_<seahowl::hydro::MonopileHydro, std::shared_ptr<seahowl::hydro::MonopileHydro>, seahowl::aero::TowerAero,
+               seahowl::hydro::FoundationFluid>(m_hydro, "MonopileHydro", pybind11::multiple_inheritance())
+        .def(py::init<>());
 }

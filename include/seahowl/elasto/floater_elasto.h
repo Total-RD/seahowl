@@ -38,8 +38,6 @@ class FloaterElasto : public FoundationElasto {
 
     virtual void build() override;
 
-    virtual void prestep(double time, double dt) override;
-
     /**
      * @brief Creates and adds body to floater.
      *

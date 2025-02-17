@@ -23,7 +23,7 @@ namespace aero {
 /**
  * @brief Tower of wind turbine as an aerodynamic component.
  */
-class TowerAero : public ComponentFluid {
+class TowerAero : public virtual ComponentFluid {
   public:
     /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the aero component. */
     std::vector<double> discretization_fractions;

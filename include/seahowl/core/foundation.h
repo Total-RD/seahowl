@@ -5,7 +5,7 @@
 namespace seahowl {
 namespace core {
 
-class Foundation : public ComponentDynamic {};
+class Foundation : public virtual ComponentDynamic {};
 
 }  // namespace core
 }  // namespace seahowl

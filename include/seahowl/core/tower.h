@@ -30,7 +30,7 @@ namespace core {
  * the aero and elasto components. The aero loads are communicated to the elasto component in the prestep, while the
  * aero positions are updated using the elasto positions in the poststep.
  */
-class Tower : public ComponentDynamic {
+class Tower : public virtual ComponentDynamic {
   public:
     /** @brief Elastodynamic model of the tower. */
     seahowl::elasto::TowerElasto& elasto;

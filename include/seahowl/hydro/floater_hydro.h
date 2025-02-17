@@ -1,6 +1,6 @@
 #pragma once
 
-#include "seahowl/commons/component_fluid.h"
+#include "seahowl/hydro/foundation_fluid.h"
 
 #include <memory>
 
@@ -18,8 +18,6 @@ namespace seahowl {
 
 /**@brief Hydrodynamic module */
 namespace hydro {
-
-class FoundationFluid : public ComponentFluid {};
 
 /**
  * @brief Floater of wind turbine as an hydrodynamic component.

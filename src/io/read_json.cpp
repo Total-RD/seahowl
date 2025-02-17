@@ -6,6 +6,7 @@
 #include "seahowl/core/blade.h"
 #include "seahowl/core/rotor.h"
 #include "seahowl/core/tower.h"
+#include "seahowl/core/monopile.h"
 #include "seahowl/core/turbine.h"
 #include "seahowl/core/system.h"
 #include "seahowl/elasto/tower_elasto.h"
@@ -14,6 +15,7 @@
 #include "seahowl/elasto/reference_point_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/elasto/floater_elasto.h"
+#include "seahowl/elasto/monopile_elasto.h"
 #include "seahowl/servo/controller_discon.h"
 #include "seahowl/commons/numerics.h"
 #include "seahowl/env/fluid_models.h"
@@ -29,6 +31,7 @@
 #include "seahowl/aero/blade_aero.h"
 #include "seahowl/aero/rotor_aero.h"
 #include "seahowl/aero/turbine_aero.h"
+#include "seahowl/hydro/monopile_hydro.h"
 #include "seahowl/aero/system_aero.h"
 #include "seahowl/hydro/mooring_hydro.h"
 #ifdef HAVE_HYDROCHRONO
@@ -820,143 +823,188 @@ void populate_turbine_from_json(const std::string& filepath,
     drivetrain.at("generator_inertia").get_to(drivetrain_inertia);
     turbine.rna.elasto.rotor->hub.inertia(0, 0) += drivetrain_inertia;
 
-    if (json_obj.contains("floater")) {
+    if (json_obj.contains("foundation")) {
         auto& turbine_elasto = turbine.elasto;
 
-        auto floater_json = json_obj.at("floater");
+        auto& foundation_json = json_obj.at("foundation");
+        if (foundation_json.at("type") == "monopile") {
+            // create monopile
+            auto monopile_elasto = std::make_shared<seahowl::elasto::MonopileElasto>();
+            auto monopile_hydro = std::make_shared<seahowl::hydro::MonopileHydro>();
+            auto monopile_core = std::make_shared<seahowl::core::Monopile>(*monopile_elasto, *monopile_hydro);
+            turbine.elasto.foundation = monopile_elasto;
+            turbine.aero.foundation = monopile_hydro;
+            turbine.foundation = monopile_core;
 
-        auto floater_hydro_ptr = std::make_shared<seahowl::hydro::FloaterHydro>();
-        turbine.aero.foundation = floater_hydro_ptr;
-        auto& floater_hydro = *floater_hydro_ptr;
+            // populate monopile
+            auto filepath_monopile = (DATADIR / foundation_json.at("file").get<std::string>()).generic_string();
+            populate_tower_from_json(filepath_monopile, *monopile_core);
+            foundation_json.at("discretization")
+                    .at("elasto")
+                    .get_to(monopile_elasto->discretization_fractions);
+            foundation_json.at("discretization")
+                    .at("hydro")
+                    .get_to(monopile_hydro->discretization_fractions);
+            if (foundation_json.contains("options")) {
+                if (foundation_json.at("options").contains("use_MacCamyFuchs_correction"))
+                    foundation_json.at("options")
+                        .at("use_MacCamyFuchs_correction")
+                        .get_to(turbine.aero.tower.use_MacCamyFuchs_correction);
+                else
+                    spdlog::warn(
+                        "MacCamyFuchs correction for tower/pile not defined in turbine.json, it is by default set to "
+                        "{}.",
+                        turbine.aero.tower.use_MacCamyFuchs_correction);
 
-        if (floater_json.contains("file")) {
-            auto json_obj_floater =
-                get_json_from_file((DATADIR / floater_json.at("file").get<std::string>()).generic_string());
+                if (foundation_json.at("options").contains("use_Cd_correction"))
+                    foundation_json.at("options").at("use_Cd_correction").get_to(turbine.aero.tower.use_Cd_correction);
+                else
+                    spdlog::warn(
+                        "Drag Coefficient correction for tower/pile not defined in turbine.json, it is by default set "
+                        "to {}.",
+                        turbine.aero.tower.use_Cd_correction);
+            }
 
-            auto floater_type = json_obj_floater.at("type").get<std::string>();
-            if (floater_type == "HydroChrono") {
-                spdlog::info("Hydrodynamic model: HydroChrono.");
+        }
+
+        else if (foundation_json.at("type") == "floater") {
+            auto floater_hydro_ptr = std::make_shared<seahowl::hydro::FloaterHydro>();
+            turbine.aero.foundation = floater_hydro_ptr;
+            auto& floater_hydro = *floater_hydro_ptr;
+
+            if (foundation_json.contains("file")) {
+                auto json_obj_floater =
+                    get_json_from_file((DATADIR / foundation_json.at("file").get<std::string>()).generic_string());
+
+                auto floater_type = json_obj_floater.at("type").get<std::string>();
+                if (floater_type == "HydroChrono") {
+                    spdlog::info("Hydrodynamic model: HydroChrono.");
 #ifdef HAVE_HYDROCHRONO
-                // make floater
-                auto floater_elasto_ptr = std::make_shared<seahowl::hydro::FloaterHydroChrono>();
-                turbine_elasto.foundation = floater_elasto_ptr;
-                // add h5file path
-                auto floater_options = json_obj_floater.at("options");
-                floater_elasto_ptr->set_h5_filepath(
-                    (DATADIR / floater_options.at("file").get<std::string>()).generic_string());
+                    // make floater
+                    auto floater_elasto_ptr = std::make_shared<seahowl::hydro::FloaterHydroChrono>();
+                    turbine_elasto.foundation = floater_elasto_ptr;
+                    // add h5file path
+                    auto floater_options = json_obj_floater.at("options");
+                    floater_elasto_ptr->set_h5_filepath(
+                        (DATADIR / floater_options.at("file").get<std::string>()).generic_string());
 #else
-                throw std::runtime_error("Trying to use HydroChrono but did not compile with HydroChrono dependency.");
+                    throw std::runtime_error(
+                        "Trying to use HydroChrono but did not compile with HydroChrono dependency.");
 #endif
-            } else {
-                auto floater_elasto_ptr = std::make_shared<seahowl::elasto::FloaterElasto>();
-                turbine_elasto.foundation = floater_elasto_ptr;
-            }
+                } else {
+                    auto floater_elasto_ptr = std::make_shared<seahowl::elasto::FloaterElasto>();
+                    turbine_elasto.foundation = floater_elasto_ptr;
+                }
 
-            auto& floater_elasto = dynamic_cast<seahowl::elasto::FloaterElasto&>(*turbine_elasto.foundation);
-            // get main body info
-            auto& body = *floater_elasto.body_main;
-            populate_body_from_json(json_obj_floater, body);
-            // get other bodies info
-            auto bodies_json = json_obj_floater.at("bodies");
-            for (auto& body_json : bodies_json) {
-                auto body_name = body_json.at("name").get<std::string>();
-                floater_elasto.add_body(body_name);
-                populate_body_from_json(body_json, floater_elasto.get_body(body_name));
-            }
+                auto& floater_elasto = dynamic_cast<seahowl::elasto::FloaterElasto&>(*turbine_elasto.foundation);
+                // get main body info
+                auto& body = *floater_elasto.body_main;
+                populate_body_from_json(json_obj_floater, body);
+                // get other bodies info
+                auto bodies_json = json_obj_floater.at("bodies");
+                for (auto& body_json : bodies_json) {
+                    auto body_name = body_json.at("name").get<std::string>();
+                    floater_elasto.add_body(body_name);
+                    populate_body_from_json(body_json, floater_elasto.get_body(body_name));
+                }
 
-            auto dm = json_obj_floater.at("damping_matrix").get<std::vector<std::vector<double>>>();
-            if (dm.size() != 6) {
-                throw std::runtime_error("Viscous damping matrix for floater body has to be defined as 6x6 matrices.");
-            }
-            Eigen::Matrix<double, 6, 6> damping_matrix;
-            for (int irow = 0; irow < 6; irow++) {
-                if (dm[irow].size() != 6) {
+                auto dm = json_obj_floater.at("damping_matrix").get<std::vector<std::vector<double>>>();
+                if (dm.size() != 6) {
                     throw std::runtime_error(
                         "Viscous damping matrix for floater body has to be defined as 6x6 matrices.");
                 }
-                for (int icol = 0; icol < 6; icol++) {
-                    damping_matrix(irow, icol) = dm[irow][icol];
+                Eigen::Matrix<double, 6, 6> damping_matrix;
+                for (int irow = 0; irow < 6; irow++) {
+                    if (dm[irow].size() != 6) {
+                        throw std::runtime_error(
+                            "Viscous damping matrix for floater body has to be defined as 6x6 matrices.");
+                    }
+                    for (int icol = 0; icol < 6; icol++) {
+                        damping_matrix(irow, icol) = dm[irow][icol];
+                    }
                 }
+                floater_elasto.body_main->set_damping_matrix(damping_matrix);
+
+                // core floater
+                auto floater_core_ptr = std::make_shared<seahowl::core::Floater>(floater_elasto, floater_hydro);
+                turbine.foundation = floater_core_ptr;
+                auto& floater_core = *floater_core_ptr;
+
+                auto moorings_json = json_obj_floater.at("moorings");
+                for (auto& mooring_json : moorings_json) {
+                    auto axis = mooring_json.at("rotation_axis").get<std::vector<double>>();
+                    auto rotation_axis = seahowl::Vector3d(axis[0], axis[1], axis[2]);
+                    auto rotation_angle = mooring_json.at("rotation_angle").get<double>() * seahowl::PI / 180.0;
+                    auto rotation = seahowl::AngleAxisd(rotation_angle, rotation_axis);
+
+                    // fairlead
+                    auto body_name = mooring_json.at("connected_body_name").get<std::string>();
+                    auto fpos = mooring_json.at("fairlead_position").get<std::vector<double>>();
+                    auto fairlead_relative_position = seahowl::Vector3d(fpos[0], fpos[1], fpos[2]);
+                    seahowl::Vector3d fairlead_position = rotation * fairlead_relative_position;
+                    if (mooring_json.at("relative_fairlead").get<bool>()) {
+                        fairlead_position += floater_elasto.body_main->get_position();
+                    }
+                    floater_elasto.add_fairlead(fairlead_position, body_name);
+                    auto& fairlead_body =
+                        floater_elasto.get_fairlead_body(body_name, floater_elasto.get_fairlead_count(body_name) - 1);
+
+                    // anchor
+                    auto apos = mooring_json.at("anchor_position").get<std::vector<double>>();
+                    auto anchor_relative_position = seahowl::Vector3d(apos[0], apos[1], apos[2]);
+                    seahowl::Vector3d anchor_position = rotation * anchor_relative_position;
+                    if (mooring_json.at("relative_anchor").get<bool>()) {
+                        anchor_position += floater_elasto.body_main->get_position();
+                    }
+                    floater_elasto.mooring_system->anchors.push_back(
+                        std::make_shared<seahowl::elasto::BodyElastoChrono>());
+                    auto& anchor_body = *floater_elasto.mooring_system->anchors.back();
+                    anchor_body.set_position(anchor_position);
+                    anchor_body.set_mass(0.0);
+                    anchor_body.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+                    anchor_body.set_fixed(true);
+
+                    auto mooring_properties_json = get_json_from_file(
+                        (DATADIR / mooring_json.at("line_properties").get<std::string>()).generic_string());
+
+                    // elasto
+                    floater_elasto.mooring_system->moorings.push_back(
+                        std::make_shared<seahowl::elasto::MooringElastoFEA>(fairlead_body, anchor_body));
+                    auto& mooring_elasto = dynamic_cast<seahowl::elasto::MooringElastoFEA&>(
+                        *floater_elasto.mooring_system->moorings.back());
+                    mooring_json.at("length").get_to(mooring_elasto.length);
+                    mooring_properties_json.at("diameter").get_to(mooring_elasto.diameter);
+                    mooring_json.at("discretization").at("elasto").get_to(mooring_elasto.discretization_fractions);
+                    mooring_properties_json.at("stiffness_axial").get_to(mooring_elasto.stiffness_axial);
+                    mooring_properties_json.at("stiffness_bending").get_to(mooring_elasto.stiffness_bending);
+                    mooring_properties_json.at("density_linear").get_to(mooring_elasto.density_linear);
+
+                    // hydro
+                    floater_hydro.mooring_system->moorings.push_back(std::make_shared<seahowl::hydro::MooringHydro>());
+                    auto& mooring_hydro = *floater_hydro.mooring_system->moorings.back();
+                    mooring_json.at("length").get_to(mooring_hydro.length);
+                    mooring_properties_json.at("diameter").get_to(mooring_hydro.diameter);
+                    mooring_json.at("discretization").at("hydro").get_to(mooring_hydro.discretization_fractions);
+                    mooring_properties_json.at("drag_coefficient_normal")
+                        .get_to(mooring_hydro.coefficients.drag_normal);
+                    mooring_properties_json.at("drag_coefficient_axial").get_to(mooring_hydro.coefficients.drag_axial);
+                    mooring_properties_json.at("added_mass_coefficient_normal")
+                        .get_to(mooring_hydro.coefficients.added_mass_normal);
+                    mooring_properties_json.at("added_mass_coefficient_axial")
+                        .get_to(mooring_hydro.coefficients.added_mass_axial);
+
+                    floater_core.mooring_system->moorings.push_back(
+                        std::make_shared<seahowl::core::Mooring>(mooring_elasto, mooring_hydro));
+                }
+            } else {
+                spdlog::warn("Turbine has floater key but no floater file was defined.");
+
+                auto floater_elasto_ptr = std::make_shared<seahowl::elasto::FloaterElasto>();
+                turbine_elasto.foundation = floater_elasto_ptr;
+                auto& floater_elasto = *floater_elasto_ptr;
+                auto floater_core = std::make_shared<seahowl::core::Floater>(floater_elasto, floater_hydro);
+                turbine.foundation = floater_core;
             }
-            floater_elasto.body_main->set_damping_matrix(damping_matrix);
-
-            // core floater
-            auto floater_core_ptr = std::make_shared<seahowl::core::Floater>(floater_elasto, floater_hydro);
-            turbine.foundation = floater_core_ptr;
-            auto& floater_core = *floater_core_ptr;
-
-            auto moorings_json = json_obj_floater.at("moorings");
-            for (auto& mooring_json : moorings_json) {
-                auto axis = mooring_json.at("rotation_axis").get<std::vector<double>>();
-                auto rotation_axis = seahowl::Vector3d(axis[0], axis[1], axis[2]);
-                auto rotation_angle = mooring_json.at("rotation_angle").get<double>() * seahowl::PI / 180.0;
-                auto rotation = seahowl::AngleAxisd(rotation_angle, rotation_axis);
-
-                // fairlead
-                auto body_name = mooring_json.at("connected_body_name").get<std::string>();
-                auto fpos = mooring_json.at("fairlead_position").get<std::vector<double>>();
-                auto fairlead_relative_position = seahowl::Vector3d(fpos[0], fpos[1], fpos[2]);
-                seahowl::Vector3d fairlead_position = rotation * fairlead_relative_position;
-                if (mooring_json.at("relative_fairlead").get<bool>()) {
-                    fairlead_position += floater_elasto.body_main->get_position();
-                }
-                floater_elasto.add_fairlead(fairlead_position, body_name);
-                auto& fairlead_body =
-                    floater_elasto.get_fairlead_body(body_name, floater_elasto.get_fairlead_count(body_name) - 1);
-
-                // anchor
-                auto apos = mooring_json.at("anchor_position").get<std::vector<double>>();
-                auto anchor_relative_position = seahowl::Vector3d(apos[0], apos[1], apos[2]);
-                seahowl::Vector3d anchor_position = rotation * anchor_relative_position;
-                if (mooring_json.at("relative_anchor").get<bool>()) {
-                    anchor_position += floater_elasto.body_main->get_position();
-                }
-                floater_elasto.mooring_system->anchors.push_back(std::make_shared<seahowl::elasto::BodyElastoChrono>());
-                auto& anchor_body = *floater_elasto.mooring_system->anchors.back();
-                anchor_body.set_position(anchor_position);
-                anchor_body.set_mass(0.0);
-                anchor_body.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
-                anchor_body.set_fixed(true);
-
-                auto mooring_properties_json = get_json_from_file(
-                    (DATADIR / mooring_json.at("line_properties").get<std::string>()).generic_string());
-
-                // elasto
-                floater_elasto.mooring_system->moorings.push_back(
-                    std::make_shared<seahowl::elasto::MooringElastoFEA>(fairlead_body, anchor_body));
-                auto& mooring_elasto =
-                    dynamic_cast<seahowl::elasto::MooringElastoFEA&>(*floater_elasto.mooring_system->moorings.back());
-                mooring_json.at("length").get_to(mooring_elasto.length);
-                mooring_properties_json.at("diameter").get_to(mooring_elasto.diameter);
-                mooring_json.at("discretization").at("elasto").get_to(mooring_elasto.discretization_fractions);
-                mooring_properties_json.at("stiffness_axial").get_to(mooring_elasto.stiffness_axial);
-                mooring_properties_json.at("stiffness_bending").get_to(mooring_elasto.stiffness_bending);
-                mooring_properties_json.at("density_linear").get_to(mooring_elasto.density_linear);
-
-                // hydro
-                floater_hydro.mooring_system->moorings.push_back(std::make_shared<seahowl::hydro::MooringHydro>());
-                auto& mooring_hydro = *floater_hydro.mooring_system->moorings.back();
-                mooring_json.at("length").get_to(mooring_hydro.length);
-                mooring_properties_json.at("diameter").get_to(mooring_hydro.diameter);
-                mooring_json.at("discretization").at("hydro").get_to(mooring_hydro.discretization_fractions);
-                mooring_properties_json.at("drag_coefficient_normal").get_to(mooring_hydro.coefficients.drag_normal);
-                mooring_properties_json.at("drag_coefficient_axial").get_to(mooring_hydro.coefficients.drag_axial);
-                mooring_properties_json.at("added_mass_coefficient_normal")
-                    .get_to(mooring_hydro.coefficients.added_mass_normal);
-                mooring_properties_json.at("added_mass_coefficient_axial")
-                    .get_to(mooring_hydro.coefficients.added_mass_axial);
-
-                floater_core.mooring_system->moorings.push_back(
-                    std::make_shared<seahowl::core::Mooring>(mooring_elasto, mooring_hydro));
-            }
-        } else {
-            spdlog::warn("Turbine has floater key but no floater file was defined.");
-
-            auto floater_elasto_ptr = std::make_shared<seahowl::elasto::FloaterElasto>();
-            turbine_elasto.foundation = floater_elasto_ptr;
-            auto& floater_elasto = *floater_elasto_ptr;
-            auto floater_core = std::make_shared<seahowl::core::Floater>(floater_elasto, floater_hydro);
-            turbine.foundation = floater_core;
         }
     }
 }
@@ -1224,8 +1272,15 @@ void populate_system(const std::string& filepath, seahowl::core::System& system_
         turbine.elasto.translate(Vector3d(trans[0], trans[1], trans[2]));
 
         if (turbine.elasto.foundation) {
-            // if has foundation: do not fix tower
+            // if has foundation: do not fix tower (assume floater)
             turbine.elasto.tower.nodes.front()->set_fixed(false);
+            try {
+                // fix if foundation is monopile
+                auto& monopile = dynamic_cast<seahowl::core::Monopile&>(*turbine.foundation);
+                monopile.elasto.nodes.front()->set_fixed(true);
+            } catch (const std::exception& e) {
+                // do nothing
+            }
         } else {
             turbine.tower.elasto.nodes.front()->set_fixed(true);
         }

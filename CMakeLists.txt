@@ -299,7 +299,9 @@ set(SEAHOWL_HYDRO_SOURCES
 set(SEAHOWL_HYDRO_HEADERS
     include/seahowl/hydro/morison.h
     include/seahowl/hydro/mooring_hydro.h
+    include/seahowl/hydro/foundation_fluid.h
     include/seahowl/hydro/floater_hydro.h
+    include/seahowl/hydro/monopile_hydro.h
 )
 if(SEAHOWL_ENABLE_HYDROCHRONO)
     list(APPEND SEAHOWL_HYDRO_SOURCES src/hydro/hydrochrono_adapter.cpp)

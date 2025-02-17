@@ -27,11 +27,6 @@ void FloaterElasto::presetup(double fraction) {
     mooring_system->presetup(fraction);
 }
 
-void FloaterElasto::prestep(double time, double dt) {
-    // mooring system prestep
-    mooring_system->prestep(time, dt);
-}
-
 void FloaterElasto::add_body(const std::string& name) {
     floater_bodies[name] = std::make_unique<seahowl::elasto::BodyElastoChrono>();
 }

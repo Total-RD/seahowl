@@ -21,12 +21,6 @@ void MooringSystemElasto::presetup(double fraction) {
     }
 }
 
-void MooringSystemElasto::prestep(double time, double dt) {
-    for (auto& mooring : moorings) {
-        mooring->prestep(time, dt);
-    }
-}
-
 void MooringSystemElasto::build() {
     for (auto& mooring : moorings) {
         mooring->build();

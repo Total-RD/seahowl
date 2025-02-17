@@ -43,20 +43,28 @@
       "elasto": [],
       "aero": [19]
     },
-    "file": "./tower_floating.csv",
+    "file": "./tower.csv",
     "options":{
       "use_MacCamyFuchs_correction": false,
       "use_Cd_correction": false
     }
   },
   "foundation": {
-    "type": "floater",
-    "file": "./floater.json"
+    "type": "monopile",
+    "file": "./monopile.csv",
+    "discretization": {
+      "elasto": [],
+      "hydro": [45]
+    },
+    "options": {
+      "use_MacCamyFuchs_correction": false,
+      "use_Cd_correction": false
+    }
   },
   "controller": {
     "type": "DISCON",
     "options": {
-      "infile": "./controller/DISCON_floating.IN",
+      "infile": "./controller/DISCON.IN",
       "libfile": "./controller/libdiscon.so"
     }
   }

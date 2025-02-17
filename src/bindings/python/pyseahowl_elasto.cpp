@@ -9,7 +9,9 @@
 #include <seahowl/elasto/rotor_elasto.h>
 #include <seahowl/elasto/tower_elasto.h>
 #include <seahowl/elasto/mooring_elasto.h>
+#include <seahowl/elasto/foundation_elasto.h>
 #include <seahowl/elasto/floater_elasto.h>
+#include <seahowl/elasto/monopile_elasto.h>
 #include <seahowl/elasto/turbine_elasto.h>
 #include <seahowl/elasto/system_elasto.h>
 #include <seahowl/elasto/chrono_adapters.h>
@@ -303,13 +305,15 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readonly("foundation", &seahowl::elasto::TurbineElasto::foundation)
         .def(py::init<>());
 
-    // elasto/floater_elasto.h
+    // elasto/foundation_elasto.h
     py::class_<seahowl::elasto::FoundationElasto, std::shared_ptr<seahowl::elasto::FoundationElasto>,
                seahowl::elasto::ComponentElasto>(m_elasto, "FoundationElasto")
         .def("link_to_entity", &seahowl::elasto::FoundationElasto::link_to_entity);
 
+    // elasto/floater_elasto.h
     py::class_<seahowl::elasto::FloaterElasto, std::shared_ptr<seahowl::elasto::FloaterElasto>,
                seahowl::elasto::FoundationElasto>(m_elasto, "FloaterElasto")
+        .def(py::init<>())
         .def_property_readonly(
             "mooring_system", [](seahowl::elasto::FloaterElasto& floater) { return floater.mooring_system.get(); },
             py::return_value_policy::reference_internal)
@@ -323,6 +327,22 @@ void initialize_pyseahowl_elasto(py::module& m) {
              py::return_value_policy::reference_internal)
         .def("get_fairlead_body", &seahowl::elasto::FloaterElasto::get_fairlead_body,
              py::return_value_policy::reference_internal);
+
+    // elasto/monopile_elasto.h
+    py::class_<seahowl::elasto::MonopileElasto, std::shared_ptr<seahowl::elasto::MonopileElasto>,
+               seahowl::elasto::TowerElasto, seahowl::elasto::FoundationElasto>(m_elasto, "MonopileElasto",
+                                                                                pybind11::multiple_inheritance())
+        .def(py::init<>())
+        .def_property_readonly(
+            "body_tp", [](seahowl::elasto::MonopileElasto& monopile) { return monopile.body_tp.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "link_tp_entity", [](seahowl::elasto::MonopileElasto& monopile) { return monopile.link_tp_entity.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "link_tp_monopile",
+            [](seahowl::elasto::MonopileElasto& monopile) { return monopile.link_tp_monopile.get(); },
+            py::return_value_policy::reference_internal);
 
     // elasto/mooring_elasto.h
     py::class_<seahowl::elasto::MooringSystemElasto, std::shared_ptr<seahowl::elasto::MooringSystemElasto>,

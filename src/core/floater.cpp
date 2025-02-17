@@ -28,7 +28,6 @@ void Floater::initialize_this(double time, double dt) {
 
 void Floater::prestep(double time, double dt) {
     mooring_system->prestep(time, dt);
-    elasto.prestep(time, dt);
 }
 
 void Floater::poststep(double time, double dt) {

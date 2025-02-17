@@ -44,11 +44,6 @@ class MooringElasto : public virtual ComponentElasto {
     virtual void set_diameter(double diameter) = 0;
 
     /**
-     * @brief Prestep of the mooring.
-     */
-    virtual void prestep(double time, double dt){};
-
-    /**
      * @brief Returns tension at fairlead.
      */
     virtual Vector3d get_tension_fairlead() const = 0;
@@ -88,7 +83,6 @@ class MooringSystemElasto : public ComponentElasto {
 
     virtual void build() override;
     virtual void presetup(double fraction) override;
-    virtual void prestep(double time, double dt);
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;
     virtual double get_mass() const override;

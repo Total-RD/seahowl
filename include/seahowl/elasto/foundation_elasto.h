@@ -7,10 +7,9 @@
 namespace seahowl {
 namespace elasto {
 
-class FoundationElasto : public ComponentElasto {
+class FoundationElasto : public virtual ComponentElasto {
   public:
     virtual void link_to_entity(const Entity& entity) = 0;
-    virtual void prestep(double time, double dt) = 0;
 };
 
 }  // namespace elasto

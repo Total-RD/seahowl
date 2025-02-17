@@ -2,6 +2,7 @@
 
 #include "seahowl/aero/rotor_aero.h"
 #include "seahowl/aero/tower_aero.h"
+#include "seahowl/hydro/foundation_fluid.h"
 #include "seahowl/hydro/floater_hydro.h"
 #include "seahowl/commons/component_fluid.h"
 
