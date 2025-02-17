@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
 #include <seahowl/elasto/chrono_adapters.h>
+#include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/env/wind_models.h>
 #include <seahowl/commons/numerics.h>
 #include <seahowl/aero/turbine_aero.h>
@@ -51,7 +52,7 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAero();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/turbine_nocontrol.json").generic_string(), turbine);
+    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(), turbine);
 
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
@@ -121,7 +122,11 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAero();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/turbine_nocontrol_fpm.json").generic_string(), turbine);
+    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(), turbine);
+    // force FPM mode on blades
+    for (auto& blade : turbine.elasto.rna.rotor->blades) {
+        dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade).fpm_mode = true;
+    }
 
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
@@ -189,8 +194,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAero();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/turbine_nocontrol_rigid.json").generic_string(),
-                                            turbine);
+    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(), turbine);
 
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
@@ -259,10 +263,9 @@ TEST_F(TestTurbine, controller_target_rpm) {
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAero();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/turbine_nocontrol_rigid.json").generic_string(),
-                                            turbine);
+    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(), turbine);
 
-    // remove controller
+    // make controller
     double target_rpm = 2.0;
     auto controller = std::make_shared<seahowl::servo::ControllerVariableTorque>();
     controller->target_rpm = target_rpm;
@@ -333,7 +336,7 @@ TEST_F(TestTurbine, actuator_disk) {
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAero();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/turbine_disk.json").generic_string(), turbine);
+    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/onshore/turbine_disk.json").generic_string(), turbine);
 
     // remove controller
     double target_rpm = 7.56;
@@ -439,7 +442,7 @@ TEST_F(TestTurbine, multiturbines) {
     system_core.fluid_model = wind_model;
 
     // turbines
-    auto turbine_file = (DATADIR / "IEA15MW/turbine_nocontrol_rigid.json").generic_string();
+    auto turbine_file = (DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string();
     auto nturbines = 3;
     for (int ii = 0; ii < nturbines; ii++) {
         system_core.elasto.turbines.push_back(std::make_shared<seahowl::elasto::TurbineElasto>());

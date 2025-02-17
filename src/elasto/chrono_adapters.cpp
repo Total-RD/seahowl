@@ -1161,14 +1161,9 @@ void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
         assemble();
     }
 
-    // constrain rotor and tower
-    std::vector<bool> tower_fixed;
+    // constrain rotor
     for (auto& turbine : turbines) {
-        // rotor
         turbine->rna.link_shaft_hub->set_constraints(true, true, true, true, true, true);
-        // tower
-        tower_fixed.push_back(turbine->tower.nodes.front()->is_fixed());
-        turbine->tower.nodes.front()->set_fixed(true);
     }
 
     // linear statics
@@ -1180,13 +1175,10 @@ void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
         chobj->DoStaticNonlinear(nonlinear_steps, true);
     }
 
-    // unconstrain rotor (and tower if it was free)
-    int idx_turbine = 0;
+    // unconstrain rotor
     for (auto& turbine : turbines) {
         // rotor
         turbine->rna.link_shaft_hub->set_constraints(true, true, true, false, true, true);
-        // tower
-        turbine->tower.nodes.front()->set_fixed(tower_fixed[idx_turbine]);
     }
 
     spdlog::debug("Performed statics prestep with linear step as {} and {} nonlinear steps.", linear, nonlinear_steps);

@@ -38,7 +38,7 @@ TEST_F(TestBEMT, tower_shadow_check) {
     auto tower_elasto = seahowl::elasto::TowerElasto();
     auto tower_aero = seahowl::aero::TowerAero();
     auto tower = seahowl::core::Tower(tower_elasto, tower_aero);
-    seahowl::io::populate_tower_from_json((DATADIR / "IEA15MW/tower.csv").generic_string(), tower);
+    seahowl::io::populate_tower_from_json((DATADIR / "IEA15MW/onshore/tower.csv").generic_string(), tower);
 
     // build elasto and aero parts
     tower.build();

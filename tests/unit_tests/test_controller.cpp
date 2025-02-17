@@ -47,8 +47,8 @@ TEST_F(TestController, IEA15) {
     auto& system_elasto = system_core.elasto;
 
     // add turbine to system
-    seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/turbine.json").generic_string(), system_core,
-                                                 "./output");
+    seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
+                                                 system_core, "./output");
     auto& turbine = *system_core.turbines[0];
     // fix tower bottom
     turbine.elasto.tower.nodes.front()->set_fixed(true);
@@ -133,7 +133,7 @@ TEST_F(TestController, actuator_disk) {
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAero();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/turbine_disk.json").generic_string(), turbine);
+    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/onshore/turbine_disk.json").generic_string(), turbine);
 
     turbine.build();
     turbine.elasto.assemble(system_elasto);

@@ -18,17 +18,17 @@
     },
     "blades": [
       {
-        "file": "./blade.json",
+        "file": "../base/blade.json",
         "initial_pitch": 0.0,
         "precone": -4.0
       },
       {
-        "file": "./blade.json",
+        "file": "../base/blade.json",
         "initial_pitch": 0.0,
         "precone": -4.0
       },
       {
-        "file": "./blade.json",
+        "file": "../base/blade.json",
         "initial_pitch": 0.0,
         "precone": -4.0
       }
@@ -36,36 +36,28 @@
   },
   "rna": {
     "initial_yaw": 0.0,
-    "file": "./rna.json"
+    "file": "../base/rna.json"
   },
   "tower": {
     "discretization": {
       "elasto": [],
       "aero": [19]
     },
-    "file": "./tower.csv",
+    "file": "./tower_floating.csv",
     "options":{
       "use_MacCamyFuchs_correction": false,
       "use_Cd_correction": false
     }
   },
   "foundation": {
-    "type": "monopile",
-    "file": "./monopile.csv",
-    "discretization": {
-      "elasto": [],
-      "hydro": [45]
-    },
-    "options": {
-      "use_MacCamyFuchs_correction": false,
-      "use_Cd_correction": false
-    }
+    "type": "floater",
+    "file": "./floater.json"
   },
   "controller": {
     "type": "DISCON",
     "options": {
-      "infile": "./controller/DISCON.IN",
-      "libfile": "./controller/libdiscon.so"
+      "infile": "../base/controller/DISCON_floating.IN",
+      "libfile": "../base/controller/libdiscon.so"
     }
   }
 }

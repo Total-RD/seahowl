@@ -1,7 +1,7 @@
 import seahowl
 
 # options
-main_filepath = "../../data/IEA15MW/main.json"  # change to actual filepath
+main_filepath = "../../data/IEA15MW/onshore/main.json"  # change to actual filepath
 seahowl.set_log_level_global("info")  # log levels: critical, info, debug, warn, trace
 
 # make simulation object

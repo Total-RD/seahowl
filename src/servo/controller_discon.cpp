@@ -3,6 +3,7 @@
 #include "seahowl/core/turbine.h"
 #include "seahowl/elasto/rotor_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
+#include "seahowl/io/utils_io.h"
 
 #include <vector>
 #include <string>
@@ -117,6 +118,13 @@ void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const 
 
     // yaw rate control
     pImpl.SetAvrSWAP(29, 0.0);
+
+    seahowl::io::utils::check_file_exists(libfile);
+
+#ifndef __gnu_linux__
+    // if not on gnu, first copy the DLL in case there are several turbines using the same file.
+    libfile = seahowl::io::utils::copy_file_and_increment(libfile, output_folder + "/tmp");
+#endif
 
     pImpl.Init(libfile);
 

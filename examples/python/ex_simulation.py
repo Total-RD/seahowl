@@ -1,7 +1,9 @@
 import seahowl
 
 # options
-turbine_filepath = "../../data/IEA15MW/turbine.json"  # change to actual filepath
+turbine_filepath = (
+    "../../data/IEA15MW/onshore/turbine.json"  # change to actual filepath
+)
 output_folder = "./output"
 seahowl.set_log_level_global("info")  # log levels: critical, info, debug, warn, trace
 

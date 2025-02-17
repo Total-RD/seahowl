@@ -2,7 +2,7 @@
   "aero": {
     "solver": "disk",
     "options": {
-      "performance_file": "./controller/Cp_Ct_Cq.IEA15MW_modified.txt"
+      "performance_file": "../base/controller/Cp_Ct_Cq.IEA15MW_modified.txt"
     }
 },
   "rotor": {
@@ -15,20 +15,20 @@
   },
   "rna": {
     "initial_yaw": 0.0,
-    "file": "./rna.json"
+    "file": "../base/rna.json"
   },
   "tower": {
     "discretization": {
-      "elasto": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-      "aero": [19]
+      "elasto": [],
+      "aero": []
     },
     "file": "./tower.csv"
   },
   "controller": {
     "type": "DISCON",
     "options": {
-      "infile": "./controller/DISCON.IN",
-      "libfile": "./controller/libdiscon.so"
+      "infile": "../base/controller/DISCON.IN",
+      "libfile": "../base/controller/libdiscon.so"
     }
   }
 }

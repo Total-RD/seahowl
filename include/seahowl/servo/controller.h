@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 // forward declarations
 namespace seahowl {
 namespace core {
@@ -22,6 +24,8 @@ class Controller {
     bool has_torque_control = false;
     /** @brief Whether yaw control is applied or not. */
     bool has_yaw_control = false;
+    /** @brief Output folder for controller. */
+    std::string output_folder = "./output";
 
     /**
      * @brief Constructor.

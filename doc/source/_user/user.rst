@@ -57,7 +57,7 @@ In this file, the following is set: global numerical options, output options, en
    * **rotation**: rotation of turbine (yaw) [deg].
 
 
-.. literalinclude:: ../../../data/IEA15MW/main.json
+.. literalinclude:: ../../../data/IEA15MW/onshore/main.json
    :language: json
    :linenos:
    :caption: Main input file example
@@ -68,7 +68,7 @@ Environment input file
 
 The environment input file contains information for the wind, wave, and current conditions.
 
-.. literalinclude:: ../../../data/IEA15MW/environment.json
+.. literalinclude:: ../../../data/IEA15MW/env/env.json
    :language: json
    :linenos:
    :caption: Environment input file example
@@ -104,10 +104,11 @@ Wind InflowWind
       "type": "inflowwind",
       "options": {
          "file_inflowwind": "./aerodyn/IEA-15-240-RWT_InflowWind.dat",
-         "file_windwnd": "./aerodyn/long_step_wind.wnd"
+         "zmin": 5.0
       }
    }
 
+Note that the zmin option allows for returning a wind velocity of zero for any position z < zmin. This can be useful when using TurbSim for example, where z < 0 cannot be part of the fluid domain.
 
 ******************
 Turbine input file
@@ -161,7 +162,7 @@ For discretization of blades and tower, it is possible to either use an ordered 
    * **file**: file path of floater file
 
 
-.. literalinclude:: ../../../data/IEA15MW/turbine.json
+.. literalinclude:: ../../../data/IEA15MW/onshore/turbine.json
    :language: json
    :linenos:
    :caption: Turbine input file example
@@ -246,7 +247,7 @@ The RNA input file contains properties of the hub, the shaft, the nacelle, and t
    * **position_from_apex**: (array of floats of length 3) offset of center of mass of hub [m].
 
 
-.. literalinclude:: ../../../data/IEA15MW/rna.json
+.. literalinclude:: ../../../data/IEA15MW/base/rna.json
    :language: json
    :linenos:
    :caption: Rotor-Nacelle Assembly input file example
@@ -291,7 +292,7 @@ The floater input file contains information for the floater and its mooring syst
       * **hydro**: (array of floats) discretization fractions (between 0 and 1) for hydro part of mooring [-].
 
 
-.. literalinclude:: ../../../data/IEA15MW/floater.json
+.. literalinclude:: ../../../data/IEA15MW/floating/floater.json
    :language: json
    :linenos:
    :caption: Floater input file example
@@ -313,7 +314,7 @@ Only *reference* points are defined in this file, and interpolation between them
 * **poisson_ratio**: (float) Poisson's ratio of tower material at reference point [-]
 * **damping_x**, **damping_y**, **damping_z**, **damping_t**: (float) Damping coefficients at reference point [-]
 
-.. literalinclude:: ../../../data/IEA15MW/tower.csv
+.. literalinclude:: ../../../data/IEA15MW/onshore/tower.csv
    :language: json
    :linenos:
    :lines: -3
@@ -321,7 +322,7 @@ Only *reference* points are defined in this file, and interpolation between them
 
 Alternatively, the tower can also be defined in a JSON format as input as follows:
 
-.. literalinclude:: ../../../data/IEA15MW/tower.json
+.. literalinclude:: ../../../data/IEA15MW/onshore/tower.json
    :language: json
    :linenos:
    :lines: -20
@@ -358,7 +359,7 @@ The airfoil filepath is only used built-in BEMT is used for aerodynamics.
    * **airfoil_file**: (string) file path of airfoil file (relative to this file path).
 
 
-.. literalinclude:: ../../../data/IEA15MW/blade.json
+.. literalinclude:: ../../../data/IEA15MW/base/blade.json
    :language: json
    :linenos:
    :lines: -51
@@ -369,7 +370,7 @@ The airfoil filepath is only used built-in BEMT is used for aerodynamics.
 Airfoil input file
 ******************
 
-.. literalinclude:: ../../../data/IEA15MW/airfoils/IEA-15-240-RWT_AeroDyn15_Polar_37.json
+.. literalinclude:: ../../../data/IEA15MW/base/airfoils/IEA-15-240-RWT_AeroDyn15_Polar_37.json
    :language: json
    :linenos:
    :lines: -15

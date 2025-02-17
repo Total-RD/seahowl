@@ -113,6 +113,11 @@ void OutputManager::preinitialize() {
         }
 #endif
     }
+    for (auto& turbine : system_core.turbines) {
+        if (turbine->controller) {
+            turbine->controller->output_folder = output_folder;
+        }
+    }
 }
 
 void OutputManager::initialize() {

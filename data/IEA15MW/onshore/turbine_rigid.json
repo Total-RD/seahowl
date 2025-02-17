@@ -15,17 +15,17 @@
     },
     "blades": [
       {
-        "file": "./blade.json",
+        "file": "../base/blade.json",
         "initial_pitch": 0,
         "precone": -4.0
       },
       {
-        "file": "./blade.json",
+        "file": "../base/blade.json",
         "initial_pitch": 0,
         "precone": -4.0
       },
       {
-        "file": "./blade.json",
+        "file": "../base/blade.json",
         "initial_pitch": 0,
         "precone": -4.0
       }
@@ -33,16 +33,24 @@
   },
   "rna": {
     "initial_yaw": 0.0,
-    "file": "./rna.json"
+    "file": "../base/rna.json"
   },
   "tower": {
     "discretization": {
-      "elasto": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-      "aero": [19]
+      "elasto": [],
+      "aero": []
     },
-    "file": "./tower.csv"
+    "file": "./tower.csv",
+    "options": {
+      "use_MacCamyFuchs_correction": false,
+      "use_Cd_correction": false
+    }
   },
   "controller": {
-    "type": ""
+    "type": "DISCON",
+    "options": {
+      "infile": "../base/controller/DISCON.IN",
+      "libfile": "../base/controller/libdiscon.so"
+    }
   }
 }

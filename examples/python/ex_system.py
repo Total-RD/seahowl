@@ -1,7 +1,7 @@
 import seahowl
 
 # options
-filepath = "../../data/IEA15MW/main.json"  # change to actual filepath
+filepath = "../../data/IEA15MW/onshore/main.json"  # change to actual filepath
 dt = 0.05
 dt_output = 1.0
 t_end = 200.0

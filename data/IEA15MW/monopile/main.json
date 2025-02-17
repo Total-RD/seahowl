@@ -21,11 +21,11 @@
     "gui": true
   },
   "environment": {
-    "file": "./environment_hydrochrono.json"
+    "file": "../env/env_waves_30m.json"
   },
   "turbines": [
     {
-      "file": "./turbine_monopile.json",
+      "file": "./turbine.json",
       "translation": [0, 0, 0],
       "rotation": 0
     }

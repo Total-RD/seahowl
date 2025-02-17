@@ -27,7 +27,7 @@ For more details about the installation process, see [INSTALL.md](INSTALL.md).
 For example, if you are in the root directory of this repository and compiled the SEAHOWL driver in a `build` folder, you can run:
 
 ```bash
-./build/seahowl_driver ./data/IEA15MW/main.json
+./build/seahowl_driver ./data/IEA15MW/onshore/main.json
 ```
 
 An `output` folder containing all the outputs will be automatically created.
@@ -42,7 +42,7 @@ import seahowl
 
 # make simulation object
 simulation = seahowl.core.Simulation()
-simulation.populate_from_file("data/IEA15MW/main.json")
+simulation.populate_from_file("data/IEA15MW/onshore/main.json")
 simulation.initialize_from_config()
 
 # simulation loop

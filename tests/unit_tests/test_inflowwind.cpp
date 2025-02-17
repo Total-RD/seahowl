@@ -33,8 +33,7 @@ TEST_F(TestInflowWind, rpm_initial_pitch) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model =
-        seahowl::env::InflowWindAdapter((DATADIR / "IEA15MW/aerodyn/IEA-15-240-RWT_InflowWind.dat").generic_string());
+    auto wind_model = seahowl::env::InflowWindAdapter((DATADIR / "IEA15MW/env/InflowWind.dat").generic_string());
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -46,7 +45,7 @@ TEST_F(TestInflowWind, rpm_initial_pitch) {
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAero();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/turbine_nocontrol.json").generic_string(), turbine);
+    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(), turbine);
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
 
