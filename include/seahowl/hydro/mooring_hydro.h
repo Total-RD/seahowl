@@ -68,7 +68,7 @@ class MooringHydro : public ComponentFluid {
     /**
      * @brief Compute fluid loads on mooring using Morison's approach on cylindrical elements.
      */
-    void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
+    void compute_fluid_loads(const env::EnvModel& fluid_model, double time) override;
 };
 
 /**
@@ -99,7 +99,7 @@ class MooringSystemHydro : public ComponentFluid {
     /**
      * @brief Compute fluid loads on mooring using Morison's approach on cylindrical elements.
      */
-    void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
+    void compute_fluid_loads(const env::EnvModel& fluid_model, double time) override;
 };
 
 }  // namespace hydro

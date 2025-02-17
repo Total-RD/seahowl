@@ -15,6 +15,14 @@ class WindModel : public FluidModel {
     double density = 1.225;
 
     /**
+     * @brief Returns true is the placement of the model (false otherwise).
+     *
+     * @param[in] position Position to assess whether inside model or not.
+     * @param[in] time Time of simulation.
+     */
+    virtual bool is_inside(const Vector3d& position, double time = 0.0) const { return true; };
+
+    /**
      * @brief Returns air density.
      */
     virtual double get_fluid_density(const Vector3d& position, double time) const override;

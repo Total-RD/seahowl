@@ -21,6 +21,7 @@
 #include "seahowl/elasto/floater_elasto.h"
 #include "seahowl/aero/blade_aero.h"
 #include "seahowl/env/wind_models.h"
+#include "seahowl/env/fluid_models.h"
 #include "seahowl/servo/controller.h"
 
 #include <filesystem>  // C++17
@@ -168,10 +169,10 @@ void OutputManager::initialize() {
             auto& system_core = this->system_core;
             auto& turbine = *system_core.turbines[idx_turbine];
             custom_csv.add_function("time (s)", [system_core]() { return system_core.get_time(); });
-            if (system_core.fluid_model) {
+            if (system_core.env_model->has_model_of_type<seahowl::env::FluidModel>()) {
                 custom_csv.add_function("wind (m/s)", [&system_core, &turbine]() {
-                    return system_core.fluid_model->get_fluid_velocity(
-                        turbine.rna.elasto.rotor->body_hub->get_position(), system_core.get_time());
+                    return system_core.env_model->get_fluid_velocity(turbine.rna.elasto.rotor->body_hub->get_position(),
+                                                                     system_core.get_time());
                 });
             }
             add_basic_turbine_info_to_csv(custom_csv, turbine);

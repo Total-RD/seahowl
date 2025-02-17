@@ -5,7 +5,7 @@ using seahowl::Vector3d;
 
 LinearSoilModel::LinearSoilModel() {}
 
-bool LinearSoilModel::is_in_soil(const Vector3d& position) const {
+bool LinearSoilModel::is_inside(const Vector3d& position, double time) const {
     double penetration_depth = (soil_position - position.dot(soil_normal));
     if (penetration_depth >= 0) {
         return true;

@@ -8,8 +8,7 @@
 // forward declarations
 namespace seahowl {
 namespace env {
-class FluidModel;
-class SoilModel;
+class EnvModel;
 }  // namespace env
 namespace servo {
 class Controller;
@@ -36,10 +35,8 @@ class System : public ComponentDynamic {
     std::deque<std::shared_ptr<Turbine>> turbines{};
     /** @brief Other dynamics components. */
     std::deque<std::shared_ptr<ComponentDynamic>> components{};
-    /** @brief Fluid model. */
-    std::shared_ptr<seahowl::env::FluidModel> fluid_model;
-    /** @brief Soil model. */
-    std::shared_ptr<seahowl::env::SoilModel> soil_model;
+    /** @brief environmental model. */
+    std::shared_ptr<seahowl::env::EnvModel> env_model;
     /** @brief System for elastodynamics. */
     seahowl::elasto::SystemElasto& elasto;
     /** @brief System for aerodynamics. */
@@ -79,8 +76,8 @@ class System : public ComponentDynamic {
      */
     virtual void poststep(double time, double dt) override;
 
-    void apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) override;
-    void apply_soil_model(seahowl::env::SoilModel& fluid_model, double time) override;
+    void apply_fluid_model(seahowl::env::EnvModel& env_model, double time) override;
+    void apply_soil_model(seahowl::env::EnvModel& env_model, double time) override;
 
     /**
      * @brief Returns time of simulation.

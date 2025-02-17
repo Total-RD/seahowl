@@ -587,7 +587,7 @@ void TurbineAeroDyn::initialize(double time, double dt) {
     aerodyn.initialize(time, dt, *this);
 }
 
-void TurbineAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_model, double time) {
+void TurbineAeroDyn::compute_fluid_loads(const seahowl::env::EnvModel& wind_model, double time) {
     // call AeroDyn to compute loads
     aerodyn.compute_loads(time, *this);
 
@@ -620,10 +620,10 @@ void TurbineAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_mo
 
 RotorAeroDyn::RotorAeroDyn(TowerAero& tower_ref) : RotorAeroBEMT(tower_ref) {}
 
-void RotorAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_model, double time) {
+void RotorAeroDyn::compute_fluid_loads(const seahowl::env::EnvModel& wind_model, double time) {
     // nothing happening here (see TurbineAeroDyn::compute_fluid_loads)
 }
 
-void RotorAeroDyn::compute_disk_averaged_wind_velocity(const env::FluidModel& fluid_model, double time) {
+void RotorAeroDyn::compute_disk_averaged_wind_velocity(const env::EnvModel& fluid_model, double time) {
     // nothing happening here (see TurbineAeroDyn::compute_fluid_loads)
 }

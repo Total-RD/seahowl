@@ -125,7 +125,7 @@ class Turbine : public ComponentDynamic {
      * @param[in] fluid_model Fluid model affecting turbine components.
      * @param[in] time Time of simulation.
      */
-    virtual void apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time);
+    virtual void apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time);
 
     /**
      * @brief Applies soil model to turbine components.
@@ -133,7 +133,7 @@ class Turbine : public ComponentDynamic {
      * @param[in] soil_model Soil model affecting turbine components.
      * @param[in] time Time of simulation.
      */
-    virtual void apply_soil_model(seahowl::env::SoilModel& soil_model, double time);
+    virtual void apply_soil_model(seahowl::env::EnvModel& soil_model, double time);
 
   protected:
     /**

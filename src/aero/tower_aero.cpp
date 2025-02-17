@@ -10,7 +10,7 @@
 using namespace seahowl;
 using namespace seahowl::aero;
 using namespace seahowl::hydro;
-using seahowl::env::FluidModel;
+using seahowl::env::EnvModel;
 
 TowerAero::TowerAero() {}
 
@@ -61,7 +61,7 @@ void TowerAero::build() {
     }
 }
 
-void TowerAero::compute_fluid_loads(const FluidModel& wind_model, double time) {
+void TowerAero::compute_fluid_loads(const EnvModel& wind_model, double time) {
     // compute loads at nodes
     for (auto& node : nodes) {
         node.compute_fluid_loads(wind_model, time);

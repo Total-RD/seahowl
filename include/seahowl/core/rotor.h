@@ -66,7 +66,7 @@ class RotorNacelleAssembly : public ComponentDynamic {
      */
     void poststep(double time, double dt) override;
 
-    void apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) override;
+    void apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) override;
 
     /**
      * @brief Updates aero positions, rotations, velocities and accelerations from elasto component of the RNA.

@@ -3,8 +3,7 @@
 #include "seahowl/elasto/component_elasto.h"
 #include "seahowl/elasto/entities_elasto.h"
 #include "seahowl/commons/numerics.h"
-#include "seahowl/env/soil_models.h"
-#include "seahowl/env/fluid_models.h"
+#include "seahowl/env/env_model.h"
 
 #include <deque>
 
@@ -154,7 +153,7 @@ class MooringElastoFEA : public MooringElasto, public ComponentElastoFEA {
      *
      * param[in] seabed Seabed model.
      */
-    void compute_seabed_loads(const seahowl::env::SoilModel& seabed);
+    void compute_seabed_loads(const seahowl::env::EnvModel& seabed);
 
     /**
      * @brief Returns tension at fairlead.

@@ -6,7 +6,7 @@
 // forward declarations
 namespace seahowl {
 namespace env {
-class FluidModel;
+class EnvModel;
 }  // namespace env
 }  // namespace seahowl
 
@@ -77,7 +77,7 @@ class MorisonNode : public EntityDynamicEigen {
      */
     MorisonNode();
 
-    void compute_fluid_loads(const env::FluidModel& fluid_model, double time);
+    void compute_fluid_loads(const env::EnvModel& fluid_model, double time);
 };
 
 /**
@@ -137,7 +137,7 @@ class MorisonPlate : public EntityDynamicEigen {
      */
     MorisonPlate();
 
-    void compute_fluid_loads(const env::FluidModel& fluid_model, double time);
+    void compute_fluid_loads(const env::EnvModel& fluid_model, double time);
 };
 
 }  // namespace hydro

@@ -59,7 +59,7 @@ class TowerAero : public virtual ComponentFluid {
     /**
      * @brief Compute wind loads on tower using Morison's approach on cylindrical elements.
      */
-    void compute_fluid_loads(const env::FluidModel& fluid_model, double time);
+    void compute_fluid_loads(const env::EnvModel& fluid_model, double time);
 };
 
 }  // namespace aero

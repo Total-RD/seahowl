@@ -6,6 +6,7 @@
 #include <seahowl/servo/controller.h>
 #include <seahowl/io/read_input.h>
 #include <seahowl/env/inflowwind_adapter.h>
+#include <seahowl/env/env_model.h>
 #include <seahowl/elasto/chrono_adapters.h>
 
 #include <gtest/gtest.h>
@@ -32,8 +33,14 @@ TEST_F(TestInflowWind, rpm_initial_pitch) {
     auto verbose = false;
     // timestepping
     double dt = 0.1;
+
+    auto path = (DATADIR / "IEA15MW/env/InflowWind.dat").generic_string();
     // wind
-    auto wind_model = seahowl::env::InflowWindAdapter((DATADIR / "IEA15MW/env/InflowWind.dat").generic_string());
+    auto wind_model = std::make_shared<seahowl::env::InflowWindAdapter>(path);
+    // env_model
+    auto env_model = seahowl::env::EnvModel();
+    env_model.addModel(wind_model);
+
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -77,7 +84,7 @@ TEST_F(TestInflowWind, rpm_initial_pitch) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 

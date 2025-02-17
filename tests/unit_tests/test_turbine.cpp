@@ -5,6 +5,7 @@
 #include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/elasto/blade_elasto.h>
 #include <seahowl/env/wind_models.h>
+#include <seahowl/env/env_model.h>
 #include <seahowl/commons/numerics.h>
 #include <seahowl/aero/turbine_aero.h>
 #include <seahowl/core/turbine.h>
@@ -37,9 +38,13 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = seahowl::env::ConstantWind();
-    wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
-    wind_model.shear_coefficient = 0.12;
+    auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
+    wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model->shear_coefficient = 0.12;
+    // env_model
+    auto env_model = seahowl::env::EnvModel();
+    env_model.addModel(wind_model);
+
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -84,7 +89,7 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -108,9 +113,13 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = seahowl::env::ConstantWind();
-    wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
-    wind_model.shear_coefficient = 0.12;
+    auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
+    wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model->shear_coefficient = 0.12;
+    // env_model
+    auto env_model = seahowl::env::EnvModel();
+    env_model.addModel(wind_model);
+
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -157,7 +166,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -181,9 +190,13 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = seahowl::env::ConstantWind();
-    wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
-    wind_model.shear_coefficient = 0.12;
+    auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
+    wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model->shear_coefficient = 0.12;
+    // env_model
+    auto env_model = seahowl::env::EnvModel();
+    env_model.addModel(wind_model);
+
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -227,7 +240,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -251,9 +264,12 @@ TEST_F(TestTurbine, controller_target_rpm) {
     // timestepping
     double dt = 0.05;
     // wind
-    auto wind_model = seahowl::env::ConstantWind();
-    wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
-    wind_model.shear_coefficient = 0.12;
+    auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
+    wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model->shear_coefficient = 0.12;
+    // env_model
+    auto env_model = seahowl::env::EnvModel();
+    env_model.addModel(wind_model);
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -299,7 +315,7 @@ TEST_F(TestTurbine, controller_target_rpm) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -323,9 +339,13 @@ TEST_F(TestTurbine, actuator_disk) {
     // timestepping
     double dt = 0.1;
     // wind
-    auto wind_model = seahowl::env::ConstantWind();
-    wind_model.set_wind_velocity(Vector3d(11.0, 0.0, 0.0));
-    wind_model.shear_coefficient = 0.12;
+    auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
+    wind_model->set_wind_velocity(Vector3d(11.0, 0.0, 0.0));
+    wind_model->shear_coefficient = 0.12;
+    // env_model
+    auto env_model = seahowl::env::EnvModel();
+    env_model.addModel(wind_model);
+
     // turbine
     double initial_pitch = 0.0 * seahowl::PI / 1000.0;
     // power target
@@ -375,7 +395,7 @@ TEST_F(TestTurbine, actuator_disk) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -393,7 +413,7 @@ TEST_F(TestTurbine, actuator_disk) {
 
     reference_power = 15.3e6;
     // wind
-    wind_model.set_wind_velocity(Vector3d(15.0, 0.0, 0.0));
+    wind_model->set_wind_velocity(Vector3d(15.0, 0.0, 0.0));
     // turbine
     initial_pitch = 11.0 * seahowl::PI / 180.0;
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
@@ -403,7 +423,7 @@ TEST_F(TestTurbine, actuator_disk) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -434,6 +454,10 @@ TEST_F(TestTurbine, multiturbines) {
     auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
     wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     wind_model->shear_coefficient = 0.12;
+    // env_model
+    auto env_model = std::make_shared<seahowl::env::EnvModel>();
+    env_model->addModel(wind_model);
+
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -444,7 +468,7 @@ TEST_F(TestTurbine, multiturbines) {
 
     // system core
     auto system_core = seahowl::core::System(system_elasto, system_aero);
-    system_core.fluid_model = wind_model;
+    system_core.env_model = env_model;
 
     // turbines
     auto turbine_file = (DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string();

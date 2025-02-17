@@ -17,7 +17,6 @@
 #include <seahowl/aero/rotor_aero.h>
 #include <seahowl/io/write_csv.h>
 #include <seahowl/io/output_manager.h>
-#include <seahowl/env/combined_models.h>
 
 namespace py = pybind11;
 

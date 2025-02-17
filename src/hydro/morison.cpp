@@ -1,6 +1,6 @@
 #include "seahowl/hydro/morison.h"
 
-#include "seahowl/env/fluid_models.h"
+#include "seahowl/env/env_model.h"
 
 #include <spdlog/spdlog.h>
 
@@ -129,7 +129,7 @@ double MacCamyFuchsTable::interpolateCmBinarySearch(double D) {
     return Cm;
 }
 
-void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double time) {
+void MorisonNode::compute_fluid_loads(const env::EnvModel& fluid_model, double time) {
     // reset total load
     load = Vector3d(0.0, 0.0, 0.0);
     load_noacc = Vector3d(0.0, 0.0, 0.0);
@@ -232,7 +232,7 @@ Quaternion MorisonElement::get_rotation() const {
 
 MorisonPlate::MorisonPlate() {}
 
-void MorisonPlate::compute_fluid_loads(const env::FluidModel& fluid_model, double time) {
+void MorisonPlate::compute_fluid_loads(const env::EnvModel& fluid_model, double time) {
     auto area = PI * pow(diameter * 0.5, 2);
 
     // vector pointing inwards of the plate

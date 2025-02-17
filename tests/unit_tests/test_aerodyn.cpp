@@ -1,6 +1,7 @@
 #include "fixture_components.h"
 
 #include <seahowl/env/wind_models.h>
+#include <seahowl/env/env_model.h>
 #include <seahowl/commons/numerics.h>
 #include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/core/turbine.h>
@@ -33,9 +34,13 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
     // timestepping
     double dt = 0.1;
     // wind (this is essentially ignored for the rotor as AeroDyn uses InflowWind input)
-    auto wind_model = seahowl::env::ConstantWind();
-    wind_model.set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
-    wind_model.shear_coefficient = 0.12;
+    auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
+    wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
+    wind_model->shear_coefficient = 0.12;
+    // env_model
+    auto env_model = seahowl::env::EnvModel();
+    env_model.addModel(wind_model);
+
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -83,7 +88,7 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(wind_model, time);
+        turbine.aero.compute_fluid_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 

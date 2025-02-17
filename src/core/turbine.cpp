@@ -159,11 +159,11 @@ double Turbine::get_generator_rpm() const {
     return rpm;
 }
 
-void Turbine::apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) {
-    aero.compute_fluid_loads(fluid_model, time);
+void Turbine::apply_fluid_model(seahowl::env::EnvModel& env_model, double time) {
+    aero.compute_fluid_loads(env_model, time);
 }
 
-void Turbine::apply_soil_model(seahowl::env::SoilModel& soil_model, double time) {
+void Turbine::apply_soil_model(seahowl::env::EnvModel& soil_model, double time) {
     if (foundation) {
         foundation->apply_soil_model(soil_model, time);
     }

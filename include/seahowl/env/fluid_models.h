@@ -1,6 +1,7 @@
 #pragma once
 
 #include "seahowl/commons/numerics.h"
+#include "seahowl/env/model.h"
 
 namespace seahowl {
 namespace env {
@@ -8,7 +9,7 @@ namespace env {
 /**
  * @brief Base class for fluid models
  */
-class FluidModel {
+class FluidModel : public Model {
   public:
     double ramp_start = 0.0;
     double ramp_end = 0.0;
@@ -20,7 +21,6 @@ class FluidModel {
      * @param[in] time Time of simulation.
      */
     virtual double get_fluid_density(const Vector3d& position, double time) const = 0;
-
     /**
      * @brief Returns fluid velocity at given coordinates.
      *

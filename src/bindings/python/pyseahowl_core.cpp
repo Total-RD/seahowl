@@ -25,6 +25,7 @@
 #include <seahowl/elasto/system_elasto.h>
 #include <seahowl/aero/system_aero.h>
 #include <seahowl/env/wind_models.h>
+#include <seahowl/env/env_model.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/io/read_input.h>
 #include <seahowl/io/read_input.h>
@@ -149,8 +150,7 @@ void initialize_pyseahowl_core(py::module& m) {
                  &seahowl::core::System::add))
         .def_readonly("turbines", &seahowl::core::System::turbines)
         .def_readonly("components", &seahowl::core::System::components)
-        .def_readwrite("fluid_model", &seahowl::core::System::fluid_model)
-        .def_readwrite("soil_model", &seahowl::core::System::soil_model)
+        .def_readwrite("env_model", &seahowl::core::System::env_model)
         .def_property_readonly("elasto", [](seahowl::core::System& system) { return &system.elasto; })
         .def_property_readonly("aero", [](seahowl::core::System& system) { return &system.aero; });
 }

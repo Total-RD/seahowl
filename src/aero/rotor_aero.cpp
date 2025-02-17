@@ -5,13 +5,12 @@
 #include "seahowl/aero/airfoil.h"
 #include "seahowl/aero/bemt.h"
 #include "seahowl/commons/utils.h"
-#include "seahowl/env/wind_models.h"
 
 #include <cmath>
 #include <spdlog/spdlog.h>
 
 using namespace seahowl::aero;
-using seahowl::env::FluidModel;
+using seahowl::env::EnvModel;
 using seahowl::Vector3d;
 using seahowl::Vector2d;
 using seahowl::PI;
@@ -51,7 +50,7 @@ seahowl::Vector2d DiskCoefficients::get_disk_coefficients_from_table(double TSR,
     return results;
 }
 
-void RotorAero::compute_disk_averaged_wind_velocity(const FluidModel& fluid_model, double time) {
+void RotorAero::compute_disk_averaged_wind_velocity(const EnvModel& fluid_model, double time) {
     disk_averaged_wind_velocity = fluid_model.get_fluid_velocity(body_hub.get_position(), time);
     size_t npoints = 1;
     for (auto& blade : blades) {
@@ -66,7 +65,7 @@ void RotorAero::compute_disk_averaged_wind_velocity(const FluidModel& fluid_mode
 
 RotorNacelleAssemblyAero::RotorNacelleAssemblyAero() {}
 
-void RotorNacelleAssemblyAero::compute_fluid_loads(const FluidModel& wind_model, double time) {
+void RotorNacelleAssemblyAero::compute_fluid_loads(const EnvModel& wind_model, double time) {
     rotor->compute_disk_averaged_wind_velocity(wind_model, time);
     rotor->compute_fluid_loads(wind_model, time);
 }
@@ -132,7 +131,7 @@ void RotorAeroBEMT::compute_radii_distances_solidity() {
     }
 }
 
-void RotorAeroBEMT::compute_fluid_loads(const FluidModel& wind_model, double time) {
+void RotorAeroBEMT::compute_fluid_loads(const EnvModel& wind_model, double time) {
     compute_radii_distances_solidity();
 
     auto hub_position = body_hub.get_position();
@@ -261,7 +260,7 @@ void RotorAeroDisk::initialize() {
     }
 }
 
-void RotorAeroDisk::compute_fluid_loads(const FluidModel& wind_model, double time) {
+void RotorAeroDisk::compute_fluid_loads(const EnvModel& wind_model, double time) {
     auto pos_hub = body_hub.get_position();
     auto vel_hub = body_hub.get_velocity();
     double density = wind_model.get_fluid_density(pos_hub, time);

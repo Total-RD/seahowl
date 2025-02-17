@@ -60,8 +60,8 @@ class Floater : public Foundation {
      */
     void poststep(double time, double dt) override;
 
-    void apply_fluid_model(seahowl::env::FluidModel& fluid_model, double time) override;
-    void apply_soil_model(seahowl::env::SoilModel& soil_model, double time) override;
+    void apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) override;
+    void apply_soil_model(seahowl::env::EnvModel& soil_model, double time) override;
 
     /**
      * @brief Builds the floater (hydro and elasto part).

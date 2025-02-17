@@ -3,7 +3,7 @@
 using namespace seahowl::env;
 using seahowl::Vector3d;
 
-bool WaveModel::is_in_water(const Vector3d& position, double time) const {
+bool WaveModel::is_inside(const Vector3d& position, double time) const {
     if (position.dot(surface_normal) <= get_water_level(position, time)) {
         return true;
     } else {
@@ -14,7 +14,7 @@ bool WaveModel::is_in_water(const Vector3d& position, double time) const {
 StillWater::StillWater() {}
 
 Vector3d StillWater::get_fluid_velocity_this(const Vector3d& position, double time) const {
-    if (is_in_water(position, time)) {
+    if (is_inside(position, time)) {
         return Vector3d(0.0, 0.0, 0.0);
     } else {
         throw std::runtime_error("Cannot retrieve water velocity above mean water level.");
@@ -22,7 +22,7 @@ Vector3d StillWater::get_fluid_velocity_this(const Vector3d& position, double ti
 }
 
 Vector3d StillWater::get_fluid_acceleration_this(const Vector3d& position, double time) const {
-    if (is_in_water(position, time)) {
+    if (is_inside(position, time)) {
         return Vector3d(0.0, 0.0, 0.0);
     } else {
         throw std::runtime_error("Cannot retrieve water acceleration above mean water level.");
@@ -30,7 +30,7 @@ Vector3d StillWater::get_fluid_acceleration_this(const Vector3d& position, doubl
 }
 
 double StillWater::get_fluid_density(const Vector3d& position, double time) const {
-    if (is_in_water(position, time)) {
+    if (is_inside(position, time)) {
         return density;
     } else {
         throw std::runtime_error("Cannot retrieve water density above mean water level.");
@@ -44,7 +44,7 @@ double StillWater::get_water_level(const Vector3d& position, double time) const 
 CurrentConstant::CurrentConstant() {}
 
 Vector3d CurrentConstant::get_fluid_velocity_this(const Vector3d& position, double time) const {
-    if (is_in_water(position, time)) {
+    if (is_inside(position, time)) {
         auto position_depth = position.dot(surface_normal) - mean_water_level;
         auto horizontal_velocity =
             velocity_seabed + (velocity_surface - velocity_seabed) *
@@ -56,7 +56,7 @@ Vector3d CurrentConstant::get_fluid_velocity_this(const Vector3d& position, doub
 }
 
 Vector3d CurrentConstant::get_fluid_acceleration_this(const Vector3d& position, double time) const {
-    if (is_in_water(position, time)) {
+    if (is_inside(position, time)) {
         return Vector3d(0.0, 0.0, 0.0);
     } else {
         throw std::runtime_error("Cannot retrieve water acceleration above mean water level.");

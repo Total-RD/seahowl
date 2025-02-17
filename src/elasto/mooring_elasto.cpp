@@ -205,7 +205,7 @@ void MooringElastoFEA::assemble_this(SystemElasto& system) {
     gravitational_acceleration = system.get_gravitational_acceleration();
 }
 
-void MooringElastoFEA::compute_seabed_loads(const seahowl::env::SoilModel& seabed) {
+void MooringElastoFEA::compute_seabed_loads(const seahowl::env::EnvModel& seabed) {
     for (auto& element : elements) {
         auto element_length = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_rest_length();
         auto element_mass = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_mass();
