@@ -13,6 +13,7 @@ set(TEST_FILES
 	unit_tests/test_bemt.cpp
 	unit_tests/test_blade.cpp
 	unit_tests/test_components.cpp
+	unit_tests/test_entities.cpp
 	unit_tests/test_rotor.cpp
 	unit_tests/test_tower.cpp
 	unit_tests/test_turbine.cpp
