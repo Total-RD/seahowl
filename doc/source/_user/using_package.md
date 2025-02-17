@@ -25,9 +25,16 @@ source bin/init_pyseahowl.sh
 ```
 ##### Windows
 
+If using Command Prompt (cmd):
 ```bash
 ./bin/init_pyseahowl.bat
 ```
+
+If using PowerShell:
+```bash
+./bin/init_pyseahowl.ps1
+```
+
 #### Example
 
 To use SEAHOWL in Python, you can follow this example:
