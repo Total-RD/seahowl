@@ -28,28 +28,6 @@ void FloaterElasto::presetup(double fraction) {
 }
 
 void FloaterElasto::prestep(double time, double dt) {
-    auto& floater_body = *body_main;
-    floater_body.reset_loads();
-
-    // apply viscous damping
-    // get local velocity (damping matrix expressed in local frame)
-    auto velocity_local = floater_body.get_rotation().inverse() * floater_body.get_velocity();
-    auto velocity_rot_local = floater_body.get_rotational_velocity(true);
-    // make vector of length 6
-    Eigen::Matrix<double, 6, 1> floater_velocity_vector(6);
-    floater_velocity_vector << velocity_local.x(), velocity_local.y(), velocity_local.z(), velocity_rot_local.x(),
-        velocity_rot_local.y(), velocity_rot_local.z();
-    // calculate damping force and moment
-    auto damping_vector = damping_matrix * (-floater_velocity_vector);
-    // project in global frame
-    auto damping_force =
-        floater_body.get_rotation() * seahowl::Vector3d(damping_vector(0), damping_vector(1), damping_vector(2));
-    auto damping_torque =
-        floater_body.get_rotation() * seahowl::Vector3d(damping_vector(3), damping_vector(4), damping_vector(5));
-    // apply damping
-    floater_body.accumulate_force(damping_force, false);
-    floater_body.accumulate_torque(damping_torque, false);
-
     // mooring system prestep
     mooring_system->prestep(time, dt);
 }

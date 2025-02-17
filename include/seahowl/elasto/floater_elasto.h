@@ -29,8 +29,6 @@ class FloaterElasto : public FoundationElasto {
     std::unique_ptr<seahowl::elasto::Link> link_floater_entity;
     /** @brief Mooring system of the floater. */
     std::unique_ptr<seahowl::elasto::MooringSystemElasto> mooring_system;
-    /** @brief Damping matrix of floater.*/
-    Eigen::Matrix<double, 6, 6> damping_matrix;
     /** @brief Main body of floater.*/
     std::unique_ptr<seahowl::elasto::BodyElasto> body_main;
 

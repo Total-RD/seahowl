@@ -316,7 +316,6 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_property_readonly(
             "body_main", [](seahowl::elasto::FloaterElasto& floater) { return floater.body_main.get(); },
             py::return_value_policy::reference_internal)
-        .def_readwrite("damping_matrix", &seahowl::elasto::FloaterElasto::damping_matrix)
         .def("add_body", &seahowl::elasto::FloaterElasto::add_body)
         .def("get_body", &seahowl::elasto::FloaterElasto::get_body, py::return_value_policy::reference_internal)
         .def("add_fairlead", &seahowl::elasto::FloaterElasto::add_fairlead)

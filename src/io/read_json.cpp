@@ -868,15 +868,17 @@ void populate_turbine_from_json(const std::string& filepath,
             if (dm.size() != 6) {
                 throw std::runtime_error("Viscous damping matrix for floater body has to be defined as 6x6 matrices.");
             }
+            Eigen::Matrix<double, 6, 6> damping_matrix;
             for (int irow = 0; irow < 6; irow++) {
                 if (dm[irow].size() != 6) {
                     throw std::runtime_error(
                         "Viscous damping matrix for floater body has to be defined as 6x6 matrices.");
                 }
                 for (int icol = 0; icol < 6; icol++) {
-                    floater_elasto.damping_matrix(irow, icol) = dm[irow][icol];
+                    damping_matrix(irow, icol) = dm[irow][icol];
                 }
             }
+            floater_elasto.body_main->set_damping_matrix(damping_matrix);
 
             // core floater
             auto floater_core_ptr = std::make_shared<seahowl::core::Floater>(floater_elasto, floater_hydro);
