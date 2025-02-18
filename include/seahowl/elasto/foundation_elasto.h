@@ -9,6 +9,11 @@ namespace elasto {
 
 class FoundationElasto : public virtual ComponentElasto {
   public:
+    /**
+     * @brief Link foundation to entity.
+     *
+     * @param[in] entity Entity to which the foundation will be linked.
+     */
     virtual void link_to_entity(const Entity& entity) = 0;
 };
 

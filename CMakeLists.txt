@@ -231,6 +231,7 @@ set(SEAHOWL_ELASTO_SOURCES
     src/elasto/tower_elasto.cpp
     src/elasto/floater_elasto.cpp
     src/elasto/mooring_elasto.cpp
+    src/elasto/monopile_elasto.cpp
     src/elasto/turbine_elasto.cpp
     src/elasto/chrono_adapters.cpp
 )

@@ -25,32 +25,37 @@ class MonopileElasto : public TowerElasto, public virtual FoundationElasto {
     /**
      * @brief Constructor.
      */
-    MonopileElasto() : TowerElasto() {
-        body_tp = std::make_unique<BodyElastoChrono>();
-        link_tp_entity = std::make_unique<seahowl::elasto::LinkChrono>();
-        link_tp_monopile = std::make_unique<seahowl::elasto::LinkChrono>();
-    };
+    MonopileElasto();
 
-    virtual void link_to_entity(const Entity& entity) override {
-        link_tp_entity->initialize(*body_tp, entity);
-        link_tp_entity->set_constraints(true, true, true, true, true, true);
-        link_tp_monopile->initialize(*body_tp, *nodes.back());
-        link_tp_monopile->set_constraints(true, true, true, true, true, true);
-        is_linked = true;
-    };
+    virtual void link_to_entity(const Entity& entity) override;
+
+    virtual void build() override;
+
+    /**
+     * @brief Translates the monopile.
+     *
+     * @param[in] translation_vector The 3D translation vector.
+     */
+    virtual void translate(const Vector3d& translation_vector) const override;
+
+    /**
+     * @brief Rotates the monopile.
+     *
+     * @param[in] translation_vector The angle of rotation (in radians).
+     * @param[in] axis The axis of rotation (3D vector).
+     */
+    virtual void rotate(double angle, const Vector3d& axis) const override;
+
+    /**
+     * @brief Returns the mass of the monopile.
+     */
+    virtual double get_mass() const override;
 
   protected:
-    /** @brief Whether floater is linked to entity or not. */
+    /** @brief Whether monopile is linked to entity or not. */
     bool is_linked = false;
 
-    virtual void assemble_this(seahowl::elasto::SystemElasto& system) override {
-        TowerElasto::assemble_this(system);
-        if (is_linked) {
-            system.add(*link_tp_entity);
-            system.add(*link_tp_monopile);
-            system.add(*body_tp);
-        }
-    };
+    virtual void assemble_this(seahowl::elasto::SystemElasto& system);
 };
 
 }  // namespace elasto
