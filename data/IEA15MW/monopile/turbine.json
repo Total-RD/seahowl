@@ -64,7 +64,7 @@
   "controller": {
     "type": "DISCON",
     "options": {
-      "infile": "../base/controller/DISCON_floating.IN",
+      "infile": "../base/controller/DISCON.IN",
       "libfile": "../base/controller/libdiscon.so"
     }
   }

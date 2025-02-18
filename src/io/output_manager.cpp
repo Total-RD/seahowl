@@ -13,6 +13,7 @@
 #include "seahowl/core/turbine.h"
 #include "seahowl/core/blade.h"
 #include "seahowl/core/floater.h"
+#include "seahowl/core/monopile.h"
 #include "seahowl/elasto/turbine_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/elasto/tower_elasto.h"
@@ -74,7 +75,7 @@ void add_basic_turbine_info_to_csv(seahowl::io::CustomCSV& custom_csv, seahowl::
                                 [&blade]() { return blade.elasto.get_pitch(); });
     }
     if (turbine.foundation) {
-        try {
+        try {  // check if floater
             auto& floater = dynamic_cast<seahowl::core::Floater&>(*turbine.foundation);
             auto& floater_elasto = floater.elasto;
             custom_csv.add_function("floater position (m)",
@@ -88,6 +89,16 @@ void add_basic_turbine_info_to_csv(seahowl::io::CustomCSV& custom_csv, seahowl::
             }
         } catch (const std::bad_cast& e) {
             // do nothing if no floater
+        }
+        try {  // check if monopile
+            auto& monopile = dynamic_cast<seahowl::core::Monopile&>(*turbine.foundation);
+            auto& monopile_elasto = monopile.elasto;
+            custom_csv.add_function("monopile base moment (Nm)",
+                                    [&monopile_elasto]() { return monopile_elasto.get_tower_base_moment(); });
+            custom_csv.add_function("monopile base force (N)",
+                                    [&monopile_elasto]() { return monopile_elasto.get_tower_base_force(); });
+        } catch (const std::bad_cast& e) {
+            // do nothing if no monopile
         }
     }
 }
