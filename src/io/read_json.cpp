@@ -1262,20 +1262,6 @@ void populate_system(const std::string& filepath, seahowl::core::System& system_
         // translate turbine
         auto trans = turbine_json.at("translation").get<std::vector<double>>();
         turbine.elasto.translate(Vector3d(trans[0], trans[1], trans[2]));
-
-        if (turbine.elasto.foundation) {
-            // if has foundation: do not fix tower (assume floater)
-            turbine.elasto.tower.nodes.front()->set_fixed(false);
-            try {
-                // fix if foundation is monopile
-                auto& monopile = dynamic_cast<seahowl::core::Monopile&>(*turbine.foundation);
-                monopile.elasto.nodes.front()->set_fixed(true);
-            } catch (const std::exception& e) {
-                // do nothing
-            }
-        } else {
-            turbine.tower.elasto.nodes.front()->set_fixed(true);
-        }
     }
 }
 

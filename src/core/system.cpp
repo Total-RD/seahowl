@@ -179,7 +179,7 @@ void System::set_time(double time) {
     elasto.set_time(time);
 }
 
-void System::run_presimulation(double duration, double dt, bool fix_towers, bool with_presetup) {
+void System::run_presimulation(double duration, double dt, bool fix_foundations, bool with_presetup) {
     if (duration == 0.0 || dt == 0.0 || dt > duration) {
         // do nothing if dt or number of steps is zero
         return;
@@ -190,12 +190,12 @@ void System::run_presimulation(double duration, double dt, bool fix_towers, bool
 
     double time_init = get_time();
 
-    std::vector<bool> tower_was_fixed;
+    std::vector<bool> foundation_was_fixed;
     for (int idx_turbine = 0; idx_turbine < turbines.size(); idx_turbine++) {
         auto& turbine = *turbines[idx_turbine];
-        tower_was_fixed.push_back(turbine.tower.elasto.nodes.front()->is_fixed());
-        if (fix_towers) {
-            turbine.tower.elasto.nodes.front()->set_fixed(true);
+        foundation_was_fixed.push_back(turbine.elasto.foundation->is_fixed());
+        if (fix_foundations) {
+            turbine.elasto.foundation->set_fixed(true);
         }
     }
 
@@ -224,10 +224,10 @@ void System::run_presimulation(double duration, double dt, bool fix_towers, bool
     // unfix towers
     for (int idx_turbine = 0; idx_turbine < turbines.size(); idx_turbine++) {
         auto& turbine = *turbines[idx_turbine];
-        if (tower_was_fixed[idx_turbine]) {
-            turbines[idx_turbine]->elasto.tower.nodes.front()->set_fixed(true);
+        if (foundation_was_fixed[idx_turbine]) {
+            turbines[idx_turbine]->elasto.foundation->set_fixed(true);
         } else {
-            turbines[idx_turbine]->elasto.tower.nodes.front()->set_fixed(false);
+            turbines[idx_turbine]->elasto.foundation->set_fixed(false);
         }
     }
 

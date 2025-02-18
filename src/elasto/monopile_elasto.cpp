@@ -18,9 +18,19 @@ void MonopileElasto::link_to_entity(const Entity& entity) {
     is_linked = true;
 }
 
+void MonopileElasto::set_fixed(bool is_fixed) {
+    nodes.front()->set_fixed(is_fixed);
+}
+
+bool MonopileElasto::is_fixed() const {
+    return nodes.front()->is_fixed();
+}
+
 void MonopileElasto::build() {
     // first build nodes
     TowerElasto::build();
+    // fix bottom of monopile
+    set_fixed(true);
     // move TP to top of monopile
     body_tp->set_position(nodes.back()->get_position());
     link_tp_monopile->initialize(*body_tp, *nodes.back());

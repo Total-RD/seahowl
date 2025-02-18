@@ -19,6 +19,14 @@ void FloaterElasto::link_to_entity(const Entity& entity) {
     is_linked = true;
 };
 
+void FloaterElasto::set_fixed(bool is_fixed) {
+    body_main->set_fixed(is_fixed);
+}
+
+bool FloaterElasto::is_fixed() const {
+    return body_main->is_fixed();
+}
+
 void FloaterElasto::build() {
     mooring_system->build();
 }

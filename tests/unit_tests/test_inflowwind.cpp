@@ -53,7 +53,6 @@ TEST_F(TestInflowWind, rpm_initial_pitch) {
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
     turbine.elasto.assemble(system_elasto);
-    turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {

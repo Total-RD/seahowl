@@ -56,7 +56,6 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
 
     turbine.build();
     turbine.elasto.assemble(system_elasto);
-    turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {

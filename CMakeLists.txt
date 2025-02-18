@@ -229,6 +229,7 @@ set(SEAHOWL_ELASTO_SOURCES
     src/elasto/reference_point_elasto.cpp
     src/elasto/rotor_elasto.cpp
     src/elasto/tower_elasto.cpp
+    src/elasto/foundation_elasto.cpp
     src/elasto/floater_elasto.cpp
     src/elasto/mooring_elasto.cpp
     src/elasto/monopile_elasto.cpp

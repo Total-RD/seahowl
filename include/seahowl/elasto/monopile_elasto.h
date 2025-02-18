@@ -28,33 +28,14 @@ class MonopileElasto : public TowerElasto, public virtual FoundationElasto {
     MonopileElasto();
 
     virtual void link_to_entity(const Entity& entity) override;
-
+    virtual void set_fixed(bool is_fixed) override;
+    virtual bool is_fixed() const override;
     virtual void build() override;
-
-    /**
-     * @brief Translates the monopile.
-     *
-     * @param[in] translation_vector The 3D translation vector.
-     */
     virtual void translate(const Vector3d& translation_vector) const override;
-
-    /**
-     * @brief Rotates the monopile.
-     *
-     * @param[in] translation_vector The angle of rotation (in radians).
-     * @param[in] axis The axis of rotation (3D vector).
-     */
     virtual void rotate(double angle, const Vector3d& axis) const override;
-
-    /**
-     * @brief Returns the mass of the monopile.
-     */
     virtual double get_mass() const override;
 
   protected:
-    /** @brief Whether monopile is linked to entity or not. */
-    bool is_linked = false;
-
     virtual void assemble_this(seahowl::elasto::SystemElasto& system);
 };
 

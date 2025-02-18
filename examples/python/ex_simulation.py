@@ -24,7 +24,6 @@ turbine = system_core.turbines[0]
 
 # fix tower bottom nodes and statics step
 system_elasto = system_core.elasto
-turbine.elasto.tower.nodes[0].set_fixed(True)
 system_elasto.do_statics(True, 10)
 
 # add fluid model

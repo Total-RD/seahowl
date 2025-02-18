@@ -33,10 +33,13 @@ class FloaterElasto : public FoundationElasto {
     FloaterElasto();
 
     virtual void link_to_entity(const Entity& entity) override;
-
+    virtual void set_fixed(bool is_fixed) override;
+    virtual bool is_fixed() const override;
     virtual void presetup(double fraction) override;
-
     virtual void build() override;
+    virtual void translate(const Vector3d& translation_vector) const override;
+    virtual void rotate(double angle, const Vector3d& axis) const override;
+    virtual double get_mass() const override;
 
     /**
      * @brief Creates and adds body to floater.
@@ -83,26 +86,6 @@ class FloaterElasto : public FoundationElasto {
      */
     virtual seahowl::elasto::Link& get_fairlead_link(const std::string& body_name, int index);
 
-    /**
-     * @brief Translates the floater.
-     *
-     * @param[in] translation_vector The 3D translation vector.
-     */
-    virtual void translate(const Vector3d& translation_vector) const override;
-
-    /**
-     * @brief Rotates the floater.
-     *
-     * @param[in] translation_vector The angle of rotation (in radians).
-     * @param[in] axis The axis of rotation (3D vector).
-     */
-    virtual void rotate(double angle, const Vector3d& axis) const override;
-
-    /**
-     * @brief Returns the mass of the floater.
-     */
-    virtual double get_mass() const override;
-
   protected:
     /** @brief List of bodies and their names. */
     std::map<std::string, std::unique_ptr<seahowl::elasto::BodyElasto>> floater_bodies;
@@ -112,8 +95,6 @@ class FloaterElasto : public FoundationElasto {
     std::map<std::string, std::deque<std::unique_ptr<seahowl::elasto::BodyElasto>>> fairlead_bodies;
     /** @brief Name of body for tower connection */
     std::string tower_connection_name = "";
-    /** @brief Whether floater is linked to entity or not. */
-    bool is_linked = false;
 
     virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;
 };

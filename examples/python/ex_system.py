@@ -13,9 +13,6 @@ system_aero = seahowl.aero.SystemAero()
 system_core = seahowl.core.System(system_elasto, system_aero)
 seahowl.io.populate_system_from_json(filepath, system_core)
 
-# fix tower bottom nodes
-for turbine in system_core.turbines:
-    turbine.tower.elasto.nodes[0].set_fixed(True)
 # statics
 system_elasto.do_statics(True, 10)
 # initialize system

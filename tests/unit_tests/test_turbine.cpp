@@ -58,7 +58,6 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
     turbine.elasto.assemble(system_elasto);
-    turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {
@@ -132,7 +131,6 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
     turbine.elasto.assemble(system_elasto);
-    turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {
@@ -200,7 +198,6 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
     turbine.elasto.assemble(system_elasto);
-    turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {
@@ -272,7 +269,6 @@ TEST_F(TestTurbine, controller_target_rpm) {
     turbine.controller = controller;
     turbine.build();
     turbine.elasto.assemble(system_elasto);
-    turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {
@@ -345,7 +341,6 @@ TEST_F(TestTurbine, actuator_disk) {
     turbine.controller = controller;
     turbine.build();
     turbine.elasto.assemble(system_elasto);
-    turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {
@@ -456,8 +451,6 @@ TEST_F(TestTurbine, multiturbines) {
         // translate
         turbine.build();
         turbine.elasto.translate(Vector3d(0.0 + ii * 150.0, 0.0 + ii * (-150.0), 0.0));
-        // fix
-        turbine.tower.elasto.nodes.front()->set_fixed(true);
     }
 
     // assemble system

@@ -2,13 +2,14 @@
 
 #include "seahowl/elasto/system_elasto.h"
 #include "seahowl/elasto/chrono_adapters.h"
-#include "seahowl/elasto/floater_elasto.h"
+#include "seahowl/elasto/foundation_elasto.h"
 
 using namespace seahowl::elasto;
 
 TurbineElasto::TurbineElasto() {
     rna = RotorNacelleAssemblyElasto();
     tower = TowerElasto();
+    foundation = std::make_shared<FoundationElastoBody>();
 }
 
 void TurbineElasto::assemble_this(SystemElasto& system) {

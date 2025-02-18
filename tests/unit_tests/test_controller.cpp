@@ -50,8 +50,6 @@ TEST_F(TestController, IEA15) {
     seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
                                                  system_core, "./output");
     auto& turbine = *system_core.turbines[0];
-    // fix tower bottom
-    turbine.elasto.tower.nodes.front()->set_fixed(true);
     // statics
     system_elasto.do_statics(true, 10);
 
@@ -137,7 +135,6 @@ TEST_F(TestController, actuator_disk) {
 
     turbine.build();
     turbine.elasto.assemble(system_elasto);
-    turbine.tower.elasto.nodes.front()->set_fixed(true);
 
     // statics
     if (statics_prestep) {
