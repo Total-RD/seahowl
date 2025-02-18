@@ -3,6 +3,9 @@
 #include <vector>
 #include <memory>
 #include "seahowl/env/model.h"
+#include "seahowl/env/fluid_models.h"
+#include "seahowl/env/soil_models.h"
+#include "seahowl/env/wave_models.h"
 #include "seahowl/commons/entities.h"
 
 namespace seahowl {
@@ -18,6 +21,7 @@ class EnvModel {
      * @brief Adds a model to the list of models
      */
     void addModel(std::shared_ptr<Model> model);
+
     /**
      * @brief Returns the list of models
      * @param[out] models List of models
@@ -79,6 +83,9 @@ class EnvModel {
 
   private:
     std::vector<std::shared_ptr<Model>> models;
+    std::vector<std::shared_ptr<FluidModel>> fluid_models;
+    std::vector<std::shared_ptr<SoilModel>> soil_models;
+    std::vector<std::shared_ptr<WaveModel>> wave_models;
 };
 
 template <typename T>
