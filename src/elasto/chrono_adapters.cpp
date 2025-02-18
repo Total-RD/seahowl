@@ -707,10 +707,8 @@ void NodeElastoChronoD::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>&
 };
 
 Eigen::Matrix<double, 6, 6> NodeElastoChronoD::get_added_mass_matrix() const {
-    if (!chload66) {
-        throw std::runtime_error("Cannot get added mass matrix for " + std::string(typeid(*this).name()) +
-                                 ", it was not set.");
-    }
+    throw std::runtime_error("Cannot get added mass matrix for " + std::string(typeid(*this).name()) +
+                             ", not implemented for cable nodes");
 }
 
 void NodeElastoChronoD::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
@@ -719,10 +717,8 @@ void NodeElastoChronoD::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& ma
 };
 
 Eigen::Matrix<double, 6, 6> NodeElastoChronoD::get_damping_matrix() const {
-    if (!chload66) {
-        throw std::runtime_error("Cannot get damping matrix for " + std::string(typeid(*this).name()) +
-                                 ", it was not set.");
-    }
+    throw std::runtime_error("Cannot get damping matrix for " + std::string(typeid(*this).name()) +
+                             ", not implemented for cable nodes");
 }
 
 void NodeElastoChronoD::set_fixed(bool is_fixed) {
