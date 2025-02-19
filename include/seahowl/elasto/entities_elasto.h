@@ -74,6 +74,13 @@ class EntityLoadable : public virtual EntityDynamic {
     virtual void set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) = 0;
 
     /**
+     * @brief Accumulates (adds to) added mass matrix of entity.
+     *
+     * @param[in] matrix Added mass matrix to accumulate.
+     */
+    virtual void accumulate_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) = 0;
+
+    /**
      * @brief Returns added mass matrix of entity.
      */
     virtual Eigen::Matrix<double, 6, 6> get_added_mass_matrix() const = 0;
@@ -84,6 +91,13 @@ class EntityLoadable : public virtual EntityDynamic {
      * @param[in] matrix Damping matrix.
      */
     virtual void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) = 0;
+
+    /**
+     * @brief Accumulates (adds to) damping matrix of entity.
+     *
+     * @param[in] matrix Damping matrix to accumulate.
+     */
+    virtual void accumulate_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) = 0;
 
     /**
      * @brief Returns damping matrix of entity.

@@ -98,8 +98,10 @@ class BodyElastoChrono : public BodyElasto, public EntityDynamicChrono {
     virtual bool is_fixed() const override;
     virtual double get_mass() override;
     virtual void set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
+    virtual void accumulate_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
     virtual Eigen::Matrix<double, 6, 6> get_added_mass_matrix() const override;
     virtual void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
+    virtual void accumulate_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
     virtual Eigen::Matrix<double, 6, 6> get_damping_matrix() const override;
 };
 
@@ -138,8 +140,10 @@ class NodeElastoChrono : public NodeElasto, public EntityDynamicChrono, public N
     virtual void set_mass(double mass) override;
     virtual double get_mass() override;
     virtual void set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
+    virtual void accumulate_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
     virtual Eigen::Matrix<double, 6, 6> get_added_mass_matrix() const override;
     virtual void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
+    virtual void accumulate_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
     virtual Eigen::Matrix<double, 6, 6> get_damping_matrix() const override;
     void set_properties(const BladeReferencePointElasto& ref, bool fpm = false);
     void set_properties(const TowerReferencePointElasto& ref);
@@ -166,8 +170,10 @@ class NodeElastoChronoD : public NodeElasto, public NodeElastoChronoBase {
     virtual void set_mass(double mass) override;
     virtual double get_mass() override;
     virtual void set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
+    virtual void accumulate_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
     virtual Eigen::Matrix<double, 6, 6> get_added_mass_matrix() const override;
     virtual void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
+    virtual void accumulate_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) override;
     virtual Eigen::Matrix<double, 6, 6> get_damping_matrix() const override;
 
     virtual void set_position(const Vector3d& position) override;

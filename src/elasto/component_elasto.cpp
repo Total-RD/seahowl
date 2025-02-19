@@ -172,12 +172,12 @@ void ComponentElastoFEA::accumulate_mass_matrix(const Eigen::Matrix<double, 6, 6
     double weight0 = 0.5 * abs(eta - 1);
     auto node0 = element->nodes[0];
     // load in global reference
-    node0->set_added_mass_matrix(node0->get_added_mass_matrix() + matrix * weight0);
+    node0->accumulate_added_mass_matrix(matrix * weight0);
     // load on second node
     double weight1 = 0.5 * abs(eta + 1);
     auto node1 = element->nodes[1];
     // load in global reference
-    node1->set_added_mass_matrix(node1->get_added_mass_matrix() + matrix * weight1);
+    node1->accumulate_added_mass_matrix(matrix * weight1);
 }
 
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_positions() const {

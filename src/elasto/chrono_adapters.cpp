@@ -143,6 +143,8 @@ class ChLoadLocal66 : public ChLoadCustom {
 
     void SetAddedMassMatrix(const ChMatrixDynamic<double>& matrix) { added_mass_matrix = matrix; }
     void SetDampingMatrix(const ChMatrixDynamic<double>& matrix) { damping_matrix = matrix; }
+    void AccumulateAddedMassMatrix(const ChMatrixDynamic<double>& matrix) { added_mass_matrix += matrix; }
+    void AccumulateDampingMatrix(const ChMatrixDynamic<double>& matrix) { damping_matrix += matrix; }
     ChMatrixDynamic<double> GetAddedMassMatrix() const { return added_mass_matrix; }
     ChMatrixDynamic<double> GetDampingMatrix() const { return damping_matrix; }
 
@@ -399,7 +401,7 @@ void BodyElastoChrono::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& 
         chloadcontainer->Add(chload66);
     }
     chload66->SetAddedMassMatrix(matrix);
-};
+}
 
 Eigen::Matrix<double, 6, 6> BodyElastoChrono::get_added_mass_matrix() const {
     if (!chload66) {
@@ -409,13 +411,29 @@ Eigen::Matrix<double, 6, 6> BodyElastoChrono::get_added_mass_matrix() const {
     return chload66->GetAddedMassMatrix();
 }
 
+void BodyElastoChrono::accumulate_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
+    if (!chload66) {
+        chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
+        chloadcontainer->Add(chload66);
+    }
+    chload66->AccumulateAddedMassMatrix(matrix);
+}
+
 void BodyElastoChrono::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
     if (!chload66) {
         chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
         chloadcontainer->Add(chload66);
     }
     chload66->SetDampingMatrix(matrix);
-};
+}
+
+void BodyElastoChrono::accumulate_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
+    if (!chload66) {
+        chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
+        chloadcontainer->Add(chload66);
+    }
+    chload66->AccumulateDampingMatrix(matrix);
+}
 
 Eigen::Matrix<double, 6, 6> BodyElastoChrono::get_damping_matrix() const {
     if (!chload66) {
@@ -510,7 +528,17 @@ void NodeElastoChrono::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& 
     // Convert from IEC convention to Chrono convention.
     auto mm = rot66_iec2ch * (matrix * rot66_iec2ch.transpose());
     chload66->SetAddedMassMatrix(mm);
-};
+}
+
+void NodeElastoChrono::accumulate_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
+    if (!chload66) {
+        chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
+        chloadcontainer->Add(chload66);
+    }
+    // Convert from IEC convention to Chrono convention.
+    auto mm = rot66_iec2ch * (matrix * rot66_iec2ch.transpose());
+    chload66->AccumulateAddedMassMatrix(mm);
+}
 
 Eigen::Matrix<double, 6, 6> NodeElastoChrono::get_added_mass_matrix() const {
     if (!chload66) {
@@ -527,7 +555,16 @@ void NodeElastoChrono::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& mat
     }
     auto mm = rot66_iec2ch * matrix * rot66_iec2ch.inverse();
     chload66->SetDampingMatrix(mm);
-};
+}
+
+void NodeElastoChrono::accumulate_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
+    if (!chload66) {
+        chload66 = std::make_shared<chrono::ChLoadLocal66>(chobj);
+        chloadcontainer->Add(chload66);
+    }
+    auto mm = rot66_iec2ch * matrix * rot66_iec2ch.inverse();
+    chload66->AccumulateDampingMatrix(mm);
+}
 
 Eigen::Matrix<double, 6, 6> NodeElastoChrono::get_damping_matrix() const {
     if (!chload66) {
@@ -704,7 +741,12 @@ double NodeElastoChronoD::get_mass() {
 void NodeElastoChronoD::set_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
     throw std::runtime_error("Cannot set added mass matrix for " + std::string(typeid(*this).name()) +
                              ", not implemented for cable nodes.");
-};
+}
+
+void NodeElastoChronoD::accumulate_added_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
+    throw std::runtime_error("Cannot set added mass matrix for " + std::string(typeid(*this).name()) +
+                             ", not implemented for cable nodes.");
+}
 
 Eigen::Matrix<double, 6, 6> NodeElastoChronoD::get_added_mass_matrix() const {
     throw std::runtime_error("Cannot get added mass matrix for " + std::string(typeid(*this).name()) +
@@ -714,7 +756,12 @@ Eigen::Matrix<double, 6, 6> NodeElastoChronoD::get_added_mass_matrix() const {
 void NodeElastoChronoD::set_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
     throw std::runtime_error("Cannot set damping matrix for " + std::string(typeid(*this).name()) +
                              ", not implemented for cable nodes.");
-};
+}
+
+void NodeElastoChronoD::accumulate_damping_matrix(const Eigen::Matrix<double, 6, 6>& matrix) {
+    throw std::runtime_error("Cannot set damping matrix for " + std::string(typeid(*this).name()) +
+                             ", not implemented for cable nodes.");
+}
 
 Eigen::Matrix<double, 6, 6> NodeElastoChronoD::get_damping_matrix() const {
     throw std::runtime_error("Cannot get damping matrix for " + std::string(typeid(*this).name()) +
