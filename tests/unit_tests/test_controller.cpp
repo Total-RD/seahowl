@@ -48,7 +48,7 @@ TEST_F(TestController, IEA15) {
 
     // add turbine to system
     seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
-                                                 system_core, "./output");
+                                                 system_core);
     auto& turbine = *system_core.turbines[0];
     // statics
     system_elasto.do_statics(true, 10);

@@ -543,9 +543,7 @@ void populate_rna_from_json(const std::string& filepath, seahowl::core::RotorNac
     populate_rna_aero_from_json(filepath, rna.aero);
 }
 
-void add_turbine_to_system_from_json(const std::string& filepath,
-                                     seahowl::core::System& system_core,
-                                     const std::string& output_folder) {
+void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
     spdlog::debug("Adding turbine to system from " + filepath + " file.");
     auto json_obj = get_json_from_file(filepath);
 
@@ -571,7 +569,7 @@ void add_turbine_to_system_from_json(const std::string& filepath,
     system_core.turbines.push_back(turbine);
 
     // populate turbine
-    populate_turbine_from_json(filepath, *turbine, output_folder);
+    populate_turbine_from_json(filepath, *turbine);
     turbine->build();
 }
 
@@ -599,9 +597,7 @@ auto populate_body_from_json(const json& body_json, seahowl::elasto::BodyElasto&
     body.set_inertia_matrix(body_inertia_matrix);
 }
 
-void populate_turbine_from_json(const std::string& filepath,
-                                seahowl::core::Turbine& turbine,
-                                const std::string& output_folder) {
+void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turbine& turbine) {
     spdlog::debug("Populating turbine from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
                   ").");
     auto json_obj = get_json_from_file(filepath);
@@ -1244,7 +1240,7 @@ void populate_system(const std::string& filepath, seahowl::core::System& system_
         // add turbine to system
         auto turbine_json = turbines_json[ii];
         auto filepath_turbine = (DATADIR / turbine_json.at("file").get<std::string>()).generic_string();
-        add_turbine_to_system_from_json(filepath_turbine, system_core, output_folder);
+        add_turbine_to_system_from_json(filepath_turbine, system_core);
 
         // get ref to turbine added last
         auto& turbine = *system_core.turbines.back();

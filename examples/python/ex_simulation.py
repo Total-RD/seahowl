@@ -19,7 +19,7 @@ simulation.outputs.set_output_folder(output_folder)
 
 # add turbine to system
 system_core = simulation.system_core
-seahowl.io.add_turbine_to_system_from_json(turbine_filepath, system_core, output_folder)
+seahowl.io.add_turbine_to_system_from_json(turbine_filepath, system_core)
 turbine = system_core.turbines[0]
 
 # fix tower bottom nodes and statics step
