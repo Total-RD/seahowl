@@ -120,6 +120,111 @@ TEST_F(TestMorison, analytical_comparison) {
     }
     EvaluateTest(test_dataset);
 }
+
+TEST_F(TestMorison, tower_morison) {
+    // make simulation object
+    auto simulation = seahowl::core::Simulation();
+    simulation.dt = 0.1;
+    simulation.duration = 50.0;
+    simulation.outputs->dt_output = 9999.9;  // no output, using custom CSV
+    simulation.outputs->has_csv = false;
+    simulation.outputs->has_gui = false;
+    simulation.outputs->has_vtk = false;
+
+    double rho = 1025.0;
+    double wave_height = 5.0;
+    double wave_period = 10.0;
+    double water_depth = 50.0;
+
+    // create Morison coefficients
+    auto coefficients = seahowl::hydro::HydroCoefficients();
+    coefficients.drag_normal = 1.0;
+    coefficients.drag_axial = 1.0;
+    coefficients.added_mass_normal = 1.0;
+    coefficients.added_mass_axial = 1.0;
+    coefficients.buoyancy_factor = 0.0;
+
+    // environmental conditions
+    auto wave_model = std::make_shared<seahowl::env::WaveModelHydroChrono>();
+    auto waves_hydrochrono = std::make_shared<RegularWave>();
+    waves_hydrochrono->regular_wave_amplitude_ = wave_height / 2.0;
+    waves_hydrochrono->regular_wave_omega_ = 2 * seahowl::PI / wave_period;
+    waves_hydrochrono->mwl_ = 0.0;
+    waves_hydrochrono->water_depth_ = water_depth;
+    waves_hydrochrono->Initialize();
+    wave_model->waves = waves_hydrochrono;
+    simulation.system_core->fluid_model = wave_model;
+
+    // tower
+    auto tower_elasto = std::make_shared<seahowl::elasto::TowerElasto>();
+    simulation.system_core->elasto.add(tower_elasto);
+    auto tower_fluid = std::make_shared<seahowl::aero::TowerAero>();
+    simulation.system_core->aero.add(tower_fluid);
+    auto tower = std::make_shared<seahowl::core::Tower>(*tower_elasto, *tower_fluid);
+    simulation.system_core->add(tower);
+    // properties
+    auto density = 7850.0;
+    auto young_modulus = 2.11e11;
+    auto poisson_ratio = 0.3;
+    double diameter = 10.0;
+    double thickness = 0.055;
+    double zbottom = -50.0;  // bottom of tower
+    double ztop = -5.0;      // top of tower (keep it below wave trough)
+    // bottom
+    auto ref1_elasto = seahowl::elasto::TowerReferencePointElasto();
+    ref1_elasto.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
+    ref1_elasto.coordinates = seahowl::Vector3d(0.0, 0.0, zbottom);
+    ref1_elasto.fraction = 0.0;
+    ref1_elasto.damping_coefficients = {0.1, 0.1, 0.1, 0.1, 0.0};
+    auto ref1_fluid = seahowl::aero::TowerReferencePointAero();
+    ref1_fluid.diameter = diameter;
+    ref1_fluid.coefficients = coefficients;
+    ref1_fluid.coordinates = seahowl::Vector3d(0.0, 0.0, zbottom);
+    ref1_fluid.fraction = 0.0;
+    // top
+    auto ref2_elasto = seahowl::elasto::TowerReferencePointElasto();
+    ref2_elasto.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
+    ref2_elasto.coordinates = seahowl::Vector3d(0.0, 0.0, ztop);
+    ref2_elasto.fraction = 1.0;
+    ref2_elasto.damping_coefficients = {0.1, 0.1, 0.1, 0.1, 0.0};
+    auto ref2_fluid = seahowl::aero::TowerReferencePointAero();
+    ref2_fluid.diameter = diameter;
+    ref2_fluid.coefficients = coefficients;
+    ref2_fluid.coordinates = seahowl::Vector3d(0.0, 0.0, ztop);
+    ref2_fluid.fraction = 1.0;
+    //
+    tower_elasto->reference_points = {ref1_elasto, ref2_elasto};
+    tower_elasto->discretization_fractions = {10};
+    tower_fluid->reference_points = {ref1_fluid, ref2_fluid};
+    tower_fluid->discretization_fractions = {50};
+    //
+    tower->build();
+
+    // fix bottom of tower
+    tower_elasto->nodes.front()->set_fixed(true);
+
+    // add functions to record values over time for the test
+    TestFrameworkDataset test_dataset({false, (ref_dir / "test_morison_tower.csv").generic_string(),
+                                       (test_dir / "test_morison_tower.test.csv").generic_string()});
+    test_dataset.test_csv.add_function("time (s)", [&simulation] { return simulation.system_core->get_time(); });
+    test_dataset.test_csv.add_function("tower base moment (N)",
+                                       [&tower_elasto] { return tower_elasto->get_tower_base_moment(); });
+    test_dataset.test_csv.add_function("tower base force (N)",
+                                       [&tower_elasto] { return tower_elasto->get_tower_base_force(); });
+
+    simulation.system_core->elasto.do_statics(true, 10);
+    simulation.initialize();
+    // store initial values
+    test_dataset.test_csv.write_row();
+    while (simulation.system_core->get_time() <= simulation.duration) {
+        // compute loads
+        simulation.step();
+
+        // store values
+        test_dataset.test_csv.write_row();
+    }
+    EvaluateTest(test_dataset);
+}
 #endif
 
 TEST_F(TestMorison, MCF_Table) {
