@@ -308,7 +308,20 @@ void initialize_pyseahowl_elasto(py::module& m) {
     // elasto/foundation_elasto.h
     py::class_<seahowl::elasto::FoundationElasto, std::shared_ptr<seahowl::elasto::FoundationElasto>,
                seahowl::elasto::ComponentElasto>(m_elasto, "FoundationElasto")
-        .def("link_to_entity", &seahowl::elasto::FoundationElasto::link_to_entity);
+        .def("link_to_entity", &seahowl::elasto::FoundationElasto::link_to_entity)
+        .def("set_fixed", &seahowl::elasto::FoundationElasto::set_fixed)
+        .def("is_fixed", &seahowl::elasto::FoundationElasto::is_fixed);
+    py::class_<seahowl::elasto::FoundationElastoBody, std::shared_ptr<seahowl::elasto::FoundationElastoBody>,
+               seahowl::elasto::FoundationElasto>(m_elasto, "FoundationElastoBody")
+        .def(py::init<>())
+        .def_property_readonly(
+            "body_foundation",
+            [](seahowl::elasto::FoundationElastoBody& foundation) { return foundation.body_foundation.get(); },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "link_foundation_entity",
+            [](seahowl::elasto::FoundationElastoBody& foundation) { return foundation.link_foundation_entity.get(); },
+            py::return_value_policy::reference_internal);
 
     // elasto/floater_elasto.h
     py::class_<seahowl::elasto::FloaterElasto, std::shared_ptr<seahowl::elasto::FloaterElasto>,
