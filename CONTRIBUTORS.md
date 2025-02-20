@@ -8,5 +8,6 @@ This file lists the entities and individuals having contributed to the code of S
 - Wenchao Yu (@wenchaoyu) wenchao.yu@totalenergies.com
 - Maxime Pallud (@MaxPal) maxime.pallud@totalenergies.com
 - Jerome Lucas (@lucasjerome) jerome.lucas@cesgenslab.fr
+- Andy Platt (@andrew-platt) andy.platt@nrel.gov
 
 If you have contributed and your name is not listed, please feel free to submit a pull request to add your information. All contributions are appreciated, big and small!
