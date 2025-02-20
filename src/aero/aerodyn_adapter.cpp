@@ -16,14 +16,14 @@
 extern "C" {
 
 void ADI_C_PreInit(int& NumTurbines_C,
-                   bool& TransposeDCM_in,
+                   int& TransposeDCM_in,
                    int& PointLoadOutput_in,
                    int& DebugLevel_in,
                    int& ErrStat_C,
                    char* ErrMsg_C);
 
 void ADI_C_SetupRotor(int& iWT_c,
-                      bool& TurbineIsHAWT_c,
+                      int& TurbineIsHAWT_c,
                       float* TurbOrigin_C,
                       float* HubPos_C,
                       double* HubOri_C,
@@ -69,10 +69,10 @@ void ADI_C_GetRotorLoads(int& iWT_C,
 
 void ADI_C_GetDiskAvgVel(int& iWT_C, float* DiskAvgVel_C, int& ErrStat_C, char* ErrMsg_C);
 
-void ADI_C_Init(bool& ADinputFilePassed,
+void ADI_C_Init(int& ADinputFilePassed,
                 const char** ADinputFileString_C,
                 int& ADinputFileStringLength_C,
-                bool& IfWinputFilePassed,
+                int& IfWinputFilePassed,
                 const char** IfWinputFileString_C,
                 int& IfWinputFileStringLength_C,
                 char* OutRootName_C,
@@ -88,7 +88,7 @@ void ADI_C_Init(bool& ADinputFilePassed,
                 int& InterpOrder_C,
                 double& DT_C,
                 double& TMax_C,
-                bool& storeHHVel,
+                int& storeHHVel,
                 int& WrVTK_in,
                 int& WrVTK_inType,
                 double& WrVTK_dt,
@@ -154,7 +154,7 @@ struct seahowl::aero::AeroDynInflowLib {
     int* MeshPtToBladeNum;
 
     /*  OutRootName
-     *  If HD writes a file (echo, summary, or other),
+     *  If AD writes a file (echo, summary, or other),
      *  use this for the root of the file name.
      */
     char OutRootName[1024];
@@ -323,16 +323,27 @@ void seahowl::aero::AeroDynInflowLib::Init() {
     const char* ADinputFile = ADinputFileString.c_str();
     const char* IfWinputFile = IfWinputFileString.c_str();
 
-    ADI_C_PreInit(NumTurbines, TransposeDCM, PointLoadOutput_in, DebugLevel_in, ErrStat, ErrMsg);
+    // Bools can be messy across a language interface.  Convert to integer to pass
+    int TransposeDCM_int{TransposeDCM};
+
+    ADI_C_PreInit(NumTurbines, TransposeDCM_int, PointLoadOutput_in, DebugLevel_in, ErrStat, ErrMsg);
     CheckError();
 
-    ADI_C_SetupRotor(iWT, TurbineIsHAWT, TurbOrigin, HubPos, HubOri, NacPos, NacOri, NumBlades, BldRootPos, BldRootOri,
+    // Bools can be messy across a language interface.  Convert to integer to pass
+    int TurbineIsHAWT_int{TurbineIsHAWT};
+
+    ADI_C_SetupRotor(iWT, TurbineIsHAWT_int, TurbOrigin, HubPos, HubOri, NacPos, NacOri, NumBlades, BldRootPos, BldRootOri,
                      NumMeshPts, MeshPos, MeshOri, MeshPtToBladeNum, ErrStat, ErrMsg);
     CheckError();
 
-    ADI_C_Init(ADinputFilePassed, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed, &IfWinputFile,
+    // Bools can be messy across a language interface.  Convert to integer to pass
+    int ADinputFilePassed_int{ADinputFilePassed};
+    int IfWinputFilePassed_int{IfWinputFilePassed};
+    int storeHHVel_int{storeHHVel};
+
+    ADI_C_Init(ADinputFilePassed_int, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed_int, &IfWinputFile,
                IfWinputFileStringLength, OutRootName, OutVTKDir, gravity, defFldDens, defKinVisc, defSpdSound, defPatm,
-               defPvap, WtrDpth, MSL2SWL, InterpOrder, DT, TMax, storeHHVel, WrVTK, WrVTK_Type, WrVTK_dt, VTKNacDim,
+               defPvap, WtrDpth, MSL2SWL, InterpOrder, DT, TMax, storeHHVel_int, WrVTK, WrVTK_Type, WrVTK_dt, VTKNacDim,
                VTKHubRad, wrOuts, DT_Outs, NumChannels, OutputChannelNames, OutputChannelUnits, ErrStat, ErrMsg);
     CheckError();
 }
