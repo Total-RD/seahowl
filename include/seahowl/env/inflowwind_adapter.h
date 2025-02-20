@@ -11,11 +11,14 @@
 /// </summary>
 extern "C" {
 
-void IfW_C_Init(const char** InputFileString_C,
+void IfW_C_Init(int& IfWinputFilePassed_C,
+                const char** InputFileString_C,
                 int& InputFileStringLength_C,
+                char* OutRootName_C,
                 int& NumWindPts_C,
                 double& DT_C,
                 int& NumChannels_C,
+                int& DebugLevel_C,
                 char* OutputChannelNames_C,
                 char* OutputChannelUnits_C,
                 int& ErrStat_C,

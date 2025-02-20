@@ -95,8 +95,20 @@ void InflowWindLib::SetVel(float* Velocity_C) {
 
 void InflowWindLib::Init() {
     const char* IfWinputFile = IfWinputFileString.c_str();
+//FIXME: the following are placeholders that should be revised
+    int DebugLevel = 1;
+    bool IfWinputFilePassed = false;
+    /*  OutRootName
+     *  If IfW writes a file (echo, summary, or other),
+     *  use this for the root of the file name.
+     */
+    char OutRootName[1024];
+    strcpy(OutRootName,"IfW");
 
-    IfW_C_Init(&IfWinputFile, IfWinputFileStringLength, NumWindPts, DT, NumChannels, OutputChannelNames,
+    // Bools can be messy across a language interface.  Convert to integer to pass
+    int IfWinputFilePassed_int{IfWinputFilePassed};
+
+    IfW_C_Init(IfWinputFilePassed_int, &IfWinputFile, IfWinputFileStringLength, OutRootName, NumWindPts, DT, DebugLevel, NumChannels, OutputChannelNames,
                OutputChannelUnits, ErrStat, ErrMsg);
     CheckError();
 }
