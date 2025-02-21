@@ -6,34 +6,6 @@
 
 #include <seahowl/env/wind_models.h>
 
-/// <summary>
-/// Inflowwind module in OpenFAST
-/// </summary>
-extern "C" {
-
-void IfW_C_Init(int& IfWinputFilePassed_C,
-                const char** InputFileString_C,
-                int& InputFileStringLength_C,
-                char* OutRootName_C,
-                int& NumWindPts_C,
-                double& DT_C,
-                int& DebugLevel_C,
-                int& NumChannels_C,
-                char* OutputChannelNames_C,
-                char* OutputChannelUnits_C,
-                int& ErrStat_C,
-                char* ErrMsg_C);
-
-void IfW_C_CalcOutput(double& Time_C,
-                      float* Positions_C,
-                      float* Velocities_C,
-                      float* OutputChannelValues_C,
-                      int& ErrStat_C,
-                      char* ErrMsg_C);
-
-void IfW_C_End(int& ErrStat_C, char* ErrMsg_C);
-}
-
 namespace seahowl {
 
 namespace core {
@@ -41,52 +13,15 @@ class Turbine;
 }
 
 namespace env {
-
-/**@brief InflowWind wrapping inferface
- *
+// forward declare (defined in .cpp file)
+/**
+ * @brief Interface to InflowWind library.
  */
-struct InflowWindLib {
-    // velocity
-    float* Velocity;
+struct InflowWindLib;
 
-    void SetIFWINFILE(std::string name);
-    void CheckError();
-
-    void SetTimeStep(double dt);
-    void SetTime(double time);
-    void SetPos(float* Position_C);
-    void SetVel(float* Velocity_C);
-
-    void Init();
-    void Calcul();
-    void End();
-
-  private:
-    // Input file string
-    std::string IfWinputFileString;
-
-    // Input file string length
-    int IfWinputFileStringLength;
-
-    // Number of wind points
-    int NumWindPts = 1;
-
-    // Time step
-    double Time;
-    double DT;
-
-    // positions
-    float* Position;
-
-    // number of output channels
-    int NumChannels = 0;
-    char OutputChannelNames[20 * 8000];
-    char OutputChannelUnits[20 * 8000];
-    float* OutputChannelValues = new float[100];
-    int ErrStat = 0;
-    char ErrMsg[1024];
-};
-
+/**
+ * @brief Adapter to InflowWind library.
+ */
 class InflowWindAdapter : public WindModel {
   public:
     /** @brief Level below which returned velocity is (0.0, 0.0, 0.0), used for z<0 when using TurbSim for example. */

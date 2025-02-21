@@ -10,8 +10,8 @@
 #include <iostream>
 #include <fstream>
 #include <spdlog/spdlog.h>
-// #include <numeric>
-// #include <sstream>
+
+using namespace seahowl::aero;
 
 extern "C" {
 
@@ -114,8 +114,8 @@ void ADI_C_End(int& ErrStat_C, char* ErrMsg_C);
  */
 struct seahowl::aero::AeroDynInflowLib {
     // Input file handling
-    bool ADinputFilePassed = false;   // false: read input info from a primary input file; true: passing info from data
-    bool IfWinputFilePassed = false;  // false: read input info from a primary input file; true: passing info from data
+    int ADinputFilePassed = 0;   // false: read input info from a primary input file; true: passing info from data
+    int IfWinputFilePassed = 0;  // false: read input info from a primary input file; true: passing info from data
 
     ~AeroDynInflowLib();
 
@@ -145,7 +145,7 @@ struct seahowl::aero::AeroDynInflowLib {
     int ADinputFileStringLength;
     int IfWinputFileStringLength;
 
-    bool TurbineIsHAWT = true;
+    int TurbineIsHAWT = 1;
     int NumTurbines = 1;
     int iWT = 1;
     int PointLoadOutput_in = 0;  // 0 for distributed loads, 1 for point loads
@@ -192,9 +192,9 @@ struct seahowl::aero::AeroDynInflowLib {
     double TimeLast;
 
     // flags
-    bool storeHHVel = false;
+    int storeHHVel = 0;
     float* HHVel = new float[3]{0.0};
-    bool TransposeDCM = false;
+    int TransposeDCM = 0;
 
     // VTK
     int WrVTK = 0;       // default of no vtk output
@@ -248,7 +248,7 @@ struct seahowl::aero::AeroDynInflowLib {
     char ErrMsg[1024];
 };
 
-seahowl::aero::AeroDynInflowLib::~AeroDynInflowLib() {
+AeroDynInflowLib::~AeroDynInflowLib() {
     delete[] HubPos, HubOri, HubVel, HubAcc;                        // hub
     delete[] NacPos, NacOri, NacVel, NacAcc;                        // nacelle
     delete[] BldRootPos, BldRootOri, BldRootVel, BldRootAcc;        // blade roots
@@ -259,7 +259,7 @@ seahowl::aero::AeroDynInflowLib::~AeroDynInflowLib() {
     delete[] HHVel;
 }
 
-void seahowl::aero::AeroDynInflowLib::CheckError() {
+void AeroDynInflowLib::CheckError() {
     if (ErrStat == 0) {
         return;
     } else if (ErrStat == 1) {
@@ -271,34 +271,34 @@ void seahowl::aero::AeroDynInflowLib::CheckError() {
     }
 }
 
-void seahowl::aero::AeroDynInflowLib::set_aerodyn_infile(const std::string& name) {
+void AeroDynInflowLib::set_aerodyn_infile(const std::string& name) {
     spdlog::debug("Set AeroDyn INFILE: {}.", name);
     ADinputFileString = name;
     ADinputFileStringLength = ADinputFileString.length();
 }
 
-void seahowl::aero::AeroDynInflowLib::set_inflowwind_infile(const std::string& name) {
+void AeroDynInflowLib::set_inflowwind_infile(const std::string& name) {
     spdlog::debug("Set InflowWind INFILE: {}.", name);
     IfWinputFileString = name;
     IfWinputFileStringLength = IfWinputFileString.length();
 }
 
-void seahowl::aero::AeroDynInflowLib::set_outfile_name(const std::string& name) {
+void AeroDynInflowLib::set_outfile_name(const std::string& name) {
     spdlog::debug("Set AeroDyn/InflowWind output file: {}.", name);
     strcpy(OutRootName, name.c_str());
 }
 
-void seahowl::aero::AeroDynInflowLib::set_outvtk_dir(const std::string& name) {
+void AeroDynInflowLib::set_outvtk_dir(const std::string& name) {
     spdlog::debug("Set AeroDyn/InflowWind output directory: {}.", name);
     strcpy(OutVTKDir, name.c_str());
 }
 
-void seahowl::aero::AeroDynInflowLib::set_time(double time) {
+void AeroDynInflowLib::set_time(double time) {
     Time = time;
     TimeLast = Time - DT;
 }
 
-void seahowl::aero::AeroDynInflowLib::initialize_arrays(int NumBlades, int NumMeshPts) {
+void AeroDynInflowLib::initialize_arrays(int NumBlades, int NumMeshPts) {
     //
     this->NumBlades = NumBlades;
     this->NumMeshPts = NumMeshPts;
@@ -318,37 +318,26 @@ void seahowl::aero::AeroDynInflowLib::initialize_arrays(int NumBlades, int NumMe
     MeshPtToBladeNum = new int[NumMeshPts]{0};
 }
 
-void seahowl::aero::AeroDynInflowLib::Init() {
+void AeroDynInflowLib::Init() {
     // input files
     const char* ADinputFile = ADinputFileString.c_str();
     const char* IfWinputFile = IfWinputFileString.c_str();
 
-    // Bools can be messy across a language interface.  Convert to integer to pass
-    int TransposeDCM_int{TransposeDCM};
-
-    ADI_C_PreInit(NumTurbines, TransposeDCM_int, PointLoadOutput_in, DebugLevel_in, ErrStat, ErrMsg);
+    ADI_C_PreInit(NumTurbines, TransposeDCM, PointLoadOutput_in, DebugLevel_in, ErrStat, ErrMsg);
     CheckError();
 
-    // Bools can be messy across a language interface.  Convert to integer to pass
-    int TurbineIsHAWT_int{TurbineIsHAWT};
-
-    ADI_C_SetupRotor(iWT, TurbineIsHAWT_int, TurbOrigin, HubPos, HubOri, NacPos, NacOri, NumBlades, BldRootPos, BldRootOri,
+    ADI_C_SetupRotor(iWT, TurbineIsHAWT, TurbOrigin, HubPos, HubOri, NacPos, NacOri, NumBlades, BldRootPos, BldRootOri,
                      NumMeshPts, MeshPos, MeshOri, MeshPtToBladeNum, ErrStat, ErrMsg);
     CheckError();
 
-    // Bools can be messy across a language interface.  Convert to integer to pass
-    int ADinputFilePassed_int{ADinputFilePassed};
-    int IfWinputFilePassed_int{IfWinputFilePassed};
-    int storeHHVel_int{storeHHVel};
-
-    ADI_C_Init(ADinputFilePassed_int, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed_int, &IfWinputFile,
+    ADI_C_Init(ADinputFilePassed, &ADinputFile, ADinputFileStringLength, IfWinputFilePassed, &IfWinputFile,
                IfWinputFileStringLength, OutRootName, OutVTKDir, gravity, defFldDens, defKinVisc, defSpdSound, defPatm,
-               defPvap, WtrDpth, MSL2SWL, InterpOrder, DT, TMax, storeHHVel_int, WrVTK, WrVTK_Type, WrVTK_dt, VTKNacDim,
+               defPvap, WtrDpth, MSL2SWL, InterpOrder, DT, TMax, storeHHVel, WrVTK, WrVTK_Type, WrVTK_dt, VTKNacDim,
                VTKHubRad, wrOuts, DT_Outs, NumChannels, OutputChannelNames, OutputChannelUnits, ErrStat, ErrMsg);
     CheckError();
 }
 
-void seahowl::aero::AeroDynInflowLib::Calcul() {
+void AeroDynInflowLib::Calcul() {
     ADI_C_CalcOutput(Time, OutputChannelValues, ErrStat, ErrMsg);
     CheckError();
 
@@ -356,7 +345,7 @@ void seahowl::aero::AeroDynInflowLib::Calcul() {
     CheckError();
 }
 
-void seahowl::aero::AeroDynInflowLib::Update() {
+void AeroDynInflowLib::Update() {
     ADI_C_SetRotorMotion(iWT, HubPos, HubOri, HubVel, HubAcc, NacPos, NacOri, NacVel, NacAcc, BldRootPos, BldRootOri,
                          BldRootVel, BldRootAcc, NumMeshPts, MeshPos, MeshOri, MeshVel, MeshAcc, ErrStat, ErrMsg);
     CheckError();
@@ -365,12 +354,12 @@ void seahowl::aero::AeroDynInflowLib::Update() {
     CheckError();
 }
 
-void seahowl::aero::AeroDynInflowLib::End() {
+void AeroDynInflowLib::End() {
     ADI_C_End(ErrStat, ErrMsg);
     CheckError();
 }
 
-seahowl::aero::AeroDynAdapter::AeroDynAdapter() {
+AeroDynAdapter::AeroDynAdapter() {
     spdlog::debug("Initialising Aerodyn15 adapter");
     pImpl = std::make_unique<AeroDynInflowLib>();
     pImpl->ADinputFilePassed = false;
@@ -379,14 +368,14 @@ seahowl::aero::AeroDynAdapter::AeroDynAdapter() {
     pImpl->set_outvtk_dir("output/vtk-ADI");
 }
 
-seahowl::aero::AeroDynAdapter::~AeroDynAdapter() {}
+AeroDynAdapter::~AeroDynAdapter() {}
 
-void seahowl::aero::AeroDynAdapter::set_infiles(const std::string& AerodynInfile, const std::string& InflowInfile) {
+void AeroDynAdapter::set_infiles(const std::string& AerodynInfile, const std::string& InflowInfile) {
     pImpl->set_aerodyn_infile(AerodynInfile);
     pImpl->set_inflowwind_infile(InflowInfile);
 }
 
-void seahowl::aero::AeroDynAdapter::initialize(double time, double dt, seahowl::aero::TurbineAero& turbine) {
+void AeroDynAdapter::initialize(double time, double dt, TurbineAero& turbine) {
     pImpl->DT = dt;
     pImpl->set_time(time);
 
@@ -419,7 +408,7 @@ void seahowl::aero::AeroDynAdapter::initialize(double time, double dt, seahowl::
     pImpl->Init();
 }
 
-void seahowl::aero::AeroDynAdapter::compute_loads(double time, seahowl::aero::TurbineAero& turbine) {
+void AeroDynAdapter::compute_loads(double time, TurbineAero& turbine) {
     pImpl->set_time(time);
     update_turbine_variables(turbine);
     pImpl->Update();
@@ -436,18 +425,18 @@ void seahowl::aero::AeroDynAdapter::compute_loads(double time, seahowl::aero::Tu
     }
 }
 
-void seahowl::aero::AeroDynAdapter::end() {
+void AeroDynAdapter::end() {
     pImpl->End();
 }
 
-void seahowl::aero::AeroDynAdapter::update_turbine_variables(seahowl::aero::TurbineAero& turbine) {
+void AeroDynAdapter::update_turbine_variables(TurbineAero& turbine) {
     update_hub_motion(turbine);
     update_nacelle_motion(turbine);
     update_roots_motion(turbine);
     update_mesh_motion(turbine);
 }
 
-void seahowl::aero::AeroDynAdapter::update_hub_motion(seahowl::aero::TurbineAero& turbine) {
+void AeroDynAdapter::update_hub_motion(TurbineAero& turbine) {
     // Get the information about hub
     auto& hub = turbine.rna.rotor->body_hub;
     auto hubPos = hub.get_position();
@@ -470,7 +459,7 @@ void seahowl::aero::AeroDynAdapter::update_hub_motion(seahowl::aero::TurbineAero
     }
 }
 
-void seahowl::aero::AeroDynAdapter::update_nacelle_motion(seahowl::aero::TurbineAero& turbine) {
+void AeroDynAdapter::update_nacelle_motion(TurbineAero& turbine) {
     // Get the information about nacelle
     auto& nac = turbine.rna.body_nacelle;
     auto nacPos = nac.get_position();
@@ -493,7 +482,7 @@ void seahowl::aero::AeroDynAdapter::update_nacelle_motion(seahowl::aero::Turbine
     }
 }
 
-void seahowl::aero::AeroDynAdapter::update_roots_motion(seahowl::aero::TurbineAero& turbine) {
+void AeroDynAdapter::update_roots_motion(TurbineAero& turbine) {
     auto nblades = turbine.rna.rotor->blades.size();
     pImpl->NumBlades = nblades;
 
@@ -523,7 +512,7 @@ void seahowl::aero::AeroDynAdapter::update_roots_motion(seahowl::aero::TurbineAe
     }
 }
 
-void seahowl::aero::AeroDynAdapter::update_mesh_motion(seahowl::aero::TurbineAero& turbine) {
+void AeroDynAdapter::update_mesh_motion(TurbineAero& turbine) {
     auto nblades = turbine.rna.rotor->blades.size();
     auto nMeshPerBlade = turbine.rna.rotor->blades[0]->nodes.size();
     auto nMesh = nMeshPerBlade * nblades;
@@ -556,11 +545,11 @@ void seahowl::aero::AeroDynAdapter::update_mesh_motion(seahowl::aero::TurbineAer
     }
 }
 
-seahowl::aero::TurbineAeroDyn::TurbineAeroDyn() : TurbineAero() {
-    rna.rotor = std::make_shared<seahowl::aero::RotorAeroDyn>(tower);
+TurbineAeroDyn::TurbineAeroDyn() : TurbineAero() {
+    rna.rotor = std::make_shared<RotorAeroDyn>(tower);
 }
 
-void seahowl::aero::TurbineAeroDyn::initialize(double time, double dt) {
+void TurbineAeroDyn::initialize(double time, double dt) {
     TurbineAero::initialize(time, dt);
 
     // VTK options for AeroDyn
@@ -573,12 +562,12 @@ void seahowl::aero::TurbineAeroDyn::initialize(double time, double dt) {
     aerodyn.initialize(time, dt, *this);
 }
 
-void seahowl::aero::TurbineAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_model, double time) {
+void TurbineAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_model, double time) {
     // call AeroDyn to compute loads
     aerodyn.compute_loads(time, *this);
 
     // transfer loads from AeroDyn to SEAHOWL rotor
-    auto& rotor = dynamic_cast<seahowl::aero::RotorAeroDyn&>(*rna.rotor);
+    auto& rotor = dynamic_cast<RotorAeroDyn&>(*rna.rotor);
     int count_node = 0;
     for (auto& blade : rotor.blades) {
         // first attach loads from AeroDyn to aero nodes
@@ -601,8 +590,8 @@ void seahowl::aero::TurbineAeroDyn::compute_fluid_loads(const seahowl::env::Flui
     }
 }
 
-seahowl::aero::RotorAeroDyn::RotorAeroDyn(TowerAero& tower_ref) : RotorAeroBEMT(tower_ref) {}
+RotorAeroDyn::RotorAeroDyn(TowerAero& tower_ref) : RotorAeroBEMT(tower_ref) {}
 
-void seahowl::aero::RotorAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_model, double time) {
+void RotorAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_model, double time) {
     // nothing happening here (see TurbineAeroDyn::compute_fluid_loads)
 }
