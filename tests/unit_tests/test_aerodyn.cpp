@@ -76,6 +76,8 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
                                        (test_dir / "test_aerodyn_rpm_initial_pitch.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("rpm (-)", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
+    test_dataset.test_csv.add_function("axial torque (Nm)",
+                                       [&turbine]() { return turbine.rna.elasto.get_axial_torque(); });
 
     while (time < 50.0) {
         // prestep

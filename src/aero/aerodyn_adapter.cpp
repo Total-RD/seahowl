@@ -552,6 +552,20 @@ TurbineAeroDyn::TurbineAeroDyn() : TurbineAero() {
 void TurbineAeroDyn::initialize(double time, double dt) {
     TurbineAero::initialize(time, dt);
 
+    // impose no offset on aero nodes
+    auto& rotor = dynamic_cast<RotorAeroDyn&>(*rna.rotor);
+    bool warned_offset = false;
+    for (auto& blade : rotor.blades) {
+        for (auto& node : blade->nodes) {
+            if (!warned_offset && (node.properties.offset_aero.norm() > 0.0)) {
+                spdlog::warn(
+                    "Aero offsets not zero on SEAHOWL side, setting them to zero and letting AeroDyn handle it.");
+                warned_offset = true;
+            }
+            node.properties.offset_aero = seahowl::Vector2d(0.0, 0.0);
+        }
+    }
+
     // VTK options for AeroDyn
     aerodyn.pImpl->WrVTK = WrVTK;
     aerodyn.pImpl->WrVTK_Type = WrVTK_Type;
@@ -582,7 +596,7 @@ void TurbineAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_mo
             blade->moments[ii] = blade->elements[ii].get_moment();
         }
     }
-    
+
     // compute loads on rest of turbine
     rna.compute_fluid_loads(wind_model, time);
     if (foundation) {
