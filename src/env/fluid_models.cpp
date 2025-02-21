@@ -3,8 +3,8 @@
 using namespace seahowl::env;
 using seahowl::Vector3d;
 
-Vector3d FluidModel::get_fluid_velocity(const Vector3d& position, double time) const {
-    Vector3d velocity = get_fluid_velocity_this(position, time);
+Vector3d FluidModel::get_velocity(const Vector3d& position, double time) const {
+    Vector3d velocity = get_velocity_this(position, time);
     if (time < ramp_end) {
         if (time > ramp_start) {
             double ramp_fraction = (time - ramp_start) / (ramp_end - ramp_start);
@@ -16,8 +16,8 @@ Vector3d FluidModel::get_fluid_velocity(const Vector3d& position, double time) c
     return velocity;
 };
 
-Vector3d FluidModel::get_fluid_acceleration(const Vector3d& position, double time) const {
-    Vector3d acceleration = get_fluid_acceleration_this(position, time);
+Vector3d FluidModel::get_acceleration(const Vector3d& position, double time) const {
+    Vector3d acceleration = get_acceleration_this(position, time);
     if (time < ramp_end) {
         if (time > ramp_start) {
             double ramp_fraction = (time - ramp_start) / (ramp_end - ramp_start);

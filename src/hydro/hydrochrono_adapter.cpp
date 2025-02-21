@@ -52,7 +52,7 @@ WaveModelHydroChrono::WaveModelHydroChrono() {
     waves = std::make_shared<NoWave>();
 }
 
-seahowl::Vector3d WaveModelHydroChrono::get_fluid_velocity_this(const Vector3d& position, double time) const {
+seahowl::Vector3d WaveModelHydroChrono::get_velocity_this(const Vector3d& position, double time) const {
     if (is_inside(position, time)) {
         return waves->GetVelocity(position, time);
     } else {
@@ -60,7 +60,7 @@ seahowl::Vector3d WaveModelHydroChrono::get_fluid_velocity_this(const Vector3d& 
     }
 }
 
-seahowl::Vector3d WaveModelHydroChrono::get_fluid_acceleration_this(const Vector3d& position, double time) const {
+seahowl::Vector3d WaveModelHydroChrono::get_acceleration_this(const Vector3d& position, double time) const {
     if (is_inside(position, time)) {
         return waves->GetAcceleration(position, time);
     } else {
@@ -68,7 +68,7 @@ seahowl::Vector3d WaveModelHydroChrono::get_fluid_acceleration_this(const Vector
     }
 }
 
-double WaveModelHydroChrono::get_fluid_density(const Vector3d& position, double time) const {
+double WaveModelHydroChrono::get_density(const Vector3d& position, double time) const {
     return density;
 }
 

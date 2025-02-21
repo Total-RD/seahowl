@@ -129,7 +129,7 @@ double MacCamyFuchsTable::interpolateCmBinarySearch(double D) {
     return Cm;
 }
 
-void MorisonNode::compute_fluid_loads(const env::EnvModel& fluid_model, double time) {
+void MorisonNode::compute_fluid_loads(const env::EnvModel& env_model, double time) {
     // reset total load
     load = Vector3d(0.0, 0.0, 0.0);
     load_noacc = Vector3d(0.0, 0.0, 0.0);
@@ -140,9 +140,9 @@ void MorisonNode::compute_fluid_loads(const env::EnvModel& fluid_model, double t
     auto area = PI * pow(diameter * 0.5, 2);
 
     // fluid density
-    double fluid_density = fluid_model.get_fluid_density(position, time);
+    double fluid_density = env_model.get_fluid_density(position, time);
     // fluid velocity
-    auto velocity_fluid = fluid_model.get_fluid_velocity(position, time);
+    auto velocity_fluid = env_model.get_fluid_velocity(position, time);
 
     auto dir = get_direction();  // axial direction
     auto velocity_relative = velocity_fluid - velocity;
@@ -165,7 +165,7 @@ void MorisonNode::compute_fluid_loads(const env::EnvModel& fluid_model, double t
 
     if (coefficients.inertia_factor != 0.0) {
         // fluid acceleration
-        auto acceleration_fluid = fluid_model.get_fluid_acceleration(position, time);
+        auto acceleration_fluid = env_model.get_fluid_acceleration(position, time);
         auto acceleration_fluid_axial = dir * acceleration_fluid.dot(dir);
         auto acceleration_fluid_normal = acceleration_fluid - acceleration_fluid_axial;
         // relative acceleration
@@ -232,7 +232,7 @@ Quaternion MorisonElement::get_rotation() const {
 
 MorisonPlate::MorisonPlate() {}
 
-void MorisonPlate::compute_fluid_loads(const env::EnvModel& fluid_model, double time) {
+void MorisonPlate::compute_fluid_loads(const env::EnvModel& env_model, double time) {
     auto area = PI * pow(diameter * 0.5, 2);
 
     // vector pointing inwards of the plate
@@ -244,9 +244,9 @@ void MorisonPlate::compute_fluid_loads(const env::EnvModel& fluid_model, double 
     auto position = get_position();
     auto velocity = get_velocity();
     // fluid density
-    double fluid_density = fluid_model.get_fluid_density(position, time);
+    double fluid_density = env_model.get_fluid_density(position, time);
     // fluid velocity
-    auto velocity_fluid = fluid_model.get_fluid_velocity(position, time);
+    auto velocity_fluid = env_model.get_fluid_velocity(position, time);
     auto velocity_relative = velocity_fluid - velocity;
 
     load = Vector3d(0.0, 0.0, 0.0);

@@ -25,7 +25,7 @@ class WindModel : public FluidModel {
     /**
      * @brief Returns air density.
      */
-    virtual double get_fluid_density(const Vector3d& position, double time) const override;
+    virtual double get_density(const Vector3d& position, double time) const override;
 };
 
 /**@brief Sheared wind model. This model and derived models assume a ground level at z=0.0. */
@@ -58,8 +58,8 @@ class ConstantWind : public ShearedWind {
     void set_wind_velocity(Vector3d velocity);
 
   protected:
-    virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const override;
-    virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_velocity_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_acceleration_this(const Vector3d& position, double time) const override;
 };
 
 /**@brief Wind ramp model. */
@@ -93,8 +93,8 @@ class WindRamp : public ShearedWind {
                        double time_end);
 
   protected:
-    virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const override;
-    virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_velocity_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_acceleration_this(const Vector3d& position, double time) const override;
 };
 
 }  // namespace env

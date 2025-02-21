@@ -86,12 +86,12 @@ class WaveModelHydroChrono : public WaveModel {
      * @brief Constructor.
      */
     WaveModelHydroChrono();
-    virtual double get_fluid_density(const Vector3d& position, double time) const override;
+    virtual double get_density(const Vector3d& position, double time) const override;
     virtual double get_water_level(const Vector3d& position, double time) const override;
 
   protected:
-    virtual Vector3d get_fluid_velocity_this(const Vector3d& position, double time) const override;
-    virtual Vector3d get_fluid_acceleration_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_velocity_this(const Vector3d& position, double time) const override;
+    virtual Vector3d get_acceleration_this(const Vector3d& position, double time) const override;
 };
 
 }  // namespace env

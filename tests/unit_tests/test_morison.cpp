@@ -90,10 +90,10 @@ TEST_F(TestMorison, analytical_comparison) {
                                        (test_dir / "test_morison_analytical_comparison.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&time_current] { return time_current; });
     test_dataset.test_csv.add_function("fluid velocity (m/s)", [&wave_model, &time_current, &position] {
-        return wave_model->get_fluid_velocity(position, time_current);
+        return wave_model->get_velocity(position, time_current);
     });
     test_dataset.test_csv.add_function("fluid acceleration (m/s2)", [&wave_model, &time_current, &position] {
-        return wave_model->get_fluid_acceleration(position, time_current);
+        return wave_model->get_acceleration(position, time_current);
     });
     test_dataset.test_csv.add_function("load node1 (N/m)", [&node1] { return node1.load; });
     test_dataset.test_csv.add_function("load node1 analytical (N/m)", [&load_analytical] { return load_analytical; });
@@ -108,8 +108,8 @@ TEST_F(TestMorison, analytical_comparison) {
         node3.compute_fluid_loads(env_model, time_current);
 
         // compute loads with analytical formula
-        auto fluid_velocity = wave_model->get_fluid_velocity(position, time_current);
-        auto fluid_acceleration = wave_model->get_fluid_acceleration(position, time_current);
+        auto fluid_velocity = wave_model->get_velocity(position, time_current);
+        auto fluid_acceleration = wave_model->get_acceleration(position, time_current);
         load_analytical[0] =
             0.5 * rho * coefficients.drag_normal * node1.diameter * abs(fluid_velocity[0]) * fluid_velocity[0] +
             rho * (1.0 + coefficients.added_mass_normal) * PI * pow(node1.diameter, 2) / 4.0 * fluid_acceleration[0];

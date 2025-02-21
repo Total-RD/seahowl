@@ -21,7 +21,7 @@ double EnvModel::get_fluid_density(const Vector3d& position, double time) const 
     if (fluid_models.size() > 0) {
         for (const auto& model : fluid_models) {
             if (model->is_inside(position, time)) {
-                return model->get_fluid_density(position, time);
+                return model->get_density(position, time);
             }
         }
     }
@@ -32,7 +32,7 @@ Vector3d EnvModel::get_fluid_velocity(const Vector3d& position, double time) con
     if (fluid_models.size() > 0) {
         for (const auto& model : fluid_models) {
             if (model->is_inside(position, time)) {
-                return model->get_fluid_velocity(position, time);
+                return model->get_velocity(position, time);
             }
         }
     }
@@ -43,7 +43,7 @@ Vector3d EnvModel::get_fluid_acceleration(const Vector3d& position, double time)
     if (fluid_models.size() > 0) {
         for (const auto& model : fluid_models) {
             if (model->is_inside(position, time)) {
-                return model->get_fluid_acceleration(position, time);
+                return model->get_acceleration(position, time);
             }
         }
     }
