@@ -52,7 +52,12 @@ TEST_F(TestInflowWind, rpm_initial_pitch) {
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
+    double time = 0.0;
     turbine.elasto.assemble(system_elasto);
+    turbine.initialize(time, dt);
+
+    // apply pitch before statics
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
 
     // statics
     if (statics_prestep) {
@@ -60,10 +65,7 @@ TEST_F(TestInflowWind, rpm_initial_pitch) {
         system_elasto.do_statics(true, 10);
         turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
-
-    double time = 0.0;
-    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
-    turbine.initialize(time, dt);
+    turbine.poststep(0.0, dt);  // to update positions aero after statics step
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_inflowwind_rpm_initial_pitch.csv").generic_string(),
@@ -71,7 +73,7 @@ TEST_F(TestInflowWind, rpm_initial_pitch) {
     test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("rpm (-)", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
 
-    while (time < 50) {
+    while (time < 50.0) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);

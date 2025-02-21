@@ -57,7 +57,12 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
+    double time = 0.0;
     turbine.elasto.assemble(system_elasto);
+    turbine.initialize(time, dt);
+
+    // apply pitch before statics
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
 
     // statics
     if (statics_prestep) {
@@ -65,10 +70,7 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
         system_elasto.do_statics(true, 10);
         turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
-
-    double time = 0.0;
-    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
-    turbine.initialize(time, dt);
+    turbine.poststep(0.0, dt);  // to update positions aero after statics step
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_turbine_rpm_initial_pitch.csv").generic_string(),
@@ -78,7 +80,7 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
     test_dataset.test_csv.add_function("axial torque (Nm)",
                                        [&turbine]() { return turbine.rna.elasto.get_axial_torque(); });
 
-    while (time < 50) {
+    while (time < 50.0) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
@@ -130,7 +132,12 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
+    double time = 0.0;
     turbine.elasto.assemble(system_elasto);
+    turbine.initialize(time, dt);
+
+    // apply pitch before statics
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
 
     // statics
     if (statics_prestep) {
@@ -138,10 +145,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
         system_elasto.do_statics(true, 10);
         turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
-
-    double time = 0.0;
-    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
-    turbine.initialize(time, dt);
+    turbine.poststep(0.0, dt);  // to update positions aero after statics step
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_turbine_rpm_initial_pitch_fpm.csv").generic_string(),
@@ -149,7 +153,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
     test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("rpm (-)", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
 
-    while (time < 50) {
+    while (time < 50.0) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
@@ -197,7 +201,12 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
     turbine.build();
+    double time = 0.0;
     turbine.elasto.assemble(system_elasto);
+    turbine.initialize(time, dt);
+
+    // apply pitch before statics
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
 
     // statics
     if (statics_prestep) {
@@ -205,10 +214,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
         system_elasto.do_statics(true, 10);
         turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
-
-    double time = 0.0;
-    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
-    turbine.initialize(time, dt);
+    turbine.poststep(0.0, dt);  // to update positions aero after statics step
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset(
@@ -217,7 +223,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
     test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("rpm (-)", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
 
-    while (time < 50) {
+    while (time < 50.0) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
@@ -268,7 +274,12 @@ TEST_F(TestTurbine, controller_target_rpm) {
     controller->target_rpm = target_rpm;
     turbine.controller = controller;
     turbine.build();
+    double time = 0.0;
     turbine.elasto.assemble(system_elasto);
+    turbine.initialize(time, dt);
+
+    // apply pitch before statics
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
 
     // statics
     if (statics_prestep) {
@@ -276,10 +287,7 @@ TEST_F(TestTurbine, controller_target_rpm) {
         system_elasto.do_statics(true, 10);
         turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
-
-    double time = 0.0;
-    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
-    turbine.initialize(time, dt);
+    turbine.poststep(0.0, dt);  // to update positions aero after statics step
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_turbine_controller_target_rpm.csv").generic_string(),
@@ -340,7 +348,12 @@ TEST_F(TestTurbine, actuator_disk) {
     controller->target_rpm = target_rpm;
     turbine.controller = controller;
     turbine.build();
+    double time = 0.0;
     turbine.elasto.assemble(system_elasto);
+    turbine.initialize(time, dt);
+
+    // apply pitch before statics
+    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
 
     // statics
     if (statics_prestep) {
@@ -348,10 +361,7 @@ TEST_F(TestTurbine, actuator_disk) {
         system_elasto.do_statics(true, 10);
         turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
-
-    double time = 0.0;
-    turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
-    turbine.initialize(time, dt);
+    turbine.poststep(0.0, dt);  // to update positions aero after statics step
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_turbine_actuator_disk.csv").generic_string(),
@@ -453,19 +463,19 @@ TEST_F(TestTurbine, multiturbines) {
         turbine.elasto.translate(Vector3d(0.0 + ii * 150.0, 0.0 + ii * (-150.0), 0.0));
     }
 
-    // assemble system
-    system_core.elasto.assemble();
+    double time = 0.0;
+    system_core.initialize(time, dt);
+
+    // apply pitch before statics
+    for (auto& turbine : system_core.turbines) {
+        turbine->rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
+    }
 
     // statics
     if (statics_prestep) {
         system_elasto.do_statics(true, 10);
     }
-
-    double time = 0.0;
-    for (auto& turbine : system_core.turbines) {
-        turbine->rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
-    }
-    system_core.initialize(time, dt);
+    system_core.poststep(0.0, dt);  // to update positions aero after statics step
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_turbine_multiturbines.csv").generic_string(),
@@ -477,7 +487,7 @@ TEST_F(TestTurbine, multiturbines) {
             "rpm turbine " + std::to_string(idx_turbine + 1) + " (-)",
             [&system_core, idx_turbine]() { return system_core.turbines[idx_turbine]->rna.elasto.get_rpm(); });
 
-    while (time < 50) {
+    while (time < 50.0) {
         // prestep
         system_core.prestep(time, dt);
 

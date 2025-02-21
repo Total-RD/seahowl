@@ -57,9 +57,10 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
 
     turbine.build();
     turbine.elasto.assemble(system_elasto);
-
     double time = 0.0;
     turbine.initialize(time, dt);
+
+    // apply pitch before statics
     turbine.rna.elasto.rotor->apply_collective_pitch_increment(initial_pitch);
 
     // statics
@@ -68,7 +69,6 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
         system_elasto.do_statics(true, 10);
         turbine.rna.elasto.link_shaft_hub->set_constraints(true, true, true, false, true, true);
     }
-
     turbine.poststep(0.0, dt);  // to update positions aero after statics step
 
     // Setup TestFwDataSet
@@ -77,7 +77,7 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
     test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("rpm (-)", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
 
-    while (time < 50) {
+    while (time < 50.0) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
