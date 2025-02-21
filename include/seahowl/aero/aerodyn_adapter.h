@@ -33,6 +33,7 @@ class AeroDynAdapter {
     std::unique_ptr<seahowl::aero::AeroDynInflowLib> pImpl;
     std::vector<Vector3d> forces_aerodyn;
     std::vector<Vector3d> moments_aerodyn;
+    Vector3d disk_averaged_velocity;
 
     AeroDynAdapter();
     AeroDynAdapter(std::string AerodynInfile, std::string InflowInfile);
@@ -77,6 +78,7 @@ class RotorAeroDyn : public RotorAeroBEMT {
   public:
     RotorAeroDyn(TowerAero& tower_ref);
     virtual void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
+    virtual void compute_disk_averaged_wind_velocity(const env::FluidModel& fluid_model, double time) override;
 };
 
 }  // namespace aero

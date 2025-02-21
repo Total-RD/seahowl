@@ -49,7 +49,7 @@ class RotorAero : public ComponentFluid {
      *
      * The disk-averaged wind velocity is computed by averaging the wind velocity along all blade.
      */
-    void compute_disk_averaged_wind_velocity(const env::FluidModel& fluid_model, double time);
+    virtual void compute_disk_averaged_wind_velocity(const env::FluidModel& fluid_model, double time);
 };
 
 class RotorAeroBEMT : public RotorAero {

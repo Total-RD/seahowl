@@ -196,6 +196,9 @@ struct seahowl::aero::AeroDynInflowLib {
     float* HHVel = new float[3]{0.0};
     int TransposeDCM = 0;
 
+    // disk averaged velocity
+    float* DiskAvgVel = new float[3]{0.0};
+
     // VTK
     int WrVTK = 0;       // default of no vtk output
     int WrVTK_Type = 1;  // default of surface meshes
@@ -257,6 +260,7 @@ AeroDynInflowLib::~AeroDynInflowLib() {
     delete[] VTKNacDim;
     delete[] TurbOrigin;
     delete[] HHVel;
+    delete[] DiskAvgVel;
 }
 
 void AeroDynInflowLib::CheckError() {
@@ -343,6 +347,9 @@ void AeroDynInflowLib::Calcul() {
 
     ADI_C_GetRotorLoads(iWT, NumMeshPts, MeshFrc, HHVel, ErrStat, ErrMsg);
     CheckError();
+
+    ADI_C_GetDiskAvgVel(iWT, DiskAvgVel, ErrStat, ErrMsg);
+    CheckError();
 }
 
 void AeroDynInflowLib::Update() {
@@ -423,6 +430,10 @@ void AeroDynAdapter::compute_loads(double time, TurbineAero& turbine) {
         moments_aerodyn[ii][1] = pImpl->MeshFrc[ii * 6 + 4];
         moments_aerodyn[ii][2] = pImpl->MeshFrc[ii * 6 + 5];
     }
+    // disk averaged velocity
+    disk_averaged_velocity[0] = pImpl->DiskAvgVel[0];
+    disk_averaged_velocity[1] = pImpl->DiskAvgVel[1];
+    disk_averaged_velocity[2] = pImpl->DiskAvgVel[2];
 }
 
 void AeroDynAdapter::end() {
@@ -602,10 +613,17 @@ void TurbineAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_mo
     if (foundation) {
         foundation->compute_fluid_loads(wind_model, time);
     }
+
+    // disk averaged velocity
+    rna.rotor->disk_averaged_wind_velocity = aerodyn.disk_averaged_velocity;
 }
 
 RotorAeroDyn::RotorAeroDyn(TowerAero& tower_ref) : RotorAeroBEMT(tower_ref) {}
 
 void RotorAeroDyn::compute_fluid_loads(const seahowl::env::FluidModel& wind_model, double time) {
+    // nothing happening here (see TurbineAeroDyn::compute_fluid_loads)
+}
+
+void RotorAeroDyn::compute_disk_averaged_wind_velocity(const env::FluidModel& fluid_model, double time) {
     // nothing happening here (see TurbineAeroDyn::compute_fluid_loads)
 }
