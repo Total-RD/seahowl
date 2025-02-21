@@ -70,6 +70,7 @@ class Turbine : public ComponentDynamic {
      * @param[in] aero Aerodynamic turbine model.
      */
     Turbine(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineAero& aero);
+    Turbine(std::shared_ptr<seahowl::elasto::TurbineElasto> elasto, std::shared_ptr<seahowl::aero::TurbineAero> aero);
 
     /**
      * @brief Applies control to turbine.

@@ -12,6 +12,11 @@ using namespace seahowl::hydro;
 
 Mooring::Mooring(MooringElastoFEA& elasto, MooringHydro& hydro) : elasto(elasto), hydro(hydro) {}
 
+Mooring::Mooring(std::shared_ptr<MooringElastoFEA> elasto, std::shared_ptr<MooringHydro> hydro)
+    : Mooring(*elasto, *hydro) {
+    add_elasto_fluid_ptr(elasto, hydro);
+}
+
 void Mooring::set_length(double length) {
     elasto.set_length(length);
     hydro.set_length(length);

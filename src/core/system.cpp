@@ -27,6 +27,12 @@ using namespace seahowl::env;
 
 System::System(seahowl::elasto::SystemElasto& elasto, seahowl::aero::SystemAero& aero) : elasto(elasto), aero(aero) {}
 
+System::System(std::shared_ptr<seahowl::elasto::SystemElasto> elasto, std::shared_ptr<seahowl::aero::SystemAero> aero)
+    : System(*elasto, *aero) {
+    elasto_ptr = elasto;
+    aero_ptr = aero;
+};
+
 void System::build() {
     // build all turbines
     for (auto& turbine : turbines) {

@@ -50,14 +50,6 @@ class Tower : public virtual ComponentDynamic {
      * @param[in] aero Aerodynamic tower model.
      */
     Tower(seahowl::elasto::TowerElasto& elasto, seahowl::aero::TowerAero& aero);
-
-    /**
-     * @brief Instantiates tower for communication between elasto and aero components.
-     * This version keeps a shared pointer of each component in memory.
-     *
-     * @param[in] elasto Elastodynamic tower model.
-     * @param[in] aero Aerodynamic tower model.
-     */
     Tower(std::shared_ptr<seahowl::elasto::TowerElasto> elasto, std::shared_ptr<seahowl::aero::TowerAero> aero);
 
     /**

@@ -43,6 +43,8 @@ class Floater : public Foundation {
      * @param[in] aero Hydrodynamic floater model.
      */
     Floater(seahowl::elasto::FloaterElasto& elasto, seahowl::hydro::FloaterHydro& hydro);
+    Floater(std::shared_ptr<seahowl::elasto::FloaterElasto> elasto,
+            std::shared_ptr<seahowl::hydro::FloaterHydro> hydro);
 
     /**
      * @brief Prestep for floater, called before elastodynamic stepping.

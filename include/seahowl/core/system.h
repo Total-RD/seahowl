@@ -50,6 +50,7 @@ class System : public ComponentDynamic {
      * @param[in] aero Aerodynamic system.
      */
     System(seahowl::elasto::SystemElasto& elasto, seahowl::aero::SystemAero& aero);
+    System(std::shared_ptr<seahowl::elasto::SystemElasto> elasto, std::shared_ptr<seahowl::aero::SystemAero> aero);
 
     void build() override;
 
@@ -122,6 +123,9 @@ class System : public ComponentDynamic {
     void add(std::shared_ptr<seahowl::core::ComponentDynamic> component);
 
   private:
+    std::shared_ptr<seahowl::elasto::SystemElasto> elasto_ptr;
+    std::shared_ptr<seahowl::aero::SystemAero> aero_ptr;
+
     /**
      * @brief Initialize system.
      *

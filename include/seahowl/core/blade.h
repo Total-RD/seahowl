@@ -50,6 +50,7 @@ class Blade : public ComponentDynamic {
      * @param[in] aero Aerodynamic blade model.
      */
     Blade(seahowl::elasto::BladeElasto& elasto, seahowl::aero::BladeAero& aero);
+    Blade(std::shared_ptr<seahowl::elasto::BladeElasto> elasto, std::shared_ptr<seahowl::aero::BladeAero> aero);
 
     /**
      * @brief Prestep for blade, called before elastodynamic stepping.

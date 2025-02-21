@@ -19,6 +19,12 @@ RotorNacelleAssembly::RotorNacelleAssembly(seahowl::elasto::RotorNacelleAssembly
                                            seahowl::aero::RotorNacelleAssemblyAero& aero)
     : elasto(elasto), aero(aero) {}
 
+RotorNacelleAssembly::RotorNacelleAssembly(std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto> elasto,
+                                           std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero> aero)
+    : RotorNacelleAssembly(*elasto, *aero) {
+    add_elasto_fluid_ptr(elasto, aero);
+}
+
 void RotorNacelleAssembly::initialize_this(double time, double dt) {
     for (auto& blade : blades) {
         blade->initialize(time, dt);

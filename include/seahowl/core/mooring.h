@@ -50,6 +50,8 @@ class Mooring : public ComponentDynamic {
      * @param[in] hydro hydrodynamic mooring model.
      */
     Mooring(seahowl::elasto::MooringElastoFEA& elasto, seahowl::hydro::MooringHydro& hydro);
+    Mooring(std::shared_ptr<seahowl::elasto::MooringElastoFEA> elasto,
+            std::shared_ptr<seahowl::hydro::MooringHydro> hydro);
 
     /**
      * @brief Sets length of the mooring line.

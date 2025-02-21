@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <stdexcept>
 #include <algorithm>
@@ -8,9 +9,13 @@
 
 // forward declarations
 namespace seahowl {
+class ComponentFluid;
 namespace env {
 class EnvModel;
 }  // namespace env
+namespace elasto {
+class ComponentElasto;
+}
 }  // namespace seahowl
 
 namespace seahowl {
@@ -69,7 +74,21 @@ class ComponentDynamic {
   protected:
     bool is_initialized = false;
 
+    /**
+     * @brief Function to store shared_ptr of components (useful to avoid segfaults in Python).
+     */
+    void add_elasto_fluid_ptr(std::shared_ptr<seahowl::elasto::ComponentElasto> elasto,
+                              std::shared_ptr<seahowl::ComponentFluid> fluid) {
+        elasto_shared_ptr = elasto;
+        fluid_shared_ptr = fluid;
+    }
+
   private:
+    // Only for memory management, never accessed (reference to underlying object is accessed instead).
+    std::shared_ptr<seahowl::elasto::ComponentElasto> elasto_shared_ptr;
+    // Only for memory management, never accessed (reference to underlying object is accessed instead).
+    std::shared_ptr<seahowl::ComponentFluid> fluid_shared_ptr;
+
     virtual void initialize_this(double time, double dt) = 0;
 };
 

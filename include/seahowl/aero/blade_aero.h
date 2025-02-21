@@ -136,6 +136,9 @@ class BladeAero : public ComponentFluid {
      */
     BladeAero();
 
+    /**
+     * @brief Builds the blade.
+     */
     void build() override;
     void compute_env_loads(const env::EnvModel& env_model, double time) override;
 

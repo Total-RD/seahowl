@@ -45,6 +45,8 @@ class RotorNacelleAssembly : public ComponentDynamic {
      */
     RotorNacelleAssembly(seahowl::elasto::RotorNacelleAssemblyElasto& elasto,
                          seahowl::aero::RotorNacelleAssemblyAero& aero);
+    RotorNacelleAssembly(std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto> elasto,
+                         std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero> aero);
 
     /**
      * @brief Prestep for RNA, called before elastodynamic stepping.

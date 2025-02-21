@@ -14,8 +14,7 @@ Tower::Tower(TowerElasto& elasto, TowerAero& aero) : elasto(elasto), aero(aero) 
 
 Tower::Tower(std::shared_ptr<seahowl::elasto::TowerElasto> elasto, std::shared_ptr<seahowl::aero::TowerAero> aero)
     : Tower(*elasto, *aero) {
-    elasto_shared_ptr = elasto;
-    aero_shared_ptr = aero;
+    add_elasto_fluid_ptr(elasto, aero);
 }
 
 void Tower::initialize_this(double time, double dt) {

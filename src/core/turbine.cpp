@@ -18,6 +18,12 @@ Turbine::Turbine(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineA
     controller = std::make_shared<Controller>();
 }
 
+Turbine::Turbine(std::shared_ptr<seahowl::elasto::TurbineElasto> elasto,
+                 std::shared_ptr<seahowl::aero::TurbineAero> aero)
+    : Turbine(*elasto, *aero) {
+    add_elasto_fluid_ptr(elasto, aero);
+}
+
 void Turbine::initialize_this(double time, double dt) {
     rna.initialize(time, dt);
     tower.initialize(time, dt);

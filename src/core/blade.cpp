@@ -14,6 +14,11 @@ using seahowl::Vector3d;
 
 Blade::Blade(seahowl::elasto::BladeElasto& elasto, seahowl::aero::BladeAero& aero) : elasto(elasto), aero(aero) {}
 
+Blade::Blade(std::shared_ptr<seahowl::elasto::BladeElasto> elasto, std::shared_ptr<seahowl::aero::BladeAero> aero)
+    : Blade(*elasto, *aero) {
+    add_elasto_fluid_ptr(elasto, aero);
+}
+
 void Blade::initialize_this(double time, double dt) {
     // mappings
     compute_mapping_aero2elasto();
