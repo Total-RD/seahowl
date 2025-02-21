@@ -2,8 +2,8 @@ include(vcpkg_find_fortran)
 
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
-    URL https://github.com/Total-RD/openfast4seahowl.git
-    REF db2ceb82e2592dc2d013cb1217a37a4a3b23cf52
+    URL https://github.com/openfast/openfast.git
+    REF fc1110183bcc87b16d93129edabdce6d30e3a497
 )
 
 vcpkg_find_fortran(FORTRAN_CMAKE)
