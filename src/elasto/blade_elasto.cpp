@@ -23,15 +23,17 @@ BladeElasto::BladeElasto() {
 }
 
 void BladeElasto::apply_pitch_increment(double pitch_increment) {
-    // apply pitch from root node direction and position
-    auto root_dir = actuator_pitch->body_worker->get_rotation() * Vector3d(0.0, 0.0, 1.0);
-    auto root_pos = actuator_pitch->body_worker->get_position();
-    translate(-root_pos);
-    rotate(-pitch_increment, root_dir);
-    actuator_pitch->rotate(pitch_increment, root_dir);  // rotate actuator back
-    translate(root_pos);
-
-    actuator_pitch->increment_value_constant(pitch_increment);
+    if (pitch_increment != 0.0) {
+        // apply pitch from root node direction and position
+        auto root_dir = actuator_pitch->get_rotation_axis();
+        auto root_pos = actuator_pitch->body_controller->get_position();
+        translate(-root_pos);
+        rotate(pitch_increment, root_dir);
+        actuator_pitch->rotate(-pitch_increment, root_dir);  // rotate actuator back
+        translate(root_pos);
+        // increment actuator
+        actuator_pitch->increment_value_constant(pitch_increment);
+    }
 }
 
 double BladeElasto::get_pitch() const {
@@ -180,6 +182,9 @@ void BladeElastoFEA::build() {
     // apply initial pitch
     apply_pitch_increment(pitch0);
     update_root_constraint();
+
+    // initialize actuator links
+    actuator_pitch->initialize_links();
 };
 
 void BladeElastoFEA::build_elements_tapered_timoshenko() {
@@ -283,6 +288,9 @@ void BladeElastoRigid::build() {
     // apply initial pitch
     apply_pitch_increment(pitch0);
     update_root_constraint();
+
+    // initialize actuator links
+    actuator_pitch->initialize_links();
 }
 
 void BladeElastoRigid::assemble_this(SystemElasto& system) {

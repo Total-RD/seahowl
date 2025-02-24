@@ -1099,10 +1099,14 @@ ActuatorRotationChrono::ActuatorRotationChrono() {
     // make actuator bodies (massless)
     body_worker = std::make_unique<BodyElastoChrono>();
     auto body1ref = dynamic_cast<BodyElastoChrono&>(*body_worker);
+    body1ref.set_position(Vector3d(0.0, 0.0, 0.0));
+    body1ref.set_rotation(Quaternion(1.0, 0.0, 0.0, 0.0));
     body1ref.set_mass(0.0);
     body1ref.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
     body_controller = std::make_unique<BodyElastoChrono>();
     auto body2ref = dynamic_cast<BodyElastoChrono&>(*body_controller);
+    body2ref.set_position(Vector3d(0.0, 0.0, 0.0));
+    body2ref.set_rotation(Quaternion(1.0, 0.0, 0.0, 0.0));
     body2ref.set_mass(0.0);
     body2ref.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
 
@@ -1116,17 +1120,20 @@ ActuatorRotationChrono::ActuatorRotationChrono() {
     link = std::make_unique<LinkChrono>();
     set_fixed_actuator(false);
 
+    // initialize with angle zero
+    set_control_timeseries(std::vector<double>{0.0, 0.0}, std::vector<double>{0.0, 0.0});
+
     // initialize links
     initialize_links();
 }
 
-void ActuatorRotationChrono::set_timeseries(const std::vector<double>& time_array,
-                                            const std::vector<double>& values_array) {
+void ActuatorRotationChrono::set_control_timeseries(const std::vector<double>& time_array,
+                                                    const std::vector<double>& values_array) {
     std::dynamic_pointer_cast<ChFunctionArray>(chfunc)->time_array = time_array;
     std::dynamic_pointer_cast<ChFunctionArray>(chfunc)->values_array = values_array;
 }
 
-double ActuatorRotationChrono::get_wanted_value(double time) const {
+double ActuatorRotationChrono::get_control_value(double time) const {
     return std::dynamic_pointer_cast<ChFunctionArray>(chfunc)->Get_y(time);
 }
 
@@ -1151,7 +1158,7 @@ void ActuatorRotationChrono::impose_value_constant(double value) {
 void ActuatorRotationChrono::increment_value_constant(double value) {
     auto new_angle = get_angle() + value;
     body_worker->set_rotation(AngleAxisd(value, get_rotation_axis()) * body_worker->get_rotation());
-    set_timeseries(std::vector<double>{0.0, 0.0}, std::vector<double>{new_angle, new_angle});
+    set_control_timeseries(std::vector<double>{0.0, 0.0}, std::vector<double>{new_angle, new_angle});
     initialize_links();
 }
 

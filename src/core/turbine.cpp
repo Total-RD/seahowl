@@ -55,7 +55,7 @@ void Turbine::apply_control(double time, double dt) {
                 } else {
                     std::vector<double> time_array{time, time + dt};
                     std::vector<double> angle_array{blade.elasto.get_pitch(), controller->get_pitch_blade(idx_blade)};
-                    blade.elasto.actuator_pitch->set_timeseries(time_array, angle_array);
+                    blade.elasto.actuator_pitch->set_control_timeseries(time_array, angle_array);
                 }
             }
         } else {
@@ -68,7 +68,7 @@ void Turbine::apply_control(double time, double dt) {
                 } else {
                     std::vector<double> time_array{time, time + dt};
                     std::vector<double> angle_array{blade->elasto.get_pitch(), controller->get_collective_pitch()};
-                    blade->elasto.actuator_pitch->set_timeseries(time_array, angle_array);
+                    blade->elasto.actuator_pitch->set_control_timeseries(time_array, angle_array);
                 }
             }
         }
@@ -81,8 +81,14 @@ void Turbine::apply_control(double time, double dt) {
     if (controller->has_yaw_control) {
         auto yaw_rate = controller->get_yaw_rate();
         auto yaw_increment = yaw_rate * dt;
-        rna.elasto.apply_yaw_increment(yaw_increment);
-        rna.update_positions_aero();
+        if (rna.elasto.actuator_yaw->is_fixed_actuator()) {
+            rna.elasto.apply_yaw_increment(yaw_increment);
+            rna.update_positions_aero();
+        } else {
+            std::vector<double> time_array{time, time + dt};
+            std::vector<double> angle_array{rna.elasto.get_yaw() + yaw_increment, rna.elasto.get_yaw() + yaw_increment};
+            rna.elasto.actuator_yaw->set_control_timeseries(time_array, angle_array);
+        }
     }
 }
 

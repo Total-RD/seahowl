@@ -728,6 +728,8 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
     populate_rna_from_json(filepath_rna, turbine.rna);
     auto yaw_rna = rna_json.at("initial_yaw").get<double>() * PI / 180.0;
     turbine.rna.elasto.yaw0 = yaw_rna;
+    bool has_yaw_actuator_dynamics = rna_json.at("yaw_actuator_dynamics").get<bool>();
+    turbine.rna.elasto.actuator_yaw->set_fixed_actuator(!has_yaw_actuator_dynamics);
 
     // update info if rotor is disk
     if (rotor_json.at("type").get<std::string>() == "disk") {

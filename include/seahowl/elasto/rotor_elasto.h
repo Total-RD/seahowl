@@ -137,10 +137,8 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     std::unique_ptr<seahowl::elasto::BodyElasto> body_shaft;
     /** @brief Nacelle rigid body. */
     std::unique_ptr<seahowl::elasto::BodyElasto> body_nacelle;
-    /** @brief Yaw bearing rigid body. */
-    std::unique_ptr<seahowl::elasto::BodyElasto> body_yaw_bearing;
-    /** @brief Body for mounting point of RNA (to link to other structures, e.g. tower). */
-    std::unique_ptr<seahowl::elasto::BodyElasto> body_mount;
+    /** @brief Actuator for yaw dynamics. */
+    std::unique_ptr<ActuatorRotation> actuator_yaw;
 
     // links
     //
@@ -150,10 +148,8 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     std::unique_ptr<Link> link_shaft_nacelle;
     /** @brief Link between shaft and yaw bearing (fixed). */
     std::unique_ptr<Link> link_shaft_yaw_bearing;
-    /** @brief Link between yaw bearing and mounting point (fixed). */
-    std::unique_ptr<Link> link_yaw_bearing_mount;
-    /** @brief Link between towertop (if any) and mounting point (fixed). */
-    std::unique_ptr<Link> link_towertop_mount;
+    /** @brief Link between RNA and mounting point (fixed). */
+    std::unique_ptr<Link> link_rna;
     ///@}
 
     // reference properties
@@ -226,13 +222,6 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
      * @brief Returns current of the RNA.
      */
     double get_yaw() const;
-
-    /**
-     * @brief Sets whether the RNA is considered fixed or free to yaw (without control).
-     *
-     * @param is_fixed Whether RNA is fixed in yaw or not.
-     */
-    void set_fixed_yaw(bool is_fixed);
 
     /**
      * @brief Attaches RNA to body on mounting point.

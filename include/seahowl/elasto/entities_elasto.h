@@ -436,14 +436,15 @@ class ActuatorRotation : public virtual Entity {
      * @param[in] time_array Time array.
      * @param[in] values_array Values array (angles).
      */
-    virtual void set_timeseries(const std::vector<double>& time_array, const std::vector<double>& values_array) = 0;
+    virtual void set_control_timeseries(const std::vector<double>& time_array,
+                                        const std::vector<double>& values_array) = 0;
 
     /**
      * @brief Returns wanted value for actuator at given time.
      *
      * @param[in] time Time value.
      */
-    virtual double get_wanted_value(double time) const = 0;
+    virtual double get_control_value(double time) const = 0;
 
     /**
      * @brief Imposes a constant value.
@@ -480,6 +481,8 @@ class ActuatorRotation : public virtual Entity {
      * @brief Returns whether the actuator is fixed or not.
      */
     virtual bool is_fixed_actuator() const = 0;
+
+    virtual void initialize_links() = 0;
 
     void set_position(const Vector3d& position) override;
     Vector3d get_position() const override;

@@ -43,7 +43,7 @@ TEST_F(TestRotor, mass) {
     rna.rotor->blades = blades;
     rna.build();
     rna.assemble(system_elasto);
-    rna.body_yaw_bearing->set_fixed(true);
+    rna.actuator_yaw->body_controller->set_fixed(true);
 
     system_elasto.do_statics(true, 0);
 
