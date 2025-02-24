@@ -86,9 +86,12 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("set_damping_matrix", &seahowl::elasto::LinkMatrixStiffnessDamping::set_damping_matrix);
     py::class_<seahowl::elasto::ActuatorRotation, std::shared_ptr<seahowl::elasto::ActuatorRotation>>(
         m_elasto, "ActuatorRotation")
-        .def("initialize", &seahowl::elasto::ActuatorRotation::initialize)
         .def("set_timeseries", &seahowl::elasto::ActuatorRotation::set_timeseries)
-        .def("get_value", &seahowl::elasto::ActuatorRotation::get_value);
+        .def("get_wanted_value", &seahowl::elasto::ActuatorRotation::get_wanted_value)
+        .def("impose_value_constant", &seahowl::elasto::ActuatorRotation::impose_value_constant)
+        .def("increment_value_constant", &seahowl::elasto::ActuatorRotation::increment_value_constant)
+        .def("set_fixed_actuator", &seahowl::elasto::ActuatorRotation::set_fixed_actuator)
+        .def("is_fixed_actuator", &seahowl::elasto::ActuatorRotation::is_fixed_actuator);
     py::class_<seahowl::elasto::MeshElasto, std::shared_ptr<seahowl::elasto::MeshElasto>>(m_elasto, "MeshElasto");
     py::class_<seahowl::elasto::SystemElasto, std::shared_ptr<seahowl::elasto::SystemElasto>>(m_elasto, "SystemElasto")
         .def("step", &seahowl::elasto::SystemElasto::step)
@@ -223,6 +226,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
                seahowl::elasto::ComponentElasto>(m_elasto, "BladeElasto")
         .def_readonly("azimuth0", &seahowl::elasto::BladeElasto::azimuth0)
         .def_readonly("precone", &seahowl::elasto::BladeElasto::precone)
+        .def_property_readonly("actuator_pitch",
+                               [](seahowl::elasto::BladeElasto& blade) { return blade.actuator_pitch.get(); })
         .def_readwrite("reference_points", &seahowl::elasto::BladeElasto::reference_points)
         .def_readwrite("discretization_fractions", &seahowl::elasto::BladeElasto::discretization_fractions)
         .def("apply_pitch_increment", &seahowl::elasto::BladeElasto::apply_pitch_increment)

@@ -19,17 +19,17 @@
     "blades": [
       {
         "file": "../base/blade.json",
-        "initial_pitch": 0,
+        "initial_pitch": 0.0,
         "precone": -4.0
       },
       {
         "file": "../base/blade.json",
-        "initial_pitch": 0,
+        "initial_pitch": 0.0,
         "precone": -4.0
       },
       {
         "file": "../base/blade.json",
-        "initial_pitch": 0,
+        "initial_pitch": 0.0,
         "precone": -4.0
       }
     ]

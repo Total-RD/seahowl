@@ -207,7 +207,7 @@ class ElementElasto {
      * param[out] position Position to evaluate.
      * param[out] rotation Rotation to evaluate.
      */
-    virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) = 0;
+    virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) const = 0;
 
     /**
      * @brief Evaluates force and torque of point within element.
@@ -216,55 +216,35 @@ class ElementElasto {
      * param[out] force Force to evaluate.
      * param[out] torque Torque to evaluate.
      */
-    virtual void evaluate_force_torque(double eta, Vector3d& force, Vector3d& torque) = 0;
+    virtual void evaluate_force_torque(double eta, Vector3d& force, Vector3d& torque) const = 0;
 
     /**
      * @brief Returns position of point within element.
      *
      * param[in] eta Normalized abscissa along element within range [-1, +1].
      */
-    Vector3d get_position(double eta) {
-        auto position = Vector3d(0.0, 0.0, 0.0);
-        auto rotation = Quaternion(0.0, 0.0, 0.0, 0.0);
-        evaluate_position_rotation(eta, position, rotation);
-        return position;
-    };
+    Vector3d get_position(double eta) const;
 
     /**
      * @brief Returns rotation of point within element.
      *
      * param[in] eta Normalized abscissa along element within range [-1, +1].
      */
-    Quaternion get_rotation(double eta) {
-        auto position = Vector3d(0.0, 0.0, 0.0);
-        auto rotation = Quaternion(0.0, 0.0, 0.0, 0.0);
-        evaluate_position_rotation(eta, position, rotation);
-        return rotation;
-    };
+    Quaternion get_rotation(double eta) const;
 
     /**
      * @brief Returns force of point within element.
      *
      * param[in] eta Normalized abscissa along element within range [-1, +1].
      */
-    Vector3d get_force(double eta) {
-        auto force = Vector3d(0.0, 0.0, 0.0);
-        auto torque = Vector3d(0.0, 0.0, 0.0);
-        evaluate_force_torque(eta, force, torque);
-        return force;
-    };
+    Vector3d get_force(double eta) const;
 
     /**
      * @brief Returns force of point within element.
      *
      * param[in] eta Normalized abscissa along element within range [-1, +1].
      */
-    Vector3d get_torque(double eta) {
-        auto force = Vector3d(0.0, 0.0, 0.0);
-        auto torque = Vector3d(0.0, 0.0, 0.0);
-        evaluate_force_torque(eta, force, torque);
-        return torque;
-    };
+    Vector3d get_torque(double eta) const;
 
     /**
      * @brief Returns mass of elasto element.
@@ -434,17 +414,21 @@ class LinkMatrixStiffnessDamping {
 
 /**
  * @brief Actuator class for imposing rotation between two bodies.
+ *
+ * Rotation happens around the Z-axis of the controller body (body_controller).
+ * The axis can be changed by providing reference_rotation to the actuator.
+ * Reference rotation is expressed in the local coordinate system of controller body.
  */
-class ActuatorRotation {
+class ActuatorRotation : public virtual Entity {
   public:
-    /**
-     * @brief Initialization of actuator.
-     *
-     * @param[in] entity1 First entity (body) to link with actuator.
-     * @param[in] entity2 Second entity (body) to link with actuator.
-     * @param[in] rotation_axis Rotation axis of actuator, relative to body2 coordinate system.
-     */
-    virtual void initialize(const Entity& entity1, const Entity& entity2, const Vector3d& rotation_axis) = 0;
+    /** @brief Body of the controller (manages motor). */
+    std::unique_ptr<BodyElasto> body_controller;
+    /** @brief Body of the worker (rotating around controller body). */
+    std::unique_ptr<BodyElasto> body_worker;
+    /** @brief Reference rotation to change axis from local the Z-axis of controller body. */
+    Quaternion reference_rotation;
+    /** @brief Link for fixing the actuator in space. */
+    std::unique_ptr<Link> link;
 
     /**
      * @brief Sets timeseries for actuator.
@@ -455,11 +439,53 @@ class ActuatorRotation {
     virtual void set_timeseries(const std::vector<double>& time_array, const std::vector<double>& values_array) = 0;
 
     /**
-     * @brief Returns value for actuator at given time.
+     * @brief Returns wanted value for actuator at given time.
      *
      * @param[in] time Time value.
      */
-    virtual double get_value(double time) = 0;
+    virtual double get_wanted_value(double time) const = 0;
+
+    /**
+     * @brief Imposes a constant value.
+     *
+     * @param[in] value Value to impose.
+     */
+    virtual void impose_value_constant(double value) = 0;
+
+    /**
+     * @brief Increments value to current angle and make it constant.
+     *
+     * @param[in] value Value to impose.
+     */
+    virtual void increment_value_constant(double value) = 0;
+
+    /**
+     * @brief Returns current angle between the 2 actuator bodies.
+     */
+    virtual double get_angle() const = 0;
+
+    /**
+     * @brief Returns the rotation axis of the actuator.
+     */
+    Vector3d get_rotation_axis() const;
+
+    /**
+     * @brief Sets whether the actuator if fixed or not (keep it false for actuator dynamics).
+     *
+     * @param[in] is_fixed Whether the actuator is fixed or not.
+     */
+    virtual void set_fixed_actuator(bool is_fixed) = 0;
+
+    /**
+     * @brief Returns whether the actuator is fixed or not.
+     */
+    virtual bool is_fixed_actuator() const = 0;
+
+    void set_position(const Vector3d& position) override;
+    Vector3d get_position() const override;
+    void set_rotation(const Quaternion& rotation);
+    Quaternion get_rotation() const override;
+    Vector3d get_rpy_angles() const override;
 };
 
 /**

@@ -682,6 +682,9 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
     // blades
     // only make blades if rotor type is not disk
     if (rotor_json.at("type").get<std::string>() != "disk") {
+        // pitch actuator dynamics
+        bool has_pitch_actuator_dynamics = rotor_json.at("pitch_actuator_dynamics").get<bool>();
+
         std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
         std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades_elasto;
         std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades_aero;
@@ -709,8 +712,7 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
                 blade_elasto->precone = 0.0;
             }
 
-            // pitch actuator dynamics
-            rotor_json.at("pitch_actuator_dynamics").get_to(blade_elasto->has_pitch_actuator_dynamics);
+            blade_elasto->actuator_pitch->set_fixed_actuator(!has_pitch_actuator_dynamics);
 
             blades_elasto.push_back(blade_elasto);
             blades_aero.push_back(blade_aero);
@@ -831,12 +833,8 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
             // populate monopile
             auto filepath_monopile = (DATADIR / foundation_json.at("file").get<std::string>()).generic_string();
             populate_tower_from_json(filepath_monopile, *monopile_core);
-            foundation_json.at("discretization")
-                    .at("elasto")
-                    .get_to(monopile_elasto->discretization_fractions);
-            foundation_json.at("discretization")
-                    .at("hydro")
-                    .get_to(monopile_hydro->discretization_fractions);
+            foundation_json.at("discretization").at("elasto").get_to(monopile_elasto->discretization_fractions);
+            foundation_json.at("discretization").at("hydro").get_to(monopile_hydro->discretization_fractions);
             if (foundation_json.contains("options")) {
                 if (foundation_json.at("options").contains("use_MacCamyFuchs_correction"))
                     foundation_json.at("options")

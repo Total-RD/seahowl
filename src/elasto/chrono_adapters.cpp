@@ -825,7 +825,7 @@ void ElementElastoChrono::set_nodes(std::shared_ptr<NodeElasto> node1, std::shar
     nodes.push_back(node2);
 }
 
-void ElementElastoChrono::evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) {
+void ElementElastoChrono::evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) const {
     auto chvec = vec2ch(position);
     auto chquat = quat2ch(rotation);
     chobj->EvaluateSectionFrame(eta, chvec, chquat);
@@ -835,7 +835,7 @@ void ElementElastoChrono::evaluate_position_rotation(double eta, Vector3d& posit
     rotation = node_ch2iec(chquat);
 }
 
-void ElementElastoChrono::evaluate_force_torque(double eta, Vector3d& force, Vector3d& torque) {
+void ElementElastoChrono::evaluate_force_torque(double eta, Vector3d& force, Vector3d& torque) const {
     auto chforce = vec2ch(force);
     auto chtorque = vec2ch(torque);
     chobj->EvaluateSectionForceTorque(eta, chforce, chtorque);
@@ -1096,24 +1096,28 @@ class ChFunctionArray : public chrono::ChFunction {
 };
 
 ActuatorRotationChrono::ActuatorRotationChrono() {
+    // make actuator bodies (massless)
+    body_worker = std::make_unique<BodyElastoChrono>();
+    auto body1ref = dynamic_cast<BodyElastoChrono&>(*body_worker);
+    body1ref.set_mass(0.0);
+    body1ref.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+    body_controller = std::make_unique<BodyElastoChrono>();
+    auto body2ref = dynamic_cast<BodyElastoChrono&>(*body_controller);
+    body2ref.set_mass(0.0);
+    body2ref.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+
+    // make actuator abject
     chobj = std::make_shared<chrono::ChLinkMotorRotationAngle>();
+    LinkChronoBase::chobj = chobj;
     chfunc = std::make_shared<ChFunctionArray>();
     chobj->SetMotorFunction(chfunc);
-}
 
-void ActuatorRotationChrono::initialize(const Entity& entity1, const Entity& entity2, const Vector3d& rotation_axis) {
-    auto body1 = dynamic_cast<const BodyElastoChrono&>(entity1);
-    auto body2 = dynamic_cast<const BodyElastoChrono&>(entity2);
+    // make link
+    link = std::make_unique<LinkChrono>();
+    set_fixed_actuator(false);
 
-    // create a frame that has its Z axis aligned to rotation_axis
-    auto chaxis = chrono::Vector(rotation_axis[0], rotation_axis[1], rotation_axis[2]).GetNormalized();
-    auto chzero = chrono::Vector(0.0, 0.0, 0.0);
-    // chaxis relative to body1
-    auto rotation_axis_rel1 = body2.get_rotation().inverse() * body1.get_rotation() * rotation_axis;
-    auto chaxis_rel1 =
-        chrono::Vector(rotation_axis_rel1[0], rotation_axis_rel1[1], rotation_axis_rel1[2]).GetNormalized();
-
-    chobj->Initialize(body1.chobj, body2.chobj, true, chzero, chzero, chaxis, chaxis);
+    // initialize links
+    initialize_links();
 }
 
 void ActuatorRotationChrono::set_timeseries(const std::vector<double>& time_array,
@@ -1122,8 +1126,53 @@ void ActuatorRotationChrono::set_timeseries(const std::vector<double>& time_arra
     std::dynamic_pointer_cast<ChFunctionArray>(chfunc)->values_array = values_array;
 }
 
-double ActuatorRotationChrono::get_value(double time) {
+double ActuatorRotationChrono::get_wanted_value(double time) const {
     return std::dynamic_pointer_cast<ChFunctionArray>(chfunc)->Get_y(time);
+}
+
+double ActuatorRotationChrono::get_angle() const {
+    if (!is_fixed_actuator()) {
+        return chobj->GetMotorRot();
+    } else {
+        // get angle between quaternions
+        auto qq = (body_worker->get_rotation().conjugate() * body_controller->get_rotation()).normalized();
+        double angle0 = 2 * std::atan2(qq.vec().z(), qq.w());
+        // get angle between 0 and 2pi
+        double angle1 = fmod(angle0, 2 * PI);
+        return angle1;
+    }
+}
+
+void ActuatorRotationChrono::impose_value_constant(double value) {
+    auto current_angle = get_angle();
+    increment_value_constant(value - current_angle);
+}
+
+void ActuatorRotationChrono::increment_value_constant(double value) {
+    auto new_angle = get_angle() + value;
+    body_worker->set_rotation(AngleAxisd(value, get_rotation_axis()) * body_worker->get_rotation());
+    set_timeseries(std::vector<double>{0.0, 0.0}, std::vector<double>{new_angle, new_angle});
+    initialize_links();
+}
+
+void ActuatorRotationChrono::set_fixed_actuator(bool is_fixed) {
+    dynamic_cast<LinkChrono&>(*link).chobj->SetDisabled(!is_fixed);
+    chobj->SetDisabled(is_fixed);
+}
+
+bool ActuatorRotationChrono::is_fixed_actuator() const {
+    return chobj->IsDisabled();
+}
+
+void ActuatorRotationChrono::initialize_links() {
+    // link
+    link->initialize(*body_worker, *body_controller);
+
+    // actuator link
+    auto body1ref = dynamic_cast<BodyElastoChrono&>(*body_worker);
+    auto body2ref = dynamic_cast<BodyElastoChrono&>(*body_controller);
+    auto chframe0 = chrono::ChFrame<double>(chrono::Vector(0.0, 0.0, 0.0), quat2ch(reference_rotation));
+    chobj->Initialize(body1ref.chobj, body2ref.chobj, true, chframe0, chframe0);
 }
 
 LinkMatrixStiffnessDampingChrono::LinkMatrixStiffnessDampingChrono() {
@@ -1331,4 +1380,7 @@ void SystemElastoChrono::add(SpringLinear& spring) {
 
 void SystemElastoChrono::add(ActuatorRotation& actuator) {
     chobj->Add(dynamic_cast<ActuatorRotationChrono&>(actuator).chobj);
+    add(*actuator.body_worker);
+    add(*actuator.body_controller);
+    add(*actuator.link);
 }

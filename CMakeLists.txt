@@ -224,6 +224,7 @@ source_group(core FILES ${SEAHOWL_CORE_SOURCES} ${SEAHOWL_CORE_HEADERS})
 
 # elasto
 set(SEAHOWL_ELASTO_SOURCES
+    src/elasto/entities_elasto.cpp
     src/elasto/component_elasto.cpp
     src/elasto/blade_elasto.cpp
     src/elasto/reference_point_elasto.cpp
