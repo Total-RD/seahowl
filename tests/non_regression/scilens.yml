@@ -1,0 +1,45 @@
+processor: ExecuteAndCompare
+tags: [csv]
+execute:
+  pre_folder_delete:  ["output"]
+  exe_guess_os_extension: true
+  command_suffix: " ./data/main.json --numerics-duration 100"
+execute_and_compare:
+  test:
+    exe_path: "build/seahowl_driver"
+  reference:
+    exe_url: Adress_to_GIT/releases/download/v0.8.1/seahowl-driver-v0.8.1-linux-x86-64.zip
+    exe_url_headers:
+      Authorization: "Bearer {{ env.GIT_TOKEN }}"
+    exe_unzip_and_use: seahowl-driver-v0.8.1-linux-x86-64/seahowl_driver
+readers:
+  csv:
+    curve_parser:
+      name: "col_x"
+      parameters:
+        x: ["time (s)", "fraction"]
+    ignore_colunmns: ["monopile base moment x (Nm)","monopile base moment y (Nm)","monopile base moment z (Nm)","monopile base force x (N)","monopile base force y (N)","monopile base force z (N)"]
+compare:
+  errors_limit: 10000
+  float_thresholds:
+    relative_vs_absolute_min: 1e-12
+    relative_error_min: 1e-3
+    relative_error_max: 1e-2
+    absolute_error_min: 1e-7
+    absolute_error_max: 1e-6
+  sources:
+    test_folder_relative_path: validation
+    reference_folder_relative_path: reference
+    additional_path_suffix: "output"
+    recursive: true
+report:
+  title_prefix : "Seahowl / Comparison Results /"
+  output:
+    export_html: true
+  html:
+    collapse_if_successful: false
+    curves:
+      display_on_load: false
+    parameter_page_mode :
+      default_value : tabs
+  logo_file: ../../../doc/source/_static/totalenergies_alpha.png

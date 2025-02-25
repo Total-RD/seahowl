@@ -1,0 +1,59 @@
+﻿{
+  "aero": {
+    "solver": "BEMT",
+    "options": {
+      "hub_loss": true,
+      "tip_loss": true,
+      "tower_shadow": true
+    }
+  },
+  "rotor": {
+    "type": "fea",
+    "options": {
+      "fpm": false
+    },
+    "discretization": {
+      "elasto": [49],
+      "aero": [49]
+    },
+    "blades": [
+      {
+        "file": "../../../../../data/IEA15MW/base/blade.json",
+        "initial_pitch": 0,
+        "precone": -4.0
+      },
+      {
+        "file": "../../../../../data/IEA15MW/base/blade.json",
+        "initial_pitch": 0,
+        "precone": -4.0
+      },
+      {
+        "file": "../../../../../data/IEA15MW/base/blade.json",
+        "initial_pitch": 0,
+        "precone": -4.0
+      }
+    ]
+  },
+  "rna": {
+    "initial_yaw": 0.0,
+    "file": "../../../../../data/IEA15MW/base/rna.json"
+  },
+  "tower": {
+    "discretization": {
+      "elasto": [],
+      "aero": [19]
+    },
+    "file": "../../../../../data/IEA15MW/onshore/tower.csv",
+    "options":{
+      "use_MacCamyFuchs_correction": false,
+      "use_Cd_correction": false
+    }
+  },
+  "controller": {
+    "type": "DISCON",
+    "options": {
+      "infile": "../../../../../data/IEA15MW/base/controller/DISCON.IN",
+      "libfile": "../../../../../data/IEA15MW/base/controller/libdiscon.so"
+    }
+  }
+}

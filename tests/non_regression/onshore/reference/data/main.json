@@ -1,0 +1,33 @@
+﻿{
+  "numerics": {
+    "dt": 0.05,
+    "duration": 2000.0,
+    "statics": {
+      "linear_step": true,
+      "nonlinear_steps": 10
+    },
+    "presimulation": {
+      "dt": 0.05,
+      "duration": 0.0,
+      "presetup": true,
+      "fix_towers": true
+    }
+  },
+  "outputs": {
+    "dt": 0.1,
+    "folder": "./output",
+    "vtk": false,
+    "log_level": "info",
+    "gui": true
+  },
+  "environment": {
+    "file": "./env_onshore.json"
+  },
+  "turbines": [
+    {
+      "file": "./turbine.json",
+      "translation": [0, 0, 0],
+      "rotation": 0
+    }
+  ]
+}
