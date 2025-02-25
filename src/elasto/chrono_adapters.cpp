@@ -1138,16 +1138,7 @@ double ActuatorRotationChrono::get_control_value(double time) const {
 }
 
 double ActuatorRotationChrono::get_angle() const {
-    if (!is_fixed_actuator()) {
-        return chobj->GetMotorRot();
-    } else {
-        // get angle between quaternions
-        auto qq = (body_worker->get_rotation().conjugate() * body_controller->get_rotation()).normalized();
-        double angle0 = 2 * std::atan2(qq.vec().z(), qq.w());
-        // get angle between 0 and 2pi
-        double angle1 = fmod(angle0, 2 * PI);
-        return angle1;
-    }
+    return chobj->GetMotorRot();
 }
 
 void ActuatorRotationChrono::impose_value_constant(double value) {
