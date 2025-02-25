@@ -87,7 +87,7 @@ TEST_F(TestTower, frequency_json) {
     tower.nodes.front()->set_fixed(true);
 
     // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_frequency.csv").generic_string(),
+    TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_frequency_json.csv").generic_string(),
                                        (test_dir / "test_tower_frequency_json.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("top x (s)", [&tower] { return tower.nodes.back()->get_position().x(); });

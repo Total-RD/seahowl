@@ -1,0 +1,24 @@
+processor: Compare
+report:
+  output:
+    export_html: true
+  html:
+    collapse_if_successful: false
+    curves:
+      display_on_load: false
+    parameter_page_mode :
+      default_value : tabs
+  title: SEAHOWL Report for Tristan
+  logo_file: ../../../../doc/source/_static/totalenergies_alpha.png
+compare:
+   errors_limit: 10000
+   sources:
+     reference_folder_relative_path: ref
+     test_filename_match_ignore: .test
+     test_folder_relative_path: test
+readers:
+  csv:
+    curve_parser:
+      name: "col_x"
+      parameters:
+        x: ["time (s)", "fraction"]
