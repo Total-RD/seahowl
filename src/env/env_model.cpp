@@ -3,7 +3,7 @@
 using namespace seahowl::env;
 using seahowl::Vector3d;
 
-void EnvModel::addModel(std::shared_ptr<Model> model) {
+void EnvModel::add_model(std::shared_ptr<Model> model) {
     models.push_back(model);
     if (std::shared_ptr<FluidModel> fluidmodel = std::dynamic_pointer_cast<FluidModel>(model))
         fluid_models.push_back(fluidmodel);
@@ -13,7 +13,7 @@ void EnvModel::addModel(std::shared_ptr<Model> model) {
         wave_models.push_back(wavemodel);
 }
 
-const std::vector<std::shared_ptr<Model>>& EnvModel::getModels() const {
+const std::vector<std::shared_ptr<Model>>& EnvModel::get_models() const {
     return models;
 }
 

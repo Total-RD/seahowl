@@ -79,7 +79,7 @@ TEST_F(TestMorison, analytical_comparison) {
     wave_model->waves = waves_hydrochrono;
     // env_model
     auto env_model = seahowl::env::EnvModel();
-    env_model.addModel(wave_model);
+    env_model.add_model(wave_model);
 
     // values to store
     auto load_analytical = seahowl::Vector3d(0.0, 0.0, 0.0);
@@ -158,7 +158,7 @@ TEST_F(TestMorison, tower_morison) {
     wave_model->waves = waves_hydrochrono;
     // env_model
     auto env_model = std::make_shared<seahowl::env::EnvModel>();
-    env_model->addModel(wave_model);
+    env_model->add_model(wave_model);
     simulation.system_core->env_model = env_model;
 
     // tower

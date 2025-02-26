@@ -20,13 +20,13 @@ class EnvModel {
     /**
      * @brief Adds a model to the list of models
      */
-    void addModel(std::shared_ptr<Model> model);
+    void add_model(std::shared_ptr<Model> model);
 
     /**
      * @brief Returns the list of models
      * @param[out] models List of models
      */
-    const std::vector<std::shared_ptr<Model>>& getModels() const;
+    const std::vector<std::shared_ptr<Model>>& get_models() const;
 
     /**
      * @brief Returns fluid density at given coordinates.

@@ -39,7 +39,7 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
     wind_model->shear_coefficient = 0.12;
     // env_model
     auto env_model = seahowl::env::EnvModel();
-    env_model.addModel(wind_model);
+    env_model.add_model(wind_model);
 
     // turbine
     double initial_pitch = seahowl::PI / 8.0;

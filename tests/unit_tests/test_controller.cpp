@@ -296,7 +296,7 @@ TEST_F(TestController, IEA15) {
     auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
     // env_model
     auto env_model = std::make_shared<seahowl::env::EnvModel>();
-    env_model->addModel(wind_model);
+    env_model->add_model(wind_model);
 
     system_core.env_model = env_model;
     wind_model->shear_coefficient = 0.12;
@@ -403,7 +403,7 @@ TEST_F(TestController, actuator_disk) {
 
     // env_model
     auto env_model = seahowl::env::EnvModel();
-    env_model.addModel(wind_model);
+    env_model.add_model(wind_model);
 
     // turbine
     double initial_pitch = 0.0 * seahowl::PI / 1000.0;

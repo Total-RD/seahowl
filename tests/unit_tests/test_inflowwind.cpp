@@ -39,7 +39,7 @@ TEST_F(TestInflowWind, rpm_initial_pitch) {
     auto wind_model = std::make_shared<seahowl::env::InflowWindAdapter>(path);
     // env_model
     auto env_model = seahowl::env::EnvModel();
-    env_model.addModel(wind_model);
+    env_model.add_model(wind_model);
 
     // turbine
     double initial_pitch = seahowl::PI / 8.0;

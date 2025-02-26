@@ -43,7 +43,7 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
     wind_model->shear_coefficient = 0.12;
     // env_model
     auto env_model = seahowl::env::EnvModel();
-    env_model.addModel(wind_model);
+    env_model.add_model(wind_model);
 
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
@@ -118,7 +118,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
     wind_model->shear_coefficient = 0.12;
     // env_model
     auto env_model = seahowl::env::EnvModel();
-    env_model.addModel(wind_model);
+    env_model.add_model(wind_model);
 
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
@@ -195,7 +195,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
     wind_model->shear_coefficient = 0.12;
     // env_model
     auto env_model = seahowl::env::EnvModel();
-    env_model.addModel(wind_model);
+    env_model.add_model(wind_model);
 
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
@@ -269,7 +269,7 @@ TEST_F(TestTurbine, controller_target_rpm) {
     wind_model->shear_coefficient = 0.12;
     // env_model
     auto env_model = seahowl::env::EnvModel();
-    env_model.addModel(wind_model);
+    env_model.add_model(wind_model);
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
 
@@ -344,7 +344,7 @@ TEST_F(TestTurbine, actuator_disk) {
     wind_model->shear_coefficient = 0.12;
     // env_model
     auto env_model = seahowl::env::EnvModel();
-    env_model.addModel(wind_model);
+    env_model.add_model(wind_model);
 
     // turbine
     double initial_pitch = 0.0 * seahowl::PI / 1000.0;
@@ -456,7 +456,7 @@ TEST_F(TestTurbine, multiturbines) {
     wind_model->shear_coefficient = 0.12;
     // env_model
     auto env_model = std::make_shared<seahowl::env::EnvModel>();
-    env_model->addModel(wind_model);
+    env_model->add_model(wind_model);
 
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
