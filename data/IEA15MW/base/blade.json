@@ -1,9 +1,9 @@
 {
   "global_variables": {
-    "damping_x": 0.0009,
-    "damping_y": 0.0009,
-    "damping_z": 0.0009,
-    "damping_t": 0.0036,
+    "damping_x": 0.00299005,
+    "damping_y": 0.00218775,
+    "damping_z": 0.00084171,
+    "damping_t": 0.00084171,
     "damping_m": 0.0,
     "offset_gravity": [0.0, 0.0],
     "offset_elastic": [0.0, 0.0]

@@ -8,10 +8,10 @@
     "added_mass_coefficient_normal": 0.0,
     "added_mass_coefficient_axial": 0.0,
     "buoyancy_factor": 0.0,
-    "damping_x": 0.0004,
-    "damping_y": 0.0004,
-    "damping_z": 0.0004,
-    "damping_t": 0.0004,
+    "damping_x": 0.005,
+    "damping_y": 0.005,
+    "damping_z": 0.005,
+    "damping_t": 0.005,
     "damping_m": 0.0
   },
   "reference_points": [{
