@@ -322,11 +322,11 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
         reference_point.structural_twist = input_data->get("twist", ii) * PI / 180.0;
         reference_point.mass_matrix = input_data->get_matrix("mass_matrix", ii);
         reference_point.stiffness_matrix = input_data->get_matrix("stiffness_matrix", ii);
-        auto damping_coefficients = input_data->get_vector_std(4, "damping_coefficients", ii);
-        reference_point.damping_coefficients[0] = damping_coefficients[0];
-        reference_point.damping_coefficients[1] = damping_coefficients[1];
-        reference_point.damping_coefficients[2] = damping_coefficients[2];
-        reference_point.damping_coefficients[3] = damping_coefficients[3];
+        reference_point.damping_coefficients[0] = input_data->get("damping_z", ii);
+        reference_point.damping_coefficients[1] = input_data->get("damping_y", ii);
+        reference_point.damping_coefficients[2] = input_data->get("damping_x", ii);
+        reference_point.damping_coefficients[3] = input_data->get("damping_t", ii);
+        reference_point.damping_coefficients[4] = input_data->get("damping_m", ii);
 
         reference_points.push_back(reference_point);
     }
@@ -441,6 +441,7 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         reference_point.damping_coefficients[1] = input_data->get("damping_y", ii);
         reference_point.damping_coefficients[2] = input_data->get("damping_x", ii);
         reference_point.damping_coefficients[3] = input_data->get("damping_t", ii);
+        reference_point.damping_coefficients[4] = input_data->get("damping_m", ii);
 
         reference_points.push_back(reference_point);
     }

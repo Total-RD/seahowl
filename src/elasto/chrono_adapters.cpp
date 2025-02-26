@@ -606,10 +606,12 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
         // damping
         chrono::fea::DampingCoefficients damping_coefficients;
         // damping coefficients: IEC -> Chrono convention
-        damping_coefficients.bx = ref.damping_coefficients[2];
-        damping_coefficients.by = ref.damping_coefficients[1];
-        damping_coefficients.bz = ref.damping_coefficients[0];
-        damping_coefficients.bt = ref.damping_coefficients[3];
+        // Timoshenko beams in Chrono use Rayleigh cofficients squared
+        damping_coefficients.bx = sqrt(ref.damping_coefficients[2]);
+        damping_coefficients.by = sqrt(ref.damping_coefficients[1]);
+        damping_coefficients.bz = sqrt(ref.damping_coefficients[0]);
+        damping_coefficients.bt = sqrt(ref.damping_coefficients[3]);
+        // mass proportional coefficient
         damping_coefficients.alpha = ref.damping_coefficients[4];
         sectionFPM->SetBeamRaleyghDamping(damping_coefficients);
     } else {
@@ -635,10 +637,12 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
         // damping
         chrono::fea::DampingCoefficients damping_coefficients;
         // damping coefficients: IEC -> Chrono convention
-        damping_coefficients.bx = ref.damping_coefficients[2];
-        damping_coefficients.by = ref.damping_coefficients[1];
-        damping_coefficients.bz = ref.damping_coefficients[0];
-        damping_coefficients.bt = ref.damping_coefficients[3];
+        // Timoshenko beams in Chrono use Rayleigh cofficients squared
+        damping_coefficients.bx = sqrt(ref.damping_coefficients[2]);
+        damping_coefficients.by = sqrt(ref.damping_coefficients[1]);
+        damping_coefficients.bz = sqrt(ref.damping_coefficients[0]);
+        damping_coefficients.bt = sqrt(ref.damping_coefficients[3]);
+        // mass-proportional coefficient
         damping_coefficients.alpha = ref.damping_coefficients[4];
         section->SetBeamRaleyghDamping(damping_coefficients);
     }
@@ -665,10 +669,13 @@ void NodeElastoChrono::set_properties(const TowerReferencePointElasto& ref) {
                                  std::to_string(ref.damping_coefficients.size()) + ").");
     }
     chrono::fea::DampingCoefficients damping_coefficients;
-    damping_coefficients.bx = ref.damping_coefficients[0];
-    damping_coefficients.by = ref.damping_coefficients[1];
-    damping_coefficients.bz = ref.damping_coefficients[2];
-    damping_coefficients.bt = ref.damping_coefficients[3];
+    // damping coefficients: IEC -> Chrono convention
+    // Timoshenko beams in Chrono use Rayleigh cofficients squared
+    damping_coefficients.bx = sqrt(ref.damping_coefficients[0]);
+    damping_coefficients.by = sqrt(ref.damping_coefficients[1]);
+    damping_coefficients.bz = sqrt(ref.damping_coefficients[2]);
+    damping_coefficients.bt = sqrt(ref.damping_coefficients[3]);
+    // mass-proportional coefficient
     damping_coefficients.alpha = ref.damping_coefficients[4];
     section->SetBeamRaleyghDamping(damping_coefficients);
 }

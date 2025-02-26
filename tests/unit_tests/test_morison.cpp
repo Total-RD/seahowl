@@ -175,7 +175,7 @@ TEST_F(TestMorison, tower_morison) {
     ref1_elasto.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
     ref1_elasto.coordinates = seahowl::Vector3d(0.0, 0.0, zbottom);
     ref1_elasto.fraction = 0.0;
-    ref1_elasto.damping_coefficients = {0.1, 0.1, 0.1, 0.1, 0.0};
+    ref1_elasto.damping_coefficients = {0.01, 0.01, 0.01, 0.01, 0.0};
     auto ref1_fluid = seahowl::aero::TowerReferencePointAero();
     ref1_fluid.diameter = diameter;
     ref1_fluid.coefficients = coefficients;
@@ -186,7 +186,7 @@ TEST_F(TestMorison, tower_morison) {
     ref2_elasto.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
     ref2_elasto.coordinates = seahowl::Vector3d(0.0, 0.0, ztop);
     ref2_elasto.fraction = 1.0;
-    ref2_elasto.damping_coefficients = {0.1, 0.1, 0.1, 0.1, 0.0};
+    ref2_elasto.damping_coefficients = {0.01, 0.01, 0.01, 0.01, 0.0};
     auto ref2_fluid = seahowl::aero::TowerReferencePointAero();
     ref2_fluid.diameter = diameter;
     ref2_fluid.coefficients = coefficients;
