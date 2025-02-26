@@ -113,9 +113,9 @@ void System::prestep(double time, double dt) {
         turbine->apply_control(time, dt);
     }
 
-    // compute forces from fluid model
+    // compute forces from env model
     if (env_model->has_model_of_type<FluidModel>()) {
-        apply_fluid_model(*env_model, time);
+        apply_env_model(*env_model, time);
     }
 
     // prestep (accumulates loads from aero to elasto)
@@ -150,14 +150,14 @@ void System::poststep(double time, double dt) {
     }
 }
 
-void System::apply_fluid_model(seahowl::env::EnvModel& env_model, double time) {
+void System::apply_env_model(seahowl::env::EnvModel& env_model, double time) {
     for (auto& turbine : turbines) {
         // compute forces from fluid model
-        turbine->apply_fluid_model(env_model, time);
+        turbine->apply_env_model(env_model, time);
     }
     for (auto& component : components) {
         // compute forces from fluid model
-        component->apply_fluid_model(env_model, time);
+        component->apply_env_model(env_model, time);
     }
 }
 

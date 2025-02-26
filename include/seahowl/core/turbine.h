@@ -120,20 +120,20 @@ class Turbine : public ComponentDynamic {
     double get_generator_rpm() const;
 
     /**
-     * @brief Applies fluid model to turbine components.
+     * @brief Applies env model to turbine components.
      *
-     * @param[in] fluid_model Fluid model affecting turbine components.
+     * @param[in] env_model env model affecting turbine components.
      * @param[in] time Time of simulation.
      */
-    virtual void apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time);
+    virtual void apply_env_model(seahowl::env::EnvModel& env_model, double time);
 
     /**
      * @brief Applies soil model to turbine components.
      *
-     * @param[in] soil_model Soil model affecting turbine components.
+     * @param[in] env_model Soil model affecting turbine components.
      * @param[in] time Time of simulation.
      */
-    virtual void apply_soil_model(seahowl::env::EnvModel& soil_model, double time);
+    virtual void apply_soil_model(seahowl::env::EnvModel& env_model, double time);
 
   protected:
     /**

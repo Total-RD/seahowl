@@ -66,7 +66,12 @@ class RotorNacelleAssembly : public ComponentDynamic {
      */
     void poststep(double time, double dt) override;
 
-    void apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) override;
+    /**
+     * @brief Applies environmental model to RNA.
+     * @param[in] env_model Environmental model affecting RNA.
+     * @param[in] time Time of simulation.
+     */
+    void apply_env_model(seahowl::env::EnvModel& env_model, double time) override;
 
     /**
      * @brief Updates aero positions, rotations, velocities and accelerations from elasto component of the RNA.

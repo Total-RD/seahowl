@@ -71,7 +71,12 @@ class Tower : public virtual ComponentDynamic {
      */
     void poststep(double time, double dt) override;
 
-    void apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) override;
+    /**
+     * @brief Applies env model to tower.
+     * @param[in] env_model Environmental model affecting tower.
+     * @param[in] time Time of simulation.
+     */
+    void apply_env_model(seahowl::env::EnvModel& env_model, double time) override;
 
     /**
      * @brief Builds the tower (aero and elasto part).

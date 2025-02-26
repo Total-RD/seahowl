@@ -76,7 +76,13 @@ class System : public ComponentDynamic {
      */
     virtual void poststep(double time, double dt) override;
 
-    void apply_fluid_model(seahowl::env::EnvModel& env_model, double time) override;
+    /**
+     * @brief Applies environmental model to system.
+     * @param[in] env_model Environmental model affecting system.
+     * @param[in] time Time of simulation.
+     */
+    void apply_env_model(seahowl::env::EnvModel& env_model, double time) override;
+
     void apply_soil_model(seahowl::env::EnvModel& env_model, double time) override;
 
     /**

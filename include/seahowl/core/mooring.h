@@ -85,9 +85,14 @@ class Mooring : public ComponentDynamic {
      */
     void poststep(double time, double dt) override;
 
-    void apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) override;
-    void apply_soil_model(seahowl::env::EnvModel& soil_model, double time) override;
+    /**
+     * @brief Applies environmental model to mooring.
+     * @param[in] env_model Environmental model affecting mooring.
+     * @param[in] time Time of simulation.
+     */
+    void apply_env_model(seahowl::env::EnvModel& env_model, double time) override;
 
+    void apply_soil_model(seahowl::env::EnvModel& soil_model, double time) override;
     /**
      * @brief Builds the mooring (hydro and elasto part).
      *
@@ -170,9 +175,13 @@ class MooringSystem : public ComponentDynamic {
 
     void prestep(double time, double dt) override;
     void poststep(double time, double dt) override;
-
-    void apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) override;
-    void apply_soil_model(seahowl::env::EnvModel& soil_model, double time) override;
+    /**
+     * @brief Applies environmental model to mooring system.
+     * @param[in] env_model Environmental model affecting mooring system.
+     * @param[in] time Time of simulation.
+     */
+    void apply_env_model(seahowl::env::EnvModel& env_model, double time) override;
+    void apply_soil_model(seahowl::env::EnvModel& env_model, double time) override;
     void build() override;
 
   private:

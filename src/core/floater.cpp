@@ -34,12 +34,12 @@ void Floater::poststep(double time, double dt) {
     mooring_system->poststep(time, dt);
 }
 
-void Floater::apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) {
-    mooring_system->apply_fluid_model(fluid_model, time);
+void Floater::apply_env_model(seahowl::env::EnvModel& env_model, double time) {
+    mooring_system->apply_env_model(env_model, time);
 }
 
-void Floater::apply_soil_model(seahowl::env::EnvModel& soil_model, double time) {
-    mooring_system->apply_soil_model(soil_model, time);
+void Floater::apply_soil_model(seahowl::env::EnvModel& env_model, double time) {
+    mooring_system->apply_soil_model(env_model, time);
 }
 
 void Floater::build() {

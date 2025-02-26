@@ -43,7 +43,7 @@ void initialize_pyseahowl_core(py::module& m) {
         .def("initialize", &seahowl::core::ComponentDynamic::initialize)
         .def("prestep", &seahowl::core::ComponentDynamic::prestep)
         .def("poststep", &seahowl::core::ComponentDynamic::poststep)
-        .def("apply_fluid_model", &seahowl::core::ComponentDynamic::apply_fluid_model)
+        .def("apply_env_model", &seahowl::core::ComponentDynamic::apply_env_model)
         .def("apply_soil_model", &seahowl::core::ComponentDynamic::apply_soil_model);
 
     // core/simulation.h

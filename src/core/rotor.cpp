@@ -50,8 +50,8 @@ void RotorNacelleAssembly::poststep(double time, double dt) {
     update_positions_aero();
 }
 
-void RotorNacelleAssembly::apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) {
-    aero.compute_fluid_loads(fluid_model, time);
+void RotorNacelleAssembly::apply_env_model(seahowl::env::EnvModel& env_model, double time) {
+    aero.compute_fluid_loads(env_model, time);
 }
 
 void RotorNacelleAssembly::update_positions_aero() {

@@ -51,20 +51,20 @@ class ComponentDynamic {
     virtual void poststep(double time, double dt) = 0;
 
     /**
-     * @brief Applies fluid model to component.
+     * @brief Applies env model to component.
      *
-     * @param[in] fluid_model Fluid model affecting component.
+     * @param[in] env_model env model affecting component.
      * @param[in] time Time of simulation.
      */
-    virtual void apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time){};
+    virtual void apply_env_model(seahowl::env::EnvModel& env_model, double time){};
 
     /**
      * @brief Applies soil model to component.
      *
-     * @param[in] fluid_model Fluid model affecting component.
+     * @param[in] env_model env model affecting component.
      * @param[in] time Time of simulation.
      */
-    virtual void apply_soil_model(seahowl::env::EnvModel& soil_model, double time){};
+    virtual void apply_soil_model(seahowl::env::EnvModel& env_model, double time){};
 
   protected:
     bool is_initialized = false;

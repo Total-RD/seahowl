@@ -56,8 +56,8 @@ void Mooring::poststep(double time, double dt) {
     update_positions_hydro();
 }
 
-void Mooring::apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) {
-    hydro.compute_fluid_loads(fluid_model, time);
+void Mooring::apply_env_model(seahowl::env::EnvModel& env_model, double time) {
+    hydro.compute_fluid_loads(env_model, time);
 }
 
 void Mooring::apply_soil_model(seahowl::env::EnvModel& soil_model, double time) {
@@ -183,15 +183,15 @@ void MooringSystem::poststep(double time, double dt) {
     }
 }
 
-void MooringSystem::apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) {
+void MooringSystem::apply_env_model(seahowl::env::EnvModel& env_model, double time) {
     for (auto& mooring : moorings) {
-        mooring->apply_fluid_model(fluid_model, time);
+        mooring->apply_env_model(env_model, time);
     }
 }
 
-void MooringSystem::apply_soil_model(seahowl::env::EnvModel& soil_model, double time) {
+void MooringSystem::apply_soil_model(seahowl::env::EnvModel& env_model, double time) {
     for (auto& mooring : moorings) {
-        mooring->apply_soil_model(soil_model, time);
+        mooring->apply_soil_model(env_model, time);
     }
 }
 

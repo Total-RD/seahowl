@@ -33,8 +33,8 @@ void Tower::poststep(double time, double dt) {
     update_positions_aero();
 }
 
-void Tower::apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) {
-    aero.compute_fluid_loads(fluid_model, time);
+void Tower::apply_env_model(seahowl::env::EnvModel& env_model, double time) {
+    aero.compute_fluid_loads(env_model, time);
 }
 
 void Tower::build() {

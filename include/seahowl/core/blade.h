@@ -71,7 +71,7 @@ class Blade : public ComponentDynamic {
      */
     void poststep(double time, double dt) override;
 
-    void apply_fluid_model(seahowl::env::EnvModel& fluid_model, double time) override;
+    void apply_env_model(seahowl::env::EnvModel& env_model, double time) override;
 
     /**
      * @brief Builds the blade (aero and elasto part).
