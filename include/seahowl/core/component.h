@@ -26,6 +26,11 @@ namespace core {
  */
 class ComponentDynamic {
   public:
+    ComponentDynamic() {}
+
+    ComponentDynamic(const std::shared_ptr<seahowl::elasto::ComponentElasto> elasto,
+                     const std::shared_ptr<seahowl::ComponentFluid> aero)
+        : elasto_shared_ptr(elasto), fluid_shared_ptr(aero) {}
     /**
      * @brief Builds the component, called before initializing the simulation.
      */
