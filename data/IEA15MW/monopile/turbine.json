@@ -38,7 +38,7 @@
   "rna": {
     "file": "../base/rna.json",
     "initial_yaw": 0.0,
-    "yaw_actuator_dynamics": false
+    "yaw_actuator_dynamics": true
   },
   "tower": {
     "discretization": {

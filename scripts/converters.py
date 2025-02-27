@@ -259,12 +259,6 @@ def convert_aerodyn_files(
 
 def convert_beamdyn_file(filename, save_directory=None):
     filepath = Path(filename)
-    beamdyn_json = dict()
-    # add default options
-    beamdyn_json["global_variables"] = {}
-    beamdyn_json["global_variables"]["damping_coefficients"] = [0.03, 0.03, 0.03, 0.06]
-    beamdyn_json["global_variables"]["offset_gravity"] = [0.0, 0.0]
-    beamdyn_json["global_variables"]["offset_elastic"] = [0.0, 0.0]
 
     reference_points = list()
     fractions = list()
@@ -294,23 +288,36 @@ def convert_beamdyn_file(filename, save_directory=None):
                     filename=path_BD_blade, save_directory=save_directory
                 )
 
-    beamdyn_json["discretization_elasto"] = fractions
+    blade_elasto_json["discretization_elasto"] = fractions
 
     reference_points = merge_interpolate_points(
         json_points1=reference_points,
         json_points2=blade_elasto_json["reference_points"],
         tol_fraction_decimals=TOL_FRACTION_DECIMALS,
     )
-    beamdyn_json["reference_points"] = reference_points
+    blade_elasto_json["reference_points"] = reference_points
 
-    return beamdyn_json
+    return blade_elasto_json
 
 
 def convert_beamdyn_blade_file(filename, save_directory=None):
     filepath = Path(filename)
     beamdyn_json = dict()
+    beamdyn_json["global_variables"] = dict()
+    beamdyn_json["global_variables"]["offset_gravity"] = [0.0, 0.0]
+    beamdyn_json["global_variables"]["offset_elastic"] = [0.0, 0.0]
     with open(filepath, "r") as f:
         lines = f.readlines()
+
+        # global variables
+        damping_coefficients = lines[8].split()
+        beamdyn_json["global_variables"]["damping_x"] = float(damping_coefficients[0])
+        beamdyn_json["global_variables"]["damping_y"] = float(damping_coefficients[1])
+        beamdyn_json["global_variables"]["damping_z"] = float(damping_coefficients[2])
+        beamdyn_json["global_variables"]["damping_t"] = float(damping_coefficients[5])
+        beamdyn_json["global_variables"]["damping_m"] = 0.0
+
+        # iterate over points
         start_idx = 10
         nprops = (len(lines) - start_idx) / 15
         points = list()
@@ -447,12 +454,11 @@ def convert_elastodyn_blade_file(filename, blade_length, save_directory=None):
     filepath = Path(filename)
     elastodyn_json = dict()
     elastodyn_json["global_variables"] = {}
-    elastodyn_json["global_variables"]["damping_coefficients"] = [
-        0.03,
-        0.03,
-        0.03,
-        0.06,
-    ]
+    elastodyn_json["global_variables"]["damping_x"] = 0.005
+    elastodyn_json["global_variables"]["damping_y"] = 0.005
+    elastodyn_json["global_variables"]["damping_z"] = 0.005
+    elastodyn_json["global_variables"]["damping_t"] = 0.005
+    elastodyn_json["global_variables"]["damping_m"] = 0.0
     elastodyn_json["global_variables"]["offset_gravity"] = [0.0, 0.0]
     elastodyn_json["global_variables"]["offset_elastic"] = [0.0, 0.0]
 
@@ -626,7 +632,7 @@ def convert_elastodyn_tower_file(
     assert npoints != 0, "Could not find tower ElastoDyn info in given file."
     start_idx = 19
 
-    header = "position_x,position_y,position_z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient_normal,drag_coefficient_axial,added_mass_coefficient_normal,added_mass_coefficient_axial,buoyancy_factor,damping_x,damping_y,damping_z,damping_t,"
+    header = "position_x,position_y,position_z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient_normal,drag_coefficient_axial,added_mass_coefficient_normal,added_mass_coefficient_axial,buoyancy_factor,damping_x,damping_y,damping_z,damping_t,damping_m,"
     csv_array = np.zeros([npoints, len(header.split(",")) - 1])
     # assume basic steel properties and cylinder shape
     young_modulus = 210e9
@@ -666,10 +672,11 @@ def convert_elastodyn_tower_file(
             0.0,
             0.0,
             0.0,
-            0.02,
-            0.02,
-            0.02,
-            0.02,
+            0.005,
+            0.005,
+            0.005,
+            0.005,
+            0.0,
         ]
 
     # save to file
@@ -988,6 +995,8 @@ def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=Fals
                             f"File does not exist: {path_DISCON}, ignoring.",
                             RuntimeWarning,
                         )
+                        controller_json["type"] = ""
+                        del controller_json["options"]
                         break
                     with open(path_DISCON, "r") as f2:
                         lines2 = f2.readlines()
@@ -1021,12 +1030,13 @@ def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=Fals
             "rotor": {
                 "type": "fea",
                 "options": {
-                    "fpm": False,
+                    "fpm": True,
                 },
                 "discretization": {
                     "elasto": blade_json["discretization_elasto"],
                     "aero": blade_json["discretization_aero"],
                 },
+                "pitch_actuator_dynamics": True,
                 "blades": [
                     {
                         "file": str(Path("./blade.json")),
@@ -1039,6 +1049,7 @@ def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=Fals
             "rna": {
                 "initial_yaw": 0.0,
                 "file": str(Path("./rna.json")),
+                "yaw_actuator_dynamics": True,
             },
             "tower": {
                 "discretization": {
