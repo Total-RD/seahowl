@@ -4,6 +4,8 @@ vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL https://github.com/openfast/openfast.git
     REF fc1110183bcc87b16d93129edabdce6d30e3a497
+    PATCHES
+        "openfast_custom_command.patch"
 )
 
 vcpkg_find_fortran(FORTRAN_CMAKE)
