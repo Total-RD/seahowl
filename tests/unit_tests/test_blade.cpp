@@ -79,6 +79,31 @@ TEST_F(TestBlade, edgewise) {
     blade.assemble(system_elasto);
     blade.nodes.front()->set_fixed(true);
 
+    // get equilibrium position
+    system_elasto.do_statics(true, 10);
+    auto pos_equilibrium = blade.nodes.back()->get_position();
+
+    // Setup TestFwDataSet
+    TestFrameworkDataset test_dataset({false, (ref_dir / "test_blade_edgewise.csv").generic_string(),
+                                       (test_dir / "test_blade_edgewise.test.csv").generic_string()});
+    test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
+    test_dataset.test_csv.add_function("tip y (s)", [&blade, &pos_equilibrium] {
+        return blade.nodes.back()->get_position().y() - pos_equilibrium.y();
+    });
+
+    // decay
+    double dt = 0.1;
+    double duration = 100.0;
+    blade.nodes.back()->set_force(Vector3d(0.0, 300.0, 0.0), false);
+    system_elasto.do_statics(true, 10);
+    blade.nodes.back()->set_force(Vector3d(0.0, 0.0, 0.0), false);
+    while (system_elasto.get_time() <= duration) {
+        test_dataset.test_csv.write_row();
+        system_elasto.step(dt);
+    }
+
+    EvaluateTest(test_dataset);
+
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset_deflection(
         {false, (ref_dir / "test_blade_edgewise_deflection.csv").generic_string(),
@@ -100,49 +125,6 @@ TEST_F(TestBlade, edgewise) {
 
     // check that deflections match reference
     EvaluateTest(test_dataset_deflection);
-
-    EvaluateTest(test_dataset_deflection);
-
-    // static position of blade tip
-    double pos0 = blade.nodes.back()->get_position().z();
-
-    // check zero-crossings (static position of blade tip)
-    int step = 0;
-    double pos_y = 0.0;
-    double dt = 0.02;
-    int npeaks = 0;
-    double natural_period = 0.0;
-    double time = 0.0;
-    double end_time = 10.0;
-    double start_time = 0.0;
-    blade.nodes.back()->set_force(Vector3d(0.0, 0.0, 1000.0), false);
-
-    // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({false, (ref_dir / "test_blade_edgewise.csv").generic_string(),
-                                       (test_dir / "test_blade_edgewise.test.csv").generic_string()});
-    test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
-    test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
-
-    while (time < end_time) {
-        if (time > 0.5) {
-            blade.nodes.back()->reset_loads();
-            if (blade.nodes.back()->get_position().z() < pos0 && pos_y > pos0) {
-                if (start_time == 0.0 && npeaks == 0) {
-                    start_time = time;
-                } else {
-                    npeaks += 1;
-                    natural_period = (time - start_time) / npeaks;
-                    test_dataset.test_csv.write_row();
-                }
-            }
-        }
-        pos_y = blade.nodes.back()->get_position().z();
-        system_elasto.step(dt);
-        time += dt;
-        step += 1;
-    }
-
-    EvaluateTest(test_dataset);
 }
 
 TEST_F(TestBlade, flapwise) {
@@ -162,6 +144,31 @@ TEST_F(TestBlade, flapwise) {
     blade.build();
     blade.assemble(system_elasto);
     blade.nodes.front()->set_fixed(true);
+
+    // get equilibrium position
+    system_elasto.do_statics(true, 10);
+    auto pos_equilibrium = blade.nodes.back()->get_position();
+
+    // Setup TestFwDataSet
+    TestFrameworkDataset test_dataset({false, (ref_dir / "test_blade_flapwise.csv").generic_string(),
+                                       (test_dir / "test_blade_flapwise.test.csv").generic_string()});
+    test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
+    test_dataset.test_csv.add_function("tip x (s)", [&blade, &pos_equilibrium] {
+        return blade.nodes.back()->get_position().x() - pos_equilibrium.x();
+    });
+
+    // decay
+    double dt = 0.1;
+    double duration = 100.0;
+    blade.nodes.back()->set_force(Vector3d(-300.0, 0.0, 0.0), false);
+    system_elasto.do_statics(true, 10);
+    blade.nodes.back()->set_force(Vector3d(0.0, 0.0, 0.0), false);
+    while (system_elasto.get_time() <= duration) {
+        test_dataset.test_csv.write_row();
+        system_elasto.step(dt);
+    }
+
+    EvaluateTest(test_dataset);
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset_deflection(
@@ -183,45 +190,4 @@ TEST_F(TestBlade, flapwise) {
     test_dataset_deflection.test_csv.write_row();
 
     EvaluateTest(test_dataset_deflection);
-
-    // static position of blade tip
-    double pos0 = blade.nodes.back()->get_position().z();
-
-    // check zero-crossings (static position of blade tip)
-    int step = 0;
-    double pos_y = 0.0;
-    double dt = 0.02;
-    int npeaks = 0;
-    double natural_period = 0.0;
-    double time = 0.0;
-    double end_time = 10.0;
-    double start_time = 0.0;
-    blade.nodes.back()->set_force(Vector3d(0.0, 0.0, 1000.0), false);
-
-    // Setup TestFwDataSet
-    TestFrameworkDataset test_dataset({false, (ref_dir / "test_blade_flapwise.csv").generic_string(),
-                                       (test_dir / "test_blade_flapwise.test.csv").generic_string()});
-    test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
-    test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
-
-    while (time < end_time) {
-        if (time > 0.5) {
-            blade.nodes.back()->reset_loads();
-            if (blade.nodes.back()->get_position().z() < pos0 && pos_y > pos0) {
-                if (start_time == 0.0 && npeaks == 0) {
-                    start_time = time;
-                } else {
-                    npeaks += 1;
-                    natural_period = (time - start_time) / npeaks;
-                    test_dataset.test_csv.write_row();
-                }
-            }
-        }
-        pos_y = blade.nodes.back()->get_position().z();
-        system_elasto.step(dt);
-        time += dt;
-        step += 1;
-    }
-
-    EvaluateTest(test_dataset);
 }

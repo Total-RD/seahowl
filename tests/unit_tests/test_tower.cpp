@@ -53,45 +53,21 @@ TEST_F(TestTower, frequency) {
     tower.assemble(system_elasto);
     tower.nodes.front()->set_fixed(true);
 
-    system_elasto.do_statics(true, 0);
-
-    // static position of tower top
-    double pos0 = tower.nodes.back()->get_position().x();
-
-    // check zero-crossings (static position of tower top)
-    int step = 0;
-    double pos_y = 0.0;
-    double dt = 0.01;
-    int npeaks = 0;
-    double natural_period = 0.0;
-    double time = 0.0;
-    double end_time = 10.0;
-    double start_time = 0.0;
-    tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
-
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_frequency.csv").generic_string(),
                                        (test_dir / "test_tower_frequency.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
-    test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
+    test_dataset.test_csv.add_function("top x (s)", [&tower] { return tower.nodes.back()->get_position().x(); });
 
-    while (time < end_time) {
-        if (time > 0.5) {
-            tower.nodes.back()->reset_loads();
-            if (tower.nodes.back()->get_position().x() < pos0 && pos_y > pos0) {
-                if (start_time == 0.0 && npeaks == 0) {
-                    start_time = time;
-                } else {
-                    npeaks += 1;
-                    natural_period = (time - start_time) / npeaks;
-                    test_dataset.test_csv.write_row();
-                }
-            }
-        }
-        pos_y = tower.nodes.back()->get_position().x();
+    // decay
+    double dt = 0.01;
+    double duration = 10.0;
+    tower.nodes.back()->set_force(Vector3d(-3000.0, 0.0, 0.0), false);
+    system_elasto.do_statics(true, 10);
+    tower.nodes.back()->set_force(Vector3d(0.0, 0.0, 0.0), false);
+    while (system_elasto.get_time() <= duration) {
+        test_dataset.test_csv.write_row();
         system_elasto.step(dt);
-        time += dt;
-        step += 1;
     }
 
     EvaluateTest(test_dataset);
@@ -110,45 +86,21 @@ TEST_F(TestTower, frequency_json) {
     tower.assemble(system_elasto);
     tower.nodes.front()->set_fixed(true);
 
-    system_elasto.do_statics(true, 0);
-
-    // static position of tower top
-    double pos0 = tower.nodes.back()->get_position().x();
-
-    // check zero-crossings (static position of tower top)
-    int step = 0;
-    double pos_y = 0.0;
-    double dt = 0.01;
-    int npeaks = 0;
-    double natural_period = 0.0;
-    double time = 0.0;
-    double end_time = 10.0;
-    double start_time = 0.0;
-    tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
-
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_frequency.csv").generic_string(),
                                        (test_dir / "test_tower_frequency_json.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
-    test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
+    test_dataset.test_csv.add_function("top x (s)", [&tower] { return tower.nodes.back()->get_position().x(); });
 
-    while (time < end_time) {
-        if (time > 0.5) {
-            tower.nodes.back()->reset_loads();
-            if (tower.nodes.back()->get_position().x() < pos0 && pos_y > pos0) {
-                if (start_time == 0.0 && npeaks == 0) {
-                    start_time = time;
-                } else {
-                    npeaks += 1;
-                    natural_period = (time - start_time) / npeaks;
-                    test_dataset.test_csv.write_row();
-                }
-            }
-        }
-        pos_y = tower.nodes.back()->get_position().x();
+    // decay
+    double dt = 0.01;
+    double duration = 10.0;
+    tower.nodes.back()->set_force(Vector3d(-3000.0, 0.0, 0.0), false);
+    system_elasto.do_statics(true, 10);
+    tower.nodes.back()->set_force(Vector3d(0.0, 0.0, 0.0), false);
+    while (system_elasto.get_time() <= duration) {
+        test_dataset.test_csv.write_row();
         system_elasto.step(dt);
-        time += dt;
-        step += 1;
     }
 
     EvaluateTest(test_dataset);
@@ -172,11 +124,13 @@ TEST_F(TestTower, cylinder_frequency) {
     ref_point1.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
     ref_point1.coordinates = seahowl::Vector3d(0.0, 0.0, 0.0);
     ref_point1.fraction = 0.0;
+    ref_point1.damping_coefficients = std::vector<double>{0.005, 0.005, 0.005, 0.005, 0.0};
     // top
     auto ref_point2 = seahowl::elasto::TowerReferencePointElasto();
     ref_point2.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
     ref_point2.coordinates = seahowl::Vector3d(0.0, 0.0, 100.0);
     ref_point2.fraction = 1.0;
+    ref_point2.damping_coefficients = std::vector<double>{0.005, 0.005, 0.005, 0.005, 0.0};
     //
     tower.reference_points = {ref_point1, ref_point2};
     tower.discretization_fractions = {20};
@@ -184,45 +138,21 @@ TEST_F(TestTower, cylinder_frequency) {
     tower.assemble(system_elasto);
     tower.nodes.front()->set_fixed(true);
 
-    system_elasto.do_statics(true, 0);
-
-    // static position of tower top
-    double pos0 = tower.nodes.back()->get_position().x();
-
-    // check zero-crossings (static position of tower top)
-    int step = 0;
-    double pos_y = 0.0;
-    double dt = 0.01;
-    int npeaks = 0;
-    double natural_period = 0.0;
-    double time = 0.0;
-    double end_time = 10.0;
-    double start_time = 0.0;
-    tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
-
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_cylinder_frequency.csv").generic_string(),
                                        (test_dir / "test_tower_cylinder_frequency.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
-    test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
+    test_dataset.test_csv.add_function("top x (s)", [&tower] { return tower.nodes.back()->get_position().x(); });
 
-    while (time < end_time) {
-        if (time > 0.5) {
-            tower.nodes.back()->reset_loads();
-            if (tower.nodes.back()->get_position().x() < pos0 && pos_y > pos0) {
-                if (start_time == 0.0 && npeaks == 0) {
-                    start_time = time;
-                } else {
-                    npeaks += 1;
-                    natural_period = (time - start_time) / npeaks;
-                    test_dataset.test_csv.write_row();
-                }
-            }
-        }
-        pos_y = tower.nodes.back()->get_position().x();
+    // decay
+    double dt = 0.01;
+    double duration = 10.0;
+    tower.nodes.back()->set_force(Vector3d(-3000.0, 0.0, 0.0), false);
+    system_elasto.do_statics(true, 10);
+    tower.nodes.back()->set_force(Vector3d(0.0, 0.0, 0.0), false);
+    while (system_elasto.get_time() <= duration) {
+        test_dataset.test_csv.write_row();
         system_elasto.step(dt);
-        time += dt;
-        step += 1;
     }
 
     EvaluateTest(test_dataset);
@@ -244,11 +174,13 @@ TEST_F(TestTower, conical_frequency) {
     ref_point1.set_properties_cylinder(density, young_modulus, poisson_ratio, 4.0, 0.030, false);
     ref_point1.coordinates = seahowl::Vector3d(0.0, 0.0, 0.0);
     ref_point1.fraction = 0.0;
+    ref_point1.damping_coefficients = std::vector<double>{0.005, 0.005, 0.005, 0.005, 0.0};
     // top
     auto ref_point2 = seahowl::elasto::TowerReferencePointElasto();
     ref_point2.set_properties_cylinder(density, young_modulus, poisson_ratio, 3.0, 0.015, false);
     ref_point2.coordinates = seahowl::Vector3d(0.0, 0.0, 100.0);
     ref_point2.fraction = 1.0;
+    ref_point2.damping_coefficients = std::vector<double>{0.005, 0.005, 0.005, 0.005, 0.0};
     //
     tower.reference_points = {ref_point1, ref_point2};
     tower.discretization_fractions = {20};
@@ -256,45 +188,21 @@ TEST_F(TestTower, conical_frequency) {
     tower.assemble(system_elasto);
     tower.nodes.front()->set_fixed(true);
 
-    system_elasto.do_statics(true, 0);
-
-    // static position of tower top
-    double pos0 = tower.nodes.back()->get_position().x();
-
-    // check zero-crossings (static position of tower top)
-    int step = 0;
-    double pos_y = 0.0;
-    double dt = 0.01;
-    int npeaks = 0;
-    double natural_period = 0.0;
-    double time = 0.0;
-    double end_time = 10.0;
-    double start_time = 0.0;
-    tower.nodes.back()->set_force(Vector3d(100000.0, 0.0, 0.0), false);
-
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_tower_conical_frequency.csv").generic_string(),
                                        (test_dir / "test_tower_conical_frequency.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto] { return system_elasto.get_time(); });
-    test_dataset.test_csv.add_function("natural period (s)", [&natural_period] { return natural_period; });
+    test_dataset.test_csv.add_function("top x (s)", [&tower] { return tower.nodes.back()->get_position().x(); });
 
-    while (time < end_time) {
-        if (time > 0.5) {
-            tower.nodes.back()->reset_loads();
-            if (tower.nodes.back()->get_position().x() < pos0 && pos_y > pos0) {
-                if (start_time == 0.0 && npeaks == 0) {
-                    start_time = time;
-                } else {
-                    npeaks += 1;
-                    natural_period = (time - start_time) / npeaks;
-                    test_dataset.test_csv.write_row();
-                }
-            }
-        }
-        pos_y = tower.nodes.back()->get_position().x();
+    // decay
+    double dt = 0.01;
+    double duration = 10.0;
+    tower.nodes.back()->set_force(Vector3d(-3000.0, 0.0, 0.0), false);
+    system_elasto.do_statics(true, 10);
+    tower.nodes.back()->set_force(Vector3d(0.0, 0.0, 0.0), false);
+    while (system_elasto.get_time() <= duration) {
+        test_dataset.test_csv.write_row();
         system_elasto.step(dt);
-        time += dt;
-        step += 1;
     }
 
     EvaluateTest(test_dataset);
