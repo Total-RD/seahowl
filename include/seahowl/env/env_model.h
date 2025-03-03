@@ -29,6 +29,24 @@ class EnvModel {
     const std::vector<std::shared_ptr<Model>>& get_models() const;
 
     /**
+     * @brief Returns the fluid model
+     * @param[out] fluid_model Fluid model
+     */
+    std::shared_ptr<FluidModel>& get_fluid_model(const Vector3d& position, double time);
+
+    /**
+     * @brief Returns the soil model
+     * @param[out] soil_model Soil model
+     */
+    std::shared_ptr<SoilModel>& get_soil_model(const Vector3d& position, double time);
+
+    /**
+     * @brief Returns the wave model
+     * @param[out] wave_model Wave model
+     */
+    std::shared_ptr<WaveModel>& get_wave_model(const Vector3d& position, double time);
+
+    /**
      * @brief Returns fluid density at given coordinates.
      *
      * @param[in] position Position at which fluid density is extracted.

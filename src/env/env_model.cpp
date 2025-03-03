@@ -17,6 +17,33 @@ const std::vector<std::shared_ptr<Model>>& EnvModel::get_models() const {
     return models;
 }
 
+std::shared_ptr<FluidModel>& EnvModel::get_fluid_model(const Vector3d& position, double time) {
+    for (auto& model : fluid_models) {
+        if (model->is_inside(position, time)) {
+            return model;
+        }
+    }
+    throw std::runtime_error("No fluid model found at given position and time.");
+}
+
+std::shared_ptr<SoilModel>& EnvModel::get_soil_model(const Vector3d& position, double time) {
+    for (auto& model : soil_models) {
+        if (model->is_inside(position, time)) {
+            return model;
+        }
+    }
+    throw std::runtime_error("No soil model found at given position and time.");
+}
+
+std::shared_ptr<WaveModel>& EnvModel::get_wave_model(const Vector3d& position, double time) {
+    for (auto& model : wave_models) {
+        if (model->is_inside(position, time)) {
+            return model;
+        }
+    }
+    throw std::runtime_error("No wave model found at given position and time.");
+}
+
 double EnvModel::get_fluid_density(const Vector3d& position, double time) const {
     if (fluid_models.size() > 0) {
         for (const auto& model : fluid_models) {
