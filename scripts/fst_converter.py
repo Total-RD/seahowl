@@ -20,8 +20,8 @@ options.indent_size = 2
 
 
 # format warning messages
-def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
-    return "%s:%s: %s: %s\n" % (filename, lineno, category.__name__, message)
+def warning_on_one_line(message, category, filepath, lineno, file=None, line=None):
+    return "%s:%s: %s: %s\n" % (filepath, lineno, category.__name__, message)
 
 
 warnings.formatwarning = warning_on_one_line
@@ -137,8 +137,8 @@ def merge_interpolate_points(json_points1, json_points2, tol_fraction_decimals=-
     return merged_points
 
 
-def convert_polar_file(filename, save_directory=None):
-    filepath = Path(filename)
+def convert_polar_file(filepath, save_directory=None):
+    filepath = Path(filepath)
     with open(filepath, "r") as f:
         lines = f.readlines()
         airfoils_per_reynolds = list()
@@ -177,19 +177,18 @@ def convert_polar_file(filename, save_directory=None):
 
     # save to file
     if save_directory is not None:
-        fullpath = Path(save_directory) / filename.with_suffix(".json").name
+        fullpath = Path(save_directory) / filepath.with_suffix(".json").name
         save_json(airfoils_per_reynolds, fullpath)
 
     return airfoils_per_reynolds
 
 
 def convert_aerodyn_files(
-    filename, save_directory=None, save_polar=True, save_aerodyn=False
+    filepath, save_directory=None, save_polar=True, save_aerodyn=False
 ):
-    filepath = Path(filename)
+    filepath = Path(filepath)
     filedir = filepath.parents[0]
     aerodyn_json = dict()
-    polar_filenames = list()
     airfoil_files = list()
     with open(filepath, "r") as f:
         lines = f.readlines()
@@ -201,10 +200,8 @@ def convert_aerodyn_files(
                     polar_filename = lines[ii + jj].split()[0]
                     polar_filename = polar_filename.replace('"', "")
                     polar_filename = polar_filename.replace("\n", "")
-                    polar_filenames.append(str(polar_filename))
                     polar_filepath = filepath.parent / polar_filename
-                    polar_filename_json = Path(polar_filename).with_suffix(".json").name
-                    polar_filepath_json = polar_filename_json
+                    polar_filename_json = Path(polar_filepath).with_suffix(".json").name
                     airfoils_dir = "airfoils"
                     if save_directory is not None and save_polar is True:
                         polar_save_directory = Path(save_directory) / airfoils_dir
@@ -221,7 +218,7 @@ def convert_aerodyn_files(
 
     filepath = path_blade_file
     aerodyn_json = dict()
-    polar_filenames = list()
+    polar_filepaths = list()
     reference_points = list()
     fractions = list()
     with open(filepath, "r") as f:
@@ -257,8 +254,8 @@ def convert_aerodyn_files(
     return aerodyn_json
 
 
-def convert_beamdyn_file(filename, save_directory=None):
-    filepath = Path(filename)
+def convert_beamdyn_file(filepath, save_directory=None):
+    filepath = Path(filepath)
 
     reference_points = list()
     fractions = list()
@@ -285,7 +282,7 @@ def convert_beamdyn_file(filename, save_directory=None):
             elif len(words) > 1 and words[1] == "BldFile":
                 path_BD_blade = filepath.parents[0] / words[0].replace('"', "")
                 blade_elasto_json = convert_beamdyn_blade_file(
-                    filename=path_BD_blade, save_directory=save_directory
+                    filepath=path_BD_blade, save_directory=save_directory
                 )
 
     blade_elasto_json["discretization_elasto"] = fractions
@@ -300,8 +297,8 @@ def convert_beamdyn_file(filename, save_directory=None):
     return blade_elasto_json
 
 
-def convert_beamdyn_blade_file(filename, save_directory=None):
-    filepath = Path(filename)
+def convert_beamdyn_blade_file(filepath, save_directory=None):
+    filepath = Path(filepath)
     beamdyn_json = dict()
     beamdyn_json["global_variables"] = dict()
     beamdyn_json["global_variables"]["offset_gravity"] = [0.0, 0.0]
@@ -458,8 +455,8 @@ def convert_beamdyn_blade_file(filename, save_directory=None):
     return beamdyn_json
 
 
-def convert_elastodyn_blade_file(filename, blade_length, save_directory=None):
-    filepath = Path(filename)
+def convert_elastodyn_blade_file(filepath, blade_length, save_directory=None):
+    filepath = Path(filepath)
     elastodyn_json = dict()
     elastodyn_json["global_variables"] = {}
     elastodyn_json["global_variables"]["damping_flapwise"] = 0.005
@@ -605,10 +602,10 @@ def merge_elasto_aero_blade(
 
 
 def convert_elastodyn_tower_file(
-    filename_elastodyn, filename_elastodyn_tower, save_directory=None
+    filepath_elastodyn, filepath_elastodyn_tower, save_directory=None
 ):
     # elastodyn (general info)
-    filepath = Path(filename_elastodyn)
+    filepath = Path(filepath_elastodyn)
     points = list()
     with open(filepath, "r") as f:
         lines = f.readlines()
@@ -621,7 +618,7 @@ def convert_elastodyn_tower_file(
                     base_height = float(words[0])
 
     # elastodyn tower (reference points)
-    filepath = Path(filename_elastodyn_tower)
+    filepath = Path(filepath_elastodyn_tower)
     points = list()
     with open(filepath, "r") as f:
         lines = f.readlines()
@@ -694,9 +691,9 @@ def convert_elastodyn_tower_file(
 
 
 def convert_elastodyn_rna_file(
-    elastodyn_filename, servodyn_filename=None, save_directory=None
+    elastodyn_filepath, servodyn_filepath=None, save_directory=None
 ):
-    filepath = Path(elastodyn_filename)
+    filepath = Path(elastodyn_filepath)
     filedir = filepath.parents[0]
 
     rna_json = dict()
@@ -767,8 +764,8 @@ def convert_elastodyn_rna_file(
                     rna_json["hub"]["position_from_apex"] = [float(words[0]), 0.0, 0.0]
 
     # extra info from servo file
-    if servodyn_filename is not None:
-        filepath = Path(servodyn_filename)
+    if servodyn_filepath is not None:
+        filepath = Path(servodyn_filepath)
         with open(filepath, "r") as f:
             lines = f.readlines()
             for ii, line in enumerate(lines):
@@ -787,8 +784,8 @@ def convert_elastodyn_rna_file(
     return rna_json
 
 
-def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=False):
-    filepath = Path(filename)
+def convert_openfast_fst(filepath, save_directory=None, use_elastodyn_blade=False):
+    filepath = Path(filepath)
     filedir = filepath.parents[0]
 
     # main json with default values to overwrite when parsing OpenFAST files
@@ -893,14 +890,14 @@ def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=Fals
                                     '"', ""
                                 )
                     tower_elasto_json = convert_elastodyn_tower_file(
-                        filename_elastodyn=path_ED,
-                        filename_elastodyn_tower=path_ED_tower,
+                        filepath_elastodyn=path_ED,
+                        filepath_elastodyn_tower=path_ED_tower,
                         save_directory=save_directory,
                     )
                     if blade_elasto_json is None:
                         if Path(path_ED_blade).exists():
                             blade_elasto_json = convert_elastodyn_blade_file(
-                                filename=path_ED_blade,
+                                filepath=path_ED_blade,
                                 save_directory=None,
                                 blade_length=blade_length,
                             )
@@ -917,7 +914,7 @@ def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=Fals
                 elif words[1] == "BldFile1" or words[1] == "BldFile(1)":
                     path_ED_blade = filedir / words[0].replace('"', "")
                     blade_elasto_json = convert_elastodyn_blade_file(
-                        filename=path_ED_blade,
+                        filepath=path_ED_blade,
                         save_directory=save_directory,
                     )
 
@@ -930,14 +927,14 @@ def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=Fals
                     ):
                         path_BD = filedir / words[0].replace('"', "")
                         blade_elasto_json = convert_beamdyn_file(
-                            filename=path_BD, save_directory=None
+                            filepath=path_BD, save_directory=None
                         )
                         has_beamdyn = True
                 # AeroDyn
                 elif words[1] == "AeroFile":
                     path_AD = filedir / words[0].replace('"', "")
                     blade_aero_json = convert_aerodyn_files(
-                        filename=path_AD,
+                        filepath=path_AD,
                         save_directory=save_directory,
                         save_polar=True,
                         save_aerodyn=False,
@@ -948,8 +945,8 @@ def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=Fals
 
         # rna
         rna_json = convert_elastodyn_rna_file(
-            elastodyn_filename=path_ED,
-            servodyn_filename=path_servo,
+            elastodyn_filepath=path_ED,
+            servodyn_filepath=path_servo,
             save_directory=save_directory,
         )
 
@@ -959,11 +956,11 @@ def convert_openfast_fst(filename, save_directory=None, use_elastodyn_blade=Fals
         )  # when using ElastoDyn, get prebend from AeroDyn
         if prebend_from_aero:
             warnings.warn(
-                f"Using ElastoDyn for blades, retrieving prebend from AeroDyn positions and assuming no sweep (case: {filename}). It is preferable to use BeamDyn input files when available.",
+                f"Using ElastoDyn for blades, retrieving prebend from AeroDyn positions and assuming no sweep (case: {filepath}). It is preferable to use BeamDyn input files when available.",
                 RuntimeWarning,
             )
         if blade_elasto_json is None:
-            raise RuntimeError(f"Did not find any blade file for case {filename}.")
+            raise RuntimeError(f"Did not find any blade file for case {filepath}.")
         blade_json = merge_elasto_aero_blade(
             elasto_json=blade_elasto_json,
             aero_json=blade_aero_json,
@@ -1091,22 +1088,23 @@ if __name__ == "__main__":
     # make command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--filename",
+        "filepath",
         help="Name of OpenFAST .fst file.",
         default="./IEA-15-240-RWT-Monopile.fst",
     )
     parser.add_argument(
-        "--save-directory",
+        "savedir",
+        nargs="?",
         help="Directory to save output files.",
         default="./converted",
     )
     args = parser.parse_args()
 
     # get arguments
-    filename = args.filename
-    save_directory = Path(args.save_directory)
+    filepath = args.filepath
+    save_directory = Path(args.savedir)
 
     # convert files
     convert_openfast_fst(
-        filename=filename, save_directory=save_directory, use_elastodyn_blade=False
+        filepath=filepath, save_directory=save_directory, use_elastodyn_blade=False
     )
