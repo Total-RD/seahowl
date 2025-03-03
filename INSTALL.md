@@ -179,8 +179,8 @@ make
 
 #### Physics
 
-- AeroDyn: https://github.com/Total-RD/openfast4seahowl
-- InflowWind: https://github.com/Total-RD/openfast4seahowl
+- AeroDyn (v4.0.2): https://github.com/OpenFAST/openfast
+- InflowWind (v4.0.2): https://github.com/OpenFAST/openfast
 - HydroChrono (v0.2.4): https://github.com/NREL/HydroChrono
 
 #### Documentation
