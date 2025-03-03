@@ -99,17 +99,16 @@ void initialize_pyseahowl_core(py::module& m) {
     // core/foundation.h
     py::class_<seahowl::core::Foundation, std::shared_ptr<seahowl::core::Foundation>, seahowl::core::ComponentDynamic>(
         m_core, "Foundation");
-    *
 
-        // core/floater.h
-        py::class_<seahowl::core::Floater, std::shared_ptr<seahowl::core::Floater>, seahowl::core::Foundation>(
-            m_core, "Floater")
-            .def(py::init<seahowl::elasto::FloaterElasto&, seahowl::hydro::FloaterHydro&>())
-            .def_property_readonly("elasto", [](seahowl::core::Floater& floater) { return &floater.elasto; })
-            .def_property_readonly("hydro", [](seahowl::core::Floater& floater) { return &floater.hydro; })
-            .def_property_readonly(
-                "mooring_system", [](seahowl::core::Floater& floater) { return floater.mooring_system.get(); },
-                py::return_value_policy::reference_internal);
+    // core/floater.h
+    py::class_<seahowl::core::Floater, std::shared_ptr<seahowl::core::Floater>, seahowl::core::Foundation>(m_core,
+                                                                                                           "Floater")
+        .def(py::init<seahowl::elasto::FloaterElasto&, seahowl::hydro::FloaterHydro&>())
+        .def_property_readonly("elasto", [](seahowl::core::Floater& floater) { return &floater.elasto; })
+        .def_property_readonly("hydro", [](seahowl::core::Floater& floater) { return &floater.hydro; })
+        .def_property_readonly(
+            "mooring_system", [](seahowl::core::Floater& floater) { return floater.mooring_system.get(); },
+            py::return_value_policy::reference_internal);
 
     // core/monopile.h
     py::class_<seahowl::core::Monopile, std::shared_ptr<seahowl::core::Monopile>, seahowl::core::Tower,
