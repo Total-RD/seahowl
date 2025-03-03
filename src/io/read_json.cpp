@@ -666,18 +666,15 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
 
     // check rotor type
     if (rotor_json.at("type") == "fea") {
-        auto rotor_options = rotor_json.at("options");
-        if (rotor_options.at("fpm") == true) {
-            spdlog::info("Rotor type: finite element blades (FPM).");
-        } else {
-            spdlog::info("Rotor type: finite element blades.");
-        }
+        spdlog::info("Rotor type: finite element blades.");
+    } else if (rotor_json.at("type") == "fpm") {
+        spdlog::info("Rotor type: finite element blades (FPM).");
     } else if (rotor_json.at("type") == "rigid") {
         spdlog::info("Rotor type: rigid.");
     } else if (rotor_json.at("type") == "disk") {
         spdlog::info("Rotor type: disk");
     } else {
-        throw std::runtime_error("Rotor type does not exist: try \"fea\" or \"rigid\" or \"disk\".");
+        throw std::runtime_error("Rotor type does not exist: try \"fea\", \"fpm\", \"rigid\", or \"disk\".");
     }
 
     // blades
@@ -693,12 +690,16 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
         for (auto& blade_json : blades_json) {
             auto filepath_blade = (DATADIR / blade_json.at("file").get<std::string>()).generic_string();
             std::shared_ptr<seahowl::elasto::BladeElasto> blade_elasto;
-            if (rotor_json.at("type").get<std::string>() == "fea") {
+            if (rotor_json.at("type").get<std::string>() == "fea" ||
+                rotor_json.at("type").get<std::string>() == "fpm") {
                 blade_elasto = std::make_shared<seahowl::elasto::BladeElastoFEA>();
                 auto& blade_elasto_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade_elasto);
                 rotor_json.at("discretization").at("elasto").get_to(blade_elasto_fea.discretization_fractions);
-                auto rotor_options = rotor_json.at("options");
-                rotor_options.at("fpm").get_to(blade_elasto_fea.fpm_mode);
+                if (rotor_json.at("type").get<std::string>() == "fpm") {
+                    blade_elasto_fea.fpm_mode = true;
+                } else if (rotor_json.at("type").get<std::string>() == "fea") {
+                    blade_elasto_fea.fpm_mode = false;
+                }
             } else if (rotor_json.at("type").get<std::string>() == "rigid") {
                 blade_elasto = std::make_shared<seahowl::elasto::BladeElastoRigid>();
             }

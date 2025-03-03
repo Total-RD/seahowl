@@ -8,9 +8,6 @@
   },
   "rotor": {
     "type": "fea",
-    "options": {
-      "fpm": false
-    },
     "discretization": {
       "elasto": [49],
       "aero": [49]

@@ -117,14 +117,14 @@ Turbine input file
 The turbine input file contains information for the rotor, the RNA, the tower, and the controller.
 Some of the options of each component are set in this file (e.g. blade pitch and precone, elasto and aero discretization of blades and towers), while more detailed options of each components are described in other files that are referred here (such as for blades and tower material properties).
 
-Rotor "type" can be "fea", "rigid", or "disk". **fpm**: (bool) if true, use Fully-Populated Matrix (FPM) elements (6x6 material properties).
+Rotor "type" can be "fea", "fpm", "rigid", or "disk". The "fpm" rotor type uses Fully-Populated Matrix (FPM) for describing blade cross-sectional properties (6x6 matrix for mass and stiffness) while the "fea" type uses only diagonal terms.
 Controller "type" can be "DISCON" or "RPM".
 
 For discretization of blades and tower, it is possible to either use an ordered array of floats between 0 and 1 (with 0 and 1 included in the array as bounds) corresponding to the normalized abscissa of the reference points or only one integer corresponding to the number of elements to use for discretization.
 
 * **rotor**: (dict)
 
-   * **type**: (string) type of rotor ("fea", "rigid", "disk").
+   * **type**: (string) type of rotor ("fea", "fpm", "rigid", "disk").
    * **options**: (dict) options specific to type of rotor.
 
    * **discretization**: (dict)
