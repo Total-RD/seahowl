@@ -45,8 +45,16 @@ struct BladeReferencePointElasto : ReferencePointElasto {
     Eigen::Matrix<double, 6, 6> mass_matrix = Eigen::Matrix<double, 6, 6>::Zero();
     /** @brief Structural twist angle of blade at reference point. */
     double structural_twist = 0.0;
-    /** @brief Damping coefficients at reference point {along x, along y, along z, about x, mass-proportional}.*/
-    std::vector<double> damping_coefficients{0.0, 0.0, 0.0, 0.0, 0.0};
+    /** @brief Flapwise (bending and shear) stiffness-proportial damping coefficients at reference point.*/
+    double damping_flapwise = 0.005;
+    /** @brief Edgewise (bending and shear) stiffness-proportial damping coefficients at reference point.*/
+    double damping_edgewise = 0.005;
+    /** @brief Axial stiffness-proportial damping coefficients at reference point.*/
+    double damping_axial = 0.005;
+    /** @brief Torsional stiffness-proportial damping coefficients at reference point.*/
+    double damping_torsion = 0.005;
+    /** @brief Mass-proportial damping coefficients at reference point.*/
+    double damping_mass = 0.0;
 
     /**
      * @brief Constructor.
@@ -79,8 +87,16 @@ struct TowerReferencePointElasto : ReferencePointElasto {
     double inertia_foreaft = 0.0;
     /** @brief Side-side inertia of tower at reference point. */
     double inertia_sideside = 0.0;
-    /** @brief Damping coefficients at reference point {along x, along y, along z, about x, mass-proportional}.*/
-    std::vector<double> damping_coefficients{0.0, 0.0, 0.0, 0.0, 0.0};
+    /** @brief Fore-aft (bending and shear) stiffness-proportial damping coefficients at reference point.*/
+    double damping_foreaft = 0.005;
+    /** @brief Side-side (bending and shear) stiffness-proportial damping coefficients at reference point.*/
+    double damping_sideside = 0.005;
+    /** @brief Axial stiffness-proportial damping coefficients at reference point.*/
+    double damping_axial = 0.005;
+    /** @brief Torsional stiffness-proportial damping coefficients at reference point.*/
+    double damping_torsion = 0.005;
+    /** @brief Mass-proportial damping coefficients at reference point.*/
+    double damping_mass = 0.0;
 
     /**
      * @brief Constructor.

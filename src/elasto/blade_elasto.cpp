@@ -109,9 +109,13 @@ double BladeElastoFEA::get_mass() const {
 void BladeElastoFEA::presetup(double fraction) {
     for (int ii = 0; ii < nodes.size(); ii++) {
         BladeReferencePointElasto ref = discretized_points[ii];
-        for (int jj = 0; jj < ref.damping_coefficients.size(); jj++) {
-            ref.damping_coefficients[jj] = (1.0 - fraction) + ref.damping_coefficients[jj] * fraction;
-        }
+        // apply damping gradually
+        ref.damping_flapwise = (1.0 - fraction) + ref.damping_flapwise * fraction;
+        ref.damping_edgewise = (1.0 - fraction) + ref.damping_edgewise * fraction;
+        ref.damping_axial = (1.0 - fraction) + ref.damping_axial * fraction;
+        ref.damping_torsion = (1.0 - fraction) + ref.damping_torsion * fraction;
+        ref.damping_mass = (1.0 - fraction) + ref.damping_mass * fraction;
+
         auto node = std::dynamic_pointer_cast<NodeElastoChrono>(nodes[ii]);
         node->set_properties(ref);
     }

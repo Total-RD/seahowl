@@ -124,13 +124,21 @@ TEST_F(TestTower, cylinder_frequency) {
     ref_point1.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
     ref_point1.coordinates = seahowl::Vector3d(0.0, 0.0, 0.0);
     ref_point1.fraction = 0.0;
-    ref_point1.damping_coefficients = std::vector<double>{0.005, 0.005, 0.005, 0.005, 0.0};
+    ref_point1.damping_foreaft = 0.005;
+    ref_point1.damping_sideside = 0.005;
+    ref_point1.damping_axial = 0.005;
+    ref_point1.damping_torsion = 0.005;
+    ref_point1.damping_mass = 0.0;
     // top
     auto ref_point2 = seahowl::elasto::TowerReferencePointElasto();
     ref_point2.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
     ref_point2.coordinates = seahowl::Vector3d(0.0, 0.0, 100.0);
     ref_point2.fraction = 1.0;
-    ref_point2.damping_coefficients = std::vector<double>{0.005, 0.005, 0.005, 0.005, 0.0};
+    ref_point2.damping_foreaft = 0.005;
+    ref_point2.damping_sideside = 0.005;
+    ref_point2.damping_axial = 0.005;
+    ref_point2.damping_torsion = 0.005;
+    ref_point2.damping_mass = 0.0;
     //
     tower.reference_points = {ref_point1, ref_point2};
     tower.discretization_fractions = {20};
@@ -174,13 +182,21 @@ TEST_F(TestTower, conical_frequency) {
     ref_point1.set_properties_cylinder(density, young_modulus, poisson_ratio, 4.0, 0.030, false);
     ref_point1.coordinates = seahowl::Vector3d(0.0, 0.0, 0.0);
     ref_point1.fraction = 0.0;
-    ref_point1.damping_coefficients = std::vector<double>{0.005, 0.005, 0.005, 0.005, 0.0};
+    ref_point1.damping_foreaft = 0.005;
+    ref_point1.damping_sideside = 0.005;
+    ref_point1.damping_axial = 0.005;
+    ref_point1.damping_torsion = 0.005;
+    ref_point1.damping_mass = 0.0;
     // top
     auto ref_point2 = seahowl::elasto::TowerReferencePointElasto();
     ref_point2.set_properties_cylinder(density, young_modulus, poisson_ratio, 3.0, 0.015, false);
     ref_point2.coordinates = seahowl::Vector3d(0.0, 0.0, 100.0);
     ref_point2.fraction = 1.0;
-    ref_point2.damping_coefficients = std::vector<double>{0.005, 0.005, 0.005, 0.005, 0.0};
+    ref_point2.damping_foreaft = 0.005;
+    ref_point2.damping_sideside = 0.005;
+    ref_point2.damping_axial = 0.005;
+    ref_point2.damping_torsion = 0.005;
+    ref_point2.damping_mass = 0.0;
     //
     tower.reference_points = {ref_point1, ref_point2};
     tower.discretization_fractions = {20};

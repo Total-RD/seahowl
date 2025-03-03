@@ -1,4 +1,4 @@
-position_x,position_y,position_z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient_normal,drag_coefficient_axial,added_mass_coefficient_normal,added_mass_coefficient_axial,buoyancy_factor,damping_x,damping_y,damping_z,damping_t,damping_m,
+position_x,position_y,position_z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient_normal,drag_coefficient_axial,added_mass_coefficient_normal,added_mass_coefficient_axial,buoyancy_factor,damping_foreaft,damping_sideside,damping_axial,damping_torsion,damping_mass,
 0.0,0.0,-30.0,10.0,0.055341,7850.0,2.10E+11,0.3,1.0,1.0,1.0,1.0,0.0,0.005,0.005,0.005,0.005,0.0,
 0.0,0.0,-25.0,10.0,0.055341,7850.0,2.10E+11,0.3,1.0,1.0,1.0,1.0,0.0,0.005,0.005,0.005,0.005,0.0,
 0.0,0.0,-20.0,10.0,0.053449,7850.0,2.10E+11,0.3,1.0,1.0,1.0,1.0,0.0,0.005,0.005,0.005,0.005,0.0,

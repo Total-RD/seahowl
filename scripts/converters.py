@@ -311,11 +311,19 @@ def convert_beamdyn_blade_file(filename, save_directory=None):
 
         # global variables
         damping_coefficients = lines[8].split()
-        beamdyn_json["global_variables"]["damping_x"] = float(damping_coefficients[0])
-        beamdyn_json["global_variables"]["damping_y"] = float(damping_coefficients[1])
-        beamdyn_json["global_variables"]["damping_z"] = float(damping_coefficients[2])
-        beamdyn_json["global_variables"]["damping_t"] = float(damping_coefficients[5])
-        beamdyn_json["global_variables"]["damping_m"] = 0.0
+        beamdyn_json["global_variables"]["damping_flapwise"] = float(
+            damping_coefficients[0]
+        )
+        beamdyn_json["global_variables"]["damping_edgewise"] = float(
+            damping_coefficients[1]
+        )
+        beamdyn_json["global_variables"]["damping_axial"] = float(
+            damping_coefficients[2]
+        )
+        beamdyn_json["global_variables"]["damping_torsion"] = float(
+            damping_coefficients[5]
+        )
+        beamdyn_json["global_variables"]["damping_mass"] = 0.0
 
         # iterate over points
         start_idx = 10
@@ -454,11 +462,11 @@ def convert_elastodyn_blade_file(filename, blade_length, save_directory=None):
     filepath = Path(filename)
     elastodyn_json = dict()
     elastodyn_json["global_variables"] = {}
-    elastodyn_json["global_variables"]["damping_x"] = 0.005
-    elastodyn_json["global_variables"]["damping_y"] = 0.005
-    elastodyn_json["global_variables"]["damping_z"] = 0.005
-    elastodyn_json["global_variables"]["damping_t"] = 0.005
-    elastodyn_json["global_variables"]["damping_m"] = 0.0
+    elastodyn_json["global_variables"]["damping_flapwise"] = 0.005
+    elastodyn_json["global_variables"]["damping_edgewise"] = 0.005
+    elastodyn_json["global_variables"]["damping_axial"] = 0.005
+    elastodyn_json["global_variables"]["damping_torsion"] = 0.005
+    elastodyn_json["global_variables"]["damping_mass"] = 0.0
     elastodyn_json["global_variables"]["offset_gravity"] = [0.0, 0.0]
     elastodyn_json["global_variables"]["offset_elastic"] = [0.0, 0.0]
 
@@ -632,7 +640,7 @@ def convert_elastodyn_tower_file(
     assert npoints != 0, "Could not find tower ElastoDyn info in given file."
     start_idx = 19
 
-    header = "position_x,position_y,position_z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient_normal,drag_coefficient_axial,added_mass_coefficient_normal,added_mass_coefficient_axial,buoyancy_factor,damping_x,damping_y,damping_z,damping_t,damping_m,"
+    header = "position_x,position_y,position_z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient_normal,drag_coefficient_axial,added_mass_coefficient_normal,added_mass_coefficient_axial,buoyancy_factor,damping_foreaft,damping_sideside,damping_axial,damping_torsion,damping_mass,"
     csv_array = np.zeros([npoints, len(header.split(",")) - 1])
     # assume basic steel properties and cylinder shape
     young_modulus = 210e9

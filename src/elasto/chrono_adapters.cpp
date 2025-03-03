@@ -588,10 +588,16 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
     auto mm = rot66_iec2ch * (ref.mass_matrix * rot66_iec2ch.transpose());
     auto sm = rot66_iec2ch * (ref.stiffness_matrix * rot66_iec2ch.transpose());
 
-    if (ref.damping_coefficients.size() != 5) {
-        throw std::runtime_error("Damping coefficients for blade must be a vector of length 5 (got " +
-                                 std::to_string(ref.damping_coefficients.size()) + ").");
-    }
+    // damping
+    chrono::fea::DampingCoefficients damping_coefficients;
+    // damping coefficients: IEC -> Chrono convention
+    // Timoshenko beams in Chrono use Rayleigh cofficients squared
+    damping_coefficients.bx = sqrt(ref.damping_axial);
+    damping_coefficients.by = sqrt(ref.damping_edgewise);
+    damping_coefficients.bz = sqrt(ref.damping_flapwise);
+    damping_coefficients.bt = sqrt(ref.damping_torsion);
+    // mass-proportional coefficient
+    damping_coefficients.alpha = ref.damping_mass;
 
     if (fpm == true) {
         auto sectionFPM = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGenericFPM>();
@@ -604,15 +610,6 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
         sectionFPM->SetMassMatrixFPM(mm);
         sectionFPM->SetStiffnessMatrixFPM(sm);
         // damping
-        chrono::fea::DampingCoefficients damping_coefficients;
-        // damping coefficients: IEC -> Chrono convention
-        // Timoshenko beams in Chrono use Rayleigh cofficients squared
-        damping_coefficients.bx = sqrt(ref.damping_coefficients[2]);
-        damping_coefficients.by = sqrt(ref.damping_coefficients[1]);
-        damping_coefficients.bz = sqrt(ref.damping_coefficients[0]);
-        damping_coefficients.bt = sqrt(ref.damping_coefficients[3]);
-        // mass proportional coefficient
-        damping_coefficients.alpha = ref.damping_coefficients[4];
         sectionFPM->SetBeamRaleyghDamping(damping_coefficients);
     } else {
         section = chrono_types::make_shared<chrono::fea::ChBeamSectionTimoshenkoAdvancedGeneric>();
@@ -635,15 +632,6 @@ void NodeElastoChrono::set_properties(const BladeReferencePointElasto& ref, bool
         section->SetZbendingRigidity(sm(5, 5));
         section->SetZshearRigidity(sm(2, 2));
         // damping
-        chrono::fea::DampingCoefficients damping_coefficients;
-        // damping coefficients: IEC -> Chrono convention
-        // Timoshenko beams in Chrono use Rayleigh cofficients squared
-        damping_coefficients.bx = sqrt(ref.damping_coefficients[2]);
-        damping_coefficients.by = sqrt(ref.damping_coefficients[1]);
-        damping_coefficients.bz = sqrt(ref.damping_coefficients[0]);
-        damping_coefficients.bt = sqrt(ref.damping_coefficients[3]);
-        // mass-proportional coefficient
-        damping_coefficients.alpha = ref.damping_coefficients[4];
         section->SetBeamRaleyghDamping(damping_coefficients);
     }
 }
@@ -659,24 +647,19 @@ void NodeElastoChrono::set_properties(const TowerReferencePointElasto& ref) {
     section->SetXtorsionRigidity(ref.stiffness_torsion);
     // foreaft
     section->SetYbendingRigidity(ref.stiffness_foreaft);
-    section->SetYshearRigidity(ref.stiffness_foreaft_shear);
+    section->SetZshearRigidity(ref.stiffness_foreaft_shear);
     // sideside
     section->SetZbendingRigidity(ref.stiffness_sideside);
-    section->SetZshearRigidity(ref.stiffness_sideside_shear);
-    // damping
-    if (ref.damping_coefficients.size() != 5) {
-        throw std::runtime_error("Damping coefficients for tower must be a vector of length 5 (got " +
-                                 std::to_string(ref.damping_coefficients.size()) + ").");
-    }
+    section->SetYshearRigidity(ref.stiffness_sideside_shear);
     chrono::fea::DampingCoefficients damping_coefficients;
     // damping coefficients: IEC -> Chrono convention
     // Timoshenko beams in Chrono use Rayleigh cofficients squared
-    damping_coefficients.bx = sqrt(ref.damping_coefficients[0]);
-    damping_coefficients.by = sqrt(ref.damping_coefficients[1]);
-    damping_coefficients.bz = sqrt(ref.damping_coefficients[2]);
-    damping_coefficients.bt = sqrt(ref.damping_coefficients[3]);
+    damping_coefficients.bx = sqrt(ref.damping_axial);
+    damping_coefficients.by = sqrt(ref.damping_sideside);
+    damping_coefficients.bz = sqrt(ref.damping_foreaft);
+    damping_coefficients.bt = sqrt(ref.damping_torsion);
     // mass-proportional coefficient
-    damping_coefficients.alpha = ref.damping_coefficients[4];
+    damping_coefficients.alpha = ref.damping_mass;
     section->SetBeamRaleyghDamping(damping_coefficients);
 }
 

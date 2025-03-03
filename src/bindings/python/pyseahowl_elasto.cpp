@@ -186,7 +186,11 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def_readwrite("stiffness_matrix", &seahowl::elasto::BladeReferencePointElasto::stiffness_matrix)
         .def_readwrite("mass_matrix", &seahowl::elasto::BladeReferencePointElasto::mass_matrix)
         .def_readwrite("structural_twist", &seahowl::elasto::BladeReferencePointElasto::structural_twist)
-        .def_readwrite("damping_coefficients", &seahowl::elasto::BladeReferencePointElasto::damping_coefficients)
+        .def_readwrite("damping_flapwise", &seahowl::elasto::BladeReferencePointElasto::damping_flapwise)
+        .def_readwrite("damping_edgewise", &seahowl::elasto::BladeReferencePointElasto::damping_edgewise)
+        .def_readwrite("damping_axial", &seahowl::elasto::BladeReferencePointElasto::damping_axial)
+        .def_readwrite("damping_torsion", &seahowl::elasto::BladeReferencePointElasto::damping_torsion)
+        .def_readwrite("damping_mass", &seahowl::elasto::BladeReferencePointElasto::damping_mass)
         .def(py::init<>());
     py::class_<seahowl::elasto::TowerReferencePointElasto, std::shared_ptr<seahowl::elasto::TowerReferencePointElasto>,
                seahowl::elasto::ReferencePointElasto>(m_elasto, "TowerReferencePointElasto")
@@ -200,7 +204,11 @@ void initialize_pyseahowl_elasto(py::module& m) {
                        &seahowl::elasto::TowerReferencePointElasto::stiffness_sideside_shear)
         .def_readwrite("inertia_foreaft", &seahowl::elasto::TowerReferencePointElasto::inertia_foreaft)
         .def_readwrite("inertia_sideside", &seahowl::elasto::TowerReferencePointElasto::inertia_sideside)
-        .def_readwrite("damping_coefficients", &seahowl::elasto::TowerReferencePointElasto::damping_coefficients)
+        .def_readwrite("damping_foreaft", &seahowl::elasto::TowerReferencePointElasto::damping_foreaft)
+        .def_readwrite("damping_sideside", &seahowl::elasto::TowerReferencePointElasto::damping_sideside)
+        .def_readwrite("damping_axial", &seahowl::elasto::TowerReferencePointElasto::damping_axial)
+        .def_readwrite("damping_torsion", &seahowl::elasto::TowerReferencePointElasto::damping_torsion)
+        .def_readwrite("damping_mass", &seahowl::elasto::TowerReferencePointElasto::damping_mass)
         .def(py::init<>())
         .def("set_properties_cylinder", &seahowl::elasto::TowerReferencePointElasto::set_properties_cylinder);
 

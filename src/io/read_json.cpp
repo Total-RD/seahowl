@@ -322,11 +322,11 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
         reference_point.structural_twist = input_data->get("twist", ii) * PI / 180.0;
         reference_point.mass_matrix = input_data->get_matrix("mass_matrix", ii);
         reference_point.stiffness_matrix = input_data->get_matrix("stiffness_matrix", ii);
-        reference_point.damping_coefficients[0] = input_data->get("damping_z", ii);
-        reference_point.damping_coefficients[1] = input_data->get("damping_y", ii);
-        reference_point.damping_coefficients[2] = input_data->get("damping_x", ii);
-        reference_point.damping_coefficients[3] = input_data->get("damping_t", ii);
-        reference_point.damping_coefficients[4] = input_data->get("damping_m", ii);
+        reference_point.damping_flapwise = input_data->get("damping_flapwise", ii);
+        reference_point.damping_edgewise = input_data->get("damping_edgewise", ii);
+        reference_point.damping_axial = input_data->get("damping_axial", ii);
+        reference_point.damping_torsion = input_data->get("damping_torsion", ii);
+        reference_point.damping_mass = input_data->get("damping_mass", ii);
 
         reference_points.push_back(reference_point);
     }
@@ -437,11 +437,11 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         young_modulus_list.push_back(young_modulus);
         poisson_ratio_list.push_back(poisson_ratio);
 
-        reference_point.damping_coefficients[0] = input_data->get("damping_z", ii);
-        reference_point.damping_coefficients[1] = input_data->get("damping_y", ii);
-        reference_point.damping_coefficients[2] = input_data->get("damping_x", ii);
-        reference_point.damping_coefficients[3] = input_data->get("damping_t", ii);
-        reference_point.damping_coefficients[4] = input_data->get("damping_m", ii);
+        reference_point.damping_foreaft = input_data->get("damping_foreaft", ii);
+        reference_point.damping_sideside = input_data->get("damping_sideside", ii);
+        reference_point.damping_axial = input_data->get("damping_axial", ii);
+        reference_point.damping_axial = input_data->get("damping_torsion", ii);
+        reference_point.damping_mass = input_data->get("damping_mass", ii);
 
         reference_points.push_back(reference_point);
     }

@@ -15,11 +15,11 @@ BladeReferencePointElasto BladeReferencePointElasto::operator*(const double fact
     new_point.structural_twist *= factor;
     new_point.mass_matrix *= factor;
     new_point.stiffness_matrix *= factor;
-    new_point.damping_coefficients[0] *= factor;
-    new_point.damping_coefficients[1] *= factor;
-    new_point.damping_coefficients[2] *= factor;
-    new_point.damping_coefficients[3] *= factor;
-    new_point.damping_coefficients[4] *= factor;
+    new_point.damping_flapwise *= factor;
+    new_point.damping_edgewise *= factor;
+    new_point.damping_axial *= factor;
+    new_point.damping_torsion *= factor;
+    new_point.damping_mass *= factor;
     return new_point;
 };
 
@@ -32,11 +32,11 @@ BladeReferencePointElasto BladeReferencePointElasto::operator+(const BladeRefere
     new_point.structural_twist += other.structural_twist;
     new_point.stiffness_matrix += other.stiffness_matrix;
     new_point.mass_matrix += other.mass_matrix;
-    new_point.damping_coefficients[0] += other.damping_coefficients[0];
-    new_point.damping_coefficients[1] += other.damping_coefficients[1];
-    new_point.damping_coefficients[2] += other.damping_coefficients[2];
-    new_point.damping_coefficients[3] += other.damping_coefficients[3];
-    new_point.damping_coefficients[4] += other.damping_coefficients[4];
+    new_point.damping_flapwise += other.damping_flapwise;
+    new_point.damping_edgewise += other.damping_edgewise;
+    new_point.damping_axial += other.damping_axial;
+    new_point.damping_torsion += other.damping_torsion;
+    new_point.damping_mass += other.damping_mass;
     return new_point;
 };
 
@@ -55,11 +55,11 @@ TowerReferencePointElasto TowerReferencePointElasto::operator*(const double fact
     new_point.stiffness_sideside_shear *= factor;
     new_point.inertia_foreaft *= factor;
     new_point.inertia_sideside *= factor;
-    new_point.damping_coefficients[0] *= factor;
-    new_point.damping_coefficients[1] *= factor;
-    new_point.damping_coefficients[2] *= factor;
-    new_point.damping_coefficients[3] *= factor;
-    new_point.damping_coefficients[4] *= factor;
+    new_point.damping_foreaft *= factor;
+    new_point.damping_sideside *= factor;
+    new_point.damping_axial *= factor;
+    new_point.damping_torsion *= factor;
+    new_point.damping_mass *= factor;
     return new_point;
 };
 
@@ -76,11 +76,11 @@ TowerReferencePointElasto TowerReferencePointElasto::operator+(const TowerRefere
     new_point.stiffness_sideside_shear += other.stiffness_sideside_shear;
     new_point.inertia_foreaft += other.inertia_foreaft;
     new_point.inertia_sideside += other.inertia_sideside;
-    new_point.damping_coefficients[0] += other.damping_coefficients[0];
-    new_point.damping_coefficients[1] += other.damping_coefficients[1];
-    new_point.damping_coefficients[2] += other.damping_coefficients[2];
-    new_point.damping_coefficients[3] += other.damping_coefficients[3];
-    new_point.damping_coefficients[4] += other.damping_coefficients[4];
+    new_point.damping_foreaft += other.damping_foreaft;
+    new_point.damping_sideside += other.damping_sideside;
+    new_point.damping_axial += other.damping_axial;
+    new_point.damping_torsion += other.damping_torsion;
+    new_point.damping_mass += other.damping_mass;
     return new_point;
 };
 
