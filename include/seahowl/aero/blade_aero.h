@@ -108,7 +108,7 @@ struct BladeElementAero {
  * Blades are discretized into elements each between 2 nodes. Aero loads are calculated at nodes and then linearly
  * integrated over element (and considered as a single point force in the center of the element).
  */
-class BladeAero {
+class BladeAero : public ComponentFluid {
   public:
     /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the aero component. */
     std::vector<double> discretization_fractions;
@@ -136,10 +136,8 @@ class BladeAero {
      */
     BladeAero();
 
-    /**
-     * @brief Builds the blade.
-     */
-    void build();
+    void build() override;
+    void compute_fluid_loads(const env::FluidModel& fluid_model, double time) override;
 
     /**
      * @brief Computes node distances from blade tip.

@@ -37,10 +37,10 @@ void initialize_pyseahowl_aero(py::module& m) {
                                                                                                   "BladeElementAero")
         .def("get_position", &seahowl::aero::BladeElementAero::get_position)
         .def("get_load", &seahowl::aero::BladeElementAero::get_load);
-    py::class_<seahowl::aero::BladeAero, std::shared_ptr<seahowl::aero::BladeAero>>(m_aero, "BladeAero")
+    py::class_<seahowl::aero::BladeAero, std::shared_ptr<seahowl::aero::BladeAero>, seahowl::ComponentFluid>(
+        m_aero, "BladeAero")
         .def(py::init<>())
         .def("get_total_load", &seahowl::aero::BladeAero::get_total_load)
-        .def("build", &seahowl::aero::BladeAero::build)
         .def_readwrite("nodes", &seahowl::aero::BladeAero::nodes);
 
     // aero/rotor_aero.h

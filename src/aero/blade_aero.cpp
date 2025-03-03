@@ -105,6 +105,10 @@ void BladeAero::build() {
     compute_distances_from_tip();
 }
 
+void BladeAero::compute_fluid_loads(const env::FluidModel& fluid_model, double time) {
+    throw std::runtime_error("Cannot compute fluid loads directly from BladeAero, call function from RotorAero.");
+}
+
 void BladeAero::compute_distances_from_tip() {
     // this is the position of the element at the tip
     auto tip_position = nodes.back().get_position();
