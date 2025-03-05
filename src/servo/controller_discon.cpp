@@ -121,12 +121,7 @@ void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const 
 
     seahowl::io::utils::check_file_exists(libfile);
 
-#ifndef __gnu_linux__
-    // if not on gnu, first copy the DLL in case there are several turbines using the same file.
-    libfile = seahowl::io::utils::copy_file_and_increment(libfile, output_folder + "/tmp");
-#endif
-
-    pImpl.Init(libfile);
+    pImpl.Init(libfile, output_folder + "/tmp_discon");
 
     spdlog::debug("Finished initialization of DISCON controller.");
 }
@@ -366,7 +361,21 @@ static std::vector<discon::ParamDef> ArrayInfo{
     {164, "in", 'R', "Yaw bearing angular acceleration", "rad/s2"}};
 }  // namespace discon
 
-void seahowl::servo::DisconInterface::Init(const std::string& libfile) {
+seahowl::servo::DisconInterface::~DisconInterface() {
+    if (handler) {
+#ifdef __unix__
+        dlclose(handler);
+#elif _WIN32
+        FreeLibrary((HMODULE)handler);
+#endif
+    }
+    if (copied_dll && path_dll != "") {
+        // remove copied discon library, if it exists.
+        std::filesystem::remove(path_dll);
+    }
+}
+
+void seahowl::servo::DisconInterface::Init(const std::string& libfile, const std::string& tmp_folder) {
     if (libfile != "") {
         if (!std::filesystem::exists(std::filesystem::path(libfile)) && libfile != "") {
             throw std::runtime_error("DISCON: dynamic library path for DISCON routine does not exist: " + libfile +
@@ -374,18 +383,40 @@ void seahowl::servo::DisconInterface::Init(const std::string& libfile) {
         }
         has_dll = true;
         // Load dynamic library and point to DISCON routine
+        spdlog::debug("DISCON: loading library {}.", libfile);
 #ifdef __unix__
-    #ifdef __gnu_linux__
-        void* handler = dlmopen(LM_ID_NEWLM, libfile.c_str(), RTLD_LAZY);
-    #else
-        void* handler = dlopen(libfile.c_str(), RTLD_LAZY);
-    #endif
+        handler = dlopen(libfile.c_str(), RTLD_NOLOAD | RTLD_LAZY);
+        if (handler) {
+            // library already loaded, first copy the library and load it with the new path.
+            auto newlibfile = seahowl::io::utils::copy_file_and_increment(libfile, tmp_folder);
+            spdlog::debug("DISCON: copied {} to {}.", libfile, newlibfile);
+            copied_dll = true;
+            path_dll = newlibfile;
+            handler = dlopen(newlibfile.c_str(), RTLD_LAZY);
+        } else {
+            // load library
+            copied_dll = false;
+            path_dll = libfile;
+            handler = dlopen(libfile.c_str(), RTLD_LAZY);
+        }
         DISCON = (DISCON_routine)dlsym(handler, "DISCON");
+#elif _WIN32
+        handler = (void*)GetModuleHandle(libfile.c_str());
+        if (handler) {
+            // library already loaded, first copy the library and load it with the new path.
+            auto newlibfile = seahowl::io::utils::copy_file_and_increment(libfile, tmp_folder);
+            spdlog::debug("DISCON: copied {} to {}.", libfile, newlibfile);
+            copied_dll = true;
+            path_dll = newlibfile;
+            handler = LoadLibrary(newlibfile.c_str());
+        } else {
+            copied_dll = false;
+            path_dll = libfile;
+            handler = (void*)LoadLibrary(libfile.c_str());
+        }
+        DISCON = (DISCON_routine)GetProcAddress((HMODULE)handler, "DISCON");
 #endif
-#ifdef _WIN32
-        HMODULE handler = LoadLibrary(libfile.c_str());
-        DISCON = (DISCON_routine)GetProcAddress(handler, "DISCON");
-#endif
+        spdlog::debug("DISCON: loaded {}.", path_dll);
     } else {
         spdlog::warn("DISCON: no dynamic library transmitted to DISCON interface.");
     }

@@ -26,6 +26,8 @@ class DisconInterface {
     float& m_pitch = avrSWAP[41];   ///<@brief Pitch return controller states
     float& m_torque = avrSWAP[46];  ///<@brief Torque return controller states
 
+    ~DisconInterface();
+
     /// <summary>
     /// Reset Controller state as initial
     ///
@@ -43,11 +45,9 @@ class DisconInterface {
     /// <summary>
     /// Initialize the controller parameters
     /// </summary>
-    /// <param name="dt">timestep</param>
-    /// <param name="omega">rotor speed</param>
-    /// <param name="pitch">pitch collective</param>
-    /// <param name="nblades">number of blades</param>
-    virtual void Init(const std::string& libfile = u8"");
+    /// <param name="libfile">DISCON library path.</param>
+    /// <param name="tmp_folder">Folder for temporary DISCON libraries.</param>
+    virtual void Init(const std::string& libfile = u8"", const std::string& tmp_folder = u8"./output/tmp_discon");
 
     /// <summary>
     /// Call the DISCON controller
@@ -176,7 +176,11 @@ class DisconInterface {
     typedef void (*DISCON_routine)(float* avrSWAP, int* aviFAIL, char* accINFILE, char* avcOUTNAME, char* avcMSG);
     DISCON_routine DISCON;
 
+    // for DLL handling
     bool has_dll = false;
+    bool copied_dll = false;
+    std::string path_dll = "";
+    void* handler;
 
     static constexpr size_t MAX_SWAP = 500;
 
