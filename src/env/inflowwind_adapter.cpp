@@ -94,11 +94,11 @@ void InflowWindLib::CheckError() {
     if (ErrStat == 0) {
         return;
     } else if (ErrStat == 1) {
-        spdlog::info("InflowWind INFO: {}.", ErrMsg);
+        spdlog::info("InflowWind INFO: \"{}\".", ErrMsg);
     } else if (ErrStat == 2) {
-        spdlog::warn("InflowWind WARNING: {}.", ErrMsg);
+        spdlog::warn("InflowWind WARNING: \"{}\".", ErrMsg);
     } else {
-        throw std::runtime_error("InflowWind ERROR: " + std::string(ErrMsg));
+        throw std::runtime_error("InflowWind ERROR: \"" + std::string(ErrMsg) + "\".");
     }
 }
 

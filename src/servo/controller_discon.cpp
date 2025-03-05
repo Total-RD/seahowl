@@ -640,4 +640,13 @@ void seahowl::servo::DisconInterface::Call() {
     if (has_dll) {
         DISCON(avrSWAP, &aviFAIL, accINFILE, avcOUTNAME, avcMSG);
     }
+
+    // handle error, if any.
+    if (aviFAIL == 0) {
+        return;
+    } else if (aviFAIL > 0) {
+        spdlog::warn("DISCON WARNING: \"{}\".", avcMSG);
+    } else if (aviFAIL < 0) {
+        throw std::runtime_error("DISCON ERROR: \"" + std::string(avcMSG) + "\".");
+    }
 }

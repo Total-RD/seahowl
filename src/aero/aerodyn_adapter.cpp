@@ -267,11 +267,11 @@ void AeroDynInflowLib::CheckError() {
     if (ErrStat == 0) {
         return;
     } else if (ErrStat == 1) {
-        spdlog::info("AeroDyn INFO: {}.", ErrMsg);
+        spdlog::info("AeroDyn INFO: \"{}\".", ErrMsg);
     } else if (ErrStat == 2) {
-        spdlog::warn("AeroDyn WARNING: {}", ErrMsg);
+        spdlog::warn("AeroDyn WARNING: \"{}\".", ErrMsg);
     } else {
-        throw std::runtime_error("AeroDyn ERROR: " + std::string(ErrMsg));
+        throw std::runtime_error("AeroDyn ERROR: \"" + std::string(ErrMsg) + "\".");
     }
 }
 

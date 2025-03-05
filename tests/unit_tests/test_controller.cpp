@@ -338,6 +338,47 @@ TEST_F(TestController, IEA15) {
     EvaluateTest(test_dataset);
 }
 
+TEST_F(TestController, discon_50turbines) {
+    // make simulation object
+    auto simulation = seahowl::core::Simulation();
+    simulation.dt = 0.05;
+    simulation.duration = 0.1;
+    simulation.outputs->dt_output = 9999.9;  // no output, using custom CSV
+    simulation.outputs->has_csv = false;
+    simulation.outputs->has_gui = false;
+    simulation.outputs->has_vtk = false;
+
+    auto& system_core = *simulation.system_core;
+    auto& system_elasto = system_core.elasto;
+
+    // add turbine to system
+    for (int ii = 0; ii < 50; ii++) {
+        seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(),
+                                                     system_core);
+        system_core.turbines.back()->elasto.translate(seahowl::Vector3d(200.0 * ii, 200.0 * ii, 0.0));
+    }
+    // statics
+    system_elasto.do_statics(true, 10);
+
+    // add wind model
+    auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
+    system_core.fluid_model = wind_model;
+    wind_model->shear_coefficient = 0.12;
+    wind_model->reference_height = system_core.turbines[0]->elasto.rna.rotor->body_hub->get_position().z();
+    wind_model->set_wind_velocity(seahowl::Vector3d(12.0, 0.0, 0.0));
+
+    // initialize simulation
+    simulation.initialize();
+
+    // simulation loop
+    while (system_core.get_time() < simulation.duration) {
+        // simulation step
+        simulation.step();
+    }
+
+    // this test will throw an error if discon libraries cannot be loaded.
+}
+
 TEST_F(TestController, actuator_disk) {
     // general options
     bool visualization_on = true;
