@@ -276,7 +276,7 @@ class SpringLinearChrono : public SpringLinear {
 /**
  * @brief Chrono link class.
  */
-class LinkChrono : public virtual Link, public LinkChronoBase {
+class LinkChrono : public Link, public LinkChronoBase {
   public:
     /** @brief Pointer to underlying Chrono object. */
     std::shared_ptr<chrono::ChLinkMateGeneric> chobj;
