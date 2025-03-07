@@ -74,7 +74,7 @@ double TurbineElasto::get_mass() const {
     total_mass += tower.get_mass();
     // foundation
     if (foundation) {
-        foundation->get_mass();
+        total_mass += foundation->get_mass();
     }
     return total_mass;
 }
