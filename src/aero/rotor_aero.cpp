@@ -51,12 +51,12 @@ seahowl::Vector2d DiskCoefficients::get_disk_coefficients_from_table(double TSR,
 }
 
 void RotorAero::compute_disk_averaged_wind_velocity(const EnvModel& env_model, double time) {
-    disk_averaged_wind_velocity = env_model.get_fluid_velocity(body_hub.get_position(), time);
+    disk_averaged_wind_velocity = env_model.fluid_models.get_velocity(body_hub.get_position(), time);
     size_t npoints = 1;
     for (auto& blade : blades) {
         for (auto& node : blade->nodes) {
             node.get_position();
-            disk_averaged_wind_velocity += env_model.get_fluid_velocity(node.get_position(), time);
+            disk_averaged_wind_velocity += env_model.fluid_models.get_velocity(node.get_position(), time);
             npoints += 1;
         }
     }
@@ -166,9 +166,9 @@ void RotorAeroBEMT::compute_fluid_loads(const EnvModel& env_model, double time) 
             auto node_axis = node_rotation * Vector3d(0.0, 0.0, 1.0);
 
             // fluid density
-            double density = env_model.get_fluid_density(node_position, time);
+            double density = env_model.fluid_models.get_density(node_position, time);
             // fluid velocity
-            auto wind_velocity = env_model.get_fluid_velocity(node_position, time);
+            auto wind_velocity = env_model.fluid_models.get_velocity(node_position, time);
             // correct wind velocity with tower shadow (if activated)
             if (has_tower_shadow) {
                 if (blade_azimuth > PI / 2.0 || blade_azimuth < -PI / 2.0) {
@@ -260,10 +260,10 @@ void RotorAeroDisk::initialize() {
     }
 }
 
-void RotorAeroDisk::compute_fluid_loads(const EnvModel& wind_model, double time) {
+void RotorAeroDisk::compute_fluid_loads(const EnvModel& env_model, double time) {
     auto pos_hub = body_hub.get_position();
     auto vel_hub = body_hub.get_velocity();
-    double density = wind_model.get_fluid_density(pos_hub, time);
+    double density = env_model.fluid_models.get_density(pos_hub, time);
 
     auto global_velocity = Vector3d(disk_averaged_wind_velocity - vel_hub);
     // project in disc frame

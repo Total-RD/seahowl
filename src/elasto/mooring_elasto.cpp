@@ -205,13 +205,13 @@ void MooringElastoFEA::assemble_this(SystemElasto& system) {
     gravitational_acceleration = system.get_gravitational_acceleration();
 }
 
-void MooringElastoFEA::compute_seabed_loads(const seahowl::env::EnvModel& seabed) {
+void MooringElastoFEA::compute_seabed_loads(const seahowl::env::EnvModel& env_model) {
     for (auto& element : elements) {
         auto element_length = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_rest_length();
         auto element_mass = dynamic_cast<seahowl::elasto::ElementMooringElasto&>(*element).get_mass();
         for (auto& node : element->nodes) {
             auto contact_area = diameter * (0.5 * element_length);
-            auto penetration_load = seabed.get_penetration_load(*node, contact_area, element_mass);
+            auto penetration_load = env_model.soil_models.get_penetration_load(*node, contact_area, element_mass);
             node->set_force(node->get_force() + penetration_load);
         }
     }

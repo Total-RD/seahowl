@@ -55,7 +55,7 @@ void System::initialize_this(double time, double dt) {
         if (turbine->elasto.foundation) {
             try {
                 auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine->elasto.foundation);
-                auto wave_models = env_model->get_models_of_type<WaveModelHydroChrono>();
+                auto wave_models = env_model->fluid_models.get_models_of_type<WaveModelHydroChrono>();
                 if (wave_models.size() > 0) {
                     spdlog::debug("Passing waves to HydroChrono floater model.");
                     floater.set_waves_hydrochrono(wave_models[0]->waves);
@@ -72,7 +72,7 @@ void System::initialize_this(double time, double dt) {
         try {
             auto& floater_core = dynamic_cast<seahowl::core::Floater&>(*component);
             auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(floater_core.elasto);
-            auto wave_models = env_model->get_models_of_type<WaveModelHydroChrono>();
+            auto wave_models = env_model->fluid_models.get_models_of_type<WaveModelHydroChrono>();
             if (wave_models.size() > 0) {
                 spdlog::debug("Passing waves to HydroChrono floater model.");
                 floater.set_waves_hydrochrono(wave_models[0]->waves);
@@ -95,12 +95,12 @@ void System::initialize_this(double time, double dt) {
     }
 
     // check if fluid model exists
-    if (!env_model->has_model_of_type<FluidModel>()) {
+    if (!env_model->fluid_models.has_model()) {
         spdlog::warn("No fluid model was attached to the system.");
     }
 
     // check if soil model exists
-    if (!env_model->has_model_of_type<SoilModel>()) {
+    if (!env_model->soil_models.has_model()) {
         spdlog::warn("No soil model was attached to the system.");
     }
 
@@ -114,7 +114,7 @@ void System::prestep(double time, double dt) {
     }
 
     // compute forces from env model
-    if (env_model->has_model_of_type<FluidModel>()) {
+    if (env_model->fluid_models.has_model()) {
         apply_env_model(*env_model, time);
     }
 
@@ -130,7 +130,7 @@ void System::prestep(double time, double dt) {
 
     // compute forces from soil model
     // happens after prestep because soil loads directly applied to elasto component (e.g. moorings)
-    if (env_model->has_model_of_type<SoilModel>()) {
+    if (env_model->soil_models.has_model()) {
         apply_soil_model(*env_model, time);
     }
 }

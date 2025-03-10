@@ -140,9 +140,9 @@ void MorisonNode::compute_fluid_loads(const env::EnvModel& env_model, double tim
     auto area = PI * pow(diameter * 0.5, 2);
 
     // fluid density
-    double fluid_density = env_model.get_fluid_density(position, time);
+    double fluid_density = env_model.fluid_models.get_density(position, time);
     // fluid velocity
-    auto velocity_fluid = env_model.get_fluid_velocity(position, time);
+    auto velocity_fluid = env_model.fluid_models.get_velocity(position, time);
 
     auto dir = get_direction();  // axial direction
     auto velocity_relative = velocity_fluid - velocity;
@@ -165,7 +165,7 @@ void MorisonNode::compute_fluid_loads(const env::EnvModel& env_model, double tim
 
     if (coefficients.inertia_factor != 0.0) {
         // fluid acceleration
-        auto acceleration_fluid = env_model.get_fluid_acceleration(position, time);
+        auto acceleration_fluid = env_model.fluid_models.get_acceleration(position, time);
         auto acceleration_fluid_axial = dir * acceleration_fluid.dot(dir);
         auto acceleration_fluid_normal = acceleration_fluid - acceleration_fluid_axial;
         // relative acceleration
@@ -244,9 +244,9 @@ void MorisonPlate::compute_fluid_loads(const env::EnvModel& env_model, double ti
     auto position = get_position();
     auto velocity = get_velocity();
     // fluid density
-    double fluid_density = env_model.get_fluid_density(position, time);
+    double fluid_density = env_model.fluid_models.get_density(position, time);
     // fluid velocity
-    auto velocity_fluid = env_model.get_fluid_velocity(position, time);
+    auto velocity_fluid = env_model.fluid_models.get_velocity(position, time);
     auto velocity_relative = velocity_fluid - velocity;
 
     load = Vector3d(0.0, 0.0, 0.0);

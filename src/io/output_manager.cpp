@@ -169,10 +169,10 @@ void OutputManager::initialize() {
             auto& system_core = this->system_core;
             auto& turbine = *system_core.turbines[idx_turbine];
             custom_csv.add_function("time (s)", [system_core]() { return system_core.get_time(); });
-            if (system_core.env_model->has_model_of_type<seahowl::env::FluidModel>()) {
+            if (system_core.env_model->fluid_models.has_model()) {
                 custom_csv.add_function("wind (m/s)", [&system_core, &turbine]() {
-                    return system_core.env_model->get_fluid_velocity(turbine.rna.elasto.rotor->body_hub->get_position(),
-                                                                     system_core.get_time());
+                    return system_core.env_model->fluid_models.get_velocity(
+                        turbine.rna.elasto.rotor->body_hub->get_position(), system_core.get_time());
                 });
             }
             add_basic_turbine_info_to_csv(custom_csv, turbine);

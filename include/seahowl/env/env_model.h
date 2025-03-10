@@ -3,10 +3,8 @@
 #include <vector>
 #include <memory>
 #include "seahowl/env/model.h"
-#include "seahowl/env/fluid_models.h"
-#include "seahowl/env/soil_models.h"
-#include "seahowl/env/wave_models.h"
-#include "seahowl/commons/entities.h"
+#include "seahowl/env/fluid_list_model.h"
+#include "seahowl/env/soil_list_model.h"
 
 namespace seahowl {
 namespace env {
@@ -15,117 +13,17 @@ namespace env {
  */
 class EnvModel {
   public:
+    /** @brief List of fluid models */
+    FluidListModel fluid_models;
+    /** @brief List of soil models */
+    SoilListModel soil_models;
+
     EnvModel() = default;
     ~EnvModel() = default;
     /**
-     * @brief Adds a model to the list of models
+     * @brief Adds a model
      */
-    void add_model(std::shared_ptr<Model> model);
-
-    /**
-     * @brief Returns the list of models
-     * @param[out] models List of models
-     */
-    const std::vector<std::shared_ptr<Model>>& get_models() const;
-
-    /**
-     * @brief Returns the fluid model
-     * @param[out] fluid_model Fluid model
-     */
-    std::shared_ptr<FluidModel>& get_fluid_model(const Vector3d& position, double time);
-
-    /**
-     * @brief Returns the soil model
-     * @param[out] soil_model Soil model
-     */
-    std::shared_ptr<SoilModel>& get_soil_model(const Vector3d& position, double time);
-
-    /**
-     * @brief Returns the wave model
-     * @param[out] wave_model Wave model
-     */
-    std::shared_ptr<WaveModel>& get_wave_model(const Vector3d& position, double time);
-
-    /**
-     * @brief Returns fluid density at given coordinates.
-     *
-     * @param[in] position Position at which fluid density is extracted.
-     * @param[in] time Time of simulation.
-     */
-    double get_fluid_density(const Vector3d& position, double time) const;
-
-    /**
-     * @brief Returns fluid velocity at given coordinates.
-     *
-     * @param[in] position Position at which fluid velocity is extracted.
-     * @param[in] time Time of simulation.
-     */
-    Vector3d get_fluid_velocity(const Vector3d& position, double time) const;
-
-    /**
-     * @brief Returns fluid acceleration at given coordinates.
-     *
-     * @param[in] position Position at which fluid acceleration is extracted.
-     * @param[in] time Time of simulation.
-     */
-    Vector3d get_fluid_acceleration(const Vector3d& position, double time) const;
-
-    /**
-     * @brief Returns soil penetration load.
-     *
-     * @param[in] entity Dynamic entity (potentially) penetrating soil.
-     * @param[in] contact_area Contact area of entity penetrating soil.
-     * @param[in] entity_mass Mass of entity penetrating soil.
-     */
-    Vector3d get_penetration_load(const EntityDynamic& entity, double contact_area, double entity_mass) const;
-
-    /**
-     * @brief Returns water level.
-     */
-    double get_water_level(const Vector3d& position, double time) const;
-
-    /**
-     * @brief Template function to access elements of a specific type in models
-     * @tparam T Type of the elements to access
-     * @return Vector of elements of type T
-     */
-    template <typename T>
-    std::vector<std::shared_ptr<T>> get_models_of_type() const;
-
-    /**
-     * @brief Template function to check if a specific type of element is present in models
-     * @tparam T Type of the element to check
-     */
-    template <typename T>
-    bool has_model_of_type() const;
-
-  private:
-    std::vector<std::shared_ptr<Model>> models;
-    std::vector<std::shared_ptr<FluidModel>> fluid_models;
-    std::vector<std::shared_ptr<SoilModel>> soil_models;
-    std::vector<std::shared_ptr<WaveModel>> wave_models;
+    void add_model(const std::shared_ptr<Model>& model);
 };
-
-template <typename T>
-bool EnvModel::has_model_of_type() const {
-    for (const auto& model : models) {
-        if (std::dynamic_pointer_cast<T>(model)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-template <typename T>
-std::vector<std::shared_ptr<T>> EnvModel::get_models_of_type() const {
-    std::vector<std::shared_ptr<T>> elements;
-    for (const auto& model : models) {
-        if (std::shared_ptr<T> element = std::dynamic_pointer_cast<T>(model)) {
-            elements.push_back(element);
-        }
-    }
-    return elements;
-}
-
 }  // namespace env
 }  // namespace seahowl

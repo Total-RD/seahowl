@@ -315,6 +315,8 @@ source_group(hydro FILES ${SEAHOWL_HYDRO_SOURCES} ${SEAHOWL_HYDRO_HEADERS})
 # env
 set(SEAHOWL_ENV_SOURCES
     src/env/env_model.cpp
+    src/env/fluid_list_model.cpp
+    src/env/soil_list_model.cpp
     src/env/fluid_models.cpp
     src/env/wind_models.cpp
     src/env/wave_models.cpp
@@ -322,6 +324,9 @@ set(SEAHOWL_ENV_SOURCES
 )
 set(SEAHOWL_ENV_HEADERS
     include/seahowl/env/model.h
+    include/seahowl/env/list_model.h
+    include/seahowl/env/fluid_list_model.h
+    include/seahowl/env/soil_list_model.h
     include/seahowl/env/env_model.h
     include/seahowl/env/fluid_models.h
     include/seahowl/env/wind_models.h
