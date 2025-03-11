@@ -9,17 +9,15 @@
   },
   "rotor": {
     "type": "fea",
-    "options": {
-      "fpm": false
-    },
     "discretization": {
       "elasto": [49],
       "aero": [49]
     },
+    "pitch_actuator_dynamics": true,
     "blades": [
       {
         "file": "../../../../../data/IEA15MW/base/blade.json",
-        "initial_pitch": 0,
+        "initial_pitch": 0.0,
         "precone": -4.0
       },
       {
@@ -35,16 +33,17 @@
     ]
   },
   "rna": {
+    "file": "../../../../../data/IEA15MW/base/rna.json",
     "initial_yaw": 0.0,
-    "file": "../../../../../data/IEA15MW/base/rna.json"
+    "yaw_actuator_dynamics": true
   },
   "tower": {
     "discretization": {
       "elasto": [],
-      "aero": [19]
+      "aero": []
     },
     "file": "../../../../../data/IEA15MW/onshore/tower.csv",
-    "options":{
+    "options": {
       "use_MacCamyFuchs_correction": false,
       "use_Cd_correction": false
     }

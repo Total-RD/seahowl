@@ -3,15 +3,15 @@ tags: [csv]
 execute:
   pre_folder_delete:  ["output"]
   exe_guess_os_extension: true
-  command_suffix: " ./data/main.json --numerics-duration 100"
+  command_suffix: " ./data/main.json --numerics-duration 50 --outputs-log-level error"
 execute_and_compare:
   test:
     exe_path: "build/seahowl_driver"
   reference:
-    exe_url: Adress_to_GIT/releases/download/v0.8.1/seahowl-driver-v0.8.1-linux-x86-64.zip
+    exe_url: Adress_to_GIT/releases/download/v0.9.0/seahowl-driver-v0.9.0-linux-x86-64.zip
     exe_url_headers:
       Authorization: "Bearer {{ env.GIT_TOKEN }}"
-    exe_unzip_and_use: seahowl-driver-v0.8.1-linux-x86-64/seahowl_driver
+    exe_unzip_and_use: seahowl-driver-v0.9.0-linux-x86-64/seahowl_driver
 readers:
   csv:
     curve_parser:
