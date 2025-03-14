@@ -50,7 +50,7 @@ PYBIND11_MODULE(seahowl, m) {
 
     // component
     py::class_<seahowl::ComponentFluid, std::shared_ptr<seahowl::ComponentFluid>>(m, "ComponentFluid")
-        .def("compute_fluid_loads", &seahowl::ComponentFluid::compute_fluid_loads);
+        .def("compute_env_loads", &seahowl::ComponentFluid::compute_env_loads);
 
     // env
     initialize_pyseahowl_env(m);

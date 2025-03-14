@@ -60,10 +60,10 @@ void MooringHydro::build() {
     }
 }
 
-void MooringHydro::compute_fluid_loads(const EnvModel& fluid_model, double time) {
+void MooringHydro::compute_env_loads(const EnvModel& env_model, double time) {
     // compute loads at nodes
     for (auto& node : nodes) {
-        node.compute_fluid_loads(fluid_model, time);
+        node.compute_env_loads(env_model, time);
     }
 
     // integrate loads over elements and store them
@@ -84,8 +84,8 @@ void MooringSystemHydro::build() {
     }
 }
 
-void MooringSystemHydro::compute_fluid_loads(const EnvModel& fluid_model, double time) {
+void MooringSystemHydro::compute_env_loads(const EnvModel& env_model, double time) {
     for (auto& mooring : moorings) {
-        mooring->compute_fluid_loads(fluid_model, time);
+        mooring->compute_env_loads(env_model, time);
     }
 }

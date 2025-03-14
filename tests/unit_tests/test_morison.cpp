@@ -103,9 +103,9 @@ TEST_F(TestMorison, analytical_comparison) {
 
     while (time_current <= duration) {
         // compute loads
-        node1.compute_fluid_loads(env_model, time_current);
-        node2.compute_fluid_loads(env_model, time_current);
-        node3.compute_fluid_loads(env_model, time_current);
+        node1.compute_env_loads(env_model, time_current);
+        node2.compute_env_loads(env_model, time_current);
+        node3.compute_env_loads(env_model, time_current);
 
         // compute loads with analytical formula
         auto fluid_velocity = wave_model->get_velocity(position, time_current);

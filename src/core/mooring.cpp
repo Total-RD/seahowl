@@ -57,7 +57,7 @@ void Mooring::poststep(double time, double dt) {
 }
 
 void Mooring::apply_env_model(seahowl::env::EnvModel& env_model, double time) {
-    hydro.compute_fluid_loads(env_model, time);
+    hydro.compute_env_loads(env_model, time);
 }
 
 void Mooring::apply_soil_model(seahowl::env::EnvModel& soil_model, double time) {

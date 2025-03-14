@@ -137,7 +137,7 @@ class BladeAero : public ComponentFluid {
     BladeAero();
 
     void build() override;
-    void compute_fluid_loads(const env::EnvModel& fluid_model, double time) override;
+    void compute_env_loads(const env::EnvModel& env_model, double time) override;
 
     /**
      * @brief Computes node distances from blade tip.

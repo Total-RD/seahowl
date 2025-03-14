@@ -88,7 +88,7 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(env_model, time);
+        turbine.aero.compute_env_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 

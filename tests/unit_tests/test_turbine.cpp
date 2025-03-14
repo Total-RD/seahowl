@@ -89,7 +89,7 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(env_model, time);
+        turbine.aero.compute_env_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -166,7 +166,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(env_model, time);
+        turbine.aero.compute_env_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -240,7 +240,7 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(env_model, time);
+        turbine.aero.compute_env_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -315,7 +315,7 @@ TEST_F(TestTurbine, controller_target_rpm) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(env_model, time);
+        turbine.aero.compute_env_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -395,7 +395,7 @@ TEST_F(TestTurbine, actuator_disk) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(env_model, time);
+        turbine.aero.compute_env_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 
@@ -423,7 +423,7 @@ TEST_F(TestTurbine, actuator_disk) {
         // prestep
         // compute forces
         turbine.apply_control(time, dt);
-        turbine.aero.compute_fluid_loads(env_model, time);
+        turbine.aero.compute_env_loads(env_model, time);
         // prestep (accumulates loads from aero to elasto)
         turbine.prestep(time, dt);
 

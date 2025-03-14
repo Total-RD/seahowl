@@ -34,7 +34,7 @@ void Tower::poststep(double time, double dt) {
 }
 
 void Tower::apply_env_model(seahowl::env::EnvModel& env_model, double time) {
-    aero.compute_fluid_loads(env_model, time);
+    aero.compute_env_loads(env_model, time);
 }
 
 void Tower::build() {

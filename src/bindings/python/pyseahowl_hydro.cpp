@@ -43,7 +43,7 @@ void initialize_pyseahowl_hydro(py::module& m) {
     py::class_<seahowl::hydro::MorisonNode, std::shared_ptr<seahowl::hydro::MorisonNode>, seahowl::EntityDynamicEigen>(
         m_hydro, "MorisonNode")
         .def(py::init<>())
-        .def("compute_fluid_loads", &seahowl::hydro::MorisonNode::compute_fluid_loads)
+        .def("compute_env_loads", &seahowl::hydro::MorisonNode::compute_env_loads)
         .def_readwrite("load", &seahowl::hydro::MorisonNode::load)
         .def_readwrite("load_noacc", &seahowl::hydro::MorisonNode::load_noacc)
         .def_readwrite("diameter", &seahowl::hydro::MorisonNode::diameter)
@@ -60,7 +60,7 @@ void initialize_pyseahowl_hydro(py::module& m) {
     py::class_<seahowl::hydro::MorisonPlate, std::shared_ptr<seahowl::hydro::MorisonPlate>,
                seahowl::EntityDynamicEigen>(m_hydro, "MorisonPlate")
         .def(py::init<>())
-        .def("compute_fluid_loads", &seahowl::hydro::MorisonPlate::compute_fluid_loads)
+        .def("compute_env_loads", &seahowl::hydro::MorisonPlate::compute_env_loads)
         .def_readwrite("load", &seahowl::hydro::MorisonPlate::load)
         .def_readwrite("diameter", &seahowl::hydro::MorisonPlate::diameter)
         .def_readwrite("drag_coefficient", &seahowl::hydro::MorisonPlate::drag_coefficient)

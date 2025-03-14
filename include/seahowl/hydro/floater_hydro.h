@@ -34,7 +34,7 @@ class FloaterHydro : public FoundationFluid {
 
     void build() override;
 
-    void compute_fluid_loads(const env::EnvModel& fluid_model, double time) override;
+    void compute_env_loads(const env::EnvModel& fluid_model, double time) override;
 };
 
 }  // namespace hydro

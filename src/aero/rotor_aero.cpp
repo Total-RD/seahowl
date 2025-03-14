@@ -65,9 +65,9 @@ void RotorAero::compute_disk_averaged_wind_velocity(const EnvModel& env_model, d
 
 RotorNacelleAssemblyAero::RotorNacelleAssemblyAero() {}
 
-void RotorNacelleAssemblyAero::compute_fluid_loads(const EnvModel& wind_model, double time) {
+void RotorNacelleAssemblyAero::compute_env_loads(const EnvModel& wind_model, double time) {
     rotor->compute_disk_averaged_wind_velocity(wind_model, time);
-    rotor->compute_fluid_loads(wind_model, time);
+    rotor->compute_env_loads(wind_model, time);
 }
 
 void RotorNacelleAssemblyAero::build() {
@@ -131,7 +131,7 @@ void RotorAeroBEMT::compute_radii_distances_solidity() {
     }
 }
 
-void RotorAeroBEMT::compute_fluid_loads(const EnvModel& env_model, double time) {
+void RotorAeroBEMT::compute_env_loads(const EnvModel& env_model, double time) {
     compute_radii_distances_solidity();
 
     auto hub_position = body_hub.get_position();
@@ -260,7 +260,7 @@ void RotorAeroDisk::initialize() {
     }
 }
 
-void RotorAeroDisk::compute_fluid_loads(const EnvModel& env_model, double time) {
+void RotorAeroDisk::compute_env_loads(const EnvModel& env_model, double time) {
     auto pos_hub = body_hub.get_position();
     auto vel_hub = body_hub.get_velocity();
     double density = env_model.fluid_models.get_density(pos_hub, time);

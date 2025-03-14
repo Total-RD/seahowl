@@ -15,6 +15,6 @@ void FloaterHydro::build() {
     mooring_system->build();
 }
 
-void FloaterHydro::compute_fluid_loads(const EnvModel& fluid_model, double time) {
-    mooring_system->compute_fluid_loads(fluid_model, time);
+void FloaterHydro::compute_env_loads(const EnvModel& env_model, double time) {
+    mooring_system->compute_env_loads(env_model, time);
 }

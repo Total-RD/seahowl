@@ -42,7 +42,7 @@ class RotorAero : public ComponentFluid {
     Vector3d disk_averaged_wind_velocity{0.0, 0.0, 0.0};
 
     virtual void initialize() = 0;
-    virtual void compute_fluid_loads(const env::EnvModel& fluid_model, double time) = 0;
+    virtual void compute_env_loads(const env::EnvModel& env_model, double time) = 0;
 
     /**
      * @brief Computes disk-averaged wind velocity.
@@ -67,7 +67,7 @@ class RotorAeroBEMT : public RotorAero {
 
     virtual void build() override;
     virtual void initialize() override;
-    virtual void compute_fluid_loads(const env::EnvModel& wind_model, double time) override;
+    virtual void compute_env_loads(const env::EnvModel& env_model, double time) override;
 
     /**
      * @brief Computes radius, distances from tip and hub, and chord solidity on all aero nodes of blades.
@@ -92,7 +92,7 @@ class RotorAeroDisk : public RotorAero {
 
     virtual void build() override{};
     void initialize() override;
-    void compute_fluid_loads(const env::EnvModel& wind_model, double time) override;
+    void compute_env_loads(const env::EnvModel& env_model, double time) override;
 };
 
 /**
@@ -110,7 +110,7 @@ class RotorNacelleAssemblyAero : public ComponentFluid {
      */
     RotorNacelleAssemblyAero();
 
-    void compute_fluid_loads(const env::EnvModel& wind_model, double time) override;
+    void compute_env_loads(const env::EnvModel& env_model, double time) override;
 
     /**
      * @brief Builds rotor.

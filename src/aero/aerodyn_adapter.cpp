@@ -587,7 +587,7 @@ void TurbineAeroDyn::initialize(double time, double dt) {
     aerodyn.initialize(time, dt, *this);
 }
 
-void TurbineAeroDyn::compute_fluid_loads(const seahowl::env::EnvModel& wind_model, double time) {
+void TurbineAeroDyn::compute_env_loads(const seahowl::env::EnvModel& env_model, double time) {
     // call AeroDyn to compute loads
     aerodyn.compute_loads(time, *this);
 
@@ -609,9 +609,9 @@ void TurbineAeroDyn::compute_fluid_loads(const seahowl::env::EnvModel& wind_mode
     }
 
     // compute loads on rest of turbine
-    rna.compute_fluid_loads(wind_model, time);
+    rna.compute_env_loads(env_model, time);
     if (foundation) {
-        foundation->compute_fluid_loads(wind_model, time);
+        foundation->compute_env_loads(env_model, time);
     }
 
     // disk averaged velocity
@@ -620,10 +620,10 @@ void TurbineAeroDyn::compute_fluid_loads(const seahowl::env::EnvModel& wind_mode
 
 RotorAeroDyn::RotorAeroDyn(TowerAero& tower_ref) : RotorAeroBEMT(tower_ref) {}
 
-void RotorAeroDyn::compute_fluid_loads(const seahowl::env::EnvModel& wind_model, double time) {
-    // nothing happening here (see TurbineAeroDyn::compute_fluid_loads)
+void RotorAeroDyn::compute_env_loads(const seahowl::env::EnvModel& env_model, double time) {
+    // nothing happening here (see TurbineAeroDyn::compute_env_loads)
 }
 
 void RotorAeroDyn::compute_disk_averaged_wind_velocity(const env::EnvModel& fluid_model, double time) {
-    // nothing happening here (see TurbineAeroDyn::compute_fluid_loads)
+    // nothing happening here (see TurbineAeroDyn::compute_env_loads)
 }

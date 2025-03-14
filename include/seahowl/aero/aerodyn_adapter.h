@@ -68,7 +68,7 @@ class TurbineAeroDyn : public TurbineAero {
 
     TurbineAeroDyn();
     void initialize(double time, double dt) override;
-    void compute_fluid_loads(const env::EnvModel& fluid_model, double time) override;
+    void compute_env_loads(const env::EnvModel& env_model, double time) override;
 };
 
 /**
@@ -77,8 +77,8 @@ class TurbineAeroDyn : public TurbineAero {
 class RotorAeroDyn : public RotorAeroBEMT {
   public:
     RotorAeroDyn(TowerAero& tower_ref);
-    virtual void compute_fluid_loads(const env::EnvModel& fluid_model, double time) override;
-    virtual void compute_disk_averaged_wind_velocity(const env::EnvModel& fluid_model, double time) override;
+    virtual void compute_env_loads(const env::EnvModel& env_model, double time) override;
+    virtual void compute_disk_averaged_wind_velocity(const env::EnvModel& env_model, double time) override;
 };
 
 }  // namespace aero

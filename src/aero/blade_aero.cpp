@@ -105,7 +105,7 @@ void BladeAero::build() {
     compute_distances_from_tip();
 }
 
-void BladeAero::compute_fluid_loads(const env::EnvModel& fluid_model, double time) {
+void BladeAero::compute_env_loads(const env::EnvModel& env_model, double time) {
     throw std::runtime_error("Cannot compute fluid loads directly from BladeAero, call function from RotorAero.");
 }
 
