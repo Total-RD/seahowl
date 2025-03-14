@@ -587,7 +587,7 @@ if (SEAHOWL_ENABLE_PYTHON)
             message(FATAL_ERROR "Failed to create virtual environment")
         endif()
 
-        set(CMD_PIP "pip install sphinx sphinx-rtd-theme matplotlib myst-parser pre-commit")
+        set(CMD_PIP "pip install sphinx sphinx-rtd-theme matplotlib myst-parser pre-commit numpy")
         set(CMD_PRECOMMIT "pre-commit install")
 
         if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
