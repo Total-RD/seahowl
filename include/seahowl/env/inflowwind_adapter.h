@@ -29,6 +29,14 @@ class InflowWindAdapter : public WindModel {
 
     std::unique_ptr<InflowWindLib> pImpl;
 
+    /**
+     * @brief Returns true is the placement of the model (false otherwise).
+     *
+     * @param[in] position Position to assess whether inside model or not.
+     * @param[in] time Time of simulation.
+     */
+    virtual bool is_inside(const Vector3d& position, double time = 0.0) const override;
+
     InflowWindAdapter(std::string InflowInfile);
     ~InflowWindAdapter();
 

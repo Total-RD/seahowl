@@ -13,6 +13,8 @@ class WindModel : public FluidModel {
   public:
     /** @brief Air density. */
     double density = 1.225;
+    /** @brief Direction of gravitational acceleration. */
+    Vector3d direction_gravity{0.0, 0.0, -1.0};
 
     /**
      * @brief Returns true is the placement of the model (false otherwise).
@@ -20,12 +22,12 @@ class WindModel : public FluidModel {
      * @param[in] position Position to assess whether inside model or not.
      * @param[in] time Time of simulation.
      */
-    virtual bool is_inside(const Vector3d& position, double time = 0.0) const { return true; };
+    virtual bool is_inside(const Vector3d& position, double time = 0.0) const override;
 
     /**
      * @brief Returns air density.
      */
-    virtual double get_density(const Vector3d& position, double time) const override;
+    virtual double get_density_this(const Vector3d& position, double time) const override;
 };
 
 /**@brief Sheared wind model. This model and derived models assume a ground level at z=0.0. */
@@ -35,8 +37,6 @@ class ShearedWind : public WindModel {
     double shear_coefficient = 0.0;
     /** @brief Reference height (where constant velocity is defined). */
     double reference_height = 150.0;
-    /** @brief Direction of gravitational acceleration. */
-    Vector3d direction_gravity{0.0, 0.0, -1.0};
 };
 
 /**@brief Constant wind models. */

@@ -9,14 +9,19 @@ Vector3d get_sheared_wind_velocity(const Vector3d& velocity,
                                    double shear_coefficient,
                                    double reference_height) {
     double distance = position.dot(-direction_gravity);
-    // assuming that ground level is at 0.0
-    if (distance < 0) {
-        distance = 0;
-    }
     return velocity * pow(distance / reference_height, shear_coefficient);
 }
 
-double WindModel::get_density(const Vector3d& position, double time) const {
+bool WindModel::is_inside(const Vector3d& position, double time) const {
+    double distance = position.dot(-direction_gravity);
+    // assuming that ground level is at 0.0
+    if (distance < 0) {
+        return false;
+    }
+    return true;
+}
+
+double WindModel::get_density_this(const Vector3d& position, double time) const {
     return density;
 }
 

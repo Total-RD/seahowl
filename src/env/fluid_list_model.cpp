@@ -18,7 +18,7 @@ Vector3d FluidListModel::get_velocity(const Vector3d& position, double time) con
     if (models.size() > 0) {
         for (const auto& model : models) {
             if (model->is_inside(position, time)) {
-                return model->get_velocity(position, time);
+                return model->get_velocity_inside(position, time);
             }
         }
     }
@@ -29,7 +29,7 @@ Vector3d FluidListModel::get_acceleration(const Vector3d& position, double time)
     if (models.size() > 0) {
         for (const auto& model : models) {
             if (model->is_inside(position, time)) {
-                return model->get_acceleration(position, time);
+                return model->get_acceleration_inside(position, time);
             }
         }
     }
