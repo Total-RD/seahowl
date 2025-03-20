@@ -49,10 +49,10 @@ void Turbine::apply_control(double time, double dt) {
 
     // apply pitch from controller
     if (controller->has_pitch_control) {
-        if (rna.blades.size() >= 1 && rna.blades.size() <= 3) {
+        if (rna.rotor.blades.size() >= 1 && rna.rotor.blades.size() <= 3) {
             // individual pitch only works with rotors from 1 to 3 blades
-            for (int idx_blade = 0; idx_blade < rna.blades.size(); idx_blade++) {
-                auto& blade = *rna.blades[idx_blade];
+            for (int idx_blade = 0; idx_blade < rna.rotor.blades.size(); idx_blade++) {
+                auto& blade = *rna.rotor.blades[idx_blade];
                 if (blade.elasto.actuator_pitch->is_fixed_actuator()) {
                     auto blade_pitch_increment = controller->get_pitch_blade(idx_blade) - blade.elasto.get_pitch();
                     blade.apply_pitch_increment(blade_pitch_increment);
@@ -64,7 +64,7 @@ void Turbine::apply_control(double time, double dt) {
             }
         } else {
             // collective pitch for more than 3 blades or 0 blade (e.g. actuator disk)
-            for (auto& blade : rna.blades) {
+            for (auto& blade : rna.rotor.blades) {
                 if (blade->elasto.actuator_pitch->is_fixed_actuator()) {
                     auto collective_pitch_increment =
                         controller->get_collective_pitch() - rna.elasto.rotor->pitch_collective;

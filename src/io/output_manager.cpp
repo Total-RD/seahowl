@@ -56,8 +56,8 @@ void add_basic_turbine_info_to_csv(seahowl::io::CustomCSV& custom_csv, seahowl::
     custom_csv.add_function("tower top moment (Nm)",
                             [&turbine]() { return turbine.tower.elasto.get_tower_top_moment(); });
     custom_csv.add_function("tower top force (N)", [&turbine]() { return turbine.tower.elasto.get_tower_top_force(); });
-    for (size_t idx_blade = 0; idx_blade < turbine.rna.blades.size(); idx_blade++) {
-        auto& blade = *turbine.rna.blades[idx_blade];
+    for (size_t idx_blade = 0; idx_blade < turbine.rna.rotor.blades.size(); idx_blade++) {
+        auto& blade = *turbine.rna.rotor.blades[idx_blade];
         custom_csv.add_function("blade" + std::to_string(idx_blade + 1) + " wind (m/s)",
                                 [&blade]() { return blade.aero.get_average_wind_velocity(); });
         custom_csv.add_function("blade" + std::to_string(idx_blade + 1) + " wind load (N)",
@@ -210,9 +210,9 @@ void OutputManager::output_all(int step) {
         output_sstring << "    turbine " << turbine_id << " info -> rpm: " << std::setprecision(3)
                        << turbine.rna.elasto.get_rpm() << ", power: " << turbine.get_generated_power()
                        << ", yaw: " << turbine.rna.elasto.get_yaw();
-        int nblades = turbine.rna.blades.size();
+        int nblades = turbine.rna.rotor.blades.size();
         if (nblades <= 3 && nblades > 0) {
-            for (int ii = 0; ii < turbine.rna.blades.size(); ii++) {
+            for (int ii = 0; ii < turbine.rna.rotor.blades.size(); ii++) {
                 output_sstring << ", pitch" << ii + 1 << ": " << turbine.rna.elasto.rotor->blades[ii]->get_pitch();
             }
         } else {

@@ -97,7 +97,7 @@ void seahowl::servo::ControllerDISCON::update_turbine_variables(double time,
 void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const seahowl::core::Turbine& turbine) {
     spdlog::debug("Initialization of DISCON controller.");
 
-    auto nblades = turbine.rna.blades.size();
+    auto nblades = turbine.rna.rotor.blades.size();
     if (nblades == 0) {
         spdlog::warn(
             "DISCON: number of blades is 0 (expected for actuator disk approach), setting it to 3 for control.");

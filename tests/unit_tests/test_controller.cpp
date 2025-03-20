@@ -44,7 +44,7 @@ TEST_F(TestController, collective_pitch_control) {
     seahowl::io::add_turbine_to_system_from_file((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
                                                  system_core);
     auto& turbine = *system_core.turbines[0];
-    for (auto& blade : turbine.rna.blades) {
+    for (auto& blade : turbine.rna.rotor.blades) {
         blade->elasto.actuator_pitch->set_fixed_actuator(false);
         blade->elasto.apply_pitch_increment(0.2);
     }
@@ -69,9 +69,9 @@ TEST_F(TestController, collective_pitch_control) {
                                        (test_dir / "test_collective_pitch_control.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("blade pitch (rad)",
-                                       [&turbine]() { return turbine.rna.blades[0]->elasto.get_pitch(); });
-    test_dataset.test_csv.add_function("blade root moment (Nm)",
-                                       [&turbine]() { return turbine.rna.blades[0]->elasto.get_blade_root_moment(); });
+                                       [&turbine]() { return turbine.rna.rotor.blades[0]->elasto.get_pitch(); });
+    test_dataset.test_csv.add_function(
+        "blade root moment (Nm)", [&turbine]() { return turbine.rna.rotor.blades[0]->elasto.get_blade_root_moment(); });
 
     // output values at time = 0
     test_dataset.test_csv.write_row();
@@ -104,7 +104,7 @@ TEST_F(TestController, collective_pitch_control_snap) {
     seahowl::io::add_turbine_to_system_from_file((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
                                                  system_core);
     auto& turbine = *system_core.turbines[0];
-    for (auto& blade : turbine.rna.blades) {
+    for (auto& blade : turbine.rna.rotor.blades) {
         blade->elasto.actuator_pitch->set_fixed_actuator(true);
         blade->elasto.apply_pitch_increment(0.2);
     }
@@ -130,9 +130,9 @@ TEST_F(TestController, collective_pitch_control_snap) {
                                        (test_dir / "test_collective_pitch_control_snap.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("blade pitch (rad)",
-                                       [&turbine]() { return turbine.rna.blades[0]->elasto.get_pitch(); });
+                                       [&turbine]() { return turbine.rna.rotor.blades[0]->elasto.get_pitch(); });
     test_dataset.test_csv.add_function("blade root moment (Nm)",
-                                       [&turbine]() { return turbine.rna.blades[0]->elasto.get_blade_root_moment(); });
+                                       [&turbine]() { return turbine.rna.rotor.blades[0]->elasto.get_blade_root_moment(); });
 
     // output values at time = 0
     test_dataset.test_csv.write_row();
@@ -190,9 +190,9 @@ TEST_F(TestController, individual_pitch_control) {
                                        (test_dir / "test_individual_pitch_control.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("blade pitch (rad)",
-                                       [&turbine]() { return turbine.rna.blades[0]->elasto.get_pitch(); });
+                                       [&turbine]() { return turbine.rna.rotor.blades[0]->elasto.get_pitch(); });
     test_dataset.test_csv.add_function("blade root moment (Nm)",
-                                       [&turbine]() { return turbine.rna.blades[0]->elasto.get_blade_root_moment(); });
+                                       [&turbine]() { return turbine.rna.rotor.blades[0]->elasto.get_blade_root_moment(); });
 
     // output values at time = 0
     test_dataset.test_csv.write_row();

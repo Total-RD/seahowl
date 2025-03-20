@@ -19,12 +19,41 @@ RotorNacelleAssembly::RotorNacelleAssembly(std::shared_ptr<seahowl::elasto::Roto
                                            std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero> aero)
     : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {}
 
-void RotorNacelleAssembly::initialize_this(double time, double dt) {
+void Rotor::initialize_this(double time, double dt) {
     for (auto& blade : blades) {
         blade->initialize(time, dt);
         // update initial azimuth of aero blade
         blade->aero.azimuth0 = blade->elasto.azimuth0;
     }
+}
+
+void Rotor::prestep(double time, double dt) {
+    // blades
+    for (auto& blade : blades) {
+        blade->prestep(time, dt);
+    }
+}
+
+void Rotor::poststep(double time, double dt) {
+    for (auto& blade : blades) {
+        blade->poststep(time, dt);
+    }
+}
+
+void Rotor::build() {
+    // build elasto
+    elasto.build();
+    // build aero
+    aero.build();
+}
+
+RotorNacelleAssembly::RotorNacelleAssembly(seahowl::elasto::RotorNacelleAssemblyElasto& elasto,
+                                           seahowl::aero::RotorNacelleAssemblyAero& aero)
+    : elasto(elasto), aero(aero), rotor(*elasto.rotor, *aero.rotor) {}
+
+void RotorNacelleAssembly::initialize_this(double time, double dt) {
+    rotor.initialize(time, dt);
+
     update_positions_aero();
     // initialize aero variables after updating positions
     aero.initialize();
@@ -33,10 +62,8 @@ void RotorNacelleAssembly::initialize_this(double time, double dt) {
 }
 
 void RotorNacelleAssembly::prestep(double time, double dt) {
-    // blades
-    for (auto& blade : blades) {
-        blade->prestep(time, dt);
-    }
+    // rotor
+    rotor.prestep(time, dt);
 
     // apply extra torque and thrust (if any) to hub
     elasto.rotor->body_hub->accumulate_torque_internals(Vector3d(aero.rotor->hub_torque_aero, 0, 0), true);
@@ -44,9 +71,9 @@ void RotorNacelleAssembly::prestep(double time, double dt) {
 }
 
 void RotorNacelleAssembly::poststep(double time, double dt) {
-    for (auto& blade : blades) {
-        blade->poststep(time, dt);
-    }
+    // rotor
+    rotor.poststep(time, dt);
+
     update_positions_aero();
 }
 
