@@ -1,7 +1,7 @@
 #include "fixture_components.h"
 
 #include <seahowl/elasto/chrono_adapters.h>
-#include <seahowl/aero/bemt.h>
+#include <seahowl/fluid/aero/bemt.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/commons/numerics.h>
 #include <seahowl/io/read_input.h>

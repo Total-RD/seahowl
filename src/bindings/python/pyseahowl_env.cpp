@@ -9,7 +9,7 @@
     #include <seahowl/env/inflowwind_adapter.h>
 #endif
 #ifdef HAVE_HYDROCHRONO
-    #include <seahowl/hydro/hydrochrono_adapter.h>
+    #include <seahowl/fluid/hydro/hydrochrono_adapter.h>
 #endif
 
 namespace py = pybind11;

@@ -1,8 +1,8 @@
-#include "seahowl/aero/blade_aero.h"
+#include "seahowl/fluid/aero/blade_aero.h"
 
 #include "seahowl/commons/utils.h"
-#include "seahowl/aero/reference_point_aero.h"
-#include "seahowl/aero/bemt.h"
+#include "seahowl/fluid/aero/reference_point_aero.h"
+#include "seahowl/fluid/aero/bemt.h"
 
 #include <spdlog/spdlog.h>
 

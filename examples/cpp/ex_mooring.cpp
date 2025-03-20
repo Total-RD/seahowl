@@ -1,5 +1,5 @@
 #include <seahowl/elasto/mooring_elasto.h>
-#include <seahowl/hydro/mooring_hydro.h>
+#include <seahowl/fluid/hydro/mooring_hydro.h>
 #include <seahowl/core/mooring.h>
 #include <seahowl/core/simulation.h>
 #include <seahowl/core/system.h>

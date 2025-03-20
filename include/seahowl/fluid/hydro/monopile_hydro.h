@@ -1,7 +1,7 @@
 #pragma once
 
-#include "seahowl/aero/tower_aero.h"
-#include "seahowl/hydro/foundation_fluid.h"
+#include "seahowl/fluid/aero/tower_aero.h"
+#include "seahowl/fluid/hydro/foundation_fluid.h"
 
 namespace seahowl {
 

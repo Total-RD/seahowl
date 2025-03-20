@@ -1,7 +1,7 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include "seahowl/aero/rotor_aero.h"
+#include "seahowl/fluid/aero/rotor_aero.h"
 #include "seahowl/core/turbine.h"
 
 /**

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "seahowl/commons/numerics.h"
-#include "seahowl/aero/turbine_aero.h"
-#include "seahowl/aero/rotor_aero.h"
+#include "seahowl/fluid/aero/turbine_aero.h"
+#include "seahowl/fluid/aero/rotor_aero.h"
 #include "seahowl/commons/component_fluid.h"
 
 #include <iostream>

@@ -1,7 +1,7 @@
 #include "seahowl/core/turbine.h"
 
 #include "seahowl/elasto/turbine_elasto.h"
-#include "seahowl/aero/turbine_aero.h"
+#include "seahowl/fluid/aero/turbine_aero.h"
 #include "seahowl/core/blade.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/elasto/floater_elasto.h"

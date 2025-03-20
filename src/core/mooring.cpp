@@ -2,7 +2,7 @@
 
 #include "seahowl/commons/utils.h"
 #include "seahowl/elasto/mooring_elasto.h"
-#include "seahowl/hydro/mooring_hydro.h"
+#include "seahowl/fluid/hydro/mooring_hydro.h"
 
 #include <spdlog/spdlog.h>
 

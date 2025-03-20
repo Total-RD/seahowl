@@ -257,28 +257,27 @@ source_group(elasto FILES ${SEAHOWL_ELASTO_SOURCES} ${SEAHOWL_ELASTO_HEADERS})
 
 # aero
 set(SEAHOWL_AERO_SOURCES
-    src/aero/system_aero.cpp
-    src/aero/airfoil.cpp
-    src/aero/bemt.cpp
-    src/aero/reference_point_aero.cpp
-    src/aero/blade_aero.cpp
-    src/aero/rotor_aero.cpp
-    src/aero/tower_aero.cpp
-    src/aero/turbine_aero.cpp
+    src/fluid/aero/airfoil.cpp
+    src/fluid/aero/bemt.cpp
+    src/fluid/aero/reference_point_aero.cpp
+    src/fluid/aero/blade_aero.cpp
+    src/fluid/aero/rotor_aero.cpp
+    src/fluid/aero/tower_aero.cpp
+    src/fluid/aero/turbine_aero.cpp
 )
 set(SEAHOWL_AERO_HEADERS
-    include/seahowl/aero/airfoil.h
-    include/seahowl/aero/bemt.h
-    include/seahowl/aero/blade_aero.h
-    include/seahowl/aero/reference_point_aero.h
-    include/seahowl/aero/system_aero.h
-    include/seahowl/aero/rotor_aero.h
-    include/seahowl/aero/tower_aero.h
-    include/seahowl/aero/turbine_aero.h
+    include/seahowl/fluid/aero/airfoil.h
+    include/seahowl/fluid/aero/bemt.h
+    include/seahowl/fluid/aero/blade_aero.h
+    include/seahowl/fluid/aero/reference_point_aero.h
+    include/seahowl/fluid/aero/system_aero.h
+    include/seahowl/fluid/aero/rotor_aero.h
+    include/seahowl/fluid/aero/tower_aero.h
+    include/seahowl/fluid/aero/turbine_aero.h
 )
 if (SEAHOWL_ENABLE_AERODYN)
-    list(APPEND SEAHOWL_AERO_SOURCES src/aero/aerodyn_adapter.cpp)
-    list(APPEND SEAHOWL_AERO_HEADERS include/seahowl/aero/aerodyn_adapter.h)
+    list(APPEND SEAHOWL_AERO_SOURCES src/fluid/aero/aerodyn_adapter.cpp)
+    list(APPEND SEAHOWL_AERO_HEADERS include/seahowl/fluid/aero/aerodyn_adapter.h)
 endif(SEAHOWL_ENABLE_AERODYN)
 source_group(aero FILES
     ${SEAHOWL_AERO_SOURCES}
@@ -297,20 +296,20 @@ source_group(servo FILES ${SEAHOWL_SERVO_SOURCES} ${SEAHOWL_SERVO_HEADERS})
 
 # hydro
 set(SEAHOWL_HYDRO_SOURCES
-    src/hydro/morison.cpp
-    src/hydro/mooring_hydro.cpp
-    src/hydro/floater_hydro.cpp
+    src/fluid/hydro/morison.cpp
+    src/fluid/hydro/mooring_hydro.cpp
+    src/fluid/hydro/floater_hydro.cpp
 )
 set(SEAHOWL_HYDRO_HEADERS
-    include/seahowl/hydro/morison.h
-    include/seahowl/hydro/mooring_hydro.h
-    include/seahowl/hydro/foundation_fluid.h
-    include/seahowl/hydro/floater_hydro.h
-    include/seahowl/hydro/monopile_hydro.h
+    include/seahowl/fluid/hydro/morison.h
+    include/seahowl/fluid/hydro/mooring_hydro.h
+    include/seahowl/fluid/hydro/foundation_fluid.h
+    include/seahowl/fluid/hydro/floater_hydro.h
+    include/seahowl/fluid/hydro/monopile_hydro.h
 )
 if(SEAHOWL_ENABLE_HYDROCHRONO)
-    list(APPEND SEAHOWL_HYDRO_SOURCES src/hydro/hydrochrono_adapter.cpp)
-    list(APPEND SEAHOWL_HYDRO_HEADERS include/seahowl/hydro/hydrochrono_adapter.h)
+    list(APPEND SEAHOWL_HYDRO_SOURCES src/fluid/hydro/hydrochrono_adapter.cpp)
+    list(APPEND SEAHOWL_HYDRO_HEADERS include/seahowl/fluid/hydro/hydrochrono_adapter.h)
 endif(SEAHOWL_ENABLE_HYDROCHRONO)
 source_group(hydro FILES ${SEAHOWL_HYDRO_SOURCES} ${SEAHOWL_HYDRO_HEADERS})
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "seahowl/commons/numerics.h"
-#include "seahowl/aero/airfoil.h"
-#include "seahowl/hydro/morison.h"
+#include "seahowl/fluid/aero/airfoil.h"
+#include "seahowl/fluid/hydro/morison.h"
 
 // forward declarations
 namespace seahowl {

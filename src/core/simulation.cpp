@@ -3,7 +3,7 @@
 #include "seahowl/core/system.h"
 #include "seahowl/elasto/system_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
-#include "seahowl/aero/system_aero.h"
+#include "seahowl/fluid/aero/system_aero.h"
 #include "seahowl/elasto/chrono_adapters.h"
 #include "seahowl/io/read_input.h"
 #include "seahowl/io/write_csv.h"

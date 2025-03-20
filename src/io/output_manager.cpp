@@ -7,7 +7,7 @@
     #include "seahowl/io/viz_insitu_irrlicht.h"
 #endif
 #ifdef HAVE_AERODYN
-    #include "seahowl/aero/aerodyn_adapter.h"
+    #include "seahowl/fluid/aero/aerodyn_adapter.h"
 #endif
 #include "seahowl/core/system.h"
 #include "seahowl/core/turbine.h"
@@ -19,7 +19,7 @@
 #include "seahowl/elasto/tower_elasto.h"
 #include "seahowl/elasto/rotor_elasto.h"
 #include "seahowl/elasto/floater_elasto.h"
-#include "seahowl/aero/blade_aero.h"
+#include "seahowl/fluid/aero/blade_aero.h"
 #include "seahowl/env/wind_models.h"
 #include "seahowl/env/fluid_models.h"
 #include "seahowl/servo/controller.h"

@@ -2,7 +2,7 @@
 
 #include "seahowl/core/turbine.h"
 #include "seahowl/elasto/rotor_elasto.h"
-#include "seahowl/aero/rotor_aero.h"
+#include "seahowl/fluid/aero/rotor_aero.h"
 
 #include <spdlog/spdlog.h>
 

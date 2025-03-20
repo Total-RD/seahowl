@@ -2,7 +2,7 @@
 
 #include "seahowl/core/tower.h"
 #include "seahowl/elasto/monopile_elasto.h"
-#include "seahowl/hydro/monopile_hydro.h"
+#include "seahowl/fluid/hydro/monopile_hydro.h"
 #include "seahowl/core/foundation.h"
 
 namespace seahowl {

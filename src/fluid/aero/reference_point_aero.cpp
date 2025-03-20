@@ -1,6 +1,6 @@
-#include "seahowl/aero/reference_point_aero.h"
+#include "seahowl/fluid/aero/reference_point_aero.h"
 
-#include "seahowl/aero/airfoil.h"
+#include "seahowl/fluid/aero/airfoil.h"
 
 #include <spdlog/spdlog.h>
 

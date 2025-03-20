@@ -1,10 +1,10 @@
 #include "seahowl/core/system.h"
 
 #include "seahowl/elasto/system_elasto.h"
-#include "seahowl/aero/system_aero.h"
+#include "seahowl/fluid/aero/system_aero.h"
 #include "seahowl/elasto/mooring_elasto.h"
 #include "seahowl/elasto/turbine_elasto.h"
-#include "seahowl/aero/turbine_aero.h"
+#include "seahowl/fluid/aero/turbine_aero.h"
 #include "seahowl/env/wind_models.h"
 #include "seahowl/env/wave_models.h"
 #include "seahowl/env/soil_models.h"
@@ -13,7 +13,7 @@
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/elasto/floater_elasto.h"
 #ifdef HAVE_HYDROCHRONO
-    #include "seahowl/hydro/hydrochrono_adapter.h"
+    #include "seahowl/fluid/hydro/hydrochrono_adapter.h"
 #endif
 
 #include <vector>

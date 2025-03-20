@@ -2,8 +2,8 @@
 
 #include "seahowl/commons/numerics.h"
 #include "seahowl/commons/entities.h"
-#include "seahowl/aero/reference_point_aero.h"
-#include "seahowl/hydro/morison.h"
+#include "seahowl/fluid/aero/reference_point_aero.h"
+#include "seahowl/fluid/hydro/morison.h"
 #include "seahowl/commons/component_fluid.h"
 
 #include <vector>

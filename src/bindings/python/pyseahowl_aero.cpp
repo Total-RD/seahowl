@@ -3,12 +3,12 @@
 #include <pybind11/eigen.h>
 
 #include <seahowl/commons/component_fluid.h>
-#include <seahowl/aero/system_aero.h>
-#include <seahowl/aero/blade_aero.h>
-#include <seahowl/aero/rotor_aero.h>
-#include <seahowl/aero/tower_aero.h>
-#include <seahowl/aero/turbine_aero.h>
-#include <seahowl/aero/reference_point_aero.h>
+#include <seahowl/fluid/aero/system_aero.h>
+#include <seahowl/fluid/aero/blade_aero.h>
+#include <seahowl/fluid/aero/rotor_aero.h>
+#include <seahowl/fluid/aero/tower_aero.h>
+#include <seahowl/fluid/aero/turbine_aero.h>
+#include <seahowl/fluid/aero/reference_point_aero.h>
 
 namespace py = pybind11;
 

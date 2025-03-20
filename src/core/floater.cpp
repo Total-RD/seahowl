@@ -3,8 +3,8 @@
 #include "seahowl/core/mooring.h"
 #include "seahowl/elasto/floater_elasto.h"
 #include "seahowl/elasto/mooring_elasto.h"
-#include "seahowl/hydro/floater_hydro.h"
-#include "seahowl/hydro/mooring_hydro.h"
+#include "seahowl/fluid/hydro/floater_hydro.h"
+#include "seahowl/fluid/hydro/mooring_hydro.h"
 
 #include <memory>
 #include <vector>

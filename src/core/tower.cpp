@@ -2,7 +2,7 @@
 
 #include "seahowl/commons/utils.h"
 #include "seahowl/elasto/tower_elasto.h"
-#include "seahowl/aero/tower_aero.h"
+#include "seahowl/fluid/aero/tower_aero.h"
 
 #include <spdlog/spdlog.h>
 

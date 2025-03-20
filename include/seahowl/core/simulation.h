@@ -2,7 +2,7 @@
 
 #include "seahowl/io/output_manager.h"
 #include "seahowl/core/system.h"
-#include "seahowl/aero/system_aero.h"
+#include "seahowl/fluid/aero/system_aero.h"
 #include "seahowl/elasto/system_elasto.h"
 #include <seahowl/io/config_manager.h>
 

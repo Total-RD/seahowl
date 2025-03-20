@@ -1,7 +1,7 @@
 #include "fixture_components.h"
 
 #include <seahowl/commons/numerics.h>
-#include <seahowl/aero/turbine_aero.h>
+#include <seahowl/fluid/aero/turbine_aero.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/io/read_input.h>

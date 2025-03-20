@@ -2,7 +2,7 @@
 
 #include "seahowl/commons/numerics.h"
 #include "seahowl/commons/entities.h"
-#include "seahowl/aero/reference_point_aero.h"
+#include "seahowl/fluid/aero/reference_point_aero.h"
 #include "seahowl/commons/component_fluid.h"
 
 #include <memory>

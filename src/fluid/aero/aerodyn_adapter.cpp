@@ -1,7 +1,7 @@
-#include <seahowl/aero/aerodyn_adapter.h>
+#include <seahowl/fluid/aero/aerodyn_adapter.h>
 
-#include <seahowl/aero/turbine_aero.h>
-#include <seahowl/aero/blade_aero.h>
+#include <seahowl/fluid/aero/turbine_aero.h>
+#include <seahowl/fluid/aero/blade_aero.h>
 #include <seahowl/env/fluid_models.h>
 #include <seahowl/env/inflowwind_adapter.h>
 

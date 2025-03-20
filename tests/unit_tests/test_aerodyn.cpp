@@ -7,7 +7,7 @@
 #include <seahowl/core/turbine.h>
 #include <seahowl/servo/controller.h>
 #include <seahowl/io/read_input.h>
-#include <seahowl/aero/aerodyn_adapter.h>
+#include <seahowl/fluid/aero/aerodyn_adapter.h>
 using namespace seahowl;
 using namespace seahowl::elasto;
 

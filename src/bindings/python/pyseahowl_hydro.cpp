@@ -3,13 +3,13 @@
 #include <pybind11/eigen.h>
 
 #include <seahowl/commons/component_fluid.h>
-#include <seahowl/hydro/morison.h>
-#include <seahowl/hydro/mooring_hydro.h>
-#include <seahowl/hydro/foundation_fluid.h>
-#include <seahowl/hydro/floater_hydro.h>
-#include <seahowl/hydro/monopile_hydro.h>
+#include <seahowl/fluid/hydro/morison.h>
+#include <seahowl/fluid/hydro/mooring_hydro.h>
+#include <seahowl/fluid/hydro/foundation_fluid.h>
+#include <seahowl/fluid/hydro/floater_hydro.h>
+#include <seahowl/fluid/hydro/monopile_hydro.h>
 #ifdef HAVE_HYDROCHRONO
-    #include <seahowl/hydro/hydrochrono_adapter.h>
+    #include <seahowl/fluid/hydro/hydrochrono_adapter.h>
 #endif
 
 namespace py = pybind11;

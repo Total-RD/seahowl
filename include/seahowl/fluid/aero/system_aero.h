@@ -1,6 +1,6 @@
 #pragma once
 
-#include "seahowl/aero/turbine_aero.h"  // @todo forward declare
+#include "seahowl/fluid/aero/turbine_aero.h"  // @todo forward declare
 #include "seahowl/commons/component_fluid.h"
 
 #include <vector>

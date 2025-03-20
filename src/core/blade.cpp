@@ -2,7 +2,7 @@
 
 #include "seahowl/commons/utils.h"
 #include "seahowl/elasto/blade_elasto.h"
-#include "seahowl/aero/blade_aero.h"
+#include "seahowl/fluid/aero/blade_aero.h"
 
 #include <memory>
 #include <spdlog/spdlog.h>

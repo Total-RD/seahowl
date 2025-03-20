@@ -1,6 +1,6 @@
 #include "seahowl/core/reference_point.h"
 
-#include "seahowl/aero/airfoil.h"
+#include "seahowl/fluid/aero/airfoil.h"
 
 using namespace seahowl::core;
 

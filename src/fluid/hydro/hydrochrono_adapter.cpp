@@ -1,4 +1,4 @@
-#include "seahowl/hydro/hydrochrono_adapter.h"
+#include "seahowl/fluid/hydro/hydrochrono_adapter.h"
 
 #include "seahowl/elasto/chrono_adapters.h"
 

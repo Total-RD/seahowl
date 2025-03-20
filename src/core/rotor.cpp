@@ -3,8 +3,8 @@
 #include "seahowl/core/blade.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/elasto/rotor_elasto.h"
-#include "seahowl/aero/blade_aero.h"
-#include "seahowl/aero/rotor_aero.h"
+#include "seahowl/fluid/aero/blade_aero.h"
+#include "seahowl/fluid/aero/rotor_aero.h"
 
 #include <memory>
 #include <vector>

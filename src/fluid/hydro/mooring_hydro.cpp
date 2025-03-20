@@ -1,4 +1,4 @@
-#include "seahowl/hydro/mooring_hydro.h"
+#include "seahowl/fluid/hydro/mooring_hydro.h"
 
 #include "seahowl/commons/utils.h"
 #include "seahowl/commons/numerics.h"

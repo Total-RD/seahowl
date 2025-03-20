@@ -1,4 +1,4 @@
-#include "seahowl/aero/airfoil.h"
+#include "seahowl/fluid/aero/airfoil.h"
 
 #include <spdlog/spdlog.h>
 #include <string>

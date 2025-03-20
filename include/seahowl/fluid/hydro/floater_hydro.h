@@ -1,6 +1,6 @@
 #pragma once
 
-#include "seahowl/hydro/foundation_fluid.h"
+#include "seahowl/fluid/hydro/foundation_fluid.h"
 
 #include <memory>
 
