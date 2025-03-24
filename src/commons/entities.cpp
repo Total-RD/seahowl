@@ -33,19 +33,19 @@ void Entity::translate(const Vector3d& translation_vector) {
     set_position(get_position() + translation_vector);
 }
 
-void EntityEigen::set_position(const Vector3d& position) {
+void EntityDynamicEigen::set_position(const Vector3d& position) {
     this->position = position;
 }
 
-Vector3d EntityEigen::get_position() const {
+Vector3d EntityDynamicEigen::get_position() const {
     return position;
 }
 
-void EntityEigen::set_rotation(const Quaternion& rotation) {
+void EntityDynamicEigen::set_rotation(const Quaternion& rotation) {
     this->rotation = rotation;
 }
 
-Quaternion EntityEigen::get_rotation() const {
+Quaternion EntityDynamicEigen::get_rotation() const {
     return rotation;
 }
 
