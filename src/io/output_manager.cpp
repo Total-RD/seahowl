@@ -159,6 +159,30 @@ void OutputManager::initialize() {
                 });
             }
             add_basic_turbine_info_to_csv(custom_csv, turbine);
+
+            // output aero load at each nodes of blade 1
+            auto& blade1 = *turbine.rna.blades[0];
+
+            std::string csv_path_aero_loads = "turbine" + std::to_string(idx_turbine + 1) + "_blade_loads_output.csv";
+            auto& aero_loads_csv = create_new_csv(csv_path_aero_loads);
+            aero_loads_csv.add_function("time (s)", [&system_core]() { return system_core.get_time(); });
+
+            for (size_t idx_node = 0; idx_node < blade1.aero.nodes.size(); idx_node++) {
+                auto& aero_loads = blade1.aero.loads[idx_node];
+                aero_loads_csv.add_function("node" + std::to_string(idx_node + 1) + " aero load (N)",
+                                            [&aero_loads]() { return aero_loads; });
+            }
+
+            // output aero moment at each nodes of blade 1
+            std::string csv_path_aero_moments =
+                "turbine" + std::to_string(idx_turbine + 1) + "_blade_moments_output.csv";
+            auto& aero_moments_csv = create_new_csv(csv_path_aero_moments);
+            aero_moments_csv.add_function("time (s)", [&system_core]() { return system_core.get_time(); });
+            for (size_t idx_node = 0; idx_node < blade1.aero.nodes.size(); idx_node++) {
+                auto& aero_moments = blade1.aero.moments[idx_node];
+                aero_moments_csv.add_function("node" + std::to_string(idx_node + 1) + " aero moment (Nm)",
+                                              [&aero_moments]() { return aero_moments; });
+            }
         }
     }
 
