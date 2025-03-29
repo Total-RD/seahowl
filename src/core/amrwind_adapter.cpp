@@ -2,10 +2,13 @@
 
 #include "seahowl/core/simulation.h"
 #include "seahowl/core/system.h"
+#include "seahowl/core/blade.h"
+#include "seahowl/core/tower.h"
 #include "seahowl/elasto/system_elasto.h"
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/aero/system_aero.h"
 #include "seahowl/aero/blade_aero.h"
+#include "seahowl/aero/tower_aero.h"
 #include "seahowl/elasto/chrono_adapters.h"
 #include "seahowl/io/read_json.h"
 #include "seahowl/io/write_csv.h"
@@ -30,18 +33,16 @@ AmrWindAdapter::AmrWindAdapter() {
     simulation = std::make_unique<seahowl::core::Simulation>();
 }
 
-void AmrWindAdapter::populate_from_file(const std::string& filepath) {
-    spdlog::stopwatch sw_setup;
+void AmrWindAdapter::initialize_from_file(const std::string& filepath) {
     spdlog::set_pattern("[%^%l%$] %v");
     spdlog::info("**************************************************************");
     spdlog::info("INITIAL AmrWindAdapter SETUP.");
     spdlog::info("**************************************************************");
 
     simulation->populate_from_file(filepath);
-    // simulation->initialize_from_config();
+    simulation->initialize_from_config();
 
     auto fluid_model = std::make_shared<seahowl::env::InflowAmrWind>();
-    // auto& wind_model = dynamic_cast<seahowl::env::WindRamp&>(*wind_model_ptr);
     simulation->system_core->fluid_model = fluid_model;
 
     for (auto& turbine : simulation->system_core->aero.turbines) {
@@ -56,115 +57,29 @@ void AmrWindAdapter::populate_from_file(const std::string& filepath) {
         }
     }
 
-    // get main file info
-    std::ifstream json_file(filepath);
-    json json_obj;
-    json_file >> json_obj;
-    json_file.close();
-
     // timestepping
     dt = simulation->dt;
     duration = simulation->duration;
 
-    spdlog::debug("Populated system in {:.3}s.", sw_setup);
+    auto& system_core = simulation->system_core;
+    auto& turbine = *system_core->turbines[0];
+    auto& blade = turbine.rna.blades[0];
+    auto& tower = turbine.tower;
+    numBlade = turbine.rna.blades.size();
+    numBladeNode = blade->aero.nodes.size();
+    bladeLength = blade->aero.nodes[0].distance_from_tip;
+    numTowerNode = tower.aero.nodes.size();
+    towerBaseHeight = tower.aero.reference_points[0].coordinates[2];
+    towerHeight = tower.aero.reference_points[numTowerNode - 1].coordinates[2];
 
-    // turbine aero discretisation
-    auto turbines_json = json_obj.at("turbines");
-    // AMR-Wind coupling on single WT, to be fixed for multiple turbines
-    auto turbine_json = turbines_json[0];
-    auto main_path = fs::path(filepath).parent_path();
-    auto filepath_turbine = (main_path / turbine_json.at("file").get<std::string>()).generic_string();
-
-    std::ifstream turbines_json_file(filepath_turbine);
-    json turbines_json_obj;
-    turbines_json_file >> turbines_json_obj;
-    turbines_json_file.close();
-
-    // number of blades
-    // numBlade = system_aero->turbines[0]->rna.rotor->blades.size();
-    auto blades_json = turbines_json_obj.at("rotor").at("blades");
-    numBlade = blades_json.size();
-
-    // number of nodes per blade
-    // numBladeNode = system_aero->turbines[0]->rna.rotor->blades[0]nodes.size();
-    auto blade_discretisation = turbines_json_obj.at("rotor").at("discretization").at("aero").get<std::vector<int>>();
-    numBladeNode = blade_discretisation[0] + 1;
-
-    // blade length
-    auto filepath_blade = (main_path / blades_json[0].at("file").get<std::string>()).generic_string();
-
-    std::ifstream blades_json_file(filepath_blade);
-    json blades_json_obj;
-    blades_json_file >> blades_json_obj;
-    blades_json_file.close();
-
-    auto points = blades_json_obj.at("reference_points").get<json>();
-    bladeLength = points[points.size() - 1]["coordinates"][2];
-
-    // number of nodes on tower
-    // numTowerNode = system_aero->turbines[0].tower->nodes.size();
-    auto tower_discretisation = turbines_json_obj.at("tower").at("discretization").at("aero").get<std::vector<int>>();
-    numTowerNode = tower_discretisation[0] + 1;
-
-    // tower height
-    auto filepath_tower = (main_path / turbines_json_obj.at("tower").at("file").get<std::string>()).generic_string();
-
-    std::ifstream tower_csv_file;
-    tower_csv_file.open(filepath_tower);
-
-    std::string line, word;
-    std::getline(tower_csv_file, line);
-
-    double tower_discret_vect[numTowerNode];
-    int idx_line = 0;
-    while (std::getline(tower_csv_file, line)) {
-        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
-        std::stringstream line_ss(line);
-        int idx_word = 0;
-        while (std::getline(line_ss, word, ',')) {
-            idx_word += 1;
-            if (idx_word == 3) {
-                tower_discret_vect[idx_line] = std::stod(word);
-                break;
-            }
-        }
-        idx_line += 1;
-    }
-
-    towerHeight = tower_discret_vect[numTowerNode - 1];
-    towerBaseHeight = tower_discret_vect[0];
+    // Hub node + blade nodes + tower nodes
+    nNodesVel = 1 +  // Hub node is the first node
+                numBlade * numBladeNode + numTowerNode;
 
     // inflow amrwind
     auto wind_model = simulation->system_core->fluid_model;
-    auto init_nNodesVel = 1;
-    // Blade nodes
-    init_nNodesVel = init_nNodesVel + numBlade * numBladeNode;
-    // Tower nodes
-    init_nNodesVel = init_nNodesVel + numTowerNode;
-
-    wind_model->wind_velocities.resize(init_nNodesVel, Eigen::Vector3d::Zero());
-    wind_model->wind_positions.resize(init_nNodesVel, Eigen::Vector3d::Zero());
-}
-
-void AmrWindAdapter::initialize() {
-    if (is_initialized) {
-        throw std::runtime_error("AmrWindAdapter was already initialized.");
-    }
-
-    simulation->initialize();
-
-    is_initialized = true;
-}
-
-void AmrWindAdapter::initialize_from_file(const std::string& filepath) {
-    if (is_initialized) {
-        throw std::runtime_error("AmrWindAdapter was already initialized.");
-    }
-    spdlog::stopwatch sw_setup;
-
-    simulation->initialize_from_config();
-
-    is_initialized = true;
+    wind_model->wind_velocities.resize(nNodesVel, Eigen::Vector3d::Zero());
+    wind_model->wind_positions.resize(nNodesVel, Eigen::Vector3d::Zero());
 }
 
 void AmrWindAdapter::init_OpFM(int* numActForcePtsBlade,
@@ -172,15 +87,6 @@ void AmrWindAdapter::init_OpFM(int* numActForcePtsBlade,
                                seahowl::core::OpFM_InputType* to_cfd,
                                seahowl::core::OpFM_OutputType* from_cfd) {
     /* Motion nodes from Seahowl */
-    // Hub node (As the coupling between AMR-Wind and OpenFAST, hub is first point always)
-    nNodesVel = 1;
-
-    // Blade nodes
-    nNodesVel = nNodesVel + numBlade * numBladeNode;
-
-    // Tower nodes
-    nNodesVel = nNodesVel + numTowerNode;
-
     // postion of Seahowl aero nodes
     to_cfd->pxVel_Len = nNodesVel;
     to_cfd->pyVel_Len = nNodesVel;
@@ -291,15 +197,9 @@ void AmrWindAdapter::init_OpFM(int* numActForcePtsBlade,
     AllocPAry(wind_model->pxVel, wind_model->pxVel_Len, "pxVel");
     AllocPAry(wind_model->pyVel, wind_model->pyVel_Len, "pyVel");
     AllocPAry(wind_model->pzVel, wind_model->pzVel_Len, "pzVel");
-
-    // wind_model->wind_velocities.resize(nNodesVel, Eigen::Vector3d::Zero());
-    // wind_model->wind_positions.resize(nNodesVel, Eigen::Vector3d::Zero());
 }
 
 void AmrWindAdapter::step(seahowl::core::OpFM_InputType* to_cfd, seahowl::core::OpFM_OutputType* from_cfd) {
-    if (!is_initialized) {
-        initialize();
-    }
     spdlog::stopwatch sw_step;
     //
     SetOpFMPositions(to_cfd, from_cfd);

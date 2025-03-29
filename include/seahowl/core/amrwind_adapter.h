@@ -92,18 +92,18 @@ class AmrWindAdapter {
     // number of blade
     int numBlade = 3;
 
-    // number of aero or elasto ? distretisation on seahowl
+    // number of aero distretisation on seahowl
     int numBladeNode = 50;
     int numTowerNode = 10;
 
-    double bladeLength = 240.0;
+    double bladeLength = 120.0;
     double towerHeight = 150.0;
     double towerBaseHeight = 15.0;
 
     // number of mapping
     int nMappings;
 
-    // number of velocity nodes (seahowl nodes)
+    // number of velocity nodes (seahowl nodes: hub + blade + tower)
     int nNodesVel;
 
     // number of actuator force nodes (amrwind nodes)
@@ -119,12 +119,8 @@ class AmrWindAdapter {
 
     AmrWindAdapter();
 
-    // populate seahowl turbine from input file
-    void populate_from_file(const std::string& filepath);
-
     // initialize seahowl turbine from input file
     void initialize_from_file(const std::string& filepath);
-    void initialize();
 
     // initialize CFD data structure
     void init_OpFM(int* numActForcePtsBlade,
