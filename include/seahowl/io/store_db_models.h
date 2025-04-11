@@ -5,7 +5,7 @@
 namespace seahowl {
 namespace io {
 // Structure pour un point de référence
-struct ReferencePointTower {
+struct ReferencePointTowerDb {
     Eigen::Vector3d position;
     double diameter;
     double thickness;
@@ -25,7 +25,7 @@ struct ReferencePointTower {
 };
 
 // Structure pour les variables globales
-struct GlobalVariablesTower {
+struct GlobalVariablesTowerDb {
     double density;
     double young_modulus;
     double poisson_ratio;
@@ -42,12 +42,12 @@ struct GlobalVariablesTower {
 };
 
 // Structure principale pour englober les données
-struct TowerData {
-    GlobalVariablesTower global_variables;
-    std::vector<ReferencePointTower> reference_points;
+struct TowerDb {
+    GlobalVariablesTowerDb global_variables;
+    std::vector<ReferencePointTowerDb> reference_points;
 };
 
-struct GlobalVariablesBlade {
+struct GlobalVariablesBladeDb {
     double damping_flapwise;
     double damping_edgewise;
     double damping_axial;
@@ -57,7 +57,13 @@ struct GlobalVariablesBlade {
     Eigen::Vector2d offset_elastic;
 };
 
-struct ReferencePointBlade {
+struct AirfoilDb {
+    double reynolds_number;
+    std::vector<std::string> header;
+    std::vector<std::vector<double>> coefficients;
+};
+
+struct ReferencePointBladeDb {
     Eigen::Vector3d coordinates;
     double twist;
     double fraction;
@@ -65,37 +71,14 @@ struct ReferencePointBlade {
     Eigen::MatrixXd mass_matrix;
     double chord;
     std::string airfoil_file;
+    std::vector<AirfoilDb> airfoil_db_list;
     Eigen::Vector2d offset_aero;
 };
 
-struct BladeData {
-    GlobalVariablesBlade global_variables;
-    std::vector<ReferencePointBlade> reference_points;
+struct BladeDb {
+    GlobalVariablesBladeDb global_variables;
+    std::vector<ReferencePointBladeDb> reference_points;
 };
-
-struct AirfoilData {
-    double reynolds_number;
-    std::vector<std::string> header;
-    std::vector<std::vector<double>> coefficients;
-};
-
-/**
- * @brief Read tower data from a file.
- * @param filepath Path to the tower data file.
- */
-TowerData read_tower(const std::string& filepath);
-
-/**
- * @brief Read airfoil data from a file.
- * @param filepath Path to the airfoil data file.
- */
-std::vector<AirfoilData> read_airfoil(const std::string& filepath);
-
-/**
- * @brief Read blade data from a file.
- * @param filepath Path to the blade data file.
- */
-BladeData read_blade(const std::string& filepath);
 
 }  // namespace io
 }  // namespace seahowl

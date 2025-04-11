@@ -343,7 +343,7 @@ set(SEAHOWL_IO_SOURCES
 	src/io/output_manager.cpp
     src/io/config_manager.cpp
     src/io/command_parser.cpp
-    src/io/json_data.cpp
+    src/io/json_db.cpp
 )
 set(SEAHOWL_IO_HEADERS
     include/seahowl/io/read_json.h
@@ -354,7 +354,8 @@ set(SEAHOWL_IO_HEADERS
 	include/seahowl/io/output_manager.h
     include/seahowl/io/config_manager.h
     include/seahowl/io/command_parser.h
-    include/seahowl/io/json_data.h
+    include/seahowl/io/store_db_models.h
+    include/seahowl/io/json_db.h
 )
 
 if(SEAHOWL_ENABLE_VTK)

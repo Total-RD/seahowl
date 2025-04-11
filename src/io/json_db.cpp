@@ -1,4 +1,5 @@
-#include "seahowl/io/json_data.h"
+#include "seahowl/io/json_db.h"
+#include "seahowl/io/store_db_models.h"
 
 #include <Eigen/Dense>
 #include <nlohmann/json.hpp>
@@ -60,7 +61,7 @@ json csv_to_json(const std::string& filename) {
     return json{{"reference_points", result}};
 }
 
-void from_json(const json& js, ReferencePointTower& ref_point) {
+void from_json(const json& js, ReferencePointTowerDb& ref_point) {
     if (js.contains("position")) {
         std::vector<double> pos = js["position"];
         ref_point.position = Eigen::Vector3d(pos[0], pos[1], pos[2]);
@@ -85,7 +86,7 @@ void from_json(const json& js, ReferencePointTower& ref_point) {
     ref_point.damping_mass = js.value("damping_mass", 0.0);
 }
 
-JSONtoCPP(GlobalVariablesTower,
+JSONtoCPP(GlobalVariablesTowerDb,
           density,
           young_modulus,
           poisson_ratio,
@@ -100,57 +101,57 @@ JSONtoCPP(GlobalVariablesTower,
           damping_torsion,
           damping_mass)
 
-    void from_json(const json& js, TowerData& tower_data) {
-    tower_data.reference_points = js["reference_points"];
+    void from_json(const json& js, TowerDb& tower_db) {
+    tower_db.reference_points = js["reference_points"];
     if (js.contains("global_variables")) {
-        tower_data.global_variables = js["global_variables"];
-        for (auto& point : tower_data.reference_points) {
-            point.density = tower_data.global_variables.density;
-            point.young_modulus = tower_data.global_variables.young_modulus;
-            point.poisson_ratio = tower_data.global_variables.poisson_ratio;
-            point.drag_coefficient_normal = tower_data.global_variables.drag_coefficient_normal;
-            point.drag_coefficient_axial = tower_data.global_variables.drag_coefficient_axial;
-            point.added_mass_coefficient_normal = tower_data.global_variables.added_mass_coefficient_normal;
-            point.added_mass_coefficient_axial = tower_data.global_variables.added_mass_coefficient_axial;
-            point.buoyancy_factor = tower_data.global_variables.buoyancy_factor;
-            point.damping_foreaft = tower_data.global_variables.damping_foreaft;
-            point.damping_sideside = tower_data.global_variables.damping_sideside;
-            point.damping_axial = tower_data.global_variables.damping_axial;
-            point.damping_torsion = tower_data.global_variables.damping_torsion;
-            point.damping_mass = tower_data.global_variables.damping_mass;
+        tower_db.global_variables = js["global_variables"];
+        for (auto& point : tower_db.reference_points) {
+            point.density = tower_db.global_variables.density;
+            point.young_modulus = tower_db.global_variables.young_modulus;
+            point.poisson_ratio = tower_db.global_variables.poisson_ratio;
+            point.drag_coefficient_normal = tower_db.global_variables.drag_coefficient_normal;
+            point.drag_coefficient_axial = tower_db.global_variables.drag_coefficient_axial;
+            point.added_mass_coefficient_normal = tower_db.global_variables.added_mass_coefficient_normal;
+            point.added_mass_coefficient_axial = tower_db.global_variables.added_mass_coefficient_axial;
+            point.buoyancy_factor = tower_db.global_variables.buoyancy_factor;
+            point.damping_foreaft = tower_db.global_variables.damping_foreaft;
+            point.damping_sideside = tower_db.global_variables.damping_sideside;
+            point.damping_axial = tower_db.global_variables.damping_axial;
+            point.damping_torsion = tower_db.global_variables.damping_torsion;
+            point.damping_mass = tower_db.global_variables.damping_mass;
         }
     }
 }
 
 json get_json(const std::string& filepath) {
-    json json_data;
+    json json_db;
     fs::path file_path(filepath);
     std::string extension = file_path.extension().string();
     if (extension == ".csv") {
         // Convert CSV to JSON
-        json_data = csv_to_json(filepath);
+        json_db = csv_to_json(filepath);
     } else if (extension == ".json") {
         std::ifstream file(filepath);
         if (!file.is_open()) {
             throw std::runtime_error("Impossible d'ouvrir le fichier JSON");
         }
-        file >> json_data;
+        file >> json_db;
         file.close();
 
     } else {
         throw std::runtime_error("Unsupported file format: " + extension);
     }
-    return json_data;
+    return json_db;
 }
 
-TowerData read_tower(const std::string& filepath) {
-    TowerData tower_data;
-    json json_data = get_json(filepath);
-    from_json(json_data, tower_data);
-    return tower_data;
+TowerDb read_tower_db(const std::string& filepath) {
+    TowerDb tower_db;
+    json json_db = get_json(filepath);
+    from_json(json_db, tower_db);
+    return tower_db;
 }
 
-void from_json(const json& js, GlobalVariablesBlade& global_vars) {
+void from_json(const json& js, GlobalVariablesBladeDb& global_vars) {
     global_vars.damping_flapwise = js.at("damping_flapwise").get<double>();
     global_vars.damping_edgewise = js.at("damping_edgewise").get<double>();
     global_vars.damping_axial = js.at("damping_axial").get<double>();
@@ -160,7 +161,7 @@ void from_json(const json& js, GlobalVariablesBlade& global_vars) {
     global_vars.offset_elastic = Eigen::Vector2d(js.at("offset_elastic")[0], js.at("offset_elastic")[1]);
 }
 
-void from_json(const json& js, ReferencePointBlade& ref_point) {
+void from_json(const json& js, ReferencePointBladeDb& ref_point) {
     ref_point.coordinates = Eigen::Vector3d(js.at("coordinates")[0], js.at("coordinates")[1], js.at("coordinates")[2]);
     ref_point.twist = js.at("twist").get<double>();
     ref_point.fraction = js.at("fraction").get<double>();
@@ -188,30 +189,37 @@ void from_json(const json& js, ReferencePointBlade& ref_point) {
     ref_point.offset_aero = Eigen::Vector2d(js.at("offset_aero")[0], js.at("offset_aero")[1]);
 }
 
-void from_json(const json& js, BladeData& blade_data) {
-    blade_data.global_variables = js.at("global_variables").get<GlobalVariablesBlade>();
-    blade_data.reference_points = js.at("reference_points").get<std::vector<ReferencePointBlade>>();
+void from_json(const json& js, BladeDb& blade_db) {
+    blade_db.global_variables = js.at("global_variables").get<GlobalVariablesBladeDb>();
+    blade_db.reference_points = js.at("reference_points").get<std::vector<ReferencePointBladeDb>>();
 }
 
-BladeData read_blade(const std::string& filepath) {
-    BladeData blade_data;
-    json json_data = get_json(filepath);
-    from_json(json_data, blade_data);
-    return blade_data;
+void from_json(const json& js, AirfoilDb& airfoil_db) {
+    airfoil_db.reynolds_number = js.at("reynolds_number").get<double>();
+    airfoil_db.header = js.at("header").get<std::vector<std::string>>();
+    airfoil_db.coefficients = js.at("coefficients").get<std::vector<std::vector<double>>>();
 }
 
-void from_json(const json& js, AirfoilData& airfoil_data) {
-    airfoil_data.reynolds_number = js.at("reynolds_number").get<double>();
-    airfoil_data.header = js.at("header").get<std::vector<std::string>>();
-    airfoil_data.coefficients = js.at("coefficients").get<std::vector<std::vector<double>>>();
+std::vector<AirfoilDb> read_airfoil_db(const std::string& filepath) {
+    AirfoilDb airfoil_db;
+    json json_db = get_json(filepath);
+    return json_db.get<std::vector<AirfoilDb>>();
 }
 
-std::vector<AirfoilData> read_airfoil(const std::string& filepath) {
-    AirfoilData airfoil_data;
-    json json_data = get_json(filepath);
-    ;
-    return json_data.get<std::vector<AirfoilData>>();
-    ;
+BladeDb read_blade_db(const std::string& filepath) {
+    BladeDb blade_db;
+    json json_db = get_json(filepath);
+    from_json(json_db, blade_db);
+
+    auto main_directory = fs::path(filepath).parent_path();
+
+    for (auto& ref_point : blade_db.reference_points) {
+        if (!ref_point.airfoil_file.empty()) {
+            auto airfoil_filepath = main_directory / ref_point.airfoil_file;
+            ref_point.airfoil_db_list = read_airfoil_db(airfoil_filepath.u8string());
+        }
+    }
+    return blade_db;
 }
 
 }  // namespace io

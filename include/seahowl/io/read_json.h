@@ -35,7 +35,7 @@ class FluidSoilModel;
 #include <string>
 #include <memory>
 #include <seahowl/io/config_manager.h>
-#include <seahowl/io/json_data.h>
+#include <seahowl/io/json_db.h>
 
 namespace seahowl {
 namespace io {
@@ -84,12 +84,12 @@ void populate_blade_from_json(const std::string& filepath, seahowl::core::Blade&
  * @brief Returns tower elasto reference points given a TowerData object.
  * @param[in] tower_data TowerData object.
  */
-std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points(const TowerData& tower_data);
+std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points(const TowerDb& tower_data);
 /**
  * @brief Returns tower aero reference points given a json file.
  * @param[in] tower_data TowerData object.
  */
-std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points(const TowerData& tower_data);
+std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points(const TowerDb& tower_data);
 
 /**
  * @brief Populates tower elasto given a json file.

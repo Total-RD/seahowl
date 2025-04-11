@@ -43,7 +43,8 @@
     #include "seahowl/aero/aerodyn_adapter.h"
 #endif
 
-#include "seahowl/io/json_data.h"
+#include "seahowl/io/json_db.h"
+#include "seahowl/io/store_db_models.h"
 
 #include <string>
 #include <memory>
@@ -308,26 +309,26 @@ std::shared_ptr<InputData> get_input_data(const std::string& filepath) {
 
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
     const std::string& filepath) {
-    BladeData blade_data = read_blade(filepath);
+    BladeDb blade_db = read_blade_db(filepath);
 
     // EXTRACT INFO
     std::vector<seahowl::elasto::BladeReferencePointElasto> reference_points;
 
-    double blade_length = blade_data.reference_points.back().coordinates.z();
+    double blade_length = blade_db.reference_points.back().coordinates.z();
 
-    for (auto& ref_point : blade_data.reference_points) {
+    for (auto& ref_point : blade_db.reference_points) {
         auto reference_point = seahowl::elasto::BladeReferencePointElasto();
         reference_point.coordinates = ref_point.coordinates;
         reference_point.fraction = reference_point.coordinates.z() / blade_length;
-        reference_point.offset_gravity = blade_data.global_variables.offset_gravity;
-        reference_point.offset_elastic = blade_data.global_variables.offset_elastic;
+        reference_point.offset_gravity = blade_db.global_variables.offset_gravity;
+        reference_point.offset_elastic = blade_db.global_variables.offset_elastic;
         reference_point.structural_twist = ref_point.twist * PI / 180.0;
         reference_point.mass_matrix = ref_point.mass_matrix;
         reference_point.stiffness_matrix = ref_point.stiffness_matrix;
-        reference_point.damping_flapwise = blade_data.global_variables.damping_flapwise;
-        reference_point.damping_edgewise = blade_data.global_variables.damping_edgewise;
-        reference_point.damping_axial = blade_data.global_variables.damping_axial;
-        reference_point.damping_torsion = blade_data.global_variables.damping_torsion;
+        reference_point.damping_flapwise = blade_db.global_variables.damping_flapwise;
+        reference_point.damping_edgewise = blade_db.global_variables.damping_edgewise;
+        reference_point.damping_axial = blade_db.global_variables.damping_axial;
+        reference_point.damping_torsion = blade_db.global_variables.damping_torsion;
         reference_points.push_back(reference_point);
     }
     return reference_points;
@@ -335,40 +336,37 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
 
 std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_json(
     const std::string& filepath) {
-    BladeData blade_data = read_blade(filepath);
+    BladeDb blade_db = read_blade_db(filepath);
 
     // EXTRACT INFO
     std::vector<seahowl::aero::BladeReferencePointAero> reference_points;
 
-    double blade_length = blade_data.reference_points.back().coordinates.z();
+    double blade_length = blade_db.reference_points.back().coordinates.z();
 
-    for (auto& ref_point : blade_data.reference_points) {
+    for (auto& ref_point_db : blade_db.reference_points) {
         auto reference_point = seahowl::aero::BladeReferencePointAero();
-        reference_point.coordinates = ref_point.coordinates;
+        reference_point.coordinates = ref_point_db.coordinates;
         reference_point.fraction = reference_point.coordinates.z() / blade_length;
-        reference_point.structural_twist = ref_point.twist * PI / 180.0;
-        reference_point.offset_aero = ref_point.offset_aero;
-        reference_point.chord = ref_point.chord;
+        reference_point.structural_twist = ref_point_db.twist * PI / 180.0;
+        reference_point.offset_aero = ref_point_db.offset_aero;
+        reference_point.chord = ref_point_db.chord;
 
-        if (!ref_point.airfoil_file.empty()) {
-            auto main_directory = fs::path(filepath).parent_path();
-            auto airfoil_filepath = main_directory / ref_point.airfoil_file;
-            std::vector<AirfoilData> airfoil_data_list = read_airfoil(airfoil_filepath.u8string());
-            for (const auto& airfoil_data : airfoil_data_list) {
+        if (!ref_point_db.airfoil_file.empty()) {
+            for (const auto& airfoil_db : ref_point_db.airfoil_db_list) {
                 std::vector<seahowl::aero::AirfoilCoefficients> coefficients_list;
-                for (const auto& coeff : airfoil_data.coefficients) {
-                    if (coeff.size() != 4) {
+                for (const auto& coeff_db : airfoil_db.coefficients) {
+                    if (coeff_db.size() != 4) {
                         throw std::runtime_error("Airfoil coefficients has to be vectors of length 4.");
                     }
                     seahowl::aero::AirfoilCoefficients coefficients;
-                    coefficients.alpha = coeff[0];
-                    coefficients.lift = coeff[1];
-                    coefficients.drag = coeff[2];
-                    coefficients.moment = coeff[3];
+                    coefficients.alpha = coeff_db[0];
+                    coefficients.lift = coeff_db[1];
+                    coefficients.drag = coeff_db[2];
+                    coefficients.moment = coeff_db[3];
                     coefficients_list.push_back(coefficients);
                 }
                 seahowl::aero::AirfoilProperties airfoil;
-                airfoil.reynolds_number = airfoil_data.reynolds_number;
+                airfoil.reynolds_number = airfoil_db.reynolds_number;
                 airfoil.coefficients_list = coefficients_list;
                 reference_point.airfoil_properties.push_back(airfoil);
             }
@@ -392,31 +390,31 @@ void populate_blade_from_json(const std::string& filepath, seahowl::core::Blade&
     populate_blade_aero_from_json(filepath, blade.aero);
 }
 
-std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points(const TowerData& tower_data) {
+std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points(const TowerDb& tower_db) {
     // EXTRACT INFO
     std::vector<seahowl::elasto::TowerReferencePointElasto> reference_points;
 
-    Vector3d pos0 = tower_data.reference_points[0].position;
-    Vector3d pos1 = tower_data.reference_points[tower_data.reference_points.size() - 1].position;
+    Vector3d pos0 = tower_db.reference_points[0].position;
+    Vector3d pos1 = tower_db.reference_points[tower_db.reference_points.size() - 1].position;
     double length = (pos1 - pos0).norm();
 
     // MAKE TOWER REFERENCE POINTS
-    for (auto point_data : tower_data.reference_points) {
+    for (auto point_db : tower_db.reference_points) {
         auto reference_point = seahowl::elasto::TowerReferencePointElasto();
-        reference_point.coordinates = point_data.position;
+        reference_point.coordinates = point_db.position;
         reference_point.fraction = (reference_point.coordinates - pos0).norm() / length;
 
         // general properties
         // shear set to false as it leads to issues when tower is not finely discretized (wrong nat. freq.)
         // its effect is usually small enough to be neglected here
-        reference_point.set_properties_cylinder(point_data.density, point_data.young_modulus, point_data.poisson_ratio,
-                                                point_data.diameter, point_data.thickness, false);
+        reference_point.set_properties_cylinder(point_db.density, point_db.young_modulus, point_db.poisson_ratio,
+                                                point_db.diameter, point_db.thickness, false);
 
-        reference_point.damping_foreaft = point_data.damping_foreaft;
-        reference_point.damping_sideside = point_data.damping_sideside;
-        reference_point.damping_axial = point_data.damping_axial;
-        reference_point.damping_torsion = point_data.damping_torsion;
-        reference_point.damping_mass = point_data.damping_mass;
+        reference_point.damping_foreaft = point_db.damping_foreaft;
+        reference_point.damping_sideside = point_db.damping_sideside;
+        reference_point.damping_axial = point_db.damping_axial;
+        reference_point.damping_torsion = point_db.damping_torsion;
+        reference_point.damping_mass = point_db.damping_mass;
 
         reference_points.push_back(reference_point);
     }
@@ -424,25 +422,25 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
     return reference_points;
 }
 
-std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points(const TowerData& tower_data) {
+std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points(const TowerDb& tower_db) {
     // EXTRACT INFO
-    Vector3d pos0 = tower_data.reference_points[0].position;
-    Vector3d pos1 = tower_data.reference_points[tower_data.reference_points.size() - 1].position;
+    Vector3d pos0 = tower_db.reference_points[0].position;
+    Vector3d pos1 = tower_db.reference_points[tower_db.reference_points.size() - 1].position;
     double length = (pos1 - pos0).norm();
 
     // MAKE TOWER REFERENCE POINTS
     std::vector<seahowl::aero::TowerReferencePointAero> reference_points;
-    for (auto point_data : tower_data.reference_points) {
+    for (auto point_db : tower_db.reference_points) {
         auto reference_point = seahowl::aero::TowerReferencePointAero();
-        reference_point.coordinates = point_data.position;
+        reference_point.coordinates = point_db.position;
         reference_point.fraction = (reference_point.coordinates - pos0).norm() / length;
 
-        reference_point.diameter = point_data.diameter;
-        reference_point.coefficients.drag_normal = point_data.drag_coefficient_normal;
-        reference_point.coefficients.drag_axial = point_data.drag_coefficient_axial;
-        reference_point.coefficients.added_mass_normal = point_data.added_mass_coefficient_normal;
-        reference_point.coefficients.added_mass_axial = point_data.added_mass_coefficient_axial;
-        reference_point.coefficients.buoyancy_factor = point_data.buoyancy_factor;
+        reference_point.diameter = point_db.diameter;
+        reference_point.coefficients.drag_normal = point_db.drag_coefficient_normal;
+        reference_point.coefficients.drag_axial = point_db.drag_coefficient_axial;
+        reference_point.coefficients.added_mass_normal = point_db.added_mass_coefficient_normal;
+        reference_point.coefficients.added_mass_axial = point_db.added_mass_coefficient_axial;
+        reference_point.coefficients.buoyancy_factor = point_db.buoyancy_factor;
 
         reference_points.push_back(reference_point);
     }
@@ -451,21 +449,21 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
 }
 
 void populate_tower_elasto_from_json(const std::string& filepath, seahowl::elasto::TowerElasto& tower) {
-    TowerData tower_data = seahowl::io::read_tower(filepath);
-    tower.reference_points = get_tower_elasto_reference_points(tower_data);
+    TowerDb tower_db = seahowl::io::read_tower_db(filepath);
+    tower.reference_points = get_tower_elasto_reference_points(tower_db);
     tower.height = tower.reference_points.back().coordinates.z();
     tower.base_height = tower.reference_points.front().coordinates.z();
 }
 
 void populate_tower_aero_from_json(const std::string& filepath, seahowl::aero::TowerAero& tower) {
     utils::check_file_exists(filepath);
-    TowerData tower_data = seahowl::io::read_tower(filepath);
+    TowerDb tower_data = seahowl::io::read_tower_db(filepath);
     tower.reference_points = get_tower_aero_reference_points(tower_data);
 }
 
 void populate_tower_from_json(const std::string& filepath, seahowl::core::Tower& tower) {
     spdlog::debug("Populating tower from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
-    TowerData tower_data = seahowl::io::read_tower(filepath);
+    TowerDb tower_data = seahowl::io::read_tower_db(filepath);
     // elasto
     tower.elasto.reference_points = get_tower_elasto_reference_points(tower_data);
     tower.elasto.height = tower.elasto.reference_points.back().coordinates.z();
