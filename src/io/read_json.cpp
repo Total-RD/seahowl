@@ -310,7 +310,11 @@ std::shared_ptr<InputData> get_input_data(const std::string& filepath) {
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
     const std::string& filepath) {
     BladeDb blade_db = read_blade_db(filepath);
+    return get_blade_elasto_reference_points_from_db(blade_db);
+}
 
+std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_db(
+    const BladeDb& blade_db) {
     // EXTRACT INFO
     std::vector<seahowl::elasto::BladeReferencePointElasto> reference_points;
 
@@ -337,7 +341,10 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
 std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_json(
     const std::string& filepath) {
     BladeDb blade_db = read_blade_db(filepath);
+    return get_blade_aero_reference_points_from_db(blade_db);
+}
 
+std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_db(const BladeDb& blade_db) {
     // EXTRACT INFO
     std::vector<seahowl::aero::BladeReferencePointAero> reference_points;
 
@@ -386,8 +393,9 @@ void populate_blade_aero_from_json(const std::string& filepath, seahowl::aero::B
 
 void populate_blade_from_json(const std::string& filepath, seahowl::core::Blade& blade) {
     spdlog::debug("Populating blade from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
-    populate_blade_elasto_from_json(filepath, blade.elasto);
-    populate_blade_aero_from_json(filepath, blade.aero);
+    BladeDb blade_db = read_blade_db(filepath);
+    blade.elasto.reference_points = get_blade_elasto_reference_points_from_db(blade_db);
+    blade.aero.reference_points = get_blade_aero_reference_points_from_db(blade_db);
 }
 
 std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points(const TowerDb& tower_db) {
@@ -473,52 +481,49 @@ void populate_tower_from_json(const std::string& filepath, seahowl::core::Tower&
 }
 
 void populate_rna_elasto_from_json(const std::string& filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
-    auto json_obj = get_json_from_file(filepath);
+    RnaDb rna_db = read_rna_db(filepath);
+    populate_rna_elasto_from_db(rna_db, rna);
+}
 
+void populate_rna_aero_from_json(const std::string& filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
+    RnaDb rna_db = read_rna_db(filepath);
+    populate_rna_aero_from_db(rna_db, rna);
+}
+
+void populate_rna_elasto_from_db(const RnaDb& rna_db, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
     // EXTRACT INFO
-    //
-    // hub
-    auto hub = json_obj.at("hub");
-    auto cm_hub = hub.at("position_from_apex").get<std::vector<double>>();
-    rna.rotor->hub.position_from_apex = Vector3d(cm_hub[0], cm_hub[1], cm_hub[2]);
-    hub.at("mass").get_to(rna.rotor->hub.mass);
-    auto hub_inertia = hub.at("inertia").get<std::vector<std::vector<double>>>();
-    rna.rotor->hub.inertia = get_matrix_from_vector_of_vectors(hub_inertia);
-    hub.at("overhang").get_to(rna.rotor->hub.overhang);
-    hub.at("radius").get_to(rna.rotor->hub.radius);
+    // rotor
+    rna.rotor->hub.position_from_apex = rna_db.hub.position_from_apex;
+    rna.rotor->hub.mass = rna_db.hub.mass;
+    rna.rotor->hub.inertia = rna_db.hub.inertia;
+    rna.rotor->hub.overhang = rna_db.hub.overhang;
+    rna.rotor->hub.radius = rna_db.hub.radius;
     // nacelle
-    auto nacelle = json_obj.at("nacelle");
-    auto cm_nac = nacelle.at("position_from_towertop").get<std::vector<double>>();
-    if (cm_nac.size() != 3) {
+    rna.nacelle.position_from_towertop = rna_db.nacelle.position_from_towertop;
+    if (rna.nacelle.position_from_towertop.size() != 3) {
         throw std::runtime_error("Center of mass of nacelle has to be vector of length 3.");
     }
-    rna.nacelle.position_from_towertop = Vector3d(cm_nac[0], cm_nac[1], cm_nac[2]);
-    nacelle.at("mass").get_to(rna.nacelle.mass);
-    auto nacelle_inertia = nacelle.at("inertia").get<std::vector<std::vector<double>>>();
-    rna.nacelle.inertia = get_matrix_from_vector_of_vectors(nacelle_inertia);
-    nacelle.at("yaw_bearing_mass").get_to(rna.nacelle.yaw_bearing_mass);
+    rna.nacelle.mass = rna_db.nacelle.mass;
+    rna.nacelle.inertia = rna_db.nacelle.inertia;
+    rna.nacelle.yaw_bearing_mass = rna_db.nacelle.yaw_bearing_mass;
     // shaft
-    auto shaft = json_obj.at("shaft");
-    shaft.at("distance_from_towertop").get_to(rna.shaft.distance_from_towertop);
-    shaft.at("tilt").get_to(rna.shaft.tilt);
+    rna.shaft.distance_from_towertop = rna_db.shaft.distance_from_towertop;
+    rna.shaft.tilt = rna_db.shaft.tilt;
     // convert to radians
     rna.shaft.tilt *= PI / 180.0;
 }
 
-void populate_rna_aero_from_json(const std::string& filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
-    auto json_obj = get_json_from_file(filepath);
-
+void populate_rna_aero_from_db(const RnaDb& rna_db, seahowl::aero::RotorNacelleAssemblyAero& rna) {
     // EXTRACT INFO
-    //
     // hub
-    auto hub = json_obj.at("hub");
-    hub.at("radius").get_to(rna.rotor->hub_radius);
+    rna.rotor->hub_radius = rna_db.hub.radius;
 }
 
 void populate_rna_from_json(const std::string& filepath, seahowl::core::RotorNacelleAssembly& rna) {
     spdlog::debug("Populating RNA from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
-    populate_rna_elasto_from_json(filepath, rna.elasto);
-    populate_rna_aero_from_json(filepath, rna.aero);
+    RnaDb rna_db = read_rna_db(filepath);
+    populate_rna_elasto_from_db(rna_db, rna.elasto);
+    populate_rna_aero_from_db(rna_db, rna.aero);
 }
 
 void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {

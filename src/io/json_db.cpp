@@ -61,6 +61,28 @@ json csv_to_json(const std::string& filename) {
     return json{{"reference_points", result}};
 }
 
+Eigen::MatrixX<double> get_matrix_from_vector_of_vectorsjj(std::vector<std::vector<double>> matvec) {
+    int mat_nrows = matvec.size();
+    int mat_ncols = 0;
+    for (int irow = 0; irow < matvec.size(); irow++) {
+        mat_ncols = matvec[0].size();
+        if (matvec[irow].size() != mat_ncols) {
+            throw std::runtime_error(
+                "Matrix does not have a consistant number of columns: " + std::to_string(mat_ncols) +
+                " columns at row 1 and " + std::to_string(matvec[irow].size()) + " columns at row " +
+                std::to_string(irow + 1) + ".");
+        }
+    }
+    Eigen::MatrixX<double> mat(mat_nrows, mat_ncols);
+    for (int irow = 0; irow < mat_nrows; irow++) {
+        for (int icol = 0; icol < mat_ncols; icol++) {
+            mat(irow, icol) = matvec[irow][icol];
+        }
+        std::cout << std::endl;
+    }
+    return mat;
+}
+
 void from_json(const json& js, ReferencePointTowerDb& ref_point) {
     if (js.contains("position")) {
         std::vector<double> pos = js["position"];
@@ -220,6 +242,53 @@ BladeDb read_blade_db(const std::string& filepath) {
         }
     }
     return blade_db;
+}
+
+void from_json(const json& js, ShaftDb& shaft) {
+    shaft.tilt = js.at("tilt").get<double>();
+    shaft.distance_from_towertop = js.at("distance_from_towertop").get<double>();
+}
+
+void from_json(const json& js, NacelleDb& nacelle) {
+    nacelle.position_from_towertop = Eigen::Vector3d(
+        js.at("position_from_towertop")[0], js.at("position_from_towertop")[1], js.at("position_from_towertop")[2]);
+    nacelle.mass = js.at("mass").get<double>();
+
+    const auto& inertia = js.at("inertia");
+    nacelle.inertia = get_matrix_from_vector_of_vectorsjj(inertia);
+    nacelle.yaw_bearing_mass = js.at("yaw_bearing_mass").get<double>();
+}
+
+void from_json(const json& js, DrivetrainDb& drivetrain) {
+    drivetrain.generator_inertia = js.at("generator_inertia").get<double>();
+    drivetrain.gearbox_efficiency = js.at("gearbox_efficiency").get<double>();
+    drivetrain.gearbox_ratio = js.at("gearbox_ratio").get<double>();
+    drivetrain.generator_efficiency = js.at("generator_efficiency").get<double>();
+}
+
+void from_json(const json& js, HubDb& hub) {
+    hub.radius = js.at("radius").get<double>();
+    hub.position_from_apex =
+        Eigen::Vector3d(js.at("position_from_apex")[0], js.at("position_from_apex")[1], js.at("position_from_apex")[2]);
+    hub.overhang = js.at("overhang").get<double>();
+    hub.mass = js.at("mass").get<double>();
+
+    const auto& inertia = js.at("inertia");
+    hub.inertia = get_matrix_from_vector_of_vectorsjj(inertia);
+}
+
+void from_json(const json& js, RnaDb& rna) {
+    rna.shaft = js.at("shaft").get<ShaftDb>();
+    rna.nacelle = js.at("nacelle").get<NacelleDb>();
+    rna.drivetrain = js.at("drivetrain").get<DrivetrainDb>();
+    rna.hub = js.at("hub").get<HubDb>();
+}
+
+RnaDb read_rna_db(const std::string& filepath) {
+    RnaDb rna_db;
+    json json_db = get_json(filepath);
+    from_json(json_db, rna_db);
+    return rna_db;
 }
 
 }  // namespace io

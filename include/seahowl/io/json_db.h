@@ -17,5 +17,11 @@ TowerDb read_tower_db(const std::string& filepath);
  */
 BladeDb read_blade_db(const std::string& filepath);
 
+/**
+ * @brief Read RNA data from a file.
+ * @param filepath Path to the RNA data file.
+ */
+RnaDb read_rna_db(const std::string& filepath);
+
 }  // namespace io
 }  // namespace seahowl

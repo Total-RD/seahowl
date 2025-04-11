@@ -80,5 +80,39 @@ struct BladeDb {
     std::vector<ReferencePointBladeDb> reference_points;
 };
 
+struct ShaftDb {
+    double tilt;
+    double distance_from_towertop;
+};
+
+struct NacelleDb {
+    Eigen::Vector3d position_from_towertop;
+    double mass;
+    Eigen::Matrix<double, 3, 3> inertia;
+    double yaw_bearing_mass;
+};
+
+struct DrivetrainDb {
+    double generator_inertia;
+    double gearbox_efficiency;
+    double gearbox_ratio;
+    double generator_efficiency;
+};
+
+struct HubDb {
+    double radius;
+    Eigen::Vector3d position_from_apex;
+    double overhang;
+    double mass;
+    Eigen::Matrix<double, 3, 3> inertia;
+};
+
+struct RnaDb {
+    ShaftDb shaft;
+    NacelleDb nacelle;
+    DrivetrainDb drivetrain;
+    HubDb hub;
+};
+
 }  // namespace io
 }  // namespace seahowl

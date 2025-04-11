@@ -42,16 +42,29 @@ namespace io {
 
 /**
  * @brief Returns blade elasto reference points given a json file.
- *
+ * @param[in] blade_db Blade database.
+ */
+std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_db(
+    const BladeDb& blade_db);
+
+/**
+ * @brief Returns blade aero reference points given a json file.
+ * @param[in] blade_db Blade database.
+ */
+std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_db(const BladeDb& blade_db);
+
+/**
+ * @brief Returns blade elasto reference points given a json file.
  * @param[in] filepath Path of the json file describing the blade.
+ * @param[out] blade Blade to populate.
  */
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
     const std::string& filepath);
 
 /**
  * @brief Returns blade aero reference points given a json file.
- *
  * @param[in] filepath Path of the json file describing the blade.
+ * @param[out] blade Blade to populate.
  */
 std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_json(
     const std::string& filepath);
@@ -124,12 +137,28 @@ void populate_tower_from_json(const std::string& filepath, seahowl::core::Tower&
 void populate_rna_elasto_from_json(const std::string& filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna);
 
 /**
+ * @brief Populates RNA elasto given a json file.
+ *
+ * @param[in] rna_db RNA database.
+ * @param[out] rna RNA to populate.
+ */
+void populate_rna_elasto_from_db(const RnaDb& rna_db, seahowl::elasto::RotorNacelleAssemblyElasto& rna);
+
+/**
  * @brief Populates RNA aero given a json file.
  *
  * @param[in] filepath Path of the json file describing the rotor.
  * @param[out] rna RNA to populate.
  */
 void populate_rna_aero_from_json(const std::string& filepath, seahowl::aero::RotorNacelleAssemblyAero& rna);
+
+/**
+ * @brief Populates RNA aero given a json file.
+ *
+ * @param[in] rna_db RNA database.
+ * @param[out] rna RNA to populate.
+ */
+void populate_rna_aero_from_db(const RnaDb& rna_db, seahowl::aero::RotorNacelleAssemblyAero& rna);
 
 /**
  * @brief Populates RNA given a json file.
