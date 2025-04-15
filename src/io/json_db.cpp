@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <nlohmann/json.hpp>
 #include <nlohmann/detail/macro_scope.hpp>
+#include <spdlog/spdlog.h>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -289,6 +290,130 @@ RnaDb read_rna_db(const std::string& filepath) {
     json json_db = get_json(filepath);
     from_json(json_db, rna_db);
     return rna_db;
+}
+
+void from_json(const json& js, WindOptionDb& options) {
+    options.reference_height = js.at("reference_height").get<double>();
+    options.shear_coefficient = js.at("shear_coefficient").get<double>();
+    options.velocity_start =
+        Eigen::Vector3d(js.at("velocity_start")[0], js.at("velocity_start")[1], js.at("velocity_start")[2]);
+    options.velocity_end =
+        Eigen::Vector3d(js.at("velocity_end")[0], js.at("velocity_end")[1], js.at("velocity_end")[2]);
+    options.time_start = js.at("time_start").get<double>();
+    options.time_end = js.at("time_end").get<double>();
+}
+
+void from_json_inflowwind(const json& js, WindOptionDb& options) {
+    if (js.contains("file_inflowwind")) {
+        options.file_inflowwind = js.at("file_inflowwind").get<std::string>();
+    } else {
+        throw std::runtime_error("InflowWind file not defined.");
+    }
+
+    if (js.contains("zmin")) {
+        options.zmin = js.at("zmin").get<double>();
+    } else {
+        spdlog::warn(
+            "Minimum height for wind speed calculation not defined for InflowWind model, using default zmin={}.");
+    }
+}
+
+void from_json(const json& js, WindDb& wind) {
+    wind.type = js.at("type").get<std::string>();
+    wind.air_density = js.at("air_density").get<double>();
+    if (wind.type == "ramp") {
+        wind.options = js.at("options").get<WindOptionDb>();
+    } else if (wind.type == "inflowwind") {
+        from_json_inflowwind(js.at("options"), wind.options);
+    } else {
+        throw std::runtime_error("Unknown wind type: " + wind.type);
+    }
+}
+
+void from_json(const json& js, SeaOptionDb& options) {
+    options.type = js.at("type").get<std::string>();
+    if (options.type == "regular") {
+        options.wave_height = js.at("wave_height").get<double>();
+        options.wave_period = js.at("wave_period").get<double>();
+
+    } else if (options.type == "irregular") {
+        options.wave_height = js.at("wave_height").get<double>();
+        options.wave_period = js.at("wave_period").get<double>();
+        options.num_bodies = js.at("num_bodies").get<int>();
+        options.frequency_min = js.at("frequency_min").get<double>();
+        options.frequency_max = js.at("frequency_max").get<double>();
+        options.nfrequencies = js.at("nfrequencies").get<int>();
+        options.peak_enhancement_factor = js.at("peak_enhancement_factor").get<double>();
+        options.is_normalized = js.at("is_normalized").get<bool>();
+        options.seed = js.at("seed").get<int>();
+        options.dt = js.at("dt").get<double>();
+        options.duration = js.at("duration").get<double>();
+        options.wave_stretching = js.at("wave_stretching").get<bool>();
+    }
+}
+void from_json_current(const json& js, SeaOptionDb& options) {
+    options.type = js.at("type").get<std::string>();
+    options.direction = Eigen::Vector3d(js.at("direction")[0], js.at("direction")[1], js.at("direction")[2]);
+    options.velocity_surface = js.at("velocity_surface").get<double>();
+    options.velocity_seabed = js.at("velocity_seabed").get<double>();
+}
+
+void from_json(const json& js, SeaDb& sea) {
+    sea.type = js.at("type").get<std::string>();
+    sea.water_density = js.at("water_density").get<double>();
+    sea.mean_water_level = js.at("mean_water_level").get<double>();
+    sea.water_depth = js.at("water_depth").get<double>();
+    if (sea.type == "HydroChrono" || sea.type == "hydrochrono") {
+        sea.options = js.at("options").get<SeaOptionDb>();
+    } else if (sea.type == "current") {
+        from_json_current(js.at("options"), sea.options);
+    }
+}
+
+void from_json(const json& js, SoilOptionDb& options) {
+    options.stiffness_normal = js.at("stiffness_normal").get<double>();
+    options.stiffness_shear = js.at("stiffness_shear").get<double>();
+    options.soil_position = js.at("soil_position").get<double>();
+}
+
+void from_json(const json& js, SoilDb& soil) {
+    soil.type = js.at("type").get<std::string>();
+    soil.options = js.at("options").get<SoilOptionDb>();
+}
+
+void from_json(const json& js, EnvironmentDb& env) {
+    env.gravity = Eigen::Vector3d(js.at("gravity")[0], js.at("gravity")[1], js.at("gravity")[2]);
+    env.wind = js.at("wind").get<WindDb>();
+
+    if (js.contains("ramp_start")) {
+        env.ramp_start = js.at("ramp_start").get<double>();
+    } else {
+        env.ramp_start = std::nullopt;
+    }
+    if (js.contains("ramp_end")) {
+        env.ramp_end = js.at("ramp_end").get<double>();
+    } else {
+        env.ramp_end = std::nullopt;
+    }
+
+    if (js.contains("sea") && !js["sea"].is_null()) {
+        env.sea = js.at("sea").get<SeaDb>();
+    } else {
+        env.sea = std::nullopt;
+    }
+
+    if (js.contains("soil") && !js["soil"].is_null()) {
+        env.soil = js.at("soil").get<SoilDb>();
+    } else {
+        env.soil = std::nullopt;
+    }
+}
+
+EnvironmentDb read_environment_db(const std::string& filepath) {
+    EnvironmentDb env_db;
+    json json_db = get_json(filepath);
+    from_json(json_db, env_db);
+    return env_db;
 }
 
 }  // namespace io

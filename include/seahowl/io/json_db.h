@@ -23,5 +23,11 @@ BladeDb read_blade_db(const std::string& filepath);
  */
 RnaDb read_rna_db(const std::string& filepath);
 
+/**
+ * @brief Read environment data from a file.
+ * @param filepath Path to the environment data file.
+ */
+EnvironmentDb read_environment_db(const std::string& filepath);
+
 }  // namespace io
 }  // namespace seahowl

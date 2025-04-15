@@ -36,6 +36,9 @@ class FluidSoilModel;
 #include <memory>
 #include <seahowl/io/config_manager.h>
 #include <seahowl/io/json_db.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace seahowl {
 namespace io {
@@ -190,6 +193,15 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
  * @param[in] filepath Path of the json file describing the environmental conditions.
  */
 std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(const std::string& filepath);
+
+/**
+ * @brief Creates and returns environmental conditions g
+ *
+ * @param[in] environment_db Environment database.
+ * @param[in] DATADIR Path of the directory containing the json file.
+ */
+std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model(const EnvironmentDb& environment_db,
+                                                                      const fs::path& DATADIR);
 
 /**
  * @brief Populates environmental conditions given a json file and a system.

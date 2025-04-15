@@ -1,6 +1,7 @@
 #pragma once
 
 #include <seahowl/commons/numerics.h>
+#include <optional>
 
 namespace seahowl {
 namespace io {
@@ -112,6 +113,70 @@ struct RnaDb {
     NacelleDb nacelle;
     DrivetrainDb drivetrain;
     HubDb hub;
+};
+
+struct WindOptionDb {
+    double reference_height;
+    double shear_coefficient;
+    Eigen::Vector3d velocity_start;
+    Eigen::Vector3d velocity_end;
+    double time_start;
+    double time_end;
+    std::string file_inflowwind;
+    double zmin;
+};
+
+struct WindDb {
+    std::string type;
+    double air_density;
+    WindOptionDb options;
+};
+
+struct SeaOptionDb {
+    std::string type;
+    double wave_height;
+    double wave_period;
+    double frequency_min;
+    double frequency_max;
+    int nfrequencies;
+    double duration;
+    double dt;
+    double peak_enhancement_factor;
+    bool is_normalized;
+    int seed;
+    int num_bodies;
+    bool wave_stretching;
+    Eigen::Vector3d direction;
+    double velocity_surface;
+    double velocity_seabed;
+};
+
+struct SeaDb {
+    std::string type;
+    double water_density;
+    double mean_water_level;
+    double water_depth;
+    SeaOptionDb options;
+};
+
+struct SoilOptionDb {
+    double stiffness_normal;
+    double stiffness_shear;
+    double soil_position;
+};
+
+struct SoilDb {
+    std::string type;
+    SoilOptionDb options;
+};
+
+struct EnvironmentDb {
+    Eigen::Vector3d gravity;
+    std::optional<double> ramp_start;
+    std::optional<double> ramp_end;
+    WindDb wind;
+    std::optional<SeaDb> sea;
+    std::optional<SoilDb> soil;
 };
 
 }  // namespace io

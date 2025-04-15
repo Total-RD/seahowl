@@ -987,12 +987,16 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
 
 std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(const std::string& filepath) {
     spdlog::debug("Getting environmental conditions from " + filepath + " file.");
-    auto environment_json = get_json_from_file(filepath);
-
     auto DATADIR = path(filepath).parent_path();
+    EnvironmentDb environment_db = read_environment_db(filepath);
+
+    return get_environmental_model(environment_db, DATADIR);
+}
+
+std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model(const EnvironmentDb& environment_db,
+                                                                      const fs::path& DATADIR) {
     // gravity
-    auto gravity = environment_json.at("gravity").get<std::vector<double>>();
-    auto gravity_vector = seahowl::Vector3d(gravity[0], gravity[1], gravity[2]);
+    auto gravity_vector = environment_db.gravity;
     auto gravity_direction = gravity_vector / gravity_vector.norm();
 
     // environment
@@ -1000,57 +1004,55 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
 
     // sea
     bool has_sea = false;
-    if (environment_json.contains("sea")) {
+    if (environment_db.sea.has_value()) {
         has_sea = true;
-        auto sea_json = environment_json.at("sea");
+        auto sea_db = environment_db.sea.value();
         env_model->fluid_model = std::make_shared<seahowl::env::WaveWindModel>();
         auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*env_model->fluid_model);
         // specific model options
-        auto sea_type = sea_json.at("type").get<std::string>();
-        if (sea_type == "still") {
+        if (sea_db.type == "still") {
             spdlog::info("Sea conditions: still water.");
             fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
-        } else if (sea_type == "HydroChrono" || sea_type == "hydrochrono") {
+        } else if (sea_db.type == "HydroChrono" || sea_db.type == "hydrochrono") {
             spdlog::info("Sea conditions: HydroChrono.");
 #ifdef HAVE_HYDROCHRONO
             fluid_model.wave_model = std::make_unique<seahowl::env::WaveModelHydroChrono>();
             auto& wave_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
-            auto sea_options = sea_json.at("options");
-            auto wave_type = sea_options.at("type").get<std::string>();
+
+            auto wave_type = sea_db.options.type;
             if (wave_type == "still") {
                 wave_model.waves = std::make_shared<NoWave>();
             } else if (wave_type == "regular") {
                 auto hydrochrono_waves = std::make_shared<RegularWave>();
                 wave_model.waves = hydrochrono_waves;
-                hydrochrono_waves->regular_wave_amplitude_ = sea_options.at("wave_height").get<double>() / 2.0;
-                hydrochrono_waves->regular_wave_omega_ = 2 * PI / sea_options.at("wave_period").get<double>();
+                hydrochrono_waves->regular_wave_amplitude_ = sea_db.options.wave_height / 2.0;
+                hydrochrono_waves->regular_wave_omega_ = 2 * PI / sea_db.options.wave_period;
                 seahowl::hydro::myMCFtable = seahowl::hydro::MacCamyFuchsTable();
-                seahowl::hydro::myMCFtable.wave_peak_period = sea_options.at("wave_period");
+                seahowl::hydro::myMCFtable.wave_peak_period = sea_db.options.wave_period;
             } else if (wave_type == "irregular") {
                 auto params = IrregularWaveParams();
-                sea_options.at("num_bodies").get_to(params.num_bodies_);
-                sea_options.at("wave_height").get_to(params.wave_height_);
-                sea_options.at("wave_period").get_to(params.wave_period_);
-                sea_options.at("frequency_min").get_to(params.frequency_min_);
-                sea_options.at("frequency_max").get_to(params.frequency_max_);
-                sea_options.at("nfrequencies").get_to(params.nfrequencies_);
-                sea_options.at("wave_period").get_to(params.wave_period_);
-                sea_options.at("peak_enhancement_factor").get_to(params.peak_enhancement_factor_);
-                sea_options.at("is_normalized").get_to(params.is_normalized_);
-                sea_options.at("seed").get_to(params.seed_);
-                sea_options.at("dt").get_to(params.simulation_dt_);
-                sea_options.at("duration").get_to(params.simulation_duration_);
-                sea_options.at("wave_stretching").get_to(params.wave_stretching_);
+                params.num_bodies_ = sea_db.options.num_bodies;
+                params.wave_height_ = sea_db.options.wave_height;
+                params.wave_period_ = sea_db.options.wave_period;
+                params.frequency_min_ = sea_db.options.frequency_min;
+                params.frequency_max_ = sea_db.options.frequency_max;
+                params.nfrequencies_ = sea_db.options.nfrequencies;
+                params.peak_enhancement_factor_ = sea_db.options.peak_enhancement_factor;
+                params.is_normalized_ = sea_db.options.is_normalized;
+                params.seed_ = sea_db.options.seed;
+                params.simulation_dt_ = sea_db.options.dt;
+                params.simulation_duration_ = sea_db.options.duration;
+                params.wave_stretching_ = sea_db.options.wave_stretching;
                 params.ramp_duration_ = 0.0;
                 params.num_bodies_ = 1;
                 wave_model.waves = std::make_shared<IrregularWaves>(params);
                 seahowl::hydro::myMCFtable = seahowl::hydro::MacCamyFuchsTable();
-                seahowl::hydro::myMCFtable.wave_peak_period = sea_options.at("wave_period");
+                seahowl::hydro::myMCFtable.wave_peak_period = sea_db.options.wave_period;
             } else {
                 throw std::runtime_error("Unrecognized wave type \"" + wave_type + "\" for HydroChrono.");
             }
-            sea_json.at("mean_water_level").get_to(wave_model.waves->mwl_);
-            sea_json.at("water_depth").get_to(wave_model.waves->water_depth_);
+            wave_model.waves->mwl_ = sea_db.mean_water_level;
+            wave_model.waves->water_depth_ = sea_db.water_depth;
             wave_model.waves->g_ = gravity_vector.norm();
             if (wave_type == "irregular") {
                 dynamic_cast<IrregularWaves&>(*wave_model.waves).CreateSpectrum();
@@ -1062,15 +1064,14 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
 #else
             throw std::runtime_error("Must compile and enable HydroChrono dependency to use HydroChrono waves.");
 #endif
-        } else if (sea_type == "current") {
+        } else if (sea_db.type == "current") {
             spdlog::info("Sea conditions: current.");
             fluid_model.wave_model = std::make_unique<seahowl::env::CurrentConstant>();
             auto& wave_model = dynamic_cast<seahowl::env::CurrentConstant&>(*fluid_model.wave_model);
-            auto sea_options = sea_json.at("options");
-            auto sea_direction = sea_options.at("direction").get<std::vector<double>>();
+            auto sea_direction = sea_db.options.direction;
             wave_model.direction = Vector3d(sea_direction[0], sea_direction[1], 0.0);
-            sea_options.at("velocity_surface").get_to(wave_model.velocity_surface);
-            sea_options.at("velocity_seabed").get_to(wave_model.velocity_seabed);
+            wave_model.velocity_surface = sea_db.options.velocity_surface;
+            wave_model.velocity_seabed = sea_db.options.velocity_seabed;
         } else {
             throw std::runtime_error(
                 "The input sea type is unknown. Please use the existing current types: still, current, HydroChrono.");
@@ -1078,49 +1079,38 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
 
         // general wave model options
         auto& wave_model = dynamic_cast<seahowl::env::WaveModel&>(*fluid_model.wave_model);
-        sea_json.at("water_density").get_to(wave_model.density);
-        sea_json.at("mean_water_level").get_to(wave_model.mean_water_level);
-        sea_json.at("water_depth").get_to(wave_model.water_depth);
+        wave_model.density = sea_db.water_density;
+        wave_model.mean_water_level = sea_db.mean_water_level;
+        wave_model.water_depth = sea_db.water_depth;
         wave_model.surface_normal = -gravity_direction;
     } else {
         spdlog::warn("Sea conditions were not defined.");
     }
 
     // wind
-    auto wind_json = environment_json.at("wind");
+    auto wind_db = environment_db.wind;
     std::shared_ptr<seahowl::env::WindModel> wind_model_ptr;
-    if (wind_json.at("type").get<std::string>() == "ramp") {
+    if (wind_db.type == "ramp") {
         spdlog::info("Wind conditions: wind ramp.");
         wind_model_ptr = std::make_shared<seahowl::env::WindRamp>();
         auto& wind_model = dynamic_cast<seahowl::env::WindRamp&>(*wind_model_ptr);
-        auto wind_options = wind_json.at("options");
-        auto v0 = wind_options.at("velocity_start").get<std::vector<double>>();
-        auto v1 = wind_options.at("velocity_end").get<std::vector<double>>();
-        wind_model.set_wind_ramp(Vector3d(v0[0], v0[1], v0[2]), wind_options.at("time_start").get<double>(),
-                                 Vector3d(v1[0], v1[1], v1[2]), wind_options.at("time_end").get<double>());
+
+        wind_model.set_wind_ramp(wind_db.options.velocity_start, wind_db.options.time_start,
+                                 wind_db.options.velocity_end, wind_db.options.time_end);
         wind_model.direction_gravity = gravity_vector.normalized();
-        wind_model.reference_height = wind_options.at("reference_height").get<double>();
-        wind_model.shear_coefficient = wind_options.at("shear_coefficient").get<double>();
-        wind_model.density = wind_json.at("air_density").get<double>();
-    } else if (wind_json.at("type").get<std::string>() == "inflowwind") {
+        wind_model.reference_height = wind_db.options.reference_height;
+        wind_model.shear_coefficient = wind_db.options.shear_coefficient;
+        wind_model.density = wind_db.air_density;
+    } else if (wind_db.type == "inflowwind") {
         spdlog::info("Wind conditions: InflowWind.");
 #ifdef HAVE_INFLOWWIND
         std::string inflowwind_filepath;
-        auto wind_options = wind_json.at("options");
-        if (wind_options.contains("file_inflowwind")) {
-            inflowwind_filepath = (DATADIR / wind_options.at("file_inflowwind")).generic_string();
-        } else {
-            throw std::runtime_error("InflowWind file not defined.");
-        }
+
+        inflowwind_filepath = (DATADIR / wind_db.options.file_inflowwind).generic_string();
+
         auto ifw_model = std::make_shared<seahowl::env::InflowWindAdapter>(inflowwind_filepath);
         wind_model_ptr = ifw_model;
-        if (wind_options.contains("zmin")) {
-            wind_options.at("zmin").get_to(ifw_model->zmin);
-        } else {
-            spdlog::warn(
-                "Minimum height for wind speed calculation not defined for InflowWind model, using default zmin={}.",
-                ifw_model->zmin);
-        }
+        ifw_model->zmin = wind_db.options.zmin;
 #else
         throw std::runtime_error(
             "InflowWind module in CMAKE options should be enabled if wind type 'inflowwind' selected.");
@@ -1139,27 +1129,28 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
     // apply ramp options
     double ramp_start = 0.0;
     double ramp_end = 0.0;
-    if (environment_json.contains("ramp_start")) {
-        environment_json.at("ramp_start").get_to(ramp_start);
+    if (environment_db.ramp_start.has_value()) {
+        ramp_start = environment_db.ramp_start.value();
     }
-    if (environment_json.contains("ramp_end")) {
-        environment_json.at("ramp_end").get_to(ramp_end);
+    if (environment_db.ramp_end.has_value()) {
+        ramp_end = environment_db.ramp_end.value();
     }
     env_model->fluid_model->ramp_start = ramp_start;
     env_model->fluid_model->ramp_end = ramp_end;
 
     // soil
-    if (environment_json.contains("soil")) {
-        auto soil_json = environment_json.at("soil");
-        if (soil_json.at("type") == "linear") {
+    if (environment_db.soil.has_value()) {
+        auto soil_db = environment_db.soil.value();
+
+        if (soil_db.type == "linear") {
             spdlog::info("Soil conditions: linear.");
             auto soil_model_shared = std::make_shared<seahowl::env::LinearSoilModel>();
             auto& soil_model = *soil_model_shared;
-            auto soil_options = soil_json.at("options");
-            soil_options.at("soil_position").get_to(soil_model.soil_position);
-            soil_options.at("stiffness_normal").get_to(soil_model.stiffness_normal);
-            soil_options.at("stiffness_shear").get_to(soil_model.stiffness_shear);
+            soil_model.soil_position = soil_db.options.soil_position;
+            soil_model.stiffness_normal = soil_db.options.stiffness_normal;
+            soil_model.stiffness_shear = soil_db.options.stiffness_shear;
             soil_model.soil_normal = -gravity_direction;
+
             env_model->soil_model = std::move(soil_model_shared);
         } else {
             throw std::runtime_error("The input soil type is unknown. Please use the existing soil types: linear.");
@@ -1174,15 +1165,16 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
 void populate_environmental_conditions_from_json(const std::string& filepath, seahowl::core::System& system_core) {
     spdlog::debug("Populating environmental conditions from " + filepath +
                   " file (absolute: " + absolute(path(filepath)).string() + ").");
-    auto environment_json = get_json_from_file(filepath);
 
     auto DATADIR = path(filepath).parent_path();
 
+    EnvironmentDb environment_db = read_environment_db(filepath);
+
     // gravity
-    auto gravity = environment_json.at("gravity").get<std::vector<double>>();
+    auto gravity = environment_db.gravity;
     system_core.elasto.set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
 
-    auto env_model = get_environmental_model_from_json(filepath);
+    auto env_model = get_environmental_model(environment_db, DATADIR);
 
     if (env_model->fluid_model) {
         system_core.fluid_model = env_model->fluid_model;
