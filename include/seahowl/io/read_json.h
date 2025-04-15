@@ -172,6 +172,14 @@ void populate_rna_aero_from_db(const RnaDb& rna_db, seahowl::aero::RotorNacelleA
 void populate_rna_from_json(const std::string& filepath, seahowl::core::RotorNacelleAssembly& rna);
 
 /**
+ * @brief Populates RNA given a json file.
+ *
+ * @param[in] rna_db RNA database.
+ * @param[out] rna RNA to populate.
+ */
+void populate_rna_from_db(const RnaDb& rna_db, seahowl::core::RotorNacelleAssembly& rna);
+
+/**
  * @brief Populates turbine given a json file.
  *
  * @param[in] filepath Path of the json file describing the turbine.

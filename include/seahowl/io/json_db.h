@@ -29,5 +29,11 @@ RnaDb read_rna_db(const std::string& filepath);
  */
 EnvironmentDb read_environment_db(const std::string& filepath);
 
+/**
+ * @brief Read turbine data from a file.
+ * @param filepath Path to the wind data file.
+ */
+TurbineDb read_turbine_db(const std::string& filepath);
+
 }  // namespace io
 }  // namespace seahowl

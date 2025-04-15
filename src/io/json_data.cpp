@@ -240,5 +240,29 @@ void from_json(const json& js, EnvironmentDb& env) {
     }
 }
 
+struct FoundationOptions {
+    bool use_MacCamyFuchs_correction;
+    bool use_Cd_correction;
+};
+
+struct Foundation {
+    std::string type;
+    std::string file;
+    Discretization discretization;
+    FoundationOptions options;
+};
+
+void from_json(const json& js, FoundationOptions& options) {
+    options.use_MacCamyFuchs_correction = js.at("use_MacCamyFuchs_correction").get<bool>();
+    options.use_Cd_correction = js.at("use_Cd_correction").get<bool>();
+}
+
+void from_json(const json& js, Foundation& foundation) {
+    foundation.type = js.at("type").get<std::string>();
+    foundation.file = js.at("file").get<std::string>();
+    foundation.discretization = js.at("discretization").get<Discretization>();
+    foundation.options = js.at("options").get<FoundationOptions>();
+}
+
 }  // namespace io
 }  // namespace seahowl

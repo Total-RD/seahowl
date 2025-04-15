@@ -179,5 +179,88 @@ struct EnvironmentDb {
     std::optional<SoilDb> soil;
 };
 
+struct AeroOptionsTurbineDb {
+    bool hub_loss;
+    bool tip_loss;
+    bool tower_shadow;
+    std::string performance_file;
+    std::string file_aerodyn;
+    std::string file_inflowwind;
+};
+
+struct AeroTurbineDb {
+    std::string solver;
+    AeroOptionsTurbineDb options;
+};
+
+struct DiscretizationTurbineDb {
+    std::vector<double> elasto;
+    std::vector<double> aero;
+};
+
+struct BladeTurbineDb {
+    std::string file;
+    double initial_pitch;
+    double precone;
+};
+
+struct RotorOptionsTurbineDb {
+    double inertia_blades;
+    double mass_blades;
+    double radius;
+};
+
+struct RotorTurbineDb {
+    std::string type;
+    DiscretizationTurbineDb discretization;
+    bool pitch_actuator_dynamics;
+    std::vector<BladeTurbineDb> blades;
+    RotorOptionsTurbineDb option;
+};
+
+struct RNATurbineDb {
+    std::string file;
+    double initial_yaw;
+    bool yaw_actuator_dynamics;
+};
+
+struct TowerOptionsTurbineDb {
+    std::optional<bool> use_MacCamyFuchs_correction;
+    std::optional<bool> use_Cd_correction;
+};
+
+struct TowerTurbineDb {
+    DiscretizationTurbineDb discretization;
+    std::string file;
+    std::optional<TowerOptionsTurbineDb> options;
+};
+
+struct ControllerOptionsTurbineDb {
+    std::string infile;
+    std::string libfile;
+    double target_rpm;
+};
+
+struct ControllerTurbineDb {
+    std::string type;
+    ControllerOptionsTurbineDb options;
+};
+
+struct FoundationTurbineDb {
+    std::string type;
+    std::optional<std::string> file;
+    DiscretizationTurbineDb discretization;
+    std::optional<TowerOptionsTurbineDb> options;
+};
+
+struct TurbineDb {
+    AeroTurbineDb aero;
+    RotorTurbineDb rotor;
+    RNATurbineDb rna;
+    TowerTurbineDb tower;
+    ControllerTurbineDb controller;
+    std::optional<FoundationTurbineDb> foundation;
+};
+
 }  // namespace io
 }  // namespace seahowl

@@ -21,6 +21,12 @@ using json = nlohmann::json;
 namespace seahowl {
 namespace io {
 
+std::string to_lowercase(const std::string& input) {
+    std::string result = input;
+    std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) { return std::tolower(c); });
+    return result;
+}
+
 json csv_to_json(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -414,6 +420,147 @@ EnvironmentDb read_environment_db(const std::string& filepath) {
     json json_db = get_json(filepath);
     from_json(json_db, env_db);
     return env_db;
+}
+
+void from_json(const json& js, AeroOptionsTurbineDb& options, const std::string& type) {
+    if (type == "bemt") {
+        options.hub_loss = js.at("hub_loss").get<bool>();
+        options.tip_loss = js.at("tip_loss").get<bool>();
+        options.tower_shadow = js.at("tower_shadow").get<bool>();
+    } else if (type == "disk") {
+        options.performance_file = js.at("performance_file").get<std::string>();
+    } else if (type == "aerodyn") {
+        options.file_aerodyn = js.at("file_aerodyn").get<std::string>();
+        options.file_inflowwind = js.at("file_inflowwind").get<std::string>();
+    }
+}
+
+void from_json(const json& js, AeroTurbineDb& aero) {
+    aero.solver = to_lowercase(js.at("solver").get<std::string>());
+    from_json(js.at("options"), aero.options, aero.solver);
+}
+
+void from_json(const json& js, DiscretizationTurbineDb& discretization, const std::string& key) {
+    discretization.elasto = js.at("elasto").get<std::vector<double>>();
+    discretization.aero = js.at(key).get<std::vector<double>>();
+}
+
+void from_json(const json& js, BladeTurbineDb& blade) {
+    blade.file = js.at("file").get<std::string>();
+    blade.initial_pitch = js.at("initial_pitch").get<double>();
+    blade.precone = js.at("precone").get<double>();
+}
+
+void from_json(const json& js, RotorOptionsTurbineDb& options) {
+    if (!js.contains("inertia_blades") || js.at("inertia_blades").is_null()) {
+        throw std::runtime_error("The \"inertia_blades\" key (rotor options) must be provided for rigid/disk rotors.");
+    }
+    options.inertia_blades = js.at("inertia_blades").get<double>();
+    if (!js.contains("mass_blades") || js.at("mass_blades").is_null()) {
+        throw std::runtime_error("The \"mass_blades\" key (rotor options) must be given for rigid/disk rotors.");
+    }
+    options.mass_blades = js.at("mass_blades").get<double>();
+    if (!js.contains("radius") || js.at("radius").is_null()) {
+        throw std::runtime_error(
+            "The \"radius\" key (rotor options) must be given for rotors using actuator disk theory.");
+    }
+    options.radius = js.at("radius").get<double>();
+}
+
+void from_json(const json& js, RotorTurbineDb& rotor) {
+    rotor.type = js.at("type").get<std::string>();
+    if (rotor.type == "disk") {
+        rotor.option = js.at("options").get<RotorOptionsTurbineDb>();
+    } else {
+        from_json(js.at("discretization"), rotor.discretization, "aero");
+        rotor.pitch_actuator_dynamics = js.at("pitch_actuator_dynamics").get<bool>();
+        rotor.blades = js.at("blades").get<std::vector<BladeTurbineDb>>();
+    }
+}
+
+void from_json(const json& js, RNATurbineDb& rna) {
+    rna.file = js.at("file").get<std::string>();
+    rna.initial_yaw = js.at("initial_yaw").get<double>();
+    rna.yaw_actuator_dynamics = js.at("yaw_actuator_dynamics").get<bool>();
+}
+
+void from_json(const json& js, TowerOptionsTurbineDb& options) {
+    if (js.contains("use_MacCamyFuchs_correction"))
+        options.use_MacCamyFuchs_correction = js.at("use_MacCamyFuchs_correction").get<bool>();
+    else
+        spdlog::warn("MacCamyFuchs correction for tower/pile not defined in turbine.json, it is by default set to {}.",
+                     0.0);
+
+    if (js.contains("use_Cd_correction"))
+        options.use_Cd_correction = js.at("use_Cd_correction").get<bool>();
+    else
+        spdlog::warn(
+            "Drag Coefficient correction for tower/pile not defined in turbine.json, it is by default set to {}.", 0.0);
+}
+
+void from_json(const json& js, TowerTurbineDb& tower) {
+    from_json(js.at("discretization"), tower.discretization, "aero");
+    tower.file = js.at("file").get<std::string>();
+
+    if (js.contains("options") && !js["options"].is_null()) {
+        tower.options = js.at("options").get<TowerOptionsTurbineDb>();
+    } else {
+        tower.options = std::nullopt;
+    }
+}
+
+void from_json(const json& js, ControllerOptionsTurbineDb& options, const std::string& type) {
+    if (type == "DISCON") {
+        options.infile = js.at("infile").get<std::string>();
+        if (js.contains("libfile") && !js["libfile"].is_null())
+            options.libfile = js.at("libfile").get<std::string>();
+        else
+            throw std::runtime_error("Need to define path to libfile for DISCON routine.");
+    } else if (type == "RPM") {
+        if (js.contains("target_rpm") && !js["target_rpm"].is_null())
+            options.target_rpm = js.at("target_rpm").get<double>();
+        else
+            throw std::runtime_error("Need to define target RPM for RPM controller (target_rpm).");
+    }
+}
+
+void from_json(const json& js, ControllerTurbineDb& controller) {
+    controller.type = js.at("type").get<std::string>();
+    from_json(js.at("options"), controller.options, controller.type);
+}
+
+void from_json(const json& js, FoundationTurbineDb& foundation) {
+    foundation.type = js.at("type").get<std::string>();
+    if (js.contains("file") && !js["file"].is_null()) {
+        foundation.file = js.at("file").get<std::string>();
+    } else {
+        foundation.file = std::nullopt;
+    }
+    from_json(js.at("discretization"), foundation.discretization, "hydro");
+    if (js.contains("options") && !js["options"].is_null())
+        foundation.options = js.at("options").get<TowerOptionsTurbineDb>();
+    else
+        foundation.options = std::nullopt;
+}
+
+void from_json(const json& js, TurbineDb& turbine) {
+    turbine.aero = js.at("aero").get<AeroTurbineDb>();
+    turbine.rotor = js.at("rotor").get<RotorTurbineDb>();
+    turbine.rna = js.at("rna").get<RNATurbineDb>();
+    turbine.tower = js.at("tower").get<TowerTurbineDb>();
+    turbine.controller = js.at("controller").get<ControllerTurbineDb>();
+    if (js.contains("foundation") && !js["foundation"].is_null()) {
+        turbine.foundation = js.at("foundation").get<FoundationTurbineDb>();
+    } else {
+        turbine.foundation = std::nullopt;
+    }
+}
+
+TurbineDb read_turbine_db(const std::string& filepath) {
+    TurbineDb turbine_db;
+    json json_db = get_json(filepath);
+    from_json(json_db, turbine_db);
+    return turbine_db;
 }
 
 }  // namespace io
