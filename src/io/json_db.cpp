@@ -563,5 +563,115 @@ TurbineDb read_turbine_db(const std::string& filepath) {
     return turbine_db;
 }
 
+void from_json(const json& js, DiscretizationFloaterdb& discretization) {
+    discretization.elasto = js.at("elasto").get<std::vector<double>>();
+    discretization.hydro = js.at("hydro").get<std::vector<double>>();
+}
+
+void from_json(const json& js, MooringFloaterdb& mooring) {
+    mooring.connected_body_name = js.at("connected_body_name").get<std::string>();
+    mooring.line_properties = js.at("line_properties").get<std::string>();
+    mooring.length = js.at("length").get<double>();
+    mooring.discretization = js.at("discretization").get<DiscretizationFloaterdb>();
+    mooring.relative_fairlead = js.at("relative_fairlead").get<bool>();
+    mooring.relative_anchor = js.at("relative_anchor").get<bool>();
+    mooring.fairlead_position =
+        Eigen::Vector3d(js.at("fairlead_position")[0], js.at("fairlead_position")[1], js.at("fairlead_position")[2]);
+    mooring.anchor_position =
+        Eigen::Vector3d(js.at("anchor_position")[0], js.at("anchor_position")[1], js.at("anchor_position")[2]);
+    mooring.rotation_axis =
+        Eigen::Vector3d(js.at("rotation_axis")[0], js.at("rotation_axis")[1], js.at("rotation_axis")[2]);
+    mooring.rotation_angle = js.at("rotation_angle").get<double>();
+}
+
+void from_json(const json& js, BodyFloaterdb& body) {
+    body.name = js.at("name").get<std::string>();
+    if (js.at("position").size() != 3) {
+        throw std::runtime_error("Position of body should be a vector of length 3.");
+    }
+    body.position = Eigen::Vector3d(js.at("position")[0], js.at("position")[1], js.at("position")[2]);
+    body.mass = js.at("mass").get<double>();
+
+    const auto& inertia = js.at("inertia");
+    if (inertia.size() != 3 || inertia[0].size() != 3) {
+        throw std::runtime_error("Inertia matrix should be a 3x3 matrix.");
+    }
+    body.inertia = Eigen::Matrix3d::Zero();
+    for (size_t i = 0; i < 3; ++i) {
+        if (inertia[i].size() != 3) {
+            throw std::runtime_error("Inertia matrix of body should be 3x3.");
+        }
+        for (size_t j = 0; j < 3; ++j) {
+            body.inertia(i, j) = inertia[i][j].get<double>();
+        }
+    }
+}
+
+void from_json(const json& js, Floaterdb& floater) {
+    floater.type = js.at("type").get<std::string>();
+    floater.options_file = js.at("options").at("file").get<std::string>();
+    if (js.at("position").size() != 3) {
+        throw std::runtime_error("Position of body should be a vector of length 3.");
+    }
+    floater.position = Eigen::Vector3d(js.at("position")[0], js.at("position")[1], js.at("position")[2]);
+    floater.mass = js.at("mass").get<double>();
+
+    const auto& inertia = js.at("inertia");
+    if (inertia.size() != 3 || inertia[0].size() != 3) {
+        throw std::runtime_error("Inertia matrix should be a 3x3 matrix.");
+    }
+    floater.inertia = Eigen::Matrix3d::Zero();
+    for (size_t i = 0; i < 3; ++i) {
+        if (inertia[i].size() != 3) {
+            throw std::runtime_error("Inertia matrix of body should be 3x3.");
+        }
+        for (size_t j = 0; j < 3; ++j) {
+            floater.inertia(i, j) = inertia[i][j].get<double>();
+        }
+    }
+
+    const auto& damping = js.at("damping_matrix");
+    if (damping.size() != 6) {
+        throw std::runtime_error("Viscous damping matrix for floater body has to be defined as 6x6 matrices.");
+    }
+    floater.damping_matrix = Eigen::MatrixXd(damping.size(), damping[0].size());
+    for (size_t i = 0; i < damping.size(); ++i) {
+        if (damping[i].size() != 6) {
+            throw std::runtime_error("Viscous damping matrix for floater body has to be defined as 6x6 matrices.");
+        }
+        for (size_t j = 0; j < damping[i].size(); ++j) {
+            floater.damping_matrix(i, j) = damping[i][j].get<double>();
+        }
+    }
+
+    floater.bodies = js.at("bodies").get<std::vector<BodyFloaterdb>>();
+    floater.moorings = js.at("moorings").get<std::vector<MooringFloaterdb>>();
+}
+
+Floaterdb read_floater_db(const std::string& filepath) {
+    Floaterdb floater_db;
+    json json_db = get_json(filepath);
+    from_json(json_db, floater_db);
+    return floater_db;
+}
+
+void from_json(const json& js, MooringPropertiesDb& mooring_props) {
+    mooring_props.diameter = js.at("diameter").get<double>();
+    mooring_props.stiffness_axial = js.at("stiffness_axial").get<double>();
+    mooring_props.stiffness_bending = js.at("stiffness_bending").get<double>();
+    mooring_props.density_linear = js.at("density_linear").get<double>();
+    mooring_props.drag_coefficient_normal = js.at("drag_coefficient_normal").get<double>();
+    mooring_props.drag_coefficient_axial = js.at("drag_coefficient_axial").get<double>();
+    mooring_props.added_mass_coefficient_normal = js.at("added_mass_coefficient_normal").get<double>();
+    mooring_props.added_mass_coefficient_axial = js.at("added_mass_coefficient_axial").get<double>();
+}
+
+MooringPropertiesDb read_mooring_properties(const std::string& filepath) {
+    MooringPropertiesDb mooring_props;
+    json json_db = get_json(filepath);
+    from_json(json_db, mooring_props);
+    return mooring_props;
+}
+
 }  // namespace io
 }  // namespace seahowl

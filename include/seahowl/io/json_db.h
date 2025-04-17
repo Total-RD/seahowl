@@ -35,5 +35,17 @@ EnvironmentDb read_environment_db(const std::string& filepath);
  */
 TurbineDb read_turbine_db(const std::string& filepath);
 
+/**
+ * @brief Read floater data from a file.
+ * @param filepath Path to the floater data file.
+ */
+Floaterdb read_floater_db(const std::string& filepath);
+
+/**
+ * @brief Read mooring properties data from a file.
+ * @param filepath Path to the mooring properties data file.
+ */
+MooringPropertiesDb read_mooring_properties(const std::string& filepath);
+
 }  // namespace io
 }  // namespace seahowl

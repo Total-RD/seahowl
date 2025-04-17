@@ -262,5 +262,52 @@ struct TurbineDb {
     std::optional<FoundationTurbineDb> foundation;
 };
 
+struct DiscretizationFloaterdb {
+    std::vector<double> elasto;
+    std::vector<double> hydro;
+};
+
+struct MooringFloaterdb {
+    std::string connected_body_name;
+    std::string line_properties;
+    double length;
+    DiscretizationFloaterdb discretization;
+    bool relative_fairlead;
+    bool relative_anchor;
+    Eigen::Vector3d fairlead_position;
+    Eigen::Vector3d anchor_position;
+    Eigen::Vector3d rotation_axis;
+    double rotation_angle;
+};
+
+struct BodyFloaterdb {
+    std::string name;
+    Eigen::Vector3d position;
+    double mass;
+    Eigen::Matrix3d inertia;
+};
+
+struct Floaterdb {
+    std::string type;
+    std::string options_file;
+    Eigen::Vector3d position;
+    double mass;
+    Eigen::Matrix3d inertia;
+    Eigen::MatrixXd damping_matrix;
+    std::vector<BodyFloaterdb> bodies;
+    std::vector<MooringFloaterdb> moorings;
+};
+
+struct MooringPropertiesDb {
+    double diameter;
+    double stiffness_axial;
+    double stiffness_bending;
+    double density_linear;
+    double drag_coefficient_normal;
+    double drag_coefficient_axial;
+    double added_mass_coefficient_normal;
+    double added_mass_coefficient_axial;
+};
+
 }  // namespace io
 }  // namespace seahowl
