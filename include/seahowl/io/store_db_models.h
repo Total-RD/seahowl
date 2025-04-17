@@ -210,9 +210,13 @@ struct RotorOptionsTurbineDb {
     double radius;
 };
 
+struct DiscretizationRotorTurbineDb {
+    std::vector<double> elasto;
+    std::vector<double> aero;
+};
 struct RotorTurbineDb {
     std::string type;
-    DiscretizationTurbineDb discretization;
+    DiscretizationRotorTurbineDb discretization;
     bool pitch_actuator_dynamics;
     std::vector<BladeTurbineDb> blades;
     RotorOptionsTurbineDb option;
@@ -229,8 +233,12 @@ struct TowerOptionsTurbineDb {
     std::optional<bool> use_Cd_correction;
 };
 
+struct DiscretizationTowerTurbineDb {
+    std::vector<double> elasto;
+    std::vector<double> aero;
+};
 struct TowerTurbineDb {
-    DiscretizationTurbineDb discretization;
+    DiscretizationTowerTurbineDb discretization;
     std::string file;
     std::optional<TowerOptionsTurbineDb> options;
 };
@@ -246,10 +254,15 @@ struct ControllerTurbineDb {
     ControllerOptionsTurbineDb options;
 };
 
+struct DiscretizationFoundationTurbineDb {
+    std::vector<double> elasto;
+    std::vector<double> hydro;
+};
+
 struct FoundationTurbineDb {
     std::string type;
     std::optional<std::string> file;
-    DiscretizationTurbineDb discretization;
+    DiscretizationFoundationTurbineDb discretization;
     std::optional<TowerOptionsTurbineDb> options;
 };
 
@@ -307,6 +320,50 @@ struct MooringPropertiesDb {
     double drag_coefficient_axial;
     double added_mass_coefficient_normal;
     double added_mass_coefficient_axial;
+};
+
+struct StaticsMainDb {
+    bool linear_step;
+    int nonlinear_steps;
+};
+
+struct PresimulationMainDb {
+    double dt;
+    double duration;
+    bool presetup;
+    bool fix_towers;
+};
+
+struct NumericsMainDb {
+    double dt;
+    double duration;
+    StaticsMainDb statics;
+    PresimulationMainDb presimulation;
+};
+
+struct OutputsMainDb {
+    double dt;
+    std::optional<std::string> folder;
+    bool vtk;
+    std::string log_level;
+    bool gui;
+};
+
+struct EnvironmentMainDb {
+    std::string file;
+};
+
+struct TurbineMainDb {
+    std::string file;
+    Eigen::Vector3d translation;
+    double rotation;
+};
+
+struct MainDb {
+    NumericsMainDb numerics;
+    OutputsMainDb outputs;
+    EnvironmentMainDb environment;
+    std::vector<TurbineMainDb> turbines;
 };
 
 }  // namespace io

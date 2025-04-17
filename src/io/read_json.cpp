@@ -58,254 +58,12 @@ namespace fs = std::filesystem;
 using std::filesystem::path;
 using std::filesystem::absolute;
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
-
 using seahowl::Vector3d;
 using seahowl::Vector2d;
 using seahowl::PI;
 
 namespace seahowl {
 namespace io {
-
-json get_json_from_file(const std::string& filepath) {
-    utils::check_file_exists(filepath);
-    std::ifstream json_file(filepath);
-    json json_obj;
-    json_file >> json_obj;
-    json_file.close();
-    return json_obj;
-}
-
-Eigen::MatrixX<double> get_matrix_from_vector_of_vectors(std::vector<std::vector<double>> matvec) {
-    int mat_nrows = matvec.size();
-    int mat_ncols = 0;
-    for (int irow = 0; irow < matvec.size(); irow++) {
-        mat_ncols = matvec[0].size();
-        if (matvec[irow].size() != mat_ncols) {
-            throw std::runtime_error(
-                "Matrix does not have a consistant number of columns: " + std::to_string(mat_ncols) +
-                " columns at row 1 and " + std::to_string(matvec[irow].size()) + " columns at row " +
-                std::to_string(irow + 1) + ".");
-        }
-    }
-    Eigen::MatrixX<double> mat(mat_nrows, mat_ncols);
-    for (int irow = 0; irow < mat_nrows; irow++) {
-        for (int icol = 0; icol < mat_ncols; icol++) {
-            mat(irow, icol) = matvec[irow][icol];
-            mat(irow, icol) = matvec[irow][icol];
-        }
-    }
-    return mat;
-}
-
-class InputData {
-  public:
-    int nrows = 0;
-    std::string filepath;
-    virtual void open(const std::string& filepath) = 0;
-    virtual double get(const std::string& key, int row) = 0;
-    virtual Vector3d get_vector3(const std::string& key, int row) = 0;
-    virtual Vector2d get_vector2(const std::string& key, int row) = 0;
-    virtual std::vector<double> get_vector_std(size_t length, const std::string& key, int row) = 0;
-    virtual std::string get_string(const std::string& key, int row) = 0;
-    virtual Eigen::MatrixX<double> get_matrix(const std::string& key, int row) = 0;
-};
-
-class InputDataCSV : public InputData {
-    std::map<std::string, std::vector<std::string>> csv_data;
-
-  public:
-    void open(const std::string& filepath) override {
-        this->filepath = filepath;
-        utils::check_file_exists(filepath);
-        // open file
-        std::ifstream csv_file;
-        csv_file.open(filepath);
-
-        // headers
-        std::map<int, std::string> csv_headers;
-        std::string line, word;
-        std::getline(csv_file, line);
-        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
-        std::stringstream line_ss(line);
-        int idx_header = 0;
-        while (std::getline(line_ss, word, ',')) {
-            csv_data[word] = {};
-            csv_headers[idx_header] = word;
-            idx_header += 1;
-        }
-
-        // data
-        int idx_line = 1;
-        while (std::getline(csv_file, line)) {
-            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
-            std::stringstream line_ss(line);
-            int idx_word = 0;
-            while (std::getline(line_ss, word, ',')) {
-                csv_data[csv_headers[idx_word]].push_back(word);
-                idx_word += 1;
-            }
-            idx_line += 1;
-            if (idx_word != idx_header) {
-                throw std::runtime_error("File " + filepath + " at line " + std::to_string(idx_line) +
-                                         ": number of columns (" + std::to_string(idx_word) +
-                                         ") different from number of headers (" + std::to_string(idx_header) + ").");
-            }
-        }
-        nrows = idx_line - 1;
-
-        csv_file.close();
-    }
-
-    double get(const std::string& key, int row) override {
-        if (csv_data.count(key) > 0) {
-            return std::stod(csv_data[key][row]);
-        } else {
-            throw std::runtime_error("Header " + key + " does not exist in CSV file " + filepath + ".");
-        }
-    }
-
-    Vector3d get_vector3(const std::string& key, int row) override {
-        std::vector<double> vec;
-        std::vector<std::string> dim_keys = {key + "_x", key + "_y", key + "_z"};
-        for (auto& dim_key : dim_keys) {
-            if (csv_data.count(dim_key) > 0) {
-                vec.push_back(std::stod(csv_data[dim_key][row]));
-            } else {
-                throw std::runtime_error("Could not find '" + dim_key + "' in CSV file " + filepath + ".");
-            }
-        }
-        return Vector3d(vec[0], vec[1], vec[2]);
-    }
-
-    Vector2d get_vector2(const std::string& key, int row) override {
-        std::vector<double> vec;
-        std::vector<std::string> dim_keys = {key + "_x", key + "_y"};
-        for (auto& dim_key : dim_keys) {
-            if (csv_data.count(dim_key) > 0) {
-                vec.push_back(std::stod(csv_data[dim_key][row]));
-            } else {
-                throw std::runtime_error("Could not find '" + dim_key + "' in CSV file " + filepath + ".");
-            }
-        }
-        return Vector2d(vec[0], vec[1]);
-    }
-
-    std::vector<double> get_vector_std(size_t length, const std::string& key, int row) override {
-        std::vector<double> vec;
-        std::vector<std::string> dim_keys;
-        for (size_t ii = 0; ii < length; ii++) {
-            dim_keys.push_back(key + "_dim" + std::to_string(ii + 1));
-        }
-        for (auto& dim_key : dim_keys) {
-            if (csv_data.count(dim_key) > 0) {
-                vec.push_back(std::stod(csv_data[dim_key][row]));
-            } else {
-                throw std::runtime_error("Could not find '" + dim_key + "' in CSV file " + filepath + ".");
-            }
-        }
-        return vec;
-    }
-
-    std::string get_string(const std::string& key, int row) override { return csv_data[key][row]; }
-
-    Eigen::MatrixX<double> get_matrix(const std::string& key, int row) override {
-        throw std::runtime_error("Cannot get matrix '" + key + "' from CSV file.");
-    }
-};
-
-class InputDataJSON : public InputData {
-    json json_rows;
-    json json_globals;
-
-  public:
-    void open(const std::string& filepath) override {
-        this->filepath = filepath;
-        utils::check_file_exists(filepath);
-        std::ifstream json_file(filepath);
-        json json_data;
-        json_file >> json_data;
-        json_file.close();
-        json_globals = json_data["global_variables"];
-        json_rows = json_data["reference_points"];
-        nrows = json_rows.size();
-    }
-
-    double get(const std::string& key, int row) override {
-        if (json_rows[row].contains(key)) {
-            return json_rows[row].at(key).get<double>();
-        } else if (json_globals.contains(key)) {
-            return json_globals.at(key).get<double>();
-        } else {
-            throw std::runtime_error("Could not find '" + key + "' in JSON file " + filepath + ".");
-        }
-    }
-
-    Vector3d get_vector3(const std::string& key, int row) override {
-        auto vec = get_vector_std(3, key, row);
-        if (vec.size() != 3) {
-            throw std::runtime_error("Key '" + key + "' has to be a vector of length 3 in JSON file " + filepath + ".");
-        }
-        return Vector3d(vec[0], vec[1], vec[2]);
-    }
-
-    Vector2d get_vector2(const std::string& key, int row) override {
-        auto vec = get_vector_std(2, key, row);
-        if (vec.size() != 2) {
-            throw std::runtime_error("Key '" + key + "' has to be a vector of length 2 in JSON file " + filepath + ".");
-        }
-        return Vector2d(vec[0], vec[1]);
-    }
-
-    std::vector<double> get_vector_std(size_t length, const std::string& key, int row) override {
-        std::vector<double> vec;
-        if (json_rows[row].contains(key)) {
-            return json_rows[row].at(key).get<std::vector<double>>();
-        } else if (json_globals.contains(key)) {
-            return json_globals.at(key).get<std::vector<double>>();
-        } else {
-            throw std::runtime_error("Could not find '" + key + "' in JSON file " + filepath + ".");
-        }
-    }
-
-    std::string get_string(const std::string& key, int row) override {
-        std::string str;
-        if (json_rows[row].contains(key)) {
-            return json_rows[row].at(key).get<std::string>();
-        } else if (json_globals.contains(key)) {
-            return json_globals.at(key).get<std::string>();
-        } else {
-            throw std::runtime_error("Could not find '" + key + "' in JSON file " + filepath + ".");
-        }
-    }
-    Eigen::MatrixX<double> get_matrix(const std::string& key, int row) override {
-        std::vector<std::vector<double>> matvec;
-        if (json_rows[row].contains(key)) {
-            matvec = json_rows[row].at(key).get<std::vector<std::vector<double>>>();
-        } else if (json_globals.contains(key)) {
-            matvec = json_globals.at(key).get<std::vector<std::vector<double>>>();
-        } else {
-            throw std::runtime_error("Could not find '" + key + "' in JSON file " + filepath + ".");
-        }
-
-        return get_matrix_from_vector_of_vectors(matvec);
-    }
-};
-
-std::shared_ptr<InputData> get_input_data(const std::string& filepath) {
-    // READ INPUT DATA
-    std::shared_ptr<InputData> input_data;
-    auto file_extension = filepath.substr(filepath.find_last_of(".") + 1);
-    if (file_extension == "csv") {
-        input_data = std::make_shared<InputDataCSV>();
-    } else if (file_extension == "json") {
-        input_data = std::make_shared<InputDataJSON>();
-    }
-    input_data->open(filepath);
-
-    return input_data;
-}
 
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
     const std::string& filepath) {
@@ -533,10 +291,12 @@ void populate_rna_from_db(const RnaDb& rna_db, seahowl::core::RotorNacelleAssemb
 
 void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
     spdlog::debug("Adding turbine to system from " + filepath + " file.");
-    auto json_obj = get_json_from_file(filepath);
+
+    auto DATADIR = path(filepath).parent_path();
+    TurbineDb turbine_db = read_turbine_db(filepath);
 
     // make turbine aero
-    if (json_obj.at("aero").at("solver") == "aerodyn" || json_obj.at("aero").at("solver") == "AeroDyn") {
+    if (turbine_db.aero.solver == "aerodyn") {
 #ifdef HAVE_AERODYN
         auto turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>();
         system_core.aero.turbines.push_back(turbine_aero);
@@ -557,18 +317,21 @@ void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core:
     system_core.turbines.push_back(turbine);
 
     // populate turbine
-    populate_turbine_from_json(filepath, *turbine);
+    populate_turbine(turbine_db, *turbine, DATADIR);
+
     turbine->build();
 }
 
 void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turbine& turbine) {
     spdlog::debug("Populating turbine from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
                   ").");
-    auto json_obj = get_json_from_file(filepath);
     auto DATADIR = path(filepath).parent_path();
 
     TurbineDb turbine_db = read_turbine_db(filepath);
+    populate_turbine(turbine_db, turbine, DATADIR);
+}
 
+void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbine, const fs::path& DATADIR) {
     if (turbine_db.aero.solver == "bemt") {
         spdlog::info("Aerodynamic model: Blade Element Momentum Theory (BEMT).");
         auto rotor_aero = std::make_shared<seahowl::aero::RotorAeroBEMT>(turbine.aero.tower);
@@ -761,7 +524,7 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
             auto filepath_monopile = (DATADIR / foundation_db.file.value()).generic_string();
             populate_tower_from_json(filepath_monopile, *monopile_core);
             monopile_elasto->discretization_fractions = foundation_db.discretization.elasto;
-            monopile_hydro->discretization_fractions = foundation_db.discretization.aero;
+            monopile_hydro->discretization_fractions = foundation_db.discretization.hydro;
 
             if (foundation_db.options.has_value()) {
                 auto& options = foundation_db.options.value();
@@ -855,7 +618,7 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
                     anchor_body.set_fixed(true);
 
                     MooringPropertiesDb mooring_properties_db =
-                        read_mooring_properties((DATADIR / mooring_db.line_properties).generic_string());
+                        read_mooring_properties_db((DATADIR / mooring_db.line_properties).generic_string());
 
                     // elasto
                     floater_elasto.mooring_system->moorings.push_back(
@@ -1097,17 +860,16 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
 
 void populate_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
     auto DATADIR = path(filepath).parent_path();
-    auto json_obj = get_json_from_file(filepath);
+    MainDb main_db = read_main_db(filepath);
 
     // outputs
-    auto outputs_json = json_obj.at("outputs");
     std::string output_folder = "./output";
-    if (outputs_json.contains("folder")) {
-        output_folder = outputs_json.at("folder").get<std::string>();
+    if (main_db.outputs.folder.has_value()) {
+        output_folder = main_db.outputs.folder.value();
     }
 
     // environmental info
-    auto filepath_environment = (DATADIR / json_obj.at("environment").at("file").get<std::string>()).generic_string();
+    auto filepath_environment = (DATADIR / main_db.environment.file).generic_string();
     populate_environmental_conditions_from_json(filepath_environment, system_core);
 
     populate_system(filepath, system_core, output_folder);
@@ -1123,14 +885,13 @@ void populate_system_from_config(const app::ConfigManager& config, seahowl::core
 
 void populate_system(const std::string& filepath, seahowl::core::System& system_core, std::string& output_folder) {
     auto DATADIR = path(filepath).parent_path();
-    auto json_obj = get_json_from_file(filepath);
+
+    MainDb main_db = read_main_db(filepath);
 
     // turbines
-    auto turbines_json = json_obj.at("turbines");
-    for (int ii = 0; ii < turbines_json.size(); ii++) {
+    for (const auto turbine_db : main_db.turbines) {
         // add turbine to system
-        auto turbine_json = turbines_json[ii];
-        auto filepath_turbine = (DATADIR / turbine_json.at("file").get<std::string>()).generic_string();
+        auto filepath_turbine = (DATADIR / turbine_db.file).generic_string();
         add_turbine_to_system_from_json(filepath_turbine, system_core);
 
         // get ref to turbine added last
@@ -1144,11 +905,10 @@ void populate_system(const std::string& filepath, seahowl::core::System& system_
         auto rot_angle = acos(v1.dot(v2));
         turbine.elasto.rotate(rot_angle, rot_axis);
         // rotation around axis opposite to gravity (yaw)
-        turbine.elasto.rotate(turbine_json.at("rotation").get<double>() * PI / 180.0,
+        turbine.elasto.rotate(turbine_db.rotation * PI / 180.0,
                               Vector3d(-system_core.elasto.get_gravitational_acceleration()).normalized());
         // translate turbine
-        auto trans = turbine_json.at("translation").get<std::vector<double>>();
-        turbine.elasto.translate(Vector3d(trans[0], trans[1], trans[2]));
+        turbine.elasto.translate(turbine_db.translation);
     }
 }
 

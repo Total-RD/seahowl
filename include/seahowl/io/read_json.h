@@ -196,6 +196,15 @@ void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core:
 void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turbine& turbine);
 
 /**
+ * @brief Populates turbine given a json file.
+ *
+ * @param[in] turbine_db Turbine database.
+ * @param[out] turbine Turbine to populate.
+ * @param[in] DATADIR Path of the directory containing the json file.
+ */
+void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbine, const fs::path& DATADIR);
+
+/**
  * @brief Creates and returns environmental conditions given a json file.
  *
  * @param[in] filepath Path of the json file describing the environmental conditions.

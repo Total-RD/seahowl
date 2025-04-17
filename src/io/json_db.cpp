@@ -68,7 +68,7 @@ json csv_to_json(const std::string& filename) {
     return json{{"reference_points", result}};
 }
 
-Eigen::MatrixX<double> get_matrix_from_vector_of_vectorsjj(std::vector<std::vector<double>> matvec) {
+Eigen::MatrixX<double> get_matrix_from_vector_of_vectors(std::vector<std::vector<double>> matvec) {
     int mat_nrows = matvec.size();
     int mat_ncols = 0;
     for (int irow = 0; irow < matvec.size(); irow++) {
@@ -262,7 +262,7 @@ void from_json(const json& js, NacelleDb& nacelle) {
     nacelle.mass = js.at("mass").get<double>();
 
     const auto& inertia = js.at("inertia");
-    nacelle.inertia = get_matrix_from_vector_of_vectorsjj(inertia);
+    nacelle.inertia = get_matrix_from_vector_of_vectors(inertia);
     nacelle.yaw_bearing_mass = js.at("yaw_bearing_mass").get<double>();
 }
 
@@ -281,7 +281,7 @@ void from_json(const json& js, HubDb& hub) {
     hub.mass = js.at("mass").get<double>();
 
     const auto& inertia = js.at("inertia");
-    hub.inertia = get_matrix_from_vector_of_vectorsjj(inertia);
+    hub.inertia = get_matrix_from_vector_of_vectors(inertia);
 }
 
 void from_json(const json& js, RnaDb& rna) {
@@ -440,11 +440,6 @@ void from_json(const json& js, AeroTurbineDb& aero) {
     from_json(js.at("options"), aero.options, aero.solver);
 }
 
-void from_json(const json& js, DiscretizationTurbineDb& discretization, const std::string& key) {
-    discretization.elasto = js.at("elasto").get<std::vector<double>>();
-    discretization.aero = js.at(key).get<std::vector<double>>();
-}
-
 void from_json(const json& js, BladeTurbineDb& blade) {
     blade.file = js.at("file").get<std::string>();
     blade.initial_pitch = js.at("initial_pitch").get<double>();
@@ -467,12 +462,17 @@ void from_json(const json& js, RotorOptionsTurbineDb& options) {
     options.radius = js.at("radius").get<double>();
 }
 
+void from_json(const json& js, DiscretizationRotorTurbineDb& discretization) {
+    discretization.elasto = js.at("elasto").get<std::vector<double>>();
+    discretization.aero = js.at("aero").get<std::vector<double>>();
+}
+
 void from_json(const json& js, RotorTurbineDb& rotor) {
     rotor.type = js.at("type").get<std::string>();
     if (rotor.type == "disk") {
         rotor.option = js.at("options").get<RotorOptionsTurbineDb>();
     } else {
-        from_json(js.at("discretization"), rotor.discretization, "aero");
+        rotor.discretization = js.at("discretization").get<DiscretizationRotorTurbineDb>();
         rotor.pitch_actuator_dynamics = js.at("pitch_actuator_dynamics").get<bool>();
         rotor.blades = js.at("blades").get<std::vector<BladeTurbineDb>>();
     }
@@ -498,8 +498,13 @@ void from_json(const json& js, TowerOptionsTurbineDb& options) {
             "Drag Coefficient correction for tower/pile not defined in turbine.json, it is by default set to {}.", 0.0);
 }
 
+void from_json(const json& js, DiscretizationTowerTurbineDb& discretization) {
+    discretization.elasto = js.at("elasto").get<std::vector<double>>();
+    discretization.aero = js.at("aero").get<std::vector<double>>();
+}
+
 void from_json(const json& js, TowerTurbineDb& tower) {
-    from_json(js.at("discretization"), tower.discretization, "aero");
+    tower.discretization = js.at("discretization").get<DiscretizationTowerTurbineDb>();
     tower.file = js.at("file").get<std::string>();
 
     if (js.contains("options") && !js["options"].is_null()) {
@@ -529,6 +534,11 @@ void from_json(const json& js, ControllerTurbineDb& controller) {
     from_json(js.at("options"), controller.options, controller.type);
 }
 
+void from_json(const json& js, DiscretizationFoundationTurbineDb& discretization) {
+    discretization.elasto = js.at("elasto").get<std::vector<double>>();
+    discretization.hydro = js.at("hydro").get<std::vector<double>>();
+}
+
 void from_json(const json& js, FoundationTurbineDb& foundation) {
     foundation.type = js.at("type").get<std::string>();
     if (js.contains("file") && !js["file"].is_null()) {
@@ -536,7 +546,7 @@ void from_json(const json& js, FoundationTurbineDb& foundation) {
     } else {
         foundation.file = std::nullopt;
     }
-    from_json(js.at("discretization"), foundation.discretization, "hydro");
+    foundation.discretization = js.at("discretization").get<DiscretizationFoundationTurbineDb>();
     if (js.contains("options") && !js["options"].is_null())
         foundation.options = js.at("options").get<TowerOptionsTurbineDb>();
     else
@@ -666,11 +676,66 @@ void from_json(const json& js, MooringPropertiesDb& mooring_props) {
     mooring_props.added_mass_coefficient_axial = js.at("added_mass_coefficient_axial").get<double>();
 }
 
-MooringPropertiesDb read_mooring_properties(const std::string& filepath) {
+MooringPropertiesDb read_mooring_properties_db(const std::string& filepath) {
     MooringPropertiesDb mooring_props;
     json json_db = get_json(filepath);
     from_json(json_db, mooring_props);
     return mooring_props;
+}
+
+void from_json(const json& js, StaticsMainDb& statics) {
+    statics.linear_step = js.at("linear_step").get<bool>();
+    statics.nonlinear_steps = js.at("nonlinear_steps").get<int>();
+}
+
+void from_json(const json& js, PresimulationMainDb& presimulation) {
+    presimulation.dt = js.at("dt").get<double>();
+    presimulation.duration = js.at("duration").get<double>();
+    presimulation.presetup = js.at("presetup").get<bool>();
+    presimulation.fix_towers = js.at("fix_towers").get<bool>();
+}
+
+void from_json(const json& js, NumericsMainDb& numerics) {
+    numerics.dt = js.at("dt").get<double>();
+    numerics.duration = js.at("duration").get<double>();
+    numerics.statics = js.at("statics").get<StaticsMainDb>();
+    numerics.presimulation = js.at("presimulation").get<PresimulationMainDb>();
+}
+
+void from_json(const json& js, OutputsMainDb& outputs) {
+    outputs.dt = js.at("dt").get<double>();
+    if (js.contains("folder") && !js["folder"].is_null()) {
+        outputs.folder = js.at("folder").get<std::string>();
+    } else {
+        outputs.folder = std::nullopt;
+    }
+    outputs.vtk = js.at("vtk").get<bool>();
+    outputs.log_level = js.at("log_level").get<std::string>();
+    outputs.gui = js.at("gui").get<bool>();
+}
+
+void from_json(const json& js, EnvironmentMainDb& environment) {
+    environment.file = js.at("file").get<std::string>();
+}
+
+void from_json(const json& js, TurbineMainDb& turbine) {
+    turbine.file = js.at("file").get<std::string>();
+    turbine.translation = Eigen::Vector3d(js.at("translation")[0], js.at("translation")[1], js.at("translation")[2]);
+    turbine.rotation = js.at("rotation").get<double>();
+}
+
+void from_json(const json& js, MainDb& config) {
+    config.numerics = js.at("numerics").get<NumericsMainDb>();
+    config.outputs = js.at("outputs").get<OutputsMainDb>();
+    config.environment = js.at("environment").get<EnvironmentMainDb>();
+    config.turbines = js.at("turbines").get<std::vector<TurbineMainDb>>();
+}
+
+MainDb read_main_db(const std::string& filepath) {
+    MainDb main_db;
+    json json_db = get_json(filepath);
+    from_json(json_db, main_db);
+    return main_db;
 }
 
 }  // namespace io

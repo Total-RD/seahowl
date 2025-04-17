@@ -45,7 +45,13 @@ Floaterdb read_floater_db(const std::string& filepath);
  * @brief Read mooring properties data from a file.
  * @param filepath Path to the mooring properties data file.
  */
-MooringPropertiesDb read_mooring_properties(const std::string& filepath);
+MooringPropertiesDb read_mooring_properties_db(const std::string& filepath);
+
+/**
+ * @brief Read main data from a file.
+ * @param filepath Path to the main data file.
+ */
+MainDb read_main_db(const std::string& filepath);
 
 }  // namespace io
 }  // namespace seahowl
