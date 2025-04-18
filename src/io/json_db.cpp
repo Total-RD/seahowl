@@ -173,7 +173,7 @@ json get_json(const std::string& filepath) {
     return json_db;
 }
 
-TowerDb read_tower_db(const std::string& filepath) {
+TowerDb read_tower_json(const std::string& filepath) {
     TowerDb tower_db;
     json json_db = get_json(filepath);
     from_json(json_db, tower_db);
@@ -229,13 +229,13 @@ void from_json(const json& js, AirfoilDb& airfoil_db) {
     airfoil_db.coefficients = js.at("coefficients").get<std::vector<std::vector<double>>>();
 }
 
-std::vector<AirfoilDb> read_airfoil_db(const std::string& filepath) {
+std::vector<AirfoilDb> read_airfoil_json(const std::string& filepath) {
     AirfoilDb airfoil_db;
     json json_db = get_json(filepath);
     return json_db.get<std::vector<AirfoilDb>>();
 }
 
-BladeDb read_blade_db(const std::string& filepath) {
+BladeDb read_blade_json(const std::string& filepath) {
     BladeDb blade_db;
     json json_db = get_json(filepath);
     from_json(json_db, blade_db);
@@ -245,7 +245,7 @@ BladeDb read_blade_db(const std::string& filepath) {
     for (auto& ref_point : blade_db.reference_points) {
         if (!ref_point.airfoil_file.empty()) {
             auto airfoil_filepath = main_directory / ref_point.airfoil_file;
-            ref_point.airfoil_db_list = read_airfoil_db(airfoil_filepath.u8string());
+            ref_point.airfoil_db_list = read_airfoil_json(airfoil_filepath.u8string());
         }
     }
     return blade_db;
@@ -291,7 +291,7 @@ void from_json(const json& js, RnaDb& rna) {
     rna.hub = js.at("hub").get<HubDb>();
 }
 
-RnaDb read_rna_db(const std::string& filepath) {
+RnaDb read_rna_json(const std::string& filepath) {
     RnaDb rna_db;
     json json_db = get_json(filepath);
     from_json(json_db, rna_db);
@@ -415,10 +415,15 @@ void from_json(const json& js, EnvironmentDb& env) {
     }
 }
 
-EnvironmentDb read_environment_db(const std::string& filepath) {
+EnvironmentDb read_environment_json(const std::string& filepath) {
     EnvironmentDb env_db;
     json json_db = get_json(filepath);
     from_json(json_db, env_db);
+    auto main_directory = fs::path(filepath).parent_path();
+    if (env_db.wind.type == "inflowwind") {
+        auto inflowwind_filepath = main_directory / env_db.wind.options.file_inflowwind;
+        env_db.wind.options.file_inflowwind_path = inflowwind_filepath;
+    }
     return env_db;
 }
 
@@ -566,10 +571,57 @@ void from_json(const json& js, TurbineDb& turbine) {
     }
 }
 
-TurbineDb read_turbine_db(const std::string& filepath) {
+TurbineDb read_turbine_json(const std::string& filepath) {
     TurbineDb turbine_db;
     json json_db = get_json(filepath);
     from_json(json_db, turbine_db);
+
+    // Finalize
+    auto main_directory = fs::path(filepath).parent_path();
+    if (turbine_db.aero.solver == "aerodyn") {
+        auto inflowwind_filepath = main_directory / turbine_db.aero.options.file_inflowwind;
+        turbine_db.aero.options.file_inflowwind_path = inflowwind_filepath;
+    }
+    if (turbine_db.aero.solver == "disk") {
+        auto performance_filepath = main_directory / turbine_db.aero.options.performance_file;
+        turbine_db.aero.options.performance_file_path = performance_filepath;
+    }
+    // Finalize the rna database
+    auto rna_filepath = main_directory / turbine_db.rna.file;
+    turbine_db.rna.data = read_rna_json(rna_filepath.generic_string());
+    // Read the rotor database
+    for (auto& blade : turbine_db.rotor.blades) {
+        auto blade_filepath = main_directory / blade.file;
+        blade.data = read_blade_json(blade_filepath.generic_string());
+    }
+    // Finalize the tower database
+    auto tower_filepath = main_directory / turbine_db.tower.file;
+    turbine_db.tower.data = read_tower_json(tower_filepath.generic_string());
+
+    if (turbine_db.foundation.has_value()) {
+        auto& foundation_db = turbine_db.foundation.value();
+        if (foundation_db.file.has_value()) {
+            auto file = main_directory / foundation_db.file.value();
+            if (foundation_db.type == "Floater") {
+                foundation_db.data_floater = read_floater_json(file.generic_string());
+            } else if (foundation_db.type == "monopile") {
+                foundation_db.data_tower = read_tower_json(file.generic_string());
+            }
+        }
+        if (foundation_db.type == "floater") {
+            foundation_db.data_floater.options_file_path = main_directory / foundation_db.data_floater.options_file;
+            for (auto& mooring : foundation_db.data_floater.moorings) {
+                auto line_properties_filepath = main_directory / mooring.line_properties;
+                mooring.properties = read_mooring_properties_json(line_properties_filepath.generic_string());
+            }
+        }
+    }
+    // Finalize the controller database
+    auto discon_filepath = main_directory / turbine_db.controller.options.infile;
+    turbine_db.controller.options.infile_path = discon_filepath;
+    auto lib_filepath = main_directory / turbine_db.controller.options.libfile;
+    turbine_db.controller.options.libfile_path = lib_filepath;
+
     return turbine_db;
 }
 
@@ -658,7 +710,7 @@ void from_json(const json& js, Floaterdb& floater) {
     floater.moorings = js.at("moorings").get<std::vector<MooringFloaterdb>>();
 }
 
-Floaterdb read_floater_db(const std::string& filepath) {
+Floaterdb read_floater_json(const std::string& filepath) {
     Floaterdb floater_db;
     json json_db = get_json(filepath);
     from_json(json_db, floater_db);
@@ -676,7 +728,7 @@ void from_json(const json& js, MooringPropertiesDb& mooring_props) {
     mooring_props.added_mass_coefficient_axial = js.at("added_mass_coefficient_axial").get<double>();
 }
 
-MooringPropertiesDb read_mooring_properties_db(const std::string& filepath) {
+MooringPropertiesDb read_mooring_properties_json(const std::string& filepath) {
     MooringPropertiesDb mooring_props;
     json json_db = get_json(filepath);
     from_json(json_db, mooring_props);
@@ -731,10 +783,20 @@ void from_json(const json& js, MainDb& config) {
     config.turbines = js.at("turbines").get<std::vector<TurbineMainDb>>();
 }
 
-MainDb read_main_db(const std::string& filepath) {
+MainDb read_main_json(const std::string& filepath) {
     MainDb main_db;
     json json_db = get_json(filepath);
     from_json(json_db, main_db);
+    auto main_directory = fs::path(filepath).parent_path();
+    for (auto& turbine : main_db.turbines) {
+        if (!turbine.file.empty()) {
+            auto turbine_filepath = main_directory / turbine.file;
+            turbine.data = read_turbine_json(turbine_filepath.generic_string());
+        }
+    }
+
+    auto env_filepath = main_directory / main_db.environment.file;
+    main_db.environment.data = read_environment_json(env_filepath.generic_string());
     return main_db;
 }
 

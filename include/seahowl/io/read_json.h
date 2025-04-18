@@ -97,6 +97,14 @@ void populate_blade_aero_from_json(const std::string& filepath, seahowl::aero::B
 void populate_blade_from_json(const std::string& filepath, seahowl::core::Blade& blade);
 
 /**
+ * @brief Populates blade given a json file.
+ *
+ * @param[in] blade_db Blade database.
+ * @param[out] blade Blade to populate.
+ */
+void populate_blade(const BladeDb& blade_db, seahowl::core::Blade& blade);
+
+/**
  * @brief Returns tower elasto reference points given a TowerData object.
  * @param[in] tower_data TowerData object.
  */
@@ -130,6 +138,14 @@ void populate_tower_aero_from_json(const std::string& filepath, seahowl::aero::T
  * @param[out] tower Tower to populate.
  */
 void populate_tower_from_json(const std::string& filepath, seahowl::core::Tower& tower);
+
+/**
+ * @brief Populates tower given a json file.
+ *
+ * @param[in] tower_db Tower database.
+ * @param[out] tower Tower to populate.
+ */
+void populate_tower_from_db(const TowerDb& tower_db, seahowl::core::Tower& tower);
 
 /**
  * @brief Populates RNA elasto given a json file.
@@ -190,6 +206,14 @@ void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core:
 /**
  * @brief Populates turbine given a json file.
  *
+ * @param[in] turbine_db Turbine database.
+ * @param[out] system_core System to add the new turbine.
+ */
+void add_turbine_to_system_from_db(const TurbineDb& turbine_db, seahowl::core::System& system_core);
+
+/**
+ * @brief Populates turbine given a json file.
+ *
  * @param[in] filepath Path of the json file describing the turbine.
  * @param[out] turbine Turbine to populate.
  */
@@ -202,7 +226,7 @@ void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turb
  * @param[out] turbine Turbine to populate.
  * @param[in] DATADIR Path of the directory containing the json file.
  */
-void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbine, const fs::path& DATADIR);
+void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbine& turbine);
 
 /**
  * @brief Creates and returns environmental conditions given a json file.
@@ -217,8 +241,7 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
  * @param[in] environment_db Environment database.
  * @param[in] DATADIR Path of the directory containing the json file.
  */
-std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model(const EnvironmentDb& environment_db,
-                                                                      const fs::path& DATADIR);
+std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(const EnvironmentDb& environment_db);
 
 /**
  * @brief Populates environmental conditions given a json file and a system.
@@ -227,6 +250,14 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model(const Envi
  * @param[out] system_core System to populate.
  */
 void populate_environmental_conditions_from_json(const std::string& filepath, seahowl::core::System& system_core);
+
+/**
+ * @brief Populates environmental conditions given a json file and a system.
+ *
+ * @param[in] environment_db Environment database.
+ * @param[out] system_core System to populate.
+ */
+void populate_environmental_conditions_from_db(const EnvironmentDb& environment_db, seahowl::core::System& system_core);
 
 /**
  * @brief Returns System instance given a json file.
@@ -248,9 +279,8 @@ void populate_system_from_config(const app::ConfigManager& config, seahowl::core
  *
  * @param[in] filepath Path of the json file describing the system.
  * @param[out] system_core System to populate.
- * @param[out] output_folder Output folder.
  */
-void populate_system(const std::string& filepath, seahowl::core::System& system_core, std::string& output_folder);
+void populate_system(const MainDb& main_db, seahowl::core::System& system_core);
 
 }  // namespace io
 }  // namespace seahowl

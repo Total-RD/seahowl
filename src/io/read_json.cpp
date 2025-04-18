@@ -67,7 +67,7 @@ namespace io {
 
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
     const std::string& filepath) {
-    BladeDb blade_db = read_blade_db(filepath);
+    BladeDb blade_db = read_blade_json(filepath);
     return get_blade_elasto_reference_points_from_db(blade_db);
 }
 
@@ -98,7 +98,7 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
 
 std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_json(
     const std::string& filepath) {
-    BladeDb blade_db = read_blade_db(filepath);
+    BladeDb blade_db = read_blade_json(filepath);
     return get_blade_aero_reference_points_from_db(blade_db);
 }
 
@@ -149,9 +149,14 @@ void populate_blade_aero_from_json(const std::string& filepath, seahowl::aero::B
     blade.reference_points = get_blade_aero_reference_points_from_json(filepath);
 }
 
+void populate_blade(const BladeDb& blade_db, seahowl::core::Blade& blade) {
+    blade.elasto.reference_points = get_blade_elasto_reference_points_from_db(blade_db);
+    blade.aero.reference_points = get_blade_aero_reference_points_from_db(blade_db);
+}
+
 void populate_blade_from_json(const std::string& filepath, seahowl::core::Blade& blade) {
     spdlog::debug("Populating blade from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
-    BladeDb blade_db = read_blade_db(filepath);
+    BladeDb blade_db = read_blade_json(filepath);
     blade.elasto.reference_points = get_blade_elasto_reference_points_from_db(blade_db);
     blade.aero.reference_points = get_blade_aero_reference_points_from_db(blade_db);
 }
@@ -215,7 +220,7 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
 }
 
 void populate_tower_elasto_from_json(const std::string& filepath, seahowl::elasto::TowerElasto& tower) {
-    TowerDb tower_db = seahowl::io::read_tower_db(filepath);
+    TowerDb tower_db = seahowl::io::read_tower_json(filepath);
     tower.reference_points = get_tower_elasto_reference_points(tower_db);
     tower.height = tower.reference_points.back().coordinates.z();
     tower.base_height = tower.reference_points.front().coordinates.z();
@@ -223,28 +228,37 @@ void populate_tower_elasto_from_json(const std::string& filepath, seahowl::elast
 
 void populate_tower_aero_from_json(const std::string& filepath, seahowl::aero::TowerAero& tower) {
     utils::check_file_exists(filepath);
-    TowerDb tower_data = seahowl::io::read_tower_db(filepath);
+    TowerDb tower_data = seahowl::io::read_tower_json(filepath);
     tower.reference_points = get_tower_aero_reference_points(tower_data);
 }
 
 void populate_tower_from_json(const std::string& filepath, seahowl::core::Tower& tower) {
     spdlog::debug("Populating tower from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
-    TowerDb tower_data = seahowl::io::read_tower_db(filepath);
+    TowerDb tower_db = seahowl::io::read_tower_json(filepath);
     // elasto
-    tower.elasto.reference_points = get_tower_elasto_reference_points(tower_data);
+    tower.elasto.reference_points = get_tower_elasto_reference_points(tower_db);
     tower.elasto.height = tower.elasto.reference_points.back().coordinates.z();
     tower.elasto.base_height = tower.elasto.reference_points.front().coordinates.z();
     // aero
-    tower.aero.reference_points = get_tower_aero_reference_points(tower_data);
+    tower.aero.reference_points = get_tower_aero_reference_points(tower_db);
+}
+
+void populate_tower_from_db(const TowerDb& tower_db, seahowl::core::Tower& tower) {
+    // elasto
+    tower.elasto.reference_points = get_tower_elasto_reference_points(tower_db);
+    tower.elasto.height = tower.elasto.reference_points.back().coordinates.z();
+    tower.elasto.base_height = tower.elasto.reference_points.front().coordinates.z();
+    // aero
+    tower.aero.reference_points = get_tower_aero_reference_points(tower_db);
 }
 
 void populate_rna_elasto_from_json(const std::string& filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
-    RnaDb rna_db = read_rna_db(filepath);
+    RnaDb rna_db = read_rna_json(filepath);
     populate_rna_elasto_from_db(rna_db, rna);
 }
 
 void populate_rna_aero_from_json(const std::string& filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
-    RnaDb rna_db = read_rna_db(filepath);
+    RnaDb rna_db = read_rna_json(filepath);
     populate_rna_aero_from_db(rna_db, rna);
 }
 
@@ -279,7 +293,7 @@ void populate_rna_aero_from_db(const RnaDb& rna_db, seahowl::aero::RotorNacelleA
 
 void populate_rna_from_json(const std::string& filepath, seahowl::core::RotorNacelleAssembly& rna) {
     spdlog::debug("Populating RNA from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
-    RnaDb rna_db = read_rna_db(filepath);
+    RnaDb rna_db = read_rna_json(filepath);
     populate_rna_elasto_from_db(rna_db, rna.elasto);
     populate_rna_aero_from_db(rna_db, rna.aero);
 }
@@ -288,13 +302,14 @@ void populate_rna_from_db(const RnaDb& rna_db, seahowl::core::RotorNacelleAssemb
     populate_rna_elasto_from_db(rna_db, rna.elasto);
     populate_rna_aero_from_db(rna_db, rna.aero);
 }
-
 void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
     spdlog::debug("Adding turbine to system from " + filepath + " file.");
 
-    auto DATADIR = path(filepath).parent_path();
-    TurbineDb turbine_db = read_turbine_db(filepath);
+    TurbineDb turbine_db = read_turbine_json(filepath);
+    add_turbine_to_system_from_db(turbine_db, system_core);
+}
 
+void add_turbine_to_system_from_db(const TurbineDb& turbine_db, seahowl::core::System& system_core) {
     // make turbine aero
     if (turbine_db.aero.solver == "aerodyn") {
 #ifdef HAVE_AERODYN
@@ -317,7 +332,7 @@ void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core:
     system_core.turbines.push_back(turbine);
 
     // populate turbine
-    populate_turbine(turbine_db, *turbine, DATADIR);
+    populate_turbine_from_db(turbine_db, *turbine);
 
     turbine->build();
 }
@@ -325,13 +340,12 @@ void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core:
 void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turbine& turbine) {
     spdlog::debug("Populating turbine from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
                   ").");
-    auto DATADIR = path(filepath).parent_path();
 
-    TurbineDb turbine_db = read_turbine_db(filepath);
-    populate_turbine(turbine_db, turbine, DATADIR);
+    TurbineDb turbine_db = read_turbine_json(filepath);
+    populate_turbine_from_db(turbine_db, turbine);
 }
 
-void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbine, const fs::path& DATADIR) {
+void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbine& turbine) {
     if (turbine_db.aero.solver == "bemt") {
         spdlog::info("Aerodynamic model: Blade Element Momentum Theory (BEMT).");
         auto rotor_aero = std::make_shared<seahowl::aero::RotorAeroBEMT>(turbine.aero.tower);
@@ -349,7 +363,7 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
         auto rotor_disk = std::make_shared<seahowl::aero::RotorAeroDisk>();
         turbine.rna.aero.rotor = rotor_disk;
         // get rotor performance from table
-        auto perf_filepath = (DATADIR / turbine_db.aero.options.performance_file).generic_string();
+        auto perf_filepath = (turbine_db.aero.options.performance_file_path).generic_string();
         get_disk_perf_from_table(perf_filepath, *rotor_disk);
     } else if (turbine_db.aero.solver == "aerodyn") {
         spdlog::info("Aerodynamic model: AeroDyn.");
@@ -364,12 +378,12 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
         std::string inflowwind_filepath;
         std::string aerodyn_filepath;
         if (!turbine_db.aero.options.file_aerodyn.empty()) {
-            aerodyn_filepath = (DATADIR / turbine_db.aero.options.file_aerodyn).generic_string();
+            aerodyn_filepath = turbine_db.aero.options.file_aerodyn_path.generic_string();
         } else {
             throw std::runtime_error("Turbine set to use aerodyn but AeroDyn file path not defined.");
         }
         if (!turbine_db.aero.options.file_inflowwind.empty()) {
-            inflowwind_filepath = (DATADIR / turbine_db.aero.options.file_inflowwind).generic_string();
+            inflowwind_filepath = turbine_db.aero.options.file_inflowwind_path.generic_string();
         } else {
             throw std::runtime_error("Turbine set to use aerodyn but InflowWind file not defined.");
         }
@@ -406,7 +420,6 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
         std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades_aero;
 
         for (auto& blade_db : turbine_db.rotor.blades) {
-            auto filepath_blade = (DATADIR / blade_db.file).generic_string();
             std::shared_ptr<seahowl::elasto::BladeElasto> blade_elasto;
             if (turbine_db.rotor.type == "fea" || turbine_db.rotor.type == "fpm") {
                 blade_elasto = std::make_shared<seahowl::elasto::BladeElastoFEA>();
@@ -422,7 +435,7 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
             }
             auto blade_aero = std::make_shared<seahowl::aero::BladeAero>();
             auto blade = std::make_shared<seahowl::core::Blade>(*blade_elasto, *blade_aero);
-            populate_blade_from_json(filepath_blade, *blade);
+            populate_blade(blade_db.data, *blade);
             blade->aero.discretization_fractions = turbine_db.rotor.discretization.aero;
             blade_elasto->pitch0 = blade_db.initial_pitch * PI / 180.0;
             blade_elasto->precone = blade_db.precone * PI / 180.0;
@@ -442,11 +455,7 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
     }
 
     // RNA
-    auto filepath_rna = (DATADIR / turbine_db.rna.file).generic_string();
-    spdlog::debug("Populating RNA from " + filepath_rna + " file (absolute: " + absolute(path(filepath_rna)).string() +
-                  ").");
-    RnaDb rna_db = read_rna_db(filepath_rna);
-    populate_rna_from_db(rna_db, turbine.rna);
+    populate_rna_from_db(turbine_db.rna.data, turbine.rna);
     auto yaw_rna = turbine_db.rna.initial_yaw * PI / 180.0;
     turbine.rna.elasto.yaw0 = yaw_rna;
     bool has_yaw_actuator_dynamics = turbine_db.rna.yaw_actuator_dynamics;
@@ -460,8 +469,7 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
     }
 
     // tower
-    auto filepath_tower = (DATADIR / turbine_db.tower.file).generic_string();
-    populate_tower_from_json(filepath_tower, turbine.tower);
+    populate_tower_from_db(turbine_db.tower.data, turbine.tower);
     turbine.elasto.tower.discretization_fractions = turbine_db.tower.discretization.elasto;
     turbine.aero.tower.discretization_fractions = turbine_db.tower.discretization.aero;
     if (turbine_db.tower.options.has_value()) {
@@ -477,13 +485,13 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
     // controller
     if (turbine_db.controller.type == "DISCON") {
         auto libfilepath = turbine_db.controller.options.libfile;
-        if (libfilepath != "") {
+        if (turbine_db.controller.options.libfile != "") {
             // path
-            libfilepath = path(DATADIR / libfilepath).generic_string();
+            libfilepath = turbine_db.controller.options.libfile_path.generic_string();
         }
         auto infilepath = turbine_db.controller.options.infile;
-        if (infilepath != "") {
-            infilepath = (DATADIR / infilepath).generic_string();
+        if (turbine_db.controller.options.infile != "") {
+            infilepath = turbine_db.controller.options.infile_path.generic_string();
         }
         // instantiate controller
         auto controller = std::make_shared<seahowl::servo::ControllerDISCON>(infilepath, libfilepath);
@@ -497,6 +505,7 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
 
     // get extra drivetrain info
     // gearbox
+    auto& rna_db = turbine_db.rna.data;
     turbine.gearbox_ratio = rna_db.drivetrain.gearbox_ratio;
     turbine.gearbox_efficiency = rna_db.drivetrain.gearbox_efficiency;
     turbine.gearbox_efficiency /= 100.0;
@@ -521,8 +530,7 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
             turbine.foundation = monopile_core;
 
             // populate monopile
-            auto filepath_monopile = (DATADIR / foundation_db.file.value()).generic_string();
-            populate_tower_from_json(filepath_monopile, *monopile_core);
+            populate_tower_from_db(foundation_db.data_tower, *monopile_core);
             monopile_elasto->discretization_fractions = foundation_db.discretization.elasto;
             monopile_hydro->discretization_fractions = foundation_db.discretization.hydro;
 
@@ -542,9 +550,7 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
             auto& floater_hydro = *floater_hydro_ptr;
 
             if (foundation_db.file.has_value()) {
-                ;
-
-                Floaterdb floater_db = read_floater_db((DATADIR / foundation_db.file.value()).generic_string());
+                Floaterdb floater_db = turbine_db.foundation.value().data_floater;
 
                 if (floater_db.type == "HydroChrono") {
                     spdlog::info("Hydrodynamic model: HydroChrono.");
@@ -554,7 +560,7 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
                     turbine_elasto.foundation = floater_elasto_ptr;
                     // add h5file path
 
-                    floater_elasto_ptr->set_h5_filepath((DATADIR / floater_db.options_file).generic_string());
+                    floater_elasto_ptr->set_h5_filepath((floater_db.options_file_path).generic_string());
 #else
                     throw std::runtime_error(
                         "Trying to use HydroChrono but did not compile with HydroChrono dependency.");
@@ -617,31 +623,28 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
                     anchor_body.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
                     anchor_body.set_fixed(true);
 
-                    MooringPropertiesDb mooring_properties_db =
-                        read_mooring_properties_db((DATADIR / mooring_db.line_properties).generic_string());
-
                     // elasto
                     floater_elasto.mooring_system->moorings.push_back(
                         std::make_shared<seahowl::elasto::MooringElastoFEA>(fairlead_body, anchor_body));
                     auto& mooring_elasto = dynamic_cast<seahowl::elasto::MooringElastoFEA&>(
                         *floater_elasto.mooring_system->moorings.back());
                     mooring_elasto.length = mooring_db.length;
-                    mooring_elasto.diameter = mooring_properties_db.diameter;
+                    mooring_elasto.diameter = mooring_db.properties.diameter;
                     mooring_elasto.discretization_fractions = mooring_db.discretization.elasto;
-                    mooring_elasto.stiffness_axial = mooring_properties_db.stiffness_axial;
-                    mooring_elasto.stiffness_bending = mooring_properties_db.stiffness_bending;
-                    mooring_elasto.density_linear = mooring_properties_db.density_linear;
+                    mooring_elasto.stiffness_axial = mooring_db.properties.stiffness_axial;
+                    mooring_elasto.stiffness_bending = mooring_db.properties.stiffness_bending;
+                    mooring_elasto.density_linear = mooring_db.properties.density_linear;
 
                     // hydro
                     floater_hydro.mooring_system->moorings.push_back(std::make_shared<seahowl::hydro::MooringHydro>());
                     auto& mooring_hydro = *floater_hydro.mooring_system->moorings.back();
                     mooring_hydro.length = mooring_db.length;
-                    mooring_hydro.diameter = mooring_properties_db.diameter;
+                    mooring_hydro.diameter = mooring_db.properties.diameter;
                     mooring_hydro.discretization_fractions = mooring_db.discretization.hydro;
-                    mooring_hydro.coefficients.drag_normal = mooring_properties_db.drag_coefficient_normal;
-                    mooring_hydro.coefficients.drag_axial = mooring_properties_db.drag_coefficient_axial;
-                    mooring_hydro.coefficients.added_mass_normal = mooring_properties_db.added_mass_coefficient_normal;
-                    mooring_hydro.coefficients.added_mass_axial = mooring_properties_db.added_mass_coefficient_axial;
+                    mooring_hydro.coefficients.drag_normal = mooring_db.properties.drag_coefficient_normal;
+                    mooring_hydro.coefficients.drag_axial = mooring_db.properties.drag_coefficient_axial;
+                    mooring_hydro.coefficients.added_mass_normal = mooring_db.properties.added_mass_coefficient_normal;
+                    mooring_hydro.coefficients.added_mass_axial = mooring_db.properties.added_mass_coefficient_axial;
 
                     floater_core.mooring_system->moorings.push_back(
                         std::make_shared<seahowl::core::Mooring>(mooring_elasto, mooring_hydro));
@@ -662,13 +665,12 @@ void populate_turbine(const TurbineDb& turbine_db, seahowl::core::Turbine& turbi
 std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(const std::string& filepath) {
     spdlog::debug("Getting environmental conditions from " + filepath + " file.");
     auto DATADIR = path(filepath).parent_path();
-    EnvironmentDb environment_db = read_environment_db(filepath);
+    EnvironmentDb environment_db = read_environment_json(filepath);
 
-    return get_environmental_model(environment_db, DATADIR);
+    return get_environmental_model_from_db(environment_db);
 }
 
-std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model(const EnvironmentDb& environment_db,
-                                                                      const fs::path& DATADIR) {
+std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(const EnvironmentDb& environment_db) {
     // gravity
     auto gravity_vector = environment_db.gravity;
     auto gravity_direction = gravity_vector / gravity_vector.norm();
@@ -780,7 +782,7 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model(const Envi
 #ifdef HAVE_INFLOWWIND
         std::string inflowwind_filepath;
 
-        inflowwind_filepath = (DATADIR / wind_db.options.file_inflowwind).generic_string();
+        inflowwind_filepath = (wind_db.options.file_inflowwind_path).generic_string();
 
         auto ifw_model = std::make_shared<seahowl::env::InflowWindAdapter>(inflowwind_filepath);
         wind_model_ptr = ifw_model;
@@ -842,13 +844,18 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
 
     auto DATADIR = path(filepath).parent_path();
 
-    EnvironmentDb environment_db = read_environment_db(filepath);
+    EnvironmentDb environment_db = read_environment_json(filepath);
 
+    populate_environmental_conditions_from_db(environment_db, system_core);
+}
+
+void populate_environmental_conditions_from_db(const EnvironmentDb& environment_db,
+                                               seahowl::core::System& system_core) {
     // gravity
     auto gravity = environment_db.gravity;
     system_core.elasto.set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
 
-    auto env_model = get_environmental_model(environment_db, DATADIR);
+    auto env_model = get_environmental_model_from_db(environment_db);
 
     if (env_model->fluid_model) {
         system_core.fluid_model = env_model->fluid_model;
@@ -859,40 +866,28 @@ void populate_environmental_conditions_from_json(const std::string& filepath, se
 }
 
 void populate_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
-    auto DATADIR = path(filepath).parent_path();
-    MainDb main_db = read_main_db(filepath);
-
-    // outputs
-    std::string output_folder = "./output";
-    if (main_db.outputs.folder.has_value()) {
-        output_folder = main_db.outputs.folder.value();
-    }
-
+    MainDb main_db = read_main_json(filepath);
     // environmental info
-    auto filepath_environment = (DATADIR / main_db.environment.file).generic_string();
-    populate_environmental_conditions_from_json(filepath_environment, system_core);
+    populate_environmental_conditions_from_db(main_db.environment.data, system_core);
 
-    populate_system(filepath, system_core, output_folder);
+    populate_system(main_db, system_core);
 }
 
 void populate_system_from_config(const app::ConfigManager& config, seahowl::core::System& system_core) {
     // environmental info
     auto filepath_environment = config.get_string("environment.file");
     populate_environmental_conditions_from_json(filepath_environment, system_core);
-    std::string output_folder = config.get_string("outputs.folder");
-    populate_system(config.get_json_filepath(), system_core, output_folder);
+
+    MainDb main_db = read_main_json(config.get_json_filepath());
+
+    populate_system(main_db, system_core);
 }
 
-void populate_system(const std::string& filepath, seahowl::core::System& system_core, std::string& output_folder) {
-    auto DATADIR = path(filepath).parent_path();
-
-    MainDb main_db = read_main_db(filepath);
-
+void populate_system(const MainDb& main_db, seahowl::core::System& system_core) {
     // turbines
     for (const auto turbine_db : main_db.turbines) {
         // add turbine to system
-        auto filepath_turbine = (DATADIR / turbine_db.file).generic_string();
-        add_turbine_to_system_from_json(filepath_turbine, system_core);
+        add_turbine_to_system_from_db(turbine_db.data, system_core);
 
         // get ref to turbine added last
         auto& turbine = *system_core.turbines.back();

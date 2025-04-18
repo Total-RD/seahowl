@@ -2,6 +2,9 @@
 
 #include <seahowl/commons/numerics.h>
 #include <optional>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace seahowl {
 namespace io {
@@ -123,6 +126,7 @@ struct WindOptionDb {
     double time_start;
     double time_end;
     std::string file_inflowwind;
+    fs::path file_inflowwind_path;
     double zmin;
 };
 
@@ -184,8 +188,11 @@ struct AeroOptionsTurbineDb {
     bool tip_loss;
     bool tower_shadow;
     std::string performance_file;
+    fs::path performance_file_path;
     std::string file_aerodyn;
+    fs::path file_aerodyn_path;
     std::string file_inflowwind;
+    fs::path file_inflowwind_path;
 };
 
 struct AeroTurbineDb {
@@ -200,6 +207,7 @@ struct DiscretizationTurbineDb {
 
 struct BladeTurbineDb {
     std::string file;
+    BladeDb data;
     double initial_pitch;
     double precone;
 };
@@ -224,6 +232,7 @@ struct RotorTurbineDb {
 
 struct RNATurbineDb {
     std::string file;
+    RnaDb data;
     double initial_yaw;
     bool yaw_actuator_dynamics;
 };
@@ -240,12 +249,15 @@ struct DiscretizationTowerTurbineDb {
 struct TowerTurbineDb {
     DiscretizationTowerTurbineDb discretization;
     std::string file;
+    TowerDb data;
     std::optional<TowerOptionsTurbineDb> options;
 };
 
 struct ControllerOptionsTurbineDb {
     std::string infile;
+    fs::path infile_path;
     std::string libfile;
+    fs::path libfile_path;
     double target_rpm;
 };
 
@@ -259,40 +271,6 @@ struct DiscretizationFoundationTurbineDb {
     std::vector<double> hydro;
 };
 
-struct FoundationTurbineDb {
-    std::string type;
-    std::optional<std::string> file;
-    DiscretizationFoundationTurbineDb discretization;
-    std::optional<TowerOptionsTurbineDb> options;
-};
-
-struct TurbineDb {
-    AeroTurbineDb aero;
-    RotorTurbineDb rotor;
-    RNATurbineDb rna;
-    TowerTurbineDb tower;
-    ControllerTurbineDb controller;
-    std::optional<FoundationTurbineDb> foundation;
-};
-
-struct DiscretizationFloaterdb {
-    std::vector<double> elasto;
-    std::vector<double> hydro;
-};
-
-struct MooringFloaterdb {
-    std::string connected_body_name;
-    std::string line_properties;
-    double length;
-    DiscretizationFloaterdb discretization;
-    bool relative_fairlead;
-    bool relative_anchor;
-    Eigen::Vector3d fairlead_position;
-    Eigen::Vector3d anchor_position;
-    Eigen::Vector3d rotation_axis;
-    double rotation_angle;
-};
-
 struct BodyFloaterdb {
     std::string name;
     Eigen::Vector3d position;
@@ -300,15 +278,9 @@ struct BodyFloaterdb {
     Eigen::Matrix3d inertia;
 };
 
-struct Floaterdb {
-    std::string type;
-    std::string options_file;
-    Eigen::Vector3d position;
-    double mass;
-    Eigen::Matrix3d inertia;
-    Eigen::MatrixXd damping_matrix;
-    std::vector<BodyFloaterdb> bodies;
-    std::vector<MooringFloaterdb> moorings;
+struct DiscretizationFloaterdb {
+    std::vector<double> elasto;
+    std::vector<double> hydro;
 };
 
 struct MooringPropertiesDb {
@@ -320,6 +292,48 @@ struct MooringPropertiesDb {
     double drag_coefficient_axial;
     double added_mass_coefficient_normal;
     double added_mass_coefficient_axial;
+};
+struct MooringFloaterdb {
+    std::string connected_body_name;
+    std::string line_properties;
+    double length;
+    DiscretizationFloaterdb discretization;
+    bool relative_fairlead;
+    bool relative_anchor;
+    Eigen::Vector3d fairlead_position;
+    Eigen::Vector3d anchor_position;
+    Eigen::Vector3d rotation_axis;
+    double rotation_angle;
+    MooringPropertiesDb properties;
+};
+
+struct Floaterdb {
+    std::string type;
+    std::string options_file;
+    fs::path options_file_path;
+    Eigen::Vector3d position;
+    double mass;
+    Eigen::Matrix3d inertia;
+    Eigen::MatrixXd damping_matrix;
+    std::vector<BodyFloaterdb> bodies;
+    std::vector<MooringFloaterdb> moorings;
+};
+struct FoundationTurbineDb {
+    std::string type;
+    std::optional<std::string> file;
+    Floaterdb data_floater;
+    TowerDb data_tower;
+    DiscretizationFoundationTurbineDb discretization;
+    std::optional<TowerOptionsTurbineDb> options;
+};
+
+struct TurbineDb {
+    AeroTurbineDb aero;
+    RotorTurbineDb rotor;
+    RNATurbineDb rna;
+    TowerTurbineDb tower;
+    ControllerTurbineDb controller;
+    std::optional<FoundationTurbineDb> foundation;
 };
 
 struct StaticsMainDb {
@@ -351,10 +365,12 @@ struct OutputsMainDb {
 
 struct EnvironmentMainDb {
     std::string file;
+    EnvironmentDb data;
 };
 
 struct TurbineMainDb {
     std::string file;
+    TurbineDb data;
     Eigen::Vector3d translation;
     double rotation;
 };

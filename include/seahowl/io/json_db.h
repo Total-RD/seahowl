@@ -9,49 +9,49 @@ namespace io {
  * @brief Read tower data from a file.
  * @param filepath Path to the tower data file.
  */
-TowerDb read_tower_db(const std::string& filepath);
+TowerDb read_tower_json(const std::string& filepath);
 
 /**
  * @brief Read blade data from a file.
  * @param filepath Path to the blade data file.
  */
-BladeDb read_blade_db(const std::string& filepath);
+BladeDb read_blade_json(const std::string& filepath);
 
 /**
  * @brief Read RNA data from a file.
  * @param filepath Path to the RNA data file.
  */
-RnaDb read_rna_db(const std::string& filepath);
+RnaDb read_rna_json(const std::string& filepath);
 
 /**
  * @brief Read environment data from a file.
  * @param filepath Path to the environment data file.
  */
-EnvironmentDb read_environment_db(const std::string& filepath);
+EnvironmentDb read_environment_json(const std::string& filepath);
 
 /**
  * @brief Read turbine data from a file.
  * @param filepath Path to the wind data file.
  */
-TurbineDb read_turbine_db(const std::string& filepath);
+TurbineDb read_turbine_json(const std::string& filepath);
 
 /**
  * @brief Read floater data from a file.
  * @param filepath Path to the floater data file.
  */
-Floaterdb read_floater_db(const std::string& filepath);
+Floaterdb read_floater_json(const std::string& filepath);
 
 /**
  * @brief Read mooring properties data from a file.
  * @param filepath Path to the mooring properties data file.
  */
-MooringPropertiesDb read_mooring_properties_db(const std::string& filepath);
+MooringPropertiesDb read_mooring_properties_json(const std::string& filepath);
 
 /**
  * @brief Read main data from a file.
  * @param filepath Path to the main data file.
  */
-MainDb read_main_db(const std::string& filepath);
+MainDb read_main_json(const std::string& filepath);
 
 }  // namespace io
 }  // namespace seahowl
