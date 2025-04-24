@@ -101,7 +101,7 @@ void Simulation::populate_from_config() {
     // output manager
     outputs->dt_output = config.get_double("outputs.dt");
     outputs->set_output_folder(config.get_string("outputs.folder"));
-    outputs->has_vtk = config.get_bool("outputs.VTK");
+    outputs->has_vtk = config.get_bool("outputs.vtk");
     outputs->has_gui = config.get_bool("outputs.gui");
 
     spdlog::info("");

@@ -54,25 +54,23 @@ void System::initialize_this(double time, double dt) {
 
     for (auto& turbine : turbines) {
         if (turbine->elasto.foundation) {
-            try {
-                auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(*turbine->elasto.foundation);
+            if (auto floater =
+                    std::dynamic_pointer_cast<seahowl::hydro::FloaterHydroChrono>(turbine->elasto.foundation)) {
+
                 auto wave_models = env_model->fluid_models.get_models_of_type<WaveModelHydroChrono>();
                 if (wave_models.size() > 0) {
                     spdlog::debug("Passing waves to HydroChrono floater model.");
-                    floater.set_waves_hydrochrono(wave_models[0]->waves);
+                    floater->set_waves_hydrochrono(wave_models[0]->waves);
                 } else {
                     throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
                 }
-            } catch (const std::bad_cast& e) {
-                // do nothing if foundation is not a HydroChrono floater
             }
         }
     }
     // also need to check components
     for (auto& component : components) {
-        try {
-            auto& floater_core = dynamic_cast<seahowl::core::Floater&>(*component);
-            auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(floater_core.elasto);
+        if (auto floater_core = std::dynamic_pointer_cast<seahowl::core::Floater>(component)) {
+            auto& floater = dynamic_cast<seahowl::hydro::FloaterHydroChrono&>(floater_core->elasto);
             auto wave_models = env_model->fluid_models.get_models_of_type<WaveModelHydroChrono>();
             if (wave_models.size() > 0) {
                 spdlog::debug("Passing waves to HydroChrono floater model.");
@@ -80,8 +78,6 @@ void System::initialize_this(double time, double dt) {
             } else {
                 throw std::runtime_error("Must use HydroChrono wave model when using HydroChrono floater.");
             }
-        } catch (const std::bad_cast& e) {
-            // do nothing if component is not a HydroChrono floater
         }
     }
 #endif

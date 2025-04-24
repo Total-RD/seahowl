@@ -76,9 +76,9 @@ void add_basic_turbine_info_to_csv(seahowl::io::CustomCSV& custom_csv, seahowl::
                                 [&blade]() { return blade.elasto.get_pitch(); });
     }
     if (turbine.foundation) {
-        try {  // check if floater
-            auto& floater = dynamic_cast<seahowl::core::Floater&>(*turbine.foundation);
-            auto& floater_elasto = floater.elasto;
+        // check if floater
+        if (auto floater = std::dynamic_pointer_cast<seahowl::core::Floater>(turbine.foundation)) {
+            auto& floater_elasto = floater->elasto;
             custom_csv.add_function("floater position (m)",
                                     [&floater_elasto]() { return floater_elasto.body_main->get_position(); });
             custom_csv.add_function("floater rotation (rad)",
@@ -88,18 +88,14 @@ void add_basic_turbine_info_to_csv(seahowl::io::CustomCSV& custom_csv, seahowl::
                 custom_csv.add_function("mooring" + std::to_string(idx_mooring + 1) + " fairlead tension (N)",
                                         [&mooring]() { return mooring.get_tension_fairlead(); });
             }
-        } catch (const std::bad_cast& e) {
-            // do nothing if no floater
         }
-        try {  // check if monopile
-            auto& monopile = dynamic_cast<seahowl::core::Monopile&>(*turbine.foundation);
-            auto& monopile_elasto = monopile.elasto;
+        // check if floater with monopile
+        if (auto monopile = std::dynamic_pointer_cast<seahowl::core::Monopile>(turbine.foundation)) {
+            auto& monopile_elasto = monopile->elasto;
             custom_csv.add_function("monopile base moment (Nm)",
                                     [&monopile_elasto]() { return monopile_elasto.get_tower_base_moment(); });
             custom_csv.add_function("monopile base force (N)",
                                     [&monopile_elasto]() { return monopile_elasto.get_tower_base_force(); });
-        } catch (const std::bad_cast& e) {
-            // do nothing if no monopile
         }
     }
 }

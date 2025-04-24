@@ -142,11 +142,13 @@ void OutputSystemVTK::initialize() {
     vtk_meshes.clear();
 
     // iterate turbines
-    for (auto [turbine_ptr, idx_turbine] = std::tuple{system_core.turbines.begin(), 0};
+    /* for (auto [turbine_ptr, idx_turbine] = std::tuple{system_core.turbines.begin(), 0};
          turbine_ptr != system_core.turbines.end(); turbine_ptr++, idx_turbine++) {
-        auto& turbine = *turbine_ptr;
+        auto& turbine = *turbine_ptr; */
+    int idx_turbine = 0;
+    for (auto turbine : system_core.turbines) {
         fs::create_directory(output_folder);
-        for (auto [blade_ptr, idx_blade] = std::tuple{turbine->rna.blades.begin(), 0};
+        /* for (auto [blade_ptr, idx_blade] = std::tuple{turbine->rna.blades.begin(), 0};
              blade_ptr != turbine->rna.blades.end(); blade_ptr++, idx_blade++) {
             auto& blade = *blade_ptr;
             try {
@@ -155,16 +157,30 @@ void OutputSystemVTK::initialize() {
                 post_blade.initialize(
                     (output_folder + "/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
                         .c_str());
-            } catch (const std::exception& e) {
+            } catch (const std::bad_cast& e) {
+                // do nothing if node blade EFA
+            }
+        } */
+        int idx_blade = 0;
+        for (auto blade : turbine->rna.blades) {
+            try {
+                auto& post_blade =
+                    vtk_meshes.emplace_back(dynamic_cast<seahowl::elasto::BladeElastoFEA&>(blade->elasto));
+                post_blade.initialize(
+                    (output_folder + "/turbine" + std::to_string(idx_turbine) + "_blade" + std::to_string(idx_blade))
+                        .c_str());
+                idx_blade++;
+            } catch (const std::bad_cast& e) {
                 // do nothing if node blade EFA
             }
         }
+
         auto& post_tower = vtk_meshes.emplace_back(turbine->tower.elasto);
         post_tower.initialize((output_folder + "/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
     }
 
     // iterate elasto components
-    for (auto [component_ptr, idx_component] = std::tuple{system_core.elasto.components.begin(), 0};
+    /* for (auto [component_ptr, idx_component] = std::tuple{system_core.elasto.components.begin(), 0};
          component_ptr != system_core.elasto.components.end(); component_ptr++, idx_component++) {
         auto& component = *component_ptr;
         try {
@@ -174,7 +190,16 @@ void OutputSystemVTK::initialize() {
         } catch (const std::exception& e) {
             // do nothing if node component elasto EFA
         }
+    } */
+    int idx_component = 0;
+    for (auto component : system_core.elasto.components) {
+        if (auto component_ptr = std::dynamic_pointer_cast<seahowl::elasto::ComponentElastoFEA>(component)) {
+            auto& post_component = vtk_meshes.emplace_back(*component_ptr);
+            post_component.initialize((output_folder + "/component" + std::to_string(idx_component)).c_str());
+            idx_component++;
+        }
     }
+    idx_turbine++;
 }
 
 void OutputSystemVTK::write(int step) {
