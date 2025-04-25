@@ -78,19 +78,19 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
 
     double blade_length = blade_db.reference_points.back().coordinates.z();
 
-    for (auto& ref_point : blade_db.reference_points) {
+    for (auto& ref_point_db : blade_db.reference_points) {
         auto reference_point = seahowl::elasto::BladeReferencePointElasto();
-        reference_point.coordinates = ref_point.coordinates;
+        reference_point.coordinates = ref_point_db.coordinates;
         reference_point.fraction = reference_point.coordinates.z() / blade_length;
-        reference_point.offset_gravity = blade_db.global_variables.offset_gravity;
-        reference_point.offset_elastic = blade_db.global_variables.offset_elastic;
-        reference_point.structural_twist = ref_point.twist * PI / 180.0;
-        reference_point.mass_matrix = ref_point.mass_matrix;
-        reference_point.stiffness_matrix = ref_point.stiffness_matrix;
-        reference_point.damping_flapwise = blade_db.global_variables.damping_flapwise;
-        reference_point.damping_edgewise = blade_db.global_variables.damping_edgewise;
-        reference_point.damping_axial = blade_db.global_variables.damping_axial;
-        reference_point.damping_torsion = blade_db.global_variables.damping_torsion;
+        reference_point.offset_gravity = ref_point_db.offset_gravity;
+        reference_point.offset_elastic = ref_point_db.offset_elastic;
+        reference_point.structural_twist = ref_point_db.twist * PI / 180.0;
+        reference_point.mass_matrix = ref_point_db.mass_matrix;
+        reference_point.stiffness_matrix = ref_point_db.stiffness_matrix;
+        reference_point.damping_flapwise = ref_point_db.damping_flapwise;
+        reference_point.damping_edgewise = ref_point_db.damping_edgewise;
+        reference_point.damping_axial = ref_point_db.damping_axial;
+        reference_point.damping_torsion = ref_point_db.damping_torsion;
         reference_points.push_back(reference_point);
     }
     return reference_points;

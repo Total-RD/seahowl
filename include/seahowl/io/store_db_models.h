@@ -77,6 +77,13 @@ struct ReferencePointBladeDb {
     std::string airfoil_file;
     std::vector<AirfoilDb> airfoil_db_list;
     Eigen::Vector2d offset_aero;
+    double damping_flapwise;
+    double damping_edgewise;
+    double damping_axial;
+    double damping_torsion;
+    double damping_mass;
+    Eigen::Vector2d offset_gravity;
+    Eigen::Vector2d offset_elastic;
 };
 
 struct BladeDb {

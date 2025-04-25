@@ -90,7 +90,7 @@ Eigen::MatrixX<double> get_matrix_from_vector_of_vectors(std::vector<std::vector
     return mat;
 }
 
-void from_json(const json& js, ReferencePointTowerDb& ref_point) {
+void from_json(const json& js, ReferencePointTowerDb& ref_point, GlobalVariablesTowerDb& global_vars) {
     if (js.contains("position")) {
         std::vector<double> pos = js["position"];
         ref_point.position = Eigen::Vector3d(pos[0], pos[1], pos[2]);
@@ -100,55 +100,47 @@ void from_json(const json& js, ReferencePointTowerDb& ref_point) {
 
     ref_point.diameter = js["diameter"];
     ref_point.thickness = js["thickness"];
-    ref_point.density = js.value("density", 0.0);
-    ref_point.young_modulus = js.value("young_modulus", 0.0);
-    ref_point.poisson_ratio = js.value("poisson_ratio", 0.0);
-    ref_point.drag_coefficient_normal = js.value("drag_coefficient_normal", 0.0);
-    ref_point.drag_coefficient_axial = js.value("drag_coefficient_axial", 0.0);
-    ref_point.added_mass_coefficient_normal = js.value("added_mass_coefficient_normal", 0.0);
-    ref_point.added_mass_coefficient_axial = js.value("added_mass_coefficient_axial", 0.0);
-    ref_point.buoyancy_factor = js.value("buoyancy_factor", 0.0);
-    ref_point.damping_foreaft = js.value("damping_foreaft", 0.0);
-    ref_point.damping_sideside = js.value("damping_sideside", 0.0);
-    ref_point.damping_axial = js.value("damping_axial", 0.0);
-    ref_point.damping_torsion = js.value("damping_torsion", 0.0);
-    ref_point.damping_mass = js.value("damping_mass", 0.0);
+    ref_point.density = js.value("density", global_vars.density);
+    ref_point.young_modulus = js.value("young_modulus", global_vars.young_modulus);
+    ref_point.poisson_ratio = js.value("poisson_ratio", global_vars.poisson_ratio);
+    ref_point.drag_coefficient_normal = js.value("drag_coefficient_normal", global_vars.drag_coefficient_normal);
+    ref_point.drag_coefficient_axial = js.value("drag_coefficient_axial", global_vars.drag_coefficient_axial);
+    ref_point.added_mass_coefficient_normal =
+        js.value("added_mass_coefficient_normal", global_vars.added_mass_coefficient_normal);
+    ref_point.added_mass_coefficient_axial =
+        js.value("added_mass_coefficient_axial", global_vars.added_mass_coefficient_axial);
+    ref_point.buoyancy_factor = js.value("buoyancy_factor", global_vars.buoyancy_factor);
+    ref_point.damping_foreaft = js.value("damping_foreaft", global_vars.damping_foreaft);
+    ref_point.damping_sideside = js.value("damping_sideside", global_vars.damping_sideside);
+    ref_point.damping_axial = js.value("damping_axial", global_vars.damping_axial);
+    ref_point.damping_torsion = js.value("damping_torsion", global_vars.damping_torsion);
+    ref_point.damping_mass = js.value("damping_mass", global_vars.damping_mass);
 }
 
-JSONtoCPP(GlobalVariablesTowerDb,
-          density,
-          young_modulus,
-          poisson_ratio,
-          drag_coefficient_normal,
-          drag_coefficient_axial,
-          added_mass_coefficient_normal,
-          added_mass_coefficient_axial,
-          buoyancy_factor,
-          damping_foreaft,
-          damping_sideside,
-          damping_axial,
-          damping_torsion,
-          damping_mass)
+void from_json(const json& js, GlobalVariablesTowerDb& global_vars) {
+    global_vars.density = js.value("density", 0.0);
+    global_vars.young_modulus = js.value("young_modulus", 0.0);
+    global_vars.poisson_ratio = js.value("poisson_ratio", 0.0);
+    global_vars.drag_coefficient_normal = js.value("drag_coefficient_normal", 0.0);
+    global_vars.drag_coefficient_axial = js.value("drag_coefficient_axial", 0.0);
+    global_vars.added_mass_coefficient_normal = js.value("added_mass_coefficient_normal", 0.0);
+    global_vars.added_mass_coefficient_axial = js.value("added_mass_coefficient_axial", 0.0);
+    global_vars.buoyancy_factor = js.value("buoyancy_factor", 0.0);
+    global_vars.damping_foreaft = js.value("damping_foreaft", 0.0);
+    global_vars.damping_sideside = js.value("damping_sideside", 0.0);
+    global_vars.damping_axial = js.value("damping_axial", 0.0);
+    global_vars.damping_torsion = js.value("damping_torsion", 0.0);
+    global_vars.damping_mass = js.value("damping_mass", 0.0);
+}
 
-    void from_json(const json& js, TowerDb& tower_db) {
-    tower_db.reference_points = js["reference_points"];
+void from_json(const json& js, TowerDb& tower_db) {
     if (js.contains("global_variables")) {
         tower_db.global_variables = js["global_variables"];
-        for (auto& point : tower_db.reference_points) {
-            point.density = tower_db.global_variables.density;
-            point.young_modulus = tower_db.global_variables.young_modulus;
-            point.poisson_ratio = tower_db.global_variables.poisson_ratio;
-            point.drag_coefficient_normal = tower_db.global_variables.drag_coefficient_normal;
-            point.drag_coefficient_axial = tower_db.global_variables.drag_coefficient_axial;
-            point.added_mass_coefficient_normal = tower_db.global_variables.added_mass_coefficient_normal;
-            point.added_mass_coefficient_axial = tower_db.global_variables.added_mass_coefficient_axial;
-            point.buoyancy_factor = tower_db.global_variables.buoyancy_factor;
-            point.damping_foreaft = tower_db.global_variables.damping_foreaft;
-            point.damping_sideside = tower_db.global_variables.damping_sideside;
-            point.damping_axial = tower_db.global_variables.damping_axial;
-            point.damping_torsion = tower_db.global_variables.damping_torsion;
-            point.damping_mass = tower_db.global_variables.damping_mass;
-        }
+    }
+    for (const auto& ref_point_json : js["reference_points"]) {
+        ReferencePointTowerDb ref_point;
+        from_json(ref_point_json, ref_point, tower_db.global_variables);
+        tower_db.reference_points.push_back(ref_point);
     }
 }
 
@@ -181,16 +173,24 @@ TowerDb read_tower_json(const std::string& filepath) {
 }
 
 void from_json(const json& js, GlobalVariablesBladeDb& global_vars) {
-    global_vars.damping_flapwise = js.at("damping_flapwise").get<double>();
-    global_vars.damping_edgewise = js.at("damping_edgewise").get<double>();
-    global_vars.damping_axial = js.at("damping_axial").get<double>();
-    global_vars.damping_torsion = js.at("damping_torsion").get<double>();
-    global_vars.damping_mass = js.at("damping_mass").get<double>();
-    global_vars.offset_gravity = Eigen::Vector2d(js.at("offset_gravity")[0], js.at("offset_gravity")[1]);
-    global_vars.offset_elastic = Eigen::Vector2d(js.at("offset_elastic")[0], js.at("offset_elastic")[1]);
+    global_vars.damping_flapwise = js.value("damping_flapwise", 0.0);
+    global_vars.damping_edgewise = js.value("damping_edgewise", 0.0);
+    global_vars.damping_axial = js.value("damping_axial", 0.0);
+    global_vars.damping_torsion = js.value("damping_torsion", 0.0);
+    global_vars.damping_mass = js.value("damping_mass", 0.0);
+    if (js.contains("offset_gravity")) {
+        global_vars.offset_gravity = Eigen::Vector2d(js.at("offset_gravity")[0], js.at("offset_gravity")[1]);
+    } else {
+        global_vars.offset_gravity = Eigen::Vector2d(0.0, 0.0);
+    }
+    if (js.contains("offset_elastic")) {
+        global_vars.offset_elastic = Eigen::Vector2d(js.at("offset_elastic")[0], js.at("offset_elastic")[1]);
+    } else {
+        global_vars.offset_elastic = Eigen::Vector2d(0.0, 0.0);
+    }
 }
 
-void from_json(const json& js, ReferencePointBladeDb& ref_point) {
+void from_json(const json& js, ReferencePointBladeDb& ref_point, const GlobalVariablesBladeDb& global_vars) {
     ref_point.coordinates = Eigen::Vector3d(js.at("coordinates")[0], js.at("coordinates")[1], js.at("coordinates")[2]);
     ref_point.twist = js.at("twist").get<double>();
     ref_point.fraction = js.at("fraction").get<double>();
@@ -216,11 +216,31 @@ void from_json(const json& js, ReferencePointBladeDb& ref_point) {
     ref_point.chord = js.at("chord").get<double>();
     ref_point.airfoil_file = js.at("airfoil_file").get<std::string>();
     ref_point.offset_aero = Eigen::Vector2d(js.at("offset_aero")[0], js.at("offset_aero")[1]);
+
+    ref_point.damping_flapwise = js.value("damping_flapwise", global_vars.damping_flapwise);
+    ref_point.damping_edgewise = js.value("damping_edgewise", global_vars.damping_edgewise);
+    ref_point.damping_axial = js.value("damping_axial", global_vars.damping_axial);
+    ref_point.damping_torsion = js.value("damping_torsion", global_vars.damping_torsion);
+    ref_point.damping_mass = js.value("damping_mass", global_vars.damping_mass);
+    if (js.contains("offset_elastic"))
+        ref_point.offset_elastic = Eigen::Vector2d(js.at("offset_elastic")[0], js.at("offset_elastic")[1]);
+    else
+        ref_point.offset_elastic = global_vars.offset_elastic;
+    if (js.contains("offset_gravity"))
+        ref_point.offset_gravity = Eigen::Vector2d(js.at("offset_gravity")[0], js.at("offset_gravity")[1]);
+    else
+        ref_point.offset_gravity = global_vars.offset_gravity;
 }
 
 void from_json(const json& js, BladeDb& blade_db) {
-    blade_db.global_variables = js.at("global_variables").get<GlobalVariablesBladeDb>();
-    blade_db.reference_points = js.at("reference_points").get<std::vector<ReferencePointBladeDb>>();
+    if (js.contains("global_variables")) {
+        blade_db.global_variables = js.at("global_variables").get<GlobalVariablesBladeDb>();
+    }
+    for (auto& ref_point_json : js.at("reference_points")) {
+        ReferencePointBladeDb ref_point;
+        from_json(ref_point_json, ref_point, blade_db.global_variables);
+        blade_db.reference_points.push_back(ref_point);
+    }
 }
 
 void from_json(const json& js, AirfoilDb& airfoil_db) {
