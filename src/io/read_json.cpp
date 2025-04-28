@@ -440,7 +440,7 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         reference_point.damping_foreaft = input_data->get("damping_foreaft", ii);
         reference_point.damping_sideside = input_data->get("damping_sideside", ii);
         reference_point.damping_axial = input_data->get("damping_axial", ii);
-        reference_point.damping_axial = input_data->get("damping_torsion", ii);
+        reference_point.damping_torsion = input_data->get("damping_torsion", ii);
         reference_point.damping_mass = input_data->get("damping_mass", ii);
 
         reference_points.push_back(reference_point);
