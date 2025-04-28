@@ -430,9 +430,11 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         auto poisson_ratio = input_data->get("poisson_ratio", ii);
         auto diameter = input_data->get("diameter", ii);
         auto thickness = input_data->get("thickness", ii);
+        auto fill_density = input_data->get("fill_density", ii);
         // shear set to false as it leads to issues when tower is not finely discretized (wrong nat. freq.)
         // its effect is usually small enough to be neglected here
-        reference_point.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false);
+        reference_point.set_properties_cylinder(density, young_modulus, poisson_ratio, diameter, thickness, false,
+                                                fill_density);
 
         young_modulus_list.push_back(young_modulus);
         poisson_ratio_list.push_back(poisson_ratio);
@@ -471,6 +473,15 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
         reference_point.coefficients.added_mass_normal = input_data->get("added_mass_coefficient_normal", ii);
         reference_point.coefficients.added_mass_axial = input_data->get("added_mass_coefficient_axial", ii);
         reference_point.coefficients.buoyancy_factor = input_data->get("buoyancy_factor", ii);
+
+        if ((reference_point.coefficients.buoyancy_factor != 0.0 && input_data->get("fill_density", ii) == 0.0) ||
+            (reference_point.coefficients.buoyancy_factor == 0.0 && input_data->get("fill_density", ii) != 0.0)) {
+            spdlog::warn(
+                "{}: For point {}, fill density={} and buoyancy factor={}: this might not be set as intended. If "
+                "fill_density!=0.0, then usually buoyancy_factor=1.0; and when buoyancy can be considered negligible "
+                "(e.g. for hollow and unfilled tower in air), then usually buoyancy_factor=0.0 and fill_density=0.0.",
+                filepath, ii, reference_point.coefficients.buoyancy_factor, input_data->get("fill_density", ii));
+        }
 
         reference_points.push_back(reference_point);
     }

@@ -7,6 +7,7 @@
     "drag_coefficient_axial": 0.0,
     "added_mass_coefficient_normal": 0.0,
     "added_mass_coefficient_axial": 0.0,
+    "fill_density": 0.0,
     "buoyancy_factor": 0.0,
     "damping_foreaft": 0.005,
     "damping_sideside": 0.005,

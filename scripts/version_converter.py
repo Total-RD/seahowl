@@ -77,6 +77,7 @@ def convert_tower_v0_8_v0_9(tower_filepath):
         csv_tower["damping_torsion"] = csv_tower["damping_t"] ** 2
         del csv_tower["damping_t"]
         csv_tower["damping_mass"] = 0.0
+        csv_tower["fill_density"] = 0.0
         csv_tower.to_csv(tower_filepath, index=False)
 
 
