@@ -34,7 +34,8 @@ void initialize_pyseahowl_env(py::module& m) {
                seahowl::env::ListModel<seahowl::env::FluidModel>>(m_env, "FluidListModel")
         .def("get_density", &seahowl::env::FluidListModel::get_density)
         .def("get_velocity", &seahowl::env::FluidListModel::get_velocity)
-        .def("get_acceleration", &seahowl::env::FluidListModel::get_acceleration);
+        .def("get_acceleration", &seahowl::env::FluidListModel::get_acceleration)
+        .def("set_ramp", &seahowl::env::FluidListModel::set_ramp);
 
     // env/soil_list_model.h
     py::class_<seahowl::env::SoilListModel, std::shared_ptr<seahowl::env::SoilListModel>,
@@ -44,8 +45,6 @@ void initialize_pyseahowl_env(py::module& m) {
     // env/fluid_models.h
     py::class_<seahowl::env::FluidModel, std::shared_ptr<seahowl::env::FluidModel>, seahowl::env::Model>(m_env,
                                                                                                          "FluidModel")
-        .def_readwrite("ramp_start", &seahowl::env::FluidModel::ramp_start)
-        .def_readwrite("ramp_end", &seahowl::env::FluidModel::ramp_end)
         .def("get_velocity", &seahowl::env::FluidModel::get_velocity)
         .def("get_acceleration", &seahowl::env::FluidModel::get_acceleration)
         .def("get_density", &seahowl::env::FluidModel::get_density);

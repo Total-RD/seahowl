@@ -11,9 +11,6 @@ namespace env {
  */
 class FluidModel : public Model {
   public:
-    double ramp_start = 0.0;
-    double ramp_end = 0.0;
-
     /**
      * @brief Returns fluid density at given coordinates.
      *
@@ -58,12 +55,23 @@ class FluidModel : public Model {
      * @param[in] time Time of simulation.
      */
     virtual Vector3d get_acceleration_inside(const Vector3d& position, double time) const;
+    /**
+     * @brief Set ramp time.
+     * @param[in] start_time Start time of the ramp.
+     * @param[in] end_time End time of the ramp.
+     */
+    void set_ramp(double start_time, double end_time) {
+        ramp_start = start_time;
+        ramp_end = end_time;
+    }
 
   private:
+    double ramp_start = 0.0;
+    double ramp_end = 0.0;
     /**
      * @brief Applies ramp to the given vector.
      */
-    void apply_ramp(double& time, Vector3d& res) const;
+    void apply_ramp(double time, Vector3d& res) const;
 
   protected:
     virtual Vector3d get_acceleration_this(const Vector3d& position, double time) const = 0;

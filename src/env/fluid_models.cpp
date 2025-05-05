@@ -43,7 +43,7 @@ double FluidModel::get_density(const Vector3d& position, double time) const {
     }
 };
 
-void seahowl::env::FluidModel::apply_ramp(double& time, Vector3d& res) const {
+void seahowl::env::FluidModel::apply_ramp(double time, Vector3d& res) const {
     if (time < ramp_end) {
         if (time > ramp_start) {
             double ramp_fraction = (time - ramp_start) / (ramp_end - ramp_start);

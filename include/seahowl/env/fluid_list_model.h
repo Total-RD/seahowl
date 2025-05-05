@@ -35,6 +35,13 @@ class FluidListModel : public ListModel<FluidModel> {
      * @param[in] time Time of simulation.
      */
     Vector3d get_acceleration(const Vector3d& position, double time) const;
+
+    /**
+     * @brief set ramp time for all fluid model.
+     * @param[in] start_time Start time of the ramp.
+     * @param[in] end_time End time of the ramp.
+     */
+    void set_ramp(double start_time, double end_time);
 };
 
 }  // namespace env
