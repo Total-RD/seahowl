@@ -21,6 +21,7 @@ Table of Contents
    :maxdepth: 1
    :caption: API doc
 
+   _user/api_cpp
    _user/api_python
 
 .. toctree::
@@ -40,5 +41,3 @@ Indices and tables
 .. include:: ../../README.md
    :parser: myst_parser.sphinx_
    :start-after: <!-- index.rst content start -->
-
-hello
