@@ -493,7 +493,7 @@ void from_json(const json& js, DiscretizationRotorTurbineDb& discretization) {
 }
 
 void from_json(const json& js, RotorTurbineDb& rotor) {
-    rotor.type = js.at("type").get<std::string>();
+    rotor.type = to_lowercase(js.at("type").get<std::string>());
     if (rotor.type == "disk") {
         rotor.option = js.at("options").get<RotorOptionsTurbineDb>();
     } else {
@@ -540,13 +540,13 @@ void from_json(const json& js, TowerTurbineDb& tower) {
 }
 
 void from_json(const json& js, ControllerOptionsTurbineDb& options, const std::string& type) {
-    if (type == "DISCON") {
+    if (type == "discon") {
         options.infile = js.at("infile").get<std::string>();
         if (js.contains("libfile") && !js["libfile"].is_null())
             options.libfile = js.at("libfile").get<std::string>();
         else
             throw std::runtime_error("Need to define path to libfile for DISCON routine.");
-    } else if (type == "RPM") {
+    } else if (type == "rpm") {
         if (js.contains("target_rpm") && !js["target_rpm"].is_null())
             options.target_rpm = js.at("target_rpm").get<double>();
         else
@@ -555,7 +555,7 @@ void from_json(const json& js, ControllerOptionsTurbineDb& options, const std::s
 }
 
 void from_json(const json& js, ControllerTurbineDb& controller) {
-    controller.type = js.at("type").get<std::string>();
+    controller.type = to_lowercase(js.at("type").get<std::string>());
     from_json(js.at("options"), controller.options, controller.type);
 }
 
@@ -565,7 +565,7 @@ void from_json(const json& js, DiscretizationFoundationTurbineDb& discretization
 }
 
 void from_json(const json& js, FoundationTurbineDb& foundation) {
-    foundation.type = js.at("type").get<std::string>();
+    foundation.type = to_lowercase(js.at("type").get<std::string>());
     if (js.contains("file") && !js["file"].is_null()) {
         foundation.file = js.at("file").get<std::string>();
     } else {
@@ -690,7 +690,7 @@ void from_json(const json& js, BodyFloaterdb& body) {
 }
 
 void from_json(const json& js, Floaterdb& floater) {
-    floater.type = js.at("type").get<std::string>();
+    floater.type = to_lowercase(js.at("type").get<std::string>());
     floater.options_file = js.at("options").at("file").get<std::string>();
     if (js.at("position").size() != 3) {
         throw std::runtime_error("Position of body should be a vector of length 3.");

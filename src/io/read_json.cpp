@@ -483,7 +483,7 @@ void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbin
         }
     }
     // controller
-    if (turbine_db.controller.type == "DISCON") {
+    if (turbine_db.controller.type == "discon") {
         auto libfilepath = turbine_db.controller.options.libfile;
         if (turbine_db.controller.options.libfile != "") {
             // path
@@ -497,7 +497,7 @@ void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbin
         auto controller = std::make_shared<seahowl::servo::ControllerDISCON>(infilepath, libfilepath);
         turbine.controller = controller;
 
-    } else if (turbine_db.controller.type == "RPM") {
+    } else if (turbine_db.controller.type == "rpm") {
         auto controller = std::make_shared<seahowl::servo::ControllerVariableTorque>();
         controller->target_rpm = turbine_db.controller.options.target_rpm;
         turbine.controller = controller;
