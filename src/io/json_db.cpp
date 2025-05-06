@@ -622,7 +622,7 @@ TurbineDb read_turbine_json(const std::string& filepath) {
         auto& foundation_db = turbine_db.foundation.value();
         if (foundation_db.file.has_value()) {
             auto file = main_directory / foundation_db.file.value();
-            if (foundation_db.type == "Floater") {
+            if (foundation_db.type == "floater") {
                 foundation_db.data_floater = read_floater_json(file.generic_string());
             } else if (foundation_db.type == "monopile") {
                 foundation_db.data_tower = read_tower_json(file.generic_string());

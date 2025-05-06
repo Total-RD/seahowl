@@ -126,14 +126,19 @@ struct RnaDb {
 };
 
 struct WindOptionDb {
+    // general wind options
     double reference_height;
     double shear_coefficient;
+
+    // wind ramp options
     Eigen::Vector3d velocity_start;
     Eigen::Vector3d velocity_end;
     double time_start;
     double time_end;
-    std::string file_inflowwind;
-    fs::path file_inflowwind_path;
+
+    // InflowWind options
+    std::string file_inflowwind;    // relative path from input file
+    fs::path file_inflowwind_path;  // relative path from driver execution folder
     double zmin;
 };
 
@@ -144,9 +149,12 @@ struct WindDb {
 };
 
 struct SeaOptionDb {
-    std::string type;
+    // wave options
+    std::string type;  // regular / irregular
     double wave_height;
     double wave_period;
+
+    // irregular wave options
     double frequency_min;
     double frequency_max;
     int nfrequencies;
@@ -155,8 +163,10 @@ struct SeaOptionDb {
     double peak_enhancement_factor;
     bool is_normalized;
     int seed;
-    int num_bodies;
     bool wave_stretching;
+    int num_bodies;
+
+    // current options
     Eigen::Vector3d direction;
     double velocity_surface;
     double velocity_seabed;
@@ -191,15 +201,20 @@ struct EnvironmentDb {
 };
 
 struct AeroOptionsTurbineDb {
+    // AeroDyn options
+    std::string file_aerodyn;       // relative path from input file
+    fs::path file_aerodyn_path;     // relative path from driver execution folder
+    std::string file_inflowwind;    // relative path from input file
+    fs::path file_inflowwind_path;  // relative path from driver execution folder
+
+    // BEMT options
     bool hub_loss;
     bool tip_loss;
     bool tower_shadow;
-    std::string performance_file;
-    fs::path performance_file_path;
-    std::string file_aerodyn;
-    fs::path file_aerodyn_path;
-    std::string file_inflowwind;
-    fs::path file_inflowwind_path;
+
+    // actuator disk options
+    std::string performance_file;    // relative path from input file
+    fs::path performance_file_path;  // relative path from driver execution folder
 };
 
 struct AeroTurbineDb {
@@ -220,6 +235,7 @@ struct BladeTurbineDb {
 };
 
 struct RotorOptionsTurbineDb {
+    // disk (single body) options
     double inertia_blades;
     double mass_blades;
     double radius;
@@ -261,10 +277,12 @@ struct TowerTurbineDb {
 };
 
 struct ControllerOptionsTurbineDb {
-    std::string infile;
-    fs::path infile_path;
-    std::string libfile;
-    fs::path libfile_path;
+    std::string infile;     // relative path from input file
+    fs::path infile_path;   // relative path from driver execution folder
+    std::string libfile;    // relative path from input file
+    fs::path libfile_path;  // relative path from driver execution folder
+
+    // options for "RPM" type controller
     double target_rpm;
 };
 
@@ -316,8 +334,8 @@ struct MooringFloaterdb {
 
 struct Floaterdb {
     std::string type;
-    std::string options_file;
-    fs::path options_file_path;
+    std::string options_file;    // relative path from input file
+    fs::path options_file_path;  // relative path from driver execution folder
     Eigen::Vector3d position;
     double mass;
     Eigen::Matrix3d inertia;
