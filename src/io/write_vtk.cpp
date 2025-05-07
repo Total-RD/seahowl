@@ -3,6 +3,7 @@
 #include "seahowl/core/system.h"
 #include "seahowl/core/blade.h"
 #include "seahowl/elasto/blade_elasto.h"
+#include "seahowl/elasto/floater_elasto.h"
 
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
@@ -146,6 +147,8 @@ void OutputSystemVTK::initialize() {
          turbine_ptr != system_core.turbines.end(); turbine_ptr++, idx_turbine++) {
         auto& turbine = *turbine_ptr;
         fs::create_directory(output_folder);
+
+        // blades
         for (auto [blade_ptr, idx_blade] = std::tuple{turbine->rna.blades.begin(), 0};
              blade_ptr != turbine->rna.blades.end(); blade_ptr++, idx_blade++) {
             auto& blade = *blade_ptr;
@@ -159,8 +162,29 @@ void OutputSystemVTK::initialize() {
                 // do nothing if node blade EFA
             }
         }
+
+        // tower
         auto& post_tower = vtk_meshes.emplace_back(turbine->tower.elasto);
         post_tower.initialize((output_folder + "/turbine" + std::to_string(idx_turbine) + "_tower").c_str());
+
+        // moorings
+        try {
+            auto& floater_core = dynamic_cast<seahowl::core::Floater&>(*turbine->foundation);
+            auto& floater = dynamic_cast<seahowl::elasto::FloaterElasto&>(floater_core.elasto);
+            for (auto [mooring_ptr, idx_mooring] = std::tuple{floater.mooring_system->moorings.begin(), 0};
+                 mooring_ptr != floater.mooring_system->moorings.end(); mooring_ptr++, idx_mooring++) {
+                auto& mooring = *mooring_ptr;
+                try {
+                    auto& post_mooring =
+                        vtk_meshes.emplace_back(dynamic_cast<seahowl::elasto::ComponentElastoFEA&>(*mooring));
+                    post_mooring.initialize((output_folder + "/mooring" + std::to_string(idx_mooring)).c_str());
+                } catch (const std::exception& e) {
+                    // do nothing if node component elasto EFA
+                }
+            }
+        } catch (const std::exception& e) {
+            // do nothing if not floater
+        }
     }
 
     // iterate elasto components
