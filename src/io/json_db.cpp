@@ -30,38 +30,38 @@ std::string to_lowercase(const std::string& input) {
 json csv_to_json(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        throw std::runtime_error("Impossible d'ouvrir le fichier CSV");
+        throw std::runtime_error("Unable to open the CSV file");
     }
 
     std::string line;
-    json result = json::array();  // Tableau JSON pour stocker les données
+    json result = json::array();  // JSON array to store the data
 
-    // Lire la première ligne pour obtenir les noms des colonnes
+    // Read the first line to get the column names
     if (!std::getline(file, line)) {
-        throw std::runtime_error("Le fichier CSV est vide");
+        throw std::runtime_error("The CSV file is empty");
     }
     std::stringstream header_stream(line);
     std::vector<std::string> column_names;
     std::string column_name;
 
     while (std::getline(header_stream, column_name, ',')) {
-        column_names.push_back(column_name);  // Stocker les noms des colonnes
+        column_names.push_back(column_name);  // Store the column names
     }
 
-    // Lire les lignes suivantes et les convertir en objets JSON
+    // Read the subsequent lines and convert them into JSON objects
     while (std::getline(file, line)) {
         std::stringstream ss(line);
         std::string cell;
-        json row = json::object();  // Objet JSON pour une ligne
+        json row = json::object();  // JSON object for a row
 
         for (size_t i = 0; i < column_names.size(); i++) {
             if (!std::getline(ss, cell, ',')) {
-                throw std::runtime_error("Nombre de colonnes incohérent dans le fichier CSV");
+                throw std::runtime_error("Inconsistent number of columns in the CSV file");
             }
-            row[column_names[i]] = std::stod(cell);  // Associer la cellule au nom de la colonne
+            row[column_names[i]] = std::stod(cell);  // Map the cell to the column name
         }
 
-        result.push_back(row);  // Ajouter la ligne au tableau JSON
+        result.push_back(row);  // Add the row to the JSON array
     }
 
     file.close();
@@ -345,7 +345,7 @@ void from_json_inflowwind(const json& js, WindOptionDb& options) {
 }
 
 void from_json(const json& js, WindDb& wind) {
-    wind.type = js.at("type").get<std::string>();
+    wind.type = to_lowercase(js.at("type").get<std::string>());
     wind.air_density = js.at("air_density").get<double>();
     if (wind.type == "ramp") {
         wind.options = js.at("options").get<WindOptionDb>();
@@ -357,7 +357,7 @@ void from_json(const json& js, WindDb& wind) {
 }
 
 void from_json(const json& js, SeaOptionDb& options) {
-    options.type = js.at("type").get<std::string>();
+    options.type = to_lowercase(js.at("type").get<std::string>());
     if (options.type == "regular") {
         options.wave_height = js.at("wave_height").get<double>();
         options.wave_period = js.at("wave_period").get<double>();
@@ -378,18 +378,18 @@ void from_json(const json& js, SeaOptionDb& options) {
     }
 }
 void from_json_current(const json& js, SeaOptionDb& options) {
-    options.type = js.at("type").get<std::string>();
+    options.type = to_lowercase(js.at("type").get<std::string>());
     options.direction = Eigen::Vector3d(js.at("direction")[0], js.at("direction")[1], js.at("direction")[2]);
     options.velocity_surface = js.at("velocity_surface").get<double>();
     options.velocity_seabed = js.at("velocity_seabed").get<double>();
 }
 
 void from_json(const json& js, SeaDb& sea) {
-    sea.type = js.at("type").get<std::string>();
+    sea.type = to_lowercase(js.at("type").get<std::string>());
     sea.water_density = js.at("water_density").get<double>();
     sea.mean_water_level = js.at("mean_water_level").get<double>();
     sea.water_depth = js.at("water_depth").get<double>();
-    if (sea.type == "HydroChrono" || sea.type == "hydrochrono") {
+    if (sea.type == "hydrochrono") {
         sea.options = js.at("options").get<SeaOptionDb>();
     } else if (sea.type == "current") {
         from_json_current(js.at("options"), sea.options);
@@ -403,7 +403,7 @@ void from_json(const json& js, SoilOptionDb& options) {
 }
 
 void from_json(const json& js, SoilDb& soil) {
-    soil.type = js.at("type").get<std::string>();
+    soil.type = to_lowercase(js.at("type").get<std::string>());
     soil.options = js.at("options").get<SoilOptionDb>();
 }
 
@@ -571,7 +571,10 @@ void from_json(const json& js, FoundationTurbineDb& foundation) {
     } else {
         foundation.file = std::nullopt;
     }
-    foundation.discretization = js.at("discretization").get<DiscretizationFoundationTurbineDb>();
+
+    if (foundation.type != "floater")
+        foundation.discretization = js.at("discretization").get<DiscretizationFoundationTurbineDb>();
+
     if (js.contains("options") && !js["options"].is_null())
         foundation.options = js.at("options").get<TowerOptionsTurbineDb>();
     else
@@ -621,15 +624,18 @@ TurbineDb read_turbine_json(const std::string& filepath) {
     if (turbine_db.foundation.has_value()) {
         auto& foundation_db = turbine_db.foundation.value();
         if (foundation_db.file.has_value()) {
-            auto file = main_directory / foundation_db.file.value();
+            foundation_db.file_path = main_directory / foundation_db.file.value();
             if (foundation_db.type == "floater") {
-                foundation_db.data_floater = read_floater_json(file.generic_string());
+                foundation_db.data_floater = read_floater_json(foundation_db.file_path.generic_string());
             } else if (foundation_db.type == "monopile") {
-                foundation_db.data_tower = read_tower_json(file.generic_string());
+                foundation_db.data_tower = read_tower_json(foundation_db.file_path.generic_string());
             }
         }
         if (foundation_db.type == "floater") {
             foundation_db.data_floater.options_file_path = main_directory / foundation_db.data_floater.options_file;
+            if (foundation_db.file.has_value()) {
+                foundation_db.file_path = main_directory / foundation_db.file.value();
+            }
             for (auto& mooring : foundation_db.data_floater.moorings) {
                 auto line_properties_filepath = main_directory / mooring.line_properties;
                 mooring.properties = read_mooring_properties_json(line_properties_filepath.generic_string());

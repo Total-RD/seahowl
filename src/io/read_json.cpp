@@ -552,7 +552,7 @@ void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbin
             if (foundation_db.file.has_value()) {
                 Floaterdb floater_db = turbine_db.foundation.value().data_floater;
 
-                if (floater_db.type == "HydroChrono") {
+                if (floater_db.type == "hydrochrono") {
                     spdlog::info("Hydrodynamic model: HydroChrono.");
 #ifdef HAVE_HYDROCHRONO
                     // make floater
@@ -560,7 +560,8 @@ void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbin
                     turbine_elasto.foundation = floater_elasto_ptr;
                     // add h5file path
 
-                    floater_elasto_ptr->set_h5_filepath((floater_db.options_file_path).generic_string());
+                    floater_elasto_ptr->set_h5_filepath(
+                        (foundation_db.data_floater.options_file_path).generic_string());
 #else
                     throw std::runtime_error(
                         "Trying to use HydroChrono but did not compile with HydroChrono dependency.");
@@ -689,7 +690,7 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(co
         if (sea_db.type == "still") {
             spdlog::info("Sea conditions: still water.");
             fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
-        } else if (sea_db.type == "HydroChrono" || sea_db.type == "hydrochrono") {
+        } else if (sea_db.type == "hydrochrono") {
             spdlog::info("Sea conditions: HydroChrono.");
 #ifdef HAVE_HYDROCHRONO
             fluid_model.wave_model = std::make_unique<seahowl::env::WaveModelHydroChrono>();
