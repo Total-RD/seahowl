@@ -35,19 +35,19 @@ struct ReferencePointTowerDb {
  * @brief Structure for global variables in tower database
  */
 struct GlobalVariablesTowerDb {
-    double density;
-    double young_modulus;
-    double poisson_ratio;
-    double drag_coefficient_normal;
-    double drag_coefficient_axial;
-    double added_mass_coefficient_normal;
-    double added_mass_coefficient_axial;
-    double buoyancy_factor;
-    double damping_foreaft;
-    double damping_sideside;
-    double damping_axial;
-    double damping_torsion;
-    double damping_mass;
+    std::optional<double> density;
+    std::optional<double> young_modulus;
+    std::optional<double> poisson_ratio;
+    std::optional<double> drag_coefficient_normal;
+    std::optional<double> drag_coefficient_axial;
+    std::optional<double> added_mass_coefficient_normal;
+    std::optional<double> added_mass_coefficient_axial;
+    std::optional<double> buoyancy_factor;
+    std::optional<double> damping_foreaft;
+    std::optional<double> damping_sideside;
+    std::optional<double> damping_axial;
+    std::optional<double> damping_torsion;
+    std::optional<double> damping_mass;
 };
 
 /**
@@ -62,13 +62,13 @@ struct TowerDb {
  * @brief Structure for global variables in blade database
  */
 struct GlobalVariablesBladeDb {
-    double damping_flapwise;
-    double damping_edgewise;
-    double damping_axial;
-    double damping_torsion;
-    double damping_mass;
-    Eigen::Vector2d offset_gravity;
-    Eigen::Vector2d offset_elastic;
+    std::optional<double> damping_flapwise;
+    std::optional<double> damping_edgewise;
+    std::optional<double> damping_axial;
+    std::optional<double> damping_torsion;
+    std::optional<double> damping_mass;
+    std::optional<Eigen::Vector2d> offset_gravity;
+    std::optional<Eigen::Vector2d> offset_elastic;
 };
 
 /**
