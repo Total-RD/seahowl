@@ -3,7 +3,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 
-#include <seahowl/io/read_json.h>
+#include <seahowl/io/read_input.h>
 #include <seahowl/core/blade.h>
 #include <seahowl/core/tower.h>
 #include <seahowl/core/rotor.h>
@@ -25,19 +25,19 @@ void initialize_pyseahowl_io(py::module& m) {
     // submodule
     auto m_io = m.def_submodule("io", "Inpout/output submodule.");
 
-    // io/read_json.h
-    m_io.def("populate_blade_from_json", &seahowl::io::populate_blade_from_json);
-    m_io.def("populate_blade_elasto_from_json", &seahowl::io::populate_blade_elasto_from_json);
-    m_io.def("populate_blade_aero_from_json", &seahowl::io::populate_blade_aero_from_json);
-    m_io.def("populate_tower_from_json", &seahowl::io::populate_tower_from_json);
-    m_io.def("populate_tower_elasto_from_json", &seahowl::io::populate_tower_elasto_from_json);
-    m_io.def("populate_tower_aero_from_json", &seahowl::io::populate_tower_aero_from_json);
-    m_io.def("populate_rna_from_json", &seahowl::io::populate_rna_from_json);
-    m_io.def("populate_turbine_from_json", &seahowl::io::populate_turbine_from_json);
-    m_io.def("add_turbine_to_system_from_json", &seahowl::io::add_turbine_to_system_from_json);
-    m_io.def("populate_environmental_conditions_from_json", &seahowl::io::populate_environmental_conditions_from_json);
-    m_io.def("get_environmental_model_from_json", &seahowl::io::get_environmental_model_from_json);
-    m_io.def("populate_system_from_json", &seahowl::io::populate_system_from_json);
+    // io/read_input.h
+    m_io.def("populate_blade_from_file", &seahowl::io::populate_blade_from_file);
+    m_io.def("populate_blade_elasto_from_file", &seahowl::io::populate_blade_elasto_from_file);
+    m_io.def("populate_blade_aero_from_file", &seahowl::io::populate_blade_aero_from_file);
+    m_io.def("populate_tower_from_file", &seahowl::io::populate_tower_from_file);
+    m_io.def("populate_tower_elasto_from_file", &seahowl::io::populate_tower_elasto_from_file);
+    m_io.def("populate_tower_aero_from_file", &seahowl::io::populate_tower_aero_from_file);
+    m_io.def("populate_rna_from_file", &seahowl::io::populate_rna_from_file);
+    m_io.def("populate_turbine_from_file", &seahowl::io::populate_turbine_from_file);
+    m_io.def("add_turbine_to_system_from_file", &seahowl::io::add_turbine_to_system_from_file);
+    m_io.def("populate_environmental_conditions_from_file", &seahowl::io::populate_environmental_conditions_from_file);
+    m_io.def("get_environmental_model_from_file", &seahowl::io::get_environmental_model_from_file);
+    m_io.def("populate_system_from_file", &seahowl::io::populate_system_from_file);
 
     // io/output_manager.h
     py::class_<seahowl::io::OutputManager, std::shared_ptr<seahowl::io::OutputManager>>(m_io, "OutputManager")

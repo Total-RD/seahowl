@@ -335,7 +335,7 @@ source_group(env FILES ${SEAHOWL_ENV_SOURCES} ${SEAHOWL_ENV_HEADERS})
 
 # io
 set(SEAHOWL_IO_SOURCES
-    src/io/read_json.cpp
+    src/io/read_input.cpp
     src/io/write_csv.cpp
     src/io/read_rotor_perf.cpp
     src/io/utils_io.cpp
@@ -343,10 +343,11 @@ set(SEAHOWL_IO_SOURCES
 	src/io/output_manager.cpp
     src/io/config_manager.cpp
     src/io/command_parser.cpp
-    src/io/json_db.cpp
+    src/io/input_reader_json.cpp
+    src/io/input_handler.cpp
 )
 set(SEAHOWL_IO_HEADERS
-    include/seahowl/io/read_json.h
+    include/seahowl/io/read_input.h
     include/seahowl/io/write_csv.h
     include/seahowl/io/read_rotor_perf.h
     include/seahowl/io/utils_io.h
@@ -354,8 +355,10 @@ set(SEAHOWL_IO_HEADERS
 	include/seahowl/io/output_manager.h
     include/seahowl/io/config_manager.h
     include/seahowl/io/command_parser.h
-    include/seahowl/io/store_db_models.h
-    include/seahowl/io/json_db.h
+    include/seahowl/io/input_structures.h
+    include/seahowl/io/input_handler.h
+    include/seahowl/io/input_reader.h
+    include/seahowl/io/input_reader_json.h
 )
 
 if(SEAHOWL_ENABLE_VTK)

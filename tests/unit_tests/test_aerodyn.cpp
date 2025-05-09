@@ -5,7 +5,7 @@
 #include <seahowl/elasto/chrono_adapters.h>
 #include <seahowl/core/turbine.h>
 #include <seahowl/servo/controller.h>
-#include <seahowl/io/read_json.h>
+#include <seahowl/io/read_input.h>
 #include <seahowl/aero/aerodyn_adapter.h>
 using namespace seahowl;
 using namespace seahowl::elasto;
@@ -47,7 +47,7 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAeroDyn();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/onshore/turbine_aerodyn.json").generic_string(),
+    seahowl::io::populate_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine_aerodyn.json").generic_string(),
                                             turbine);
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();

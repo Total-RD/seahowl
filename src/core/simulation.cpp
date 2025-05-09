@@ -5,7 +5,7 @@
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/aero/system_aero.h"
 #include "seahowl/elasto/chrono_adapters.h"
-#include "seahowl/io/read_json.h"
+#include "seahowl/io/read_input.h"
 #include "seahowl/io/write_csv.h"
 #include "seahowl/io/output_manager.h"
 #include "seahowl/commons/utils.h"

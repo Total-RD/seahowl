@@ -1,4 +1,4 @@
-#include "seahowl/io/read_json.h"
+#include "seahowl/io/read_input.h"
 #include "seahowl/io/utils_io.h"
 #include "seahowl/io/read_rotor_perf.h"
 
@@ -43,8 +43,8 @@
     #include "seahowl/aero/aerodyn_adapter.h"
 #endif
 
-#include "seahowl/io/json_db.h"
-#include "seahowl/io/store_db_models.h"
+#include "seahowl/io/input_structures.h"
+#include "seahowl/io/input_handler.h"
 
 #include <string>
 #include <memory>
@@ -64,12 +64,6 @@ using seahowl::PI;
 
 namespace seahowl {
 namespace io {
-
-std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_json(
-    const std::string& filepath) {
-    BladeDb blade_db = read_blade_json(filepath);
-    return get_blade_elasto_reference_points_from_db(blade_db);
-}
 
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_db(
     const BladeDb& blade_db) {
@@ -96,10 +90,11 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
     return reference_points;
 }
 
-std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_json(
+std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_file(
     const std::string& filepath) {
-    BladeDb blade_db = read_blade_json(filepath);
-    return get_blade_aero_reference_points_from_db(blade_db);
+    InputHandler input_handler(filepath);
+    BladeDb blade_db = input_handler.reader->read_blade();
+    return get_blade_elasto_reference_points_from_db(blade_db);
 }
 
 std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_db(const BladeDb& blade_db) {
@@ -141,12 +136,19 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
     return reference_points;
 }
 
-void populate_blade_elasto_from_json(const std::string& filepath, seahowl::elasto::BladeElasto& blade) {
-    blade.reference_points = get_blade_elasto_reference_points_from_json(filepath);
+std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_file(
+    const std::string& filepath) {
+    InputHandler input_handler(filepath);
+    BladeDb blade_db = input_handler.reader->read_blade();
+    return get_blade_aero_reference_points_from_db(blade_db);
 }
 
-void populate_blade_aero_from_json(const std::string& filepath, seahowl::aero::BladeAero& blade) {
-    blade.reference_points = get_blade_aero_reference_points_from_json(filepath);
+void populate_blade_elasto_from_file(const std::string& filepath, seahowl::elasto::BladeElasto& blade) {
+    blade.reference_points = get_blade_elasto_reference_points_from_file(filepath);
+}
+
+void populate_blade_aero_from_file(const std::string& filepath, seahowl::aero::BladeAero& blade) {
+    blade.reference_points = get_blade_aero_reference_points_from_file(filepath);
 }
 
 void populate_blade(const BladeDb& blade_db, seahowl::core::Blade& blade) {
@@ -154,14 +156,15 @@ void populate_blade(const BladeDb& blade_db, seahowl::core::Blade& blade) {
     blade.aero.reference_points = get_blade_aero_reference_points_from_db(blade_db);
 }
 
-void populate_blade_from_json(const std::string& filepath, seahowl::core::Blade& blade) {
+void populate_blade_from_file(const std::string& filepath, seahowl::core::Blade& blade) {
     spdlog::debug("Populating blade from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
-    BladeDb blade_db = read_blade_json(filepath);
+    InputHandler input_handler(filepath);
+    BladeDb blade_db = input_handler.reader->read_blade();
     blade.elasto.reference_points = get_blade_elasto_reference_points_from_db(blade_db);
     blade.aero.reference_points = get_blade_aero_reference_points_from_db(blade_db);
 }
 
-std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points(const TowerDb& tower_db) {
+std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points_db(const TowerDb& tower_db) {
     // EXTRACT INFO
     std::vector<seahowl::elasto::TowerReferencePointElasto> reference_points;
 
@@ -193,7 +196,7 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
     return reference_points;
 }
 
-std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points(const TowerDb& tower_db) {
+std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_points_db(const TowerDb& tower_db) {
     // EXTRACT INFO
     Vector3d pos0 = tower_db.reference_points[0].position;
     Vector3d pos1 = tower_db.reference_points[tower_db.reference_points.size() - 1].position;
@@ -219,47 +222,39 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
     return reference_points;
 }
 
-void populate_tower_elasto_from_json(const std::string& filepath, seahowl::elasto::TowerElasto& tower) {
-    TowerDb tower_db = seahowl::io::read_tower_json(filepath);
-    tower.reference_points = get_tower_elasto_reference_points(tower_db);
+void populate_tower_elasto_from_file(const std::string& filepath, seahowl::elasto::TowerElasto& tower) {
+    InputHandler input_handler(filepath);
+    TowerDb tower_db = input_handler.reader->read_tower();
+    tower.reference_points = get_tower_elasto_reference_points_db(tower_db);
     tower.height = tower.reference_points.back().coordinates.z();
     tower.base_height = tower.reference_points.front().coordinates.z();
 }
 
-void populate_tower_aero_from_json(const std::string& filepath, seahowl::aero::TowerAero& tower) {
-    utils::check_file_exists(filepath);
-    TowerDb tower_data = seahowl::io::read_tower_json(filepath);
-    tower.reference_points = get_tower_aero_reference_points(tower_data);
+void populate_tower_aero_from_file(const std::string& filepath, seahowl::aero::TowerAero& tower) {
+    InputHandler input_handler(filepath);
+    TowerDb tower_db = input_handler.reader->read_tower();
+    tower.reference_points = get_tower_aero_reference_points_db(tower_db);
 }
 
-void populate_tower_from_json(const std::string& filepath, seahowl::core::Tower& tower) {
+void populate_tower_from_file(const std::string& filepath, seahowl::core::Tower& tower) {
     spdlog::debug("Populating tower from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
-    TowerDb tower_db = seahowl::io::read_tower_json(filepath);
+    InputHandler input_handler(filepath);
+    TowerDb tower_db = input_handler.reader->read_tower();
     // elasto
-    tower.elasto.reference_points = get_tower_elasto_reference_points(tower_db);
+    tower.elasto.reference_points = get_tower_elasto_reference_points_db(tower_db);
     tower.elasto.height = tower.elasto.reference_points.back().coordinates.z();
     tower.elasto.base_height = tower.elasto.reference_points.front().coordinates.z();
     // aero
-    tower.aero.reference_points = get_tower_aero_reference_points(tower_db);
+    tower.aero.reference_points = get_tower_aero_reference_points_db(tower_db);
 }
 
 void populate_tower_from_db(const TowerDb& tower_db, seahowl::core::Tower& tower) {
     // elasto
-    tower.elasto.reference_points = get_tower_elasto_reference_points(tower_db);
+    tower.elasto.reference_points = get_tower_elasto_reference_points_db(tower_db);
     tower.elasto.height = tower.elasto.reference_points.back().coordinates.z();
     tower.elasto.base_height = tower.elasto.reference_points.front().coordinates.z();
     // aero
-    tower.aero.reference_points = get_tower_aero_reference_points(tower_db);
-}
-
-void populate_rna_elasto_from_json(const std::string& filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
-    RnaDb rna_db = read_rna_json(filepath);
-    populate_rna_elasto_from_db(rna_db, rna);
-}
-
-void populate_rna_aero_from_json(const std::string& filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
-    RnaDb rna_db = read_rna_json(filepath);
-    populate_rna_aero_from_db(rna_db, rna);
+    tower.aero.reference_points = get_tower_aero_reference_points_db(tower_db);
 }
 
 void populate_rna_elasto_from_db(const RnaDb& rna_db, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
@@ -291,9 +286,22 @@ void populate_rna_aero_from_db(const RnaDb& rna_db, seahowl::aero::RotorNacelleA
     rna.rotor->hub_radius = rna_db.hub.radius;
 }
 
-void populate_rna_from_json(const std::string& filepath, seahowl::core::RotorNacelleAssembly& rna) {
+void populate_rna_elasto_from_file(const std::string& filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
+    InputHandler input_handler(filepath);
+    RnaDb rna_db = input_handler.reader->read_rna();
+    populate_rna_elasto_from_db(rna_db, rna);
+}
+
+void populate_rna_aero_from_file(const std::string& filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
+    InputHandler input_handler(filepath);
+    RnaDb rna_db = input_handler.reader->read_rna();
+    populate_rna_aero_from_db(rna_db, rna);
+}
+
+void populate_rna_from_file(const std::string& filepath, seahowl::core::RotorNacelleAssembly& rna) {
     spdlog::debug("Populating RNA from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
-    RnaDb rna_db = read_rna_json(filepath);
+    InputHandler input_handler(filepath);
+    RnaDb rna_db = input_handler.reader->read_rna();
     populate_rna_elasto_from_db(rna_db, rna.elasto);
     populate_rna_aero_from_db(rna_db, rna.aero);
 }
@@ -301,48 +309,6 @@ void populate_rna_from_json(const std::string& filepath, seahowl::core::RotorNac
 void populate_rna_from_db(const RnaDb& rna_db, seahowl::core::RotorNacelleAssembly& rna) {
     populate_rna_elasto_from_db(rna_db, rna.elasto);
     populate_rna_aero_from_db(rna_db, rna.aero);
-}
-void add_turbine_to_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
-    spdlog::debug("Adding turbine to system from " + filepath + " file.");
-
-    TurbineDb turbine_db = read_turbine_json(filepath);
-    add_turbine_to_system_from_db(turbine_db, system_core);
-}
-
-void add_turbine_to_system_from_db(const TurbineDb& turbine_db, seahowl::core::System& system_core) {
-    // make turbine aero
-    if (turbine_db.aero.solver == "aerodyn") {
-#ifdef HAVE_AERODYN
-        auto turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>();
-        system_core.aero.turbines.push_back(turbine_aero);
-#endif
-    } else {
-        auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
-        system_core.aero.turbines.push_back(turbine_aero);
-    }
-
-    // make turbine elasto
-    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
-    system_core.elasto.turbines.push_back(turbine_elasto);
-
-    // add turbine to system
-    std::shared_ptr<seahowl::core::Turbine> turbine;
-    turbine = std::make_shared<seahowl::core::Turbine>(*system_core.elasto.turbines.back(),
-                                                       *system_core.aero.turbines.back());
-    system_core.turbines.push_back(turbine);
-
-    // populate turbine
-    populate_turbine_from_db(turbine_db, *turbine);
-
-    turbine->build();
-}
-
-void populate_turbine_from_json(const std::string& filepath, seahowl::core::Turbine& turbine) {
-    spdlog::debug("Populating turbine from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
-                  ").");
-
-    TurbineDb turbine_db = read_turbine_json(filepath);
-    populate_turbine_from_db(turbine_db, turbine);
 }
 
 void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbine& turbine) {
@@ -663,12 +629,48 @@ void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbin
     }
 }
 
-std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(const std::string& filepath) {
-    spdlog::debug("Getting environmental conditions from " + filepath + " file.");
-    auto DATADIR = path(filepath).parent_path();
-    EnvironmentDb environment_db = read_environment_json(filepath);
+void populate_turbine_from_file(const std::string& filepath, seahowl::core::Turbine& turbine) {
+    spdlog::debug("Populating turbine from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
+                  ").");
 
-    return get_environmental_model_from_db(environment_db);
+    InputHandler input_handler(filepath);
+    TurbineDb turbine_db = input_handler.reader->read_turbine();
+    populate_turbine_from_db(turbine_db, turbine);
+}
+
+void add_turbine_to_system_from_db(const TurbineDb& turbine_db, seahowl::core::System& system_core) {
+    // make turbine aero
+    if (turbine_db.aero.solver == "aerodyn") {
+#ifdef HAVE_AERODYN
+        auto turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>();
+        system_core.aero.turbines.push_back(turbine_aero);
+#endif
+    } else {
+        auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
+        system_core.aero.turbines.push_back(turbine_aero);
+    }
+
+    // make turbine elasto
+    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
+    system_core.elasto.turbines.push_back(turbine_elasto);
+
+    // add turbine to system
+    std::shared_ptr<seahowl::core::Turbine> turbine;
+    turbine = std::make_shared<seahowl::core::Turbine>(*system_core.elasto.turbines.back(),
+                                                       *system_core.aero.turbines.back());
+    system_core.turbines.push_back(turbine);
+
+    // populate turbine
+    populate_turbine_from_db(turbine_db, *turbine);
+
+    turbine->build();
+}
+
+void add_turbine_to_system_from_file(const std::string& filepath, seahowl::core::System& system_core) {
+    spdlog::debug("Adding turbine to system from " + filepath + " file.");
+    InputHandler input_handler(filepath);
+    TurbineDb turbine_db = input_handler.reader->read_turbine();
+    add_turbine_to_system_from_db(turbine_db, system_core);
 }
 
 std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(const EnvironmentDb& environment_db) {
@@ -839,15 +841,12 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(co
     return env_model;
 }
 
-void populate_environmental_conditions_from_json(const std::string& filepath, seahowl::core::System& system_core) {
-    spdlog::debug("Populating environmental conditions from " + filepath +
-                  " file (absolute: " + absolute(path(filepath)).string() + ").");
-
+std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_file(const std::string& filepath) {
+    spdlog::debug("Getting environmental conditions from " + filepath + " file.");
     auto DATADIR = path(filepath).parent_path();
-
-    EnvironmentDb environment_db = read_environment_json(filepath);
-
-    populate_environmental_conditions_from_db(environment_db, system_core);
+    InputHandler input_handler(filepath);
+    EnvironmentDb environment_db = input_handler.reader->read_environment();
+    return get_environmental_model_from_db(environment_db);
 }
 
 void populate_environmental_conditions_from_db(const EnvironmentDb& environment_db,
@@ -866,22 +865,16 @@ void populate_environmental_conditions_from_db(const EnvironmentDb& environment_
     }
 }
 
-void populate_system_from_json(const std::string& filepath, seahowl::core::System& system_core) {
-    MainDb main_db = read_main_json(filepath);
-    // environmental info
-    populate_environmental_conditions_from_db(main_db.environment.data, system_core);
+void populate_environmental_conditions_from_file(const std::string& filepath, seahowl::core::System& system_core) {
+    spdlog::debug("Populating environmental conditions from " + filepath +
+                  " file (absolute: " + absolute(path(filepath)).string() + ").");
 
-    populate_system(main_db, system_core);
-}
+    auto DATADIR = path(filepath).parent_path();
 
-void populate_system_from_config(const app::ConfigManager& config, seahowl::core::System& system_core) {
-    // environmental info
-    auto filepath_environment = config.get_string("environment.file");
-    populate_environmental_conditions_from_json(filepath_environment, system_core);
+    InputHandler input_handler(filepath);
+    EnvironmentDb environment_db = input_handler.reader->read_environment();
 
-    MainDb main_db = read_main_json(config.get_json_filepath());
-
-    populate_system(main_db, system_core);
+    populate_environmental_conditions_from_db(environment_db, system_core);
 }
 
 void populate_system(const MainDb& main_db, seahowl::core::System& system_core) {
@@ -906,6 +899,26 @@ void populate_system(const MainDb& main_db, seahowl::core::System& system_core) 
         // translate turbine
         turbine.elasto.translate(turbine_db.translation);
     }
+}
+
+void populate_system_from_file(const std::string& filepath, seahowl::core::System& system_core) {
+    InputHandler input_handler(filepath);
+    MainDb main_db = input_handler.reader->read_main();
+    // environmental info
+    populate_environmental_conditions_from_db(main_db.environment.data, system_core);
+
+    populate_system(main_db, system_core);
+}
+
+void populate_system_from_config(const app::ConfigManager& config, seahowl::core::System& system_core) {
+    // environmental info
+    auto filepath_environment = config.get_string("environment.file");
+    populate_environmental_conditions_from_file(filepath_environment, system_core);
+
+    InputHandler input_handler(config.get_json_filepath());
+    MainDb main_db = input_handler.reader->read_main();
+
+    populate_system(main_db, system_core);
 }
 
 }  // namespace io

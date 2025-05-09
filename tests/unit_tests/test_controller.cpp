@@ -9,7 +9,7 @@
 #include <seahowl/core/system.h>
 #include <seahowl/servo/controller_discon.h>
 #include <seahowl/elasto/blade_elasto.h>
-#include <seahowl/io/read_json.h>
+#include <seahowl/io/read_input.h>
 
 #include <filesystem>  // C++17
 using std::filesystem::path;
@@ -40,7 +40,7 @@ TEST_F(TestController, collective_pitch_control) {
     auto& system_elasto = system_core.elasto;
 
     // add turbine to system
-    seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
+    seahowl::io::add_turbine_to_system_from_file((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
                                                  system_core);
     auto& turbine = *system_core.turbines[0];
     for (auto& blade : turbine.rna.blades) {
@@ -97,7 +97,7 @@ TEST_F(TestController, collective_pitch_control_snap) {
     auto& system_elasto = system_core.elasto;
 
     // add turbine to system
-    seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
+    seahowl::io::add_turbine_to_system_from_file((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
                                                  system_core);
     auto& turbine = *system_core.turbines[0];
     for (auto& blade : turbine.rna.blades) {
@@ -154,7 +154,7 @@ TEST_F(TestController, yaw_control) {
     auto& system_elasto = system_core.elasto;
 
     // add turbine to system
-    seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(),
+    seahowl::io::add_turbine_to_system_from_file((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(),
                                                  system_core);
     auto& turbine = *system_core.turbines[0];
 
@@ -215,7 +215,7 @@ TEST_F(TestController, yaw_control_snap) {
     auto& system_elasto = system_core.elasto;
 
     // add turbine to system
-    seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(),
+    seahowl::io::add_turbine_to_system_from_file((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(),
                                                  system_core);
     auto& turbine = *system_core.turbines[0];
 
@@ -285,7 +285,7 @@ TEST_F(TestController, IEA15) {
     auto& system_elasto = system_core.elasto;
 
     // add turbine to system
-    seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
+    seahowl::io::add_turbine_to_system_from_file((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(),
                                                  system_core);
     auto& turbine = *system_core.turbines[0];
     // statics
@@ -353,7 +353,7 @@ TEST_F(TestController, discon_50turbines) {
 
     // add turbine to system
     for (int ii = 0; ii < 50; ii++) {
-        seahowl::io::add_turbine_to_system_from_json((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(),
+        seahowl::io::add_turbine_to_system_from_file((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(),
                                                      system_core);
         system_core.turbines.back()->elasto.translate(seahowl::Vector3d(200.0 * ii, 200.0 * ii, 0.0));
     }
@@ -406,7 +406,7 @@ TEST_F(TestController, actuator_disk) {
     auto turbine_elasto = seahowl::elasto::TurbineElasto();
     auto turbine_aero = seahowl::aero::TurbineAero();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_json((DATADIR / "IEA15MW/onshore/turbine_disk.json").generic_string(), turbine);
+    seahowl::io::populate_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine_disk.json").generic_string(), turbine);
 
     turbine.build();
     turbine.elasto.assemble(system_elasto);

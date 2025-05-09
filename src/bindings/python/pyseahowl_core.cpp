@@ -26,8 +26,8 @@
 #include <seahowl/aero/system_aero.h>
 #include <seahowl/env/wind_models.h>
 #include <seahowl/servo/controller.h>
-#include <seahowl/io/read_json.h>
-#include <seahowl/io/read_json.h>
+#include <seahowl/io/read_input.h>
+#include <seahowl/io/read_input.h>
 
 namespace py = pybind11;
 

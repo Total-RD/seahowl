@@ -1,5 +1,5 @@
 #include <seahowl/core/simulation.h>
-#include <seahowl/io/read_json.h>
+#include <seahowl/io/read_input.h>
 #include <seahowl/io/config_manager.h>
 
 #include <filesystem>  // C++17

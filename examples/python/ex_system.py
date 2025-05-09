@@ -11,7 +11,7 @@ t_output_next = 0.0
 system_elasto = seahowl.elasto.SystemElastoChrono()
 system_aero = seahowl.aero.SystemAero()
 system_core = seahowl.core.System(system_elasto, system_aero)
-seahowl.io.populate_system_from_json(filepath, system_core)
+seahowl.io.populate_system_from_file(filepath, system_core)
 
 # statics
 system_elasto.do_statics(True, 10)
