@@ -21,6 +21,11 @@ using json = nlohmann::json;
 namespace seahowl {
 namespace io {
 
+/**
+ * @brief Convert a string to lowercase
+ * @param input The input string
+ * @return The lowercase string
+ */
 std::string to_lowercase(const std::string& input) {
     std::string result = input;
     std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) { return std::tolower(c); });
@@ -62,6 +67,11 @@ double read_value(const json& js, const std::string& key, const std::optional<do
     }
 }
 
+/**
+ * @brief Convert CSV file to JSON format
+ * @param filename The name of the CSV file
+ * @return JSON object containing the data
+ */
 json csv_to_json(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -125,6 +135,37 @@ Eigen::MatrixX<double> get_matrix_from_vector_of_vectors(std::vector<std::vector
     return mat;
 }
 
+/**
+ * @brief Get JSON data from a file
+ * @details This function reads a file (Json or Csv) and converts it to a JSON object.
+ * @param filepath The path to the file
+ * @return JSON object containing the data
+ */
+json get_json(const std::string& filepath) {
+    if (!fs::exists(filepath)) {
+        throw std::runtime_error("File does not exist: " + filepath);
+    }
+
+    json json_db;
+    fs::path file_path(filepath);
+    std::string extension = file_path.extension().string();
+    if (extension == ".csv") {
+        // Convert CSV to JSON
+        json_db = csv_to_json(filepath);
+    } else if (extension == ".json") {
+        std::ifstream file(filepath);
+        if (!file.is_open()) {
+            throw std::runtime_error("Unable to open the JSON file" + filepath);
+        }
+        file >> json_db;
+        file.close();
+
+    } else {
+        throw std::runtime_error("Unsupported file format: " + extension);
+    }
+    return json_db;
+}
+
 void from_json(const json& js, ReferencePointTowerDb& ref_point, GlobalVariablesTowerDb& global_vars) {
     if (js.contains("position")) {
         std::vector<double> pos = js["position"];
@@ -177,27 +218,6 @@ void from_json(const json& js, TowerDb& tower_db) {
         from_json(ref_point_json, ref_point, tower_db.global_variables);
         tower_db.reference_points.push_back(ref_point);
     }
-}
-
-json get_json(const std::string& filepath) {
-    json json_db;
-    fs::path file_path(filepath);
-    std::string extension = file_path.extension().string();
-    if (extension == ".csv") {
-        // Convert CSV to JSON
-        json_db = csv_to_json(filepath);
-    } else if (extension == ".json") {
-        std::ifstream file(filepath);
-        if (!file.is_open()) {
-            throw std::runtime_error("Unable to open the JSON file");
-        }
-        file >> json_db;
-        file.close();
-
-    } else {
-        throw std::runtime_error("Unsupported file format: " + extension);
-    }
-    return json_db;
 }
 
 TowerDb read_tower_json(const std::string& filepath) {
@@ -486,6 +506,9 @@ EnvironmentDb read_environment_json(const std::string& filepath) {
     if (env_db.wind.type == "inflowwind") {
         auto inflowwind_filepath = main_directory / env_db.wind.options.file_inflowwind;
         env_db.wind.options.file_inflowwind_path = inflowwind_filepath;
+        if (!fs::exists(inflowwind_filepath)) {
+            throw std::runtime_error("InflowWind file not found: " + inflowwind_filepath.u8string());
+        }
     }
     return env_db;
 }
@@ -647,10 +670,21 @@ TurbineDb read_turbine_json(const std::string& filepath) {
     if (turbine_db.aero.solver == "aerodyn") {
         auto inflowwind_filepath = main_directory / turbine_db.aero.options.file_inflowwind;
         turbine_db.aero.options.file_inflowwind_path = inflowwind_filepath;
+        if (!fs::exists(inflowwind_filepath)) {
+            throw std::runtime_error("InflowWind file not found: " + inflowwind_filepath.u8string());
+        }
+        auto aerodyn_filepath = main_directory / turbine_db.aero.options.file_aerodyn;
+        turbine_db.aero.options.file_aerodyn_path = aerodyn_filepath;
+        if (!fs::exists(aerodyn_filepath)) {
+            throw std::runtime_error("AeroDyn file not found: " + aerodyn_filepath.u8string());
+        }
     }
     if (turbine_db.aero.solver == "disk") {
         auto performance_filepath = main_directory / turbine_db.aero.options.performance_file;
         turbine_db.aero.options.performance_file_path = performance_filepath;
+        if (!fs::exists(performance_filepath)) {
+            throw std::runtime_error("Performance file not found: " + performance_filepath.u8string());
+        }
     }
     // Finalize the rna database
     auto rna_filepath = main_directory / turbine_db.rna.file;
@@ -688,8 +722,14 @@ TurbineDb read_turbine_json(const std::string& filepath) {
     // Finalize the controller database
     auto discon_filepath = main_directory / turbine_db.controller.options.infile;
     turbine_db.controller.options.infile_path = discon_filepath;
+    if (!fs::exists(discon_filepath)) {
+        throw std::runtime_error("DISCON file not found: " + discon_filepath.u8string());
+    }
     auto lib_filepath = main_directory / turbine_db.controller.options.libfile;
     turbine_db.controller.options.libfile_path = lib_filepath;
+    if (!fs::exists(lib_filepath)) {
+        throw std::runtime_error("DISCON library file not found: " + lib_filepath.u8string());
+    }
 
     return turbine_db;
 }
