@@ -18,6 +18,13 @@ class ListModel {
      * @param[in] model Model to add
      */
     void add_model(const std::shared_ptr<T>& model);
+
+    /**
+     * @brief Inserts a model to the list
+     * @param[in] model Model to insert
+     */
+    void insert_model(const std::shared_ptr<T>& model);
+
     /**
      * @brief Returns the list of models
      * @return Vector of models
@@ -52,6 +59,11 @@ class ListModel {
 template <typename T>
 void ListModel<T>::add_model(const std::shared_ptr<T>& model) {
     models.push_back(model);
+}
+
+template <typename T>
+void ListModel<T>::insert_model(const std::shared_ptr<T>& model) {
+    models.insert(models.begin(), model);
 }
 
 template <typename T>
