@@ -223,7 +223,11 @@ void from_json(const json& js, TowerDb& tower_db) {
 TowerDb InputReaderJson::read_tower() {
     TowerDb tower_db;
     json json_db = get_json(filepath);
-    from_json(json_db, tower_db);
+    try {
+        from_json(json_db, tower_db);
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    }
     return tower_db;
 }
 
@@ -315,14 +319,21 @@ void from_json(const json& js, AirfoilDb& airfoil_db) {
 std::vector<AirfoilDb> read_airfoil(const std::string& filepath_) {
     AirfoilDb airfoil_db;
     json json_db = get_json(filepath_);
-    return json_db.get<std::vector<AirfoilDb>>();
+    try {
+        return json_db.get<std::vector<AirfoilDb>>();
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error reading in file " + filepath_ + " : " + std::string(e.what()));
+    }
 }
 
 BladeDb InputReaderJson::read_blade() {
     BladeDb blade_db;
     json json_db = get_json(filepath);
-    from_json(json_db, blade_db);
-
+    try {
+        from_json(json_db, blade_db);
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    }
     auto main_directory = fs::path(filepath).parent_path();
 
     for (auto& ref_point : blade_db.reference_points) {
@@ -377,7 +388,11 @@ void from_json(const json& js, RnaDb& rna) {
 RnaDb InputReaderJson::read_rna() {
     RnaDb rna_db;
     json json_db = get_json(filepath);
-    from_json(json_db, rna_db);
+    try {
+        from_json(json_db, rna_db);
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    }
     return rna_db;
 }
 
@@ -501,14 +516,18 @@ void from_json(const json& js, EnvironmentDb& env) {
 EnvironmentDb InputReaderJson::read_environment() {
     EnvironmentDb env_db;
     json json_db = get_json(filepath);
-    from_json(json_db, env_db);
-    auto main_directory = fs::path(filepath).parent_path();
-    if (env_db.wind.type == "inflowwind") {
-        auto inflowwind_filepath = main_directory / env_db.wind.options.file_inflowwind;
-        env_db.wind.options.file_inflowwind_path = inflowwind_filepath;
-        if (!fs::exists(inflowwind_filepath)) {
-            throw std::runtime_error("InflowWind file not found: " + inflowwind_filepath.u8string());
+    try {
+        from_json(json_db, env_db);
+        auto main_directory = fs::path(filepath).parent_path();
+        if (env_db.wind.type == "inflowwind") {
+            auto inflowwind_filepath = main_directory / env_db.wind.options.file_inflowwind;
+            env_db.wind.options.file_inflowwind_path = inflowwind_filepath;
+            if (!fs::exists(inflowwind_filepath)) {
+                throw std::runtime_error("InflowWind file not found: " + inflowwind_filepath.u8string());
+            }
         }
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
     }
     return env_db;
 }
@@ -663,8 +682,11 @@ void from_json(const json& js, TurbineDb& turbine) {
 TurbineDb InputReaderJson::read_turbine() {
     TurbineDb turbine_db;
     json json_db = get_json(filepath);
-    from_json(json_db, turbine_db);
-
+    try {
+        from_json(json_db, turbine_db);
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    }
     // Finalize
     auto main_directory = fs::path(filepath).parent_path();
     if (turbine_db.aero.solver == "aerodyn") {
@@ -828,7 +850,11 @@ void from_json(const json& js, Floaterdb& floater) {
 Floaterdb InputReaderJson::read_floater() {
     Floaterdb floater_db;
     json json_db = get_json(filepath);
-    from_json(json_db, floater_db);
+    try {
+        from_json(json_db, floater_db);
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    }
     return floater_db;
 }
 
@@ -846,7 +872,11 @@ void from_json(const json& js, MooringPropertiesDb& mooring_props) {
 MooringPropertiesDb InputReaderJson::read_mooring_properties() {
     MooringPropertiesDb mooring_props;
     json json_db = get_json(filepath);
-    from_json(json_db, mooring_props);
+    try {
+        from_json(json_db, mooring_props);
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    }
     return mooring_props;
 }
 
@@ -901,7 +931,11 @@ void from_json(const json& js, MainDb& config) {
 MainDb InputReaderJson::read_main() {
     MainDb main_db;
     json json_db = get_json(filepath);
-    from_json(json_db, main_db);
+    try {
+        from_json(json_db, main_db);
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    }
     auto main_directory = fs::path(filepath).parent_path();
     for (auto& turbine : main_db.turbines) {
         if (!turbine.file.empty()) {
