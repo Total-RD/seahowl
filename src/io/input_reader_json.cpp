@@ -51,16 +51,17 @@ std::optional<double> read_optional_value(const json& js, const std::string& key
  * @details If the key is not found in the json object, it will return the value from the global variables if it exists.
  *          If the key is not found and the global variable is not set, it will throw an error.
  * @param js json object
+ * @param global_vars json object global variables
  * @param key key to read
- * @param global_vars global variables
+
  * @return value
  */
-double read_value(const json& js, const std::string& key, const std::optional<double>& global_vars) {
+double read_value(const json& js, const json& js_global_vars, const std::string& key) {
     if (js.contains(key)) {
         return js.at(key).get<double>();
     } else {
-        if (global_vars.has_value())
-            return global_vars.value();
+        if (js_global_vars.contains(key))
+            return js_global_vars.at(key).get<double>();
         else
             throw std::runtime_error(
                 key + " is not defined in the JSON file and no default value is provided in the global variables.");
@@ -166,7 +167,7 @@ json get_json(const std::string& filepath) {
     return json_db;
 }
 
-void from_json(const json& js, ReferencePointTowerDb& ref_point, GlobalVariablesTowerDb& global_vars) {
+void from_json(const json& js, const json& js_global_vars, ReferencePointTowerDb& ref_point) {
     if (js.contains("position")) {
         std::vector<double> pos = js["position"];
         ref_point.position = Eigen::Vector3d(pos[0], pos[1], pos[2]);
@@ -174,48 +175,31 @@ void from_json(const json& js, ReferencePointTowerDb& ref_point, GlobalVariables
         ref_point.position = Eigen::Vector3d(js["position_x"], js["position_y"], js["position_z"]);
     }
 
-    ref_point.diameter = js.at("diameter").get<double>();
-    ref_point.thickness = js.at("thickness").get<double>();
-    ref_point.density = read_value(js, "density", global_vars.density);
-    ref_point.young_modulus = read_value(js, "young_modulus", global_vars.young_modulus);
-    ref_point.poisson_ratio = read_value(js, "poisson_ratio", global_vars.poisson_ratio);
-    ref_point.drag_coefficient_normal = read_value(js, "drag_coefficient_normal", global_vars.drag_coefficient_normal);
-    ref_point.drag_coefficient_axial = read_value(js, "drag_coefficient_axial", global_vars.drag_coefficient_axial);
-    ref_point.added_mass_coefficient_normal =
-        read_value(js, "added_mass_coefficient_normal", global_vars.added_mass_coefficient_normal);
-    ref_point.added_mass_coefficient_axial =
-        read_value(js, "added_mass_coefficient_axial", global_vars.added_mass_coefficient_axial);
-    ref_point.buoyancy_factor = read_value(js, "buoyancy_factor", global_vars.buoyancy_factor);
-    ref_point.damping_foreaft = read_value(js, "damping_foreaft", global_vars.damping_foreaft);
-    ref_point.damping_sideside = read_value(js, "damping_sideside", global_vars.damping_sideside);
-    ref_point.damping_axial = read_value(js, "damping_axial", global_vars.damping_axial);
-    ref_point.damping_torsion = read_value(js, "damping_torsion", global_vars.damping_torsion);
-    ref_point.damping_mass = read_value(js, "damping_mass", global_vars.damping_mass);
-}
-
-void from_json(const json& js, GlobalVariablesTowerDb& global_vars) {
-    global_vars.density = read_optional_value(js, "density");
-    global_vars.young_modulus = read_optional_value(js, "young_modulus");
-    global_vars.poisson_ratio = read_optional_value(js, "poisson_ratio");
-    global_vars.drag_coefficient_normal = read_optional_value(js, "drag_coefficient_normal");
-    global_vars.drag_coefficient_axial = read_optional_value(js, "drag_coefficient_axial");
-    global_vars.added_mass_coefficient_normal = read_optional_value(js, "added_mass_coefficient_normal");
-    global_vars.added_mass_coefficient_axial = read_optional_value(js, "added_mass_coefficient_axial");
-    global_vars.buoyancy_factor = read_optional_value(js, "buoyancy_factor");
-    global_vars.damping_foreaft = read_optional_value(js, "damping_foreaft");
-    global_vars.damping_sideside = read_optional_value(js, "damping_sideside");
-    global_vars.damping_axial = read_optional_value(js, "damping_axial");
-    global_vars.damping_torsion = read_optional_value(js, "damping_torsion");
-    global_vars.damping_mass = read_optional_value(js, "damping_mass");
+    ref_point.diameter = read_value(js, js_global_vars, "diameter");
+    ref_point.thickness = read_value(js, js_global_vars, "thickness");
+    ref_point.density = read_value(js, js_global_vars, "density");
+    ref_point.young_modulus = read_value(js, js_global_vars, "young_modulus");
+    ref_point.poisson_ratio = read_value(js, js_global_vars, "poisson_ratio");
+    ref_point.drag_coefficient_normal = read_value(js, js_global_vars, "drag_coefficient_normal");
+    ref_point.drag_coefficient_axial = read_value(js, js_global_vars, "drag_coefficient_axial");
+    ref_point.added_mass_coefficient_normal = read_value(js, js_global_vars, "added_mass_coefficient_normal");
+    ref_point.added_mass_coefficient_axial = read_value(js, js_global_vars, "added_mass_coefficient_axial");
+    ref_point.buoyancy_factor = read_value(js, js_global_vars, "buoyancy_factor");
+    ref_point.damping_foreaft = read_value(js, js_global_vars, "damping_foreaft");
+    ref_point.damping_sideside = read_value(js, js_global_vars, "damping_sideside");
+    ref_point.damping_axial = read_value(js, js_global_vars, "damping_axial");
+    ref_point.damping_torsion = read_value(js, js_global_vars, "damping_torsion");
+    ref_point.damping_mass = read_value(js, js_global_vars, "damping_mass");
 }
 
 void from_json(const json& js, TowerDb& tower_db) {
+    json json_global_vars;
     if (js.contains("global_variables")) {
-        tower_db.global_variables = js["global_variables"];
+        json_global_vars = js["global_variables"];
     }
     for (const auto& ref_point_json : js["reference_points"]) {
         ReferencePointTowerDb ref_point;
-        from_json(ref_point_json, ref_point, tower_db.global_variables);
+        from_json(ref_point_json, json_global_vars, ref_point);
         tower_db.reference_points.push_back(ref_point);
     }
 }
@@ -231,29 +215,10 @@ TowerDb InputReaderJson::read_tower() {
     return tower_db;
 }
 
-void from_json(const json& js, GlobalVariablesBladeDb& global_vars) {
-    global_vars.damping_flapwise = read_optional_value(js, "damping_flapwise");
-    global_vars.damping_edgewise = read_optional_value(js, "damping_edgewise");
-    global_vars.damping_axial = read_optional_value(js, "damping_axial");
-    global_vars.damping_torsion = read_optional_value(js, "damping_torsion");
-    global_vars.damping_mass = read_optional_value(js, "damping_mass");
-
-    if (js.contains("offset_gravity")) {
-        global_vars.offset_gravity = Eigen::Vector2d(js.at("offset_gravity")[0], js.at("offset_gravity")[1]);
-    } else {
-        global_vars.offset_gravity = std::nullopt;
-    }
-    if (js.contains("offset_elastic")) {
-        global_vars.offset_elastic = Eigen::Vector2d(js.at("offset_elastic")[0], js.at("offset_elastic")[1]);
-    } else {
-        global_vars.offset_elastic = std::nullopt;
-    }
-}
-
-void from_json(const json& js, ReferencePointBladeDb& ref_point, const GlobalVariablesBladeDb& global_vars) {
+void from_json(const json& js, const json& js_global_vars, ReferencePointBladeDb& ref_point) {
     ref_point.coordinates = Eigen::Vector3d(js.at("coordinates")[0], js.at("coordinates")[1], js.at("coordinates")[2]);
-    ref_point.twist = js.at("twist").get<double>();
-    ref_point.fraction = js.at("fraction").get<double>();
+    ref_point.twist = read_value(js, js_global_vars, "twist");
+    ref_point.fraction = read_value(js, js_global_vars, "fraction");
 
     // Convert stiffness_matrix
     const auto& stiffness = js.at("stiffness_matrix");
@@ -273,39 +238,50 @@ void from_json(const json& js, ReferencePointBladeDb& ref_point, const GlobalVar
         }
     }
 
-    ref_point.chord = js.at("chord").get<double>();
+    ref_point.chord = read_value(js, js_global_vars, "chord");
     ref_point.airfoil_file = js.at("airfoil_file").get<std::string>();
-    ref_point.offset_aero = Eigen::Vector2d(js.at("offset_aero")[0], js.at("offset_aero")[1]);
 
-    ref_point.damping_flapwise = read_value(js, "damping_flapwise", global_vars.damping_flapwise);
-    ref_point.damping_edgewise = read_value(js, "damping_edgewise", global_vars.damping_edgewise);
-    ref_point.damping_axial = read_value(js, "damping_axial", global_vars.damping_axial);
-    ref_point.damping_torsion = read_value(js, "damping_torsion", global_vars.damping_torsion);
-    ref_point.damping_mass = read_value(js, "damping_mass", global_vars.damping_mass);
+    if (js.contains("offset_aero"))
+        ref_point.offset_aero = Eigen::Vector2d(js.at("offset_aero")[0], js.at("offset_aero")[1]);
+    else if (js_global_vars.contains("offset_aero"))
+        ref_point.offset_aero =
+            Eigen::Vector2d(js_global_vars.at("offset_aero")[0], js_global_vars.at("offset_aero")[1]);
+    else
+        throw std::runtime_error(
+            "offset_aero is not defined in the JSON file and no default value is provided in the global variables.");
+
+    ref_point.damping_flapwise = read_value(js, js_global_vars, "damping_flapwise");
+    ref_point.damping_edgewise = read_value(js, js_global_vars, "damping_edgewise");
+    ref_point.damping_axial = read_value(js, js_global_vars, "damping_axial");
+    ref_point.damping_torsion = read_value(js, js_global_vars, "damping_torsion");
+    ref_point.damping_mass = read_value(js, js_global_vars, "damping_mass");
 
     if (js.contains("offset_elastic"))
         ref_point.offset_elastic = Eigen::Vector2d(js.at("offset_elastic")[0], js.at("offset_elastic")[1]);
-    else if (global_vars.offset_elastic.has_value())
-        ref_point.offset_elastic = global_vars.offset_elastic.value();
+    else if (js_global_vars.contains("offset_elastic"))
+        ref_point.offset_elastic =
+            Eigen::Vector2d(js_global_vars.at("offset_elastic")[0], js_global_vars.at("offset_elastic")[1]);
     else
         throw std::runtime_error(
             "offset_elastic is not defined in the JSON file and no default value is provided in the global variables.");
     if (js.contains("offset_gravity"))
         ref_point.offset_gravity = Eigen::Vector2d(js.at("offset_gravity")[0], js.at("offset_gravity")[1]);
-    else if (global_vars.offset_gravity.has_value())
-        ref_point.offset_gravity = global_vars.offset_gravity.value();
+    else if (js_global_vars.contains("offset_gravity"))
+        ref_point.offset_gravity =
+            Eigen::Vector2d(js_global_vars.at("offset_gravity")[0], js_global_vars.at("offset_gravity")[1]);
     else
         throw std::runtime_error(
             "offset_gravity is not defined in the JSON file and no default value is provided in the global variables.");
 }
 
 void from_json(const json& js, BladeDb& blade_db) {
+    json js_global_vars;
     if (js.contains("global_variables")) {
-        blade_db.global_variables = js.at("global_variables").get<GlobalVariablesBladeDb>();
+        js_global_vars = js["global_variables"];
     }
     for (auto& ref_point_json : js.at("reference_points")) {
         ReferencePointBladeDb ref_point;
-        from_json(ref_point_json, ref_point, blade_db.global_variables);
+        from_json(ref_point_json, js_global_vars, ref_point);
         blade_db.reference_points.push_back(ref_point);
     }
 }
