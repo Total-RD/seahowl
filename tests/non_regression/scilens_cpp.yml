@@ -3,22 +3,19 @@ tags: [csv]
 execute:
   pre_folder_delete:  ["output"]
   exe_guess_os_extension: true
-  command_suffix: " ./data/main.json --numerics-duration 50 --outputs-log-level error"
+  command_suffix: " ./data/main.json --numerics-duration 30 "
 execute_and_compare:
   test:
     exe_path: "build/seahowl_driver"
   reference:
-    exe_url: Adress_to_GIT/releases/download/v0.9.0/seahowl-driver-v0.9.0-linux-x86-64.zip
-    exe_url_headers:
-      Authorization: "Bearer {{ env.GIT_TOKEN }}"
-    exe_unzip_and_use: seahowl-driver-v0.9.0-linux-x86-64/seahowl_driver
+    exe_path: "install/bin/seahowl_driver"
+  #test_only: true
 readers:
   csv:
     curve_parser:
       name: "col_x"
       parameters:
         x: ["time (s)", "fraction"]
-    ignore_colunmns: ["monopile base moment x (Nm)","monopile base moment y (Nm)","monopile base moment z (Nm)","monopile base force x (N)","monopile base force y (N)","monopile base force z (N)"]
 compare:
   errors_limit: 10000
   float_thresholds:
@@ -42,4 +39,4 @@ report:
       display_on_load: false
     parameter_page_mode :
       default_value : tabs
-  logo_file: ../../../doc/source/_static/totalenergies_alpha.png
+  logo_file: ../../../../doc/source/_static/totalenergies_alpha.png

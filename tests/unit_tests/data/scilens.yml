@@ -8,7 +8,7 @@ report:
       display_on_load: false
     parameter_page_mode :
       default_value : tabs
-  title: SEAHOWL Report for Tristan
+  title_prefix : "Seahowl / Comparison Results "
   logo_file: ../../../../doc/source/_static/totalenergies_alpha.png
 compare:
    errors_limit: 10000

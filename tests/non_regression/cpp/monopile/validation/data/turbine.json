@@ -16,24 +16,24 @@
     "pitch_actuator_dynamics": true,
     "blades": [
       {
-        "file": "../../../../../data/IEA15MW/base/blade.json",
+        "file": "../../../../../../data/IEA15MW/base/blade.json",
         "initial_pitch": 0.0,
         "precone": -4.0
       },
       {
-        "file": "../../../../../data/IEA15MW/base/blade.json",
+        "file": "../../../../../../data/IEA15MW/base/blade.json",
         "initial_pitch": 0.0,
         "precone": -4.0
       },
       {
-        "file": "../../../../../data/IEA15MW/base/blade.json",
+        "file": "../../../../../../data/IEA15MW/base/blade.json",
         "initial_pitch": 0.0,
         "precone": -4.0
       }
     ]
   },
   "rna": {
-    "file": "../../../../../data/IEA15MW/base/rna.json",
+    "file": "../../../../../../data/IEA15MW/base/rna.json",
     "initial_yaw": 0.0,
     "yaw_actuator_dynamics": true
   },
@@ -42,7 +42,7 @@
       "elasto": [],
       "aero": [19]
     },
-    "file": "../../../../../data/IEA15MW/onshore/tower.csv",
+    "file": "../../../../../../data/IEA15MW/onshore/tower.csv",
     "options":{
       "use_MacCamyFuchs_correction": false,
       "use_Cd_correction": false
@@ -63,8 +63,8 @@
   "controller": {
     "type": "DISCON",
     "options": {
-      "infile": "../../../../../data/IEA15MW/base/controller/DISCON.IN",
-      "libfile": "../../../../../data/IEA15MW/base/controller/libdiscon.so"
+      "infile": "../../../../../../data/IEA15MW/base/controller/DISCON.IN",
+      "libfile": "../../../../../../data/IEA15MW/base/controller/libdiscon.so"
     }
   }
 }

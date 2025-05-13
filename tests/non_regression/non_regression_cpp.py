@@ -9,7 +9,7 @@ TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 ROOT_DIR = os.path.dirname(os.path.dirname(TEST_DIR))
 
 
-class TestNonRegression(unittest.TestCase):
+class TestNonRegressionCpp(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
@@ -33,7 +33,7 @@ class TestNonRegression(unittest.TestCase):
     def _generic_test(self, input_dir):
 
         test_dir = os.path.join(TEST_DIR, input_dir)
-        runner = StandaloneTaskRunner(f"{TEST_DIR}/scilens.yml")
+        runner = StandaloneTaskRunner(f"{TEST_DIR}/scilens_cpp.yml")
         results = runner.process(test_dir, origin_working_dir=ROOT_DIR)
 
         if results.error:
@@ -46,11 +46,11 @@ class TestNonRegression(unittest.TestCase):
 
     def test_onshore(self):
 
-        self._generic_test("onshore")
+        self._generic_test("cpp/onshore")
 
     def test_monopile(self):
 
-        self._generic_test("monopile")
+        self._generic_test("cpp/monopile")
 
 
 if __name__ == "__main__":

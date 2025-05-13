@@ -1,0 +1,39 @@
+processor: Compare
+tags: [csv]
+#execute:
+#  pre_folder_delete:  ["output"]
+#execute_and_compare:
+#    test:
+#        exe_command: "export PYTHONPATH=seahowl/build && python ex_simulation.py"
+#    reference:
+#        exe_command: "export PYTHONPATH=seahowl/install && python ex_simulation.py"
+readers:
+  csv:
+    curve_parser:
+      name: "col_x"
+      parameters:
+        x: ["time (s)", "fraction"]
+compare:
+  errors_limit: 10000
+  float_thresholds:
+    relative_vs_absolute_min: 1e-12
+    relative_error_min: 1e-3
+    relative_error_max: 1e-2
+    absolute_error_min: 1e-7
+    absolute_error_max: 1e-6
+  sources:
+    test_folder_relative_path: validation
+    reference_folder_relative_path: reference
+    additional_path_suffix: "output"
+    recursive: true
+report:
+  title_prefix : "Seahowl / Comparison Results /"
+  output:
+    export_html: true
+  html:
+    collapse_if_successful: false
+    curves:
+      display_on_load: false
+    parameter_page_mode :
+      default_value : tabs
+  logo_file: ../../../../doc/source/_static/totalenergies_alpha.png
