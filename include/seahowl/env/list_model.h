@@ -23,6 +23,7 @@ class ListModel {
      * @brief Inserts a model to the list
      * @param[in] model Model to insert
      */
+    template <typename U>
     void insert_model(const std::shared_ptr<T>& model);
 
     /**
@@ -62,8 +63,31 @@ void ListModel<T>::add_model(const std::shared_ptr<T>& model) {
 }
 
 template <typename T>
+template <typename U>
 void ListModel<T>::insert_model(const std::shared_ptr<T>& model) {
-    models.insert(models.begin(), model);
+    // if the list is empty, just add the model
+    if (models.empty()) {
+        models.push_back(model);
+        return;
+    }
+    // if the model is of the same type as U
+    if (std::shared_ptr<U> ele_model = std::dynamic_pointer_cast<U>(model)) {
+        auto it = models.begin();
+        // find the first element of type U
+        for (; it != models.end(); ++it) {
+            if (std::shared_ptr<U> ele_model = std::dynamic_pointer_cast<U>(*it)) {
+                models.insert(it, model);
+                break;
+            }
+        }
+        // if they are object type as U, insert it at the end
+        if (it == models.end()) {
+            models.push_back(model);
+        }
+    } else {
+        // if the model is not of the same type as U, insert it at the beginning
+        models.insert(models.begin(), model);
+    }
 }
 
 template <typename T>
