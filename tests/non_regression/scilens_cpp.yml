@@ -1,4 +1,5 @@
 processor: ExecuteAndCompare
+#processor: Compare
 tags: [csv]
 execute:
   pre_folder_delete:  ["output"]
@@ -8,7 +9,7 @@ execute_and_compare:
   test:
     exe_path: "build/seahowl_driver"
   reference:
-    exe_path: "install/bin/seahowl_driver"
+    exe_path: "ref/bin/seahowl_driver"
   #test_only: true
 readers:
   csv:
@@ -24,6 +25,14 @@ compare:
     relative_error_max: 1e-2
     absolute_error_min: 1e-7
     absolute_error_max: 1e-6
+    #vectors:
+      #ponderation_method: amplitude_moderation
+      #amplitude_moderation_multiplier: 0.01
+      #ponderation_method: RIAE_midpoint
+      #riae_threshold: 0.1
+      #reduction_method: ignore
+      #ponderation_method: RIAE_trapezoid
+      #riae_threshold: 0.01
   sources:
     test_folder_relative_path: validation
     reference_folder_relative_path: reference

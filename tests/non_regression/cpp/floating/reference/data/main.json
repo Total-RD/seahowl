@@ -1,0 +1,33 @@
+﻿{
+  "numerics": {
+    "dt": 0.05,
+    "duration": 2000.0,
+    "statics": {
+      "linear_step": false,
+      "nonlinear_steps": 0
+    },
+    "presimulation": {
+      "dt": 0.001,
+      "duration": 0.1,
+      "presetup": true,
+      "fix_towers": true
+    }
+  },
+  "outputs": {
+    "dt": 0.1,
+    "folder": "./output",
+    "vtk": false,
+    "log_level": "info",
+    "gui": true
+  },
+  "environment": {
+    "file": "../../../../../../data/IEA15MW/env/env_waves_200m.json"
+  },
+  "turbines": [
+    {
+      "file": "../../../../../../data/IEA15MW/floating/turbine.json",
+      "translation": [0, 0, 0],
+      "rotation": 0
+    }
+  ]
+}

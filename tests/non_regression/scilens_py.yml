@@ -1,12 +1,5 @@
 processor: Compare
 tags: [csv]
-#execute:
-#  pre_folder_delete:  ["output"]
-#execute_and_compare:
-#    test:
-#        exe_command: "export PYTHONPATH=seahowl/build && python ex_simulation.py"
-#    reference:
-#        exe_command: "export PYTHONPATH=seahowl/install && python ex_simulation.py"
 readers:
   csv:
     curve_parser:

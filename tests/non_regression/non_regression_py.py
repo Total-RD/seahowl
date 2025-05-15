@@ -9,11 +9,11 @@ TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 ROOT_DIR = os.path.dirname(os.path.dirname(TEST_DIR))
 
 VAL_PY_DIR = os.path.join(os.getcwd(), "build")
-REF_PY_DIR = os.path.join(os.getcwd(), "install/bin")
+REF_PY_DIR = os.path.join(os.getcwd(), "ref/bin")
 
 ENV_PYTHONPATH = "PYTHONPATH"
 
-test_only = True
+test_only = False
 
 
 class TestNonRegressionPy(unittest.TestCase):
@@ -23,11 +23,13 @@ class TestNonRegressionPy(unittest.TestCase):
 
         # Setup Assets Helper with the target folder
         assets = Assets(
-            os.path.join(TEST_DIR, "test_assets"), force_clean=True, force_create=True
+            os.path.join(TEST_DIR, "test_assets_py"),
+            force_clean=True,
+            force_create=True,
         )
 
         # Copy the tree where we found reports
-        assets.copy(assets.report_discover(TEST_DIR))
+        assets.copy(assets.report_discover(os.path.join(TEST_DIR, "python")))
 
         # Create an index of those reports
         assets.create_html_index(

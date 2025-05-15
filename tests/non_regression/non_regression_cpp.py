@@ -16,11 +16,13 @@ class TestNonRegressionCpp(unittest.TestCase):
 
         # Setup Assets Helper with the target folder
         assets = Assets(
-            os.path.join(TEST_DIR, "test_assets"), force_clean=True, force_create=True
+            os.path.join(TEST_DIR, "test_assets_cpp"),
+            force_clean=True,
+            force_create=True,
         )
 
         # Copy the tree where we found reports
-        assets.copy(assets.report_discover(TEST_DIR))
+        assets.copy(assets.report_discover(os.path.join(TEST_DIR, "cpp")))
 
         # Create an index of those reports
         assets.create_html_index(
