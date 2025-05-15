@@ -29,6 +29,10 @@ void initialize_pyseahowl_env(py::module& m) {
         .def_readwrite("fluid_models", &seahowl::env::EnvModel::fluid_models)
         .def_readwrite("soil_models", &seahowl::env::EnvModel::soil_models);
 
+    // env/ListModel<FluidModel>
+    py::class_<seahowl::env::ListModel<seahowl::env::FluidModel>,
+               std::shared_ptr<seahowl::env::ListModel<seahowl::env::FluidModel>>>(m_env, "ListModel_FluidModel");
+
     // env/fluid_list_model.h
     py::class_<seahowl::env::FluidListModel, std::shared_ptr<seahowl::env::FluidListModel>,
                seahowl::env::ListModel<seahowl::env::FluidModel>>(m_env, "FluidListModel")
@@ -36,6 +40,10 @@ void initialize_pyseahowl_env(py::module& m) {
         .def("get_velocity", &seahowl::env::FluidListModel::get_velocity)
         .def("get_acceleration", &seahowl::env::FluidListModel::get_acceleration)
         .def("set_ramp", &seahowl::env::FluidListModel::set_ramp);
+
+    // env/ListModel<SoilModel>
+    py::class_<seahowl::env::ListModel<seahowl::env::SoilModel>,
+               std::shared_ptr<seahowl::env::ListModel<seahowl::env::SoilModel>>>(m_env, "ListModel_SoilModel");
 
     // env/soil_list_model.h
     py::class_<seahowl::env::SoilListModel, std::shared_ptr<seahowl::env::SoilListModel>,
