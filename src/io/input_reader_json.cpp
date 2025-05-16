@@ -143,8 +143,8 @@ Eigen::MatrixX<double> get_matrix_from_vector_of_vectors(std::vector<std::vector
  * @return JSON object containing the data
  */
 json get_json(const std::string& filepath) {
-    if (!fs::exists(filepath)) {
-        throw std::runtime_error("File does not exist: " + filepath);
+    if (!fs::is_regular_file(filepath)) {
+        throw std::runtime_error(" File does not exist.");
     }
 
     json json_db;
@@ -206,11 +206,11 @@ void from_json(const json& js, TowerDb& tower_db) {
 
 TowerDb InputReaderJson::read_tower() {
     TowerDb tower_db;
-    json json_db = get_json(filepath);
     try {
+        json json_db = get_json(filepath);
         from_json(json_db, tower_db);
-    } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error reading in Tower file " + filepath + " -> " + std::string(e.what()));
     }
     return tower_db;
 }
@@ -294,21 +294,21 @@ void from_json(const json& js, AirfoilDb& airfoil_db) {
 
 std::vector<AirfoilDb> read_airfoil(const std::string& filepath_) {
     AirfoilDb airfoil_db;
-    json json_db = get_json(filepath_);
     try {
+        json json_db = get_json(filepath_);
         return json_db.get<std::vector<AirfoilDb>>();
-    } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error reading in file " + filepath_ + " : " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error reading in Airfoil file " + filepath_ + " -> " + std::string(e.what()));
     }
 }
 
 BladeDb InputReaderJson::read_blade() {
     BladeDb blade_db;
-    json json_db = get_json(filepath);
     try {
+        json json_db = get_json(filepath);
         from_json(json_db, blade_db);
-    } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error reading in Blade file " + filepath + " -> " + std::string(e.what()));
     }
     auto main_directory = fs::path(filepath).parent_path();
 
@@ -363,11 +363,11 @@ void from_json(const json& js, RnaDb& rna) {
 
 RnaDb InputReaderJson::read_rna() {
     RnaDb rna_db;
-    json json_db = get_json(filepath);
     try {
+        json json_db = get_json(filepath);
         from_json(json_db, rna_db);
-    } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error reading in RNA file " + filepath + " -> " + std::string(e.what()));
     }
     return rna_db;
 }
@@ -491,19 +491,19 @@ void from_json(const json& js, EnvironmentDb& env) {
 
 EnvironmentDb InputReaderJson::read_environment() {
     EnvironmentDb env_db;
-    json json_db = get_json(filepath);
     try {
+        json json_db = get_json(filepath);
         from_json(json_db, env_db);
         auto main_directory = fs::path(filepath).parent_path();
         if (env_db.wind.type == "inflowwind") {
             auto inflowwind_filepath = main_directory / env_db.wind.options.file_inflowwind;
             env_db.wind.options.file_inflowwind_path = inflowwind_filepath;
-            if (!fs::exists(inflowwind_filepath)) {
+            if (!fs::is_regular_file(inflowwind_filepath)) {
                 throw std::runtime_error("InflowWind file not found: " + inflowwind_filepath.u8string());
             }
         }
-    } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error reading in file " + filepath + " -> " + std::string(e.what()));
     }
     return env_db;
 }
@@ -657,82 +657,85 @@ void from_json(const json& js, TurbineDb& turbine) {
 
 TurbineDb InputReaderJson::read_turbine() {
     TurbineDb turbine_db;
-    json json_db = get_json(filepath);
+    std::string filepath_ini = filepath;
     try {
+        json json_db = get_json(filepath);
         from_json(json_db, turbine_db);
-    } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
-    }
-    // Finalize
-    auto main_directory = fs::path(filepath).parent_path();
-    if (turbine_db.aero.solver == "aerodyn") {
-        auto inflowwind_filepath = main_directory / turbine_db.aero.options.file_inflowwind;
-        turbine_db.aero.options.file_inflowwind_path = inflowwind_filepath;
-        if (!fs::exists(inflowwind_filepath)) {
-            throw std::runtime_error("InflowWind file not found: " + inflowwind_filepath.u8string());
-        }
-        auto aerodyn_filepath = main_directory / turbine_db.aero.options.file_aerodyn;
-        turbine_db.aero.options.file_aerodyn_path = aerodyn_filepath;
-        if (!fs::exists(aerodyn_filepath)) {
-            throw std::runtime_error("AeroDyn file not found: " + aerodyn_filepath.u8string());
-        }
-    }
-    if (turbine_db.aero.solver == "disk") {
-        auto performance_filepath = main_directory / turbine_db.aero.options.performance_file;
-        turbine_db.aero.options.performance_file_path = performance_filepath;
-        if (!fs::exists(performance_filepath)) {
-            throw std::runtime_error("Performance file not found: " + performance_filepath.u8string());
-        }
-    }
-    // Finalize the rna database
-    auto rna_filepath = main_directory / turbine_db.rna.file;
-    filepath = rna_filepath.generic_string();
-    turbine_db.rna.data = read_rna();
-    // Read the rotor database
-    for (auto& blade : turbine_db.rotor.blades) {
-        auto blade_filepath = main_directory / blade.file;
-        filepath = blade_filepath.generic_string();
-        blade.data = read_blade();
-    }
-    // Finalize the tower database
-    auto tower_filepath = main_directory / turbine_db.tower.file;
-    filepath = tower_filepath.generic_string();
-    turbine_db.tower.data = read_tower();
 
-    if (turbine_db.foundation.has_value()) {
-        auto& foundation_db = turbine_db.foundation.value();
-        if (foundation_db.file.has_value()) {
-            foundation_db.file_path = main_directory / foundation_db.file.value();
-            if (foundation_db.type == "floater") {
-                filepath = foundation_db.file_path.generic_string();
-                foundation_db.data_floater = read_floater();
-            } else if (foundation_db.type == "monopile") {
-                filepath = foundation_db.file_path.generic_string();
-                foundation_db.data_tower = read_tower();
+        // Finalize
+        auto main_directory = fs::path(filepath).parent_path();
+        if (turbine_db.aero.solver == "aerodyn") {
+            auto inflowwind_filepath = main_directory / turbine_db.aero.options.file_inflowwind;
+            turbine_db.aero.options.file_inflowwind_path = inflowwind_filepath;
+            if (!fs::is_regular_file(inflowwind_filepath)) {
+                throw std::runtime_error("InflowWind file not found: " + inflowwind_filepath.u8string());
+            }
+            auto aerodyn_filepath = main_directory / turbine_db.aero.options.file_aerodyn;
+            turbine_db.aero.options.file_aerodyn_path = aerodyn_filepath;
+            if (!fs::is_regular_file(aerodyn_filepath)) {
+                throw std::runtime_error("AeroDyn file not found: " + aerodyn_filepath.u8string());
             }
         }
-        if (foundation_db.type == "floater") {
-            foundation_db.data_floater.options_file_path = main_directory / foundation_db.data_floater.options_file;
+        if (turbine_db.aero.solver == "disk") {
+            auto performance_filepath = main_directory / turbine_db.aero.options.performance_file;
+            turbine_db.aero.options.performance_file_path = performance_filepath;
+            if (!fs::is_regular_file(performance_filepath)) {
+                throw std::runtime_error("Performance file not found: " + performance_filepath.u8string());
+            }
+        }
+        // Finalize the rna database
+        auto rna_filepath = main_directory / turbine_db.rna.file;
+        filepath = rna_filepath.generic_string();
+        turbine_db.rna.data = read_rna();
+        // Read the rotor database
+        for (auto& blade : turbine_db.rotor.blades) {
+            auto blade_filepath = main_directory / blade.file;
+            filepath = blade_filepath.generic_string();
+            blade.data = read_blade();
+        }
+        // Finalize the tower database
+        auto tower_filepath = main_directory / turbine_db.tower.file;
+        filepath = tower_filepath.generic_string();
+        turbine_db.tower.data = read_tower();
+
+        if (turbine_db.foundation.has_value()) {
+            auto& foundation_db = turbine_db.foundation.value();
             if (foundation_db.file.has_value()) {
                 foundation_db.file_path = main_directory / foundation_db.file.value();
+                if (foundation_db.type == "floater") {
+                    filepath = foundation_db.file_path.generic_string();
+                    foundation_db.data_floater = read_floater();
+                } else if (foundation_db.type == "monopile") {
+                    filepath = foundation_db.file_path.generic_string();
+                    foundation_db.data_tower = read_tower();
+                }
             }
-            for (auto& mooring : foundation_db.data_floater.moorings) {
-                auto line_properties_filepath = main_directory / mooring.line_properties;
-                filepath = line_properties_filepath.generic_string();
-                mooring.properties = read_mooring_properties();
+            if (foundation_db.type == "floater") {
+                foundation_db.data_floater.options_file_path = main_directory / foundation_db.data_floater.options_file;
+                if (foundation_db.file.has_value()) {
+                    foundation_db.file_path = main_directory / foundation_db.file.value();
+                }
+                for (auto& mooring : foundation_db.data_floater.moorings) {
+                    auto line_properties_filepath = main_directory / mooring.line_properties;
+                    filepath = line_properties_filepath.generic_string();
+                    mooring.properties = read_mooring_properties();
+                }
             }
         }
-    }
-    // Finalize the controller database
-    auto discon_filepath = main_directory / turbine_db.controller.options.infile;
-    turbine_db.controller.options.infile_path = discon_filepath;
-    if (!fs::exists(discon_filepath)) {
-        throw std::runtime_error("DISCON file not found: " + discon_filepath.u8string());
-    }
-    auto lib_filepath = main_directory / turbine_db.controller.options.libfile;
-    turbine_db.controller.options.libfile_path = lib_filepath;
-    if (!fs::exists(lib_filepath)) {
-        throw std::runtime_error("DISCON library file not found: " + lib_filepath.u8string());
+        // Finalize the controller database
+        auto discon_filepath = main_directory / turbine_db.controller.options.infile;
+        turbine_db.controller.options.infile_path = discon_filepath;
+        if (!fs::is_regular_file(discon_filepath)) {
+            throw std::runtime_error("DISCON file not found: " + discon_filepath.u8string());
+        }
+        auto lib_filepath = main_directory / turbine_db.controller.options.libfile;
+        turbine_db.controller.options.libfile_path = lib_filepath;
+        if (!fs::is_regular_file(lib_filepath)) {
+            throw std::runtime_error("DISCON library file not found: " + lib_filepath.u8string());
+        }
+        filepath = filepath_ini;
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error reading in Turbine file " + filepath_ini + " -> " + std::string(e.what()));
     }
 
     return turbine_db;
@@ -825,11 +828,11 @@ void from_json(const json& js, Floaterdb& floater) {
 
 Floaterdb InputReaderJson::read_floater() {
     Floaterdb floater_db;
-    json json_db = get_json(filepath);
     try {
+        json json_db = get_json(filepath);
         from_json(json_db, floater_db);
-    } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error reading in Floater file " + filepath + " -> " + std::string(e.what()));
     }
     return floater_db;
 }
@@ -847,11 +850,12 @@ void from_json(const json& js, MooringPropertiesDb& mooring_props) {
 
 MooringPropertiesDb InputReaderJson::read_mooring_properties() {
     MooringPropertiesDb mooring_props;
-    json json_db = get_json(filepath);
     try {
+        json json_db = get_json(filepath);
         from_json(json_db, mooring_props);
-    } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error reading in Mooring properties file " + filepath + " -> " +
+                                 std::string(e.what()));
     }
     return mooring_props;
 }
@@ -906,24 +910,21 @@ void from_json(const json& js, MainDb& config) {
 
 MainDb InputReaderJson::read_main() {
     MainDb main_db;
+    std::string filepath_ini = filepath;
     json json_db = get_json(filepath);
-    try {
-        from_json(json_db, main_db);
-    } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error reading in file " + filepath + " : " + std::string(e.what()));
-    }
+    from_json(json_db, main_db);
+
     auto main_directory = fs::path(filepath).parent_path();
     for (auto& turbine : main_db.turbines) {
-        if (!turbine.file.empty()) {
-            auto turbine_filepath = main_directory / turbine.file;
-            filepath = turbine_filepath.generic_string();
-            turbine.data = read_turbine();
-        }
+        auto turbine_filepath = main_directory / turbine.file;
+        filepath = turbine_filepath.generic_string();
+        turbine.data = read_turbine();
     }
 
     auto env_filepath = main_directory / main_db.environment.file;
     filepath = env_filepath.generic_string();
     main_db.environment.data = read_environment();
+    filepath = filepath_ini;
     return main_db;
 }
 

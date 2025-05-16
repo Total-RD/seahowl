@@ -8,6 +8,9 @@ namespace seahowl {
 namespace io {
 
 InputHandler::InputHandler(const std::string& filepath) {
+    if (filepath.empty() || !fs::is_regular_file(filepath)) {
+        throw std::runtime_error("File does not exist.");
+    }
     // Initialize the input reader based on the file extension
     fs::path file_(filepath);
     std::string extension = file_.extension().string();

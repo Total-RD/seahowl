@@ -24,7 +24,7 @@ const std::string& get_disk_perf_line(std::vector<std::string>& lines, int index
 void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorAeroDisk& aero) {
     std::string appo;
 
-    if (!fs::exists(filepath)) {
+    if (!fs::is_regular_file(filepath)) {
         throw std::runtime_error("File \"" + filepath + "\" does not exist.");
     }
 

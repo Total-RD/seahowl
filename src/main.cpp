@@ -22,7 +22,7 @@ void run_simulation(int argc, char* argv[]) {
     if (argc > 1 && strncmp(argv[1], "-", 1) != 0) {
         // check if first argument is an option or the main input file
         filepath_main = argv[1];
-        if (filepath_main.empty() || !fs::exists(filepath_main)) {
+        if (filepath_main.empty() || !fs::is_regular_file(filepath_main)) {
             // check if main input file exists
             throw std::runtime_error("SEAHOWL driver: main input file not found: " + filepath_main +
                                      " (absolute: " + fs::absolute(filepath_main).generic_string() + ").");

@@ -57,7 +57,7 @@ Simulation::Simulation()
                      {},
                      "Set log level (critical|error|warn|info|debug|trace)",
                      "string",
-                     "default",
+                     "info",
                      true,
                      true,
                      true},

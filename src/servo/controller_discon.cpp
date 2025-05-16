@@ -377,7 +377,7 @@ seahowl::servo::DisconInterface::~DisconInterface() {
 
 void seahowl::servo::DisconInterface::Init(const std::string& libfile, const std::string& tmp_folder) {
     if (libfile != "") {
-        if (!std::filesystem::exists(std::filesystem::path(libfile)) && libfile != "") {
+        if (!std::filesystem::is_regular_file(std::filesystem::path(libfile)) && libfile != "") {
             throw std::runtime_error("DISCON: dynamic library path for DISCON routine does not exist: " + libfile +
                                      ".");
         }
@@ -454,7 +454,7 @@ void seahowl::servo::DisconInterface::SetINFILE(const std::string& name) {
     spdlog::debug("Set DISCON INFILE: " + name + ".");
     if (name == "") {
         spdlog::warn("DISCON: no input file transmitted to DISCON interface.");
-    } else if (!std::filesystem::exists(std::filesystem::path(name))) {
+    } else if (!std::filesystem::is_regular_file(std::filesystem::path(name))) {
         throw std::runtime_error("DISCON: input file path for DISCON routine does not exist: " + name + ".");
     }
     strcpy(accINFILE, name.c_str());
