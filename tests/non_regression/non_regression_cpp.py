@@ -54,6 +54,10 @@ class TestNonRegressionCpp(unittest.TestCase):
 
         self._generic_test("cpp/monopile")
 
+    def test_floating(self):
+
+        self._generic_test("cpp/floating")
+
 
 if __name__ == "__main__":
 
