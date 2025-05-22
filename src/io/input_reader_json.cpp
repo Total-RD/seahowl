@@ -131,7 +131,6 @@ Eigen::MatrixX<double> get_matrix_from_vector_of_vectors(std::vector<std::vector
         for (int icol = 0; icol < mat_ncols; icol++) {
             mat(irow, icol) = matvec[irow][icol];
         }
-        std::cout << std::endl;
     }
     return mat;
 }
@@ -210,7 +209,7 @@ TowerDb InputReaderJson::read_tower() {
         json json_db = get_json(filepath);
         from_json(json_db, tower_db);
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Tower file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Tower file \"" + filepath + "\" -> " + std::string(e.what()));
     }
     return tower_db;
 }
@@ -298,7 +297,7 @@ std::vector<AirfoilDb> read_airfoil(const std::string& filepath_) {
         json json_db = get_json(filepath_);
         return json_db.get<std::vector<AirfoilDb>>();
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Airfoil file " + filepath_ + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Airfoil file \"" + filepath_ + "\" -> " + std::string(e.what()));
     }
 }
 
@@ -308,7 +307,7 @@ BladeDb InputReaderJson::read_blade() {
         json json_db = get_json(filepath);
         from_json(json_db, blade_db);
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Blade file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Blade file \"" + filepath + "\" -> " + std::string(e.what()));
     }
     auto main_directory = fs::path(filepath).parent_path();
 
@@ -367,7 +366,7 @@ RnaDb InputReaderJson::read_rna() {
         json json_db = get_json(filepath);
         from_json(json_db, rna_db);
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in RNA file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in RNA file \"" + filepath + "\" -> " + std::string(e.what()));
     }
     return rna_db;
 }
@@ -503,7 +502,7 @@ EnvironmentDb InputReaderJson::read_environment() {
             }
         }
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Environment file \"" + filepath + "\" -> " + std::string(e.what()));
     }
     return env_db;
 }
@@ -735,7 +734,7 @@ TurbineDb InputReaderJson::read_turbine() {
         }
         filepath = filepath_ini;
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Turbine file " + filepath_ini + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Turbine file \"" + filepath + "\" -> " + std::string(e.what()));
     }
 
     return turbine_db;
@@ -832,7 +831,7 @@ Floaterdb InputReaderJson::read_floater() {
         json json_db = get_json(filepath);
         from_json(json_db, floater_db);
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Floater file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Floater file \"" + filepath + "\" -> " + std::string(e.what()));
     }
     return floater_db;
 }
@@ -854,7 +853,7 @@ MooringPropertiesDb InputReaderJson::read_mooring_properties() {
         json json_db = get_json(filepath);
         from_json(json_db, mooring_props);
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Mooring properties file " + filepath + " -> " +
+        throw std::runtime_error("Error reading in Mooring properties file \"" + filepath + "\" -> " +
                                  std::string(e.what()));
     }
     return mooring_props;

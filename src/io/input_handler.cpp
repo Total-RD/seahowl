@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 namespace seahowl {
 namespace io {
 
-InputHandler::InputHandler(const std::string& filepath) {
+void InputHandler::set_filepath(const std::string& filepath) {
     if (filepath.empty() || !fs::is_regular_file(filepath)) {
         throw std::runtime_error("File does not exist.");
     }

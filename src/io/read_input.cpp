@@ -93,12 +93,14 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
 std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_reference_points_from_file(
     const std::string& filepath) {
     BladeDb blade_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        blade_db = input_handler.reader->read_blade();
+        input_handler.set_filepath(filepath);
+
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Blade file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Blade file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    blade_db = input_handler.reader->read_blade();
     return get_blade_elasto_reference_points_from_db(blade_db);
 }
 
@@ -144,12 +146,14 @@ std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_poi
 std::vector<seahowl::aero::BladeReferencePointAero> get_blade_aero_reference_points_from_file(
     const std::string& filepath) {
     BladeDb blade_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        blade_db = input_handler.reader->read_blade();
+        input_handler.set_filepath(filepath);
+
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Blade file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Blade file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    blade_db = input_handler.reader->read_blade();
     return get_blade_aero_reference_points_from_db(blade_db);
 }
 
@@ -168,12 +172,14 @@ void populate_blade(const BladeDb& blade_db, seahowl::core::Blade& blade) {
 
 void populate_blade_from_file(const std::string& filepath, seahowl::core::Blade& blade) {
     BladeDb blade_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        blade_db = input_handler.reader->read_blade();
+        input_handler.set_filepath(filepath);
+
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Blade file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Blade file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    blade_db = input_handler.reader->read_blade();
     spdlog::debug("Populating blade from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
 
     blade.elasto.reference_points = get_blade_elasto_reference_points_from_db(blade_db);
@@ -240,12 +246,13 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
 
 void populate_tower_elasto_from_file(const std::string& filepath, seahowl::elasto::TowerElasto& tower) {
     TowerDb tower_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        tower_db = input_handler.reader->read_tower();
+        input_handler.set_filepath(filepath);
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Tower file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Tower file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    tower_db = input_handler.reader->read_tower();
     tower.reference_points = get_tower_elasto_reference_points_db(tower_db);
     tower.height = tower.reference_points.back().coordinates.z();
     tower.base_height = tower.reference_points.front().coordinates.z();
@@ -253,24 +260,26 @@ void populate_tower_elasto_from_file(const std::string& filepath, seahowl::elast
 
 void populate_tower_aero_from_file(const std::string& filepath, seahowl::aero::TowerAero& tower) {
     TowerDb tower_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        tower_db = input_handler.reader->read_tower();
+        input_handler.set_filepath(filepath);
+
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Tower file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Tower file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    tower_db = input_handler.reader->read_tower();
     tower.reference_points = get_tower_aero_reference_points_db(tower_db);
 }
 
 void populate_tower_from_file(const std::string& filepath, seahowl::core::Tower& tower) {
     TowerDb tower_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        tower_db = input_handler.reader->read_tower();
+        input_handler.set_filepath(filepath);
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Tower file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Tower file \"" + filepath + "\" -> " + std::string(e.what()));
     }
-
+    tower_db = input_handler.reader->read_tower();
     spdlog::debug("Populating tower from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
 
     // elasto
@@ -321,35 +330,39 @@ void populate_rna_aero_from_db(const RnaDb& rna_db, seahowl::aero::RotorNacelleA
 
 void populate_rna_elasto_from_file(const std::string& filepath, seahowl::elasto::RotorNacelleAssemblyElasto& rna) {
     RnaDb rna_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        rna_db = input_handler.reader->read_rna();
+        input_handler.set_filepath(filepath);
+
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in RNA file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in RNA file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    rna_db = input_handler.reader->read_rna();
     populate_rna_elasto_from_db(rna_db, rna);
 }
 
 void populate_rna_aero_from_file(const std::string& filepath, seahowl::aero::RotorNacelleAssemblyAero& rna) {
     RnaDb rna_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        rna_db = input_handler.reader->read_rna();
+        input_handler.set_filepath(filepath);
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in RNA file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in RNA file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    rna_db = input_handler.reader->read_rna();
     populate_rna_aero_from_db(rna_db, rna);
 }
 
 void populate_rna_from_file(const std::string& filepath, seahowl::core::RotorNacelleAssembly& rna) {
     RnaDb rna_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        rna_db = input_handler.reader->read_rna();
-    } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in RNA file " + filepath + " -> " + std::string(e.what()));
-    }
+        input_handler.set_filepath(filepath);
 
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error reading in RNA file \"" + filepath + "\" -> " + std::string(e.what()));
+    }
+    rna_db = input_handler.reader->read_rna();
     spdlog::debug("Populating RNA from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
 
     populate_rna_elasto_from_db(rna_db, rna.elasto);
@@ -681,12 +694,13 @@ void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbin
 
 void populate_turbine_from_file(const std::string& filepath, seahowl::core::Turbine& turbine) {
     TurbineDb turbine_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        turbine_db = input_handler.reader->read_turbine();
+        input_handler.set_filepath(filepath);
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Turbine file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Turbine file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    turbine_db = input_handler.reader->read_turbine();
     spdlog::debug("Populating turbine from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
                   ").");
     populate_turbine_from_db(turbine_db, turbine);
@@ -723,12 +737,14 @@ void add_turbine_to_system_from_db(const TurbineDb& turbine_db, seahowl::core::S
 void add_turbine_to_system_from_file(const std::string& filepath, seahowl::core::System& system_core) {
     spdlog::debug("Adding turbine to system from " + filepath + " file.");
     TurbineDb turbine_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        turbine_db = input_handler.reader->read_turbine();
+        input_handler.set_filepath(filepath);
+
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Turbine file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Turbine file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    turbine_db = input_handler.reader->read_turbine();
     add_turbine_to_system_from_db(turbine_db, system_core);
 }
 
@@ -903,12 +919,14 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(co
 std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_file(const std::string& filepath) {
     spdlog::debug("Getting environmental conditions from " + filepath + " file.");
     EnvironmentDb environment_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        environment_db = input_handler.reader->read_environment();
+        input_handler.set_filepath(filepath);
+
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Environment file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Environment file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    environment_db = input_handler.reader->read_environment();
     return get_environmental_model_from_db(environment_db);
 }
 
@@ -930,12 +948,13 @@ void populate_environmental_conditions_from_db(const EnvironmentDb& environment_
 
 void populate_environmental_conditions_from_file(const std::string& filepath, seahowl::core::System& system_core) {
     EnvironmentDb environment_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
-        environment_db = input_handler.reader->read_environment();
+        input_handler.set_filepath(filepath);
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Environment file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Environment file \"" + filepath + "\" -> " + std::string(e.what()));
     }
+    environment_db = input_handler.reader->read_environment();
 
     spdlog::debug("Populating environmental conditions from " + filepath +
                   " file (absolute: " + absolute(path(filepath)).string() + ").");
@@ -969,11 +988,12 @@ void populate_system(const MainDb& main_db, seahowl::core::System& system_core) 
 
 void populate_system_from_file(const std::string& filepath, seahowl::core::System& system_core) {
     MainDb main_db;
+    InputHandler input_handler;
     try {
-        InputHandler input_handler(filepath);
+        input_handler.set_filepath(filepath);
         main_db = input_handler.reader->read_main();
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Main file " + filepath + " -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Main file \"" + filepath + "\" -> " + std::string(e.what()));
     }
     // environmental info
     populate_environmental_conditions_from_db(main_db.environment.data, system_core);
@@ -988,10 +1008,11 @@ void populate_system_from_config(const app::ConfigManager& config, seahowl::core
         auto filepath_environment = config.get_string("environment.file");
         populate_environmental_conditions_from_file(filepath_environment, system_core);
 
-        InputHandler input_handler(config.get_json_filepath());
+        InputHandler input_handler;
+        input_handler.set_filepath(config.get_json_filepath());
         main_db = input_handler.reader->read_main();
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Main file " + config.get_json_filepath() + " -> " +
+        throw std::runtime_error("Error reading in Main file \"" + config.get_json_filepath() + "\" -> " +
                                  std::string(e.what()));
     }
     populate_system(main_db, system_core);

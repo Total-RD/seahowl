@@ -11,7 +11,15 @@ class InputHandler {
   public:
     std::unique_ptr<InputReader> reader;
     // Constructor
-    InputHandler(const std::string& filepath);
+    InputHandler() = default;
+
+    // set filepath
+    /**
+     * @brief Set the file path for the input handler.
+     * @param filepath Path to the input file.
+     */
+    void set_filepath(const std::string& filepath);
+
     // Destructor
     ~InputHandler() = default;
 };
