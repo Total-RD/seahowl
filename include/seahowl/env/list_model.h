@@ -62,6 +62,14 @@ void ListModel<T>::add_model(const std::shared_ptr<T>& model) {
     models.push_back(model);
 }
 
+/**
+ * @brief Inserts a model to the list
+ * @param[in] model Model to insert
+ * @details
+ * If the list is empty, just add the model.
+ * If the model is of the same type as U, find the first element of type U and insert the model before it.
+ * If the model is not of the same type as U, insert it at the beginning.
+ */
 template <typename T>
 template <typename U>
 void ListModel<T>::insert_model(const std::shared_ptr<T>& model) {
