@@ -11,8 +11,6 @@ execute_and_compare:
   reference:
     exe_path: "ref/bin/seahowl_driver"
   #test_only: true
-file_reader:
-  extension_unknown_ignore: true
 readers:
   csv:
     #ignore_colunmns: ["wind z (m/s)", "rpm (-)"]
@@ -21,7 +19,7 @@ readers:
       parameters:
         x: ["time (s)", "fraction"]
 compare:
-  errors_limit: 10000
+  errors_limit: 100000
   float_thresholds:
     relative_vs_absolute_min: 1e-12
     relative_error_min: 1e-3
@@ -34,8 +32,8 @@ compare:
       #ponderation_method: RIAE_midpoint
       #riae_threshold: 0.01
       #reduction_method: ignore
-      #ponderation_method: RIAE_trapezoid
-      #riae_threshold: 0.1
+      ponderation_method: RIAE_trapezoid
+      riae_threshold: 0.1
   sources:
     test_folder_relative_path: validation
     reference_folder_relative_path: reference

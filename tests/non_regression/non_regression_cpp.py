@@ -7,6 +7,7 @@ from scilens.helpers.assets import Assets
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 ROOT_DIR = os.path.dirname(os.path.dirname(TEST_DIR))
+WORKING_DIR = os.path.dirname(os.path.dirname(TEST_DIR))
 
 
 class TestNonRegressionCpp(unittest.TestCase):
@@ -32,10 +33,18 @@ class TestNonRegressionCpp(unittest.TestCase):
             logo_file=os.path.join(TEST_DIR, "logo.png"),
         )
 
-    def _generic_test(self, input_dir):
+    def _generic_test(self, input_dir, main_json, decription):
 
         test_dir = os.path.join(TEST_DIR, input_dir)
-        runner = StandaloneTaskRunner(f"{TEST_DIR}/scilens_cpp.yml")
+
+        yml_file = f"{test_dir}/scilens_cpp.yml"
+        if not os.path.exists(yml_file):
+            yml_file = f"{TEST_DIR}/scilens_cpp.yml"
+
+        runner = StandaloneTaskRunner(yml_file)
+        option = f"{runner.config.execute.command_suffix} --outputs-folder ."
+        runner.config.execute.command_suffix = f" {main_json} {option}"
+        runner.config.report.description = decription
         results = runner.process(test_dir, origin_working_dir=ROOT_DIR)
 
         if results.error:
@@ -47,16 +56,25 @@ class TestNonRegressionCpp(unittest.TestCase):
             )
 
     def test_onshore(self):
-
-        self._generic_test("cpp/onshore")
+        main_json = os.path.join(WORKING_DIR, "data/IEA15MW/onshore/main.json")
+        description = (
+            "Non regression Test for Seahowl for Onshore case with duration 100s"
+        )
+        self._generic_test("cpp/onshore", main_json, description)
 
     def test_monopile(self):
-
-        self._generic_test("cpp/monopile")
+        main_json = os.path.join(WORKING_DIR, "data/IEA15MW/monopile/main.json")
+        description = (
+            "Non regression Test for Seahowl for Monopile case with duration 100s"
+        )
+        self._generic_test("cpp/monopile", main_json, description)
 
     def test_floating(self):
-
-        self._generic_test("cpp/floating")
+        main_json = os.path.join(WORKING_DIR, "data/IEA15MW/floating/main.json")
+        description = (
+            "Non regression Test for Seahowl for Floating case with duration 100s"
+        )
+        self._generic_test("cpp/floating", main_json, description)
 
 
 if __name__ == "__main__":
