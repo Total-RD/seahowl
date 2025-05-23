@@ -734,7 +734,7 @@ TurbineDb InputReaderJson::read_turbine() {
         }
         filepath = filepath_ini;
     } catch (const std::exception& e) {
-        throw std::runtime_error("Error reading in Turbine file \"" + filepath + "\" -> " + std::string(e.what()));
+        throw std::runtime_error("Error reading in Turbine file \"" + filepath_ini + "\" -> " + std::string(e.what()));
     }
 
     return turbine_db;
