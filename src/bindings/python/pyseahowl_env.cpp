@@ -39,7 +39,9 @@ void initialize_pyseahowl_env(py::module& m) {
         .def("get_density", &seahowl::env::FluidListModel::get_density)
         .def("get_velocity", &seahowl::env::FluidListModel::get_velocity)
         .def("get_acceleration", &seahowl::env::FluidListModel::get_acceleration)
-        .def("set_ramp", &seahowl::env::FluidListModel::set_ramp);
+        .def("set_ramp", &seahowl::env::FluidListModel::set_ramp)
+        .def("get_models", &seahowl::env::FluidListModel::get_models)
+        .def("get_model", &seahowl::env::FluidListModel::get_model);
 
     // env/ListModel<SoilModel>
     py::class_<seahowl::env::ListModel<seahowl::env::SoilModel>,
@@ -48,7 +50,9 @@ void initialize_pyseahowl_env(py::module& m) {
     // env/soil_list_model.h
     py::class_<seahowl::env::SoilListModel, std::shared_ptr<seahowl::env::SoilListModel>,
                seahowl::env::ListModel<seahowl::env::SoilModel>>(m_env, "SoilListModel")
-        .def("get_penetration_load", &seahowl::env::SoilListModel::get_penetration_load);
+        .def("get_penetration_load", &seahowl::env::SoilListModel::get_penetration_load)
+        .def("get_models", &seahowl::env::SoilListModel::get_models)
+        .def("get_model", &seahowl::env::SoilListModel::get_model);
 
     // env/fluid_models.h
     py::class_<seahowl::env::FluidModel, std::shared_ptr<seahowl::env::FluidModel>, seahowl::env::Model>(m_env,
