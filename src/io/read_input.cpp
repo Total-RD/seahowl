@@ -22,7 +22,6 @@
 #include "seahowl/env/wind_models.h"
 #include "seahowl/env/wave_models.h"
 #include "seahowl/env/soil_models.h"
-#include "seahowl/env/combined_models.h"
 #include "seahowl/hydro/morison.h"
 #ifdef HAVE_INFLOWWIND
     #include "seahowl/env/inflowwind_adapter.h"
@@ -748,37 +747,36 @@ void add_turbine_to_system_from_file(const std::string& filepath, seahowl::core:
     add_turbine_to_system_from_db(turbine_db, system_core);
 }
 
-std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(const EnvironmentDb& environment_db) {
+std::shared_ptr<seahowl::env::EnvModel> get_environmental_model_from_db(const EnvironmentDb& environment_db) {
     // gravity
     auto gravity_vector = environment_db.gravity;
     auto gravity_direction = gravity_vector / gravity_vector.norm();
 
     // environment
-    auto env_model = std::make_shared<seahowl::env::FluidSoilModel>();
+    auto env_model = std::make_shared<seahowl::env::EnvModel>();
+    std::shared_ptr<seahowl::env::WaveModel> wave_model_ptr;
 
     // sea
     bool has_sea = false;
     if (environment_db.sea.has_value()) {
         has_sea = true;
         auto sea_db = environment_db.sea.value();
-        env_model->fluid_model = std::make_shared<seahowl::env::WaveWindModel>();
-        auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*env_model->fluid_model);
+
         // specific model options
         if (sea_db.type == "still") {
             spdlog::info("Sea conditions: still water.");
-            fluid_model.wave_model = std::make_unique<seahowl::env::StillWater>();
+            wave_model_ptr = std::make_unique<seahowl::env::StillWater>();
         } else if (sea_db.type == "hydrochrono") {
             spdlog::info("Sea conditions: HydroChrono.");
 #ifdef HAVE_HYDROCHRONO
-            fluid_model.wave_model = std::make_unique<seahowl::env::WaveModelHydroChrono>();
-            auto& wave_model = dynamic_cast<seahowl::env::WaveModelHydroChrono&>(*fluid_model.wave_model);
+            auto wave_hydro_ptr = std::make_unique<seahowl::env::WaveModelHydroChrono>();
 
             auto wave_type = sea_db.options.type;
             if (wave_type == "still") {
-                wave_model.waves = std::make_shared<NoWave>();
+                wave_hydro_ptr->waves = std::make_shared<NoWave>();
             } else if (wave_type == "regular") {
                 auto hydrochrono_waves = std::make_shared<RegularWave>();
-                wave_model.waves = hydrochrono_waves;
+                wave_hydro_ptr->waves = hydrochrono_waves;
                 hydrochrono_waves->regular_wave_amplitude_ = sea_db.options.wave_height / 2.0;
                 hydrochrono_waves->regular_wave_omega_ = 2 * PI / sea_db.options.wave_period;
                 seahowl::hydro::myMCFtable = seahowl::hydro::MacCamyFuchsTable();
@@ -799,44 +797,44 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(co
                 params.wave_stretching_ = sea_db.options.wave_stretching;
                 params.ramp_duration_ = 0.0;
                 params.num_bodies_ = 1;
-                wave_model.waves = std::make_shared<IrregularWaves>(params);
+                wave_hydro_ptr->waves = std::make_shared<IrregularWaves>(params);
                 seahowl::hydro::myMCFtable = seahowl::hydro::MacCamyFuchsTable();
                 seahowl::hydro::myMCFtable.wave_peak_period = sea_db.options.wave_period;
             } else {
                 throw std::runtime_error("Unrecognized wave type \"" + wave_type + "\" for HydroChrono.");
             }
-            wave_model.waves->mwl_ = sea_db.mean_water_level;
-            wave_model.waves->water_depth_ = sea_db.water_depth;
-            wave_model.waves->g_ = gravity_vector.norm();
+            wave_hydro_ptr->waves->mwl_ = sea_db.mean_water_level;
+            wave_hydro_ptr->waves->water_depth_ = sea_db.water_depth;
+            wave_hydro_ptr->waves->g_ = gravity_vector.norm();
             if (wave_type == "irregular") {
-                dynamic_cast<IrregularWaves&>(*wave_model.waves).CreateSpectrum();
+                dynamic_cast<IrregularWaves&>(*wave_hydro_ptr->waves).CreateSpectrum();
             }
             if (wave_type == "regular") {
-                dynamic_cast<RegularWave&>(*wave_model.waves).Initialize();
+                dynamic_cast<RegularWave&>(*wave_hydro_ptr->waves).Initialize();
             }
-
+            wave_model_ptr = std::move(wave_hydro_ptr);
 #else
             throw std::runtime_error("Must compile and enable HydroChrono dependency to use HydroChrono waves.");
 #endif
         } else if (sea_db.type == "current") {
             spdlog::info("Sea conditions: current.");
-            fluid_model.wave_model = std::make_unique<seahowl::env::CurrentConstant>();
-            auto& wave_model = dynamic_cast<seahowl::env::CurrentConstant&>(*fluid_model.wave_model);
+            auto wave_Current_ptr = std::make_unique<seahowl::env::CurrentConstant>();
             auto sea_direction = sea_db.options.direction;
-            wave_model.direction = Vector3d(sea_direction[0], sea_direction[1], 0.0);
-            wave_model.velocity_surface = sea_db.options.velocity_surface;
-            wave_model.velocity_seabed = sea_db.options.velocity_seabed;
+            wave_Current_ptr->direction = Vector3d(sea_direction[0], sea_direction[1], 0.0);
+            wave_Current_ptr->velocity_surface = sea_db.options.velocity_surface;
+            wave_Current_ptr->velocity_seabed = sea_db.options.velocity_seabed;
+            wave_model_ptr = std::move(wave_Current_ptr);
         } else {
             throw std::runtime_error(
                 "The input sea type is unknown. Please use the existing current types: still, current, HydroChrono.");
         }
 
         // general wave model options
-        auto& wave_model = dynamic_cast<seahowl::env::WaveModel&>(*fluid_model.wave_model);
-        wave_model.density = sea_db.water_density;
-        wave_model.mean_water_level = sea_db.mean_water_level;
-        wave_model.water_depth = sea_db.water_depth;
-        wave_model.surface_normal = -gravity_direction;
+        wave_model_ptr->density = sea_db.water_density;
+        wave_model_ptr->mean_water_level = sea_db.mean_water_level;
+        wave_model_ptr->water_depth = sea_db.water_depth;
+        wave_model_ptr->surface_normal = -gravity_direction;
+        env_model->add_model(std::move(wave_model_ptr));
     } else {
         spdlog::warn("Sea conditions were not defined.");
     }
@@ -873,12 +871,6 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(co
         throw std::runtime_error(
             "The input wind type is unknown. Please use the existing wind types: ramp or inflowwind.");
     }
-    if (has_sea) {
-        auto& fluid_model = dynamic_cast<seahowl::env::WaveWindModel&>(*env_model->fluid_model);
-        fluid_model.wind_model = std::move(wind_model_ptr);
-    } else {
-        env_model->fluid_model = std::move(wind_model_ptr);
-    }
 
     // apply ramp options
     double ramp_start = 0.0;
@@ -889,8 +881,9 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(co
     if (environment_db.ramp_end.has_value()) {
         ramp_end = environment_db.ramp_end.value();
     }
-    env_model->fluid_model->ramp_start = ramp_start;
-    env_model->fluid_model->ramp_end = ramp_end;
+
+    env_model->add_model(std::move(wind_model_ptr));
+    env_model->fluid_models.set_ramp(ramp_start, ramp_end);
 
     // soil
     if (environment_db.soil.has_value()) {
@@ -898,14 +891,13 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(co
 
         if (soil_db.type == "linear") {
             spdlog::info("Soil conditions: linear.");
-            auto soil_model_shared = std::make_shared<seahowl::env::LinearSoilModel>();
-            auto& soil_model = *soil_model_shared;
-            soil_model.soil_position = soil_db.options.soil_position;
-            soil_model.stiffness_normal = soil_db.options.stiffness_normal;
-            soil_model.stiffness_shear = soil_db.options.stiffness_shear;
-            soil_model.soil_normal = -gravity_direction;
+            auto soil_model = std::make_shared<seahowl::env::LinearSoilModel>();
+            soil_model->soil_position = soil_db.options.soil_position;
+            soil_model->stiffness_normal = soil_db.options.stiffness_normal;
+            soil_model->stiffness_shear = soil_db.options.stiffness_shear;
+            soil_model->soil_normal = -gravity_direction;
 
-            env_model->soil_model = std::move(soil_model_shared);
+            env_model->add_model(std::move(soil_model));
         } else {
             throw std::runtime_error("The input soil type is unknown. Please use the existing soil types: linear.");
         }
@@ -916,7 +908,7 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_db(co
     return env_model;
 }
 
-std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_file(const std::string& filepath) {
+std::shared_ptr<seahowl::env::EnvModel> get_environmental_model_from_file(const std::string& filepath) {
     spdlog::debug("Getting environmental conditions from " + filepath + " file.");
     EnvironmentDb environment_db;
     InputHandler input_handler;
@@ -936,14 +928,7 @@ void populate_environmental_conditions_from_db(const EnvironmentDb& environment_
     auto gravity = environment_db.gravity;
     system_core.elasto.set_gravitational_acceleration(Vector3d(gravity[0], gravity[1], gravity[2]));
 
-    auto env_model = get_environmental_model_from_db(environment_db);
-
-    if (env_model->fluid_model) {
-        system_core.fluid_model = env_model->fluid_model;
-    }
-    if (env_model->soil_model) {
-        system_core.soil_model = env_model->soil_model;
-    }
+    system_core.env_model = get_environmental_model_from_db(environment_db);
 }
 
 void populate_environmental_conditions_from_file(const std::string& filepath, seahowl::core::System& system_core) {

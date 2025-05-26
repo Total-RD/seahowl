@@ -27,7 +27,7 @@ struct BladeReferencePointAero;
 struct TowerReferencePointAero;
 }  // namespace aero
 namespace env {
-class FluidSoilModel;
+class EnvModel;
 }  // namespace env
 }  // namespace seahowl
 
@@ -151,7 +151,7 @@ void populate_turbine_from_file(const std::string& filepath, seahowl::core::Turb
  *
  * @param[in] filepath Path of the file describing the environmental conditions.
  */
-std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_file(const std::string& filepath);
+std::shared_ptr<seahowl::env::EnvModel> get_environmental_model_from_file(const std::string& filepath);
 
 /**
  * @brief Populates environmental conditions given a file and a system.
