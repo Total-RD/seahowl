@@ -10,9 +10,6 @@ using namespace seahowl::core;
 using namespace seahowl::elasto;
 using namespace seahowl::aero;
 
-Tower::Tower(seahowl::elasto::TowerElasto& elasto, seahowl::aero::TowerAero& aero)
-    : ComponentDynamic(nullptr, nullptr), elasto(elasto), aero(aero) {}
-
 Tower::Tower(std::shared_ptr<seahowl::elasto::TowerElasto> elasto, std::shared_ptr<seahowl::aero::TowerAero> aero)
     : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {}
 

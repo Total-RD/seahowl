@@ -166,7 +166,7 @@ TEST_F(TestMorison, tower_morison) {
     simulation.system_core->elasto.add(tower_elasto);
     auto tower_fluid = std::make_shared<seahowl::aero::TowerAero>();
     simulation.system_core->aero.add(tower_fluid);
-    auto tower = std::make_shared<seahowl::core::Tower>(*tower_elasto, *tower_fluid);
+    auto tower = std::make_shared<seahowl::core::Tower>(tower_elasto, tower_fluid);
     simulation.system_core->add(tower);
     // properties
     auto density = 7850.0;

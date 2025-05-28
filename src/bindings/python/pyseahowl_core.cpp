@@ -103,8 +103,8 @@ void initialize_pyseahowl_core(py::module& m) {
         m_core, "Foundation");
 
     // core/floater.h
-    py::class_<seahowl::core::Floater, std::shared_ptr<seahowl::core::Floater>, seahowl::core::Foundation>(
-        m_core, "Floater")
+    py::class_<seahowl::core::Floater, std::shared_ptr<seahowl::core::Floater>, seahowl::core::Foundation>(m_core,
+                                                                                                           "Floater")
         .def(py::init<std::shared_ptr<seahowl::elasto::FloaterElasto>, std::shared_ptr<seahowl::hydro::FloaterHydro>>())
         .def_property_readonly("elasto", [](seahowl::core::Floater& floater) { return &floater.elasto; })
         .def_property_readonly("hydro", [](seahowl::core::Floater& floater) { return &floater.hydro; })
@@ -115,7 +115,8 @@ void initialize_pyseahowl_core(py::module& m) {
     // core/monopile.h
     py::class_<seahowl::core::Monopile, std::shared_ptr<seahowl::core::Monopile>, seahowl::core::Tower,
                seahowl::core::Foundation>(m_core, "Monopile", pybind11::multiple_inheritance())
-        .def(py::init<seahowl::elasto::MonopileElasto&, seahowl::hydro::MonopileHydro&>())
+        .def(py::init<std::shared_ptr<seahowl::elasto::MonopileElasto>,
+                      std::shared_ptr<seahowl::hydro::MonopileHydro>>())
         .def_property_readonly("elasto", [](seahowl::core::Monopile& monopile) { return &monopile.elasto; })
         .def_property_readonly("hydro", [](seahowl::core::Monopile& monopile) { return &monopile.hydro; });
 

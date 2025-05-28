@@ -552,7 +552,7 @@ void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbin
             // create monopile
             auto monopile_elasto = std::make_shared<seahowl::elasto::MonopileElasto>();
             auto monopile_hydro = std::make_shared<seahowl::hydro::MonopileHydro>();
-            auto monopile_core = std::make_shared<seahowl::core::Monopile>(*monopile_elasto, *monopile_hydro);
+            auto monopile_core = std::make_shared<seahowl::core::Monopile>(monopile_elasto, monopile_hydro);
             turbine.elasto.foundation = monopile_elasto;
             turbine.aero.foundation = monopile_hydro;
             turbine.foundation = monopile_core;

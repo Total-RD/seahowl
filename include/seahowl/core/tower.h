@@ -49,7 +49,6 @@ class Tower : public virtual ComponentDynamic {
      * @param[in] elasto Elastodynamic tower model.
      * @param[in] aero Aerodynamic tower model.
      */
-    Tower(seahowl::elasto::TowerElasto& elasto, seahowl::aero::TowerAero& aero);
     Tower(std::shared_ptr<seahowl::elasto::TowerElasto> elasto, std::shared_ptr<seahowl::aero::TowerAero> aero);
 
     /**
