@@ -16,7 +16,7 @@ using namespace seahowl::hydro;
 
 Floater::Floater(std::shared_ptr<seahowl::elasto::FloaterElasto> elasto,
                  std::shared_ptr<seahowl::hydro::FloaterHydro> hydro)
-    : ComponentDynamic(elasto, hydro), elasto(*elasto), hydro(*hydro) {
+    : Foundation(elasto, hydro), ComponentDynamic(elasto, hydro), elasto(*elasto), hydro(*hydro) {
     mooring_system = std::make_unique<MooringSystem>(elasto->mooring_system, hydro->mooring_system);
 }
 
