@@ -21,6 +21,7 @@ void TurbineAero::initialize(double time, double dt) {}
 void TurbineAero::compute_env_loads(const EnvModel& env_model, double time) {
     rna->compute_env_loads(env_model, time);
     tower->compute_env_loads(env_model, time);
+
     if (foundation) {
         foundation->compute_env_loads(env_model, time);
     }

@@ -609,7 +609,9 @@ void TurbineAeroDyn::compute_env_loads(const seahowl::env::EnvModel& env_model, 
     }
 
     // compute loads on rest of turbine
+
     rna->compute_env_loads(env_model, time);
+
     if (foundation) {
         foundation->compute_env_loads(env_model, time);
     }

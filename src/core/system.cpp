@@ -51,6 +51,7 @@ void System::initialize_this(double time, double dt) {
     /// @todo replace this check with better handling (e.g. at initialization of floater by passing fluid model)
     // Specific HydroChrono handling: need to pass waves from environment to HydroChrono floater.
     // Needs to happen before initializing turbines
+
     for (auto& turbine : turbines) {
         if (turbine->elasto.foundation) {
             try {
