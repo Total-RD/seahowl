@@ -387,9 +387,9 @@ void AeroDynAdapter::initialize(double time, double dt, TurbineAero& turbine) {
     pImpl->set_time(time);
 
     // initialize arrays of interface
-    int nblades = turbine.rna.rotor->blades.size();
+    int nblades = turbine.rna->rotor->blades.size();
     int npoints = 0;
-    for (auto& blade : turbine.rna.rotor->blades) {
+    for (auto& blade : turbine.rna->rotor->blades) {
         npoints += blade->nodes.size();
     }
     pImpl->initialize_arrays(nblades, npoints);
@@ -401,7 +401,7 @@ void AeroDynAdapter::initialize(double time, double dt, TurbineAero& turbine) {
     // associate points to blade idx
     int idx_blade = 0;
     int idx_node = 0;  // Index into the MeshPttoBladeNum array [0:(total number of nodes on all blades)-1]
-    for (auto& blade : turbine.rna.rotor->blades) {
+    for (auto& blade : turbine.rna->rotor->blades) {
         for (auto& node : blade->nodes) {
             pImpl->MeshPtToBladeNum[idx_node] = idx_blade + 1;
             idx_node += 1;
@@ -449,7 +449,7 @@ void AeroDynAdapter::update_turbine_variables(TurbineAero& turbine) {
 
 void AeroDynAdapter::update_hub_motion(TurbineAero& turbine) {
     // Get the information about hub
-    auto& hub = turbine.rna.rotor->body_hub;
+    auto& hub = turbine.rna->rotor->body_hub;
     auto hubPos = hub.get_position();
     auto hubOri = hub.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
     auto hubTranVel = hub.get_velocity();
@@ -472,7 +472,7 @@ void AeroDynAdapter::update_hub_motion(TurbineAero& turbine) {
 
 void AeroDynAdapter::update_nacelle_motion(TurbineAero& turbine) {
     // Get the information about nacelle
-    auto& nac = turbine.rna.body_nacelle;
+    auto& nac = turbine.rna->body_nacelle;
     auto nacPos = nac.get_position();
     auto nacOri = nac.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
     auto nacTranVel = nac.get_velocity();
@@ -494,11 +494,11 @@ void AeroDynAdapter::update_nacelle_motion(TurbineAero& turbine) {
 }
 
 void AeroDynAdapter::update_roots_motion(TurbineAero& turbine) {
-    auto nblades = turbine.rna.rotor->blades.size();
+    auto nblades = turbine.rna->rotor->blades.size();
     pImpl->NumBlades = nblades;
 
     for (int i = 0; i < nblades; i++) {
-        auto& blade = turbine.rna.rotor->blades[i];
+        auto& blade = turbine.rna->rotor->blades[i];
         auto& bldRoot = blade->body_root;
         auto bldRootPos = bldRoot->get_position();
         auto bldRootOri = bldRoot->get_rotation().toRotationMatrix();
@@ -524,14 +524,14 @@ void AeroDynAdapter::update_roots_motion(TurbineAero& turbine) {
 }
 
 void AeroDynAdapter::update_mesh_motion(TurbineAero& turbine) {
-    auto nblades = turbine.rna.rotor->blades.size();
-    auto nMeshPerBlade = turbine.rna.rotor->blades[0]->nodes.size();
+    auto nblades = turbine.rna->rotor->blades.size();
+    auto nMeshPerBlade = turbine.rna->rotor->blades[0]->nodes.size();
     auto nMesh = nMeshPerBlade * nblades;
     pImpl->NumMeshPts = nMesh;
 
     for (int i = 0; i < nblades; i++) {
         for (int j = 0; j < nMeshPerBlade; j++) {
-            auto& bldMesh = turbine.rna.rotor->blades[i]->nodes[j];
+            auto& bldMesh = turbine.rna->rotor->blades[i]->nodes[j];
             auto meshPos = bldMesh.get_position();
             auto meshOri = bldMesh.get_rotation().toRotationMatrix();
             auto meshTranVel = bldMesh.get_velocity();
@@ -557,14 +557,14 @@ void AeroDynAdapter::update_mesh_motion(TurbineAero& turbine) {
 }
 
 TurbineAeroDyn::TurbineAeroDyn() : TurbineAero() {
-    rna.rotor = std::make_shared<RotorAeroDyn>(tower);
+    rna->rotor = std::make_shared<RotorAeroDyn>(*tower);
 }
 
 void TurbineAeroDyn::initialize(double time, double dt) {
     TurbineAero::initialize(time, dt);
 
     // impose no offset on aero nodes
-    auto& rotor = dynamic_cast<RotorAeroDyn&>(*rna.rotor);
+    auto& rotor = dynamic_cast<RotorAeroDyn&>(*rna->rotor);
     bool warned_offset = false;
     for (auto& blade : rotor.blades) {
         for (auto& node : blade->nodes) {
@@ -581,7 +581,7 @@ void TurbineAeroDyn::initialize(double time, double dt) {
     aerodyn.pImpl->WrVTK = WrVTK;
     aerodyn.pImpl->WrVTK_Type = WrVTK_Type;
     aerodyn.pImpl->WrVTK_dt;
-    aerodyn.pImpl->VTKHubRad = rna.rotor->hub_radius;
+    aerodyn.pImpl->VTKHubRad = rna->rotor->hub_radius;
 
     // initialize AeroDyn adapter
     aerodyn.initialize(time, dt, *this);
@@ -592,7 +592,7 @@ void TurbineAeroDyn::compute_env_loads(const seahowl::env::EnvModel& env_model, 
     aerodyn.compute_loads(time, *this);
 
     // transfer loads from AeroDyn to SEAHOWL rotor
-    auto& rotor = dynamic_cast<RotorAeroDyn&>(*rna.rotor);
+    auto& rotor = dynamic_cast<RotorAeroDyn&>(*rna->rotor);
     int count_node = 0;
     for (auto& blade : rotor.blades) {
         // first attach loads from AeroDyn to aero nodes
@@ -609,13 +609,13 @@ void TurbineAeroDyn::compute_env_loads(const seahowl::env::EnvModel& env_model, 
     }
 
     // compute loads on rest of turbine
-    rna.compute_env_loads(env_model, time);
+    rna->compute_env_loads(env_model, time);
     if (foundation) {
         foundation->compute_env_loads(env_model, time);
     }
 
     // disk averaged velocity
-    rna.rotor->disk_averaged_wind_velocity = aerodyn.disk_averaged_velocity;
+    rna->rotor->disk_averaged_wind_velocity = aerodyn.disk_averaged_velocity;
 }
 
 RotorAeroDyn::RotorAeroDyn(TowerAero& tower_ref) : RotorAeroBEMT(tower_ref) {}

@@ -21,9 +21,9 @@ namespace elasto {
 class FloaterElasto : public FoundationElasto {
   public:
     /** @brief Link between foundation and entity (e.g. towerbase of turbine). */
-    std::unique_ptr<seahowl::elasto::Link> link_floater_entity;
+    std::shared_ptr<seahowl::elasto::Link> link_floater_entity;
     /** @brief Mooring system of the floater. */
-    std::unique_ptr<seahowl::elasto::MooringSystemElasto> mooring_system;
+    std::shared_ptr<seahowl::elasto::MooringSystemElasto> mooring_system;
     /** @brief Main body of floater.*/
     std::unique_ptr<seahowl::elasto::BodyElasto> body_main;
 

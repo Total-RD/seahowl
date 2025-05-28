@@ -25,7 +25,7 @@ namespace hydro {
 class FloaterHydro : public FoundationFluid {
   public:
     /** @brief Mooring system of the floater. */
-    std::unique_ptr<MooringSystemHydro> mooring_system;
+    std::shared_ptr<MooringSystemHydro> mooring_system;
 
     /**
      * @brief Constructor.

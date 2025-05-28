@@ -234,7 +234,7 @@ void OutputManager::output_initial_logs() {
 
         // reference points
         size_t idx_point;
-        auto& reference_points = turbine.elasto.tower.reference_points;
+        auto& reference_points = turbine.elasto.tower->reference_points;
         auto csv_out = seahowl::io::CustomCSV(
             (fs::path(logs_folder) / ("turbine" + std::to_string(idx_turbine + 1) + "_tower_points_reference.csv"))
                 .generic_string());
@@ -269,7 +269,7 @@ void OutputManager::output_initial_logs() {
         }
 
         // discretized points
-        auto& discretized_points = turbine.elasto.tower.discretized_points;
+        auto& discretized_points = turbine.elasto.tower->discretized_points;
         csv_out = seahowl::io::CustomCSV(
             (fs::path(logs_folder) / ("turbine" + std::to_string(idx_turbine + 1) + "_tower_points_discretized.csv"))
                 .generic_string());

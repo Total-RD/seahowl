@@ -29,9 +29,9 @@ class TurbineElasto : public ComponentElasto {
     // components
     //
     /** @brief Rotor-nacelle assembly of the turbine. */
-    seahowl::elasto::RotorNacelleAssemblyElasto rna;
+    std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto> rna;
     /** @brief Tower of the turbine. */
-    seahowl::elasto::TowerElasto tower;
+    std::shared_ptr<seahowl::elasto::TowerElasto> tower;
     /** @brief Foundation of the turbine */
     std::shared_ptr<seahowl::elasto::FoundationElasto> foundation;
 

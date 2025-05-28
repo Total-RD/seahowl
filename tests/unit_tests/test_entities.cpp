@@ -29,7 +29,7 @@ TEST_F(TestEntities, added_mass_damping) {
 
     // bodies
     std::vector<seahowl::elasto::BodyElastoChrono> bodies;
-    for (int ii; ii < 7; ii++) {
+    for (int ii = 0; ii < 7; ii++) {
         // create body
         bodies.push_back(seahowl::elasto::BodyElastoChrono());
         auto& body = bodies.back();

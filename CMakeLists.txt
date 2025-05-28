@@ -226,6 +226,7 @@ source_group(core FILES ${SEAHOWL_CORE_SOURCES} ${SEAHOWL_CORE_HEADERS})
 set(SEAHOWL_ELASTO_SOURCES
     src/elasto/entities_elasto.cpp
     src/elasto/component_elasto.cpp
+    src/elasto/system_elasto.cpp
     src/elasto/blade_elasto.cpp
     src/elasto/reference_point_elasto.cpp
     src/elasto/rotor_elasto.cpp
@@ -256,6 +257,7 @@ source_group(elasto FILES ${SEAHOWL_ELASTO_SOURCES} ${SEAHOWL_ELASTO_HEADERS})
 
 # aero
 set(SEAHOWL_AERO_SOURCES
+    src/aero/system_aero.cpp
     src/aero/airfoil.cpp
     src/aero/bemt.cpp
     src/aero/reference_point_aero.cpp

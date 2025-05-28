@@ -15,15 +15,9 @@ using namespace seahowl::core;
 using namespace seahowl::elasto;
 using namespace seahowl::aero;
 
-RotorNacelleAssembly::RotorNacelleAssembly(seahowl::elasto::RotorNacelleAssemblyElasto& elasto,
-                                           seahowl::aero::RotorNacelleAssemblyAero& aero)
-    : elasto(elasto), aero(aero) {}
-
 RotorNacelleAssembly::RotorNacelleAssembly(std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto> elasto,
                                            std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero> aero)
-    : RotorNacelleAssembly(*elasto, *aero) {
-    add_elasto_fluid_ptr(elasto, aero);
-}
+    : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {}
 
 void RotorNacelleAssembly::initialize_this(double time, double dt) {
     for (auto& blade : blades) {

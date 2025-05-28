@@ -54,8 +54,8 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
     auto system_chrono = system_elasto.chobj;
 
     // turbine
-    auto turbine_elasto = seahowl::elasto::TurbineElasto();
-    auto turbine_aero = seahowl::aero::TurbineAero();
+    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
+    auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
     seahowl::io::populate_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(), turbine);
 
@@ -129,12 +129,12 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
     auto system_chrono = system_elasto.chobj;
 
     // turbine
-    auto turbine_elasto = seahowl::elasto::TurbineElasto();
-    auto turbine_aero = seahowl::aero::TurbineAero();
+    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
+    auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
     seahowl::io::populate_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine.json").generic_string(), turbine);
     // force FPM mode on blades
-    for (auto& blade : turbine.elasto.rna.rotor->blades) {
+    for (auto& blade : turbine.elasto.rna->rotor->blades) {
         dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade).fpm_mode = true;
     }
 
@@ -206,8 +206,8 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
     auto system_chrono = system_elasto.chobj;
 
     // turbine
-    auto turbine_elasto = seahowl::elasto::TurbineElasto();
-    auto turbine_aero = seahowl::aero::TurbineAero();
+    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
+    auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
     seahowl::io::populate_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(), turbine);
 
@@ -279,8 +279,8 @@ TEST_F(TestTurbine, controller_target_rpm) {
     auto system_chrono = system_elasto.chobj;
 
     // turbine
-    auto turbine_elasto = seahowl::elasto::TurbineElasto();
-    auto turbine_aero = seahowl::aero::TurbineAero();
+    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
+    auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
     seahowl::io::populate_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string(), turbine);
 
@@ -357,8 +357,8 @@ TEST_F(TestTurbine, actuator_disk) {
     auto system_chrono = system_elasto.chobj;
 
     // turbine
-    auto turbine_elasto = seahowl::elasto::TurbineElasto();
-    auto turbine_aero = seahowl::aero::TurbineAero();
+    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
+    auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
     seahowl::io::populate_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine_disk.json").generic_string(), turbine);
 
@@ -462,9 +462,9 @@ TEST_F(TestTurbine, multiturbines) {
     double initial_pitch = seahowl::PI / 8.0;
 
     // system
-    auto system_elasto = SystemElastoChrono();
-    system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
-    auto system_aero = seahowl::aero::SystemAero();
+    auto system_elasto = std::make_shared<SystemElastoChrono>();
+    system_elasto->set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
+    auto system_aero = std::make_shared<seahowl::aero::SystemAero>();
 
     // system core
     auto system_core = seahowl::core::System(system_elasto, system_aero);
@@ -476,8 +476,8 @@ TEST_F(TestTurbine, multiturbines) {
     for (int ii = 0; ii < nturbines; ii++) {
         system_core.elasto.turbines.push_back(std::make_shared<seahowl::elasto::TurbineElasto>());
         system_core.aero.turbines.push_back(std::make_shared<seahowl::aero::TurbineAero>());
-        system_core.turbines.push_back(std::make_shared<seahowl::core::Turbine>(*system_core.elasto.turbines.back(),
-                                                                                *system_core.aero.turbines.back()));
+        system_core.turbines.push_back(std::make_shared<seahowl::core::Turbine>(system_core.elasto.turbines.back(),
+                                                                                system_core.aero.turbines.back()));
         auto& turbine = *system_core.turbines.back();
         seahowl::io::populate_turbine_from_file(turbine_file, turbine);
         // empty controller
@@ -497,14 +497,14 @@ TEST_F(TestTurbine, multiturbines) {
 
     // statics
     if (statics_prestep) {
-        system_elasto.do_statics(true, 10);
+        system_elasto->do_statics(true, 10);
     }
     system_core.poststep(0.0, dt);  // to update positions aero after statics step
 
     // Setup TestFwDataSet
     TestFrameworkDataset test_dataset({false, (ref_dir / "test_turbine_multiturbines.csv").generic_string(),
                                        (test_dir / "test_turbine_multiturbines.test.csv").generic_string()});
-    test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
+    test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto->get_time(); });
     // test_dataset.add_test_function("time (s)", system_elasto.get_time);
     for (size_t idx_turbine = 0; idx_turbine < system_core.turbines.size(); idx_turbine++)
         test_dataset.test_csv.add_function(

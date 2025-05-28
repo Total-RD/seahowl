@@ -10,12 +10,11 @@ using namespace seahowl::core;
 using namespace seahowl::elasto;
 using namespace seahowl::aero;
 
-Tower::Tower(TowerElasto& elasto, TowerAero& aero) : elasto(elasto), aero(aero) {}
+Tower::Tower(seahowl::elasto::TowerElasto& elasto, seahowl::aero::TowerAero& aero)
+    : ComponentDynamic(nullptr, nullptr), elasto(elasto), aero(aero) {}
 
 Tower::Tower(std::shared_ptr<seahowl::elasto::TowerElasto> elasto, std::shared_ptr<seahowl::aero::TowerAero> aero)
-    : Tower(*elasto, *aero) {
-    add_elasto_fluid_ptr(elasto, aero);
-}
+    : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {}
 
 void Tower::initialize_this(double time, double dt) {
     // mappings

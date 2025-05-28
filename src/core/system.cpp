@@ -25,13 +25,8 @@
 using namespace seahowl::core;
 using namespace seahowl::env;
 
-System::System(seahowl::elasto::SystemElasto& elasto, seahowl::aero::SystemAero& aero) : elasto(elasto), aero(aero) {}
-
 System::System(std::shared_ptr<seahowl::elasto::SystemElasto> elasto, std::shared_ptr<seahowl::aero::SystemAero> aero)
-    : System(*elasto, *aero) {
-    elasto_ptr = elasto;
-    aero_ptr = aero;
-};
+    : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero){};
 
 void System::build() {
     // build all turbines
@@ -56,7 +51,6 @@ void System::initialize_this(double time, double dt) {
     /// @todo replace this check with better handling (e.g. at initialization of floater by passing fluid model)
     // Specific HydroChrono handling: need to pass waves from environment to HydroChrono floater.
     // Needs to happen before initializing turbines
-
     for (auto& turbine : turbines) {
         if (turbine->elasto.foundation) {
             try {

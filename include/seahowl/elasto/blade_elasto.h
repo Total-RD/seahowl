@@ -30,6 +30,7 @@ class BladeElasto : public virtual ComponentElasto {
     std::vector<double> discretization_fractions;
 
     BladeElasto();
+    ~BladeElasto() = default;
 
     virtual void rotate(double angle, const Vector3d& axis) const override;
     virtual void translate(const Vector3d& translation_vector) const override;

@@ -12,17 +12,15 @@
 using namespace seahowl::core;
 using namespace seahowl::servo;
 using namespace seahowl::elasto;
+using namespace seahowl::aero;
 
-Turbine::Turbine(seahowl::elasto::TurbineElasto& elasto, seahowl::aero::TurbineAero& aero)
-    : elasto(elasto), aero(aero), rna(elasto.rna, aero.rna), tower(elasto.tower, aero.tower) {
-    controller = std::make_shared<Controller>();
-}
-
-Turbine::Turbine(std::shared_ptr<seahowl::elasto::TurbineElasto> elasto,
-                 std::shared_ptr<seahowl::aero::TurbineAero> aero)
-    : Turbine(*elasto, *aero) {
-    add_elasto_fluid_ptr(elasto, aero);
-}
+Turbine::Turbine(std::shared_ptr<TurbineElasto> elasto, std::shared_ptr<TurbineAero> aero)
+    : ComponentDynamic(elasto, aero),
+      elasto(*elasto),
+      aero(*aero),
+      rna(elasto->rna, aero->rna),
+      tower(elasto->tower, aero->tower),
+      controller(std::make_shared<Controller>()) {}
 
 void Turbine::initialize_this(double time, double dt) {
     rna.initialize(time, dt);

@@ -43,8 +43,6 @@ class RotorNacelleAssembly : public ComponentDynamic {
      * @param[in] elasto Elastodynamic RNA model.
      * @param[in] aero Aerodynamic RNA model.
      */
-    RotorNacelleAssembly(seahowl::elasto::RotorNacelleAssemblyElasto& elasto,
-                         seahowl::aero::RotorNacelleAssemblyAero& aero);
     RotorNacelleAssembly(std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto> elasto,
                          std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero> aero);
 

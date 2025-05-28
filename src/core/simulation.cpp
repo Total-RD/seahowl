@@ -71,9 +71,9 @@ Simulation::Simulation()
                 ""},
            }},
       }) {
-    system_elasto = std::make_unique<seahowl::elasto::SystemElastoChrono>();
-    system_aero = std::make_unique<seahowl::aero::SystemAero>();
-    system_core = std::make_unique<System>(*system_elasto, *system_aero);
+    system_elasto = std::make_shared<seahowl::elasto::SystemElastoChrono>();
+    system_aero = std::make_shared<seahowl::aero::SystemAero>();
+    system_core = std::make_unique<System>(system_elasto, system_aero);
     outputs = std::make_unique<seahowl::io::OutputManager>(*system_core);
 }
 

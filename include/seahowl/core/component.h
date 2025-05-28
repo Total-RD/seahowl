@@ -26,11 +26,10 @@ namespace core {
  */
 class ComponentDynamic {
   public:
-    ComponentDynamic() {}
+    ComponentDynamic(const std::shared_ptr<seahowl::elasto::ComponentElasto> elasto_,
+                     const std::shared_ptr<seahowl::ComponentFluid> fluid_)
+        : elasto_ptr(elasto_), fluid_ptr(fluid_) {}
 
-    ComponentDynamic(const std::shared_ptr<seahowl::elasto::ComponentElasto> elasto,
-                     const std::shared_ptr<seahowl::ComponentFluid> aero)
-        : elasto_shared_ptr(elasto), fluid_shared_ptr(aero) {}
     /**
      * @brief Builds the component, called before initializing the simulation.
      */
@@ -79,20 +78,11 @@ class ComponentDynamic {
   protected:
     bool is_initialized = false;
 
-    /**
-     * @brief Function to store shared_ptr of components (useful to avoid segfaults in Python).
-     */
-    void add_elasto_fluid_ptr(std::shared_ptr<seahowl::elasto::ComponentElasto> elasto,
-                              std::shared_ptr<seahowl::ComponentFluid> fluid) {
-        elasto_shared_ptr = elasto;
-        fluid_shared_ptr = fluid;
-    }
-
   private:
     // Only for memory management, never accessed (reference to underlying object is accessed instead).
-    std::shared_ptr<seahowl::elasto::ComponentElasto> elasto_shared_ptr;
+    std::shared_ptr<seahowl::elasto::ComponentElasto> elasto_ptr;
     // Only for memory management, never accessed (reference to underlying object is accessed instead).
-    std::shared_ptr<seahowl::ComponentFluid> fluid_shared_ptr;
+    std::shared_ptr<seahowl::ComponentFluid> fluid_ptr;
 
     virtual void initialize_this(double time, double dt) = 0;
 };

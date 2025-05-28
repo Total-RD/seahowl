@@ -12,12 +12,25 @@ namespace aero {
 /**
  * @brief Aero system base class.
  */
-class SystemAero {
+class SystemAero : public ComponentFluid {
   public:
     /** @brief Turbines in system. */
     std::deque<std::shared_ptr<TurbineAero>> turbines{};
     /** @brief Components in system. */
     std::deque<std::shared_ptr<ComponentFluid>> components{};
+
+    /**
+     * @brief Builds the tower.
+     */
+    void build() override;
+
+    /**
+     * @brief Computes aero loads on sytem.
+     *
+     * @param[in] env_model env model to use for applying aero loads.
+     * @param[in] time Time of simulation.
+     */
+    void compute_env_loads(const env::EnvModel& env_model, double time) override;
 
     /**
      * @brief Adds turbine to system.

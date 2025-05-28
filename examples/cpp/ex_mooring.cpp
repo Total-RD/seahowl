@@ -79,7 +79,7 @@ void run_simulation() {
     auto mooring_hydro = std::make_shared<seahowl::hydro::MooringHydro>();
     system_core->aero.add(mooring_hydro);
     // core
-    auto mooring = std::make_shared<seahowl::core::Mooring>(*mooring_elasto, *mooring_hydro);
+    auto mooring = std::make_shared<seahowl::core::Mooring>(mooring_elasto, mooring_hydro);
     system_core->add(mooring);
 
     // set mooring properties

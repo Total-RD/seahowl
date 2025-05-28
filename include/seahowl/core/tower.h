@@ -112,11 +112,6 @@ class Tower : public virtual ComponentDynamic {
     void update_loads_elasto();
 
   private:
-    // Only for memory management, never accessed (reference to underlying object is accessed instead).
-    std::shared_ptr<seahowl::elasto::TowerElasto> elasto_shared_ptr;
-    // Only for memory management, never accessed (reference to underlying object is accessed instead).
-    std::shared_ptr<seahowl::aero::TowerAero> aero_shared_ptr;
-
     /**
      * @brief Initialize tower, called before starting the simulation.
      *

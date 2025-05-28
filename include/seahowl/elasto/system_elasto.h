@@ -13,7 +13,7 @@ namespace elasto {
 /**
  * @brief Elasto system base class.
  */
-class SystemElasto {
+class SystemElasto : public ComponentElasto {
   public:
     /** @brief Turbines in system. */
     std::deque<std::shared_ptr<TurbineElasto>> turbines{};
@@ -23,6 +23,11 @@ class SystemElasto {
     std::shared_ptr<MeshElasto> mesh;
     /** @brief Whether system has been assembled or not. */
     bool is_assembled = false;
+
+    /**
+     * @brief Builds the component (to call before assemble).
+     */
+    void build() override;
 
     /**
      * @brief Assembles the system.*
@@ -132,6 +137,29 @@ class SystemElasto {
      * @param[in] turbine Turbine to add to system.
      */
     virtual void add(std::shared_ptr<TurbineElasto> turbine) { turbines.push_back(turbine); }
+
+    /**
+     * @brief Translates the system.
+     *
+     * @param[in] translation_vector The 3D translation vector.
+     */
+    virtual void translate(const seahowl::Vector3d& translation_vector) const override;
+
+    /**
+     * @brief Rotates the system.
+     *
+     * @param[in] translation_vector The angle of rotation (in radians).
+     * @param[in] axis The axis of rotation (3D vector).
+     */
+    virtual void rotate(double angle, const seahowl::Vector3d& axis) const override;
+
+    /**
+     * @brief Returns the mass of the system.
+     */
+    virtual double get_mass() const override;
+
+  protected:
+    virtual void assemble_this(seahowl::elasto::SystemElasto& system) override {}
 };
 
 }  // namespace elasto

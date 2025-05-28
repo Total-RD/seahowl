@@ -12,10 +12,8 @@ using namespace seahowl::elasto;
 using namespace seahowl::aero;
 using seahowl::Vector3d;
 
-Blade::Blade(seahowl::elasto::BladeElasto& elasto, seahowl::aero::BladeAero& aero) : elasto(elasto), aero(aero) {}
-
-Blade::Blade(const std::shared_ptr<seahowl::elasto::BladeElasto>& elasto,
-             const std::shared_ptr<seahowl::aero::BladeAero>& aero)
+Blade::Blade(const std::shared_ptr<seahowl::elasto::BladeElasto> elasto,
+             const std::shared_ptr<seahowl::aero::BladeAero> aero)
     : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {}
 
 void Blade::initialize_this(double time, double dt) {

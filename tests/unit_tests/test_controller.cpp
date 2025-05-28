@@ -54,7 +54,7 @@ TEST_F(TestController, collective_pitch_control) {
     // add wind model
     auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
     wind_model->shear_coefficient = 0.12;
-    wind_model->reference_height = turbine.elasto.rna.rotor->body_hub->get_position().z();
+    wind_model->reference_height = turbine.elasto.rna->rotor->body_hub->get_position().z();
     wind_model->set_wind_velocity(seahowl::Vector3d(12.0, 0.0, 0.0));
     // env_model
     auto env_model = std::make_shared<seahowl::env::EnvModel>();
@@ -114,7 +114,7 @@ TEST_F(TestController, collective_pitch_control_snap) {
     // add wind model
     auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
     wind_model->shear_coefficient = 0.12;
-    wind_model->reference_height = turbine.elasto.rna.rotor->body_hub->get_position().z();
+    wind_model->reference_height = turbine.elasto.rna->rotor->body_hub->get_position().z();
     wind_model->set_wind_velocity(seahowl::Vector3d(12.0, 0.0, 0.0));
     // env_model
     auto env_model = std::make_shared<seahowl::env::EnvModel>();
@@ -180,7 +180,7 @@ TEST_F(TestController, yaw_control) {
     // add wind model
     auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
     wind_model->shear_coefficient = 0.12;
-    wind_model->reference_height = turbine.elasto.rna.rotor->body_hub->get_position().z();
+    wind_model->reference_height = turbine.elasto.rna->rotor->body_hub->get_position().z();
     wind_model->set_wind_velocity(seahowl::Vector3d(12.0, 1.0, 0.0));
     // env_model
     auto env_model = std::make_shared<seahowl::env::EnvModel>();
@@ -245,7 +245,7 @@ TEST_F(TestController, yaw_control_snap) {
     // add wind model
     auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
     wind_model->shear_coefficient = 0.12;
-    wind_model->reference_height = turbine.elasto.rna.rotor->body_hub->get_position().z();
+    wind_model->reference_height = turbine.elasto.rna->rotor->body_hub->get_position().z();
     wind_model->set_wind_velocity(seahowl::Vector3d(12.0, 1.0, 0.0));
     // env_model
     auto env_model = std::make_shared<seahowl::env::EnvModel>();
@@ -315,7 +315,7 @@ TEST_F(TestController, IEA15) {
 
     system_core.env_model = env_model;
     wind_model->shear_coefficient = 0.12;
-    wind_model->reference_height = turbine.elasto.rna.rotor->body_hub->get_position().z();
+    wind_model->reference_height = turbine.elasto.rna->rotor->body_hub->get_position().z();
     wind_model->set_wind_velocity(seahowl::Vector3d(time_speed_vector[0].second, 0.0, 0.0));
 
     // initialize simulation
@@ -383,7 +383,7 @@ TEST_F(TestController, discon_50turbines) {
     // add wind model
     auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
     wind_model->shear_coefficient = 0.12;
-    wind_model->reference_height = system_core.turbines[0]->elasto.rna.rotor->body_hub->get_position().z();
+    wind_model->reference_height = system_core.turbines[0]->elasto.rna->rotor->body_hub->get_position().z();
     wind_model->set_wind_velocity(seahowl::Vector3d(12.0, 0.0, 0.0));
     // env_model
     auto env_model = std::make_shared<seahowl::env::EnvModel>();
@@ -431,8 +431,8 @@ TEST_F(TestController, actuator_disk) {
     auto system_chrono = system_elasto.chobj;
 
     // turbine
-    auto turbine_elasto = seahowl::elasto::TurbineElasto();
-    auto turbine_aero = seahowl::aero::TurbineAero();
+    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
+    auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
     auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
     seahowl::io::populate_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine_disk.json").generic_string(), turbine);
 

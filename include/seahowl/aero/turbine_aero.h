@@ -30,9 +30,9 @@ class TurbineAero : public ComponentFluid {
     // components
     //
     /** @brief Rotor-nacelle assembly of the turbine. */
-    seahowl::aero::RotorNacelleAssemblyAero rna;
+    std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero> rna;
     /** @brief Tower of the turbine. */
-    seahowl::aero::TowerAero tower;
+    std::shared_ptr<seahowl::aero::TowerAero> tower;
     /** @brief Foundation of the turbine. */
     std::shared_ptr<seahowl::hydro::FoundationFluid> foundation;
 

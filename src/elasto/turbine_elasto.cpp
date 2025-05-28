@@ -7,8 +7,8 @@
 using namespace seahowl::elasto;
 
 TurbineElasto::TurbineElasto() {
-    rna = RotorNacelleAssemblyElasto();
-    tower = TowerElasto();
+    rna = std::make_shared<RotorNacelleAssemblyElasto>();
+    tower = std::make_shared<TowerElasto>();
     foundation = std::make_shared<FoundationElastoBody>();
 }
 
@@ -18,27 +18,27 @@ void TurbineElasto::assemble_this(SystemElasto& system) {
         foundation->assemble(system);
     }
     // assemble RNA
-    rna.assemble(system);
+    rna->assemble(system);
     // assemble tower
-    tower.assemble(system);
+    tower->assemble(system);
 }
 
 void TurbineElasto::build() {
     // build RNA
-    rna.build();
+    rna->build();
     // build tower
-    tower.build();
+    tower->build();
 
     // link tower to rotor
-    auto& towertop_node = *tower.nodes.back();
+    auto& towertop_node = *tower->nodes.back();
     // translate RNA center of origin (yaw bearing body) to towertop
-    rna.translate(towertop_node.get_position() - rna.actuator_yaw->body_controller->get_position());
-    rna.attach_rna_to_node(towertop_node);
+    rna->translate(towertop_node.get_position() - rna->actuator_yaw->body_controller->get_position());
+    rna->attach_rna_to_node(towertop_node);
 
     // build foundation
     if (foundation) {
         foundation->build();
-        foundation->link_to_entity(*tower.nodes.front());
+        foundation->link_to_entity(*tower->nodes.front());
     }
 }
 
@@ -46,21 +46,21 @@ void TurbineElasto::presetup(double fraction) {
     if (foundation) {
         foundation->presetup(fraction);
     }
-    rna.presetup(fraction);
-    tower.presetup(fraction);
+    rna->presetup(fraction);
+    tower->presetup(fraction);
 }
 
 void TurbineElasto::translate(const Vector3d& translation_vector) const {
-    rna.translate(translation_vector);
-    tower.translate(translation_vector);
+    rna->translate(translation_vector);
+    tower->translate(translation_vector);
     if (foundation) {
         foundation->translate(translation_vector);
     }
 }
 
 void TurbineElasto::rotate(double angle, const Vector3d& axis) const {
-    rna.rotate(angle, axis);
-    tower.rotate(angle, axis);
+    rna->rotate(angle, axis);
+    tower->rotate(angle, axis);
     if (foundation) {
         foundation->rotate(angle, axis);
     }
@@ -69,9 +69,9 @@ void TurbineElasto::rotate(double angle, const Vector3d& axis) const {
 double TurbineElasto::get_mass() const {
     double total_mass = 0.0;
     // RNA
-    total_mass += rna.get_mass();
+    total_mass += rna->get_mass();
     // tower
-    total_mass += tower.get_mass();
+    total_mass += tower->get_mass();
     // foundation
     if (foundation) {
         total_mass += foundation->get_mass();

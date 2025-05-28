@@ -49,7 +49,6 @@ class Mooring : public ComponentDynamic {
      * @param[in] elasto Elastodynamic mooring model.
      * @param[in] hydro hydrodynamic mooring model.
      */
-    Mooring(seahowl::elasto::MooringElastoFEA& elasto, seahowl::hydro::MooringHydro& hydro);
     Mooring(std::shared_ptr<seahowl::elasto::MooringElastoFEA> elasto,
             std::shared_ptr<seahowl::hydro::MooringHydro> hydro);
 
@@ -166,7 +165,8 @@ class MooringSystem : public ComponentDynamic {
      * @param[in] elasto Elastodynamic mooring system model.
      * @param[in] hydro hydrodynamic mooring system model.
      */
-    MooringSystem(seahowl::elasto::MooringSystemElasto& elasto, seahowl::hydro::MooringSystemHydro& hydro);
+    MooringSystem(std::shared_ptr<seahowl::elasto::MooringSystemElasto> elasto,
+                  std::shared_ptr<seahowl::hydro::MooringSystemHydro> hydro);
 
     /**
      * @brief Adds mooring to mooring system.
