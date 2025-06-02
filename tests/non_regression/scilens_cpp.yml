@@ -2,9 +2,9 @@ processor: ExecuteAndCompare
 #processor: Compare
 tags: [csv]
 execute:
-  pre_folder_delete:  ["output"]
+  pre_files_delete : true
   exe_guess_os_extension: true
-  command_suffix: "--numerics-duration 100"
+  command_suffix: "--numerics-duration 10"
 execute_and_compare:
   test:
     exe_path: "build/seahowl_driver"
@@ -48,6 +48,7 @@ report:
   html:
     collapse_if_successful: false
     curves:
+      compare_vs_difference: true
       display_on_load: false
     parameter_page_mode :
       default_value : tabs

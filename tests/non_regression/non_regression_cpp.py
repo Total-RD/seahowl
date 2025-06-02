@@ -37,11 +37,12 @@ class TestNonRegressionCpp(unittest.TestCase):
 
         test_dir = os.path.join(TEST_DIR, input_dir)
 
-        yml_file = f"{test_dir}/scilens_cpp.yml"
-        if not os.path.exists(yml_file):
-            yml_file = f"{TEST_DIR}/scilens_cpp.yml"
+        yml_file = f"{TEST_DIR}/scilens_cpp.yml"
+        yml_file_override = f"{test_dir}/scilens_cpp.yml"
+        if not os.path.exists(yml_file_override):
+            yml_file_override = None
 
-        runner = StandaloneTaskRunner(yml_file)
+        runner = StandaloneTaskRunner(yml_file, config_override=yml_file_override)
         option = f"{runner.config.execute.command_suffix} --outputs-folder ."
         runner.config.execute.command_suffix = f" {main_json} {option}"
         runner.config.report.description = decription
