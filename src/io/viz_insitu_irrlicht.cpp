@@ -38,7 +38,7 @@ void VisualizationInSituIrrlicht::initialize_elasto(seahowl::elasto::SystemElast
     application_irrlicht->AddTypicalLights();
     application_irrlicht->AddSkyBox();
     if (system_elasto.turbines.size() > 0) {
-        auto zpos = system_elasto.turbines[0]->rna.rotor->body_hub->get_position().z();
+        auto zpos = system_elasto.turbines[0]->rna->rotor->body_hub->get_position().z();
         application_irrlicht->AddCamera(Vector3d(-zpos, -zpos, zpos), Vector3d(0, 0, zpos));
     } else {
         application_irrlicht->AddCamera(Vector3d(-150, -150, 150), Vector3d(0, 0, 150.));

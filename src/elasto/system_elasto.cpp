@@ -41,3 +41,10 @@ double SystemElasto::get_mass() const {
     }
     return mass;
 }
+
+void SystemElasto::assemble_this(seahowl::elasto::SystemElasto& system) {
+    if (&system != &*this) {
+        throw std::runtime_error("Cannot assemble a SystemElasto instance using another SystemElasto instance.");
+    }
+    assemble();
+}

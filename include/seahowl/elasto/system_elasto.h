@@ -159,7 +159,7 @@ class SystemElasto : public ComponentElasto {
     virtual double get_mass() const override;
 
   protected:
-    virtual void assemble_this(seahowl::elasto::SystemElasto& system) override {}
+    virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;
 };
 
 }  // namespace elasto
