@@ -22,24 +22,24 @@
 #include "seahowl/env/wind_models.h"
 #include "seahowl/env/wave_models.h"
 #include "seahowl/env/soil_models.h"
-#include "seahowl/hydro/morison.h"
+#include "seahowl/fluid/hydro/morison.h"
 #ifdef HAVE_INFLOWWIND
     #include "seahowl/env/inflowwind_adapter.h"
 #endif
-#include "seahowl/aero/airfoil.h"
-#include "seahowl/aero/blade_aero.h"
-#include "seahowl/aero/rotor_aero.h"
-#include "seahowl/aero/turbine_aero.h"
-#include "seahowl/hydro/monopile_hydro.h"
-#include "seahowl/aero/system_aero.h"
-#include "seahowl/hydro/mooring_hydro.h"
+#include "seahowl/fluid/aero/airfoil.h"
+#include "seahowl/fluid/aero/blade_aero.h"
+#include "seahowl/fluid/aero/rotor_aero.h"
+#include "seahowl/fluid/aero/turbine_aero.h"
+#include "seahowl/fluid/hydro/monopile_hydro.h"
+#include "seahowl/fluid/aero/system_aero.h"
+#include "seahowl/fluid/hydro/mooring_hydro.h"
 #ifdef HAVE_HYDROCHRONO
-    #include "seahowl/hydro/hydrochrono_adapter.h"
+    #include "seahowl/fluid/hydro/hydrochrono_adapter.h"
     #include "seahowl/elasto/chrono_adapters.h"
     #include <hydroc/hydro_forces.h>
 #endif
 #ifdef HAVE_AERODYN
-    #include "seahowl/aero/aerodyn_adapter.h"
+    #include "seahowl/fluid/aero/aerodyn_adapter.h"
 #endif
 
 #include "seahowl/io/input_structures.h"
@@ -474,7 +474,7 @@ void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbin
         }
         turbine.elasto.rna->rotor->blades = blades_elasto;
         turbine.aero.rna->rotor->blades = blades_aero;
-        turbine.rna.blades = blades;
+        turbine.rna.rotor.blades = blades;
     }
 
     // RNA

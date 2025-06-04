@@ -132,7 +132,7 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     // RNA components
     //
     /** @brief Rotor. */
-    std::unique_ptr<seahowl::elasto::RotorElasto> rotor;
+    std::shared_ptr<seahowl::elasto::RotorElasto> rotor;
     /** @brief Shaft rigid body. */
     std::unique_ptr<seahowl::elasto::BodyElasto> body_shaft;
     /** @brief Nacelle rigid body. */

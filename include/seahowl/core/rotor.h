@@ -41,7 +41,7 @@ class Rotor : public ComponentDynamic {
      * @param[in] elasto Elastodynamic Rotor model.
      * @param[in] aero Aerodynamic Rotor model.
      */
-    Rotor(seahowl::elasto::RotorElasto& elasto, seahowl::aero::RotorAero& aero);
+    Rotor(std::shared_ptr<seahowl::elasto::RotorElasto> elasto, std::shared_ptr<seahowl::aero::RotorAero> aero);
 
     /**
      * @brief Prestep for Rotor, called before elastodynamic stepping.

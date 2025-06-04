@@ -15,8 +15,7 @@ using namespace seahowl::core;
 using namespace seahowl::elasto;
 using namespace seahowl::aero;
 
-RotorNacelleAssembly::RotorNacelleAssembly(std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto> elasto,
-                                           std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero> aero)
+Rotor::Rotor(std::shared_ptr<seahowl::elasto::RotorElasto> elasto, std::shared_ptr<seahowl::aero::RotorAero> aero)
     : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {}
 
 void Rotor::initialize_this(double time, double dt) {
@@ -47,9 +46,9 @@ void Rotor::build() {
     aero.build();
 }
 
-RotorNacelleAssembly::RotorNacelleAssembly(seahowl::elasto::RotorNacelleAssemblyElasto& elasto,
-                                           seahowl::aero::RotorNacelleAssemblyAero& aero)
-    : elasto(elasto), aero(aero), rotor(*elasto.rotor, *aero.rotor) {}
+RotorNacelleAssembly::RotorNacelleAssembly(std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto> elasto,
+                                           std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero> aero)
+    : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero), rotor(elasto->rotor, aero->rotor) {}
 
 void RotorNacelleAssembly::initialize_this(double time, double dt) {
     rotor.initialize(time, dt);

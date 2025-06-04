@@ -257,6 +257,7 @@ source_group(elasto FILES ${SEAHOWL_ELASTO_SOURCES} ${SEAHOWL_ELASTO_HEADERS})
 
 # aero
 set(SEAHOWL_AERO_SOURCES
+    src/fluid/aero/system_aero.cpp
     src/fluid/aero/airfoil.cpp
     src/fluid/aero/bemt.cpp
     src/fluid/aero/reference_point_aero.cpp
