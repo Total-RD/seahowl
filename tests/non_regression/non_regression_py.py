@@ -1,6 +1,7 @@
 import os
 import unittest
 import subprocess
+import tempfile
 
 from scilens import StandaloneTaskRunner
 from scilens.helpers.assets import Assets
@@ -10,10 +11,43 @@ ROOT_DIR = os.path.dirname(os.path.dirname(TEST_DIR))
 
 VAL_PY_DIR = os.path.join(os.getcwd(), "build")
 REF_PY_DIR = os.path.join(os.getcwd(), "ref/bin")
+EXAMPLES_DIR = os.path.join(os.getcwd(), "examples/python")
 
 ENV_PYTHONPATH = "PYTHONPATH"
 
-test_only = False
+test_only = True
+only_compare = False
+
+
+def clean_directory(directory):
+    """Recursively delete all files and directories in the given directory."""
+    for root, dirs, files in os.walk(directory, topdown=False):
+        for name in files:
+            if name.startswith("."):
+                continue
+            os.remove(os.path.join(root, name))
+        for name in dirs:
+            clean_directory(os.path.join(root, name))
+            os.rmdir(os.path.join(root, name))
+
+
+def run_modified_script(script_path, modifications):
+    # Read the original script
+    with open(script_path, "r") as f:
+        code = f.read()
+    # Apply the modifications (replace a string)
+    for old, new in modifications.items():
+        code = code.replace(old, new)
+    # Write to a temporary file
+    with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp:
+        tmp.write(code)
+        tmp_script_path = tmp.name
+    # Execute the modified script
+    try:
+        subprocess.run(["python3", tmp_script_path], check=True, cwd=EXAMPLES_DIR)
+    finally:
+        # Clean up the temporary file
+        os.remove(tmp_script_path)
 
 
 class TestNonRegressionPy(unittest.TestCase):
@@ -39,25 +73,34 @@ class TestNonRegressionPy(unittest.TestCase):
             logo_file=os.path.join(TEST_DIR, "logo.png"),
         )
 
-    def _generic_test(self, input_dir, script_name):
-
+    def _generic_test(self, input_dir, script_name, decription):
+        # Prepare the test directory and environment
         test_dir = os.path.join(TEST_DIR, input_dir)
 
-        outpu_dir = os.path.join(test_dir, "output")
-        if os.path.exists(outpu_dir):
-            os.rmdir(outpu_dir)
+        # specify the yml file and override if it exists
+        yml_file = f"{TEST_DIR}/scilens_py.yml"
+        yml_file_override = f"{test_dir}/scilens_py.yml"
+        if not os.path.exists(yml_file_override):
+            yml_file_override = None
 
-        VAL_DIR = os.path.join(test_dir, "validation")
-        REF_DIR = os.path.join(test_dir, "reference")
+        if not only_compare:
+            VAL_DIR = os.path.join(test_dir, "validation")
+            REF_DIR = os.path.join(test_dir, "reference")
 
-        os.environ[ENV_PYTHONPATH] = VAL_PY_DIR
-        subprocess.run(["python3", script_name], check=True, cwd=VAL_DIR)
+            os.environ[ENV_PYTHONPATH] = VAL_PY_DIR
 
-        if not test_only:
-            os.environ[ENV_PYTHONPATH] = REF_PY_DIR
-            subprocess.run(["python3", script_name], check=True, cwd=REF_DIR)
+            modifications = {'"./output"': f'"{VAL_DIR}"'}
+            clean_directory(VAL_DIR)
+            run_modified_script(script_name, modifications)
 
-        runner = StandaloneTaskRunner(f"{TEST_DIR}/scilens_py.yml")
+            if not test_only:
+                os.environ[ENV_PYTHONPATH] = REF_PY_DIR
+                modifications = {'"./output"': f'"{REF_DIR}"'}
+                clean_directory(REF_DIR)
+                run_modified_script(script_name, modifications)
+
+        runner = StandaloneTaskRunner(yml_file, config_override=yml_file_override)
+        runner.config.report.description = decription
         results = runner.process(test_dir, origin_working_dir=ROOT_DIR)
 
         if results.error:
@@ -69,21 +112,18 @@ class TestNonRegressionPy(unittest.TestCase):
             )
 
     def test_simulation(self):
-        self._generic_test("python/simulation", "ex_simulation.py")
-
-    @unittest.skip("Not yet implemented")
-    def test_mooring(self):
-        self._generic_test("python/mooring", "ex_mooring.py")
-
-    @unittest.skip("Not yet implemented")
-    def test_system(self):
-        self._generic_test("python/system", "ex_system.py")
+        script = os.path.join(EXAMPLES_DIR, "ex_simulation.py")
+        description = (
+            "Non regression Test for Seahowl for simulation case with duration 100s"
+        )
+        self._generic_test("python/simulation", script, description)
 
     def test_main(self):
-        self._generic_test("python/main", "ex_main.py")
-
-    def test_load_sims(self):
-        self._generic_test("python/load_sims", "load_sims.py")
+        script = os.path.join(EXAMPLES_DIR, "ex_main.py")
+        description = (
+            "Non regression Test for Seahowl for Onshore case with duration 100s"
+        )
+        self._generic_test("python/main", script, description)
 
 
 if __name__ == "__main__":

@@ -17,8 +17,8 @@ compare:
   sources:
     test_folder_relative_path: validation
     reference_folder_relative_path: reference
-    additional_path_suffix: "output"
     recursive: true
+    not_matching_source_ignore_pattern: ".gitkeep"
 report:
   title_prefix : "Seahowl / Comparison Results /"
   output:
@@ -26,6 +26,7 @@ report:
   html:
     collapse_if_successful: false
     curves:
+      compare_vs_difference: true
       display_on_load: false
     parameter_page_mode :
       default_value : tabs

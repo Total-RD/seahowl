@@ -10,7 +10,7 @@ seahowl.set_log_level_global("info")  # log levels: critical, info, debug, warn,
 # make simulation object
 simulation = seahowl.core.Simulation()
 simulation.dt = 0.05
-simulation.duration = 200.0
+simulation.duration = 100.0
 simulation.outputs.dt_output = 0.0
 simulation.outputs.has_gui = True
 simulation.outputs.has_vtk = False
@@ -28,7 +28,8 @@ system_elasto.do_statics(True, 10)
 
 # add fluid model
 wind_model = seahowl.env.ConstantWind()
-system_core.fluid_model = wind_model
+system_core.env_model = seahowl.env.EnvModel()
+system_core.env_model.add_model(wind_model)
 wind_model.set_wind_velocity(
     [12.0, 0.0, 0.0],
 )
