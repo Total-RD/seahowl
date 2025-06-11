@@ -2,10 +2,11 @@ processor: Compare
 tags: [csv]
 readers:
   csv:
-    curve_parser:
-      name: "col_x"
-      parameters:
-        x: ["time (s)", "fraction"]
+    cols:
+      curve_parser:
+        name: "col_x"
+        parameters:
+          x: ["time (s)", "fraction"]
 compare:
   errors_limit: 10000
   float_thresholds:
