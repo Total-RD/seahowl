@@ -413,6 +413,9 @@ void seahowl::servo::DisconInterface::Init(const std::string& libfile, const std
         }
         DISCON = (DISCON_routine)GetProcAddress((HMODULE)handler, "DISCON");
 #endif
+        if (!handler) {
+            throw std::runtime_error("DISCON: could not load dynamic library for DISCON routine: " + libfile + ".");
+        }
         spdlog::debug("DISCON: loaded {}.", path_dll);
         has_dll = true;
     } else {
