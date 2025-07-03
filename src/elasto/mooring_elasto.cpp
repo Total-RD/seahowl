@@ -12,7 +12,11 @@ using namespace seahowl::elasto;
 MooringSystemElasto::MooringSystemElasto() {}
 
 void MooringSystemElasto::add_mooring(std::shared_ptr<MooringElasto> mooring) {
-    moorings.push_back(mooring);
+    if (std::find(moorings.begin(), moorings.end(), mooring) == moorings.end()) {
+        moorings.push_back(mooring);
+    } else {
+        spdlog::warn("Mooring Elasto already exists in the system, not adding again.");
+    }
 }
 
 void MooringSystemElasto::presetup(double fraction) {

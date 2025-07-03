@@ -37,14 +37,14 @@ class SystemAero : public ComponentFluid {
      *
      * @param[in] turbine Turbine to add to system.
      */
-    void add(std::shared_ptr<TurbineAero> turbine) { turbines.push_back(turbine); }
+    void add(std::shared_ptr<TurbineAero> turbine);
 
     /**
      * @brief Adds component to system.
      *
      * @param[in] component Component to add to system.
      */
-    void add(std::shared_ptr<seahowl::ComponentFluid> component) { components.push_back(component); }
+    void add(std::shared_ptr<seahowl::ComponentFluid> component);
 };
 
 }  // namespace aero

@@ -68,7 +68,10 @@ void MooringHydro::compute_env_loads(const EnvModel& env_model, double time) {
 MooringSystemHydro::MooringSystemHydro() {}
 
 void MooringSystemHydro::add_mooring(std::shared_ptr<MooringHydro> mooring) {
-    moorings.push_back(mooring);
+    if (std::find(moorings.begin(), moorings.end(), mooring) == moorings.end()) {
+        moorings.push_back(mooring);
+    } else
+        spdlog::warn("Mooring hydro already exists in the system, not adding again.");
 }
 
 void MooringSystemHydro::build() {

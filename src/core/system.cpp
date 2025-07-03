@@ -238,9 +238,21 @@ void System::run_presimulation(double duration, double dt, bool fix_foundations,
 }
 
 void System::add(std::shared_ptr<Turbine> turbine) {
-    turbines.push_back(turbine);
+    if (std::find(turbines.begin(), turbines.end(), turbine) == turbines.end()) {
+        turbines.push_back(turbine);
+        aero.add(turbine->fluid_ptr);
+        elasto.add(turbine->elasto_ptr);
+    } else {
+        spdlog::warn("Turbine already exists in the system, not adding again.");
+    }
 }
 
 void System::add(std::shared_ptr<ComponentDynamic> component) {
-    components.push_back(component);
+    if (std::find(components.begin(), components.end(), component) == components.end()) {
+        components.push_back(component);
+        aero.add(component->fluid_ptr);
+        elasto.add(component->elasto_ptr);
+    } else {
+        spdlog::warn("Components already exists in the system, not adding again.");
+    }
 }

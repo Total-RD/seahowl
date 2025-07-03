@@ -1,6 +1,22 @@
 #include "seahowl/fluid/aero/system_aero.h"
 
+#include <spdlog/spdlog.h>
+
 using namespace seahowl::aero;
+
+void SystemAero::add(std::shared_ptr<TurbineAero> turbine) {
+    if (std::find(turbines.begin(), turbines.end(), turbine) == turbines.end()) {
+        turbines.push_back(turbine);
+    } else
+        spdlog::warn("Turbine aero already exists in the system, not adding again.");
+}
+
+void SystemAero::add(std::shared_ptr<seahowl::ComponentFluid> component) {
+    if (std::find(components.begin(), components.end(), component) == components.end()) {
+        components.push_back(component);
+    } else
+        spdlog::warn("Component aero already exists in the system, not adding again.");
+}
 
 void SystemAero::build() {
     // build all turbines

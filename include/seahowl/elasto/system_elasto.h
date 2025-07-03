@@ -129,14 +129,14 @@ class SystemElasto : public ComponentElasto {
      *
      * @param[in] component Component to add to system.
      */
-    virtual void add(std::shared_ptr<ComponentElasto> component) { components.push_back(component); };
+    virtual void add(std::shared_ptr<ComponentElasto> component);
 
     /**
      * @brief Adds turbine to system.
      *
      * @param[in] turbine Turbine to add to system.
      */
-    virtual void add(std::shared_ptr<TurbineElasto> turbine) { turbines.push_back(turbine); }
+    virtual void add(std::shared_ptr<TurbineElasto> turbine);
 
     /**
      * @brief Translates the system.

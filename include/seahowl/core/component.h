@@ -75,15 +75,15 @@ class ComponentDynamic {
      */
     virtual void apply_soil_model(seahowl::env::EnvModel& env_model, double time){};
 
-  protected:
-    bool is_initialized = false;
-
-  private:
     // Only for memory management, never accessed (reference to underlying object is accessed instead).
     std::shared_ptr<seahowl::elasto::ComponentElasto> elasto_ptr;
     // Only for memory management, never accessed (reference to underlying object is accessed instead).
     std::shared_ptr<seahowl::ComponentFluid> fluid_ptr;
 
+  protected:
+    bool is_initialized = false;
+
+  private:
     virtual void initialize_this(double time, double dt) = 0;
 };
 

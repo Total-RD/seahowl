@@ -1,6 +1,22 @@
 #include "seahowl/elasto/system_elasto.h"
 
+#include <spdlog/spdlog.h>
+
 using namespace seahowl::elasto;
+
+void SystemElasto::add(std::shared_ptr<ComponentElasto> component) {
+    if (std::find(components.begin(), components.end(), component) == components.end()) {
+        components.push_back(component);
+    } else
+        spdlog::warn("Components Elasto already exists in the system, not adding again.");
+};
+
+void SystemElasto::add(std::shared_ptr<TurbineElasto> turbine) {
+    if (std::find(turbines.begin(), turbines.end(), turbine) == turbines.end()) {
+        turbines.push_back(turbine);
+    } else
+        spdlog::warn("Turbine Elasto already exists in the system, not adding again.");
+}
 
 void SystemElasto::build() {
     // build all turbines

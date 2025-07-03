@@ -139,7 +139,11 @@ MooringSystem::MooringSystem(std::shared_ptr<seahowl::elasto::MooringSystemElast
     : ComponentDynamic(elasto, hydro), elasto(*elasto), hydro(*hydro) {}
 
 void MooringSystem::add_mooring(std::shared_ptr<Mooring> mooring) {
-    moorings.push_back(mooring);
+    if (std::find(moorings.begin(), moorings.end(), mooring) == moorings.end()) {
+        moorings.push_back(mooring);
+    } else {
+        spdlog::warn("Mooring already exists in the system, not adding again.");
+    }
 }
 
 void MooringSystem::perform_sanity_check() {
