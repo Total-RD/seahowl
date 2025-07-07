@@ -517,7 +517,6 @@ void from_json(const json& js, AeroOptionsTurbineDb& options, const std::string&
         options.performance_file = js.at("performance_file").get<std::string>();
     } else if (type == "aerodyn") {
         options.file_aerodyn = js.at("file_aerodyn").get<std::string>();
-        options.file_inflowwind = js.at("file_inflowwind").get<std::string>();
     }
 }
 
@@ -665,11 +664,6 @@ TurbineDb InputReaderJson::read_turbine() {
         // Finalize
         auto main_directory = fs::path(filepath).parent_path();
         if (turbine_db.aero.solver == "aerodyn") {
-            auto inflowwind_filepath = main_directory / turbine_db.aero.options.file_inflowwind;
-            turbine_db.aero.options.file_inflowwind_path = inflowwind_filepath;
-            if (!fs::is_regular_file(inflowwind_filepath)) {
-                throw std::runtime_error("InflowWind file not found: " + inflowwind_filepath.u8string());
-            }
             auto aerodyn_filepath = main_directory / turbine_db.aero.options.file_aerodyn;
             turbine_db.aero.options.file_aerodyn_path = aerodyn_filepath;
             if (!fs::is_regular_file(aerodyn_filepath)) {

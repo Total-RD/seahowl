@@ -410,12 +410,7 @@ void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbin
         } else {
             throw std::runtime_error("Turbine set to use aerodyn but AeroDyn file path not defined.");
         }
-        if (!turbine_db.aero.options.file_inflowwind.empty()) {
-            inflowwind_filepath = turbine_db.aero.options.file_inflowwind_path.generic_string();
-        } else {
-            throw std::runtime_error("Turbine set to use aerodyn but InflowWind file not defined.");
-        }
-        turbine_aero.aerodyn.set_infiles(aerodyn_filepath, inflowwind_filepath);
+        turbine_aero.aerodyn.set_aerodyn_infile(aerodyn_filepath);
         turbine_aero.rna->rotor = std::make_shared<seahowl::aero::RotorAeroDyn>(*turbine.aero.tower);
 #else
         throw std::runtime_error("Trying to use AeroDyn for turbine but the code was not compiled for using AeroDyn.");

@@ -228,10 +228,8 @@ struct EnvironmentDb {
  */
 struct AeroOptionsTurbineDb {
     // AeroDyn options
-    std::string file_aerodyn;       // relative path from input file
-    fs::path file_aerodyn_path;     // relative path from driver execution folder
-    std::string file_inflowwind;    // relative path from input file
-    fs::path file_inflowwind_path;  // relative path from driver execution folder
+    std::string file_aerodyn;    // relative path from input file
+    fs::path file_aerodyn_path;  // relative path from driver execution folder
 
     // BEMT options
     bool hub_loss;
