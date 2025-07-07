@@ -3,6 +3,7 @@
 #include <seahowl/aero/turbine_aero.h>
 #include <seahowl/aero/blade_aero.h>
 #include <seahowl/env/fluid_models.h>
+#include <seahowl/env/inflowwind_adapter.h>
 
 #include <stdexcept>
 #include <vector>
@@ -12,6 +13,7 @@
 #include <spdlog/spdlog.h>
 
 using namespace seahowl::aero;
+using namespace seahowl::env;
 
 extern "C" {
 
@@ -377,9 +379,12 @@ AeroDynAdapter::AeroDynAdapter() {
 
 AeroDynAdapter::~AeroDynAdapter() {}
 
-void AeroDynAdapter::set_infiles(const std::string& AerodynInfile, const std::string& InflowInfile) {
-    pImpl->set_aerodyn_infile(AerodynInfile);
-    pImpl->set_inflowwind_infile(InflowInfile);
+void AeroDynAdapter::set_aerodyn_infile(const std::string& aerodyn_Infile) {
+    pImpl->set_aerodyn_infile(aerodyn_Infile);
+}
+
+void AeroDynAdapter::set_inflow_wind_infile(const std::string& Inflow_wind_Infile_) {
+    pImpl->set_inflowwind_infile(Inflow_wind_Infile_);
 }
 
 void AeroDynAdapter::initialize(double time, double dt, TurbineAero& turbine) {
@@ -558,6 +563,29 @@ void AeroDynAdapter::update_mesh_motion(TurbineAero& turbine) {
 
 TurbineAeroDyn::TurbineAeroDyn() : TurbineAero() {
     rna->rotor = std::make_shared<RotorAeroDyn>(*tower);
+}
+
+void TurbineAeroDyn::setup_environment(const env::EnvModel& env_model) {
+    std::shared_ptr<InflowWindAdapter> inflow_wind_adapter;
+    bool found_inflow_wind_model = false;
+    for (auto fluid_model : env_model.fluid_models.get_models()) {
+        if (std::shared_ptr<InflowWindAdapter> model = std::dynamic_pointer_cast<InflowWindAdapter>(fluid_model)) {
+            if (!found_inflow_wind_model) {
+                found_inflow_wind_model = true;
+                inflow_wind_adapter = model;
+            } else {
+                throw std::runtime_error("AeroDyn adapter can only handle one InflowWind model at a time.");
+            }
+        }
+    }
+    if (!found_inflow_wind_model) {
+        throw std::runtime_error("AeroDyn adapter requires an InflowWind model to be set up in the environment.");
+    }
+    std::string inflow_wind_infile = inflow_wind_adapter->get_inflow_wind_infile();
+    if (inflow_wind_infile.empty()) {
+        throw std::runtime_error("AeroDyn adapter requires an InflowWind input file to be set up in the environment.");
+    }
+    aerodyn.set_inflow_wind_infile(inflow_wind_infile);
 }
 
 void TurbineAeroDyn::initialize(double time, double dt) {

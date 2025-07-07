@@ -57,8 +57,9 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
 
-    turbine_aero->aerodyn.set_infiles((DATADIR / "IEA15MW/base/aerodyn/IEA-15-240-RWT_AeroDyn15.dat").generic_string(),
-                                      (DATADIR / "IEA15MW/env/InflowWind.dat").generic_string());
+    turbine_aero->aerodyn.set_aerodyn_infile(
+        (DATADIR / "IEA15MW/base/aerodyn/IEA-15-240-RWT_AeroDyn15.dat").generic_string());
+    turbine_aero->aerodyn.set_inflow_wind_infile((DATADIR / "IEA15MW/env/InflowWind.dat").generic_string());
 
     turbine.build();
     turbine.elasto.assemble(system_elasto);

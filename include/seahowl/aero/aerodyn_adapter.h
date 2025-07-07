@@ -36,10 +36,10 @@ class AeroDynAdapter {
     Vector3d disk_averaged_velocity;
 
     AeroDynAdapter();
-    AeroDynAdapter(std::string AerodynInfile, std::string InflowInfile);
     ~AeroDynAdapter();
 
-    void set_infiles(const std::string& AerodynInfile, const std::string& InflowInfile);
+    void set_aerodyn_infile(const std::string& aerodyn_Infile);
+    void set_inflow_wind_infile(const std::string& inflow_wind_infile);
     void initialize(double time, double dt, seahowl::aero::TurbineAero& turbine);
     void compute_loads(double time, seahowl::aero::TurbineAero& turbine);
     void end();
@@ -67,6 +67,7 @@ class TurbineAeroDyn : public TurbineAero {
     double WrVTK_dt;
 
     TurbineAeroDyn();
+    void setup_environment(const env::EnvModel& env_model) override;
     void initialize(double time, double dt) override;
     void compute_env_loads(const env::EnvModel& env_model, double time) override;
 };

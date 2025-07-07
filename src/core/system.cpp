@@ -88,6 +88,7 @@ void System::initialize_this(double time, double dt) {
 
     // initialize all turbines
     for (auto& turbine : turbines) {
+        turbine->aero.setup_environment(*env_model);
         turbine->initialize(time, dt);
     }
     // initialize all extra components
