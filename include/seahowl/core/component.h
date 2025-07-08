@@ -75,15 +75,25 @@ class ComponentDynamic {
      */
     virtual void apply_soil_model(seahowl::env::EnvModel& env_model, double time){};
 
-    // Only for memory management, never accessed (reference to underlying object is accessed instead).
-    std::shared_ptr<seahowl::elasto::ComponentElasto> elasto_ptr;
-    // Only for memory management, never accessed (reference to underlying object is accessed instead).
-    std::shared_ptr<seahowl::ComponentFluid> fluid_ptr;
+    /**
+     * @brief Get elasto shared_ptr component.
+     */
+    std::shared_ptr<seahowl::elasto::ComponentElasto> get_shared_elasto() const { return elasto_ptr; }
+
+    /**
+     * @brief Get fluid shared_ptr component.
+     */
+    std::shared_ptr<seahowl::ComponentFluid> get_shared_fluid() const { return fluid_ptr; }
 
   protected:
     bool is_initialized = false;
 
   private:
+    // Only for memory management, never accessed (reference to underlying object is accessed instead).
+    std::shared_ptr<seahowl::elasto::ComponentElasto> elasto_ptr;
+    // Only for memory management, never accessed (reference to underlying object is accessed instead).
+    std::shared_ptr<seahowl::ComponentFluid> fluid_ptr;
+
     virtual void initialize_this(double time, double dt) = 0;
 };
 
