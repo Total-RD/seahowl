@@ -2,8 +2,7 @@
   "aero": {
     "solver": "aerodyn",
     "options": {
-      "file_aerodyn": "../base/aerodyn/IEA-15-240-RWT_AeroDyn15.dat",
-      "file_inflowwind": "../env/InflowWind.dat"
+      "file_aerodyn": "../base/aerodyn/IEA-15-240-RWT_AeroDyn15.dat"
     }
   },
   "rotor": {
