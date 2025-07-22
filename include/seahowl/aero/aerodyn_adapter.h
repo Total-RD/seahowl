@@ -39,7 +39,7 @@ class AeroDynAdapter {
     ~AeroDynAdapter();
 
     void set_aerodyn_infile(const std::string& aerodyn_Infile);
-    void set_inflow_wind_infile(const std::string& inflow_wind_infile);
+    void set_inflowwind_infile(const std::string& inflowwind_infile);
     void initialize(double time, double dt, seahowl::aero::TurbineAero& turbine);
     void compute_loads(double time, seahowl::aero::TurbineAero& turbine);
     void end();

@@ -383,8 +383,8 @@ void AeroDynAdapter::set_aerodyn_infile(const std::string& aerodyn_Infile) {
     pImpl->set_aerodyn_infile(aerodyn_Infile);
 }
 
-void AeroDynAdapter::set_inflow_wind_infile(const std::string& Inflow_wind_Infile_) {
-    pImpl->set_inflowwind_infile(Inflow_wind_Infile_);
+void AeroDynAdapter::set_inflowwind_infile(const std::string& inflowwind_infile_) {
+    pImpl->set_inflowwind_infile(inflowwind_infile_);
 }
 
 void AeroDynAdapter::initialize(double time, double dt, TurbineAero& turbine) {
@@ -581,11 +581,8 @@ void TurbineAeroDyn::setup_environment(const env::EnvModel& env_model) {
     if (!found_inflow_wind_model) {
         throw std::runtime_error("AeroDyn adapter requires an InflowWind model to be set up in the environment.");
     }
-    std::string inflow_wind_infile = inflow_wind_adapter->get_inflow_wind_infile();
-    if (inflow_wind_infile.empty()) {
-        throw std::runtime_error("AeroDyn adapter requires an InflowWind input file to be set up in the environment.");
-    }
-    aerodyn.set_inflow_wind_infile(inflow_wind_infile);
+    std::string inflowwind_infile = inflow_wind_adapter->get_inflowwind_infile();
+    aerodyn.set_inflowwind_infile(inflowwind_infile);
 }
 
 void TurbineAeroDyn::initialize(double time, double dt) {
