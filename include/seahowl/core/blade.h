@@ -1,6 +1,7 @@
 #pragma once
 
 #include "seahowl/core/component.h"
+#include "seahowl/commons/utils.h"
 
 #include <memory>
 #include <vector>

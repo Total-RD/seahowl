@@ -6,11 +6,7 @@
 
 using namespace seahowl::elasto;
 
-TurbineElasto::TurbineElasto() {
-    rna = std::make_shared<RotorNacelleAssemblyElasto>();
-    tower = std::make_shared<TowerElasto>();
-    foundation = std::make_shared<FoundationElastoBody>();
-}
+TurbineElasto::TurbineElasto() {}
 
 void TurbineElasto::assemble_this(SystemElasto& system) {
     // assemble foundation

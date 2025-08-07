@@ -108,10 +108,8 @@ void RotorElasto::accumulate_axial_torque(double torque) {
     body_hub->accumulate_torque_internals(Vector3d(torque, 0.0, 0.0), true);
 }
 
-RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {
-    // rotor
-    rotor = std::make_unique<RotorElasto>();
-
+RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto(std::shared_ptr<seahowl::elasto::RotorElasto> rotor)
+    : rotor(rotor) {
     // shaft
     body_shaft = std::make_unique<BodyElastoChrono>();
     // link between hub and shaft

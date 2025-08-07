@@ -16,6 +16,7 @@
 #include "seahowl/elasto/blade_elasto.h"
 #include "seahowl/elasto/floater_elasto.h"
 #include "seahowl/elasto/monopile_elasto.h"
+#include "seahowl/elasto/foundation_elasto.h"
 #include "seahowl/servo/controller_discon.h"
 #include "seahowl/commons/numerics.h"
 #include "seahowl/env/fluid_models.h"
@@ -164,11 +165,6 @@ void populate_blade_aero_from_file(const std::string& filepath, seahowl::aero::B
     blade.reference_points = get_blade_aero_reference_points_from_file(filepath);
 }
 
-void populate_blade(const BladeDb& blade_db, seahowl::core::Blade& blade) {
-    blade.elasto.reference_points = get_blade_elasto_reference_points_from_db(blade_db);
-    blade.aero.reference_points = get_blade_aero_reference_points_from_db(blade_db);
-}
-
 void populate_blade_from_file(const std::string& filepath, seahowl::core::Blade& blade) {
     BladeDb blade_db;
     InputHandler input_handler;
@@ -183,6 +179,162 @@ void populate_blade_from_file(const std::string& filepath, seahowl::core::Blade&
 
     blade.elasto.reference_points = get_blade_elasto_reference_points_from_db(blade_db);
     blade.aero.reference_points = get_blade_aero_reference_points_from_db(blade_db);
+}
+
+std::shared_ptr<seahowl::elasto::BladeElasto> get_blade_elasto_from_db(const BladeTurbineDb& blade_db,
+                                                                       const RotorTurbineDb& rotor_db) {
+    // Blade Elasto
+    std::shared_ptr<seahowl::elasto::BladeElasto> blade_elasto;
+    if (rotor_db.type == "fea" || rotor_db.type == "fpm") {
+        blade_elasto = std::make_shared<seahowl::elasto::BladeElastoFEA>();
+        auto& blade_elasto_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade_elasto);
+        blade_elasto_fea.discretization_fractions = rotor_db.discretization.elasto;
+        if (rotor_db.type == "fpm") {
+            blade_elasto_fea.fpm_mode = true;
+        } else if (rotor_db.type == "fea") {
+            blade_elasto_fea.fpm_mode = false;
+        }
+    } else if (rotor_db.type == "rigid") {
+        blade_elasto = std::make_shared<seahowl::elasto::BladeElastoRigid>();
+    }
+    blade_elasto->pitch0 = blade_db.initial_pitch * PI / 180.0;
+    blade_elasto->precone = blade_db.precone * PI / 180.0;
+    // no precone if blade is rigid (assumed that blade is on rotor disc)
+    if (rotor_db.type == "rigid") {
+        blade_elasto->precone = 0.0;
+    }
+    // pitch actuator dynamics
+    blade_elasto->actuator_pitch->set_fixed_actuator(!rotor_db.pitch_actuator_dynamics);
+    blade_elasto->reference_points = get_blade_elasto_reference_points_from_db(blade_db.data);
+
+    return blade_elasto;
+}
+
+std::shared_ptr<seahowl::aero::BladeAero> get_blade_aero_from_db(const BladeTurbineDb& blade_db,
+                                                                 const RotorTurbineDb& rotor_db) {
+    // Blade Aero
+    auto blade_aero = std::make_shared<seahowl::aero::BladeAero>();
+    blade_aero->discretization_fractions = rotor_db.discretization.aero;
+    blade_aero->reference_points = get_blade_aero_reference_points_from_db(blade_db.data);
+
+    return blade_aero;
+}
+
+std::shared_ptr<seahowl::aero::RotorAero> get_rotor_aero_from_db(const TurbineDb& turbine_db,
+                                                                 const seahowl::aero::TurbineAero& turbine_aero) {
+    std::shared_ptr<seahowl::aero::RotorAero> rotor_aero;
+    if (turbine_db.aero.solver == "bemt") {
+        spdlog::info("Aerodynamic model: Blade Element Momentum Theory (BEMT).");
+        auto rotor_aero_bemt = std::make_shared<seahowl::aero::RotorAeroBEMT>(*turbine_aero.tower);
+        rotor_aero_bemt->has_hub_loss = turbine_db.aero.options.hub_loss;
+        rotor_aero_bemt->has_tip_loss = turbine_db.aero.options.tip_loss;
+        rotor_aero_bemt->has_tower_shadow = turbine_db.aero.options.tower_shadow;
+        rotor_aero = rotor_aero_bemt;
+
+    } else if (turbine_db.aero.solver == "disk") {
+        spdlog::info("Aerodynamic model: Actuator Disk Theory.");
+        if (turbine_db.rotor.type != "disk") {
+            throw std::runtime_error("Only rotor type \"disk\" can be used with aero solver \"disk\".");
+        }
+        auto rotor_disk = std::make_shared<seahowl::aero::RotorAeroDisk>();
+
+        // get rotor performance from table
+        auto perf_filepath = (turbine_db.aero.options.performance_file_path).generic_string();
+        get_disk_perf_from_table(perf_filepath, *rotor_disk);
+        rotor_aero = rotor_disk;
+
+    } else if (turbine_db.aero.solver == "aerodyn") {
+        spdlog::info("Aerodynamic model: AeroDyn.");
+#ifdef HAVE_AERODYN
+        rotor_aero = std::make_shared<seahowl::aero::RotorAeroDyn>(*turbine_aero.tower);
+#else
+        throw std::runtime_error("Trying to use AeroDyn for turbine but the code was not compiled for using AeroDyn.");
+#endif
+    } else {
+        throw std::runtime_error("Unknown aero solver \"" + turbine_db.aero.solver + "\".");
+    }
+
+    // blades
+    // only make blades if rotor type is not disk
+    if (turbine_db.rotor.type != "disk") {
+        for (const auto& blade_db : turbine_db.rotor.blades) {
+            auto blade_aero = get_blade_aero_from_db(blade_db, turbine_db.rotor);
+            rotor_aero->blades.push_back(blade_aero);
+        }
+    }
+
+    return rotor_aero;
+}
+
+std::shared_ptr<seahowl::elasto::RotorElasto> get_rotor_elasto_from_db(const TurbineDb& turbine_db) {
+    auto rotor_elasto = std::make_shared<seahowl::elasto::RotorElasto>();
+    // blades
+    // only make blades if rotor type is not disk
+    if (turbine_db.rotor.type != "disk") {
+        for (const auto& blade_db : turbine_db.rotor.blades) {
+            auto blade_elasto = get_blade_elasto_from_db(blade_db, turbine_db.rotor);
+            rotor_elasto->blades.push_back(blade_elasto);
+        }
+    }
+    return rotor_elasto;
+}
+
+std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero> get_rna_aero_from_db(
+    const TurbineDb& turbine_db,
+    const seahowl::aero::TurbineAero& turbine_aero) {
+    auto rna_aero = std::make_shared<seahowl::aero::RotorNacelleAssemblyAero>();
+
+    rna_aero->rotor = get_rotor_aero_from_db(turbine_db, turbine_aero);
+
+    if (turbine_db.rotor.type == "disk") {
+        rna_aero->rotor->radius = turbine_db.rotor.option.radius;
+    }
+
+    rna_aero->rotor->hub_radius = turbine_db.rna.data.hub.radius;
+    return rna_aero;
+}
+
+std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto> get_rna_elasto_from_db(const TurbineDb& turbine_db) {
+    auto rotor_elasto = get_rotor_elasto_from_db(turbine_db);
+    auto rna_elasto = std::make_shared<seahowl::elasto::RotorNacelleAssemblyElasto>(rotor_elasto);
+
+    auto rna_db = turbine_db.rna.data;
+    // rotor
+    rna_elasto->rotor->hub.position_from_apex = rna_db.hub.position_from_apex;
+    rna_elasto->rotor->hub.mass = rna_db.hub.mass;
+    rna_elasto->rotor->hub.inertia = rna_db.hub.inertia;
+    rna_elasto->rotor->hub.overhang = rna_db.hub.overhang;
+    rna_elasto->rotor->hub.radius = rna_db.hub.radius;
+
+    // nacelle
+    rna_elasto->nacelle.position_from_towertop = rna_db.nacelle.position_from_towertop;
+    if (rna_elasto->nacelle.position_from_towertop.size() != 3) {
+        throw std::runtime_error("Center of mass of nacelle has to be vector of length 3.");
+    }
+    rna_elasto->nacelle.mass = rna_db.nacelle.mass;
+    rna_elasto->nacelle.inertia = rna_db.nacelle.inertia;
+    rna_elasto->nacelle.yaw_bearing_mass = rna_db.nacelle.yaw_bearing_mass;
+    // shaft
+    rna_elasto->shaft.distance_from_towertop = rna_db.shaft.distance_from_towertop;
+    rna_elasto->shaft.tilt = rna_db.shaft.tilt;
+    // convert to radians
+    rna_elasto->shaft.tilt *= PI / 180.0;
+
+    rna_elasto->yaw0 = turbine_db.rna.initial_yaw * PI / 180.0;
+    bool has_yaw_actuator_dynamics = turbine_db.rna.yaw_actuator_dynamics;
+    rna_elasto->actuator_yaw->set_fixed_actuator(!has_yaw_actuator_dynamics);
+
+    // update info if rotor is disk
+    if (turbine_db.rotor.type == "disk") {
+        rna_elasto->rotor->hub.inertia(0, 0) += turbine_db.rotor.option.inertia_blades;
+        rna_elasto->rotor->hub.mass += turbine_db.rotor.option.mass_blades;
+    }
+
+    // add inertia of generator to hub directly
+    double drivetrain_inertia = rna_db.drivetrain.generator_inertia;
+    rna_elasto->rotor->hub.inertia(0, 0) += drivetrain_inertia;
+
+    return rna_elasto;
 }
 
 std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_reference_points_db(const TowerDb& tower_db) {
@@ -243,6 +395,282 @@ std::vector<seahowl::aero::TowerReferencePointAero> get_tower_aero_reference_poi
     return reference_points;
 }
 
+std::shared_ptr<seahowl::aero::TowerAero> get_tower_aero_from_db(const TurbineDb& turbine_db) {
+    auto tower_aero = std::make_shared<seahowl::aero::TowerAero>();
+
+    tower_aero->reference_points = get_tower_aero_reference_points_db(turbine_db.tower.data);
+    tower_aero->discretization_fractions = turbine_db.tower.discretization.aero;
+    if (turbine_db.tower.options.has_value()) {
+        if (turbine_db.tower.options.value().use_MacCamyFuchs_correction.has_value()) {
+            tower_aero->use_MacCamyFuchs_correction =
+                turbine_db.tower.options.value().use_MacCamyFuchs_correction.value();
+        }
+
+        if (turbine_db.tower.options.value().use_Cd_correction.has_value()) {
+            tower_aero->use_Cd_correction = turbine_db.tower.options.value().use_Cd_correction.value();
+        }
+    }
+
+    return tower_aero;
+}
+
+std::shared_ptr<seahowl::elasto::TowerElasto> get_tower_elasto_from_db(const TurbineDb& turbine_db) {
+    auto tower_elasto = std::make_shared<seahowl::elasto::TowerElasto>();
+    tower_elasto->reference_points = get_tower_elasto_reference_points_db(turbine_db.tower.data);
+    tower_elasto->height = tower_elasto->reference_points.back().coordinates.z();
+    tower_elasto->base_height = tower_elasto->reference_points.front().coordinates.z();
+    tower_elasto->discretization_fractions = turbine_db.tower.discretization.elasto;
+    return tower_elasto;
+}
+
+std::shared_ptr<seahowl::servo::Controller> get_controller_discon_from_db(const ControllerTurbineDb& controller_db) {
+    std::shared_ptr<seahowl::servo::Controller> controller;
+
+    if (controller_db.type == "discon") {
+        auto libfilepath = controller_db.options.libfile;
+        if (controller_db.options.libfile != "") {
+            // path
+            libfilepath = controller_db.options.libfile_path.generic_string();
+        }
+        auto infilepath = controller_db.options.infile;
+        if (controller_db.options.infile != "") {
+            infilepath = controller_db.options.infile_path.generic_string();
+        }
+        // instantiate controller
+        controller = std::make_shared<seahowl::servo::ControllerDISCON>(infilepath, libfilepath);
+
+    } else if (controller_db.type == "rpm") {
+        auto controller_rpm = std::make_shared<seahowl::servo::ControllerVariableTorque>();
+        controller_rpm->target_rpm = controller_db.options.target_rpm;
+        controller = controller_rpm;
+    }
+    return controller;
+}
+
+std::shared_ptr<seahowl::hydro::FoundationFluid> get_foundation_fluid_from_db(
+    const FoundationTurbineDb& foundation_db) {
+    std::shared_ptr<seahowl::hydro::FoundationFluid> foundation_fluid;
+    if (foundation_db.type == "monopile") {
+        // create monopile
+        auto monopile_hydro = std::make_shared<seahowl::hydro::MonopileHydro>();
+
+        // aero
+        monopile_hydro->reference_points = get_tower_aero_reference_points_db(foundation_db.data_tower);
+        monopile_hydro->discretization_fractions = foundation_db.discretization.hydro;
+
+        if (foundation_db.options.has_value()) {
+            auto& options = foundation_db.options.value();
+            if (options.use_MacCamyFuchs_correction.has_value()) {
+                monopile_hydro->use_MacCamyFuchs_correction = options.use_MacCamyFuchs_correction.value();
+            }
+            if (options.use_Cd_correction.has_value()) {
+                monopile_hydro->use_Cd_correction = options.use_Cd_correction.value();
+            }
+        }
+        foundation_fluid = monopile_hydro;
+
+    } else if (foundation_db.type == "floater") {
+        auto floater_hydro = std::make_shared<seahowl::hydro::FloaterHydro>();
+
+        if (foundation_db.file.has_value()) {
+            for (auto& mooring_db : foundation_db.data_floater.moorings) {
+                // hydro
+                floater_hydro->mooring_system->moorings.push_back(std::make_shared<seahowl::hydro::MooringHydro>());
+                auto mooring_hydro = floater_hydro->mooring_system->moorings.back();
+                mooring_hydro->length = mooring_db.length;
+                mooring_hydro->diameter = mooring_db.properties.diameter;
+                mooring_hydro->discretization_fractions = mooring_db.discretization.hydro;
+                mooring_hydro->coefficients.drag_normal = mooring_db.properties.drag_coefficient_normal;
+                mooring_hydro->coefficients.drag_axial = mooring_db.properties.drag_coefficient_axial;
+                mooring_hydro->coefficients.added_mass_normal = mooring_db.properties.added_mass_coefficient_normal;
+                mooring_hydro->coefficients.added_mass_axial = mooring_db.properties.added_mass_coefficient_axial;
+            }
+        } else {
+            spdlog::warn("Turbine has floater key but no floater file was defined.");
+        }
+        foundation_fluid = floater_hydro;
+    }
+    return foundation_fluid;
+}
+
+std::shared_ptr<seahowl::elasto::FoundationElasto> get_foundation_elasto_from_db(
+    const FoundationTurbineDb& foundation_db) {
+    std::shared_ptr<seahowl::elasto::FoundationElasto> foundation_elasto;
+    if (foundation_db.type == "monopile") {
+        // create monopile
+        auto monopile_elasto = std::make_shared<seahowl::elasto::MonopileElasto>();
+
+        monopile_elasto->reference_points = get_tower_elasto_reference_points_db(foundation_db.data_tower);
+        monopile_elasto->height = monopile_elasto->reference_points.back().coordinates.z();
+        monopile_elasto->base_height = monopile_elasto->reference_points.front().coordinates.z();
+        monopile_elasto->discretization_fractions = foundation_db.discretization.elasto;
+        foundation_elasto = monopile_elasto;
+
+    } else if (foundation_db.type == "floater") {
+        if (foundation_db.file.has_value()) {
+            Floaterdb floater_db = foundation_db.data_floater;
+
+            if (floater_db.type == "hydrochrono") {
+                spdlog::info("Hydrodynamic model: HydroChrono.");
+#ifdef HAVE_HYDROCHRONO
+                // make floater
+                auto floater_elasto = std::make_shared<seahowl::hydro::FloaterHydroChrono>();
+                // add h5file path
+                floater_elasto->set_h5_filepath((foundation_db.data_floater.options_file_path).generic_string());
+                foundation_elasto = floater_elasto;
+#else
+                throw std::runtime_error("Trying to use HydroChrono but did not compile with HydroChrono dependency.");
+#endif
+            } else {
+                auto floater_elasto = std::make_shared<seahowl::elasto::FloaterElasto>();
+                foundation_elasto = floater_elasto;
+            }
+
+            auto floater_elasto = std::dynamic_pointer_cast<seahowl::elasto::FloaterElasto>(foundation_elasto);
+            // get main body info
+            auto& body = *floater_elasto->body_main;
+            body.set_mass(floater_db.mass);
+            body.set_position(floater_db.position);
+            body.set_inertia_matrix(floater_db.inertia);
+
+            // get other bodies info
+            for (auto& body_db : floater_db.bodies) {
+                floater_elasto->add_body(body_db.name);
+                auto& body_i = floater_elasto->get_body(body_db.name);
+                body_i.set_mass(body_db.mass);
+                body_i.set_position(body_db.position);
+                body_i.set_inertia_matrix(body_db.inertia);
+            }
+
+            floater_elasto->body_main->set_damping_matrix(floater_db.damping_matrix);
+
+            for (auto& mooring_db : floater_db.moorings) {
+                auto rotation_axis = mooring_db.rotation_axis;
+                auto rotation_angle = mooring_db.rotation_angle * seahowl::PI / 180.0;
+                auto rotation = seahowl::AngleAxisd(rotation_angle, rotation_axis);
+
+                // fairlead
+                auto body_name = mooring_db.connected_body_name;
+                auto fairlead_relative_position = mooring_db.fairlead_position;
+                seahowl::Vector3d fairlead_position = rotation * fairlead_relative_position;
+                if (mooring_db.relative_fairlead) {
+                    fairlead_position += floater_elasto->body_main->get_position();
+                }
+                floater_elasto->add_fairlead(fairlead_position, body_name);
+                auto& fairlead_body =
+                    floater_elasto->get_fairlead_body(body_name, floater_elasto->get_fairlead_count(body_name) - 1);
+
+                // anchor
+                auto anchor_relative_position = mooring_db.anchor_position;
+                seahowl::Vector3d anchor_position = rotation * anchor_relative_position;
+                if (mooring_db.relative_anchor) {
+                    anchor_position += floater_elasto->body_main->get_position();
+                }
+                floater_elasto->mooring_system->anchors.push_back(
+                    std::make_shared<seahowl::elasto::BodyElastoChrono>());
+                auto& anchor_body = *floater_elasto->mooring_system->anchors.back();
+                anchor_body.set_position(anchor_position);
+                anchor_body.set_mass(0.0);
+                anchor_body.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
+                anchor_body.set_fixed(true);
+
+                // elasto
+                floater_elasto->mooring_system->moorings.push_back(
+                    std::make_shared<seahowl::elasto::MooringElastoFEA>(fairlead_body, anchor_body));
+                auto mooring_elasto = std::dynamic_pointer_cast<seahowl::elasto::MooringElastoFEA>(
+                    floater_elasto->mooring_system->moorings.back());
+                mooring_elasto->length = mooring_db.length;
+                mooring_elasto->diameter = mooring_db.properties.diameter;
+                mooring_elasto->discretization_fractions = mooring_db.discretization.elasto;
+                mooring_elasto->stiffness_axial = mooring_db.properties.stiffness_axial;
+                mooring_elasto->stiffness_bending = mooring_db.properties.stiffness_bending;
+                mooring_elasto->density_linear = mooring_db.properties.density_linear;
+            }
+        } else {
+            spdlog::warn("Turbine has floater key but no floater file was defined.");
+
+            auto floater_elasto = std::make_shared<seahowl::elasto::FloaterElasto>();
+            foundation_elasto = floater_elasto;
+        }
+    }
+    return foundation_elasto;
+}
+
+std::shared_ptr<seahowl::elasto::TurbineElasto> get_turbine_elasto_from_db(const TurbineDb& turbine_db) {
+    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
+    // rna
+    turbine_elasto->rna = get_rna_elasto_from_db(turbine_db);
+    // tower
+    turbine_elasto->tower = get_tower_elasto_from_db(turbine_db);
+    // foundation
+    if (turbine_db.foundation.has_value()) {
+        turbine_elasto->foundation = get_foundation_elasto_from_db(turbine_db.foundation.value());
+    } else {
+        turbine_elasto->foundation = std::make_shared<seahowl::elasto::FoundationElastoBody>();
+    }
+
+    return turbine_elasto;
+}
+
+std::shared_ptr<seahowl::aero::TurbineAero> get_turbine_aero_from_db(const TurbineDb& turbine_db) {
+    std::shared_ptr<seahowl::aero::TurbineAero> turbine_aero;
+    // make turbine aero
+    if (turbine_db.aero.solver == "aerodyn") {
+#ifdef HAVE_AERODYN
+        turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>();
+#endif
+    } else {
+        turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
+    }
+    // tower
+    turbine_aero->tower = get_tower_aero_from_db(turbine_db);
+    // rna
+    turbine_aero->rna = get_rna_aero_from_db(turbine_db, *turbine_aero);
+    // foundation
+    if (turbine_db.foundation.has_value()) {
+        turbine_aero->foundation = get_foundation_fluid_from_db(turbine_db.foundation.value());
+    }
+    return turbine_aero;
+}
+
+std::shared_ptr<seahowl::core::Turbine> get_turbine_from_db(const TurbineDb& turbine_db) {
+    // elasto
+    auto turbine_elasto = get_turbine_elasto_from_db(turbine_db);
+    // aero
+    auto turbine_aero = get_turbine_aero_from_db(turbine_db);
+    // make turbine
+    auto turbine = std::make_shared<seahowl::core::Turbine>(turbine_elasto, turbine_aero);
+    // controller
+    turbine->controller = get_controller_discon_from_db(turbine_db.controller);
+
+    // get extra drivetrain info
+    // gearbox
+    auto& rna_db = turbine_db.rna.data;
+    turbine->gearbox_ratio = rna_db.drivetrain.gearbox_ratio;
+    turbine->gearbox_efficiency = rna_db.drivetrain.gearbox_efficiency;
+    turbine->gearbox_efficiency /= 100.0;
+    // generator
+    turbine->generator_efficiency = rna_db.drivetrain.generator_efficiency;
+    turbine->generator_efficiency /= 100.0;
+
+    // fondation
+    if (turbine_db.foundation.has_value()) {
+        if (turbine_db.foundation.value().type == "monopile") {
+            // monopile
+            auto monopile_hydro = std::dynamic_pointer_cast<seahowl::hydro::MonopileHydro>(turbine_aero->foundation);
+            auto monopile_elasto =
+                std::dynamic_pointer_cast<seahowl::elasto::MonopileElasto>(turbine_elasto->foundation);
+            turbine->foundation = std::make_shared<seahowl::core::Monopile>(monopile_elasto, monopile_hydro);
+        } else {
+            // floater
+            auto floater_hydro = std::dynamic_pointer_cast<seahowl::hydro::FloaterHydro>(turbine_aero->foundation);
+            auto floater_elasto = std::dynamic_pointer_cast<seahowl::elasto::FloaterElasto>(turbine_elasto->foundation);
+            turbine->foundation = std::make_shared<seahowl::core::Floater>(floater_elasto, floater_hydro);
+        }
+    }
+    return turbine;
+}
+
 void populate_tower_elasto_from_file(const std::string& filepath, seahowl::elasto::TowerElasto& tower) {
     TowerDb tower_db;
     InputHandler input_handler;
@@ -281,15 +709,6 @@ void populate_tower_from_file(const std::string& filepath, seahowl::core::Tower&
     tower_db = input_handler.reader->read_tower();
     spdlog::debug("Populating tower from " + filepath + " file (absolute: " + absolute(path(filepath)).string() + ").");
 
-    // elasto
-    tower.elasto.reference_points = get_tower_elasto_reference_points_db(tower_db);
-    tower.elasto.height = tower.elasto.reference_points.back().coordinates.z();
-    tower.elasto.base_height = tower.elasto.reference_points.front().coordinates.z();
-    // aero
-    tower.aero.reference_points = get_tower_aero_reference_points_db(tower_db);
-}
-
-void populate_tower_from_db(const TowerDb& tower_db, seahowl::core::Tower& tower) {
     // elasto
     tower.elasto.reference_points = get_tower_elasto_reference_points_db(tower_db);
     tower.elasto.height = tower.elasto.reference_points.back().coordinates.z();
@@ -368,324 +787,7 @@ void populate_rna_from_file(const std::string& filepath, seahowl::core::RotorNac
     populate_rna_aero_from_db(rna_db, rna.aero);
 }
 
-void populate_rna_from_db(const RnaDb& rna_db, seahowl::core::RotorNacelleAssembly& rna) {
-    populate_rna_elasto_from_db(rna_db, rna.elasto);
-    populate_rna_aero_from_db(rna_db, rna.aero);
-}
-
-void populate_turbine_from_db(const TurbineDb& turbine_db, seahowl::core::Turbine& turbine) {
-    if (turbine_db.aero.solver == "bemt") {
-        spdlog::info("Aerodynamic model: Blade Element Momentum Theory (BEMT).");
-        auto rotor_aero = std::make_shared<seahowl::aero::RotorAeroBEMT>(*turbine.aero.tower);
-        turbine.rna.aero.rotor = rotor_aero;
-
-        rotor_aero->has_hub_loss = turbine_db.aero.options.hub_loss;
-        rotor_aero->has_tip_loss = turbine_db.aero.options.tip_loss;
-        rotor_aero->has_tower_shadow = turbine_db.aero.options.tower_shadow;
-
-    } else if (turbine_db.aero.solver == "disk") {
-        spdlog::info("Aerodynamic model: Actuator Disk Theory.");
-        if (turbine_db.rotor.type != "disk") {
-            throw std::runtime_error("Only rotor type \"disk\" can be used with aero solver \"disk\".");
-        }
-        auto rotor_disk = std::make_shared<seahowl::aero::RotorAeroDisk>();
-        turbine.rna.aero.rotor = rotor_disk;
-        // get rotor performance from table
-        auto perf_filepath = (turbine_db.aero.options.performance_file_path).generic_string();
-        get_disk_perf_from_table(perf_filepath, *rotor_disk);
-    } else if (turbine_db.aero.solver == "aerodyn") {
-        spdlog::info("Aerodynamic model: AeroDyn.");
-#ifdef HAVE_AERODYN
-        // check that right turbine type was defined for AeroDyn
-        try {
-            auto& turbine_aero = dynamic_cast<seahowl::aero::TurbineAeroDyn&>(turbine.aero);
-        } catch (const std::exception& e) {
-            throw std::runtime_error("Wrong aero turbine type to use AeroDyn solver (needs to be TurbineAeroDyn).");
-        }
-        auto& turbine_aero = dynamic_cast<seahowl::aero::TurbineAeroDyn&>(turbine.aero);
-        std::string inflowwind_filepath;
-        std::string aerodyn_filepath;
-        if (!turbine_db.aero.options.file_aerodyn.empty()) {
-            aerodyn_filepath = turbine_db.aero.options.file_aerodyn_path.generic_string();
-        } else {
-            throw std::runtime_error("Turbine set to use aerodyn but AeroDyn file path not defined.");
-        }
-        turbine_aero.aerodyn.set_aerodyn_infile(aerodyn_filepath);
-        turbine_aero.rna->rotor = std::make_shared<seahowl::aero::RotorAeroDyn>(*turbine.aero.tower);
-#else
-        throw std::runtime_error("Trying to use AeroDyn for turbine but the code was not compiled for using AeroDyn.");
-#endif
-    } else {
-        throw std::runtime_error("Unknown aero solver \"" + turbine_db.aero.solver + "\".");
-    }
-
-    // check rotor type
-    if (turbine_db.rotor.type == "fea") {
-        spdlog::info("Rotor type: finite element blades.");
-    } else if (turbine_db.rotor.type == "fpm") {
-        spdlog::info("Rotor type: finite element blades (FPM).");
-    } else if (turbine_db.rotor.type == "rigid") {
-        spdlog::info("Rotor type: rigid.");
-    } else if (turbine_db.rotor.type == "disk") {
-        spdlog::info("Rotor type: disk");
-    } else {
-        throw std::runtime_error("Rotor type does not exist: try \"fea\", \"fpm\", \"rigid\", or \"disk\".");
-    }
-
-    // blades
-    // only make blades if rotor type is not disk
-    if (turbine_db.rotor.type != "disk") {
-        // pitch actuator dynamics
-        bool has_pitch_actuator_dynamics = turbine_db.rotor.pitch_actuator_dynamics;
-
-        std::vector<std::shared_ptr<seahowl::core::Blade>> blades;
-        std::vector<std::shared_ptr<seahowl::elasto::BladeElasto>> blades_elasto;
-        std::vector<std::shared_ptr<seahowl::aero::BladeAero>> blades_aero;
-
-        for (auto& blade_db : turbine_db.rotor.blades) {
-            std::shared_ptr<seahowl::elasto::BladeElasto> blade_elasto;
-            if (turbine_db.rotor.type == "fea" || turbine_db.rotor.type == "fpm") {
-                blade_elasto = std::make_shared<seahowl::elasto::BladeElastoFEA>();
-                auto& blade_elasto_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade_elasto);
-                blade_elasto_fea.discretization_fractions = turbine_db.rotor.discretization.elasto;
-                if (turbine_db.rotor.type == "fpm") {
-                    blade_elasto_fea.fpm_mode = true;
-                } else if (turbine_db.rotor.type == "fea") {
-                    blade_elasto_fea.fpm_mode = false;
-                }
-            } else if (turbine_db.rotor.type == "rigid") {
-                blade_elasto = std::make_shared<seahowl::elasto::BladeElastoRigid>();
-            }
-            auto blade_aero = std::make_shared<seahowl::aero::BladeAero>();
-            auto blade = std::make_shared<seahowl::core::Blade>(blade_elasto, blade_aero);
-            populate_blade(blade_db.data, *blade);
-            blade->aero.discretization_fractions = turbine_db.rotor.discretization.aero;
-            blade_elasto->pitch0 = blade_db.initial_pitch * PI / 180.0;
-            blade_elasto->precone = blade_db.precone * PI / 180.0;
-            // no precone if blade is rigid (assumed that blade is on rotor disc)
-            if (turbine_db.rotor.type == "rigid") {
-                blade_elasto->precone = 0.0;
-            }
-
-            blade_elasto->actuator_pitch->set_fixed_actuator(!has_pitch_actuator_dynamics);
-            blades_elasto.push_back(blade_elasto);
-            blades_aero.push_back(blade_aero);
-            blades.push_back(blade);
-        }
-        turbine.elasto.rna->rotor->blades = blades_elasto;
-        turbine.aero.rna->rotor->blades = blades_aero;
-        turbine.rna.rotor.blades = blades;
-    }
-
-    // RNA
-    populate_rna_from_db(turbine_db.rna.data, turbine.rna);
-    auto yaw_rna = turbine_db.rna.initial_yaw * PI / 180.0;
-    turbine.rna.elasto.yaw0 = yaw_rna;
-    bool has_yaw_actuator_dynamics = turbine_db.rna.yaw_actuator_dynamics;
-    turbine.rna.elasto.actuator_yaw->set_fixed_actuator(!has_yaw_actuator_dynamics);
-
-    // update info if rotor is disk
-    if (turbine_db.rotor.type == "disk") {
-        turbine.rna.elasto.rotor->hub.inertia(0, 0) += turbine_db.rotor.option.inertia_blades;
-        turbine.rna.elasto.rotor->hub.mass += turbine_db.rotor.option.mass_blades;
-        turbine.rna.aero.rotor->radius = turbine_db.rotor.option.radius;
-    }
-
-    // tower
-    populate_tower_from_db(turbine_db.tower.data, turbine.tower);
-    turbine.elasto.tower->discretization_fractions = turbine_db.tower.discretization.elasto;
-    turbine.aero.tower->discretization_fractions = turbine_db.tower.discretization.aero;
-    if (turbine_db.tower.options.has_value()) {
-        if (turbine_db.tower.options.value().use_MacCamyFuchs_correction.has_value()) {
-            turbine.aero.tower->use_MacCamyFuchs_correction =
-                turbine_db.tower.options.value().use_MacCamyFuchs_correction.value();
-        }
-
-        if (turbine_db.tower.options.value().use_Cd_correction.has_value()) {
-            turbine.aero.tower->use_Cd_correction = turbine_db.tower.options.value().use_Cd_correction.value();
-        }
-    }
-    // controller
-    if (turbine_db.controller.type == "discon") {
-        auto libfilepath = turbine_db.controller.options.libfile;
-        if (turbine_db.controller.options.libfile != "") {
-            // path
-            libfilepath = turbine_db.controller.options.libfile_path.generic_string();
-        }
-        auto infilepath = turbine_db.controller.options.infile;
-        if (turbine_db.controller.options.infile != "") {
-            infilepath = turbine_db.controller.options.infile_path.generic_string();
-        }
-        // instantiate controller
-        auto controller = std::make_shared<seahowl::servo::ControllerDISCON>(infilepath, libfilepath);
-        turbine.controller = controller;
-
-    } else if (turbine_db.controller.type == "rpm") {
-        auto controller = std::make_shared<seahowl::servo::ControllerVariableTorque>();
-        controller->target_rpm = turbine_db.controller.options.target_rpm;
-        turbine.controller = controller;
-    }
-
-    // get extra drivetrain info
-    // gearbox
-    auto& rna_db = turbine_db.rna.data;
-    turbine.gearbox_ratio = rna_db.drivetrain.gearbox_ratio;
-    turbine.gearbox_efficiency = rna_db.drivetrain.gearbox_efficiency;
-    turbine.gearbox_efficiency /= 100.0;
-    // generator
-    turbine.generator_efficiency = rna_db.drivetrain.generator_efficiency;
-    turbine.generator_efficiency /= 100.0;
-    // add inertia of generator to hub directly
-    double drivetrain_inertia = rna_db.drivetrain.generator_inertia;
-    turbine.rna.elasto.rotor->hub.inertia(0, 0) += drivetrain_inertia;
-
-    if (turbine_db.foundation.has_value()) {
-        auto& turbine_elasto = turbine.elasto;
-
-        auto& foundation_db = turbine_db.foundation.value();
-        if (foundation_db.type == "monopile") {
-            // create monopile
-            auto monopile_elasto = std::make_shared<seahowl::elasto::MonopileElasto>();
-            auto monopile_hydro = std::make_shared<seahowl::hydro::MonopileHydro>();
-            auto monopile_core = std::make_shared<seahowl::core::Monopile>(monopile_elasto, monopile_hydro);
-            turbine.elasto.foundation = monopile_elasto;
-            turbine.aero.foundation = monopile_hydro;
-            turbine.foundation = monopile_core;
-
-            // populate monopile
-            populate_tower_from_db(foundation_db.data_tower, *monopile_core);
-            monopile_elasto->discretization_fractions = foundation_db.discretization.elasto;
-            monopile_hydro->discretization_fractions = foundation_db.discretization.hydro;
-
-            if (foundation_db.options.has_value()) {
-                auto& options = foundation_db.options.value();
-                if (options.use_MacCamyFuchs_correction.has_value()) {
-                    monopile_hydro->use_MacCamyFuchs_correction = options.use_MacCamyFuchs_correction.value();
-                }
-                if (options.use_Cd_correction.has_value()) {
-                    monopile_hydro->use_Cd_correction = options.use_Cd_correction.value();
-                }
-            }
-
-        } else if (foundation_db.type == "floater") {
-            auto floater_hydro = std::make_shared<seahowl::hydro::FloaterHydro>();
-            turbine.aero.foundation = floater_hydro;
-
-            if (foundation_db.file.has_value()) {
-                Floaterdb floater_db = turbine_db.foundation.value().data_floater;
-
-                if (floater_db.type == "hydrochrono") {
-                    spdlog::info("Hydrodynamic model: HydroChrono.");
-#ifdef HAVE_HYDROCHRONO
-                    // make floater
-                    auto floater_elasto_ptr = std::make_shared<seahowl::hydro::FloaterHydroChrono>();
-                    turbine_elasto.foundation = floater_elasto_ptr;
-                    // add h5file path
-
-                    floater_elasto_ptr->set_h5_filepath(
-                        (foundation_db.data_floater.options_file_path).generic_string());
-#else
-                    throw std::runtime_error(
-                        "Trying to use HydroChrono but did not compile with HydroChrono dependency.");
-#endif
-                } else {
-                    auto floater_elasto_ptr = std::make_shared<seahowl::elasto::FloaterElasto>();
-                    turbine_elasto.foundation = floater_elasto_ptr;
-                }
-
-                auto floater_elasto =
-                    std::dynamic_pointer_cast<seahowl::elasto::FloaterElasto>(turbine_elasto.foundation);
-                // get main body info
-                auto& body = *floater_elasto->body_main;
-                body.set_mass(floater_db.mass);
-                body.set_position(floater_db.position);
-                body.set_inertia_matrix(floater_db.inertia);
-
-                // get other bodies info
-                for (auto& body_db : floater_db.bodies) {
-                    floater_elasto->add_body(body_db.name);
-                    auto& body_i = floater_elasto->get_body(body_db.name);
-                    body_i.set_mass(body_db.mass);
-                    body_i.set_position(body_db.position);
-                    body_i.set_inertia_matrix(body_db.inertia);
-                }
-
-                floater_elasto->body_main->set_damping_matrix(floater_db.damping_matrix);
-
-                // core floater
-                auto floater_core_ptr = std::make_shared<seahowl::core::Floater>(floater_elasto, floater_hydro);
-                turbine.foundation = floater_core_ptr;
-                auto& floater_core = *floater_core_ptr;
-
-                for (auto& mooring_db : floater_db.moorings) {
-                    auto rotation_axis = mooring_db.rotation_axis;
-                    auto rotation_angle = mooring_db.rotation_angle * seahowl::PI / 180.0;
-                    auto rotation = seahowl::AngleAxisd(rotation_angle, rotation_axis);
-
-                    // fairlead
-                    auto body_name = mooring_db.connected_body_name;
-                    auto fairlead_relative_position = mooring_db.fairlead_position;
-                    seahowl::Vector3d fairlead_position = rotation * fairlead_relative_position;
-                    if (mooring_db.relative_fairlead) {
-                        fairlead_position += floater_elasto->body_main->get_position();
-                    }
-                    floater_elasto->add_fairlead(fairlead_position, body_name);
-                    auto& fairlead_body =
-                        floater_elasto->get_fairlead_body(body_name, floater_elasto->get_fairlead_count(body_name) - 1);
-
-                    // anchor
-                    auto anchor_relative_position = mooring_db.anchor_position;
-                    seahowl::Vector3d anchor_position = rotation * anchor_relative_position;
-                    if (mooring_db.relative_anchor) {
-                        anchor_position += floater_elasto->body_main->get_position();
-                    }
-                    floater_elasto->mooring_system->anchors.push_back(
-                        std::make_shared<seahowl::elasto::BodyElastoChrono>());
-                    auto& anchor_body = *floater_elasto->mooring_system->anchors.back();
-                    anchor_body.set_position(anchor_position);
-                    anchor_body.set_mass(0.0);
-                    anchor_body.set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
-                    anchor_body.set_fixed(true);
-
-                    // elasto
-                    floater_elasto->mooring_system->moorings.push_back(
-                        std::make_shared<seahowl::elasto::MooringElastoFEA>(fairlead_body, anchor_body));
-                    auto mooring_elasto = std::dynamic_pointer_cast<seahowl::elasto::MooringElastoFEA>(
-                        floater_elasto->mooring_system->moorings.back());
-                    mooring_elasto->length = mooring_db.length;
-                    mooring_elasto->diameter = mooring_db.properties.diameter;
-                    mooring_elasto->discretization_fractions = mooring_db.discretization.elasto;
-                    mooring_elasto->stiffness_axial = mooring_db.properties.stiffness_axial;
-                    mooring_elasto->stiffness_bending = mooring_db.properties.stiffness_bending;
-                    mooring_elasto->density_linear = mooring_db.properties.density_linear;
-
-                    // hydro
-                    floater_hydro->mooring_system->moorings.push_back(std::make_shared<seahowl::hydro::MooringHydro>());
-                    auto mooring_hydro = floater_hydro->mooring_system->moorings.back();
-                    mooring_hydro->length = mooring_db.length;
-                    mooring_hydro->diameter = mooring_db.properties.diameter;
-                    mooring_hydro->discretization_fractions = mooring_db.discretization.hydro;
-                    mooring_hydro->coefficients.drag_normal = mooring_db.properties.drag_coefficient_normal;
-                    mooring_hydro->coefficients.drag_axial = mooring_db.properties.drag_coefficient_axial;
-                    mooring_hydro->coefficients.added_mass_normal = mooring_db.properties.added_mass_coefficient_normal;
-                    mooring_hydro->coefficients.added_mass_axial = mooring_db.properties.added_mass_coefficient_axial;
-
-                    floater_core.mooring_system->moorings.push_back(
-                        std::make_shared<seahowl::core::Mooring>(mooring_elasto, mooring_hydro));
-                }
-            } else {
-                spdlog::warn("Turbine has floater key but no floater file was defined.");
-
-                auto floater_elasto = std::make_shared<seahowl::elasto::FloaterElasto>();
-                turbine_elasto.foundation = floater_elasto;
-                auto floater_core = std::make_shared<seahowl::core::Floater>(floater_elasto, floater_hydro);
-                turbine.foundation = floater_core;
-            }
-        }
-    }
-}
-
-void populate_turbine_from_file(const std::string& filepath, seahowl::core::Turbine& turbine) {
+seahowl::core::Turbine get_turbine_from_file(const std::string& filepath) {
     TurbineDb turbine_db;
     InputHandler input_handler;
     try {
@@ -696,33 +798,21 @@ void populate_turbine_from_file(const std::string& filepath, seahowl::core::Turb
     turbine_db = input_handler.reader->read_turbine();
     spdlog::debug("Populating turbine from " + filepath + " file (absolute: " + absolute(path(filepath)).string() +
                   ").");
-    populate_turbine_from_db(turbine_db, turbine);
+
+    return *get_turbine_from_db(turbine_db);
 }
 
 void add_turbine_to_system_from_db(const TurbineDb& turbine_db, seahowl::core::System& system_core) {
-    // make turbine aero
-    if (turbine_db.aero.solver == "aerodyn") {
-#ifdef HAVE_AERODYN
-        auto turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>();
-        system_core.aero.turbines.push_back(turbine_aero);
-#endif
-    } else {
-        auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
-        system_core.aero.turbines.push_back(turbine_aero);
-    }
-
-    // make turbine elasto
-    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
-    system_core.elasto.turbines.push_back(turbine_elasto);
-
+    // create turbine
+    auto turbine = get_turbine_from_db(turbine_db);
     // add turbine to system
-    std::shared_ptr<seahowl::core::Turbine> turbine;
-    turbine =
-        std::make_shared<seahowl::core::Turbine>(system_core.elasto.turbines.back(), system_core.aero.turbines.back());
     system_core.turbines.push_back(turbine);
 
-    // populate turbine
-    populate_turbine_from_db(turbine_db, *turbine);
+    // add turbine elasto and aero to system
+    auto turbine_elasto = std::dynamic_pointer_cast<seahowl::elasto::TurbineElasto>(turbine->get_shared_elasto());
+    system_core.elasto.turbines.push_back(turbine_elasto);
+    auto turbine_aero = std::dynamic_pointer_cast<seahowl::aero::TurbineAero>(turbine->get_shared_fluid());
+    system_core.aero.turbines.push_back(turbine_aero);
 
     turbine->build();
 }

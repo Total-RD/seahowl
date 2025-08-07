@@ -19,8 +19,7 @@ Turbine::Turbine(std::shared_ptr<TurbineElasto> elasto, std::shared_ptr<TurbineA
       elasto(*elasto),
       aero(*aero),
       rna(elasto->rna, aero->rna),
-      tower(elasto->tower, aero->tower),
-      controller(std::make_shared<Controller>()) {}
+      tower(elasto->tower, aero->tower) {}
 
 void Turbine::initialize_this(double time, double dt) {
     rna.initialize(time, dt);

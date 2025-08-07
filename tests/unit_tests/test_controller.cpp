@@ -491,10 +491,7 @@ TEST_F(TestController, actuator_disk) {
     auto system_chrono = system_elasto.chobj;
 
     // turbine
-    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
-    auto turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();
-    auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine_disk.json").generic_string(), turbine);
+    auto turbine = seahowl::io::get_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine_disk.json").generic_string());
 
     turbine.build();
     turbine.elasto.assemble(system_elasto);

@@ -162,7 +162,7 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     /**
      * @brief Constructor.
      */
-    RotorNacelleAssemblyElasto();
+    RotorNacelleAssemblyElasto(std::shared_ptr<seahowl::elasto::RotorElasto> rotor);
 
     /**
      * @brief Builds the rotor.

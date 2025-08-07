@@ -37,8 +37,8 @@ TEST_F(TestRotor, mass) {
         }
         blades.push_back(blade);
     }
-
-    auto rna = seahowl::elasto::RotorNacelleAssemblyElasto();
+    auto rotor = std::make_shared<RotorElasto>();
+    auto rna = seahowl::elasto::RotorNacelleAssemblyElasto(rotor);
     seahowl::io::populate_rna_elasto_from_file((DATADIR / "IEA15MW/base/rna.json").generic_string(), rna);
     rna.rotor->blades = blades;
     rna.build();

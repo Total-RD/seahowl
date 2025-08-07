@@ -136,7 +136,19 @@ void Mooring::update_loads_elasto() {
 
 MooringSystem::MooringSystem(std::shared_ptr<seahowl::elasto::MooringSystemElasto> elasto,
                              std::shared_ptr<seahowl::hydro::MooringSystemHydro> hydro)
-    : ComponentDynamic(elasto, hydro), elasto(*elasto), hydro(*hydro) {}
+    : ComponentDynamic(elasto, hydro), elasto(*elasto), hydro(*hydro) {
+    // initialize moorings
+    auto it_hydro = hydro->moorings.begin();
+    auto it_elasto = elasto->moorings.begin();
+    for (; it_hydro != hydro->moorings.end() && it_elasto != elasto->moorings.end(); ++it_hydro, ++it_elasto) {
+        if (auto mooring_elasto = std::dynamic_pointer_cast<MooringElastoFEA>(*it_elasto)) {
+            // create Mooring object that connects elasto and hydro components
+            moorings.push_back(std::make_shared<Mooring>(mooring_elasto, *it_hydro));
+        } else {
+            throw std::runtime_error("The Elasto Mooring is not an elastodynamic FEA component in mooring system.");
+        }
+    }
+}
 
 void MooringSystem::add_mooring(std::shared_ptr<Mooring> mooring) {
     if (std::find(moorings.begin(), moorings.end(), mooring) == moorings.end()) {

@@ -49,17 +49,15 @@ TEST_F(TestAeroDyn, rpm_initial_pitch) {
     system_elasto.set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
 
     // turbine
-    auto turbine_elasto = std::make_shared<seahowl::elasto::TurbineElasto>();
-    auto turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>();
-    auto turbine = seahowl::core::Turbine(turbine_elasto, turbine_aero);
-    seahowl::io::populate_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine_aerodyn.json").generic_string(),
-                                            turbine);
+    auto turbine =
+        seahowl::io::get_turbine_from_file((DATADIR / "IEA15MW/onshore/turbine_aerodyn.json").generic_string());
     // remove controller
     turbine.controller = std::make_shared<seahowl::servo::Controller>();
 
-    turbine_aero->aerodyn.set_aerodyn_infile(
+    auto& turbine_aero = dynamic_cast<seahowl::aero::TurbineAeroDyn&>(turbine.aero);
+    turbine_aero.aerodyn.set_aerodyn_infile(
         (DATADIR / "IEA15MW/base/aerodyn/IEA-15-240-RWT_AeroDyn15.dat").generic_string());
-    turbine_aero->aerodyn.set_inflowwind_infile((DATADIR / "IEA15MW/env/InflowWind.dat").generic_string());
+    turbine_aero.aerodyn.set_inflowwind_infile((DATADIR / "IEA15MW/env/InflowWind.dat").generic_string());
 
     turbine.build();
     turbine.elasto.assemble(system_elasto);

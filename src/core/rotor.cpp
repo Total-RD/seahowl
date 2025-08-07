@@ -16,7 +16,14 @@ using namespace seahowl::elasto;
 using namespace seahowl::aero;
 
 Rotor::Rotor(std::shared_ptr<seahowl::elasto::RotorElasto> elasto, std::shared_ptr<seahowl::aero::RotorAero> aero)
-    : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {}
+    : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {
+    // initialize blades
+    auto it_aero = aero->blades.begin();
+    auto it_elasto = elasto->blades.begin();
+    for (; it_aero != aero->blades.end() && it_elasto != elasto->blades.end(); ++it_aero, ++it_elasto) {
+        blades.push_back(std::make_shared<Blade>(*it_elasto, *it_aero));
+    }
+}
 
 void Rotor::initialize_this(double time, double dt) {
     for (auto& blade : blades) {

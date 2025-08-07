@@ -27,8 +27,8 @@ class Monopile : public Tower, public virtual Foundation {
     Monopile(std::shared_ptr<seahowl::elasto::MonopileElasto> elasto,
              std::shared_ptr<seahowl::hydro::MonopileHydro> hydro)
         : Foundation(elasto, hydro),
-          ComponentDynamic(elasto, hydro),
           Tower(elasto, hydro),
+          ComponentDynamic(elasto, hydro),
           elasto(*elasto),
           hydro(*hydro){};
 };

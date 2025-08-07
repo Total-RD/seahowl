@@ -139,12 +139,12 @@ void populate_rna_from_file(const std::string& filepath, seahowl::core::RotorNac
 void add_turbine_to_system_from_file(const std::string& filepath, seahowl::core::System& system_core);
 
 /**
- * @brief Populates turbine given a file.
+ * @brief Returns a turbine instance given a file.
  *
  * @param[in] filepath Path of the file describing the turbine.
- * @param[out] turbine Turbine to populate.
+ * @return A new turbine instance.
  */
-void populate_turbine_from_file(const std::string& filepath, seahowl::core::Turbine& turbine);
+seahowl::core::Turbine get_turbine_from_file(const std::string& filepath);
 
 /**
  * @brief Creates and returns environmental conditions given a file.
