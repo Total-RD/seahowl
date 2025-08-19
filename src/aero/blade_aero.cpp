@@ -93,12 +93,8 @@ void BladeAero::build() {
     }
     // elements
     elements.clear();
-    loads.clear();
-    moments.clear();
     for (int ii = 0; ii < discretized_points.size() - 1; ii++) {
         elements.push_back(BladeElementAero(nodes[ii], nodes[ii + 1]));
-        loads.push_back(Vector3d(0.0, 0.0, 0.0));
-        moments.push_back(Vector3d(0.0, 0.0, 0.0));
     }
 
     // get distance from tip
@@ -140,8 +136,8 @@ Vector3d BladeAero::get_average_wind_velocity() {
 
 Vector3d BladeAero::get_total_load() {
     auto total = Vector3d(0.0, 0.0, 0.0);
-    for (auto& load : loads) {
-        total += load;
+    for (auto& element : elements) {
+        total += element.get_load();
     }
     return total;
 }

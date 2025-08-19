@@ -162,7 +162,7 @@ void FloaterElasto::rotate(double angle, const Vector3d& axis) const {
 }
 
 double FloaterElasto::get_mass() const {
-    double total_mass = 0;
+    double total_mass = body_main->get_mass();
     for (auto& bodymap : floater_bodies) {
         auto& body = *bodymap.second;
         total_mass += body.get_mass();

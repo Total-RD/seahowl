@@ -4,9 +4,10 @@
   "ramp_end": 0.0,
   "wind": {
     "type": "inflowwind",
+    "air_density": 1.225,
     "options": {
-       "file_inflowwind": "./InflowWind.dat",
-       "zmin": 5.0
+      "file_inflowwind": "./InflowWind.dat",
+      "zmin": 5.0
     }
   }
 }

@@ -15,10 +15,14 @@ namespace elasto {
 class EntityLoadable : public virtual EntityDynamic {
   public:
     /**
-    /**
      * @brief Resets forces and moments of loadable entity.
      */
     virtual void reset_loads() = 0;
+
+    /**
+     * @brief Resets internal forces and moments. Do not call manually.
+     */
+    virtual void reset_loads_internals() = 0;
 
     /**
      * @brief Returns applied force on entity.
@@ -28,11 +32,39 @@ class EntityLoadable : public virtual EntityDynamic {
     virtual Vector3d get_force(bool is_local = false) const = 0;
 
     /**
+     * @brief Returns applied internal force on entity. For internal workflow.
+     *
+     * @param[in] is_local Whether the force is returned from local or global reference frame.
+     */
+    virtual Vector3d get_force_internals(bool is_local = false) const = 0;
+
+    /**
+     * @brief Returns total applied force (internal and external) on entity.
+     *
+     * @param[in] is_local Whether the force is returned from local or global reference frame.
+     */
+    virtual Vector3d get_force_total(bool is_local = false) const;
+
+    /**
      * @brief Returns applied torque on entity.
      *
      * @param[in] is_local Whether the torque is returned from local or global reference frame.
      */
     virtual Vector3d get_torque(bool is_local = true) const = 0;
+
+    /**
+     * @brief Returns applied internal torque on entity. For internal workflow.
+     *
+     * @param[in] is_local Whether the torque is returned from local or global reference frame.
+     */
+    virtual Vector3d get_torque_internals(bool is_local = true) const = 0;
+
+    /**
+     * @brief Returns total applied torque (internal and external) on entity.
+     *
+     * @param[in] is_local Whether the torque is returned from local or global reference frame.
+     */
+    virtual Vector3d get_torque_total(bool is_local = true) const;
 
     /**
      * @brief Sets force on entity.
@@ -59,12 +91,28 @@ class EntityLoadable : public virtual EntityDynamic {
     virtual void accumulate_force(const Vector3d& force, bool is_local = false) = 0;
 
     /**
+     * @brief Accumulates internal force on entity. Do not call manually.
+     *
+     * @param[in] force Force to be accumulated.
+     * @param[in] is_local Whether the force is applied from local or global reference frame.
+     */
+    virtual void accumulate_force_internals(const Vector3d& force, bool is_local = false) = 0;
+
+    /**
      * @brief Accumulates torque on entity.
      *
      * @param[in] torque Torque to be accumulated.
      * @param[in] is_local Whether the torque is applied from local or global reference frame.
      */
     virtual void accumulate_torque(const Vector3d& torque, bool is_local = true) = 0;
+
+    /**
+     * @brief Accumulates internal torque on entity. Do not call manually.
+     *
+     * @param[in] torque Torque to be accumulated.
+     * @param[in] is_local Whether the torque is applied from local or global reference frame.
+     */
+    virtual void accumulate_torque_internals(const Vector3d& torque, bool is_local = true) = 0;
 
     /**
      * @brief Sets added mass matrix of entity.
@@ -429,6 +477,11 @@ class ActuatorRotation : public virtual Entity {
     Quaternion reference_rotation;
     /** @brief Link for fixing the actuator in space. */
     std::unique_ptr<Link> link;
+
+    /**
+     * @brief Resets actuator (bodies back to origin and control timeseries to zero).
+     */
+    virtual void reset() = 0;
 
     /**
      * @brief Sets timeseries for actuator.

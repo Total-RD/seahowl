@@ -313,13 +313,14 @@ Only *reference* points are defined in this file, and interpolation between them
 * **position_x**, **position_y**, **position_z**: (float) position of reference point [m].
 * **diameter**: (float) diameter of tower at reference point [m].
 * **thickness**: (float) thickness of tower at reference point [m].
-* **density**: (float) linear density of tower at reference point [kg/m].
+* **density**: (float) Volumetric density of tower material at reference point [kg/m3].
 * **young_modulus**: (float) Young's modulus of tower material at reference point [Pa].
 * **poisson_ratio**: (float) Poisson's ratio of tower material at reference point [-].
 * **drag_coefficient_axial**: (float) Axial Morison drag coefficient [-].
 * **drag_coefficient_normal**: (float) Normal Morison drag coefficient [-].
 * **added_mass_coefficient_axial**: (float) Axial Morison added mass coefficient (Ca) [-].
 * **added_mass_coefficient_normal**: (float) Normal Morison added mass coefficient (Ca) [-].
+* **fill_density**: (float) Volumetric density of material/fluid filling the inner diameter of the hollow tower [kg/m3].
 * **buoyancy_factor**: (float) Buoyancy factor (0.0 for no buoyancy, 1.0 for fully buoyant) [-].
 * **damping_foreaft**: (float) fore-aft (bending and shear) stiffness-proportional Rayleigh damping coefficient [-].
 * **damping_sideside**: (float) side-side (bending and shear) stiffness-proportional Rayleigh damping coefficient [-].

@@ -7,7 +7,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # =================
 project(
     SEAHOWL
-    VERSION 0.9.0
+    VERSION 0.10.0
     DESCRIPTION "Servo-Elasto-Aero-Hydro Offshore Wind Lab"
     LANGUAGES CXX
 )
@@ -476,7 +476,8 @@ if(SEAHOWL_ENABLE_IRRLICHT)
     find_package(PNG CONFIG REQUIRED)
     find_package(JPEG REQUIRED)
     find_package(BZip2 REQUIRED)
-    target_link_libraries(seahowl_core PRIVATE PNG::PNG JPEG::JPEG BZip2::BZip2)
+    find_package(Irrlicht CONFIG REQUIRED)
+    target_link_libraries(seahowl_core PRIVATE PNG::PNG JPEG::JPEG BZip2::BZip2 Irrlicht)
 endif(SEAHOWL_ENABLE_IRRLICHT)
 
 
@@ -664,16 +665,16 @@ if(SEAHOWL_ENABLE_PYTHON)
         file(WRITE ${FILE_INITPY}
             "#!/bin/bash\n"
             "SCRIPT_DIR=$(cd \"$(dirname \"\${BASH_SOURCE}\")\" && pwd)\n"
-            "$SCRIPT_DIR/python3/python3 -m virtualenv .venv \n"
+            "\"$SCRIPT_DIR/python3/python3\" -m virtualenv .venv \n"
             "CALL_DIR=$(pwd)\n"
-            "source $CALL_DIR/.venv/bin/activate\n"
-            "export PYTHONPATH=$SCRIPT_DIR:$PYTHONPATH\n")
+            "source \"$CALL_DIR/.venv/bin/activate\"\n"
+            "export PYTHONPATH=\"$SCRIPT_DIR\":$PYTHONPATH\n")
     else()
         set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.bat)
         file(WRITE ${FILE_INITPY}
             "set SCRIPT_DIR=%~dp0\n"
-            "%SCRIPT_DIR%python3/python.exe -m virtualenv %SCRIPT_DIR%.venv\n"
-            "call %SCRIPT_DIR%.venv/Scripts/activate\n"
+            "\"%SCRIPT_DIR%python3/python.exe\" -m virtualenv \"%SCRIPT_DIR%.venv\"\n"
+            "call \"%SCRIPT_DIR%.venv/Scripts/activate\"\n"
             "set PYTHONPATH=%SCRIPT_DIR%;%PYTHONPATH%\n"
             "cmd /K\n")
         set(FILE_INITPYPS ${CMAKE_BINARY_DIR}/init_pyseahowl.ps1)

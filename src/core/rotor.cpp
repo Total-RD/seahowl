@@ -39,8 +39,8 @@ void RotorNacelleAssembly::prestep(double time, double dt) {
     }
 
     // apply extra torque and thrust (if any) to hub
-    elasto.rotor->body_hub->accumulate_torque(Vector3d(aero.rotor->hub_torque_aero, 0, 0), true);
-    elasto.rotor->body_hub->accumulate_force(Vector3d(aero.rotor->hub_thrust_aero, 0, 0), true);
+    elasto.rotor->body_hub->accumulate_torque_internals(Vector3d(aero.rotor->hub_torque_aero, 0, 0), true);
+    elasto.rotor->body_hub->accumulate_force_internals(Vector3d(aero.rotor->hub_thrust_aero, 0, 0), true);
 }
 
 void RotorNacelleAssembly::poststep(double time, double dt) {

@@ -113,14 +113,14 @@ void Blade::update_positions_aero() {
 
 void Blade::update_loads_elasto() {
     elasto.reset_loads();
-    if (aero.loads.size() != mapping_aero2elasto_elements.size()) {
-        throw std::runtime_error("Blade: length of vector of loads (" + std::to_string(aero.loads.size()) +
+    if (aero.elements.size() != mapping_aero2elasto_elements.size()) {
+        throw std::runtime_error("Blade: length of vector of elements (" + std::to_string(aero.elements.size()) +
                                  " and length of aero to elasto mapping(" +
                                  std::to_string(mapping_aero2elasto_elements.size()) + ") do not match.");
     }
-    for (int ii = 0; ii < aero.loads.size(); ii++) {
-        elasto.accumulate_load_along_blade(aero.loads[ii], aero.moments[ii], mapping_aero2elasto_elements[ii].index,
-                                           mapping_aero2elasto_elements[ii].eta,
+    for (int ii = 0; ii < aero.elements.size(); ii++) {
+        elasto.accumulate_load_along_blade(aero.elements[ii].get_load(), aero.elements[ii].get_moment(),
+                                           mapping_aero2elasto_elements[ii].index, mapping_aero2elasto_elements[ii].eta,
                                            aero.elements[ii].get_offset_aero_absolute());
     }
 }

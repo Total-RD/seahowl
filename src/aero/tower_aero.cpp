@@ -50,14 +50,8 @@ void TowerAero::build() {
     }
     // elements
     elements.clear();
-    loads.clear();
-    loads_noacc.clear();
-    added_mass_matrices.clear();
     for (int ii = 0; ii < discretized_points.size() - 1; ii++) {
         elements.push_back(MorisonElement(nodes[ii], nodes[ii + 1]));
-        loads.push_back(Vector3d(0.0, 0.0, 0.0));
-        loads_noacc.push_back(Vector3d(0.0, 0.0, 0.0));
-        added_mass_matrices.push_back(Eigen::Matrix<double, 6, 6>::Zero());
     }
 }
 
@@ -65,12 +59,5 @@ void TowerAero::compute_env_loads(const EnvModel& wind_model, double time) {
     // compute loads at nodes
     for (auto& node : nodes) {
         node.compute_env_loads(wind_model, time);
-    }
-
-    // integrate loads over elements and store them
-    for (int ii = 0; ii < elements.size(); ii++) {
-        loads[ii] = elements[ii].get_load();
-        loads_noacc[ii] = elements[ii].get_load_noacc();
-        added_mass_matrices[ii] = elements[ii].get_added_mass_matrix();
     }
 }

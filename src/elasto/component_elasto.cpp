@@ -93,7 +93,7 @@ double ComponentElastoFEA::get_mass() const {
 
 void ComponentElastoFEA::reset_loads() {
     for (auto& node : nodes) {
-        node->reset_loads();
+        node->reset_loads_internals();
     }
 }
 
@@ -140,16 +140,16 @@ void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
     auto moment0 = moment * weight0;
     auto node0 = element->nodes[0];
     // load in global reference
-    node0->accumulate_force(load0, false);
-    node0->accumulate_torque(moment0 + (position + offset - node0->get_position()).cross(load0), false);
+    node0->accumulate_force_internals(load0, false);
+    node0->accumulate_torque_internals(moment0 + (position + offset - node0->get_position()).cross(load0), false);
     // load on second node
     double weight1 = 0.5 * abs(eta + 1);
     auto load1 = load * weight1;
     auto moment1 = moment * weight1;
     auto node1 = element->nodes[1];
     // load in global reference
-    node1->accumulate_force(load1, false);
-    node1->accumulate_torque(moment1 + (position + offset - node1->get_position()).cross(load1), false);
+    node1->accumulate_force_internals(load1, false);
+    node1->accumulate_torque_internals(moment1 + (position + offset - node1->get_position()).cross(load1), false);
 }
 
 void ComponentElastoFEA::accumulate_mass_matrix(const Eigen::Matrix<double, 6, 6>& matrix,

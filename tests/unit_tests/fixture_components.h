@@ -78,7 +78,7 @@ class FixtureComponents : public ::testing::Test {
     path TESTDIR;
     path ref_dir;
     path test_dir;
-    double rel_error = 1e-2;
+    double rel_error = 1e-3;
     double abs_error = 1e-6;
     bool dump_test_to_reference = false;
 };

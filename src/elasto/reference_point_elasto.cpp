@@ -89,7 +89,8 @@ void TowerReferencePointElasto::set_properties_cylinder(double density_volume,
                                                         double poisson_ratio,
                                                         double outer_diameter,
                                                         double thickness,
-                                                        bool shear) {
+                                                        bool shear,
+                                                        double fill_density) {
     auto shear_modulus = 0.5 * young_modulus / (1.0 + poisson_ratio);
 
     // geometry info
@@ -97,7 +98,7 @@ void TowerReferencePointElasto::set_properties_cylinder(double density_volume,
     auto d2 = outer_diameter - 2.0 * thickness;
     auto area = PI * (pow(d1, 2) - pow(d2, 2)) / 4.0;
     // linear density
-    auto density_linear = density_volume * area;
+    auto density_linear = density_volume * area + fill_density * PI * pow(d2, 2) / 4.0;
     // stiffnesses
     auto EI = young_modulus * PI * (pow(d1, 4) - pow(d2, 4)) / 64.;  // bending
     auto EA = young_modulus * area;                                  // axial
@@ -109,8 +110,9 @@ void TowerReferencePointElasto::set_properties_cylinder(double density_volume,
     stiffness_axial = EA;
     stiffness_torsion = kt;
     density = density_linear;
-    inertia_foreaft = EI / young_modulus * density_volume;
-    inertia_sideside = EI / young_modulus * density_volume;
+    // inertia from tower thickness density + fill fluid density
+    inertia_foreaft = EI / young_modulus * density_volume + PI * (pow(d2, 4)) / 64. * fill_density;
+    inertia_sideside = EI / young_modulus * density_volume + PI * (pow(d2, 4)) / 64. * fill_density;
 
     if (shear) {
         stiffness_foreaft_shear = shear_modulus * area;

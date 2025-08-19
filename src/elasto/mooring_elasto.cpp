@@ -212,7 +212,7 @@ void MooringElastoFEA::compute_seabed_loads(const seahowl::env::EnvModel& env_mo
         for (auto& node : element->nodes) {
             auto contact_area = diameter * (0.5 * element_length);
             auto penetration_load = env_model.soil_models.get_penetration_load(*node, contact_area, element_mass);
-            node->set_force(node->get_force() + penetration_load);
+            node->accumulate_force_internals(penetration_load);
         }
     }
 }

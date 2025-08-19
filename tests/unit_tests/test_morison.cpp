@@ -32,6 +32,7 @@ TEST_F(TestMorison, analytical_comparison) {
     double wave_height = 5.0;
     double wave_period = 10.0;
     double water_depth = 50.0;
+    double mean_water_level = 0.0;
     double diameter = 5.0;
 
     // create Morison coefficients
@@ -70,10 +71,12 @@ TEST_F(TestMorison, analytical_comparison) {
 
     // environmental conditions
     auto wave_model = std::make_shared<seahowl::env::WaveModelHydroChrono>();
+    wave_model->water_depth = water_depth;
+    wave_model->mean_water_level = mean_water_level;
     auto waves_hydrochrono = std::make_shared<RegularWave>();
     waves_hydrochrono->regular_wave_amplitude_ = wave_height / 2.0;
     waves_hydrochrono->regular_wave_omega_ = 2 * seahowl::PI / wave_period;
-    waves_hydrochrono->mwl_ = 0.0;
+    waves_hydrochrono->mwl_ = mean_water_level;
     waves_hydrochrono->water_depth_ = water_depth;
     waves_hydrochrono->Initialize();
     wave_model->waves = waves_hydrochrono;
@@ -138,6 +141,7 @@ TEST_F(TestMorison, tower_morison) {
     double wave_height = 5.0;
     double wave_period = 10.0;
     double water_depth = 50.0;
+    double mean_water_level = 0.0;
 
     // create Morison coefficients
     auto coefficients = seahowl::hydro::HydroCoefficients();
@@ -149,10 +153,12 @@ TEST_F(TestMorison, tower_morison) {
 
     // environmental conditions
     auto wave_model = std::make_shared<seahowl::env::WaveModelHydroChrono>();
+    wave_model->mean_water_level = mean_water_level;
+    wave_model->water_depth = water_depth;
     auto waves_hydrochrono = std::make_shared<RegularWave>();
     waves_hydrochrono->regular_wave_amplitude_ = wave_height / 2.0;
     waves_hydrochrono->regular_wave_omega_ = 2 * seahowl::PI / wave_period;
-    waves_hydrochrono->mwl_ = 0.0;
+    waves_hydrochrono->mwl_ = mean_water_level;
     waves_hydrochrono->water_depth_ = water_depth;
     waves_hydrochrono->Initialize();
     wave_model->waves = waves_hydrochrono;

@@ -26,7 +26,7 @@ namespace aero {
 class TowerAero : public virtual ComponentFluid {
   public:
     /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the aero component. */
-    std::vector<double> discretization_fractions;
+    std::vector<double> discretization_fractions{};
     /** @brief List of reference points describing the tower properties along its longitudinal axis. */
     std::vector<TowerReferencePointAero> reference_points;
     /** @brief List of discretized points (interpolated reference points) describing the tower properties. */
@@ -35,12 +35,6 @@ class TowerAero : public virtual ComponentFluid {
     std::vector<hydro::MorisonNode> nodes;
     /** @brief Aero elements. */
     std::vector<hydro::MorisonElement> elements;
-    /** @brief Loads at center of tower elements. */
-    std::vector<Vector3d> loads;
-    /** @brief Loads without component from structural acceleration at center of tower elements. */
-    std::vector<Vector3d> loads_noacc;
-    /** @brief Added mass matrices at center of tower elements. */
-    std::vector<Eigen::Matrix<double, 6, 6>> added_mass_matrices;
     /** @brief MacCamy and Fuchs Correction for large cylinders, Flag. */
     bool use_MacCamyFuchs_correction = false;
     /** @brief Cd Correction for large cylinders, Flag. */

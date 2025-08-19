@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <vector>
 
 // forward declarations
 namespace seahowl {

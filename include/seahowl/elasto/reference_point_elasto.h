@@ -121,7 +121,8 @@ struct TowerReferencePointElasto : ReferencePointElasto {
                                  double poisson_ratio,
                                  double outer_diameter,
                                  double thickness,
-                                 bool shear = false);
+                                 bool shear = false,
+                                 double fill_fluid_density = 0.0);
 };
 
 }  // namespace elasto

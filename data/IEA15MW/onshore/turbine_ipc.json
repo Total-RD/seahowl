@@ -1,4 +1,4 @@
-{
+﻿{
   "aero": {
     "solver": "BEMT",
     "options": {
@@ -13,7 +13,7 @@
       "elasto": [49],
       "aero": [49]
     },
-    "pitch_actuator_dynamics": true,
+    "pitch_actuator_dynamics": false,
     "blades": [
       {
         "file": "../base/blade.json",
@@ -51,7 +51,7 @@
   "controller": {
     "type": "DISCON",
     "options": {
-      "infile": "../base/controller/DISCON.IN",
+      "infile": "../base/controller/DISCON_IPC.IN",
       "libfile": "../base/controller/libdiscon.so"
     }
   }

@@ -637,7 +637,7 @@ def convert_elastodyn_tower_file(
     assert npoints != 0, "Could not find tower ElastoDyn info in given file."
     start_idx = 19
 
-    header = "position_x,position_y,position_z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient_normal,drag_coefficient_axial,added_mass_coefficient_normal,added_mass_coefficient_axial,buoyancy_factor,damping_foreaft,damping_sideside,damping_axial,damping_torsion,damping_mass,"
+    header = "position_x,position_y,position_z,diameter,thickness,density,young_modulus,poisson_ratio,drag_coefficient_normal,drag_coefficient_axial,added_mass_coefficient_normal,added_mass_coefficient_axial,fill_density,buoyancy_factor,damping_foreaft,damping_sideside,damping_axial,damping_torsion,damping_mass,"
     csv_array = np.zeros([npoints, len(header.split(",")) - 1])
     # assume basic steel properties and cylinder shape
     young_modulus = 210e9
@@ -673,6 +673,7 @@ def convert_elastodyn_tower_file(
             young_modulus,
             poisson_ratio,
             drag_coefficient,
+            0.0,
             0.0,
             0.0,
             0.0,

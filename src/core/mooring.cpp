@@ -121,14 +121,14 @@ void Mooring::update_positions_hydro() {
 
 void Mooring::update_loads_elasto() {
     elasto.reset_loads();
-    if (hydro.loads.size() != mapping_hydro2elasto_elements.size()) {
-        throw std::runtime_error("Mooring: length of vector of loads (" + std::to_string(hydro.loads.size()) +
+    if (hydro.elements.size() != mapping_hydro2elasto_elements.size()) {
+        throw std::runtime_error("Mooring: length of vector of elements (" + std::to_string(hydro.elements.size()) +
                                  ") and length of hydro to elasto mapping (" +
                                  std::to_string(mapping_hydro2elasto_elements.size()) + ") do not match.");
     }
     auto offset = Vector3d(0.0, 0.0, 0.0);
-    for (int ii = 0; ii < hydro.loads.size(); ii++) {
-        elasto.accumulate_element_load(hydro.loads[ii], Vector3d(0.0, 0.0, 0.0),
+    for (int ii = 0; ii < hydro.elements.size(); ii++) {
+        elasto.accumulate_element_load(hydro.elements[ii].get_load(), Vector3d(0.0, 0.0, 0.0),
                                        mapping_hydro2elasto_elements[ii].index, mapping_hydro2elasto_elements[ii].eta,
                                        offset);
     }

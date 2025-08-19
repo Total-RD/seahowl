@@ -246,11 +246,6 @@ void RotorAeroBEMT::compute_env_loads(const EnvModel& env_model, double time) {
                     global_normal * local_velocity.y() + global_tangent * local_velocity.x();
             }
         }
-        // update loads of blade
-        for (int ii = 0; ii < blade->elements.size(); ii++) {
-            blade->loads[ii] = blade->elements[ii].get_load();
-            blade->moments[ii] = blade->elements[ii].get_moment();
-        }
     }
 }
 

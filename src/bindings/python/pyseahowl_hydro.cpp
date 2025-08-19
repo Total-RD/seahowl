@@ -74,7 +74,6 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def_readwrite("length", &seahowl::hydro::MooringHydro::length)
         .def_readwrite("diameter", &seahowl::hydro::MooringHydro::diameter)
         .def_readwrite("coefficients", &seahowl::hydro::MooringHydro::coefficients)
-        .def_readwrite("loads", &seahowl::hydro::MooringHydro::loads)
         .def_readonly("nodes", &seahowl::hydro::MooringHydro::nodes)
         .def_readonly("elements", &seahowl::hydro::MooringHydro::elements)
         .def("build", &seahowl::hydro::MooringHydro::build)

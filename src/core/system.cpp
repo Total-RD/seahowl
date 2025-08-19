@@ -116,7 +116,7 @@ void System::prestep(double time, double dt) {
 
     // compute forces from env model
     if (env_model->fluid_models.has_model()) {
-        apply_env_model(*env_model, time);
+        apply_env_model(*env_model, time + dt);
     }
 
     // prestep (accumulates loads from aero to elasto)

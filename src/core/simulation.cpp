@@ -52,7 +52,7 @@ Simulation::Simulation()
                 {
                     {"dt", {}, "Set the time step for generating outputs", "double", "0", true, true, true},
                     {"folder", {}, "Set the path of the folder for outputs", "string", "./output", true, true, true},
-                    {"vtk", {}, "Generate VTK outputs", "bool", "true", true, true, true},
+                    {"vtk", {}, "Generate VTK outputs", "bool", "false", true, true, true},
                     {"log_level",
                      {},
                      "Set log level (critical|error|warn|info|debug|trace)",
@@ -101,7 +101,7 @@ void Simulation::populate_from_config() {
     // output manager
     outputs->dt_output = config.get_double("outputs.dt");
     outputs->set_output_folder(config.get_string("outputs.folder"));
-    outputs->has_vtk = config.get_bool("outputs.VTK");
+    outputs->has_vtk = config.get_bool("outputs.vtk");
     outputs->has_gui = config.get_bool("outputs.gui");
 
     spdlog::info("");

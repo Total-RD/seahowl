@@ -111,7 +111,7 @@ struct BladeElementAero {
 class BladeAero : public ComponentFluid {
   public:
     /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the aero component. */
-    std::vector<double> discretization_fractions;
+    std::vector<double> discretization_fractions{};
     /** @brief List of reference points describing the blade properties along its longitudinal axis. */
     std::vector<BladeReferencePointAero> reference_points;
     /** @brief List of discretized points (interpolated reference points) describing the blade properties. */
@@ -120,10 +120,6 @@ class BladeAero : public ComponentFluid {
     std::vector<BladeNodeAero> nodes;
     /** @brief Aero elements. */
     std::vector<BladeElementAero> elements;
-    /** @brief Loads at center of blade elements. */
-    std::vector<Vector3d> loads;
-    /** @brief Loads at center of blade elements. */
-    std::vector<Vector3d> moments;
     /** @brief Initial azimuth of the blade relative to rotor azimuth (in radians). */
     double azimuth0 = 0.0;
     /** @brief Pitch of the blade (in radians). */

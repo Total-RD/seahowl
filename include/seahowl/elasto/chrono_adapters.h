@@ -36,6 +36,7 @@ class ChLinkTSDA;
 class ChLoadBodyBodyBushingGeneric;
 class ChSystem;
 class ChLoadLocal66;
+class ChLoadForceTorque;
 class ChLoadContainer;
 class ChFunction;
 namespace fea {
@@ -83,6 +84,7 @@ class BodyElastoChrono : public BodyElasto, public EntityDynamicChrono {
     std::shared_ptr<chrono::ChBody> chobj;
     std::shared_ptr<chrono::ChLoadLocal66> chload66;
     std::shared_ptr<chrono::ChLoadContainer> chloadcontainer;
+    std::shared_ptr<chrono::ChLoadForceTorque> chloads_internals;
 
     BodyElastoChrono();
     virtual void set_mass(double mass) override;
@@ -90,12 +92,17 @@ class BodyElastoChrono : public BodyElasto, public EntityDynamicChrono {
     virtual void set_inertia_matrix(const Eigen::Matrix<double, 3, 3>& inertia) override;
     virtual Eigen::Matrix<double, 3, 3> get_inertia_matrix() const override;
     virtual void reset_loads() override;
+    virtual void reset_loads_internals() override;
     virtual Vector3d get_force(bool is_local = false) const override;
+    virtual Vector3d get_force_internals(bool is_local = false) const override;
     virtual Vector3d get_torque(bool is_local = true) const override;
+    virtual Vector3d get_torque_internals(bool is_local = false) const override;
     virtual void set_force(const Vector3d& force, bool is_local = false) override;
     virtual void set_torque(const Vector3d& torque, bool is_local = true) override;
     virtual void accumulate_force(const Vector3d& force, bool is_local = false) override;
+    virtual void accumulate_force_internals(const Vector3d& force, bool is_local = false) override;
     virtual void accumulate_torque(const Vector3d& torque, bool is_local = true) override;
+    virtual void accumulate_torque_internals(const Vector3d& torque, bool is_local = true) override;
     virtual void set_fixed(bool is_fixed) override;
     virtual bool is_fixed() const override;
     virtual double get_mass() override;
@@ -113,6 +120,7 @@ class NodeElastoChronoBase {
     std::shared_ptr<chrono::fea::ChNodeFEAbase> chobj;
     std::shared_ptr<chrono::ChLoadLocal66> chload66;
     std::shared_ptr<chrono::ChLoadContainer> chloadcontainer;
+    std::shared_ptr<chrono::ChLoadForceTorque> chloads_internals;
 
     NodeElastoChronoBase();
 };
@@ -131,12 +139,17 @@ class NodeElastoChrono : public NodeElasto, public EntityDynamicChrono, public N
     virtual Quaternion get_rotation() const override;
     virtual Vector3d get_direction() const override;
     virtual void reset_loads() override;
+    virtual void reset_loads_internals() override;
     virtual Vector3d get_force(bool is_local = false) const override;
+    virtual Vector3d get_force_internals(bool is_local = false) const override;
     virtual Vector3d get_torque(bool is_local = true) const override;
+    virtual Vector3d get_torque_internals(bool is_local = false) const override;
     virtual void set_force(const Vector3d& force, bool is_local = false) override;
     virtual void set_torque(const Vector3d& torque, bool is_local = true) override;
     virtual void accumulate_force(const Vector3d& force, bool is_local = false) override;
+    virtual void accumulate_force_internals(const Vector3d& force, bool is_local = false) override;
     virtual void accumulate_torque(const Vector3d& torque, bool is_local = true) override;
+    virtual void accumulate_torque_internals(const Vector3d& torque, bool is_local = true) override;
     virtual void set_fixed(bool is_fixed) override;
     virtual bool is_fixed() const override;
     virtual void set_mass(double mass) override;
@@ -161,12 +174,17 @@ class NodeElastoChronoD : public NodeElasto, public NodeElastoChronoBase {
     virtual Quaternion get_rotation() const override;
     virtual Vector3d get_direction() const override;
     virtual void reset_loads() override;
+    virtual void reset_loads_internals() override;
     virtual Vector3d get_force(bool is_local = false) const override;
+    virtual Vector3d get_force_internals(bool is_local = false) const override;
     virtual Vector3d get_torque(bool is_local = true) const override;
+    virtual Vector3d get_torque_internals(bool is_local = false) const override;
     virtual void set_force(const Vector3d& force, bool is_local = false) override;
     virtual void set_torque(const Vector3d& torque, bool is_local = true) override;
     virtual void accumulate_force(const Vector3d& force, bool is_local = false) override;
+    virtual void accumulate_force_internals(const Vector3d& force, bool is_local = false) override;
     virtual void accumulate_torque(const Vector3d& torque, bool is_local = true) override;
+    virtual void accumulate_torque_internals(const Vector3d& torque, bool is_local = true) override;
     virtual void set_fixed(bool is_fixed) override;
     virtual bool is_fixed() const override;
     virtual void set_mass(double mass) override;
@@ -326,6 +344,7 @@ class ActuatorRotationChrono : public ActuatorRotation, public LinkChronoBase {
     std::shared_ptr<chrono::ChLinkMotorRotationAngle> chobj;
 
     ActuatorRotationChrono();
+    void reset() override;
     void set_control_timeseries(const std::vector<double>& time_array,
                                 const std::vector<double>& values_array) override;
     double get_control_value(double time) const override;

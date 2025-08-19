@@ -601,11 +601,6 @@ void TurbineAeroDyn::compute_env_loads(const seahowl::env::EnvModel& env_model, 
             node.moment = aerodyn.moments_aerodyn[count_node];
             count_node += 1;
         }
-        // then update loads of aero elements
-        for (int ii = 0; ii < blade->elements.size(); ii++) {
-            blade->loads[ii] = blade->elements[ii].get_load();
-            blade->moments[ii] = blade->elements[ii].get_moment();
-        }
     }
 
     // compute loads on rest of turbine

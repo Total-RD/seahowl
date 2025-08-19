@@ -119,8 +119,6 @@ void seahowl::servo::ControllerDISCON::initialize(double time, double dt, const 
     // yaw rate control
     pImpl.SetAvrSWAP(29, 0.0);
 
-    seahowl::io::utils::check_file_exists(libfile);
-
     pImpl.Init(libfile, output_folder + "/tmp_discon");
 
     spdlog::debug("Finished initialization of DISCON controller.");
@@ -416,10 +414,11 @@ void seahowl::servo::DisconInterface::Init(const std::string& libfile, const std
         DISCON = (DISCON_routine)GetProcAddress((HMODULE)handler, "DISCON");
 #endif
         spdlog::debug("DISCON: loaded {}.", path_dll);
+        has_dll = true;
     } else {
         spdlog::warn("DISCON: no dynamic library transmitted to DISCON interface.");
+        has_dll = false;
     }
-    has_dll = true;
 
     avrSWAP[58] = 500;  // Buffer chaar size
     avrSWAP[50] = 500;  // self.char_buffer
@@ -639,14 +638,14 @@ float seahowl::servo::DisconInterface::GetForcedAvrSWAP(size_t index) const {
 void seahowl::servo::DisconInterface::Call() {
     if (has_dll) {
         DISCON(avrSWAP, &aviFAIL, accINFILE, avcOUTNAME, avcMSG);
-    }
 
-    // handle error, if any.
-    if (aviFAIL == 0) {
-        return;
-    } else if (aviFAIL > 0) {
-        spdlog::warn("DISCON WARNING: \"{}\".", avcMSG);
-    } else if (aviFAIL < 0) {
-        throw std::runtime_error("DISCON ERROR: \"" + std::string(avcMSG) + "\".");
+        // handle error, if any.
+        if (aviFAIL == 0) {
+            return;
+        } else if (aviFAIL > 0) {
+            spdlog::warn("DISCON WARNING: \"{}\".", avcMSG);
+        } else if (aviFAIL < 0) {
+            throw std::runtime_error("DISCON ERROR: \"" + std::string(avcMSG) + "\".");
+        }
     }
 }

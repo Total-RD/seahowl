@@ -8,7 +8,9 @@ using seahowl::elasto::BladeElasto;
 using seahowl::elasto::RotorElasto;
 using seahowl::elasto::RotorNacelleAssemblyElasto;
 
-RotorElasto::RotorElasto() {}
+RotorElasto::RotorElasto() {
+    body_hub = std::make_unique<BodyElastoChrono>();
+}
 
 void RotorElasto::assemble_this(SystemElasto& system) {
     for (auto& blade : blades) {
@@ -32,7 +34,6 @@ void RotorElasto::build() {
     auto rotation0 = Quaternion(1.0, 0.0, 0.0, 0.0);
 
     // hub
-    body_hub = std::make_unique<BodyElastoChrono>();
     // mass and inertia
     body_hub->set_mass(hub.mass);
     body_hub->set_inertia_matrix(hub.inertia);
@@ -100,11 +101,11 @@ double RotorElasto::get_mass() const {
 }
 
 void RotorElasto::reset_loads() {
-    body_hub->reset_loads();
+    body_hub->reset_loads_internals();
 }
 
 void RotorElasto::accumulate_axial_torque(double torque) {
-    body_hub->accumulate_torque(Vector3d(torque, 0.0, 0.0), true);
+    body_hub->accumulate_torque_internals(Vector3d(torque, 0.0, 0.0), true);
 }
 
 RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {
@@ -240,7 +241,7 @@ double RotorNacelleAssemblyElasto::get_mass() const {
 
 void RotorNacelleAssemblyElasto::reset_loads() {
     rotor->reset_loads();
-    body_shaft->reset_loads();
+    body_shaft->reset_loads_internals();
     torque_elec_accumulated = 0.0;
 }
 
@@ -280,8 +281,8 @@ double RotorNacelleAssemblyElasto::get_axial_torque() const {
 }
 
 void RotorNacelleAssemblyElasto::accumulate_electrical_torque(double torque) {
-    rotor->body_hub->accumulate_torque(Vector3d(-torque, 0.0, 0.0), true);
-    body_shaft->accumulate_torque(Vector3d(torque, 0.0, 0.0), true);
+    rotor->body_hub->accumulate_torque_internals(Vector3d(-torque, 0.0, 0.0), true);
+    body_shaft->accumulate_torque_internals(Vector3d(torque, 0.0, 0.0), true);
     torque_elec_accumulated += torque;
 }
 

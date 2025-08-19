@@ -3,6 +3,14 @@
 using namespace seahowl;
 using namespace seahowl::elasto;
 
+Vector3d EntityLoadable::get_force_total(bool is_local) const {
+    return get_force(is_local) + get_force_internals(is_local);
+}
+
+Vector3d EntityLoadable::get_torque_total(bool is_local) const {
+    return get_torque(is_local) + get_torque_internals(is_local);
+}
+
 Vector3d ElementElasto::get_position(double eta) const {
     auto position = Vector3d(0.0, 0.0, 0.0);
     auto rotation = Quaternion(0.0, 0.0, 0.0, 0.0);

@@ -84,6 +84,9 @@ TEST_F(TestTurbine, rpm_initial_pitch) {
     test_dataset.test_csv.add_function("rpm (-)", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
     test_dataset.test_csv.add_function("axial torque (Nm)",
                                        [&turbine]() { return turbine.rna.elasto.get_axial_torque(); });
+    test_dataset.test_csv.add_function("blade1 root moment (Nm)", [&turbine]() {
+        return turbine.rna.elasto.rotor->blades[0]->get_blade_root_moment();
+    });
 
     while (time < 50.0) {
         // prestep
@@ -161,6 +164,11 @@ TEST_F(TestTurbine, rpm_initial_pitch_fpm) {
                                        (test_dir / "test_turbine_rpm_initial_pitch_fpm.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("rpm (-)", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
+    test_dataset.test_csv.add_function("axial torque (Nm)",
+                                       [&turbine]() { return turbine.rna.elasto.get_axial_torque(); });
+    test_dataset.test_csv.add_function("blade1 root moment (Nm)", [&turbine]() {
+        return turbine.rna.elasto.rotor->blades[0]->get_blade_root_moment();
+    });
 
     while (time < 50.0) {
         // prestep
@@ -235,6 +243,11 @@ TEST_F(TestTurbine, rpm_initial_pitch_rigid_rotor) {
          (test_dir / "test_turbine_rpm_initial_pitch_rigid_rotor.test.csv").generic_string()});
     test_dataset.test_csv.add_function("time (s)", [&system_elasto]() { return system_elasto.get_time(); });
     test_dataset.test_csv.add_function("rpm (-)", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
+    test_dataset.test_csv.add_function("axial torque (Nm)",
+                                       [&turbine]() { return turbine.rna.elasto.get_axial_torque(); });
+    test_dataset.test_csv.add_function("blade1 root moment (Nm)", [&turbine]() {
+        return turbine.rna.elasto.rotor->blades[0]->get_blade_root_moment();
+    });
 
     while (time < 50.0) {
         // prestep
