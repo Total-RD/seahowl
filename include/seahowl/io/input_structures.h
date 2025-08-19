@@ -23,6 +23,7 @@ struct ReferencePointTowerDb {
     double drag_coefficient_axial;
     double added_mass_coefficient_normal;
     double added_mass_coefficient_axial;
+    double fill_density;
     double buoyancy_factor;
     double damping_foreaft;
     double damping_sideside;

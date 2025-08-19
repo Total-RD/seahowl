@@ -183,6 +183,7 @@ void from_json(const json& js, const json& js_global_vars, ReferencePointTowerDb
     ref_point.drag_coefficient_axial = read_value(js, js_global_vars, "drag_coefficient_axial");
     ref_point.added_mass_coefficient_normal = read_value(js, js_global_vars, "added_mass_coefficient_normal");
     ref_point.added_mass_coefficient_axial = read_value(js, js_global_vars, "added_mass_coefficient_axial");
+    ref_point.fill_density = read_value(js, js_global_vars, "fill_density");
     ref_point.buoyancy_factor = read_value(js, js_global_vars, "buoyancy_factor");
     ref_point.damping_foreaft = read_value(js, js_global_vars, "damping_foreaft");
     ref_point.damping_sideside = read_value(js, js_global_vars, "damping_sideside");

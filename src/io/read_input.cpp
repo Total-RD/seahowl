@@ -203,7 +203,7 @@ std::vector<seahowl::elasto::TowerReferencePointElasto> get_tower_elasto_referen
         // shear set to false as it leads to issues when tower is not finely discretized (wrong nat. freq.)
         // its effect is usually small enough to be neglected here
         reference_point.set_properties_cylinder(point_db.density, point_db.young_modulus, point_db.poisson_ratio,
-                                                point_db.diameter, point_db.thickness, false);
+                                                point_db.diameter, point_db.thickness, false, point_db.fill_density);
 
         reference_point.damping_foreaft = point_db.damping_foreaft;
         reference_point.damping_sideside = point_db.damping_sideside;
