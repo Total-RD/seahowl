@@ -1,24 +1,33 @@
 processor: Compare
+tags: [csv]
+readers:
+  csv:
+    cols:
+      curve_parser:
+        name: "col_x"
+        parameters:
+          x: ["time (s)", "fraction"]
+compare:
+  errors_limit: 10000
+  float_thresholds:
+    relative_vs_absolute_min: 1e-12
+    relative_error_min: 1e-3
+    relative_error_max: 1e-2
+    absolute_error_min: 1e-7
+    absolute_error_max: 1e-6
+  sources:
+    test_folder_relative_path: test
+    reference_folder_relative_path: ref
+    test_filename_match_ignore: .test
 report:
+  title_prefix : "Seahowl / Comparison Results /"
   output:
     export_html: true
   html:
     collapse_if_successful: false
     curves:
+      compare_vs_difference: true
       display_on_load: false
     parameter_page_mode :
       default_value : tabs
-  title_prefix : "Seahowl / Comparison Results "
   logo_file: ../../../../doc/source/_static/totalenergies_alpha.png
-compare:
-   errors_limit: 10000
-   sources:
-     reference_folder_relative_path: ref
-     test_filename_match_ignore: .test
-     test_folder_relative_path: test
-readers:
-  csv:
-    curve_parser:
-      name: "col_x"
-      parameters:
-        x: ["time (s)", "fraction"]

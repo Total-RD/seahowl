@@ -15,6 +15,13 @@ file_reader:
   extension_unknown_ignore: true
 readers:
   csv:
+    metrics:
+      #- col: "Y-Value-1"
+      #  aggregation: "mean"
+      - name: "tower base moment (Nm)"
+        aggregation: "mean"
+        function: "euclidean_norm"
+        components: ["tower base moment x (Nm)", "tower base moment y (Nm)", "tower base moment z (Nm)"]
     cols:
       #ignore_colunmns: ["wind z (m/s)", "rpm (-)"]
       curve_parser:
