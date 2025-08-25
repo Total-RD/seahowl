@@ -61,6 +61,7 @@ option(SEAHOWL_ENABLE_IRRLICHT "Enable Irrlicht 3D visualization library" OFF)
 option(SEAHOWL_ENABLE_TESTS "Enable tests" OFF)
 option(SEAHOWL_ENABLE_DOC "Generate html documentation" OFF)
 option(SEAHOWL_ENABLE_BUILD "Build library and drivers" ON)
+option(SEAHOWL_ENABLE_OPENMP "Enable OpenMP" ON)
 option(SEAHOWL_ENABLE_PYTHON "Enable python binding" OFF)
 option(SEAHOWL_ENABLE_VIRTUALENV "Enable Python virtual env" OFF)
 option(SEAHOWL_ENABLE_EXAMPLES "Enable examples" ON)
@@ -76,6 +77,16 @@ option(SEAHOWL_ENABLE_HYDROCHRONO "Enable HydroChrono library" OFF)
 
 # Eigen library
 find_package(Eigen3 3.3.0 REQUIRED NO_MODULE)
+
+# OpenMP
+if(SEAHOWL_ENABLE_OPENMP)
+    find_package(OpenMP)
+    if(OpenMP_CXX_FOUND)
+        message(STATUS "OpenMP found: ${OpenMP_CXX_FLAGS}")
+    else()
+        message(WARNING "OpenMP not found.")
+    endif()
+endif()
 
 # Irrlicht Visualization library
 if(SEAHOWL_ENABLE_IRRLICHT)
@@ -425,6 +436,7 @@ target_compile_definitions(
     seahowl_core
     PRIVATE
     CHRONO_DATA_DIR="${CHRONO_DATA_DIR}"
+    SEAHOWL_HAVE_OPENMP=$<BOOL:${SEAHOWL_ENABLE_OPENMP}>
     SEAHOWL_HAVE_HYDROCHRONO=$<BOOL:${SEAHOWL_ENABLE_HYDROCHRONO}>
     SEAHOWL_HAVE_VTK=$<BOOL:${SEAHOWL_ENABLE_VTK}>
     SEAHOWL_HAVE_AERODYN=$<BOOL:${SEAHOWL_ENABLE_AERODYN}>
@@ -454,6 +466,12 @@ target_link_libraries(seahowl_core
     PUBLIC Eigen3::Eigen
     PRIVATE nlohmann_json::nlohmann_json ${CHRONO_LIBRARIES} spdlog::spdlog
 )
+
+if (SEAHOWL_ENABLE_OPENMP)
+    if (OpenMP_CXX_FOUND)
+        target_link_libraries(seahowl_core PRIVATE ${OpenMP_CXX_LIBRARIES})
+    endif (SEAHOWL_ENABLE_OPENMP)
+endif (SEAHOWL_ENABLE_OPENMP)
 
 if (SEAHOWL_ENABLE_HYDROCHRONO)
     target_link_libraries(seahowl_core PRIVATE HydroChrono::HydroChrono)

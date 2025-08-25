@@ -179,6 +179,10 @@ void print_banner() {
 #ifdef SEAHOWL_HAVE_VTK
     spdlog::info("  |- VTK: {}", (SEAHOWL_HAVE_VTK ? "yes" : "no"));
 #endif
+#ifdef SEAHOWL_HAVE_OPENMP
+    spdlog::info("  |- OpenMP: {}", (SEAHOWL_HAVE_OPENMP ? "yes" : "no"));
+#endif
+
     //
     // current_time
     std::ostringstream oss;

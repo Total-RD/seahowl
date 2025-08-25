@@ -7,6 +7,10 @@
 
 #include <spdlog/spdlog.h>
 
+#ifdef SEAHOWL_HAVE_OPENMP
+    #include <omp.h>
+#endif
+
 using namespace seahowl;
 using namespace seahowl::aero;
 using namespace seahowl::hydro;
@@ -56,8 +60,9 @@ void TowerAero::build() {
 }
 
 void TowerAero::compute_env_loads(const EnvModel& wind_model, double time) {
-    // compute loads at nodes
-    for (auto& node : nodes) {
-        node.compute_env_loads(wind_model, time);
+// compute loads at nodes
+#pragma omp parallel for
+    for (int ii = 0; ii < static_cast<int>(nodes.size()); ++ii) {
+        nodes[ii].compute_env_loads(wind_model, time);
     }
 }
