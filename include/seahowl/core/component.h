@@ -29,7 +29,10 @@ class ComponentDynamic {
     ComponentDynamic(const std::shared_ptr<seahowl::elasto::ComponentElasto> elasto_,
                      const std::shared_ptr<seahowl::ComponentFluid> fluid_)
         : elasto_ptr(elasto_), fluid_ptr(fluid_) {}
-
+    /**
+     * @brief Virtual destructor.
+     */
+    virtual ~ComponentDynamic() = default;
     /**
      * @brief Builds the component, called before initializing the simulation.
      */

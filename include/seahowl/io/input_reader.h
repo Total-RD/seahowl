@@ -14,7 +14,10 @@ class InputReader {
      * @param filepath Path to the input file.
      */
     InputReader(const std::string& filepath_) : filepath(filepath_) {}
-
+    /**
+     * @brief Destructor
+     */
+    virtual ~InputReader() = default;
     /**
      * @brief Read tower data from a file.
      */

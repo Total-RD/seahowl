@@ -254,10 +254,23 @@ struct seahowl::aero::AeroDynInflowLib {
 };
 
 AeroDynInflowLib::~AeroDynInflowLib() {
-    delete[] HubPos, HubOri, HubVel, HubAcc;                        // hub
-    delete[] NacPos, NacOri, NacVel, NacAcc;                        // nacelle
-    delete[] BldRootPos, BldRootOri, BldRootVel, BldRootAcc;        // blade roots
-    delete[] MeshPos, MeshOri, MeshVel, MeshAcc, MeshPtToBladeNum;  // blades mesh
+    delete[] HubPos;
+    delete[] HubOri;
+    delete[] HubVel;
+    delete[] HubAcc;  // hub
+    delete[] NacPos;
+    delete[] NacOri;
+    delete[] NacVel;
+    delete[] NacAcc;  // nacelle
+    delete[] BldRootPos;
+    delete[] BldRootOri;
+    delete[] BldRootVel;
+    delete[] BldRootAcc;  // blade roots
+    delete[] MeshPos;
+    delete[] MeshOri;
+    delete[] MeshVel;
+    delete[] MeshAcc;
+    delete[] MeshPtToBladeNum;  // blades mesh
     delete[] OutputChannelValues;
     delete[] VTKNacDim;
     delete[] TurbOrigin;

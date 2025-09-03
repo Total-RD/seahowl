@@ -49,7 +49,7 @@ AirfoilProperties AirfoilProperties::operator+(const AirfoilProperties& other) c
     while (idx1 + idx2 < this->coefficients_list.size() + other.coefficients_list.size()) {
         auto& coeffs1 = this->coefficients_list[idx1];
         auto& coeffs2 = other.coefficients_list[idx2];
-        if (abs(coeffs1.alpha - coeffs2.alpha) < 1e-6) {
+        if (std::abs(coeffs1.alpha - coeffs2.alpha) < 1e-6) {
             new_point.coefficients_list.push_back(coeffs1 + coeffs2);
             if (idx1 + 1 < this->coefficients_list.size() && idx2 + 1 < other.coefficients_list.size()) {
                 if (this->coefficients_list[idx1 + 1].alpha > other.coefficients_list[idx2 + 1].alpha) {

@@ -81,7 +81,7 @@ class Blade : public ComponentDynamic {
      * Sets the nodes and elements for elasto and aero components of the blade, as well as the aero->elasto mapping and
      * elasto->aero mapping.
      */
-    virtual void build();
+    virtual void build() override;
 
     /**
      * @brief Applies pitch increment to the blade (i.e. rotates the blade around its longitudinal axis).

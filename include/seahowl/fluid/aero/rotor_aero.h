@@ -115,7 +115,7 @@ class RotorNacelleAssemblyAero : public ComponentFluid {
     /**
      * @brief Builds rotor.
      */
-    void build();
+    void build() override;
 
     /**
      * @brief Initializes rotor related variables with current configuration.

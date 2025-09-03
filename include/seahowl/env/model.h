@@ -17,6 +17,10 @@ class Model {
      * @param[in] time Time of simulation.
      */
     virtual bool is_inside(const Vector3d& position, double time = 0.0) const = 0;
+    /**
+     * @brief Virtual destructor.
+     */
+    virtual ~Model() = default;
 };
 
 }  // namespace env

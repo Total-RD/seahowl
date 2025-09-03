@@ -333,6 +333,7 @@ class LinkMatrixStiffnessDampingChrono : public LinkMatrixStiffnessDamping {
     Eigen::Matrix<double, 6, 6> damping_matrix;
 
     LinkMatrixStiffnessDampingChrono();
+    virtual ~LinkMatrixStiffnessDampingChrono() = default;
     void initialize(const Entity& entity1, const Entity& entity2) override;
     void set_stiffness_matrix(const Eigen::Matrix<double, 6, 6>& stiffness_matrix) override;
     void set_damping_matrix(const Eigen::Matrix<double, 6, 6>& damping_matrix) override;

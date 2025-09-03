@@ -54,7 +54,7 @@ class TurbineElasto : public ComponentElasto {
      *
      * Calls build for each of the components of the turbine.
      */
-    void build();
+    void build() override;
 
     /**
      * @brief Translates the turbine.

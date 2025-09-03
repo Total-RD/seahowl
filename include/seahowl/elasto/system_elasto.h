@@ -23,7 +23,10 @@ class SystemElasto : public ComponentElasto {
     std::shared_ptr<MeshElasto> mesh;
     /** @brief Whether system has been assembled or not. */
     bool is_assembled = false;
-
+    /**
+     * @brief Virtual destructor.
+     */
+    virtual ~SystemElasto() = default;
     /**
      * @brief Builds the component (to call before assemble).
      */
@@ -41,7 +44,7 @@ class SystemElasto : public ComponentElasto {
      *
      * @param[in] fraction Fraction of presetup phase, starting at 0.0 and ending at 1.0.
      */
-    virtual void presetup(double fraction) = 0;
+    // virtual void presetup(double fraction) = 0;
 
     /**
      * @brief Does an elasto step.

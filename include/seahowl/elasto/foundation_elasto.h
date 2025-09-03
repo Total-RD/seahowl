@@ -51,7 +51,7 @@ class FoundationElastoBody : public virtual FoundationElasto {
     virtual double get_mass() const override;
 
   protected:
-    virtual void assemble_this(seahowl::elasto::SystemElasto& system);
+    virtual void assemble_this(seahowl::elasto::SystemElasto& system) override;
 };
 
 }  // namespace elasto

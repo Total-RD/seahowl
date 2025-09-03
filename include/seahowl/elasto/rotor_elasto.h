@@ -90,7 +90,7 @@ class RotorElasto : public ComponentElasto {
     /**
      * @brief Resets accumulated loads.
      */
-    void reset_loads();
+    void reset_loads() override;
 
     /**
      * @brief Applies pitch increment to all blades (i.e. rotates blades around their respective longitudinal axis).
@@ -163,6 +163,7 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
      * @brief Constructor.
      */
     RotorNacelleAssemblyElasto(std::shared_ptr<seahowl::elasto::RotorElasto> rotor);
+    ~RotorNacelleAssemblyElasto() = default;
 
     /**
      * @brief Builds the rotor.
@@ -177,7 +178,7 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     /**
      * @brief Resets accumulated loads.
      */
-    void reset_loads();
+    void reset_loads() override;
 
     /**
      * @brief Returns the RPM of the rotor.

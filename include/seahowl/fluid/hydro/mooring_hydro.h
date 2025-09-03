@@ -61,7 +61,7 @@ class MooringHydro : public ComponentFluid {
     /**
      * @brief Builds the mooring.
      */
-    void build();
+    void build() override;
 
     /**
      * @brief Compute fluid loads on mooring using Morison's approach on cylindrical elements.

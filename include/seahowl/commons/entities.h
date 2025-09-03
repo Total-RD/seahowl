@@ -13,6 +13,10 @@ namespace seahowl {
 class Entity {
   public:
     /**
+     * @brief Virtual destructor.
+     */
+    virtual ~Entity() = default;
+    /**
      * @brief Sets position of entity.
      *
      * @param[in] position Position of entity.

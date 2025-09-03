@@ -239,7 +239,10 @@ class ElementElasto {
   public:
     /** @brief Nodes of elasto element. */
     std::vector<std::shared_ptr<NodeElasto>> nodes;
-
+    /**
+     * @brief Virtual destructor.
+     */
+    virtual ~ElementElasto() = default;
     /**
      * @brief Sets nodes of element.
      *
@@ -353,6 +356,10 @@ class SpringLinear {
      * @param[in] body2 Second body to link.
      */
     virtual void initialize(const BodyElasto& body1, const BodyElasto& body2) = 0;
+    /**
+     * @brief Virtual destructor.
+     */
+    virtual ~SpringLinear() = default;
 
     /**
      * @brief Initialize spring between bodies with anchor offsets.
@@ -402,6 +409,10 @@ class SpringLinear {
 class Link {
   public:
     /**
+     * @brief Destructor.
+     */
+    virtual ~Link() = default;
+    /**
      * @brief Initialize link between entitiies.
      *
      * @param[in] entity1 First entity to link.
@@ -437,6 +448,7 @@ class Link {
  */
 class LinkMatrixStiffnessDamping {
   public:
+    virtual ~LinkMatrixStiffnessDamping() = default;
     /**
      * @brief Initialize link between entitiies.
      *
@@ -477,7 +489,10 @@ class ActuatorRotation : public virtual Entity {
     Quaternion reference_rotation;
     /** @brief Link for fixing the actuator in space. */
     std::unique_ptr<Link> link;
-
+    /**
+     * @brief Destructor.
+     */
+    virtual ~ActuatorRotation() = default;
     /**
      * @brief Resets actuator (bodies back to origin and control timeseries to zero).
      */
@@ -539,7 +554,7 @@ class ActuatorRotation : public virtual Entity {
 
     void set_position(const Vector3d& position) override;
     Vector3d get_position() const override;
-    void set_rotation(const Quaternion& rotation);
+    void set_rotation(const Quaternion& rotation) override;
     Quaternion get_rotation() const override;
     Vector3d get_rpy_angles() const override;
 };
@@ -549,6 +564,10 @@ class ActuatorRotation : public virtual Entity {
  */
 class MeshElasto {
   public:
+    /**
+     * @brief Virtual destructor.
+     */
+    virtual ~MeshElasto() = default;
     /**
      * @brief Adds node to mesh.
      *
