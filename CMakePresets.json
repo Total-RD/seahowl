@@ -141,6 +141,60 @@
         "minimal"
       ],
       "displayName": "Minimal SEAHOWL installation (Debug)"
+    },
+    {
+      "name": "default/Intel",
+      "displayName": "Default SEAHOWL installation Intel Compilers",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTING": "ON",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_MANIFEST_DIR": "${sourceDir}/external/vcpkg_intel",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install",
+        "CMAKE_CXX_FLAGS_RELEASE": "-O3 -std=c++17 -fPIC -shared -fp-model=precise -fiopenmp"
+      },
+      "environment": {
+        "FC": "ifx",
+        "CXX": "icpx",
+        "CC": "icx"
+      }
+    },
+    {
+      "name": "default/debug/Intel",
+      "inherits": "default/Intel",
+      "displayName": "Default SEAHOWL installation (Debug) Intel Compilers",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "full/Intel",
+      "inherits": "default/Intel",
+      "displayName": "Full SEAHOWL installation Intel Compilers",
+      "cacheVariables": {
+        "SEAHOWL_ENABLE_BUILD": "ON",
+        "SEAHOWL_ENABLE_TESTS": "ON",
+        "SEAHOWL_ENABLE_EXAMPLES": "ON",
+        "SEAHOWL_ENABLE_PYTHON": "ON",
+        "SEAHOWL_ENABLE_VIRTUALENV": "ON",
+        "SEAHOWL_ENABLE_HYDROCHRONO": "ON",
+        "SEAHOWL_ENABLE_AERODYN": "ON",
+        "SEAHOWL_ENABLE_INFLOWWIND": "ON",
+        "SEAHOWL_ENABLE_IRRLICHT": "OFF",
+        "SEAHOWL_ENABLE_VTK": "OFF",
+        "SEAHOWL_ENABLE_DOC": "OFF"
+      }
+    },
+    {
+      "name": "full/debug/Intel",
+      "inherits": [
+        "debug",
+        "full/Intel"
+      ],
+      "displayName": "Full SEAHOWL installation (Debug) Intel Compilers"
     }
   ]
 }

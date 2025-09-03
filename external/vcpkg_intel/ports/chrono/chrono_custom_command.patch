@@ -1,0 +1,118 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index bc455c11a..37d5d4623 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -96,6 +96,14 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+       set(CH_CXX_FLAGS "-std=c++14")
+       set(CH_CXX14 TRUE)
+     endif()
++elseif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
++    message(STATUS "Intel Compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
++    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0)
++      set(CH_CXX14 TRUE)
++    endif()
++    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 17.0)
++      set(CH_CXX17 TRUE)
++    endif()
+ endif()
+ 
+ if(NOT CH_CXX14)
+diff --git a/src/chrono_irrlicht/CMakeLists.txt b/src/chrono_irrlicht/CMakeLists.txt
+index d6d9d47d6..1e066e373 100644
+--- a/src/chrono_irrlicht/CMakeLists.txt
++++ b/src/chrono_irrlicht/CMakeLists.txt
+@@ -77,8 +77,8 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   SET(MAC_LIBS ${COCOA_LIBRARY} ${OPENGL_LIBRARY} ${IOKIT_LIBRARY})
+   SET(IRRLICHT_LIBRARY "${IRRLICHT_LIBRARY}")
+ else()
+-  FIND_PATH(IRRLICHT_INSTALL_DIR NAMES irrlicht.h PATHS "/usr/include/irrlicht" "/usr/local/include/irrlicht")
+-  FIND_LIBRARY(IRRLICHT_LIBRARY NAMES Irrlicht PATHS ${IRRLICHT_INSTALL_DIR}/../../lib)
++  FIND_PATH(IRRLICHT_ROOT NAMES irrlicht.h PATHS "/usr/include/irrlicht" "/usr/local/include/irrlicht")
++  FIND_LIBRARY(IRRLICHT_LIBRARY NAMES Irrlicht PATHS ${IRRLICHT_ROOT}/../../lib)
+   set(IRRLICHT_LIBRARY "${IRRLICHT_LIBRARY}")
+ ENDIF()
+ 
+@@ -167,38 +167,38 @@ endif()
+ # appropriate directory (depending on the build type); however, we use
+ # copy_if_different.
+ 
+-IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+-
+-  IF(DEFINED ENV{CONDA_BUILD})
+-    SET(CH_IRRLICHT_DLL "$ENV{PREFIX}/Library/bin/Irrlicht.dll")
+-  ELSEIF("${CH_COMPILER}" STREQUAL "COMPILER_MSVC")
+-    SET(CH_IRRLICHT_DLL "${IRRLICHT_INSTALL_DIR}/bin/Win32-VisualStudio/Irrlicht.dll")
+-  ELSEIF("${CH_COMPILER}" STREQUAL "COMPILER_MSVC_X64")
+-    SET(CH_IRRLICHT_DLL "${IRRLICHT_INSTALL_DIR}/bin/Win64-VisualStudio/Irrlicht.dll")
+-  ENDIF()
+-
+-  ADD_CUSTOM_COMMAND(
+-    TARGET ChronoEngine_irrlicht POST_BUILD
+-    COMMAND ${CMAKE_COMMAND} -E make_directory
+-            "${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>"
+-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+-            "${CH_IRRLICHT_DLL}"
+-            "${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>"
+-    MAIN_DEPENDENCY ChronoEngine_irrlicht
+-    COMMENT "Copying Irrlicht DLL..."
+-  )
+-
+-  # copy the Irrlicht dll into the installed package to be on the safe side 
+-  install(FILES "${CH_IRRLICHT_DLL}" DESTINATION bin)
+-
+-  # Make variable visible from outside this directory
+-  SET(CH_IRRLICHT_DLL "${CH_IRRLICHT_DLL}" PARENT_SCOPE)
+-
+-ENDIF()
+-
+-if(CH_STATIC)
+-  SET(CH_IRRLICHT_LIB "${IRRLICHT_LIBRARY}" PARENT_SCOPE)
+-endif()
++# IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
++#
++#   IF(DEFINED ENV{CONDA_BUILD})
++#     SET(CH_IRRLICHT_DLL "$ENV{PREFIX}/Library/bin/Irrlicht.dll")
++#   ELSEIF("${CH_COMPILER}" STREQUAL "COMPILER_MSVC")
++#     SET(CH_IRRLICHT_DLL "${IRRLICHT_ROOT}/bin/Win32-VisualStudio/Irrlicht.dll")
++#   ELSEIF("${CH_COMPILER}" STREQUAL "COMPILER_MSVC_X64")
++#     SET(CH_IRRLICHT_DLL "${IRRLICHT_ROOT}/bin/Win64-VisualStudio/Irrlicht.dll")
++#   ENDIF()
++#
++#   ADD_CUSTOM_COMMAND(
++#     TARGET ChronoEngine_irrlicht POST_BUILD
++#     COMMAND ${CMAKE_COMMAND} -E make_directory
++#             "${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>"
++#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
++#             "${CH_IRRLICHT_DLL}"
++#             "${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>"
++#     MAIN_DEPENDENCY ChronoEngine_irrlicht
++#     COMMENT "Copying Irrlicht DLL..."
++#   )
++#
++#   # copy the Irrlicht dll into the installed package to be on the safe side 
++#   install(FILES "${CH_IRRLICHT_DLL}" DESTINATION bin)
++#
++#   # Make variable visible from outside this directory
++#   SET(CH_IRRLICHT_DLL "${CH_IRRLICHT_DLL}" PARENT_SCOPE)
++#
++# ENDIF()
++#
++#if(CH_STATIC)
++#  SET(CH_IRRLICHT_LIB "${IRRLICHT_LIBRARY}" PARENT_SCOPE)
++#endif()
+ 
+ 
+ #-------------------------------------------------------------------------------
+diff --git a/template_project/CMakeLists.txt b/template_project/CMakeLists.txt
+index e6e98f1ca..572ceef8a 100644
+--- a/template_project/CMakeLists.txt
++++ b/template_project/CMakeLists.txt
+@@ -166,6 +166,5 @@ target_link_libraries(my_demo ${CHRONO_LIBRARIES})
+ # or to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_<CONFIG>} if the specific CMAKE_RUNTIME_OUTPUT_DIRECTORY_<CONFIG> has been set
+ #--------------------------------------------------------------
+ 
+-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "<mycustompathforrelease>")
+-add_DLL_copy_command()
++set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
++#add_DLL_copy_command("${CHRONO_DLLS}")
