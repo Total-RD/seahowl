@@ -66,7 +66,7 @@ class TurbineAeroDyn : public TurbineAero {
     /** @brief VTK save time step. */
     double WrVTK_dt;
 
-    TurbineAeroDyn();
+    TurbineAeroDyn(const std::string& aerodyn_Infile);
     void setup_environment(const env::EnvModel& env_model) override;
     void initialize(double time, double dt) override;
     void compute_env_loads(const env::EnvModel& env_model, double time) override;

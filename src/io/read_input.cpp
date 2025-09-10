@@ -617,7 +617,8 @@ std::shared_ptr<seahowl::aero::TurbineAero> get_turbine_aero_from_db(const Turbi
     // make turbine aero
     if (turbine_db.aero.solver == "aerodyn") {
 #ifdef HAVE_AERODYN
-        turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>();
+        auto file_aerodyn_path = turbine_db.aero.options.file_aerodyn_path.generic_string();
+        turbine_aero = std::make_shared<seahowl::aero::TurbineAeroDyn>(file_aerodyn_path);
 #endif
     } else {
         turbine_aero = std::make_shared<seahowl::aero::TurbineAero>();

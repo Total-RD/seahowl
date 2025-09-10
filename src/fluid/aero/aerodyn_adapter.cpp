@@ -574,8 +574,9 @@ void AeroDynAdapter::update_mesh_motion(TurbineAero& turbine) {
     }
 }
 
-TurbineAeroDyn::TurbineAeroDyn() : TurbineAero() {
+TurbineAeroDyn::TurbineAeroDyn(const std::string& aerodyn_Infile) : TurbineAero() {
     rna->rotor = std::make_shared<RotorAeroDyn>(*tower);
+    aerodyn.set_aerodyn_infile(aerodyn_Infile);
 }
 
 void TurbineAeroDyn::setup_environment(const env::EnvModel& env_model) {
