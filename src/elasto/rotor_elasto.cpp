@@ -10,6 +10,15 @@ using seahowl::elasto::RotorNacelleAssemblyElasto;
 
 RotorElasto::RotorElasto() {
     body_hub = std::make_unique<BodyElastoChrono>();
+
+    actuator_hub = std::make_unique<ActuatorRotationChrono>("speed");
+    actuator_hub->reference_rotation = Quaternion(AngleAxisd(PI / 2.0, Vector3d(0.0, 1.0, 0.0)));
+    actuator_hub->reset();
+    actuator_hub->set_control_timeseries(std::vector<double>{0.0, 0.0}, std::vector<double>{0.0, 0.0});
+    actuator_hub->set_disabled_actuator(true);
+
+    link_hub = std::make_unique<LinkChrono>();
+    link_hub->set_constraints(true, true, true, true, true, true);
 }
 
 void RotorElasto::assemble_this(SystemElasto& system) {
@@ -17,6 +26,10 @@ void RotorElasto::assemble_this(SystemElasto& system) {
         blade->assemble(system);
     }
     system.add(*body_hub);
+    // system.add(*body_hub2);
+    system.add(*actuator_hub);
+    system.add(*link_hub);
+    // system.add(*link_hub2);
 }
 
 void RotorElasto::presetup(double fraction) {
@@ -40,6 +53,9 @@ void RotorElasto::build() {
     body_hub->set_position(hub.position_from_apex);
     body_hub->set_rotation(rotation0);
 
+    actuator_hub->set_position(hub.position_from_apex);
+    actuator_hub->set_rotation(rotation0);
+
     // blades
     auto nblades = blades.size();
     for (int ii = 0; ii < nblades; ii++) {
@@ -60,6 +76,7 @@ void RotorElasto::build() {
         // update blade-hub constraint
         blade->attach_blade_to_body(*body_hub);
     }
+    link_hub->initialize(*body_hub, *actuator_hub->body_worker);
 }
 
 void RotorElasto::apply_collective_pitch_increment(double pitch_increment) {
@@ -78,6 +95,7 @@ void RotorElasto::rotate(double angle, const Vector3d& axis) const {
     }
     // hub
     body_hub->rotate(angle, axis);
+    actuator_hub->rotate(angle, axis);
 }
 
 void RotorElasto::translate(const Vector3d& translation_vector) const {
@@ -87,6 +105,7 @@ void RotorElasto::translate(const Vector3d& translation_vector) const {
     }
     // hub
     body_hub->translate(translation_vector);
+    actuator_hub->translate(translation_vector);
 }
 
 double RotorElasto::get_mass() const {
@@ -116,7 +135,7 @@ RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {
     body_shaft = std::make_unique<BodyElastoChrono>();
     // link between hub and shaft
     link_shaft_hub = std::make_unique<LinkChrono>();
-    link_shaft_hub->set_constraints(true, true, true, false, true, true);
+    link_shaft_hub->set_constraints(true, true, true, true, true, true);
 
     // nacelle
     body_nacelle = std::make_unique<BodyElastoChrono>();
@@ -129,7 +148,7 @@ RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {
     link_shaft_yaw_bearing->set_constraints(true, true, true, true, true, true);
 
     // yaw actuator
-    actuator_yaw = std::make_unique<ActuatorRotationChrono>();
+    actuator_yaw = std::make_unique<ActuatorRotationChrono>("angle");
     actuator_yaw->reference_rotation = Quaternion(1.0, 0.0, 0.0, 0.0);
     // actuator_yaw->reference_rotation = Quaternion(AngleAxisd(PI, Vector3d(1.0, 0.0, 0.0)));
 
@@ -173,7 +192,7 @@ void RotorNacelleAssemblyElasto::build() {
     // shaft
     body_shaft->set_mass(0.0);
     body_shaft->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
-    link_shaft_hub->initialize(*rotor->body_hub, *body_shaft);
+    link_shaft_hub->initialize(*rotor->actuator_hub->body_controller, *body_shaft);
 
     // nacelle
     body_nacelle->set_position(nacelle.position_from_towertop);

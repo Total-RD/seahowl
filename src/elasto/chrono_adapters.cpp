@@ -13,11 +13,14 @@
 #include <chrono/physics/ChLoadContainer.h>
 #include <chrono/fea/ChLinkNodeNode.h>
 #include <chrono/fea/ChLinkNodeFrame.h>
-#include <chrono/physics/ChLinkRevolute.h>
 #include <chrono/fea/ChMesh.h>
 #include <chrono/physics/ChSystemSMC.h>
 #include <chrono/solver/ChDirectSolverLS.h>
+#include <chrono/physics/ChLinkRevolute.h>
+#include <chrono/physics/ChLinkMotorRotation.h>
 #include <chrono/physics/ChLinkMotorRotationAngle.h>
+#include <chrono/physics/ChLinkMotorRotationSpeed.h>
+#include <chrono/physics/ChLinkMotorRotationTorque.h>
 
 #include <vector>
 #include <memory>
@@ -1244,13 +1247,22 @@ class ChFunctionArray : public chrono::ChFunction {
     }
 };
 
-ActuatorRotationChrono::ActuatorRotationChrono() {
+ActuatorRotationChrono::ActuatorRotationChrono(const std::string& mode) {
     // make actuator bodies (massless)
     body_worker = std::make_unique<BodyElastoChrono>();
     body_controller = std::make_unique<BodyElastoChrono>();
+    chobj_link_revolute = std::make_shared<chrono::ChLinkRevolute>();
 
     // make actuator abject
-    chobj = std::make_shared<chrono::ChLinkMotorRotationAngle>();
+    if (mode == "angle") {
+        chobj = std::make_shared<chrono::ChLinkMotorRotationAngle>();
+    } else if (mode == "speed") {
+        chobj = std::make_shared<chrono::ChLinkMotorRotationSpeed>();
+    } else if (mode == "torque") {
+        chobj = std::make_shared<chrono::ChLinkMotorRotationTorque>();
+    } else {
+        throw std::runtime_error("Unknown mode for rotational actuator, choose \"angle\", \"speed\", or \"torque\".");
+    }
     LinkChronoBase::chobj = chobj;
     chfunc = std::make_shared<ChFunctionArray>();
     chobj->SetMotorFunction(chfunc);
@@ -1263,6 +1275,9 @@ ActuatorRotationChrono::ActuatorRotationChrono() {
 
     // unfix actuator at initialization
     set_fixed_actuator(false);
+
+    // disable revolute link by default, only activate if actuator is disabled
+    chobj_link_revolute->SetDisabled(true);
 }
 
 void ActuatorRotationChrono::reset() {
@@ -1312,23 +1327,45 @@ void ActuatorRotationChrono::increment_value_constant(double value) {
 }
 
 void ActuatorRotationChrono::set_fixed_actuator(bool is_fixed) {
-    dynamic_cast<LinkChrono&>(*link).chobj->SetDisabled(!is_fixed);
-    chobj->SetDisabled(is_fixed);
+    if (!is_disabled_actuator()) {
+        dynamic_cast<LinkChrono&>(*link).chobj->SetDisabled(!is_fixed);
+        chobj->SetDisabled(is_fixed);
+    } else {
+        spdlog::warn("Trying to set actuator fixed mode to {}, but actuator is disabled.");
+    }
+    this->is_fixed = is_fixed;
 }
 
 bool ActuatorRotationChrono::is_fixed_actuator() const {
-    return chobj->IsDisabled();
+    return is_fixed;
+}
+
+void ActuatorRotationChrono::set_disabled_actuator(bool is_disabled) {
+    chobj_link_revolute->SetDisabled(!is_disabled);
+    dynamic_cast<LinkChrono&>(*link).chobj->SetDisabled(is_disabled);
+    chobj->SetDisabled(is_disabled);
+
+    // sets actuator config if not disabled
+    set_fixed_actuator(is_fixed);
+}
+
+bool ActuatorRotationChrono::is_disabled_actuator() const {
+    return (!chobj_link_revolute->IsDisabled());
 }
 
 void ActuatorRotationChrono::initialize_links() {
-    // link
-    link->initialize(*body_worker, *body_controller);
-
     // actuator link
     auto body1ref = dynamic_cast<BodyElastoChrono&>(*body_worker);
     auto body2ref = dynamic_cast<BodyElastoChrono&>(*body_controller);
     auto chframe0 = chrono::ChFrame<double>(chrono::ChVector3(0.0, 0.0, 0.0), quat2ch(reference_rotation));
     chobj->Initialize(body1ref.chobj, body2ref.chobj, true, chframe0, chframe0);
+
+    // link
+    link->initialize(*body_worker, *body_controller);
+
+    // revolute link
+    auto frame = chrono::ChFrame<>(body2ref.chobj->GetPos(), body2ref.chobj->GetRot() * quat2ch(reference_rotation));
+    chobj_link_revolute->Initialize(body1ref.chobj, body2ref.chobj, frame);
 }
 
 LinkMatrixStiffnessDampingChrono::LinkMatrixStiffnessDampingChrono() {
@@ -1490,7 +1527,7 @@ void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
     // unconstrain rotor
     for (auto& turbine : turbines) {
         // rotor
-        turbine->rna->link_shaft_hub->set_constraints(true, true, true, false, true, true);
+        turbine->rna->link_shaft_hub->set_constraints(true, true, true, true, true, true);
     }
 
     spdlog::debug("Performed statics prestep with linear step as {} and {} nonlinear steps.", linear, nonlinear_steps);
@@ -1539,4 +1576,5 @@ void SystemElastoChrono::add(ActuatorRotation& actuator) {
     add(*actuator.body_worker);
     add(*actuator.body_controller);
     add(*actuator.link);
+    chobj->Add(dynamic_cast<ActuatorRotationChrono&>(actuator).chobj_link_revolute);
 }

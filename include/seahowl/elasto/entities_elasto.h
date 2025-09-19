@@ -535,6 +535,16 @@ class ActuatorRotation : public virtual Entity {
      */
     virtual bool is_fixed_actuator() const = 0;
 
+    /**
+     * @brief Disables actuator if true, enables it if false.
+     */
+    virtual void set_disabled_actuator(bool is_disabled) = 0;
+
+    /**
+     * @brief Returns status of actuator (true: disabled, false: enabled).
+     */
+    virtual bool is_disabled_actuator() const = 0;
+
     virtual void initialize_links() = 0;
 
     void set_position(const Vector3d& position) override;

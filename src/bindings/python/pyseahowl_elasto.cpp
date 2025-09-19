@@ -99,7 +99,9 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("impose_value_constant", &seahowl::elasto::ActuatorRotation::impose_value_constant)
         .def("increment_value_constant", &seahowl::elasto::ActuatorRotation::increment_value_constant)
         .def("set_fixed_actuator", &seahowl::elasto::ActuatorRotation::set_fixed_actuator)
-        .def("is_fixed_actuator", &seahowl::elasto::ActuatorRotation::is_fixed_actuator);
+        .def("is_fixed_actuator", &seahowl::elasto::ActuatorRotation::is_fixed_actuator)
+        .def("set_disabled_actuator", &seahowl::elasto::ActuatorRotation::set_disabled_actuator)
+        .def("is_disabled_actuator", &seahowl::elasto::ActuatorRotation::is_disabled_actuator);
     py::class_<seahowl::elasto::MeshElasto, std::shared_ptr<seahowl::elasto::MeshElasto>>(m_elasto, "MeshElasto");
     py::class_<seahowl::elasto::SystemElasto, std::shared_ptr<seahowl::elasto::SystemElasto>>(m_elasto, "SystemElasto")
         .def("step", &seahowl::elasto::SystemElasto::step)
@@ -161,7 +163,7 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def(py::init<>());
     py::class_<seahowl::elasto::ActuatorRotationChrono, std::shared_ptr<seahowl::elasto::ActuatorRotationChrono>,
                seahowl::elasto::ActuatorRotation>(m_elasto, "ActuatorRotationChrono")
-        .def(py::init<>());
+        .def(py::init<std::string>());
     py::class_<seahowl::elasto::LinkMatrixStiffnessDampingChrono,
                std::shared_ptr<seahowl::elasto::LinkMatrixStiffnessDampingChrono>,
                seahowl::elasto::LinkMatrixStiffnessDamping>(m_elasto, "LinkMatrixStiffnessDampingChrono")
@@ -267,6 +269,9 @@ void initialize_pyseahowl_elasto(py::module& m) {
         .def("apply_collective_pitch_increment", &seahowl::elasto::RotorElasto::apply_collective_pitch_increment)
         .def_readonly("blades", &seahowl::elasto::RotorElasto::blades)
         .def_property_readonly("body_hub", [](seahowl::elasto::RotorElasto& rotor) { return rotor.body_hub.get(); })
+        .def_property_readonly(
+            "actuator_hub", [](seahowl::elasto::RotorElasto& rotor) { return rotor.actuator_hub.get(); },
+            py::return_value_policy::reference_internal)
         .def_readonly("pitch_collective", &seahowl::elasto::RotorElasto::pitch_collective);
     py::class_<seahowl::elasto::RotorNacelleAssemblyElasto,
                std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto>, seahowl::elasto::ComponentElasto>(

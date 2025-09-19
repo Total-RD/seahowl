@@ -13,7 +13,7 @@ BladeElasto::BladeElasto() {
     // links
     link_root = std::make_unique<LinkChrono>();
     link_root->set_constraints(true, true, true, true, true, true);
-    actuator_pitch = std::make_unique<ActuatorRotationChrono>();
+    actuator_pitch = std::make_unique<ActuatorRotationChrono>("angle");
     actuator_pitch->reference_rotation = Quaternion(AngleAxisd(PI, Vector3d(1.0, 0.0, 0.0)));
     link_blade = std::make_unique<LinkChrono>();
     link_blade->set_constraints(true, true, true, true, true, true);

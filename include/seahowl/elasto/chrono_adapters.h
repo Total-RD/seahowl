@@ -30,8 +30,9 @@ class ChBodyFrame;
 class ChLinkBase;
 class ChLinkPointPoint;
 class ChLinkPointFrame;
+class ChLinkRevolute;
 class ChLinkMateGeneric;
-class ChLinkMotorRotationAngle;
+class ChLinkMotorRotation;
 class ChLinkTSDA;
 class ChLoadBodyBodyBushingGeneric;
 class ChSystem;
@@ -301,7 +302,6 @@ class LinkChrono : public Link, public LinkChronoBase {
 
     LinkChrono();
     virtual void set_constraints(bool surge, bool sway, bool heave, bool roll, bool pitch, bool yaw) override;
-
     virtual void initialize(const Entity& entity1, const Entity& entity2) override;
     Vector3d get_reaction_force() const override;
     Vector3d get_reaction_torque() const override;
@@ -341,9 +341,10 @@ class LinkMatrixStiffnessDampingChrono : public LinkMatrixStiffnessDamping {
 class ActuatorRotationChrono : public ActuatorRotation, public LinkChronoBase {
   public:
     /** @brief Pointer to underlying Chrono object. */
-    std::shared_ptr<chrono::ChLinkMotorRotationAngle> chobj;
+    std::shared_ptr<chrono::ChLinkMotorRotation> chobj;
+    std::shared_ptr<chrono::ChLinkRevolute> chobj_link_revolute;
 
-    ActuatorRotationChrono();
+    ActuatorRotationChrono(const std::string& mode = "angle");
     void reset() override;
     void set_control_timeseries(const std::vector<double>& time_array,
                                 const std::vector<double>& values_array) override;
@@ -353,10 +354,13 @@ class ActuatorRotationChrono : public ActuatorRotation, public LinkChronoBase {
     double get_angle() const override;
     void set_fixed_actuator(bool is_fixed) override;
     bool is_fixed_actuator() const override;
+    void set_disabled_actuator(bool is_disabled) override;
+    bool is_disabled_actuator() const override;
 
   private:
     /** @brief Function piloting the actuator. */
     std::shared_ptr<chrono::ChFunction> chfunc;
+    bool is_fixed = false;
 
     void initialize_links() override;
 };
