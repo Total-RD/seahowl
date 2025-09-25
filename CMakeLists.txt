@@ -665,6 +665,8 @@ if(SEAHOWL_ENABLE_PYTHON)
         file(WRITE ${FILE_INITPY}
             "#!/bin/bash\n"
             "SCRIPT_DIR=$(cd \"$(dirname \"\${BASH_SOURCE}\")\" && pwd)\n"
+            "sed -i 's|^prefix=.*|prefix=\"\$prefix_real\"|' \"$SCRIPT_DIR/python3/python3.11-config\"\n"
+            "sed -i 's|^exec_prefix=.*|exec_prefix=\"\$prefix_real\"|' \"$SCRIPT_DIR/python3/python3.11-config\"\n"
             "\"$SCRIPT_DIR/python3/python3\" -m virtualenv .venv \n"
             "CALL_DIR=$(pwd)\n"
             "source \"$CALL_DIR/.venv/bin/activate\"\n"
@@ -673,6 +675,8 @@ if(SEAHOWL_ENABLE_PYTHON)
         set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.bat)
         file(WRITE ${FILE_INITPY}
             "set SCRIPT_DIR=%~dp0\n"
+            "powershell -Command \"(Get-Content \\\"%SCRIPT_DIR%python3\\python3.11-config\\\") -replace '^prefix=.*', 'prefix=\\\"$prefix_real\\\"' | Set-Content \\\"%SCRIPT_DIR%python3\\python3.11-config\\\"\"\n"
+            "powershell -Command \"(Get-Content \\\"%SCRIPT_DIR%python3\\python3.11-config\\\") -replace '^exec_prefix=.*', 'exec_prefix=\\\"$prefix_real\\\"' | Set-Content \\\"%SCRIPT_DIR%python3\\python3.11-config\\\"\"\n"
             "\"%SCRIPT_DIR%python3/python.exe\" -m virtualenv \"%SCRIPT_DIR%.venv\"\n"
             "call \"%SCRIPT_DIR%.venv/Scripts/activate\"\n"
             "set PYTHONPATH=%SCRIPT_DIR%;%PYTHONPATH%\n"
