@@ -601,11 +601,15 @@ void from_json(const json& js, TowerTurbineDb& tower) {
 
 void from_json(const json& js, ControllerOptionsTurbineDb& options, const std::string& type) {
     if (type == "discon") {
-        options.infile = js.at("infile").get<std::string>();
+        if (js.contains("infile") && !js["infile"].is_null())
+            options.infile = js.at("infile").get<std::string>();
+        else
+            spdlog::warn("DISCON: no input file transmitted to Discon controller.");
+
         if (js.contains("libfile") && !js["libfile"].is_null())
             options.libfile = js.at("libfile").get<std::string>();
         else
-            throw std::runtime_error("Need to define path to libfile for DISCON routine.");
+            spdlog::warn("DISCON: no dynamic library transmitted to DISCON interface.");
     } else if (type == "rpm") {
         if (js.contains("target_rpm") && !js["target_rpm"].is_null())
             options.target_rpm = js.at("target_rpm").get<double>();
@@ -717,15 +721,21 @@ TurbineDb InputReaderJson::read_turbine() {
             }
         }
         // Finalize the controller database
-        auto discon_filepath = main_directory / turbine_db.controller.options.infile;
-        turbine_db.controller.options.infile_path = discon_filepath;
-        if (!fs::is_regular_file(discon_filepath)) {
-            throw std::runtime_error("DISCON file not found: " + discon_filepath.u8string());
+        if (turbine_db.controller.options.infile != "") {
+            auto discon_filepath = main_directory / turbine_db.controller.options.infile;
+            turbine_db.controller.options.infile_path = discon_filepath;
+            if (!fs::is_regular_file(discon_filepath)) {
+                throw std::runtime_error(
+                    "DISCON: input file path for DISCON routine does not exist: " + discon_filepath.u8string() + ".");
+            }
         }
-        auto lib_filepath = main_directory / turbine_db.controller.options.libfile;
-        turbine_db.controller.options.libfile_path = lib_filepath;
-        if (!fs::is_regular_file(lib_filepath)) {
-            throw std::runtime_error("DISCON library file not found: " + lib_filepath.u8string());
+        if (turbine_db.controller.options.libfile != "") {
+            auto lib_filepath = main_directory / turbine_db.controller.options.libfile;
+            turbine_db.controller.options.libfile_path = lib_filepath;
+            if (!fs::is_regular_file(lib_filepath)) {
+                throw std::runtime_error(
+                    "DISCON: dynamic library path for DISCON routine does not exist: " + lib_filepath.u8string() + ".");
+            }
         }
         filepath = filepath_ini;
     } catch (const std::exception& e) {

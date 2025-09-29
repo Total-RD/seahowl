@@ -336,10 +336,10 @@ struct TowerTurbineDb {
  * @brief Structure for controller options in turbine database
  */
 struct ControllerOptionsTurbineDb {
-    std::string infile;     // relative path from input file
-    fs::path infile_path;   // relative path from driver execution folder
-    std::string libfile;    // relative path from input file
-    fs::path libfile_path;  // relative path from driver execution folder
+    std::string infile = "";   // relative path from input file
+    fs::path infile_path;      // relative path from driver execution folder
+    std::string libfile = "";  // relative path from input file
+    fs::path libfile_path;     // relative path from driver execution folder
 
     // options for "RPM" type controller
     double target_rpm;
