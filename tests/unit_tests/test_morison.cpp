@@ -163,9 +163,7 @@ TEST_F(TestMorison, tower_morison) {
     waves_hydrochrono->Initialize();
     wave_model->waves = waves_hydrochrono;
     // env_model
-    auto env_model = std::make_shared<seahowl::env::EnvModel>();
-    env_model->add_model(wave_model);
-    simulation.system_core->env_model = env_model;
+    simulation.system_core->env_model->add_model(wave_model);
 
     // tower
     auto tower_elasto = std::make_shared<seahowl::elasto::TowerElasto>();

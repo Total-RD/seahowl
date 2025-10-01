@@ -28,7 +28,6 @@ system_elasto.do_statics(True, 10)
 
 # add fluid model
 wind_model = seahowl.env.ConstantWind()
-system_core.env_model = seahowl.env.EnvModel()
 system_core.env_model.add_model(wind_model)
 wind_model.set_wind_velocity(
     [12.0, 0.0, 0.0],

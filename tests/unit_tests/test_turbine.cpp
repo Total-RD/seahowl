@@ -453,9 +453,6 @@ TEST_F(TestTurbine, multiturbines) {
     auto wind_model = std::make_shared<seahowl::env::ConstantWind>();
     wind_model->set_wind_velocity(Vector3d(8.0, 0.0, 0.0));
     wind_model->shear_coefficient = 0.12;
-    // env_model
-    auto env_model = std::make_shared<seahowl::env::EnvModel>();
-    env_model->add_model(wind_model);
 
     // turbine
     double initial_pitch = seahowl::PI / 8.0;
@@ -467,7 +464,7 @@ TEST_F(TestTurbine, multiturbines) {
 
     // system core
     auto system_core = seahowl::core::System(system_elasto, system_aero);
-    system_core.env_model = env_model;
+    system_core.env_model->add_model(wind_model);
 
     // turbines
     auto turbine_file = (DATADIR / "IEA15MW/onshore/turbine_rigid.json").generic_string();

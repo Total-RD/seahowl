@@ -41,16 +41,14 @@ void run_simulation() {
 
     // fluid model
     auto fluid_model = std::make_shared<seahowl::env::StillWater>();
-    auto env_model = std::make_shared<seahowl::env::EnvModel>();
-    env_model->add_model(fluid_model);
-    system_core->env_model = env_model;
+    system_core->env_model->add_model(fluid_model);
     fluid_model->density = 1025.0;
     fluid_model->mean_water_level = mean_water_level;
     fluid_model->water_depth = water_depth;
 
     // soil model
     auto soil_model = std::make_shared<seahowl::env::LinearSoilModel>();
-    env_model->add_model(soil_model);
+    system_core->env_model->add_model(soil_model);
     soil_model->soil_position = mean_water_level - water_depth;
     soil_model->soil_normal = seahowl::Vector3d(0.0, 0.0, 1.0);
     soil_model->stiffness_normal = 1e6;
