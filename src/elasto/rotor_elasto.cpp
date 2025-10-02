@@ -11,7 +11,7 @@ using seahowl::elasto::RotorNacelleAssemblyElasto;
 RotorElasto::RotorElasto() {
     body_hub = std::make_unique<BodyElastoChrono>();
 
-    actuator_hub = std::make_unique<ActuatorRotationChrono>("speed");
+    actuator_hub = std::make_unique<ActuatorRotationChrono>("torque");
     actuator_hub->reference_rotation = Quaternion(AngleAxisd(PI / 2.0, Vector3d(0.0, 1.0, 0.0)));
     actuator_hub->reset();
     actuator_hub->set_control_timeseries(std::vector<double>{0.0, 0.0}, std::vector<double>{0.0, 0.0});
@@ -148,7 +148,7 @@ RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto() {
     link_shaft_yaw_bearing->set_constraints(true, true, true, true, true, true);
 
     // yaw actuator
-    actuator_yaw = std::make_unique<ActuatorRotationChrono>("angle");
+    actuator_yaw = std::make_unique<ActuatorRotationChrono>("speed");
     actuator_yaw->reference_rotation = Quaternion(1.0, 0.0, 0.0, 0.0);
     // actuator_yaw->reference_rotation = Quaternion(AngleAxisd(PI, Vector3d(1.0, 0.0, 0.0)));
 
