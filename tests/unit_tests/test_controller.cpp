@@ -157,7 +157,7 @@ TEST_F(TestController, individual_pitch_control) {
     auto& system_core = *simulation.system_core;
     auto& system_elasto = system_core.elasto;
 
-    // add turbine to system
+    // add turbine to system=
     seahowl::io::add_turbine_to_system_from_file((DATADIR / "IEA15MW/onshore/turbine_ipc.json").generic_string(),
                                                  system_core);
     auto& turbine = *system_core.turbines[0];

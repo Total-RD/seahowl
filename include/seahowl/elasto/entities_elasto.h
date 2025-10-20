@@ -493,6 +493,7 @@ class ActuatorRotation : public virtual Entity {
      * @brief Destructor.
      */
     virtual ~ActuatorRotation() = default;
+
     /**
      * @brief Resets actuator (bodies back to origin and control timeseries to zero).
      */

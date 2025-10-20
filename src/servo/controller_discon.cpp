@@ -416,6 +416,7 @@ void seahowl::servo::DisconInterface::Init(const std::string& libfile, const std
         spdlog::debug("DISCON: loaded {}.", path_dll);
         has_dll = true;
     } else {
+        spdlog::warn("DISCON: no dynamic library transmitted to DISCON interface.");
         has_dll = false;
     }
 
