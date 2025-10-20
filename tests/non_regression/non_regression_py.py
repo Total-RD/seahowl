@@ -37,6 +37,8 @@ def run_modified_script(script_path, modifications):
         code = f.read()
     # Apply the modifications (replace a string)
     for old, new in modifications.items():
+        if os.name == "nt":
+            new = new.replace("\\", "/")
         code = code.replace(old, new)
     # Write to a temporary file
     with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp:
