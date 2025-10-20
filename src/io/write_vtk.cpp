@@ -149,8 +149,8 @@ void OutputSystemVTK::initialize() {
         fs::create_directory(output_folder);
 
         // blades
-        for (auto [blade_ptr, idx_blade] = std::tuple{turbine->rna.blades.begin(), 0};
-             blade_ptr != turbine->rna.blades.end(); blade_ptr++, idx_blade++) {
+        for (auto [blade_ptr, idx_blade] = std::tuple{turbine->rna.rotor.blades.begin(), 0};
+             blade_ptr != turbine->rna.rotor.blades.end(); blade_ptr++, idx_blade++) {
             auto& blade = *blade_ptr;
             try {
                 auto& post_blade =
