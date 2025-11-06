@@ -28,6 +28,8 @@ readers:
         name: "col_x"
         parameters:
           x: ["time (s)", "fraction"]
+      rows:
+        line_start : 3
 compare:
   errors_limit: 10000
   float_thresholds:
