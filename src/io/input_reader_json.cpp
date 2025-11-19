@@ -86,6 +86,10 @@ json csv_to_json(const std::string& filename) {
     if (!std::getline(file, line)) {
         throw std::runtime_error("The CSV file is empty");
     }
+
+    if (!line.empty() && line.back() == '\r') {
+        line.pop_back();
+    }
     std::stringstream header_stream(line);
     std::vector<std::string> column_names;
     std::string column_name;
@@ -104,7 +108,12 @@ json csv_to_json(const std::string& filename) {
             if (!std::getline(ss, cell, ',')) {
                 throw std::runtime_error("Inconsistent number of columns in the CSV file");
             }
-            row[column_names[i]] = std::stod(cell);  // Map the cell to the column name
+            try {
+                row[column_names[i]] = std::stod(cell);  // Map the cell to the column name
+            } catch (const std::invalid_argument& e) {
+                throw std::runtime_error("Invalid number format in CSV file at column '" + column_names[i] +
+                                         "': " + cell);
+            }
         }
 
         result.push_back(row);  // Add the row to the JSON array
