@@ -1053,6 +1053,7 @@ std::shared_ptr<seahowl::env::FluidSoilModel> get_environmental_model_from_json(
                 wave_model.waves = hydrochrono_waves;
                 hydrochrono_waves->regular_wave_amplitude_ = sea_options.at("wave_height").get<double>() / 2.0;
                 hydrochrono_waves->regular_wave_omega_ = 2 * PI / sea_options.at("wave_period").get<double>();
+                hydrochrono_waves->wave_stretching_ = sea_options.at("wave_stretching").get<bool>();
                 seahowl::hydro::myMCFtable = seahowl::hydro::MacCamyFuchsTable();
                 seahowl::hydro::myMCFtable.wave_peak_period = sea_options.at("wave_period");
             } else if (wave_type == "irregular") {
