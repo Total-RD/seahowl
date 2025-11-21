@@ -144,9 +144,9 @@ TEST_F(TestMorison, tower_morison) {
     // create Morison coefficients
     auto coefficients = seahowl::hydro::HydroCoefficients();
     coefficients.drag_normal = 1.0;
-    coefficients.drag_axial = 1.0;
+    coefficients.drag_axial = 0.0;
     coefficients.added_mass_normal = 1.0;
-    coefficients.added_mass_axial = 1.0;
+    coefficients.added_mass_axial = 0.0;
     coefficients.buoyancy_factor = 0.0;
 
     // environmental conditions
