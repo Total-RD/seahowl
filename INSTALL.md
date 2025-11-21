@@ -214,7 +214,7 @@ make
 
 - AeroDyn (v4.0.2): https://github.com/OpenFAST/openfast
 - InflowWind (v4.0.2): https://github.com/OpenFAST/openfast
-- HydroChrono (v0.2.6): https://github.com/NREL/HydroChrono
+- HydroChrono (v0.2.8): https://github.com/Project-SEA-Stack/HydroChrono
 
 #### Documentation
 

@@ -31,7 +31,7 @@ TEST_F(TestMorison, analytical_comparison) {
     double dt = 0.1;
     double wave_height = 5.0;
     double wave_period = 10.0;
-    double water_depth = 50.0;
+    double water_depth = 99999999.9;  // make it deep water
     double mean_water_level = 0.0;
     double diameter = 5.0;
 
@@ -78,6 +78,7 @@ TEST_F(TestMorison, analytical_comparison) {
     waves_hydrochrono->regular_wave_omega_ = 2 * seahowl::PI / wave_period;
     waves_hydrochrono->mwl_ = mean_water_level;
     waves_hydrochrono->water_depth_ = water_depth;
+    waves_hydrochrono->wave_stretching_ = false;
     waves_hydrochrono->Initialize();
     wave_model.waves = waves_hydrochrono;
 
@@ -157,6 +158,7 @@ TEST_F(TestMorison, tower_morison) {
     waves_hydrochrono->regular_wave_omega_ = 2 * seahowl::PI / wave_period;
     waves_hydrochrono->mwl_ = mean_water_level;
     waves_hydrochrono->water_depth_ = water_depth;
+    waves_hydrochrono->wave_stretching_ = true;
     waves_hydrochrono->Initialize();
     wave_model->waves = waves_hydrochrono;
     simulation.system_core->fluid_model = wave_model;
