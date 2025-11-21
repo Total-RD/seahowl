@@ -181,8 +181,10 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
             coeff_added_mass_normal = coefficients.added_mass_normal;
         }
         // added mass (with Cm = 1 + Ca)
+        // assuming added mass is only in the normal direction in the absence of coefficients
+        // (assuming cylinder with no end plate, e.g. tower, monopile)
         auto load_added_mass_fluid = fluid_density * area *
-                                     (acceleration_fluid + coeff_added_mass_normal * acceleration_fluid_normal +
+                                     (acceleration_fluid_normal + coeff_added_mass_normal * acceleration_fluid_normal +
                                       coefficients.added_mass_axial * acceleration_fluid_axial);
 
         load_noacc += load_added_mass_fluid * coefficients.inertia_factor;
