@@ -37,7 +37,6 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def_readwrite("added_mass_axial", &seahowl::hydro::HydroCoefficients::added_mass_axial)
         .def_readwrite("buoyancy_factor", &seahowl::hydro::HydroCoefficients::buoyancy_factor)
         .def_readwrite("nodal_acceleration_factor", &seahowl::hydro::HydroCoefficients::nodal_acceleration_factor)
-        .def_readwrite("inertia_factor", &seahowl::hydro::HydroCoefficients::inertia_factor)
         .def_readwrite("use_MacCamyFuchs_correction", &seahowl::hydro::HydroCoefficients::use_MacCamyFuchs_correction)
         .def_readwrite("use_Cd_correction", &seahowl::hydro::HydroCoefficients::use_Cd_correction);
     py::class_<seahowl::hydro::MorisonNode, std::shared_ptr<seahowl::hydro::MorisonNode>, seahowl::EntityDynamicEigen>(

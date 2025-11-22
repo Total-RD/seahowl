@@ -24,8 +24,6 @@ struct HydroCoefficients {
     double added_mass_axial = 0.0;
     /** @brief Factor for buoyancy (1.0 for fully buoyant). */
     double buoyancy_factor = 1.0;
-    /** @brief Factor for inertia (1.0 for default behavior). */
-    double inertia_factor = 1.0;
     /** @brief Factor for nodal acceleration (1.0 for default behavior). */
     double nodal_acceleration_factor = 1.0;
     /** @brief MacCamy and Fuchs Correction for large cylinders, Flag. */

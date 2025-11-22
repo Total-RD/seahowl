@@ -25,7 +25,6 @@ HydroCoefficients HydroCoefficients::operator*(const double factor) const {
     new_point.added_mass_normal *= factor;
     new_point.added_mass_axial *= factor;
     new_point.buoyancy_factor *= factor;
-    new_point.inertia_factor *= factor;
     new_point.nodal_acceleration_factor *= factor;
     return new_point;
 };
@@ -37,7 +36,6 @@ HydroCoefficients HydroCoefficients::operator+(const HydroCoefficients& other) c
     new_point.added_mass_normal += other.added_mass_normal;
     new_point.added_mass_axial += other.added_mass_axial;
     new_point.buoyancy_factor += other.buoyancy_factor;
-    new_point.inertia_factor += other.inertia_factor;
     new_point.nodal_acceleration_factor += other.nodal_acceleration_factor;
     return new_point;
 };
@@ -149,7 +147,9 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
     auto velocity_relative_axial = dir * velocity_relative.dot(dir);
     auto velocity_relative_normal = velocity_relative - velocity_relative_axial;
 
-    // drag
+    // drag loads
+    // ------------------------------------------------------------
+
     double coeff_drag_normal;
     if (coefficients.use_Cd_correction && fluid_density > 500.0) {
         coeff_drag_normal = myMCFtable.getCd(diameter, myMCFtable.wave_peak_period, velocity_relative_axial.norm());
@@ -163,51 +163,55 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
                            velocity_relative_axial.norm() * velocity_relative_axial;
     load_noacc += load_drag_normal + load_drag_axial;
 
-    if (coefficients.inertia_factor != 0.0) {
-        // fluid acceleration
-        auto acceleration_fluid = fluid_model.get_fluid_acceleration(position, time);
-        auto acceleration_fluid_axial = dir * acceleration_fluid.dot(dir);
-        auto acceleration_fluid_normal = acceleration_fluid - acceleration_fluid_axial;
-        // relative acceleration
-        auto acceleration = get_acceleration() * coefficients.nodal_acceleration_factor;
-        auto acceleration_axial = dir * acceleration.dot(dir);
-        auto acceleration_normal = acceleration - acceleration_axial;
+    // inertia loads (with Cm = 1 + Ca)
+    // ------------------------------------------------------------
 
-        double coeff_added_mass_normal;
-        // Diffraction is relevant for dense fluids. For the air, the MacCamy and Fuchs correction not applicable.
-        if (coefficients.use_MacCamyFuchs_correction && fluid_density > 500.0) {
-            coeff_added_mass_normal = myMCFtable.interpolateCmBinarySearch(diameter) - 1.0;
-        } else {
-            coeff_added_mass_normal = coefficients.added_mass_normal;
-        }
+    // fluid acceleration
+    auto acceleration_fluid = fluid_model.get_fluid_acceleration(position, time);
+    auto acceleration_fluid_axial = dir * acceleration_fluid.dot(dir);
+    auto acceleration_fluid_normal = acceleration_fluid - acceleration_fluid_axial;
+    // relative acceleration
+    auto acceleration = get_acceleration() * coefficients.nodal_acceleration_factor;
+    auto acceleration_axial = dir * acceleration.dot(dir);
+    auto acceleration_normal = acceleration - acceleration_axial;
 
-        // added mass (with Cm = 1 + Ca)
-        // normal component due to fluid acceleration
-        Vector3d load_added_mass_fluid =
-            fluid_density * area * acceleration_fluid_normal * (1 + coeff_added_mass_normal);
-
-        // if Cax=0, assume no axial added mass at all (e.g. tower, monopile)
-        // Cax=0: assumption of cylinder with no tapered member and no variation of diameter along the length of the
-        // member Cax!=0 can be used for special geometries, such as mooring chains
-        if (coefficients.added_mass_axial != 0.0) {
-            // axial component due to fluid acceleration
-            load_added_mass_fluid +=
-                fluid_density * area * acceleration_fluid_axial * (1 + coefficients.added_mass_axial);
-        }
-
-        load_noacc += load_added_mass_fluid * coefficients.inertia_factor;
-
-        added_mass_matrix(0, 0) = fluid_density * area * coeff_added_mass_normal * coefficients.inertia_factor;
-        added_mass_matrix(1, 1) = fluid_density * area * coeff_added_mass_normal * coefficients.inertia_factor;
-        added_mass_matrix(2, 2) = fluid_density * area * coefficients.added_mass_axial * coefficients.inertia_factor;
-
-        // contributions from structure acceleration (Ca)
-        auto load_added_mass_normal = -fluid_density * area * coeff_added_mass_normal * acceleration_normal;
-        auto load_added_mass_axial = -fluid_density * area * coefficients.added_mass_axial * acceleration_axial;
-        load += (load_added_mass_normal + load_added_mass_axial) * coefficients.inertia_factor;
+    double coeff_added_mass_normal;
+    // Diffraction is relevant for dense fluids. For the air, the MacCamy and Fuchs correction not applicable.
+    if (coefficients.use_MacCamyFuchs_correction && fluid_density > 500.0) {
+        coeff_added_mass_normal = myMCFtable.interpolateCmBinarySearch(diameter) - 1.0;
+    } else {
+        coeff_added_mass_normal = coefficients.added_mass_normal;
     }
 
-    // buoyancy
+    auto load_inertia_fluid = Vector3d(0.0, 0.0, 0.0);
+    // if Ca_n=0, assume no normal added mass at all (=> Cm_n=0)
+    // usually, Ca_n>0, and Cm_a=1+Ca_n
+    if (coefficients.added_mass_normal != 0.0) {
+        // normal component due to fluid acceleration
+        load_inertia_fluid += fluid_density * area * acceleration_fluid_normal * (1 + coeff_added_mass_normal);
+    }
+    // if Ca_a=0, assume no axial added mass at all (=> Cm_a=0, e.g. tower, monopile)
+    // Ca_a=0: assumption of cylinder with no tapered member and no variation of diameter along the length of the
+    // member Ca_a>0 (=> Cm_a=1+Ca_a) can be used for special geometries, such as mooring chains
+    if (coefficients.added_mass_axial != 0.0) {
+        // axial component due to fluid acceleration
+        load_inertia_fluid += fluid_density * area * acceleration_fluid_axial * (1 + coefficients.added_mass_axial);
+    }
+
+    load_noacc += load_inertia_fluid;
+
+    // contributions from structure acceleration (Ca)
+    added_mass_matrix(0, 0) = fluid_density * area * coeff_added_mass_normal;
+    added_mass_matrix(1, 1) = fluid_density * area * coeff_added_mass_normal;
+    added_mass_matrix(2, 2) = fluid_density * area * coefficients.added_mass_axial;
+    // if added mass matrix is not used, and added mass loads are used instead:
+    auto load_added_mass_normal = -fluid_density * area * coeff_added_mass_normal * acceleration_normal;
+    auto load_added_mass_axial = -fluid_density * area * coefficients.added_mass_axial * acceleration_axial;
+    load += (load_added_mass_normal + load_added_mass_axial);
+
+    // buoyancy loads
+    // ------------------------------------------------------------
+
     Vector3d gravitational_acceleration{0.0, 0.0, -9.81};
     auto load_buoyancy = fluid_density * area * (-gravitational_acceleration);
     load_noacc += load_buoyancy * coefficients.buoyancy_factor;
