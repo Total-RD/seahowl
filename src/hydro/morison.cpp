@@ -180,18 +180,26 @@ void MorisonNode::compute_fluid_loads(const env::FluidModel& fluid_model, double
         } else {
             coeff_added_mass_normal = coefficients.added_mass_normal;
         }
+
         // added mass (with Cm = 1 + Ca)
-        // assuming added mass is only in the normal direction in the absence of coefficients
-        // (assuming cylinder with no end plate, e.g. tower, monopile)
-        auto load_added_mass_fluid = fluid_density * area *
-                                     (acceleration_fluid_normal + coeff_added_mass_normal * acceleration_fluid_normal +
-                                      coefficients.added_mass_axial * acceleration_fluid_axial);
+        // normal component due to fluid acceleration
+        Vector3d load_added_mass_fluid =
+            fluid_density * area * acceleration_fluid_normal * (1 + coeff_added_mass_normal);
+
+        // if Cax=0, assume no axial added mass at all (e.g. tower, monopile)
+        // Cax=0: assumption of cylinder with no tapered member and no variation of diameter along the length of the
+        // member Cax!=0 can be used for special geometries, such as mooring chains
+        if (coefficients.added_mass_axial != 0.0) {
+            // axial component due to fluid acceleration
+            load_added_mass_fluid +=
+                fluid_density * area * acceleration_fluid_axial * (1 + coefficients.added_mass_axial);
+        }
 
         load_noacc += load_added_mass_fluid * coefficients.inertia_factor;
 
-        added_mass_matrix(0, 0) = fluid_density * area * coeff_added_mass_normal;
-        added_mass_matrix(1, 1) = fluid_density * area * coeff_added_mass_normal;
-        added_mass_matrix(2, 2) = fluid_density * area * coefficients.added_mass_axial;
+        added_mass_matrix(0, 0) = fluid_density * area * coeff_added_mass_normal * coefficients.inertia_factor;
+        added_mass_matrix(1, 1) = fluid_density * area * coeff_added_mass_normal * coefficients.inertia_factor;
+        added_mass_matrix(2, 2) = fluid_density * area * coefficients.added_mass_axial * coefficients.inertia_factor;
 
         // contributions from structure acceleration (Ca)
         auto load_added_mass_normal = -fluid_density * area * coeff_added_mass_normal * acceleration_normal;
