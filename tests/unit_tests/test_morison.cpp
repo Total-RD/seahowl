@@ -38,9 +38,9 @@ TEST_F(TestMorison, analytical_comparison) {
     // create Morison coefficients
     auto coefficients = seahowl::hydro::HydroCoefficients();
     coefficients.drag_normal = 1.2;
-    coefficients.drag_axial = 0.0;
+    coefficients.drag_axial = 0.1;
     coefficients.added_mass_normal = 0.63;
-    coefficients.added_mass_axial = 0.0;
+    coefficients.added_mass_axial = 0.1;
     coefficients.buoyancy_factor = 0.0;
 
     // create Morison node 1
@@ -100,7 +100,7 @@ TEST_F(TestMorison, analytical_comparison) {
     test_dataset.test_csv.add_function("load node1 analytical (N/m)", [&load_analytical] { return load_analytical; });
     test_dataset.test_csv.add_function("load node2 (N/m)", [&node2] { return node2.load; });
     test_dataset.test_csv.add_function("load element (N)", [&element] { return element.get_load(); });
-    test_dataset.test_csv.add_function("load node3 (N/m)", [&node2] { return node2.load; });
+    test_dataset.test_csv.add_function("load node3 (N/m)", [&node3] { return node3.load; });
 
     while (time_current <= duration) {
         // compute loads
@@ -115,7 +115,7 @@ TEST_F(TestMorison, analytical_comparison) {
             0.5 * rho * coefficients.drag_normal * node1.diameter * abs(fluid_velocity[0]) * fluid_velocity[0] +
             rho * (1.0 + coefficients.added_mass_normal) * PI * pow(node1.diameter, 2) / 4.0 * fluid_acceleration[0];
         load_analytical[2] =
-            0.5 * rho * coefficients.drag_axial * node1.diameter * abs(fluid_velocity[2]) * fluid_velocity[2] +
+            0.5 * rho * coefficients.drag_axial * node1.diameter * PI * abs(fluid_velocity[2]) * fluid_velocity[2] +
             rho * (1.0 + coefficients.added_mass_axial) * PI * pow(node1.diameter, 2) / 4.0 * fluid_acceleration[2];
 
         // store values
