@@ -21,6 +21,7 @@ set(TEST_FILES
 	unit_tests/test_morison.cpp
 	unit_tests/tools/test_framework_dataset.cpp
 	unit_tests/tools/csv.cpp
+	unit_tests/tools/get_env_var.cpp
 )
 
 if(SEAHOWL_ENABLE_AERODYN)

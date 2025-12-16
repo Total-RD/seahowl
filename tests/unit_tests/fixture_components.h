@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tools/test_framework_dataset.h"
+#include "tools/get_env_var.h"
 
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
@@ -15,30 +16,10 @@ class FixtureComponents : public ::testing::Test {
         spdlog::set_level(spdlog::level::info);
 
         // set data directory root
-        char* const env_datadir = std::getenv("SEAHOWL_DATADIR");
-        if (env_datadir == NULL) {
-#ifdef SEAHOWL_DATADIR
-            DATADIR = path(SEAHOWL_DATADIR);
-#else
-            spdlog::critical("SEAHOWL_DATADIR not defined (need to set environment variable).");
-            std::exit(EXIT_FAILURE);
-#endif
-        } else {
-            DATADIR = path(env_datadir);
-        }
-
+        DATADIR = get_data_dir();
         // set test directories roots
-        char* const env_testdir = std::getenv("SEAHOWL_TESTDIR");
-        if (env_testdir == NULL) {
-#ifdef SEAHOWL_TESTDIR
-            TESTDIR = path(SEAHOWL_TESTDIR);
-#else
-            spdlog::critical("SEAHOWL_TESTDIR not defined (need to set environment variable).");
-            std::exit(EXIT_FAILURE);
-#endif
-        } else {
-            TESTDIR = path(env_testdir);
-        }
+        TESTDIR = get_test_dir();
+
         ref_dir = path(TESTDIR) / "unit_tests/data";
         test_dir = path(TESTDIR) / "unit_tests/data";
     }
