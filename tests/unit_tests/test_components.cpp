@@ -16,12 +16,12 @@ class MyEnvironment : public ::testing::Environment {
         // Code spécifique Windows
         auto env_bin = test_dir / "../build/.venv/Scripts/activate.bat";
         auto cmd = "cmd /C \" " + env_bin.string();
-        int ret = std::system((cmd + " && " + scilens_cmd + " " + data_test_dir.string()).c_str());
+        int ret = std::system((cmd + " && " + scilens_cmd + " " + data_test_dir.string() + " 2>nul").c_str());
 #elif defined(__linux__)
         // Code spécifique Linux
         auto env_bin = test_dir / "../build/.venv/bin/activate";
         auto cmd = "bash -c 'source " + env_bin.string();
-        int ret = std::system((cmd + " && " + scilens_cmd + " " + data_test_dir.string() + "'").c_str());
+        int ret = std::system((cmd + " && " + scilens_cmd + " " + data_test_dir.string() + " 2>/dev/null'").c_str());
 #endif
     }
 };
