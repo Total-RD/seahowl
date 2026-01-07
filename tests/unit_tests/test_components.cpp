@@ -10,18 +10,18 @@ class MyEnvironment : public ::testing::Environment {
         // set test directories roots
         auto test_dir = get_test_dir();
         auto data_test_dir = test_dir / "unit_tests/data";
-        std::string scilens_cmd = "scilens run --collect-depth 1 --export-html-add-index";
+        std::string scilens_cmd = "scilens --log-level ERROR run --collect-depth 1 --export-html-add-index";
 
 #ifdef _WIN32
         // Code spécifique Windows
         auto env_bin = test_dir / "../build/.venv/Scripts/activate.bat";
         auto cmd = "cmd /C \" " + env_bin.string();
-        int ret = std::system((cmd + " && " + scilens_cmd + " " + data_test_dir.string() + " 2>nul").c_str());
+        int ret = std::system((cmd + " && " + scilens_cmd + " " + data_test_dir.string()).c_str());
 #elif defined(__linux__)
         // Code spécifique Linux
         auto env_bin = test_dir / "../build/.venv/bin/activate";
         auto cmd = "bash -c 'source " + env_bin.string();
-        int ret = std::system((cmd + " && " + scilens_cmd + " " + data_test_dir.string() + " 2>/dev/null'").c_str());
+        int ret = std::system((cmd + " && " + scilens_cmd + " " + data_test_dir.string() + "'").c_str());
 #endif
     }
 };
