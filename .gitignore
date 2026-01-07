@@ -44,3 +44,4 @@ tests/non_regression/test_assets_py
 tests/non_regression/**/validation/**/*.*
 tests/non_regression/**/*.html
 tests/unit_tests/data/**/test/*.*
+tests/unit_tests/data/**/*.html

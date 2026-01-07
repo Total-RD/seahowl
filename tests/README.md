@@ -26,12 +26,7 @@ Use the following command to run unit tests:
 ./build/test_components
 ```
 
-Use the following command to generate html report:
-
-```bash
-cd tests/unit_tests/data
-scilens run --collect-depth 1 --export-html-add-index .
-```
+The HTML reports are automatically generated : `tests/unit_tests/data/index.html`
 
 ### non-regression tests
 Use the following command the non-regression tests:
@@ -39,7 +34,7 @@ Use the following command the non-regression tests:
 ```bash
 python -m unittest discover -v -s tests/non_regression -p "*.py"
 ```
-The HTML reports are automatically generated in the following directories: `test_components/test_assets_cpp` and `test_components/test_assets_py`.
+The HTML reports are automatically generated in the following directories: `test_components/test_assets_cpp/index.html` and `test_components/test_assets_py/index.html`.
 
 For more launch options, please refer to [unittest — Unit testing framework Python 3 documentation](https://docs.python.org/3/library/unittest.html)
 
