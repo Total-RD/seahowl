@@ -93,10 +93,10 @@ std::vector<seahowl::DiscretizationPoint> seahowl::get_indice_and_positions(
 double seahowl::bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
                                        const Eigen::VectorXd& x_list,
                                        const Eigen::VectorXd& y_list,
-                                       double y,
-                                       double x) {
+                                       double x,
+                                       double y) {
     // Find the four surrounding data points
-    int x0, y0 = -99;
+    int x0 = -99, y0 = -99;
     for (unsigned ii = 0; ii < x_list.size() - 1; ii++) {
         if (x >= x_list[ii] && x <= x_list[ii + 1])
             x0 = ii;

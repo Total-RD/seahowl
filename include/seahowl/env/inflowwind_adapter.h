@@ -37,7 +37,7 @@ class InflowWindAdapter : public WindModel {
      */
     virtual bool is_inside(const Vector3d& position, double time = 0.0) const override;
 
-    InflowWindAdapter(std::string inflowwind_infile);
+    InflowWindAdapter(const std::string& inflowwind_infile);
     ~InflowWindAdapter();
 
     std::string get_inflowwind_infile() const { return inflowwind_infile; }

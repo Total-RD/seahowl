@@ -419,8 +419,8 @@ void AeroDynAdapter::initialize(double time, double dt, TurbineAero& turbine) {
     // associate points to blade idx
     int idx_blade = 0;
     int idx_node = 0;  // Index into the MeshPttoBladeNum array [0:(total number of nodes on all blades)-1]
-    for (auto& blade : turbine.rna->rotor->blades) {
-        for (auto& node : blade->nodes) {
+    for (const auto& blade : turbine.rna->rotor->blades) {
+        for (const auto& node : blade->nodes) {
             pImpl->MeshPtToBladeNum[idx_node] = idx_blade + 1;
             idx_node += 1;
         }
@@ -467,7 +467,7 @@ void AeroDynAdapter::update_turbine_variables(TurbineAero& turbine) {
 
 void AeroDynAdapter::update_hub_motion(TurbineAero& turbine) {
     // Get the information about hub
-    auto& hub = turbine.rna->rotor->body_hub;
+    const auto& hub = turbine.rna->rotor->body_hub;
     auto hubPos = hub.get_position();
     auto hubOri = hub.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
     auto hubTranVel = hub.get_velocity();
@@ -490,7 +490,7 @@ void AeroDynAdapter::update_hub_motion(TurbineAero& turbine) {
 
 void AeroDynAdapter::update_nacelle_motion(TurbineAero& turbine) {
     // Get the information about nacelle
-    auto& nac = turbine.rna->body_nacelle;
+    const auto& nac = turbine.rna->body_nacelle;
     auto nacPos = nac.get_position();
     auto nacOri = nac.get_rotation().toRotationMatrix();  // get a rotation matrix 3x3
     auto nacTranVel = nac.get_velocity();
@@ -619,7 +619,6 @@ void TurbineAeroDyn::initialize(double time, double dt) {
     // VTK options for AeroDyn
     aerodyn.pImpl->WrVTK = WrVTK;
     aerodyn.pImpl->WrVTK_Type = WrVTK_Type;
-    aerodyn.pImpl->WrVTK_dt;
     aerodyn.pImpl->VTKHubRad = rna->rotor->hub_radius;
 
     // initialize AeroDyn adapter

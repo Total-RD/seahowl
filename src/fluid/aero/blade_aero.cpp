@@ -9,8 +9,7 @@
 using namespace seahowl;
 using namespace seahowl::aero;
 
-BladeNodeAero::BladeNodeAero(BladeReferencePointAero& point) {
-    properties = point;
+BladeNodeAero::BladeNodeAero(const BladeReferencePointAero& point) : properties(point) {
     set_position(point.coordinates);
     set_velocity(Vector3d(0.0, 0.0, 0.0));
     set_acceleration(Vector3d(0.0, 0.0, 0.0));
@@ -58,9 +57,7 @@ Vector3d BladeElementAero::get_offset_aero_absolute() const {
     return 0.5 * (node1.get_offset_aero_absolute() + node2.get_offset_aero_absolute());
 }
 
-BladeAero::BladeAero() {
-    body_root = std::make_unique<EntityDynamicEigen>();
-}
+BladeAero::BladeAero() : body_root(std::make_unique<EntityDynamicEigen>()) {}
 
 void BladeAero::build() {
     // check that enough reference points were defined to create elements (at least 2)
@@ -127,7 +124,7 @@ void BladeAero::compute_radii(const Vector3d& hub_apex_position) {
 
 Vector3d BladeAero::get_average_wind_velocity() {
     auto average = Vector3d(0.0, 0.0, 0.0);
-    for (auto& node : nodes) {
+    for (const auto& node : nodes) {
         average += node.wind_velocity_shadowed;
     }
     average /= nodes.size();
@@ -136,7 +133,7 @@ Vector3d BladeAero::get_average_wind_velocity() {
 
 Vector3d BladeAero::get_total_load() {
     auto total = Vector3d(0.0, 0.0, 0.0);
-    for (auto& element : elements) {
+    for (const auto& element : elements) {
         total += element.get_load();
     }
     return total;

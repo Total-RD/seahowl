@@ -44,11 +44,11 @@ void Tower::build() {
     aero.build();
 }
 
-void Tower::set_discretization_elasto(std::vector<double> fractions) {
+void Tower::set_discretization_elasto(const std::vector<double>& fractions) {
     elasto.discretization_fractions = fractions;
 }
 
-void Tower::set_discretization_aero(std::vector<double> fractions) {
+void Tower::set_discretization_aero(const std::vector<double>& fractions) {
     aero.discretization_fractions = fractions;
 }
 

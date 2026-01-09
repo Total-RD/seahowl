@@ -91,14 +91,14 @@ class Tower : public virtual ComponentDynamic {
      *
      * @param[in] fractions Normalized discretization fractions within [0, 1].
      */
-    void set_discretization_elasto(std::vector<double> fractions);
+    void set_discretization_elasto(const std::vector<double>& fractions);
 
     /**
      * @brief Sets the discretization fractions to use when building the aero part of the tower.
      *
      * @param[in] fractions Normalized discretization fractions within [0, 1].
      */
-    void set_discretization_aero(std::vector<double> fractions);
+    void set_discretization_aero(const std::vector<double>& fractions);
 
     /**
      * @brief Updates aero positions, rotations, velocities and accelerations from elasto component of the tower.

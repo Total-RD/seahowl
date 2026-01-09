@@ -37,10 +37,8 @@ BladeReferencePointAero BladeReferencePointAero::operator+(const BladeReferenceP
     return new_point;
 };
 
-TowerReferencePointAero::TowerReferencePointAero() {
-    rotation = Quaternion(1.0, 0.0, 0.0, 0.0);
-    velocity = Vector3d(0.0, 0.0, 0.0);
-}
+TowerReferencePointAero::TowerReferencePointAero()
+    : rotation(Quaternion(1.0, 0.0, 0.0, 0.0)), velocity(Vector3d(0.0, 0.0, 0.0)) {}
 
 TowerReferencePointAero TowerReferencePointAero::operator*(const double factor) const {
     TowerReferencePointAero new_point = *this;

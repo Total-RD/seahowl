@@ -8,9 +8,7 @@ using seahowl::elasto::BladeElasto;
 using seahowl::elasto::RotorElasto;
 using seahowl::elasto::RotorNacelleAssemblyElasto;
 
-RotorElasto::RotorElasto() {
-    body_hub = std::make_unique<BodyElastoChrono>();
-}
+RotorElasto::RotorElasto() : body_hub(std::make_unique<BodyElastoChrono>()) {}
 
 void RotorElasto::assemble_this(SystemElasto& system) {
     for (auto& blade : blades) {
@@ -109,30 +107,28 @@ void RotorElasto::accumulate_axial_torque(double torque) {
 }
 
 RotorNacelleAssemblyElasto::RotorNacelleAssemblyElasto(std::shared_ptr<seahowl::elasto::RotorElasto> rotor)
-    : rotor(rotor) {
-    // shaft
-    body_shaft = std::make_unique<BodyElastoChrono>();
+    : rotor(rotor),
+      body_shaft(std::make_unique<BodyElastoChrono>()),
+      body_nacelle(std::make_unique<BodyElastoChrono>()),
+      link_shaft_hub(std::make_unique<LinkChrono>()),
+      link_shaft_nacelle(std::make_unique<LinkChrono>()),
+      link_shaft_yaw_bearing(std::make_unique<LinkChrono>()),
+      actuator_yaw(std::make_unique<ActuatorRotationChrono>()),
+      link_rna(std::make_unique<LinkChrono>()) {
     // link between hub and shaft
-    link_shaft_hub = std::make_unique<LinkChrono>();
     link_shaft_hub->set_constraints(true, true, true, false, true, true);
 
-    // nacelle
-    body_nacelle = std::make_unique<BodyElastoChrono>();
     // link between nacelle body and shaft body
-    link_shaft_nacelle = std::make_unique<LinkChrono>();
     link_shaft_nacelle->set_constraints(true, true, true, true, true, true);
 
     // link between yaw bearing body and shaft body
-    link_shaft_yaw_bearing = std::make_unique<LinkChrono>();
     link_shaft_yaw_bearing->set_constraints(true, true, true, true, true, true);
 
     // yaw actuator
-    actuator_yaw = std::make_unique<ActuatorRotationChrono>();
     actuator_yaw->reference_rotation = Quaternion(1.0, 0.0, 0.0, 0.0);
     // actuator_yaw->reference_rotation = Quaternion(AngleAxisd(PI, Vector3d(1.0, 0.0, 0.0)));
 
     // RNA link
-    link_rna = std::make_unique<LinkChrono>();
     link_rna->set_constraints(true, true, true, true, true, true);
 }
 

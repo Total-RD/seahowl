@@ -71,11 +71,11 @@ void Mooring::build() {
     hydro.build();
 }
 
-void Mooring::set_discretization_elasto(std::vector<double> fractions) {
+void Mooring::set_discretization_elasto(const std::vector<double>& fractions) {
     elasto.discretization_fractions = fractions;
 }
 
-void Mooring::set_discretization_hydro(std::vector<double> fractions) {
+void Mooring::set_discretization_hydro(const std::vector<double>& fractions) {
     hydro.discretization_fractions = fractions;
 }
 
@@ -163,7 +163,7 @@ void MooringSystem::perform_sanity_check() {
         // check that moorings are also present in their elasto and hydro system counterparts
         bool found_elasto = false;
         bool found_hydro = false;
-        for (auto& mooring_elasto : elasto.moorings) {
+        for (const auto& mooring_elasto : elasto.moorings) {
             if (&mooring->elasto == &*mooring_elasto) {
                 found_elasto = true;
             }
@@ -171,7 +171,7 @@ void MooringSystem::perform_sanity_check() {
         if (!found_elasto) {
             throw std::runtime_error("Did not find mooring in mooring_system elasto class");
         }
-        for (auto& mooring_hydro : hydro.moorings) {
+        for (const auto& mooring_hydro : hydro.moorings) {
             if (&mooring->hydro == &*mooring_hydro) {
                 found_hydro = true;
             }

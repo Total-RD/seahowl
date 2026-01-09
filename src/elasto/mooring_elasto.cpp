@@ -77,10 +77,10 @@ double MooringSystemElasto::get_mass() const {
 
 MooringElasto::MooringElasto(BodyElasto& fairlead, BodyElasto& anchor) : fairlead(fairlead), anchor(anchor) {}
 
-MooringElastoFEA::MooringElastoFEA(BodyElasto& fairlead, BodyElasto& anchor) : MooringElasto(fairlead, anchor) {
-    fairlead_link = std::make_unique<seahowl::elasto::LinkChronoCable>();
-    anchor_link = std::make_unique<seahowl::elasto::LinkChronoCable>();
-}
+MooringElastoFEA::MooringElastoFEA(BodyElasto& fairlead, BodyElasto& anchor)
+    : MooringElasto(fairlead, anchor),
+      fairlead_link(std::make_unique<seahowl::elasto::LinkChronoCable>()),
+      anchor_link(std::make_unique<seahowl::elasto::LinkChronoCable>()) {}
 
 void MooringElastoFEA::set_length(double length) {
     this->length = length;

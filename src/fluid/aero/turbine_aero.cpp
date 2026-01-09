@@ -3,10 +3,7 @@
 using namespace seahowl::aero;
 using seahowl::env::EnvModel;
 
-TurbineAero::TurbineAero() {
-    rna = std::make_shared<RotorNacelleAssemblyAero>();
-    tower = std::make_shared<TowerAero>();
-}
+TurbineAero::TurbineAero() : rna(std::make_shared<RotorNacelleAssemblyAero>()), tower(std::make_shared<TowerAero>()) {}
 
 void TurbineAero::build() {
     rna->build();

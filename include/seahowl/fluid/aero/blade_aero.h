@@ -45,7 +45,7 @@ struct BladeNodeAero : public EntityDynamicEigen {
     /**
      * @brief Constructor.
      */
-    BladeNodeAero(BladeReferencePointAero& point);
+    BladeNodeAero(const BladeReferencePointAero& point);
 
     /**
      * @brief Get aero offset in global frame of reference.

@@ -137,9 +137,9 @@ namespace chrono {
  */
 class ChLoadLocal66 : public ChLoadCustom {
   public:
-    ChLoadLocal66(std::shared_ptr<ChBody> mloadable) : ChLoadCustom(mloadable) { body_frame = mloadable; }
+    ChLoadLocal66(std::shared_ptr<ChBody> mloadable) : ChLoadCustom(mloadable), body_frame(mloadable) {}
 
-    ChLoadLocal66(std::shared_ptr<fea::ChNodeFEAxyzrot> mloadable) : ChLoadCustom(mloadable) { body_frame = mloadable; }
+    ChLoadLocal66(std::shared_ptr<fea::ChNodeFEAxyzrot> mloadable) : ChLoadCustom(mloadable), body_frame(mloadable) {}
 
     /**
      * @brief "Virtual" copy constructor (covariant return type). Required from chrono inheritance.
@@ -253,10 +253,10 @@ class ChLoadLocal66 : public ChLoadCustom {
  */
 class ChLoadForceTorque : public ChLoadCustom {
   public:
-    ChLoadForceTorque(std::shared_ptr<ChLoadable> mloadable) : ChLoadCustom(mloadable) {
-        chload_force = ChVector3<double>(0.0, 0.0, 0.0);
-        chload_torque = ChVector3<double>(0.0, 0.0, 0.0);
-    }
+    ChLoadForceTorque(std::shared_ptr<ChLoadable> mloadable)
+        : ChLoadCustom(mloadable),
+          chload_force(ChVector3<double>(0.0, 0.0, 0.0)),
+          chload_torque(ChVector3<double>(0.0, 0.0, 0.0)) {}
 
     /**
      * @brief "Virtual" copy constructor (covariant return type). Required from chrono inheritance.
@@ -356,13 +356,13 @@ Vector3d EntityDynamicChrono::get_rotational_acceleration(bool is_local) const {
     }
 }
 
-BodyElastoChrono::BodyElastoChrono() {
-    chobj = chrono_types::make_shared<chrono::ChBody>();
-    chloadcontainer = chrono_types::make_shared<chrono::ChLoadContainer>();
+BodyElastoChrono::BodyElastoChrono()
+    : chobj(chrono_types::make_shared<chrono::ChBody>()),
+      chloadcontainer(chrono_types::make_shared<chrono::ChLoadContainer>()),
+      chloads_internals(chrono_types::make_shared<chrono::ChLoadForceTorque>(chobj)) {
     EntityDynamicChrono::chobj = chobj;
     set_mass(MASS_NOTSET_VALUE);
     set_inertia_diagonal(Vector3d(MASS_NOTSET_VALUE, MASS_NOTSET_VALUE, MASS_NOTSET_VALUE));
-    chloads_internals = chrono_types::make_shared<chrono::ChLoadForceTorque>(chobj);
     chloadcontainer->Add(chloads_internals);
 }
 
@@ -531,9 +531,9 @@ NodeElastoChronoBase::NodeElastoChronoBase() {
     chloadcontainer = chrono_types::make_shared<chrono::ChLoadContainer>();
 }
 
-NodeElastoChrono::NodeElastoChrono(const Vector3d& position, const Quaternion& rotation) {
-    chobj = chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(
-        chrono::ChFrame<>(vector2ch(position), node_iec2ch(rotation)));
+NodeElastoChrono::NodeElastoChrono(const Vector3d& position, const Quaternion& rotation)
+    : chobj(chrono_types::make_shared<chrono::fea::ChNodeFEAxyzrot>(
+          chrono::ChFrame<>(vector2ch(position), node_iec2ch(rotation)))) {
     EntityDynamicChrono::chobj = chobj;
     NodeElastoChronoBase::chobj = chobj;
 
@@ -787,8 +787,8 @@ void NodeElastoChrono::set_properties(const TowerReferencePointElasto& ref) {
     section->SetRayleighDamping(damping_coefficients);
 }
 
-NodeElastoChronoD::NodeElastoChronoD(const Vector3d& position, const Vector3d& direction) {
-    chobj = std::make_shared<chrono::fea::ChNodeFEAxyzD>(vector2ch(position), vector2ch(direction));
+NodeElastoChronoD::NodeElastoChronoD(const Vector3d& position, const Vector3d& direction)
+    : chobj(std::make_shared<chrono::fea::ChNodeFEAxyzD>(vector2ch(position), vector2ch(direction))) {
     NodeElastoChronoBase::chobj = chobj;
 
     chloads_internals = chrono_types::make_shared<chrono::ChLoadForceTorque>(chobj);
@@ -996,8 +996,8 @@ double ElementElastoChrono::get_mass() {
     return chobj->GetMass();
 }
 
-ElementBladeElastoChrono::ElementBladeElastoChrono() {
-    chobj = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenko>();
+ElementBladeElastoChrono::ElementBladeElastoChrono()
+    : chobj(chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenko>()) {
     ElementElastoChrono::chobj = chobj;
     // create blade section
     auto blade_section = chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGeneric>();
@@ -1029,8 +1029,8 @@ void ElementBladeElastoChrono::update_properties() {
     chobj->GetTaperedSection()->ComputeAverageSectionParameters();
 }
 
-ElementBladeElastoChronoFPM::ElementBladeElastoChronoFPM() {
-    chobj = chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenkoFPM>();
+ElementBladeElastoChronoFPM::ElementBladeElastoChronoFPM()
+    : chobj(chrono_types::make_shared<chrono::fea::ChElementBeamTaperedTimoshenkoFPM>()) {
     ElementElastoChrono::chobj = chobj;
     // create blade section
     auto blade_section = chrono_types::make_shared<chrono::fea::ChBeamSectionTaperedTimoshenkoAdvancedGenericFPM>();
@@ -1064,8 +1064,8 @@ void ElementBladeElastoChronoFPM::update_properties() {
     chobj->GetTaperedSection()->ComputeAverageSectionParameters();
 }
 
-ElementMooringElastoChrono::ElementMooringElastoChrono() {
-    chobj = chrono_types::make_shared<chrono::fea::ChElementCableANCF>();
+ElementMooringElastoChrono::ElementMooringElastoChrono()
+    : chobj(chrono_types::make_shared<chrono::fea::ChElementCableANCF>()) {
     ElementElastoChrono::chobj = chobj;
 }
 
@@ -1102,9 +1102,7 @@ double ElementMooringElastoChrono::get_rest_length() const {
     return chobj->GetRestLength();
 }
 
-SpringLinearChrono::SpringLinearChrono() {
-    chobj = chrono_types::make_shared<chrono::ChLinkTSDA>();
-}
+SpringLinearChrono::SpringLinearChrono() : chobj(chrono_types::make_shared<chrono::ChLinkTSDA>()) {}
 
 void SpringLinearChrono::initialize(const BodyElasto& body1, const BodyElasto& body2) {
     chobj->Initialize(dynamic_cast<const BodyElastoChrono&>(body1).chobj,
@@ -1138,8 +1136,7 @@ double SpringLinearChrono::get_force() {
     return chobj->GetForce();
 }
 
-LinkChrono::LinkChrono() {
-    chobj = chrono_types::make_shared<chrono::ChLinkMateGeneric>();
+LinkChrono::LinkChrono() : chobj(chrono_types::make_shared<chrono::ChLinkMateGeneric>()) {
     chobj->SetConstrainedCoords(true, true, true, true, true, true);
     LinkChronoBase::chobj = chobj;
 }
@@ -1248,15 +1245,14 @@ class ChFunctionArray : public chrono::ChFunction {
     }
 };
 
-ActuatorRotationChrono::ActuatorRotationChrono() {
+ActuatorRotationChrono::ActuatorRotationChrono()
+    : chobj(std::make_shared<chrono::ChLinkMotorRotationAngle>()), chfunc(std::make_shared<ChFunctionArray>()) {
     // make actuator bodies (massless)
     body_worker = std::make_unique<BodyElastoChrono>();
     body_controller = std::make_unique<BodyElastoChrono>();
 
     // make actuator abject
-    chobj = std::make_shared<chrono::ChLinkMotorRotationAngle>();
     LinkChronoBase::chobj = chobj;
-    chfunc = std::make_shared<ChFunctionArray>();
     chobj->SetMotorFunction(chfunc);
 
     // make link
@@ -1335,11 +1331,10 @@ void ActuatorRotationChrono::initialize_links() {
     chobj->Initialize(body1ref.chobj, body2ref.chobj, true, chframe0, chframe0);
 }
 
-LinkMatrixStiffnessDampingChrono::LinkMatrixStiffnessDampingChrono() {
-    // empty stiffness and damping matrices
-    stiffness_matrix = Eigen::Matrix<double, 6, 6>::Zero();
-    damping_matrix = Eigen::Matrix<double, 6, 6>::Zero();
-}
+LinkMatrixStiffnessDampingChrono::LinkMatrixStiffnessDampingChrono()
+    :  // empty stiffness and damping matrices
+      stiffness_matrix(Eigen::Matrix<double, 6, 6>::Zero()),
+      damping_matrix(Eigen::Matrix<double, 6, 6>::Zero()) {}
 
 void LinkMatrixStiffnessDampingChrono::initialize(const Entity& entity1, const Entity& entity2) {
     try {
@@ -1370,8 +1365,7 @@ void LinkMatrixStiffnessDampingChrono::set_damping_matrix(const Eigen::Matrix<do
     }
 }
 
-MeshElastoChrono::MeshElastoChrono() {
-    chobj = chrono_types::make_shared<chrono::fea::ChMesh>();
+MeshElastoChrono::MeshElastoChrono() : chobj(chrono_types::make_shared<chrono::fea::ChMesh>()) {
     chloadcontainers.clear();
 }
 
@@ -1390,10 +1384,10 @@ void MeshElastoChrono::add(ElementElasto& element) {
     chobj->AddElement(dynamic_cast<ElementElastoChrono&>(element).chobj);
 }
 
-SystemElastoChrono::SystemElastoChrono() {
-    chobj = chrono_types::make_shared<chrono::ChSystemSMC>();
+SystemElastoChrono::SystemElastoChrono()
+    : chobj(chrono_types::make_shared<chrono::ChSystemSMC>()),
+      chloadcontainer(chrono_types::make_shared<chrono::ChLoadContainer>()) {
     set_gravitational_acceleration(Vector3d(0.0, 0.0, -9.81));
-    chloadcontainer = chrono_types::make_shared<chrono::ChLoadContainer>();
     chobj->Add(chloadcontainer);
 
     // solver
@@ -1419,10 +1413,10 @@ void SystemElastoChrono::assemble() {
     if (is_assembled) {
         throw std::runtime_error("Component already assembled: " + std::string(typeid(*this).name()) + ".");
     }
-    for (auto& turbine : turbines) {
+    for (const auto& turbine : turbines) {
         turbine->assemble(*this);
     }
-    for (auto& component : components) {
+    for (const auto& component : components) {
         component->assemble(*this);
     }
     is_assembled = true;
@@ -1478,7 +1472,7 @@ void SystemElastoChrono::do_statics(bool linear, int nonlinear_steps) {
     }
 
     // constrain rotor
-    for (auto& turbine : turbines) {
+    for (const auto& turbine : turbines) {
         turbine->rna->link_shaft_hub->set_constraints(true, true, true, true, true, true);
     }
 

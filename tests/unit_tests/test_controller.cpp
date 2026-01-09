@@ -499,6 +499,8 @@ TEST_F(TestController, actuator_disk) {
 
     test_dataset.test_csv.add_function("rpm (-)", [&turbine]() { return turbine.rna.elasto.get_rpm(); });
     test_dataset.test_csv.add_function("power (W)", [&turbine]() { return turbine.get_generated_power(); });
+    test_dataset.test_csv.add_function("pitch (rad)",
+                                       [&turbine]() { return turbine.rna.elasto.rotor->pitch_collective; });
 
     int count = 0;
     while (time < simul_time) {

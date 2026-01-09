@@ -45,7 +45,7 @@ class FloaterHydroChrono : public elasto::FloaterElasto {
      *
      * @param[in] filepath Path to .h5 file.
      */
-    void set_h5_filepath(std::string filepath);
+    void set_h5_filepath(const std::string& filepath);
 
     /**
      * @brief Sets waves used to compute hydro loads on floater.

@@ -15,8 +15,8 @@ namespace fs = std::filesystem;
 using seahowl::Vector3d;
 using namespace seahowl::io;
 
-VisualizationInSituIrrlicht::VisualizationInSituIrrlicht() {
-    application_irrlicht = chrono_types::make_shared<chrono::irrlicht::ChVisualSystemIrrlicht>();
+VisualizationInSituIrrlicht::VisualizationInSituIrrlicht()
+    : application_irrlicht(chrono_types::make_shared<chrono::irrlicht::ChVisualSystemIrrlicht>()) {
     application_irrlicht->SetWindowTitle("SEAHOWL");
     application_irrlicht->Initialize();
     application_irrlicht->SetCameraVertical(chrono::CameraVerticalDir::Z);

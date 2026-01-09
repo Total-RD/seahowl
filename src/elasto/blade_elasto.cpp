@@ -9,13 +9,13 @@
 
 using namespace seahowl::elasto;
 
-BladeElasto::BladeElasto() {
+BladeElasto::BladeElasto()
+    : link_root(std::make_unique<LinkChrono>()),
+      actuator_pitch(std::make_unique<ActuatorRotationChrono>()),
+      link_blade(std::make_unique<LinkChrono>()) {
     // links
-    link_root = std::make_unique<LinkChrono>();
     link_root->set_constraints(true, true, true, true, true, true);
-    actuator_pitch = std::make_unique<ActuatorRotationChrono>();
     actuator_pitch->reference_rotation = Quaternion(AngleAxisd(PI, Vector3d(1.0, 0.0, 0.0)));
-    link_blade = std::make_unique<LinkChrono>();
     link_blade->set_constraints(true, true, true, true, true, true);
     //
     discretization_fractions = {0.0, 1.0};
@@ -168,8 +168,8 @@ void BladeElastoFEA::build() {
     }
     // apply structural twist
     for (int ii = 0; ii < nodes.size(); ii++) {
-        auto& node = nodes[ii];
-        auto& point = discretized_points[ii];
+        const auto& node = nodes[ii];
+        const auto& point = discretized_points[ii];
         auto axis = node->get_direction();
         auto twist_matrix = AngleAxisd(-point.structural_twist, axis);
         auto rotation_matrix = twist_matrix * nodes[ii]->get_rotation().toRotationMatrix();
@@ -328,7 +328,7 @@ seahowl::EntityDynamicEigen BladeElastoRigid::get_entity_along_blade(double eta,
     // relative position along z axis of blade
     auto z_position = (0.5 * fabs(eta + 1.0)) * length;
 
-    auto& body_root = *actuator_pitch->body_worker;
+    const auto& body_root = *actuator_pitch->body_worker;
 
     // position
     Vector3d position = body_root.get_position() + body_root.get_rotation() * Vector3d(0.0, 0.0, z_position);

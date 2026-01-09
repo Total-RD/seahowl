@@ -19,9 +19,9 @@ class TowerElasto : public ComponentElastoFEA {
     /** @brief List of discretized points (interpolated reference points) describing the tower properties. */
     std::vector<TowerReferencePointElasto> discretized_points;
     /** @brief Height of the tower (absolute value above ground / sea water level). */
-    double height;
+    double height = 0.0;
     /** @brief Height of the base of the tower (absolute value above ground / sea water level). */
-    double base_height;
+    double base_height = 0.0;
 
     /**
      * @brief Constructor.

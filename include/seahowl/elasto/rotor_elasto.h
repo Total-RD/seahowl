@@ -243,7 +243,7 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
 
   private:
     /** @brief Accumulated Electrical torque on the rotor.*/
-    double torque_elec_accumulated;
+    double torque_elec_accumulated = 0.0;
     /** @brief Whether the RNA is mounted (e.g. on a tower) or not. */
     bool is_mounted = false;
 };

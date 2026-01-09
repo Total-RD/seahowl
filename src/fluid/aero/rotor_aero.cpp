@@ -53,8 +53,8 @@ seahowl::Vector2d DiskCoefficients::get_disk_coefficients_from_table(double TSR,
 void RotorAero::compute_disk_averaged_wind_velocity(const EnvModel& env_model, double time) {
     disk_averaged_wind_velocity = env_model.fluid_models.get_velocity(body_hub.get_position(), time);
     size_t npoints = 1;
-    for (auto& blade : blades) {
-        for (auto& node : blade->nodes) {
+    for (const auto& blade : blades) {
+        for (const auto& node : blade->nodes) {
             node.get_position();
             disk_averaged_wind_velocity += env_model.fluid_models.get_velocity(node.get_position(), time);
             npoints += 1;
@@ -92,7 +92,7 @@ void RotorAeroBEMT::build() {
     // calculate rotor radius
     radius = 0.0;
     for (int ii = 0; ii < blades.size(); ii++) {
-        auto& blade = blades[ii];
+        const auto& blade = blades[ii];
         radius += (blade->discretized_points.back().coordinates - body_hub.get_position()).norm();
     }
     radius /= blades.size();
@@ -111,7 +111,7 @@ void RotorAeroBEMT::compute_radii_distances_solidity() {
 
     // compute radii and distances
     radius = 0.0;
-    for (auto& blade : blades) {
+    for (const auto& blade : blades) {
         auto tip_position = blade->nodes.back().get_position();
         for (auto& node : blade->nodes) {
             node.radius = (node.get_position() - body_hub.get_position()).norm();
@@ -124,7 +124,7 @@ void RotorAeroBEMT::compute_radii_distances_solidity() {
     }
 
     // compute chord solidities (to compute after blade radius is set)
-    for (auto& blade : blades) {
+    for (const auto& blade : blades) {
         for (auto& node : blade->nodes) {
             node.chord_solidity = nblades * node.properties.chord / (2 * PI * node.radius);
         }
@@ -141,7 +141,7 @@ void RotorAeroBEMT::compute_env_loads(const EnvModel& env_model, double time) {
     auto disk_normal = hub_rotation * Vector3d(1.0, 0.0, 0.0);
 
     // iterate over blades
-    for (auto& blade : blades) {
+    for (const auto& blade : blades) {
         auto blade_azimuth = azimuth + blade->azimuth0;
         // check that blade_azimuth is between pi and -pi
         if (blade_azimuth < -PI || blade_azimuth > PI) {
@@ -152,11 +152,8 @@ void RotorAeroBEMT::compute_env_loads(const EnvModel& env_model, double time) {
         auto disk_axis = project_vector_to_plane(root_axis, disk_normal).normalized();
         auto disk_tangent = disk_axis.cross(disk_normal).normalized();
 
-        int count = -1;
         // iterate over blade nodes
         for (auto& node : blade->nodes) {
-            count += 1;
-
             // node info
             auto node_position = node.get_position();
             auto node_rotation = node.get_rotation();
@@ -267,7 +264,7 @@ void RotorAeroDisk::compute_env_loads(const EnvModel& env_model, double time) {
     double RPM = (body_hub.get_rotation().inverse() * body_hub.get_rotational_velocity()).x();
     double TSR = RPM * radius / local_velocity_disc;
 
-    auto coefficients = disk_coefficients.get_disk_coefficients_from_table(pitch_collective * 180.0 / seahowl::PI, TSR);
+    auto coefficients = disk_coefficients.get_disk_coefficients_from_table(TSR, pitch_collective * 180.0 / seahowl::PI);
     // get thrust and power coefficients
     auto ct = coefficients[1];
     auto cp = coefficients[0];

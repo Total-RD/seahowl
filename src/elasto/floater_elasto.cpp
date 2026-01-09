@@ -7,11 +7,10 @@
 
 using namespace seahowl::elasto;
 
-FloaterElasto::FloaterElasto() {
-    body_main = std::make_unique<seahowl::elasto::BodyElastoChrono>();
-    mooring_system = std::make_unique<seahowl::elasto::MooringSystemElasto>();
-    link_floater_entity = std::make_unique<seahowl::elasto::LinkChrono>();
-}
+FloaterElasto::FloaterElasto()
+    : body_main(std::make_unique<seahowl::elasto::BodyElastoChrono>()),
+      mooring_system(std::make_unique<seahowl::elasto::MooringSystemElasto>()),
+      link_floater_entity(std::make_unique<seahowl::elasto::LinkChrono>()) {}
 
 void FloaterElasto::link_to_entity(const Entity& entity) {
     link_floater_entity->initialize(*body_main, entity);
@@ -100,7 +99,7 @@ seahowl::elasto::Link& FloaterElasto::get_fairlead_link(const std::string& body_
 
 void FloaterElasto::assemble_this(seahowl::elasto::SystemElasto& system) {
     // first add hydro bodies
-    for (auto& bodymap : floater_bodies) {
+    for (const auto& bodymap : floater_bodies) {
         auto& body = *bodymap.second;
         system.add(body);
     }
@@ -108,8 +107,8 @@ void FloaterElasto::assemble_this(seahowl::elasto::SystemElasto& system) {
     // link hydro bodies to body_main
     // needs to happen after adding hydro bodies to system (HydroChrono requirement)
     system.add(*body_main);
-    for (auto& bodymap : floater_bodies) {
-        auto& body = *bodymap.second;
+    for (const auto& bodymap : floater_bodies) {
+        const auto& body = *bodymap.second;
         auto link_cog = std::make_unique<seahowl::elasto::LinkChrono>();
         link_cog->initialize(*body_main, body);
         system.add(*link_cog);

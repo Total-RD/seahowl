@@ -24,8 +24,7 @@ double WindModel::get_density_this(const Vector3d& position, double time) const 
     return density;
 }
 
-ConstantWind::ConstantWind() {
-    wind_velocity = Vector3d(0.0, 0.0, 0.0);
+ConstantWind::ConstantWind() : wind_velocity(Vector3d(0.0, 0.0, 0.0)) {
     direction_gravity = Vector3d(0.0, 0.0, -1.0);
 }
 

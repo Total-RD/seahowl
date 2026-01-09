@@ -3,12 +3,13 @@
 using namespace seahowl;
 using namespace seahowl::elasto;
 
-MonopileElasto::MonopileElasto() : TowerElasto() {
-    body_tp = std::make_unique<BodyElastoChrono>();
+MonopileElasto::MonopileElasto()
+    : TowerElasto(),
+      body_tp(std::make_unique<BodyElastoChrono>()),
+      link_tp_entity(std::make_unique<seahowl::elasto::LinkChrono>()),
+      link_tp_monopile(std::make_unique<seahowl::elasto::LinkChrono>()) {
     body_tp->set_mass(0.0);
     body_tp->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
-    link_tp_entity = std::make_unique<seahowl::elasto::LinkChrono>();
-    link_tp_monopile = std::make_unique<seahowl::elasto::LinkChrono>();
 }
 
 void MonopileElasto::link_to_entity(const Entity& entity) {

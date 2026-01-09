@@ -37,7 +37,7 @@ void get_disk_perf_from_table(std::string filepath, seahowl::aero::RotorAeroDisk
         std::string line;
         std::istringstream iss1(line);
         unsigned idLine = -1;
-        int ind1, ind2, ind3, ind4, ind5 = 0;
+        int ind1 = 0, ind2 = 0, ind3 = 0, ind4 = 0, ind5 = 0;
         std::vector<std::string> stringVector;
         while (std::getline(myfile, line)) {  // getline (myfile,line);
             idLine += 1;

@@ -101,7 +101,7 @@ void ComponentElastoFEA::evaluate_position_rotation(Vector3d& position,
                                                     Quaternion& rotation,
                                                     int element_index,
                                                     double eta) const {
-    auto& element = elements[element_index];
+    const auto& element = elements[element_index];
 
     element->evaluate_position_rotation(eta, position, rotation);
 }
@@ -112,7 +112,7 @@ void ComponentElastoFEA::evaluate_position_rotation_slerp(Vector3d& position,
                                                           double eta) const {
     evaluate_position_rotation(position, rotation, element_index, eta);
     // interpolate quaternion
-    auto& element = elements[element_index];
+    const auto& element = elements[element_index];
     rotation = interpolate_node_rotation_slerp(*element, eta);
 }
 
@@ -133,7 +133,7 @@ void ComponentElastoFEA::accumulate_element_load(const Vector3d& load,
     evaluate_position_rotation(position, rotation, element_index, eta);
 
     // apply loads
-    auto& element = elements[element_index];
+    const auto& element = elements[element_index];
     // load on first node
     double weight0 = 0.5 * abs(eta - 1);
     auto load0 = load * weight0;
@@ -167,7 +167,7 @@ void ComponentElastoFEA::accumulate_mass_matrix(const Eigen::Matrix<double, 6, 6
     evaluate_position_rotation(position, rotation, element_index, eta);
 
     // apply loads
-    auto& element = elements[element_index];
+    const auto& element = elements[element_index];
     // load on first node
     double weight0 = 0.5 * abs(eta - 1);
     auto node0 = element->nodes[0];
@@ -182,7 +182,7 @@ void ComponentElastoFEA::accumulate_mass_matrix(const Eigen::Matrix<double, 6, 6
 
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_positions() const {
     std::vector<Vector3d> positions;
-    for (auto& node : nodes) {
+    for (const auto& node : nodes) {
         positions.push_back(node->get_position());
     }
     return positions;
@@ -190,7 +190,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_positions() const {
 
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_velocities() const {
     std::vector<Vector3d> velocities;
-    for (auto& node : nodes) {
+    for (const auto& node : nodes) {
         velocities.push_back(node->get_velocity());
     }
     return velocities;
@@ -198,7 +198,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_velocities() const {
 
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_accelerations() const {
     std::vector<Vector3d> accelerations;
-    for (auto& node : nodes) {
+    for (const auto& node : nodes) {
         accelerations.push_back(node->get_acceleration());
     }
     return accelerations;
@@ -206,7 +206,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_accelerations() const {
 
 std::vector<Quaternion> ComponentElastoFEA::get_nodes_rotations() const {
     std::vector<Quaternion> rotations;
-    for (auto& node : nodes) {
+    for (const auto& node : nodes) {
         rotations.push_back(node->get_rotation());
     }
     return rotations;
@@ -214,7 +214,7 @@ std::vector<Quaternion> ComponentElastoFEA::get_nodes_rotations() const {
 
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_directions() const {
     std::vector<Vector3d> directions;
-    for (auto& node : nodes) {
+    for (const auto& node : nodes) {
         directions.push_back(node->get_direction());
     }
     return directions;
@@ -222,7 +222,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_directions() const {
 
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_velocities() const {
     std::vector<Vector3d> rotational_velocities;
-    for (auto& node : nodes) {
+    for (const auto& node : nodes) {
         rotational_velocities.push_back(node->get_rotational_velocity());
     }
     return rotational_velocities;
@@ -230,7 +230,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_velocities() cons
 
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_accelerations() const {
     std::vector<Vector3d> rotational_accelerations;
-    for (auto& node : nodes) {
+    for (const auto& node : nodes) {
         rotational_accelerations.push_back(node->get_rotational_acceleration());
     }
     return rotational_accelerations;
@@ -238,7 +238,7 @@ std::vector<Vector3d> ComponentElastoFEA::get_nodes_rotational_accelerations() c
 
 std::vector<Vector3d> ComponentElastoFEA::get_nodes_loads() const {
     std::vector<Vector3d> loads;
-    for (auto& node : nodes) {
+    for (const auto& node : nodes) {
         loads.push_back(node->get_force());
     }
     return loads;
@@ -255,9 +255,9 @@ seahowl::EntityDynamicEigen ComponentElastoFEA::get_entity_along_component(doubl
     // update properties of aero nodes
     double weight1 = 0.5 * fabs(eta - 1.0);
     double weight2 = 0.5 * fabs(eta + 1.0);
-    auto& element = elements[element_index];
-    auto& node1 = element->nodes[0];
-    auto& node2 = element->nodes[1];
+    const auto& element = elements[element_index];
+    const auto& node1 = element->nodes[0];
+    const auto& node2 = element->nodes[1];
     entity.set_velocity(weight1 * node1->get_velocity() + weight2 * node2->get_velocity());
     entity.set_rotational_velocity(weight1 * node1->get_rotational_velocity() +
                                    weight2 * node2->get_rotational_velocity());

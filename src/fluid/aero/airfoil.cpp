@@ -47,8 +47,8 @@ AirfoilProperties AirfoilProperties::operator+(const AirfoilProperties& other) c
     int idx2 = 0;
     new_point.coefficients_list.clear();
     while (idx1 + idx2 < this->coefficients_list.size() + other.coefficients_list.size()) {
-        auto& coeffs1 = this->coefficients_list[idx1];
-        auto& coeffs2 = other.coefficients_list[idx2];
+        const auto& coeffs1 = this->coefficients_list[idx1];
+        const auto& coeffs2 = other.coefficients_list[idx2];
         if (std::abs(coeffs1.alpha - coeffs2.alpha) < 1e-6) {
             new_point.coefficients_list.push_back(coeffs1 + coeffs2);
             if (idx1 + 1 < this->coefficients_list.size() && idx2 + 1 < other.coefficients_list.size()) {
@@ -68,7 +68,7 @@ AirfoilProperties AirfoilProperties::operator+(const AirfoilProperties& other) c
             }
         } else {
             if (coeffs1.alpha < coeffs2.alpha) {
-                auto& coeffs2_previous = other.coefficients_list[idx2 - 1];
+                const auto& coeffs2_previous = other.coefficients_list[idx2 - 1];
                 double alpha_range = coeffs2.alpha - coeffs2_previous.alpha;
                 double w1 = (coeffs1.alpha - coeffs2_previous.alpha) / alpha_range;
                 double w2 = (coeffs2.alpha - coeffs1.alpha) / alpha_range;
@@ -76,7 +76,7 @@ AirfoilProperties AirfoilProperties::operator+(const AirfoilProperties& other) c
                 new_point.coefficients_list.push_back(coeffs);
                 idx1 += 1;
             } else if (coeffs2.alpha < coeffs1.alpha) {
-                auto& coeffs1_previous = this->coefficients_list[idx1 - 1];
+                const auto& coeffs1_previous = this->coefficients_list[idx1 - 1];
                 double alpha_range = coeffs1.alpha - coeffs1_previous.alpha;
                 double w1 = (coeffs2.alpha - coeffs1_previous.alpha) / alpha_range;
                 double w2 = (coeffs1.alpha - coeffs2.alpha) / alpha_range;

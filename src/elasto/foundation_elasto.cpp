@@ -4,11 +4,11 @@
 
 using namespace seahowl::elasto;
 
-FoundationElastoBody::FoundationElastoBody() {
-    body_foundation = std::make_unique<BodyElastoChrono>();
+FoundationElastoBody::FoundationElastoBody()
+    : body_foundation(std::make_unique<BodyElastoChrono>()),
+      link_foundation_entity(std::make_unique<seahowl::elasto::LinkChrono>()) {
     body_foundation->set_mass(0.0);
     body_foundation->set_inertia_diagonal(Vector3d(0.0, 0.0, 0.0));
-    link_foundation_entity = std::make_unique<seahowl::elasto::LinkChrono>();
 }
 
 void FoundationElastoBody::link_to_entity(const Entity& entity) {

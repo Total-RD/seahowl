@@ -22,8 +22,7 @@ class ConfigManagerImpl {
     std::map<std::string, SpecComputed> varspecs_;
     std::map<std::string, ValueComputed> vals_;
 
-    ConfigManagerImpl(const ConfigManagerOptions& options) {
-        options_ = options;
+    ConfigManagerImpl(const ConfigManagerOptions& options) : options_(options) {
         linearize(options_.variable_specs, "_");
     }
 
