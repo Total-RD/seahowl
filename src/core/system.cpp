@@ -26,9 +26,10 @@ using namespace seahowl::core;
 using namespace seahowl::env;
 
 System::System(std::shared_ptr<seahowl::elasto::SystemElasto> elasto, std::shared_ptr<seahowl::aero::SystemAero> aero)
-    : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {
-    env_model = std::make_shared<seahowl::env::EnvModel>();
-};
+    : ComponentDynamic(elasto, aero),
+      elasto(*elasto),
+      aero(*aero),
+      env_model(std::make_shared<seahowl::env::EnvModel>()){};
 
 void System::build() {
     // build all turbines
