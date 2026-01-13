@@ -407,7 +407,7 @@ void AeroDynAdapter::initialize(double time, double dt, TurbineAero& turbine) {
     // initialize arrays of interface
     int nblades = turbine.rna->rotor->blades.size();
     int npoints = 0;
-    for (auto& blade : turbine.rna->rotor->blades) {
+    for (const auto& blade : turbine.rna->rotor->blades) {
         npoints += blade->nodes.size();
     }
     pImpl->initialize_arrays(nblades, npoints);

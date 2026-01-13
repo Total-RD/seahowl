@@ -30,19 +30,19 @@ void SystemElasto::build() {
 }
 
 void SystemElasto::translate(const Vector3d& translation_vector) const {
-    for (auto& turbine : turbines) {
+    for (const auto& turbine : turbines) {
         turbine->translate(translation_vector);
     }
-    for (auto& component : components) {
+    for (const auto& component : components) {
         component->translate(translation_vector);
     }
 }
 
 void SystemElasto::rotate(double angle, const Vector3d& axis) const {
-    for (auto& turbine : turbines) {
+    for (const auto& turbine : turbines) {
         turbine->rotate(angle, axis);
     }
-    for (auto& component : components) {
+    for (const auto& component : components) {
         component->rotate(angle, axis);
     }
 }

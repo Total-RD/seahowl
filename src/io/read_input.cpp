@@ -72,7 +72,7 @@ std::vector<seahowl::elasto::BladeReferencePointElasto> get_blade_elasto_referen
 
     double blade_length = blade_db.reference_points.back().coordinates.z();
 
-    for (auto& ref_point_db : blade_db.reference_points) {
+    for (const auto& ref_point_db : blade_db.reference_points) {
         auto reference_point = seahowl::elasto::BladeReferencePointElasto();
         reference_point.coordinates = ref_point_db.coordinates;
         reference_point.fraction = reference_point.coordinates.z() / blade_length;
@@ -473,7 +473,7 @@ std::shared_ptr<seahowl::hydro::FoundationFluid> get_foundation_fluid_from_db(
         auto floater_hydro = std::make_shared<seahowl::hydro::FloaterHydro>();
 
         if (foundation_db.file.has_value()) {
-            for (auto& mooring_db : foundation_db.data_floater.moorings) {
+            for (const auto& mooring_db : foundation_db.data_floater.moorings) {
                 // hydro
                 floater_hydro->mooring_system->moorings.push_back(std::make_shared<seahowl::hydro::MooringHydro>());
                 auto mooring_hydro = floater_hydro->mooring_system->moorings.back();
@@ -544,7 +544,7 @@ std::shared_ptr<seahowl::elasto::FoundationElasto> get_foundation_elasto_from_db
 
             floater_elasto->body_main->set_damping_matrix(floater_db.damping_matrix);
 
-            for (auto& mooring_db : floater_db.moorings) {
+            for (const auto& mooring_db : floater_db.moorings) {
                 auto rotation_axis = mooring_db.rotation_axis;
                 auto rotation_angle = mooring_db.rotation_angle * seahowl::PI / 180.0;
                 auto rotation = seahowl::AngleAxisd(rotation_angle, rotation_axis);
@@ -842,9 +842,7 @@ std::shared_ptr<seahowl::env::EnvModel> get_environmental_model_from_db(const En
     std::shared_ptr<seahowl::env::WaveModel> wave_model_ptr;
 
     // sea
-    bool has_sea = false;
     if (environment_db.sea.has_value()) {
-        has_sea = true;
         auto sea_db = environment_db.sea.value();
 
         // specific model options

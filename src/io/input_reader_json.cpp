@@ -288,7 +288,7 @@ void from_json(const json& js, BladeDb& blade_db) {
     if (js.contains("global_variables")) {
         js_global_vars = js["global_variables"];
     }
-    for (auto& ref_point_json : js.at("reference_points")) {
+    for (const auto& ref_point_json : js.at("reference_points")) {
         ReferencePointBladeDb ref_point;
         from_json(ref_point_json, js_global_vars, ref_point);
         blade_db.reference_points.push_back(ref_point);
@@ -302,7 +302,6 @@ void from_json(const json& js, AirfoilDb& airfoil_db) {
 }
 
 std::vector<AirfoilDb> read_airfoil(const std::string& filepath_) {
-    AirfoilDb airfoil_db;
     try {
         json json_db = get_json(filepath_);
         return json_db.get<std::vector<AirfoilDb>>();

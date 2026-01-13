@@ -63,7 +63,7 @@ void Turbine::apply_control(double time, double dt) {
             }
         } else {
             // collective pitch for more than 3 blades or 0 blade (e.g. actuator disk)
-            for (auto& blade : rna.rotor.blades) {
+            for (const auto& blade : rna.rotor.blades) {
                 if (blade->elasto.actuator_pitch->is_fixed_actuator()) {
                     auto collective_pitch_increment =
                         controller->get_collective_pitch() - rna.elasto.rotor->pitch_collective;
