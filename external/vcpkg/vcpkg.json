@@ -42,7 +42,7 @@
     },
     {
       "name": "pybind11",
-      "version>=": "2.13.6"
+      "version>=": "3.0.1"
     },
     {
       "name": "vcpkg-tool-ninja",
