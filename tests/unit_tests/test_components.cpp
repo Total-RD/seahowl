@@ -20,10 +20,10 @@ class MyEnvironment : public ::testing::Environment {
         auto env_bin = test_dir / "../build/.venv/Scripts/activate.bat";
         auto cmd = "cmd /C \" " + env_bin.string() + " && ";
         #else
-        auto env_bin = "";
+        auto cmd = std::string("");
         #endif
         // test if scilens is available
-        int ret = std::system((cmd + "scilens version ' >nul 2>&1").c_str());
+        int ret = std::system((cmd + "scilens version >nul 2>&1").c_str());
         if (ret != 0) {
             spdlog::warn("scilens is not available in the environment.");
             return;
