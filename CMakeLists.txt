@@ -141,7 +141,12 @@ endif(SEAHOWL_ENABLE_HYDROCHRONO)
 if(SEAHOWL_ENABLE_PYTHON)
     find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
     find_package(pybind11 CONFIG REQUIRED)
+    add_definitions("-DHAVE_PYTHON=1")
 endif(SEAHOWL_ENABLE_PYTHON)
+
+IF(SEAHOWL_ENABLE_VIRTUALENV)
+     add_definitions("-DHAVE_ENV_PYTHON=1")
+endif()
 
 # --------------------------------------------------------------
 # Tweaks to disable some warnings with MSVC
