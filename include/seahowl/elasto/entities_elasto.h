@@ -10,7 +10,7 @@ namespace seahowl {
 namespace elasto {
 
 /**
- * @brief Elasto loadable entiry base class.
+ * @brief Elasto loadable entity base class.
  */
 class EntityLoadable : public virtual EntityDynamic {
   public:
@@ -192,7 +192,7 @@ class BodyElasto : public virtual EntityLoadable {
     /**
      * @brief Fix body in space.
      *
-     * param[in] is_fixed Fixed if true, free if false.
+     * @param[in] is_fixed Fixed if true, free if false.
      */
     virtual void set_fixed(bool is_fixed) = 0;
 
@@ -222,7 +222,7 @@ class NodeElasto : public virtual EntityLoadable {
     /**
      * @brief Fix node in space.
      *
-     * param[in] is_fixed Fixed if true, free if false.
+     * @param[in] is_fixed Fixed if true, free if false.
      */
     virtual void set_fixed(bool is_fixed) = 0;
 
@@ -246,54 +246,58 @@ class ElementElasto {
     /**
      * @brief Sets nodes of element.
      *
-     * param[in] node1 First node of element.
-     * param[in] node1 Second node of element.
+     * @param[in] node1 First node of element.
+     * @param[in] node2 Second node of element.
      */
     virtual void set_nodes(std::shared_ptr<NodeElasto> node1, std::shared_ptr<NodeElasto> node2) = 0;
 
     /**
      * @brief Evaluates position and rotation of point within element.
      *
-     * param[in] eta Normalized abscissa along element within range [-1, +1].
-     * param[out] position Position to evaluate.
-     * param[out] rotation Rotation to evaluate.
+     * @param[in] eta Normalized abscissa along element within range [-1, +1].
+     * @param[out] position Position to evaluate.
+     * @param[out] rotation Rotation to evaluate.
      */
     virtual void evaluate_position_rotation(double eta, Vector3d& position, Quaternion& rotation) const = 0;
 
     /**
      * @brief Evaluates force and torque of point within element.
      *
-     * param[in] eta Normalized abscissa along element within range [-1, +1].
-     * param[out] force Force to evaluate.
-     * param[out] torque Torque to evaluate.
+     * @param[in] eta Normalized abscissa along element within range [-1, +1].
+     * @param[out] force Force to evaluate.
+     * @param[out] torque Torque to evaluate.
      */
     virtual void evaluate_force_torque(double eta, Vector3d& force, Vector3d& torque) const = 0;
 
     /**
      * @brief Returns position of point within element.
      *
-     * param[in] eta Normalized abscissa along element within range [-1, +1].
+     * @param[in] eta Normalized abscissa along element within range [-1, +1].
+     * @return Position at the specified eta location.
      */
     Vector3d get_position(double eta) const;
 
     /**
      * @brief Returns rotation of point within element.
      *
-     * param[in] eta Normalized abscissa along element within range [-1, +1].
+     * @param[in] eta Normalized abscissa along element within range [-1, +1].
+     * @return Rotation at the specified eta location.
      */
     Quaternion get_rotation(double eta) const;
 
     /**
      * @brief Returns force of point within element.
      *
-     * param[in] eta Normalized abscissa along element within range [-1, +1].
+     * @param[in] eta Normalized abscissa along element within range [-1, +1].
+     * @return Force at the specified eta location.
      */
     Vector3d get_force(double eta) const;
 
     /**
-     * @brief Returns force of point within element.
+     * @brief Returns torque of point within element.
      *
-     * param[in] eta Normalized abscissa along element within range [-1, +1].
+     * @param[in] eta Normalized abscissa along element within range [-1, +1].
+     * @return Torque at the specified eta location.
      */
     Vector3d get_torque(double eta) const;
 

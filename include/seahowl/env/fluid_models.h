@@ -69,13 +69,39 @@ class FluidModel : public Model {
     double ramp_start = 0.0;
     double ramp_end = 0.0;
     /**
-     * @brief Applies ramp to the given vector.
+     * @brief Applies ramp factor to the given vector based on current time.
+     *
+     * @param[in] time Current simulation time.
+     * @param[in,out] res Vector to which the ramp factor is applied.
      */
     void apply_ramp(double time, Vector3d& res) const;
 
   protected:
+    /**
+     * @brief Returns fluid acceleration at given coordinates (implementation).
+     *
+     * @param[in] position Position at which fluid acceleration is computed.
+     * @param[in] time Time of simulation.
+     * @return Fluid acceleration vector.
+     */
     virtual Vector3d get_acceleration_this(const Vector3d& position, double time) const = 0;
+
+    /**
+     * @brief Returns fluid velocity at given coordinates (implementation).
+     *
+     * @param[in] position Position at which fluid velocity is computed.
+     * @param[in] time Time of simulation.
+     * @return Fluid velocity vector.
+     */
     virtual Vector3d get_velocity_this(const Vector3d& position, double time) const = 0;
+
+    /**
+     * @brief Returns fluid density at given coordinates (implementation).
+     *
+     * @param[in] position Position at which fluid density is computed.
+     * @param[in] time Time of simulation.
+     * @return Fluid density value.
+     */
     virtual double get_density_this(const Vector3d& position, double time) const = 0;
 };
 

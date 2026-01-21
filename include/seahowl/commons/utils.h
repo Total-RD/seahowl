@@ -34,9 +34,31 @@ struct DiscretizationPoint {
     double eta = 0;
 };
 
+/**
+ * @brief Computes discretization points indices and positions from discretization and reference fractions.
+ *
+ * Maps discretization fractions to reference fractions, returning the element index and
+ * the normalized position (eta) within each element.
+ *
+ * @param[in] discretization_fractions Fractions at which to discretize, within [0, 1].
+ * @param[in] reference_fractions Reference fractions defining element boundaries, within [0, 1].
+ * @return Vector of DiscretizationPoint containing element index and eta position.
+ */
 std::vector<DiscretizationPoint> get_indice_and_positions(const std::vector<double>& discretization_fractions,
                                                           const std::vector<double>& reference_fractions);
 
+/**
+ * @brief Interpolates reference points at specified discretization fractions.
+ *
+ * If discretization_fractions is empty, returns reference_points directly.
+ * Otherwise, interpolates between reference points to create discretized points
+ * at the specified fractions. Reference points must have a 'fraction' member.
+ *
+ * @tparam T Type of reference point (must have 'fraction' member and support arithmetic operators).
+ * @param[in] discretization_fractions Fractions at which to interpolate, within [0, 1].
+ * @param[in] reference_points Reference points with fractions starting at 0 and ending at 1.
+ * @return Vector of interpolated points at the discretization fractions.
+ */
 template <typename T>
 std::vector<T> get_discretized_points(const std::vector<double>& discretization_fractions,
                                       const std::vector<T>& reference_points) {
@@ -93,7 +115,17 @@ std::vector<T> get_discretized_points(const std::vector<double>& discretization_
 }
 
 /**
- * @brief Bilinear interpolation.
+ * @brief Performs bilinear interpolation on a 2D data matrix.
+ *
+ * Interpolates a value from a 2D data matrix at coordinates (x, y) using
+ * the four nearest grid points.
+ *
+ * @param[in] dataMatrix 2D matrix of data values.
+ * @param[in] x_list Vector of x-coordinates corresponding to matrix columns.
+ * @param[in] y_list Vector of y-coordinates corresponding to matrix rows.
+ * @param[in] x X-coordinate at which to interpolate.
+ * @param[in] y Y-coordinate at which to interpolate.
+ * @return Interpolated value at (x, y).
  */
 double bilinear_interpolation(const Eigen::MatrixXd& dataMatrix,
                               const Eigen::VectorXd& x_list,

@@ -21,7 +21,9 @@ class EnvModel {
     EnvModel() = default;
     ~EnvModel() = default;
     /**
-     * @brief Adds a model
+     * @brief Adds a model to the environment.
+     *
+     * @param[in] model Shared pointer to the model to add (fluid or soil model).
      */
     void add_model(const std::shared_ptr<Model>& model);
 };

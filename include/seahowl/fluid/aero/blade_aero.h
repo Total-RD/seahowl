@@ -44,6 +44,8 @@ struct BladeNodeAero : public EntityDynamicEigen {
 
     /**
      * @brief Constructor.
+     *
+     * @param[in] point Reference point containing aerodynamic properties for this node.
      */
     BladeNodeAero(BladeReferencePointAero& point);
 
@@ -133,9 +135,18 @@ class BladeAero : public ComponentFluid {
     BladeAero();
 
     /**
-     * @brief Builds the blade.
+     * @brief Builds the blade aerodynamic model.
+     *
+     * Creates nodes and elements from discretized reference points.
      */
     void build() override;
+
+    /**
+     * @brief Computes aerodynamic loads from environmental model.
+     *
+     * @param[in] env_model Environmental model containing wind data.
+     * @param[in] time Current simulation time [s].
+     */
     void compute_env_loads(const env::EnvModel& env_model, double time) override;
 
     /**

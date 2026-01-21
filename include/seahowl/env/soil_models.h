@@ -25,7 +25,10 @@ class SoilModel : public Model {
 };
 
 /**
- * @brief Base class for soil models
+ * @brief Linear soil model with stiffness-based penetration resistance.
+ *
+ * Implements a simple linear soil model where penetration loads are proportional
+ * to penetration depth via normal and shear stiffness coefficients.
  */
 class LinearSoilModel : public SoilModel {
   public:

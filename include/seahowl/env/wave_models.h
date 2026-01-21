@@ -28,7 +28,11 @@ class WaveModel : public FluidModel {
     virtual bool is_inside(const Vector3d& position, double time) const override;
 
     /**
-     * @brief Returns water level.
+     * @brief Returns water level (free surface elevation) at given position and time.
+     *
+     * @param[in] position Horizontal position at which water level is computed.
+     * @param[in] time Time of simulation.
+     * @return Water level (free surface elevation) [m].
      */
     virtual double get_water_level(const Vector3d& position, double time) const = 0;
 };

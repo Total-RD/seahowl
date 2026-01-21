@@ -25,7 +25,20 @@ struct AirfoilCoefficients {
      */
     AirfoilCoefficients();
 
+    /**
+     * @brief Multiplies all coefficients by a scalar factor.
+     *
+     * @param[in] factor Scalar multiplication factor.
+     * @return New AirfoilCoefficients with scaled values.
+     */
     AirfoilCoefficients operator*(const double factor) const;
+
+    /**
+     * @brief Adds two AirfoilCoefficients element-wise.
+     *
+     * @param[in] other AirfoilCoefficients to add.
+     * @return New AirfoilCoefficients with summed values.
+     */
     AirfoilCoefficients operator+(const AirfoilCoefficients& other) const;
 };
 
@@ -52,7 +65,20 @@ struct AirfoilProperties {
      */
     AirfoilCoefficients find_coefficients(double alpha);
 
+    /**
+     * @brief Multiplies all properties by a scalar factor.
+     *
+     * @param[in] factor Scalar multiplication factor.
+     * @return New AirfoilProperties with scaled values.
+     */
     AirfoilProperties operator*(const double factor) const;
+
+    /**
+     * @brief Adds two AirfoilProperties element-wise (for interpolation).
+     *
+     * @param[in] other AirfoilProperties to add.
+     * @return New AirfoilProperties with summed values.
+     */
     AirfoilProperties operator+(const AirfoilProperties& other) const;
 };
 

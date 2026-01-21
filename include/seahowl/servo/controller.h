@@ -10,7 +10,7 @@ class Turbine;
 }  // namespace seahowl
 
 namespace seahowl {
-/**@brief Servo controller module */
+/** @brief Servo controller module */
 namespace servo {
 
 /**
@@ -35,8 +35,8 @@ class Controller {
     /**
      * @brief Initialization of controller.
      *
-     * @param[in] time Time of simulation.
-     * @param[in] dt Time step legnth.
+     * @param[in] time Time of simulation [s].
+     * @param[in] dt Time step length [s].
      * @param[in] turbine Turbine that is controlled by this controller.
      */
     virtual void initialize(double time, double dt, const seahowl::core::Turbine& turbine);
@@ -44,8 +44,8 @@ class Controller {
     /**
      * @brief Stepping of controller.
      *
-     * @param[in] time Time of simulation.
-     * @param[in] dt Time step legnth.
+     * @param[in] time Time of simulation [s].
+     * @param[in] dt Time step length [s].
      * @param[in] turbine Turbine that is controlled by this controller.
      */
     virtual void step(double time, double dt, const seahowl::core::Turbine& turbine);
@@ -53,19 +53,23 @@ class Controller {
     /**
      * @brief Post-step for controller.
      *
-     * @param[in] time Time of simulation.
-     * @param[in] dt Time step legnth.
+     * @param[in] time Time of simulation [s].
+     * @param[in] dt Time step length [s].
      * @param[in] turbine Turbine that is controlled by this controller.
      */
     virtual void poststep(double time, double dt, const seahowl::core::Turbine& turbine);
 
     /**
      * @brief Returns electrical torque to apply.
+     *
+     * @return Electrical torque [Nm].
      */
     virtual double get_torque_elec() const;
 
     /**
      * @brief Returns collective pitch to apply.
+     *
+     * @return Collective pitch [rad].
      */
     virtual double get_collective_pitch() const;
 
@@ -73,13 +77,14 @@ class Controller {
      * @brief Returns pitch to apply on blade.
      *
      * @param[in] index_blade Index of blade (0, 1, or 2).
+     * @return Blade pitch [rad].
      */
     virtual double get_pitch_blade(int index_blade) const;
 
     /**
      * @brief Returns yaw rate to apply to yaw bearing.
      *
-     * @param[in] yaw_rate Yaw rate (rad/s).
+     * @return Yaw rate [rad/s].
      */
     virtual double get_yaw_rate() const;
 };
@@ -89,13 +94,13 @@ class Controller {
  */
 class ControllerVariableTorque : public Controller {
   private:
-    /** @brief Current electrical torque. */
+    /** @brief Current electrical torque [Nm]. */
     double torque_elec = 0.0;
-    /** @brief Previous electrical torque. */
+    /** @brief Previous electrical torque [Nm]. */
     double torque_elec_previous = 0.0;
 
   public:
-    /** @brief Target RPM (max RPM for turbine). */
+    /** @brief Target RPM (max RPM for turbine) [rpm]. */
     double target_rpm = 0.0;
 
     /**
@@ -106,8 +111,8 @@ class ControllerVariableTorque : public Controller {
     /**
      * @brief Stepping of controller.
      *
-     * @param[in] time Time of simulation.
-     * @param[in] dt Time step legnth.
+     * @param[in] time Time of simulation [s].
+     * @param[in] dt Time step length [s].
      * @param[in] turbine Turbine that is controlled by this controller.
      */
     virtual void step(double time, double dt, const seahowl::core::Turbine& turbine) override;
@@ -115,21 +120,23 @@ class ControllerVariableTorque : public Controller {
     /**
      * @brief Post-step for controller.
      *
-     * @param[in] time Time of simulation.
-     * @param[in] dt Time step legnth.
+     * @param[in] time Time of simulation [s].
+     * @param[in] dt Time step length [s].
      * @param[in] turbine Turbine that is controlled by this controller.
      */
     virtual void poststep(double time, double dt, const seahowl::core::Turbine& turbine) override;
 
     /**
      * @brief Returns electrical torque to apply.
+     *
+     * @return Electrical torque [Nm].
      */
     virtual double get_torque_elec() const override;
 
     /**
      * @brief Sets target RPM.
      *
-     * @param[in] target_rpm Target (max) RPM.
+     * @param[in] target_rpm Target (max) RPM [rpm].
      */
     void set_target_rpm(double target_rpm);
 };

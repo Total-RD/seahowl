@@ -5,181 +5,222 @@
 #include <iostream>
 #include <cstring>
 
-/// <summary>
-/// Fortran Fonction definition of DISCO (ROSCO) controller
-/// </summary>
-/// <param name="avrSWAP"></param>
-/// <param name="aviFAIL"></param>
-/// <param name="accINFILE"></param>
-/// <param name="avcOUTNAME"></param>
-/// <param name="avcMSG"></param>
-
 namespace seahowl {
 namespace servo {
 
-/**@brief DISCON wrapping (adapter) interface
+/** @brief DISCON wrapping (adapter) interface.
  */
 class DisconInterface {
   public:
-    float& m_time = avrSWAP[1];     ///<@brief Time
-    float& m_dt = avrSWAP[2];       ///<@brief Time step
-    float& m_pitch = avrSWAP[41];   ///<@brief Pitch return controller states
-    float& m_torque = avrSWAP[46];  ///<@brief Torque return controller states
+    /** @brief Time [s]. */
+    float& m_time = avrSWAP[1];
+    /** @brief Time step [s]. */
+    float& m_dt = avrSWAP[2];
+    /** @brief Pitch return controller states [rad]. */
+    float& m_pitch = avrSWAP[41];
+    /** @brief Torque return controller states [Nm]. */
+    float& m_torque = avrSWAP[46];
 
     ~DisconInterface();
 
-    /// <summary>
-    /// Reset Controller state as initial
-    ///
-    /// </summary>
+    /**
+     * @brief Resets controller state as initial.
+     */
     void ResetFirst() {
         avrSWAP[0] = 0;  // Initial step iStatus
     }
 
-    /// <summary>
-    /// Reset all controller fields to 0
-    ///
-    /// </summary>
+    /**
+     * @brief Resets all controller fields to 0.
+     */
     void ResetAll();
 
-    /// <summary>
-    /// Initialize the controller parameters
-    /// </summary>
-    /// <param name="libfile">DISCON library path.</param>
-    /// <param name="tmp_folder">Folder for temporary DISCON libraries.</param>
+    /**
+     * @brief Initializes the controller parameters.
+     *
+     * @param[in] libfile DISCON library path.
+     * @param[in] tmp_folder Folder for temporary DISCON libraries.
+     */
     virtual void Init(const std::string& libfile = u8"", const std::string& tmp_folder = u8"./output/tmp_discon");
 
-    /// <summary>
-    /// Call the DISCON controller
-    /// </summary>
+    /**
+     * @brief Calls the DISCON controller.
+     */
     virtual void Call();
 
-    /// <summary>
-    /// Helper to set the guess pitch
-    /// </summary>
-    /// <param name="pitch_angle"></param>
+    /**
+     * @brief Sets the guess pitch.
+     *
+     * @param[in] pitch_angle Pitch angle [rad].
+     */
     void SetPitch(double pitch_angle);
 
+    /**
+     * @brief Sets blade pitch.
+     *
+     * @param[in] index_blade Index of blade.
+     * @param[in] pitch_angle Pitch angle [rad].
+     */
     void SetPitchBlade(int index_blade, double pitch_angle);
 
+    /**
+     * @brief Sets blade root moment.
+     *
+     * @param[in] index_blade Index of blade.
+     * @param[in] flap Flapwise moment [Nm].
+     * @param[in] edge Edgewise moment [Nm].
+     */
     void SetRootMomentBlade(int index_blade, double flap, double edge);
 
+    /**
+     * @brief Sets tower top acceleration.
+     *
+     * @param[in] foreaft Fore-aft acceleration [m/s^2].
+     * @param[in] sideside Side-side acceleration [m/s^2].
+     */
     void SetTowerTopAcceleration(double foreaft, double sideside);
 
+    /**
+     * @brief Sets nacelle rotational acceleration.
+     *
+     * @param[in] roll Roll acceleration [rad/s^2].
+     * @param[in] pitch Pitch acceleration [rad/s^2].
+     * @param[in] yaw Yaw acceleration [rad/s^2].
+     */
     void SetNacelleRotationalAcceleration(double roll, double pitch, double yaw);
 
-    /// <summary>
-    /// Helper to set Inflow wind speed
-    /// </summary>
-    /// <param name="ws">The inflow wind speed. m.s^{-1}</param>
+    /**
+     * @brief Sets inflow wind speed.
+     *
+     * @param[in] ws The inflow wind speed [m/s].
+     */
     void SetWindSpeed(double ws);
 
-    /// <summary>
-    /// Helper to set rotor speed
-    /// </summary>
-    /// <param name="omega">The rotor speed. rad.s^{-1}</param>
+    /**
+     * @brief Sets rotor speed.
+     *
+     * @param[in] omega The rotor speed [rad/s].
+     */
     void SetRotorSpeed(double omega);
 
-    /// <summary>
-    /// Helper to set rotor speed
-    /// </summary>
-    /// <param name="omega">The rotor speed. rad.s^{-1}</param>
+    /**
+     * @brief Sets generator speed.
+     *
+     * @param[in] omega The generator speed [rad/s].
+     */
     void SetGeneratorSpeed(double omega);
 
-    /// <summary>
-    /// Helper to set time
-    /// </summary>
-    /// <param name="time">The time. s</param>
+    /**
+     * @brief Sets time.
+     *
+     * @param[in] time The time [s].
+     */
     void SetTime(double time);
 
-    /// <summary>
-    /// Helper to set time step size
-    /// </summary>
-    /// <param name="dt">The time step size. s</param>
+    /**
+     * @brief Sets time step size.
+     *
+     * @param[in] dt The time step size [s].
+     */
     void SetDeltaTime(double dt);
 
-    /// <summary>
-    /// Helper to set rotor azimuth
-    /// </summary>
-    /// <param name="azimuth">The rotor azimuth. rad</param>
+    /**
+     * @brief Sets rotor azimuth.
+     *
+     * @param[in] azimuth The rotor azimuth [rad].
+     */
     void SetRotorAzimuth(double azimuth);
 
-    /// <summary>
-    /// Helper to set the generated power
-    /// </summary>
-    /// <param name="power">The generated power. W</param>
+    /**
+     * @brief Sets the generated power.
+     *
+     * @param[in] power The generated power [W].
+     */
     void SetGeneratedPower(double power);
 
-    /// <summary>
-    /// Helper to set the shaft power
-    /// </summary>
-    /// <param name="power">The shaft power. W</param>
+    /**
+     * @brief Sets the shaft power.
+     *
+     * @param[in] power The shaft power [W].
+     */
     void SetShaftPower(double power);
 
-    /// <summary>
-    /// Helper to set number of blades
-    /// </summary>
-    /// <param name="nblades">The number of blades.</param>
+    /**
+     * @brief Sets number of blades.
+     *
+     * @param[in] nblades The number of blades.
+     */
     void SetNumberOfBlades(size_t nblades);
 
-    /// <summary>
-    /// Helper to set yaw error of the RNA
-    /// </summary>
-    /// <param name="yaw_error">The yaw error (rad).</param>
+    /**
+     * @brief Sets yaw error of the RNA.
+     *
+     * @param[in] yaw_error The yaw error [rad].
+     */
     void SetYawError(double yaw_error);
 
-    /// <summary>
-    /// Set Value in avrSWAP array of DISCON
-    /// </summary>
-    /// <param name="index">Index Fortran. (eg +1 compared to C)</param>
-    /// <param name="value">The value to set</param>
+    /**
+     * @brief Sets value in avrSWAP array of DISCON.
+     *
+     * @param[in] index Index Fortran (e.g. +1 compared to C).
+     * @param[in] value The value to set.
+     */
     void SetAvrSWAP(size_t index, float value);
 
-    // Helper to force the cast of value to float
+    /** @brief Sets value in avrSWAP array (forces cast of value to float). */
     void SetAvrSWAP(size_t index, size_t value);
-    // Helper to force the cast of value to float
+    /** @brief Sets value in avrSWAP array (forces cast of value to float). */
     void SetAvrSWAP(size_t index, double value);
 
-    // Forces the value of AvrSWAP even if it is of "out" type
+    /** @brief Forces the value of avrSWAP even if it is of "out" type. */
     void SetForcedAvrSWAP(size_t index, double value);
 
-    /// <summary>
-    /// Get Value from avrSWAP array of DISCON
-    /// </summary>
-    /// <param name="index">Index Fortran. (eg +1 compared to C)</param>
+    /**
+     * @brief Gets value from avrSWAP array of DISCON.
+     *
+     * @param[in] index Index Fortran (e.g. +1 compared to C).
+     */
     float GetAvrSWAP(size_t index) const;
 
-    // Forces the value of AvrSWAP even if it is of "in" type
+    /** @brief Gets the value of avrSWAP even if it is of "in" type. */
     float GetForcedAvrSWAP(size_t index) const;
 
-    /// <summary>
-    /// Set input filename with path relative to working directory.
-    /// Path is used for other files
-    /// ex! control/DISCON.in find other files in control directory
-    /// </summary>
-    /// <param name="name">DISCON.IN input file path</param>
+    /**
+     * @brief Sets input filename with path relative to working directory.
+     *
+     * Path is used for other files (e.g. control/DISCON.in finds other files in control directory).
+     *
+     * @param[in] name DISCON.IN input file path.
+     */
     void SetINFILE(const std::string& name = u8"DISCON.IN");
 
-    /// <summary>
-    /// Set output base name (relative to working directory).
-    /// </summary>
-    /// <param name="name">a name (not a path)</param>
+    /**
+     * @brief Sets output base name (relative to working directory).
+     *
+     * @param[in] name A name (not a path).
+     */
     void SetOUTNAME(const std::string& name = u8"simDEBUG.RO.dbg");
 
-    /// <summary>
-    /// Print all output
-    /// </summary>
+    /**
+     * @brief Prints all output.
+     *
+     * @param[in] ssout Output stream.
+     */
     void PrintAllOut(std::ostream& ssout = std::cout) const;
 
   private:
-    // declare DISCON routine type and variable to load from dynamic library
+    /** @brief DISCON routine type to load from dynamic library. */
     typedef void (*DISCON_routine)(float* avrSWAP, int* aviFAIL, char* accINFILE, char* avcOUTNAME, char* avcMSG);
+    /** @brief DISCON routine variable loaded from dynamic library. */
     DISCON_routine DISCON;
 
-    // for DLL handling
+    /** @brief Whether DLL is loaded. */
     bool has_dll = false;
+    /** @brief Whether DLL has been copied. */
     bool copied_dll = false;
+    /** @brief Path to DLL. */
     std::string path_dll = "";
+    /** @brief DLL handler. */
     void* handler;
 
     static constexpr size_t MAX_SWAP = 500;
@@ -203,15 +244,15 @@ class ControllerDISCON : public Controller {
      * @brief Constructor.
      *
      * @param[in] infile Path of parameters file.
-     * @param[in] infile Path of output file.
+     * @param[in] libfile Path of dynamic library file.
      */
     ControllerDISCON(const std::string& infile = u8"DISCON.IN", const std::string& libfile = u8"libdiscon.so");
 
     /**
      * @brief Updates turbine variables of object communicating with DISCON module.
      *
-     * @param[in] time Time of simulation.
-     * @param[in] dt Time step legnth.
+     * @param[in] time Time of simulation [s].
+     * @param[in] dt Time step length [s].
      * @param[in] turbine Turbine that is controlled by this controller.
      */
     void update_turbine_variables(double time, double dt, const seahowl::core::Turbine& turbine);
@@ -219,27 +260,32 @@ class ControllerDISCON : public Controller {
     /**
      * @brief Initialization of controller.
      *
-     * @param[in] time Time of simulation.
-     * @param[in] dt Time step legnth.
+     * @param[in] time Time of simulation [s].
+     * @param[in] dt Time step length [s].
      * @param[in] turbine Turbine that is controlled by this controller.
      */
     virtual void initialize(double time, double dt, const seahowl::core::Turbine& turbine) override;
+
     /**
      * @brief Stepping of controller.
      *
-     * @param[in] time Time of simulation.
-     * @param[in] dt Time step legnth.
+     * @param[in] time Time of simulation [s].
+     * @param[in] dt Time step length [s].
      * @param[in] turbine Turbine that is controlled by this controller.
      */
     virtual void step(double time, double dt, const seahowl::core::Turbine& turbine) override;
 
     /**
      * @brief Returns electrical torque to apply.
+     *
+     * @return Electrical torque [Nm].
      */
     virtual double get_torque_elec() const override;
 
     /**
      * @brief Returns collective pitch to apply.
+     *
+     * @return Collective pitch [rad].
      */
     virtual double get_collective_pitch() const override;
 
@@ -247,13 +293,14 @@ class ControllerDISCON : public Controller {
      * @brief Returns pitch to apply on blade.
      *
      * @param[in] index_blade Index of blade (0, 1, or 2).
+     * @return Blade pitch [rad].
      */
     virtual double get_pitch_blade(int index_blade) const override;
 
     /**
      * @brief Returns yaw rate to apply to yaw bearing.
      *
-     * @param[in] yaw_rate Yaw rate (rad/s).
+     * @return Yaw rate [rad/s].
      */
     virtual double get_yaw_rate() const override;
 
