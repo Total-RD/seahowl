@@ -52,10 +52,12 @@ void initialize_pyseahowl_core(py::module& m) {
         .def("run_all", &seahowl::core::Simulation::run_all)
         .def("step", &seahowl::core::Simulation::step)
         .def("populate_from_file", &seahowl::core::Simulation::populate_from_file)
+        .def("populate_from_config", &seahowl::core::Simulation::populate_from_config)
         .def("initialize", &seahowl::core::Simulation::initialize)
         .def("initialize_from_config", &seahowl::core::Simulation::initialize_from_config)
         .def_readwrite("dt", &seahowl::core::Simulation::dt)
         .def_readwrite("duration", &seahowl::core::Simulation::duration)
+        .def_readonly("is_initialized", &seahowl::core::Simulation::is_initialized)
         .def_property_readonly(
             "system_core", [](seahowl::core::Simulation& sim) { return sim.system_core.get(); },
             py::return_value_policy::reference_internal)
@@ -68,6 +70,7 @@ void initialize_pyseahowl_core(py::module& m) {
         m_core, "Turbine")
         .def(py::init<std::shared_ptr<seahowl::elasto::TurbineElasto>, std::shared_ptr<seahowl::aero::TurbineAero>>())
         .def("apply_control", &seahowl::core::Turbine::apply_control)
+        .def("get_shaft_power", &seahowl::core::Turbine::get_shaft_power)
         .def("get_generated_power", &seahowl::core::Turbine::get_generated_power)
         .def("get_generator_rpm", &seahowl::core::Turbine::get_generator_rpm)
         .def_property_readonly("elasto", [](seahowl::core::Turbine& turbine) { return &turbine.elasto; })
@@ -75,12 +78,19 @@ void initialize_pyseahowl_core(py::module& m) {
         .def_readonly("controller", &seahowl::core::Turbine::controller)
         .def_readonly("tower", &seahowl::core::Turbine::tower)
         .def_readonly("rna", &seahowl::core::Turbine::rna)
-        .def_readonly("foundation", &seahowl::core::Turbine::foundation);
+        .def_readonly("foundation", &seahowl::core::Turbine::foundation)
+        .def_readwrite("generator_efficiency", &seahowl::core::Turbine::generator_efficiency)
+        .def_readwrite("gearbox_ratio", &seahowl::core::Turbine::gearbox_ratio)
+        .def_readwrite("gearbox_efficiency", &seahowl::core::Turbine::gearbox_efficiency);
 
     // core/tower.h
     py::class_<seahowl::core::Tower, std::shared_ptr<seahowl::core::Tower>, seahowl::core::ComponentDynamic>(m_core,
                                                                                                              "Tower")
         .def(py::init<std::shared_ptr<seahowl::elasto::TowerElasto>, std::shared_ptr<seahowl::aero::TowerAero>>())
+        .def("set_discretization_elasto", &seahowl::core::Tower::set_discretization_elasto)
+        .def("set_discretization_aero", &seahowl::core::Tower::set_discretization_aero)
+        .def("update_positions_aero", &seahowl::core::Tower::update_positions_aero)
+        .def("update_loads_elasto", &seahowl::core::Tower::update_loads_elasto)
         .def_property_readonly("elasto", [](seahowl::core::Tower& tower) { return &tower.elasto; })
         .def_property_readonly("aero", [](seahowl::core::Tower& tower) { return &tower.aero; });
 
@@ -91,12 +101,18 @@ void initialize_pyseahowl_core(py::module& m) {
                       std::shared_ptr<seahowl::hydro::MooringHydro>>())
         .def("set_length", &seahowl::core::Mooring::set_length)
         .def("set_diameter", &seahowl::core::Mooring::set_diameter)
+        .def("set_discretization_elasto", &seahowl::core::Mooring::set_discretization_elasto)
+        .def("set_discretization_hydro", &seahowl::core::Mooring::set_discretization_hydro)
+        .def("update_positions_hydro", &seahowl::core::Mooring::update_positions_hydro)
+        .def("update_loads_elasto", &seahowl::core::Mooring::update_loads_elasto)
         .def_property_readonly("elasto", [](seahowl::core::Mooring& mooring) { return &mooring.elasto; })
         .def_property_readonly("hydro", [](seahowl::core::Mooring& mooring) { return &mooring.hydro; });
     py::class_<seahowl::core::MooringSystem, std::shared_ptr<seahowl::core::MooringSystem>,
                seahowl::core::ComponentDynamic>(m_core, "MooringSystem")
         .def_readonly("moorings", &seahowl::core::MooringSystem::moorings)
-        .def("add_mooring", &seahowl::core::MooringSystem::add_mooring);
+        .def("add_mooring", &seahowl::core::MooringSystem::add_mooring)
+        .def_property_readonly("elasto", [](seahowl::core::MooringSystem& ms) { return &ms.elasto; })
+        .def_property_readonly("hydro", [](seahowl::core::MooringSystem& ms) { return &ms.hydro; });
 
     // core/foundation.h
     py::class_<seahowl::core::Foundation, std::shared_ptr<seahowl::core::Foundation>, seahowl::core::ComponentDynamic>(
@@ -125,6 +141,8 @@ void initialize_pyseahowl_core(py::module& m) {
                seahowl::core::ComponentDynamic>(m_core, "RotorNacelleAssembly")
         .def(py::init<std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto>,
                       std::shared_ptr<seahowl::aero::RotorNacelleAssemblyAero>>())
+        .def("update_positions_aero", &seahowl::core::RotorNacelleAssembly::update_positions_aero)
+        .def("get_yaw_error", &seahowl::core::RotorNacelleAssembly::get_yaw_error)
         .def_readonly("rotor", &seahowl::core::RotorNacelleAssembly::rotor)
         .def_property_readonly("elasto", [](seahowl::core::RotorNacelleAssembly& rna) { return &rna.elasto; })
         .def_property_readonly("aero", [](seahowl::core::RotorNacelleAssembly& rna) { return &rna.aero; });
@@ -143,6 +161,8 @@ void initialize_pyseahowl_core(py::module& m) {
         .def("apply_pitch_increment", &seahowl::core::Blade::apply_pitch_increment)
         .def("set_discretization_elasto", &seahowl::core::Blade::set_discretization_elasto)
         .def("set_discretization_aero", &seahowl::core::Blade::set_discretization_aero)
+        .def("update_positions_aero", &seahowl::core::Blade::update_positions_aero)
+        .def("update_loads_elasto", &seahowl::core::Blade::update_loads_elasto)
         .def_property_readonly("elasto", [](seahowl::core::Blade& blade) { return &blade.elasto; })
         .def_property_readonly("aero", [](seahowl::core::Blade& blade) { return &blade.aero; });
 

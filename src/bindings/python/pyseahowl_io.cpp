@@ -42,8 +42,10 @@ void initialize_pyseahowl_io(py::module& m) {
     py::class_<seahowl::io::OutputManager, std::shared_ptr<seahowl::io::OutputManager>>(m_io, "OutputManager")
         .def(py::init<seahowl::core::System&>())
         .def("set_output_folder", &seahowl::io::OutputManager::set_output_folder)
+        .def("preinitialize", &seahowl::io::OutputManager::preinitialize)
         .def("initialize", &seahowl::io::OutputManager::initialize)
         .def("output_all", &seahowl::io::OutputManager::output_all)
+        .def("output_initial_logs", &seahowl::io::OutputManager::output_initial_logs)
         .def("create_new_csv", &seahowl::io::OutputManager::create_new_csv, py::return_value_policy::reference_internal)
         .def_readwrite("dt_output", &seahowl::io::OutputManager::dt_output)
         .def_readwrite("has_vtk", &seahowl::io::OutputManager::has_vtk)
@@ -69,7 +71,23 @@ void initialize_pyseahowl_io(py::module& m) {
                          custom_csv.add_function(name, cfunction);
                          added_function = true;
                      } catch (const std::runtime_error& e) {
-                         seahowl::log(e.what(), "error");
+                         try {
+                             std::function<seahowl::Vector3d()> cfunction =
+                                 pyfunction.cast<std::function<seahowl::Vector3d()>>();
+                             auto vec = cfunction();
+                             custom_csv.add_function(name, cfunction);
+                             added_function = true;
+                         } catch (const std::runtime_error& e) {
+                             try {
+                                 std::function<seahowl::Quaternion()> cfunction =
+                                     pyfunction.cast<std::function<seahowl::Quaternion()>>();
+                                 auto vec = cfunction();
+                                 custom_csv.add_function(name, cfunction);
+                                 added_function = true;
+                             } catch (const std::runtime_error& e) {
+                                 seahowl::log(e.what(), "error");
+                             }
+                         }
                      }
                  }
                  if (!added_function) {

@@ -441,7 +441,7 @@ std::shared_ptr<seahowl::servo::Controller> get_controller_discon_from_db(const 
 
     } else if (controller_db.type == "rpm") {
         auto controller_rpm = std::make_shared<seahowl::servo::ControllerVariableTorque>();
-        controller_rpm->target_rpm = controller_db.options.target_rpm;
+        controller_rpm->set_target_rpm(controller_db.options.target_rpm);
         controller = controller_rpm;
     }
     return controller;

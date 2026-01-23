@@ -58,17 +58,18 @@ void initialize_pyseahowl_env(py::module& m) {
                                                                                                          "FluidModel")
         .def("get_velocity", &seahowl::env::FluidModel::get_velocity)
         .def("get_acceleration", &seahowl::env::FluidModel::get_acceleration)
-        .def("get_density", &seahowl::env::FluidModel::get_density);
+        .def("get_density", &seahowl::env::FluidModel::get_density)
+        .def("set_ramp", &seahowl::env::FluidModel::set_ramp);
 
     // env/wind_models.h
     py::class_<seahowl::env::WindModel, std::shared_ptr<seahowl::env::WindModel>, seahowl::env::FluidModel>(m_env,
                                                                                                             "WindModel")
-        .def_readwrite("air_density", &seahowl::env::WindModel::density);
+        .def_readwrite("air_density", &seahowl::env::WindModel::density)
+        .def_readwrite("direction_gravity", &seahowl::env::WindModel::direction_gravity);
     py::class_<seahowl::env::ShearedWind, std::shared_ptr<seahowl::env::ShearedWind>, seahowl::env::WindModel>(
         m_env, "ShearedWind")
         .def_readwrite("shear_coefficient", &seahowl::env::ShearedWind::shear_coefficient)
-        .def_readwrite("reference_height", &seahowl::env::ShearedWind::reference_height)
-        .def_readwrite("direction_gravity", &seahowl::env::ShearedWind::direction_gravity);
+        .def_readwrite("reference_height", &seahowl::env::ShearedWind::reference_height);
     py::class_<seahowl::env::ConstantWind, std::shared_ptr<seahowl::env::ConstantWind>, seahowl::env::ShearedWind>(
         m_env, "ConstantWind")
         .def(py::init<>())

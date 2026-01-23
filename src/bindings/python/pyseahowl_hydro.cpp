@@ -46,11 +46,14 @@ void initialize_pyseahowl_hydro(py::module& m) {
         .def_readwrite("load", &seahowl::hydro::MorisonNode::load)
         .def_readwrite("load_noacc", &seahowl::hydro::MorisonNode::load_noacc)
         .def_readwrite("diameter", &seahowl::hydro::MorisonNode::diameter)
-        .def_readwrite("coefficients", &seahowl::hydro::MorisonNode::coefficients);
+        .def_readwrite("coefficients", &seahowl::hydro::MorisonNode::coefficients)
+        .def_readwrite("added_mass_matrix", &seahowl::hydro::MorisonNode::added_mass_matrix);
     py::class_<seahowl::hydro::MorisonElement, std::shared_ptr<seahowl::hydro::MorisonElement>>(m_hydro,
                                                                                                 "MorisonElement")
         .def(py::init<const seahowl::hydro::MorisonNode&, const seahowl::hydro::MorisonNode&>())
         .def("get_load", &seahowl::hydro::MorisonElement::get_load)
+        .def("get_load_noacc", &seahowl::hydro::MorisonElement::get_load_noacc)
+        .def("get_added_mass_matrix", &seahowl::hydro::MorisonElement::get_added_mass_matrix)
         .def("get_position", &seahowl::hydro::MorisonElement::get_position)
         .def("get_rotation", &seahowl::hydro::MorisonElement::get_rotation)
         .def_property_readonly("node1", [](seahowl::hydro::MorisonElement& element) { return &element.node1; })

@@ -289,7 +289,7 @@ TEST_F(TestTurbine, controller_target_rpm) {
     // make controller
     double target_rpm = 2.0;
     auto controller = std::make_shared<seahowl::servo::ControllerVariableTorque>();
-    controller->target_rpm = target_rpm;
+    controller->set_target_rpm(target_rpm);
     turbine.controller = controller;
     turbine.build();
     double time = 0.0;
@@ -364,7 +364,7 @@ TEST_F(TestTurbine, actuator_disk) {
     // remove controller
     double target_rpm = 7.56;
     auto controller = std::make_shared<seahowl::servo::ControllerVariableTorque>();
-    controller->target_rpm = target_rpm;
+    controller->set_target_rpm(target_rpm);
     turbine.controller = controller;
     turbine.build();
     double time = 0.0;

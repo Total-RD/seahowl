@@ -17,17 +17,19 @@ void initialize_pyseahowl_servo(py::module& m) {
         .def_readwrite("has_pitch_control", &seahowl::servo::Controller::has_pitch_control)
         .def_readwrite("has_torque_control", &seahowl::servo::Controller::has_torque_control)
         .def_readwrite("has_yaw_control", &seahowl::servo::Controller::has_yaw_control)
+        .def_readwrite("output_folder", &seahowl::servo::Controller::output_folder)
         .def("initialize", &seahowl::servo::Controller::initialize)
         .def("step", &seahowl::servo::Controller::step)
         .def("poststep", &seahowl::servo::Controller::poststep)
         .def("get_torque_elec", &seahowl::servo::Controller::get_torque_elec)
         .def("get_pitch_blade", &seahowl::servo::Controller::get_pitch_blade)
-        .def("get_collective_pitch", &seahowl::servo::Controller::get_collective_pitch);
+        .def("get_collective_pitch", &seahowl::servo::Controller::get_collective_pitch)
+        .def("get_yaw_rate", &seahowl::servo::Controller::get_yaw_rate);
 
     py::class_<seahowl::servo::ControllerVariableTorque, std::shared_ptr<seahowl::servo::ControllerVariableTorque>,
                seahowl::servo::Controller>(m_servo, "ControllerVariableTorque")
         .def(py::init<>())
-        .def_readwrite("target_rpm", &seahowl::servo::ControllerVariableTorque::target_rpm);
+        .def("set_target_rpm", &seahowl::servo::ControllerVariableTorque::set_target_rpm);
     py::class_<seahowl::servo::ControllerDISCON, std::shared_ptr<seahowl::servo::ControllerDISCON>,
                seahowl::servo::Controller>(m_servo, "ControllerDISCON")
         .def(py::init<const std::string&, const std::string&>())
