@@ -53,7 +53,7 @@ void Tower::set_discretization_aero(const std::vector<double>& fractions) {
 }
 
 void Tower::compute_mapping_aero2elasto() {
-    mapping_aero2elasto_nodes =
+    mapping_fluid2elasto_nodes =
         get_indice_and_positions(aero.discretization_fractions, elasto.discretization_fractions);
 
     // get aero element position (center) from which loads will be applied
@@ -67,12 +67,12 @@ void Tower::compute_mapping_aero2elasto() {
         auto element_fraction = 0.5 * (aero.discretization_fractions[ii] + aero.discretization_fractions[ii + 1]);
         aero_discretization_fractions_elements.push_back(element_fraction);
     }
-    mapping_aero2elasto_elements =
+    mapping_fluid2elasto_elements =
         get_indice_and_positions(aero_discretization_fractions_elements, elasto.discretization_fractions);
 }
 
 void Tower::compute_mapping_elasto2aero() {
-    mapping_elasto2aero = get_indice_and_positions(elasto.discretization_fractions, aero.discretization_fractions);
+    compute_mapping_elasto2fluid(elasto.discretization_fractions, aero.discretization_fractions);
 }
 
 void Tower::update_positions_aero() {
@@ -80,8 +80,8 @@ void Tower::update_positions_aero() {
         auto& node_aero = aero.nodes[ii];
 
         // update position and rotation of aero elements
-        int elasto_element_index = mapping_aero2elasto_nodes[ii].index;
-        double eta = mapping_aero2elasto_nodes[ii].eta;
+        int elasto_element_index = mapping_fluid2elasto_nodes[ii].index;
+        double eta = mapping_fluid2elasto_nodes[ii].eta;
         auto entity = elasto.get_entity_along_component_slerp(eta, elasto_element_index);
         node_aero.set_rotation(entity.get_rotation());
         node_aero.set_position(entity.get_position());
@@ -94,17 +94,17 @@ void Tower::update_positions_aero() {
 
 void Tower::update_loads_elasto() {
     elasto.reset_loads();
-    if (aero.elements.size() != mapping_aero2elasto_elements.size()) {
+    if (aero.elements.size() != mapping_fluid2elasto_elements.size()) {
         throw std::runtime_error("Tower: length of vector of elements (" + std::to_string(aero.elements.size()) +
                                  " and length of aero to elasto mapping(" +
-                                 std::to_string(mapping_aero2elasto_elements.size()) + ") do not match.");
+                                 std::to_string(mapping_fluid2elasto_elements.size()) + ") do not match.");
     }
     auto offset = Vector3d(0.0, 0.0, 0.0);
     for (int ii = 0; ii < aero.elements.size(); ii++) {
         elasto.accumulate_element_load(aero.elements[ii].get_load_noacc(), Vector3d(0.0, 0.0, 0.0),
-                                       mapping_aero2elasto_elements[ii].index, mapping_aero2elasto_elements[ii].eta,
+                                       mapping_fluid2elasto_elements[ii].index, mapping_fluid2elasto_elements[ii].eta,
                                        offset);
-        elasto.accumulate_mass_matrix(aero.elements[ii].get_added_mass_matrix(), mapping_aero2elasto_elements[ii].index,
-                                      mapping_aero2elasto_elements[ii].eta);
+        elasto.accumulate_mass_matrix(aero.elements[ii].get_added_mass_matrix(),
+                                      mapping_fluid2elasto_elements[ii].index, mapping_fluid2elasto_elements[ii].eta);
     }
 }

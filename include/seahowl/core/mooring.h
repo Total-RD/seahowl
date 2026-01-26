@@ -4,8 +4,7 @@
 #include <vector>
 #include <deque>
 
-#include "seahowl/commons/utils.h"  // for DiscretizationPoint
-#include "seahowl/core/component.h"
+#include "seahowl/core/component_elasto_fluid.h"
 
 // forward declarations
 namespace seahowl {
@@ -33,18 +32,12 @@ namespace core {
  * between the hydro and elasto components. The hydro loads are communicated to the elasto component in the prestep,
  * while the hydro positions are updated using the elasto positions in the poststep.
  */
-class Mooring : public ComponentDynamic {
+class Mooring : public ComponentElastoFluid {
   public:
     /** @brief Elastodynamic model of the mooring. */
     seahowl::elasto::MooringElastoFEA& elasto;
     /** @brief Hydrodynamic model of the mooring. */
     seahowl::hydro::MooringHydro& hydro;
-    /** @brief Mapping of hydro nodes into elasto domain. */
-    std::vector<seahowl::DiscretizationPoint> mapping_hydro2elasto_nodes;
-    /** @brief Mapping of hydro elements (central point of elements) into elasto domain. */
-    std::vector<seahowl::DiscretizationPoint> mapping_hydro2elasto_elements;
-    /** @brief Mapping of elasto nodes into hydro domain. */
-    std::vector<seahowl::DiscretizationPoint> mapping_elasto2hydro;
 
     /**
      * @brief Instantiates mooring for communication between elasto and hydro components.

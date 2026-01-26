@@ -1,7 +1,6 @@
 #pragma once
 
-#include "seahowl/core/component.h"
-#include "seahowl/commons/utils.h"
+#include "seahowl/core/component_elasto_fluid.h"
 
 #include <memory>
 #include <vector>
@@ -34,18 +33,12 @@ namespace core {
  * the aero and elasto components. The aero loads are communicated to the elasto component in the prestep, while the
  * aero positions are updated using the elasto positions in the poststep.
  */
-class Blade : public ComponentDynamic {
+class Blade : public ComponentElastoFluid {
   public:
     /** @brief Elastodynamic model of the blade. */
     seahowl::elasto::BladeElasto& elasto;
     /** @brief Aerodynamic model of the blade. */
     seahowl::aero::BladeAero& aero;
-    /** @brief Mapping of aero nodes into elasto domain. */
-    std::vector<seahowl::DiscretizationPoint> mapping_aero2elasto_nodes;
-    /** @brief Mapping of aero elements (central point of elements) into elasto domain. */
-    std::vector<seahowl::DiscretizationPoint> mapping_aero2elasto_elements;
-    /** @brief Mapping of elasto nodes into aero domain. */
-    std::vector<seahowl::DiscretizationPoint> mapping_elasto2aero;
 
     /**
      * @brief Instantiates blade for communication between elasto and aero components.
