@@ -1,0 +1,16 @@
+{
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "tests/non_regression",
+        "-p",
+        "*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "files.associations": {
+        "deque": "cpp",
+        "string": "cpp",
+        "vector": "cpp"
+    }
+}
