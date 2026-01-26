@@ -134,16 +134,6 @@ class Mooring : public ComponentElastoFluid {
      * @param[in] dt Time step length.
      */
     void initialize_this(double time, double dt) override;
-
-    /**
-     * @brief Computes the hydro->elasto mapping that is used when accumulating hydro loads on elasto component.
-     */
-    void compute_mapping_hydro2elasto();
-
-    /**
-     * @brief Computes the elasto->hydro mapping.
-     */
-    void compute_mapping_elasto2hydro();
 };
 
 class MooringSystem : public ComponentDynamic {

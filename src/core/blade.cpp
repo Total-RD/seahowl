@@ -14,17 +14,17 @@ using seahowl::Vector3d;
 
 Blade::Blade(const std::shared_ptr<seahowl::elasto::BladeElasto> elasto,
              const std::shared_ptr<seahowl::aero::BladeAero> aero)
-    : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {}
+    : ComponentDynamic(elasto, aero), ComponentElastoFluid(elasto, aero), elasto(*elasto), aero(*aero) {}
 
 void Blade::initialize_this(double time, double dt) {
     // mappings
-    compute_mapping_aero2elasto();
-    compute_mapping_elasto2aero();
+    compute_mapping_fluid2elasto();
+    compute_mapping_elasto2fluid();
     // update position of aero points
     update_positions_aero();
 
     spdlog::info("Initialized blade of total mass {:.4}kg with {} elasto and {} aero elements.", elasto.get_mass(),
-                 elasto.discretization_fractions.size() - 1, aero.elements.size());
+                 elasto_discretized.discretization_fractions.size() - 1, aero.elements.size());
 }
 
 void Blade::prestep(double time, double dt) {
@@ -55,32 +55,12 @@ void Blade::apply_pitch_increment(double pitch_increment) {
 }
 
 void Blade::set_discretization_elasto(const std::vector<double>& fractions) {
-    elasto.discretization_fractions = fractions;
+    elasto_discretized.discretization_fractions = fractions;
 };
 
 void Blade::set_discretization_aero(const std::vector<double>& fractions) {
     aero.discretization_fractions = fractions;
 };
-
-void Blade::compute_mapping_aero2elasto() {
-    // get aero element position (center) from which loads will be applied
-    std::vector<double> aero_discretization_fractions_elements;
-    for (auto& element : aero.elements) {
-        aero_discretization_fractions_elements.push_back(element.fraction);
-    }
-    mapping_fluid2elasto_elements =
-        get_indice_and_positions(aero_discretization_fractions_elements, elasto.discretization_fractions);
-    std::vector<double> aero_discretization_fractions_nodes;
-    for (auto& node : aero.nodes) {
-        aero_discretization_fractions_nodes.push_back(node.properties.fraction);
-    }
-    mapping_fluid2elasto_nodes =
-        get_indice_and_positions(aero_discretization_fractions_nodes, elasto.discretization_fractions);
-}
-
-void Blade::compute_mapping_elasto2aero() {
-    compute_mapping_elasto2fluid(elasto.discretization_fractions, aero.discretization_fractions);
-}
 
 void Blade::update_positions_aero() {
     for (int ii = 0; ii < aero.nodes.size(); ii++) {

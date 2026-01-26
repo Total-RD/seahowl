@@ -11,7 +11,7 @@ using namespace seahowl::elasto;
 using namespace seahowl::fluid::hydro;
 
 Mooring::Mooring(std::shared_ptr<MooringElastoFEA> elasto, std::shared_ptr<MooringHydro> hydro)
-    : ComponentDynamic(elasto, hydro), elasto(*elasto), hydro(*hydro) {}
+    : ComponentDynamic(elasto, hydro), ComponentElastoFluid(elasto, hydro), elasto(*elasto), hydro(*hydro) {}
 
 void Mooring::set_length(double length) {
     elasto.set_length(length);
@@ -38,8 +38,8 @@ void Mooring::initialize_this(double time, double dt) {
     perform_sanity_check();
 
     // mappings
-    compute_mapping_hydro2elasto();
-    compute_mapping_elasto2hydro();
+    compute_mapping_fluid2elasto();
+    compute_mapping_elasto2fluid();
     // update position of hydro points
     update_positions_hydro();
 
@@ -72,34 +72,11 @@ void Mooring::build() {
 }
 
 void Mooring::set_discretization_elasto(const std::vector<double>& fractions) {
-    elasto.discretization_fractions = fractions;
+    elasto_discretized.discretization_fractions = fractions;
 }
 
 void Mooring::set_discretization_hydro(const std::vector<double>& fractions) {
     hydro.discretization_fractions = fractions;
-}
-
-void Mooring::compute_mapping_hydro2elasto() {
-    mapping_fluid2elasto_nodes =
-        get_indice_and_positions(hydro.discretization_fractions, elasto.discretization_fractions);
-
-    // get hydro element position (center) from which loads will be applied
-    if (hydro.elements.size() != hydro.discretization_fractions.size() - 1) {
-        throw std::runtime_error("There are " + std::to_string(hydro.elements.size()) + " elements for " +
-                                 std::to_string(hydro.discretization_fractions.size() - 1) +
-                                 "discretization fractions (" + std::to_string(hydro.nodes.size()) + " nodes).");
-    }
-    std::vector<double> hydro_discretization_fractions_elements;
-    for (int ii = 0; ii < hydro.elements.size(); ii++) {
-        auto element_fraction = 0.5 * (hydro.discretization_fractions[ii] + hydro.discretization_fractions[ii + 1]);
-        hydro_discretization_fractions_elements.push_back(element_fraction);
-    }
-    mapping_fluid2elasto_elements =
-        get_indice_and_positions(hydro_discretization_fractions_elements, elasto.discretization_fractions);
-}
-
-void Mooring::compute_mapping_elasto2hydro() {
-    compute_mapping_elasto2fluid(elasto.discretization_fractions, hydro.discretization_fractions);
 }
 
 void Mooring::update_positions_hydro() {

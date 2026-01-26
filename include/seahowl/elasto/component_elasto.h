@@ -82,18 +82,27 @@ class ComponentElasto {
 };
 
 /**
+ * @brief Elasto component with discretization support.
+ *
+ * Intermediate class for elasto components that have discretization fractions.
+ */
+class ComponentElastoDiscretized : public virtual ComponentElasto {
+  public:
+    /** @brief Discretization fractions (normalized abscissa) in the range [0, 1]. */
+    std::vector<double> discretization_fractions{};
+};
+
+/**
  * @brief Finite Element Elasto component base class.
  *
  * All FEA elasto component classes are derived from this class.
  */
-class ComponentElastoFEA : public virtual ComponentElasto {
+class ComponentElastoFEA : public virtual ComponentElastoDiscretized {
   public:
     /** @brief Finite element nodes. */
     std::vector<std::shared_ptr<NodeElasto>> nodes;
     /** @brief Finite element beams. */
     std::vector<std::shared_ptr<ElementElasto>> elements;
-    /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the FEA component. */
-    std::vector<double> discretization_fractions{};
 
     /**
      * @brief Builds nodes for the elasto component based on reference points.

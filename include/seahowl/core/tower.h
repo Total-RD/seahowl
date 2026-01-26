@@ -116,16 +116,6 @@ class Tower : public ComponentElastoFluid {
      * @param[in] dt Time step length.
      */
     void initialize_this(double time, double dt) override;
-
-    /**
-     * @brief Computes the aero->elasto mapping that is used when accumulating aero loads on elasto component.
-     */
-    void compute_mapping_aero2elasto();
-
-    /**
-     * @brief Computes the elasto->aero mapping.
-     */
-    void compute_mapping_elasto2aero();
 };
 
 }  // namespace core

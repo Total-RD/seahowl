@@ -26,8 +26,6 @@ namespace aero {
  */
 class TowerAero : public virtual ComponentFluid {
   public:
-    /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the aero component. */
-    std::vector<double> discretization_fractions{};
     /** @brief List of reference points describing the tower properties along its longitudinal axis. */
     std::vector<TowerReferencePointAero> reference_points;
     /** @brief List of discretized points (interpolated reference points) describing the tower properties. */

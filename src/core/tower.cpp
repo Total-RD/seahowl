@@ -11,12 +11,12 @@ using namespace seahowl::elasto;
 using namespace seahowl::fluid::aero;
 
 Tower::Tower(std::shared_ptr<seahowl::elasto::TowerElasto> elasto, std::shared_ptr<seahowl::aero::TowerAero> aero)
-    : ComponentDynamic(elasto, aero), elasto(*elasto), aero(*aero) {}
+    : ComponentDynamic(elasto, aero), ComponentElastoFluid(elasto, aero), elasto(*elasto), aero(*aero) {}
 
 void Tower::initialize_this(double time, double dt) {
     // mappings
-    compute_mapping_aero2elasto();
-    compute_mapping_elasto2aero();
+    compute_mapping_fluid2elasto();
+    compute_mapping_elasto2fluid();
     // update position of aero points
     update_positions_aero();
 
@@ -45,34 +45,11 @@ void Tower::build() {
 }
 
 void Tower::set_discretization_elasto(const std::vector<double>& fractions) {
-    elasto.discretization_fractions = fractions;
+    elasto_discretized.discretization_fractions = fractions;
 }
 
 void Tower::set_discretization_aero(const std::vector<double>& fractions) {
     aero.discretization_fractions = fractions;
-}
-
-void Tower::compute_mapping_aero2elasto() {
-    mapping_fluid2elasto_nodes =
-        get_indice_and_positions(aero.discretization_fractions, elasto.discretization_fractions);
-
-    // get aero element position (center) from which loads will be applied
-    if (aero.elements.size() != aero.discretization_fractions.size() - 1) {
-        throw std::runtime_error("There are " + std::to_string(aero.elements.size()) + " elements for " +
-                                 std::to_string(aero.discretization_fractions.size() - 1) +
-                                 "discretization fractions (" + std::to_string(aero.nodes.size()) + " nodes).");
-    }
-    std::vector<double> aero_discretization_fractions_elements;
-    for (int ii = 0; ii < aero.elements.size(); ii++) {
-        auto element_fraction = 0.5 * (aero.discretization_fractions[ii] + aero.discretization_fractions[ii + 1]);
-        aero_discretization_fractions_elements.push_back(element_fraction);
-    }
-    mapping_fluid2elasto_elements =
-        get_indice_and_positions(aero_discretization_fractions_elements, elasto.discretization_fractions);
-}
-
-void Tower::compute_mapping_elasto2aero() {
-    compute_mapping_elasto2fluid(elasto.discretization_fractions, aero.discretization_fractions);
 }
 
 void Tower::update_positions_aero() {

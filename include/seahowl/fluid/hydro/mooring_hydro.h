@@ -27,8 +27,6 @@ namespace hydro {
  */
 class MooringHydro : public ComponentFluid {
   public:
-    /** @brief Discretization fractions (normalized abscissa) in the range [0, 1] to discretize the hydro component. */
-    std::vector<double> discretization_fractions{};
     /** @brief Hydrodynamic coefficients. */
     HydroCoefficients coefficients;
     /** @brief Hydro nodes. */
