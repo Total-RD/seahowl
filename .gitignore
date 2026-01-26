@@ -35,7 +35,6 @@
 build
 build*
 .vs
-.vscode
 
 # temporary files
 *.swp
