@@ -52,6 +52,16 @@ extensions = [
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
 
+# MyST parser configuration
+myst_enable_extensions = [
+    "colon_fence",  # ::: fence blocks
+    "deflist",  # Definition lists
+    "fieldlist",  # Field lists
+    "tasklist",  # Checkbox lists
+]
+
+myst_heading_anchors = 3  # Auto-generate heading anchors for h1-h3
+
 # Include TODO comments
 todo_include_todos = True
 
