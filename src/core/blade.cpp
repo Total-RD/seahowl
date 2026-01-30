@@ -24,7 +24,7 @@ void Blade::initialize_this(double time, double dt) {
     update_positions_aero();
 
     spdlog::info("Initialized blade of total mass {:.4}kg with {} elasto and {} aero elements.", elasto.get_mass(),
-                 elasto_discretized.discretization_fractions.size() - 1, aero.elements.size());
+                 elasto.discretization_fractions.size() - 1, aero.elements.size());
 }
 
 void Blade::prestep(double time, double dt) {
@@ -55,7 +55,7 @@ void Blade::apply_pitch_increment(double pitch_increment) {
 }
 
 void Blade::set_discretization_elasto(const std::vector<double>& fractions) {
-    elasto_discretized.discretization_fractions = fractions;
+    elasto.discretization_fractions = fractions;
 };
 
 void Blade::set_discretization_aero(const std::vector<double>& fractions) {

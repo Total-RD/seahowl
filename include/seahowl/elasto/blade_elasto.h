@@ -10,7 +10,7 @@ namespace elasto {
 /**
  * @brief Base class for blade of wind turbine.
  */
-class BladeElasto : public virtual ComponentElastoDiscretized {
+class BladeElasto : public virtual ComponentElasto {
   public:
     /** @brief Link between blade and pitch axis body. */
     std::unique_ptr<Link> link_root;

@@ -45,7 +45,7 @@ void Tower::build() {
 }
 
 void Tower::set_discretization_elasto(const std::vector<double>& fractions) {
-    elasto_discretized.discretization_fractions = fractions;
+    elasto.discretization_fractions = fractions;
 }
 
 void Tower::set_discretization_aero(const std::vector<double>& fractions) {

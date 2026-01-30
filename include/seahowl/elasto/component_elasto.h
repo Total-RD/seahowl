@@ -79,14 +79,7 @@ class ComponentElasto {
   protected:
     bool is_assembled = false;
     virtual void assemble_this(SystemElasto& system) = 0;
-};
 
-/**
- * @brief Elasto component with discretization support.
- *
- * Intermediate class for elasto components that have discretization fractions.
- */
-class ComponentElastoDiscretized : public virtual ComponentElasto {
   public:
     /** @brief Discretization fractions (normalized abscissa) in the range [0, 1]. */
     std::vector<double> discretization_fractions{};
@@ -97,7 +90,7 @@ class ComponentElastoDiscretized : public virtual ComponentElasto {
  *
  * All FEA elasto component classes are derived from this class.
  */
-class ComponentElastoFEA : public virtual ComponentElastoDiscretized {
+class ComponentElastoFEA : public virtual ComponentElasto {
   public:
     /** @brief Finite element nodes. */
     std::vector<std::shared_ptr<NodeElasto>> nodes;

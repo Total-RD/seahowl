@@ -10,7 +10,7 @@
 // forward declarations
 namespace seahowl {
 namespace elasto {
-class ComponentElastoDiscretized;
+class ComponentElasto;
 }  // namespace elasto
 }  // namespace seahowl
 
@@ -25,8 +25,8 @@ namespace core {
  */
 class ComponentElastoFluid : public virtual ComponentDynamic {
   protected:
-    /** @brief Reference to the discretized elasto component. */
-    seahowl::elasto::ComponentElastoDiscretized& elasto_discretized;
+    /** @brief Reference to the elasto component. */
+    seahowl::elasto::ComponentElasto& elasto;
     /** @brief Reference to the fluid component. */
     seahowl::fluid::ComponentFluid& fluid;
 
@@ -42,7 +42,7 @@ class ComponentElastoFluid : public virtual ComponentDynamic {
      * @param[in] elasto Shared pointer to the discretized elasto component.
      * @param[in] fluid Shared pointer to the fluid component.
      */
-    ComponentElastoFluid(const std::shared_ptr<seahowl::elasto::ComponentElastoDiscretized> elasto,
+    ComponentElastoFluid(const std::shared_ptr<seahowl::elasto::ComponentElasto> elasto,
                          const std::shared_ptr<seahowl::fluid::ComponentFluid> fluid);
 
     /**

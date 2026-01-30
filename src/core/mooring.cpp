@@ -72,7 +72,7 @@ void Mooring::build() {
 }
 
 void Mooring::set_discretization_elasto(const std::vector<double>& fractions) {
-    elasto_discretized.discretization_fractions = fractions;
+    elasto.discretization_fractions = fractions;
 }
 
 void Mooring::set_discretization_hydro(const std::vector<double>& fractions) {

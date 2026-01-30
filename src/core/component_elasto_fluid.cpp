@@ -5,20 +5,20 @@
 namespace seahowl {
 namespace core {
 
-ComponentElastoFluid::ComponentElastoFluid(const std::shared_ptr<seahowl::elasto::ComponentElastoDiscretized> elasto,
+ComponentElastoFluid::ComponentElastoFluid(const std::shared_ptr<seahowl::elasto::ComponentElasto> elasto,
                                            const std::shared_ptr<seahowl::fluid::ComponentFluid> fluid)
-    : ComponentDynamic(elasto, fluid), elasto_discretized(*elasto), fluid(*fluid) {}
+    : ComponentDynamic(elasto, fluid), elasto(*elasto), fluid(*fluid) {}
 
 void ComponentElastoFluid::compute_mapping_elasto2fluid() {
     // Map elasto nodes to fluid domain
     mapping_elasto2fluid_nodes =
-        get_indice_and_positions(elasto_discretized.discretization_fractions, fluid.discretization_fractions);
+        get_indice_and_positions(elasto.discretization_fractions, fluid.discretization_fractions);
 }
 
 void ComponentElastoFluid::compute_mapping_fluid2elasto() {
     // Map fluid nodes to elasto elements
     mapping_fluid2elasto_nodes =
-        get_indice_and_positions(fluid.discretization_fractions, elasto_discretized.discretization_fractions);
+        get_indice_and_positions(fluid.discretization_fractions, elasto.discretization_fractions);
 
     // Compute element fractions as midpoints between node fractions
     std::vector<double> fluid_element_fractions;
@@ -28,8 +28,7 @@ void ComponentElastoFluid::compute_mapping_fluid2elasto() {
     }
 
     // Map fluid elements to elasto elements
-    mapping_fluid2elasto_elements =
-        get_indice_and_positions(fluid_element_fractions, elasto_discretized.discretization_fractions);
+    mapping_fluid2elasto_elements = get_indice_and_positions(fluid_element_fractions, elasto.discretization_fractions);
 }
 
 }  // namespace core
