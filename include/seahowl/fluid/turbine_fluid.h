@@ -56,7 +56,7 @@ class TurbineFluid : public ComponentFluid {
      * @param[in] time Time of the simulation (usually 0 at init) [s]
      * @param[in] dt Time step length [s]
      */
-    virtual void initialize(double time, double dt);
+    virtual void initialize(double time, double dt) override;
 
     /**
      * @brief Computes fluid loads on turbine.

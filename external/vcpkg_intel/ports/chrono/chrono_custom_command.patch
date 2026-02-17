@@ -73,9 +73,9 @@ index d6d9d47d6..1e066e373 100644
 +#   IF(DEFINED ENV{CONDA_BUILD})
 +#     SET(CH_IRRLICHT_DLL "$ENV{PREFIX}/Library/bin/Irrlicht.dll")
 +#   ELSEIF("${CH_COMPILER}" STREQUAL "COMPILER_MSVC")
-+#     SET(CH_IRRLICHT_DLL "${IRRLICHT_ROOT}/bin/Win32-VisualStudio/Irrlicht.dll")
++#     SET(CH_IRRLICHT_DLL "${IRRLICHT_INSTALL_DIR}/bin/Win32-VisualStudio/Irrlicht.dll")
 +#   ELSEIF("${CH_COMPILER}" STREQUAL "COMPILER_MSVC_X64")
-+#     SET(CH_IRRLICHT_DLL "${IRRLICHT_ROOT}/bin/Win64-VisualStudio/Irrlicht.dll")
++#     SET(CH_IRRLICHT_DLL "${IRRLICHT_INSTALL_DIR}/bin/Win64-VisualStudio/Irrlicht.dll")
 +#   ENDIF()
 +#
 +#   ADD_CUSTOM_COMMAND(

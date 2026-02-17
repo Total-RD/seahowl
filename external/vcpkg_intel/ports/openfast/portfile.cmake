@@ -3,9 +3,10 @@ include(vcpkg_find_fortran)
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL https://github.com/openfast/openfast.git
-    REF fc1110183bcc87b16d93129edabdce6d30e3a497
+    REF 3a9d3f29f03b52b536d391fbd360683f847be712
     PATCHES
         "openfast_custom_command.patch"
+        "openfast_custom_command2.patch"
 )
 
 vcpkg_find_fortran(FORTRAN_CMAKE)

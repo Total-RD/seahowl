@@ -34,15 +34,15 @@
     },
     {
       "name": "hydrochrono",
-      "version>=": "0.2.6"
+      "version>=": "0.2.8"
     },
     {
       "name": "openfast",
-      "version>=": "4.0.2"
+      "version>=": "4.2.0"
     },
     {
       "name": "pybind11",
-      "version>=": "3.0.0"
+      "version>=": "3.0.1"
     },
     {
       "name": "vcpkg-tool-ninja",
