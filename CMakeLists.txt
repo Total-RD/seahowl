@@ -794,7 +794,7 @@ else()
 endif()
 
 install(DIRECTORY ${SEAHOWL_DATADIR}
-        DESTINATION data)
+        DESTINATION .)
 
 #copy the README.md file to the install directory
 install(FILES ${PROJECT_SOURCE_DIR}/doc/source/user-guide/using_package.md
