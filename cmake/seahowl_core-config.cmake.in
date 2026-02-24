@@ -1,0 +1,9 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/seahowl_core-targets.cmake")
+
+set(SEAHOWL_CORE_VERSION "@PROJECT_VERSION@")
+
+# Optionally, add include directories or other variables
+# set_and_check(SEAHOWL_CORE_INCLUDE_DIR "@PACKAGE_INCLUDE_DESTINATION@")
+# set_and_check(SEAHOWL_CORE_LIB_DIR "@PACKAGE_LIB_DESTINATION@")

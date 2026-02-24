@@ -543,6 +543,47 @@ if(SEAHOWL_ENABLE_IRRLICHT)
     target_link_libraries(seahowl_core PRIVATE PNG::PNG JPEG::JPEG BZip2::BZip2 Irrlicht)
 endif(SEAHOWL_ENABLE_IRRLICHT)
 
+add_library(seahowl_core::seahowl_core ALIAS seahowl_core)
+
+# --- Installation de la lib
+install(TARGETS seahowl_core
+    EXPORT seahowl_coreTargets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+
+install(DIRECTORY include/
+    DESTINATION include
+)
+
+# --- Export des targets
+install(EXPORT seahowl_coreTargets
+    FILE seahowl_core-targets.cmake
+    NAMESPACE seahowl_core::
+    DESTINATION cmake/seahowl_core
+)
+
+# --- Génération du Config.cmake
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+    seahowl_core-configVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/seahowl_core-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/seahowl_core-config.cmake
+    INSTALL_DESTINATION cmake/seahowl_core
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/seahowl_core-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/seahowl_core-configVersion.cmake
+    DESTINATION cmake/seahowl_core
+)
 
 # =============
 # DRIVER
