@@ -20,18 +20,18 @@ SEAHOWL uses an embedded Python in a virtual environment located in the `.venv` 
 ##### Linux
 
 ```bash
-source bin/init_pyseahowl.sh
+source tools/init_pyseahowl.sh
 ```
 ##### Windows
 
 If using Command Prompt (cmd):
 ```bash
-./bin/init_pyseahowl.bat
+./tools/init_pyseahowl.bat
 ```
 
 If using PowerShell:
 ```bash
-./bin/init_pyseahowl.ps1
+./tools/init_pyseahowl.ps1
 ```
 
 #### Example
