@@ -718,18 +718,25 @@ install(TARGETS seahowl_core
 install(TARGETS seahowl_driver
         RUNTIME DESTINATION bin)
 
-set_target_properties(seahowl_driver PROPERTIES
-                      INSTALL_RPATH "$ORIGIN/../lib"
-                      BUILD_RPATH "$ORIGIN/../lib")
+if(NOT WIN32)
+    set_target_properties(seahowl_driver PROPERTIES
+                          INSTALL_RPATH "$ORIGIN/../lib"
+                          BUILD_RPATH "$ORIGIN/../lib")
+endif()
 
 if(SEAHOWL_ENABLE_PYTHON)
+    if(NOT WIN32)
+        install(TARGETS pyseahowl
+                LIBRARY DESTINATION lib)
 
-    install(TARGETS pyseahowl
-            LIBRARY DESTINATION lib)
+        set_target_properties(pyseahowl PROPERTIES
+                            INSTALL_RPATH "$ORIGIN"
+                            BUILD_RPATH "$ORIGIN")
+    else()
+        install(TARGETS pyseahowl
+                LIBRARY DESTINATION bin)
+    endif()
 
-    set_target_properties(pyseahowl PROPERTIES
-                        INSTALL_RPATH "$ORIGIN"
-                        BUILD_RPATH "$ORIGIN")
     if (VCPKG_APPLOCAL_DEPS)
         install(DIRECTORY ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/python3
                             DESTINATION tools
@@ -751,10 +758,10 @@ if(SEAHOWL_ENABLE_PYTHON)
             set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.bat)
             file(WRITE ${FILE_INITPY}
                 "set SCRIPT_DIR=%~dp0\n"
-                "for %%i in (\"%SCRIPT_DIR%..\") do set PARENT_DIR=%%~fi\n"
-                "\"%SCRIPT_DIR%tools/python3/python.exe\" -m virtualenv \"%SCRIPT_DIR%.venv\"\n"
-                "call \"%SCRIPT_DIR%.venv/Scripts/activate\"\n"
-                "set PYTHONPATH=%SCRIPT_DIR%lib;%PYTHONPATH%\n"
+                "for %%i in (\"%SCRIPT_DIR%..\") do set SCRIPT_DIR=%%~fi\n"
+                "\"%SCRIPT_DIR%/tools/python3/python.exe\" -m virtualenv \"%SCRIPT_DIR%/.venv\"\n"
+                "call \"%SCRIPT_DIR%/.venv/Scripts/activate\"\n"
+                "set PYTHONPATH=%SCRIPT_DIR%/bin;%PYTHONPATH%\n"
                 "cmd /K\n")
             set(FILE_INITPYPS ${CMAKE_BINARY_DIR}/init_pyseahowl.ps1)
                 file(WRITE ${FILE_INITPYPS}
@@ -762,7 +769,7 @@ if(SEAHOWL_ENABLE_PYTHON)
                     "$SCRIPT_DIR = Split-Path -Parent $SCRIPT_DIR\n"
                     "& \"$SCRIPT_DIR\\tools\\python3\\python.exe\" -m virtualenv \"$SCRIPT_DIR\\.venv\"\n"
                     "& \"$SCRIPT_DIR\\.venv\\Scripts\\Activate.ps1\"\n"
-                    "$env:PYTHONPATH = \"$SCRIPT_DIR\\lib;$env:PYTHONPATH\"\n")
+                    "$env:PYTHONPATH = \"$SCRIPT_DIR\\bin;$env:PYTHONPATH\"\n")
 
             file(CHMOD ${FILE_INITPYPS} FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
@@ -799,7 +806,7 @@ else()
     endif()
 
     install(FILES ${LIST_DLL}
-            DESTINATION lib)
+            DESTINATION bin)
 endif()
 
 install(DIRECTORY ${SEAHOWL_DATADIR}
