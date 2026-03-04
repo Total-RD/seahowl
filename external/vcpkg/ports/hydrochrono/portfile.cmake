@@ -1,7 +1,9 @@
 vcpkg_from_git(
-    OUT_SOURCE_PATH SOURCE_PATH
-    URL https://github.com/Project-SEA-Stack//HydroChrono.git
-    REF 71eff2bad24463ea42667f67dd4c39cb22246780
+        OUT_SOURCE_PATH SOURCE_PATH
+        URL https://github.com/Project-SEA-Stack//HydroChrono.git
+        REF 71eff2bad24463ea42667f67dd4c39cb22246780
+        PATCHES
+            "fix_macos.patch"
 )
 
 vcpkg_cmake_configure(

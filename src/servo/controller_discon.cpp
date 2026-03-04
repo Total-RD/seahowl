@@ -16,6 +16,9 @@
 #ifdef __unix__
     #include <dlfcn.h>
 #endif
+#ifdef __APPLE__
+    #include <dlfcn.h>
+#endif
 #ifdef _WIN32
     #include <windows.h>
 #endif
@@ -381,7 +384,8 @@ void seahowl::servo::DisconInterface::Init(const std::string& libfile, const std
     if (libfile != "") {
         // Load dynamic library and point to DISCON routine
         spdlog::debug("DISCON: loading library {}.", libfile);
-#ifdef __unix__
+
+#if defined(__unix__) || defined(__APPLE__)
         handler = dlopen(libfile.c_str(), RTLD_NOLOAD | RTLD_LAZY);
         if (handler) {
             // library already loaded, first copy the library and load it with the new path.

@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9a0e9e1..6ec7291 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -233,6 +233,7 @@ target_link_libraries(HydroChrono
+     $<$<TARGET_EXISTS:Eigen3::Eigen>:Eigen3::Eigen>
+   PRIVATE
+     ${HDF5_LIBRARIES}
++    ${HDF5_CXX_LIBRARIES}
+ )
+ 
+ # If Eigen is module-mode (no imported target), include its dir
+diff --git a/src/logging.cpp b/src/logging.cpp
+index 30b900d..f061589 100644
+--- a/src/logging.cpp
++++ b/src/logging.cpp
+@@ -42,6 +42,8 @@
+ #include <sysinfoapi.h>   // for Windows memory status
+ #elif defined(__APPLE__)
+ #include <mach-o/dyld.h>  // for macOS executable path
++#include <unistd.h>       // for readlink on macOS
++#include <limits.h>       // for PATH_MAX constant
+ #else
+ #include <unistd.h>       // for Linux executable path
+ #include <limits.h>       // for PATH_MAX constant
