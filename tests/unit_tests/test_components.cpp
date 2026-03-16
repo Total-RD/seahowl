@@ -49,6 +49,21 @@ class MyEnvironment : public ::testing::Environment {
             return;
         }
         ret = std::system((cmd + scilens_cmd + " " + data_test_dir.string() + "'").c_str());
+    #elif defined(__APPLE__)
+            // Code spécifique macOS
+        #ifdef HAVE_ENV_PYTHON
+        auto env_bin = test_dir / "../build/.venv/bin/activate";
+        auto cmd = "bash -c 'source " + env_bin.string() + " && ";
+        #else
+        auto cmd = std::string("'");
+        #endif
+        // test if scilens is available
+        int ret = std::system((cmd + "scilens version ' > /dev/null 2>&1").c_str());
+        if (ret != 0) {
+            spdlog::warn("scilens is not available in the environment.");
+            return;
+        }
+        ret = std::system((cmd + scilens_cmd + " " + data_test_dir.string() + "'").c_str());
     #endif
 #endif
     }

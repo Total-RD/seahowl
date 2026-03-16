@@ -155,7 +155,7 @@ endif(SEAHOWL_ENABLE_HYDROCHRONO)
 
 # python
 if(SEAHOWL_ENABLE_PYTHON)
-    find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
+    find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED)
     find_package(pybind11 CONFIG REQUIRED)
     add_definitions("-DHAVE_PYTHON=1")
 endif(SEAHOWL_ENABLE_PYTHON)
@@ -619,7 +619,7 @@ if (SEAHOWL_ENABLE_PYTHON)
         ${PYSEAHOWL_DIR}/pyseahowl_io.cpp
     )
 	target_compile_features(pyseahowl PRIVATE cxx_std_17)
-    target_link_libraries(pyseahowl PRIVATE seahowl_core pybind11::embed)
+    target_link_libraries(pyseahowl PRIVATE seahowl_core Python3::Module pybind11::module)
     target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
     set_target_properties(pyseahowl PROPERTIES OUTPUT_NAME seahowl)
 
