@@ -657,7 +657,7 @@ if (SEAHOWL_ENABLE_PYTHON)
         set(CMD_PIP "pip install mkdocs mkdocs-material mkdocs-include-markdown-plugin pybind11-stubgen \'mkdocstrings[python]\' matplotlib myst-parser pre-commit numpy pytest scilens scilens-compare")
         set(CMD_PRECOMMIT "pre-commit install")
 
-        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             set(ACTIVATE_PY "source ${CMAKE_BINARY_DIR}/.venv/bin/activate")
             set(LAUNCH_PIP bash -c)
         else()
@@ -744,7 +744,7 @@ if(SEAHOWL_ENABLE_PYTHON)
                             DESTINATION tools
                             USE_SOURCE_PERMISSIONS)
 
-        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.sh)
             file(WRITE ${FILE_INITPY}
                 "#!/bin/bash\n"
@@ -789,7 +789,7 @@ if(SEAHOWL_ENABLE_PYTHON)
 
 endif(SEAHOWL_ENABLE_PYTHON)
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     INSTALL(CODE "
         include(BundleUtilities)
         fixup_bundle(\"${CMAKE_BINARY_DIR}/seahowl_driver\" \"\" \"${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib\")
