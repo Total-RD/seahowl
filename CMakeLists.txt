@@ -731,9 +731,15 @@ if(SEAHOWL_ENABLE_PYTHON)
         install(TARGETS pyseahowl
                 LIBRARY DESTINATION lib)
 
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         set_target_properties(pyseahowl PROPERTIES
-                            INSTALL_RPATH "$ORIGIN"
-                            BUILD_RPATH "$ORIGIN")
+                              BUILD_RPATH "@loader_path;@loader_path/../Frameworks"
+                              INSTALL_RPATH "@loader_path;@loader_path/../Frameworks")
+    else()
+            set_target_properties(pyseahowl PROPERTIES
+                                  INSTALL_RPATH "$ORIGIN"
+                                  BUILD_RPATH "$ORIGIN")
+    endif()
     else()
         install(TARGETS pyseahowl
                 LIBRARY DESTINATION bin)
