@@ -710,74 +710,90 @@ endif()
 # ===========================
 # INSTALL
 # ===========================
+install(TARGETS seahowl_core
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin)
+
 install(TARGETS seahowl_driver
         RUNTIME DESTINATION bin)
 
-set_target_properties(seahowl_driver PROPERTIES
-                      INSTALL_RPATH "$ORIGIN"
-                      BUILD_RPATH "$ORIGIN")
+if(NOT WIN32)
+    set_target_properties(seahowl_driver PROPERTIES
+                          INSTALL_RPATH "$ORIGIN/../lib"
+                          BUILD_RPATH "$ORIGIN/../lib")
+endif()
 
 if(SEAHOWL_ENABLE_PYTHON)
+    if(NOT WIN32)
+        install(TARGETS pyseahowl
+                LIBRARY DESTINATION lib)
 
-    install(TARGETS pyseahowl
-            LIBRARY DESTINATION bin)
-
-    set_target_properties(pyseahowl PROPERTIES
-                        INSTALL_RPATH "$ORIGIN"
-                        BUILD_RPATH "$ORIGIN")
-
-    install(DIRECTORY ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/python3
-                        DESTINATION bin
-                        USE_SOURCE_PERMISSIONS)
-
-    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-        set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.sh)
-        file(WRITE ${FILE_INITPY}
-            "#!/bin/bash\n"
-            "SCRIPT_DIR=$(cd \"$(dirname \"\${BASH_SOURCE}\")\" && pwd)\n"
-            "sed -i 's|^prefix=.*|prefix=\"\$prefix_real\"|' \"$SCRIPT_DIR/python3/python3.12-config\"\n"
-            "sed -i 's|^exec_prefix=.*|exec_prefix=\"\$prefix_real\"|' \"$SCRIPT_DIR/python3/python3.12-config\"\n"
-            "\"$SCRIPT_DIR/python3/python3\" -m virtualenv .venv \n"
-            "CALL_DIR=$(pwd)\n"
-            "source \"$CALL_DIR/.venv/bin/activate\"\n"
-            "export PYTHONPATH=\"$SCRIPT_DIR\":$PYTHONPATH\n")
+        set_target_properties(pyseahowl PROPERTIES
+                            INSTALL_RPATH "$ORIGIN"
+                            BUILD_RPATH "$ORIGIN")
     else()
-        set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.bat)
-        file(WRITE ${FILE_INITPY}
-            "set SCRIPT_DIR=%~dp0\n"
-            "powershell -Command \"(Get-Content \\\"%SCRIPT_DIR%python3\\python3.12-config\\\") -replace '^prefix=.*', 'prefix=\\\"$prefix_real\\\"' | Set-Content \\\"%SCRIPT_DIR%python3\\python3.12-config\\\"\"\n"
-            "powershell -Command \"(Get-Content \\\"%SCRIPT_DIR%python3\\python3.12-config\\\") -replace '^exec_prefix=.*', 'exec_prefix=\\\"$prefix_real\\\"' | Set-Content \\\"%SCRIPT_DIR%python3\\python3.12-config\\\"\"\n"
-            "\"%SCRIPT_DIR%python3/python.exe\" -m virtualenv \"%SCRIPT_DIR%.venv\"\n"
-            "call \"%SCRIPT_DIR%.venv/Scripts/activate\"\n"
-            "set PYTHONPATH=%SCRIPT_DIR%;%PYTHONPATH%\n"
-            "cmd /K\n")
-        set(FILE_INITPYPS ${CMAKE_BINARY_DIR}/init_pyseahowl.ps1)
-            file(WRITE ${FILE_INITPYPS}
-                "$SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Definition\n"
-                "& \"$SCRIPT_DIR\\python3\\python.exe\" -m virtualenv \"$SCRIPT_DIR\\.venv\"\n"
-                "& \"$SCRIPT_DIR\\.venv\\Scripts\\Activate.ps1\"\n"
-                "$env:PYTHONPATH = \"$SCRIPT_DIR;$env:PYTHONPATH\"\n")
-
-        file(CHMOD ${FILE_INITPYPS} FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
-        install(FILES ${FILE_INITPYPS}
-            DESTINATION bin
-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
+        install(TARGETS pyseahowl
+                LIBRARY DESTINATION bin)
     endif()
 
-    file(CHMOD ${FILE_INITPY} FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    if (VCPKG_APPLOCAL_DEPS)
+        install(DIRECTORY ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/python3
+                            DESTINATION tools
+                            USE_SOURCE_PERMISSIONS)
 
-    install(FILES ${FILE_INITPY}
-        DESTINATION bin
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+            set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.sh)
+            file(WRITE ${FILE_INITPY}
+                "#!/bin/bash\n"
+                "SCRIPT_DIR=$(cd \"$(dirname \"\${BASH_SOURCE}\")\" && pwd)\n"
+                "SCRIPT_DIR=$(dirname \"$SCRIPT_DIR\")\n"
+                "sed -i 's|^prefix=.*|prefix=\"\$prefix_real\"|' \"$SCRIPT_DIR/tools/python3/python3.12-config\"\n"
+                "sed -i 's|^exec_prefix=.*|exec_prefix=\"\$prefix_real\"|' \"$SCRIPT_DIR/tools/python3/python3.12-config\"\n"
+                "\"$SCRIPT_DIR/tools/python3/python3\" -m virtualenv .venv \n"
+                "CALL_DIR=$(pwd)\n"
+                "source \"$CALL_DIR/.venv/bin/activate\"\n"
+                "export PYTHONPATH=\"$SCRIPT_DIR/lib\":$PYTHONPATH\n")
+        else()
+            set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.bat)
+            file(WRITE ${FILE_INITPY}
+                "set SCRIPT_DIR=%~dp0\n"
+                "for %%i in (\"%SCRIPT_DIR%..\") do set SCRIPT_DIR=%%~fi\n"
+                "\"%SCRIPT_DIR%/tools/python3/python.exe\" -m virtualenv \"%SCRIPT_DIR%/.venv\"\n"
+                "call \"%SCRIPT_DIR%/.venv/Scripts/activate\"\n"
+                "set PYTHONPATH=%SCRIPT_DIR%/bin;%PYTHONPATH%\n"
+                "cmd /K\n")
+            set(FILE_INITPYPS ${CMAKE_BINARY_DIR}/init_pyseahowl.ps1)
+                file(WRITE ${FILE_INITPYPS}
+                    "$SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Definition\n"
+                    "$SCRIPT_DIR = Split-Path -Parent $SCRIPT_DIR\n"
+                    "& \"$SCRIPT_DIR\\tools\\python3\\python.exe\" -m virtualenv \"$SCRIPT_DIR\\.venv\"\n"
+                    "& \"$SCRIPT_DIR\\.venv\\Scripts\\Activate.ps1\"\n"
+                    "$env:PYTHONPATH = \"$SCRIPT_DIR\\bin;$env:PYTHONPATH\"\n")
+
+            file(CHMOD ${FILE_INITPYPS} FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+            install(FILES ${FILE_INITPYPS}
+                DESTINATION tools
+                PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
+        endif()
+
+        file(CHMOD ${FILE_INITPY} FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+        install(FILES ${FILE_INITPY}
+            DESTINATION tools
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
+    endif(VCPKG_APPLOCAL_DEPS)
 
 endif(SEAHOWL_ENABLE_PYTHON)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     INSTALL(CODE "
-            include(BundleUtilities)
-            fixup_bundle(\"${CMAKE_INSTALL_PREFIX}/bin/seahowl_driver\" \"\" \"${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib\")
-            " DESTINATION bin COMPONENT Runtime)
+        include(BundleUtilities)
+        fixup_bundle(\"${CMAKE_BINARY_DIR}/seahowl_driver\" \"\" \"${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib\")
+    " DESTINATION bin COMPONENT Runtime)
+    file(GLOB SO_FILES "${CMAKE_BINARY_DIR}/*.so")
+    INSTALL(FILES ${SO_FILES} DESTINATION lib)
 else()
 
     if (${CMAKE_GENERATOR} MATCHES "Ninja")
@@ -794,7 +810,7 @@ else()
 endif()
 
 install(DIRECTORY ${SEAHOWL_DATADIR}
-        DESTINATION data)
+        DESTINATION .)
 
 #copy the README.md file to the install directory
 install(FILES ${PROJECT_SOURCE_DIR}/doc/source/user-guide/using_package.md
