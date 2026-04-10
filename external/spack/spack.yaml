@@ -1,0 +1,31 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  repos:
+    - ./repos
+  # add package specs to the `specs` list
+  specs:
+  - eigen@3.4.0
+  - nlohmann-json@3.11.3
+  - spdlog@1.15.0
+  - googletest@1.15.2
+  - py-pybind11@2.13.6
+  - chrono@9.0.1
+  - hydrochrono@0.2.8
+  - openfast@4.2.0
+  - hdf5@1.14.4.3+cxx
+  view: true
+  concretizer:
+    unify: true
+  packages:
+    gcc:
+      externals:
+      - spec: gcc@13.3.0 languages:='c,c++,fortran'
+        prefix: /usr
+        extra_attributes:
+          compilers:
+            c: /usr/bin/gcc
+            cxx: /usr/bin/g++
+            fortran: /usr/bin/gfortran
