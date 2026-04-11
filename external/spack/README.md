@@ -14,7 +14,7 @@ source spack/share/spack/setup-env.sh
 
 ## Install dependancies
 ```bash
-cd seahowl-spack-env
+cd external/spack
 spack env activate .
 spack install
 ```
