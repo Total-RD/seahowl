@@ -238,6 +238,8 @@ static void write_tower_points_csv(const std::string& csv_filepath,
     size_t idx_point;
     auto csv_out = seahowl::io::CustomCSV(csv_filepath);
     csv_out.add_function("fraction", [&points, &idx_point]() { return points[idx_point].fraction; });
+    csv_out.add_function("coordinates",
+                         [&points, &idx_point]() -> seahowl::Vector3d { return points[idx_point].coordinates; });
     csv_out.add_function("density_linear", [&points, &idx_point]() { return points[idx_point].density; });
     csv_out.add_function("stiffness_foreaft", [&points, &idx_point]() { return points[idx_point].stiffness_foreaft; });
     csv_out.add_function("stiffness_sideside",
@@ -250,6 +252,51 @@ static void write_tower_points_csv(const std::string& csv_filepath,
                          [&points, &idx_point]() { return points[idx_point].stiffness_sideside_shear; });
     csv_out.add_function("inertia_foreaft", [&points, &idx_point]() { return points[idx_point].inertia_foreaft; });
     csv_out.add_function("inertia_sideside", [&points, &idx_point]() { return points[idx_point].inertia_sideside; });
+    for (idx_point = 0; idx_point < points.size(); idx_point++) {
+        csv_out.write_row();
+    }
+}
+
+/**
+ * @brief Writes a CSV log of blade reference points (offsets, twist, dampings, full 6x6 mass and stiffness matrices).
+ *
+ * The 6x6 mass and stiffness matrices are flattened in row-major order into 36 columns each,
+ * named `mass_matrix_ij` / `stiffness_matrix_ij` with i,j in [0,5].
+ *
+ * @param[in] csv_filepath Output CSV file path.
+ * @param[in] points Reference points (either reference_points or discretized_points of a BladeElasto).
+ */
+static void write_blade_points_csv(const std::string& csv_filepath,
+                                   const std::vector<seahowl::elasto::BladeReferencePointElasto>& points) {
+    size_t idx_point;
+    auto csv_out = seahowl::io::CustomCSV(csv_filepath);
+    csv_out.add_function("fraction", [&points, &idx_point]() { return points[idx_point].fraction; });
+    csv_out.add_function("coordinates",
+                         [&points, &idx_point]() -> seahowl::Vector3d { return points[idx_point].coordinates; });
+    csv_out.add_function("offset_elastic_x", [&points, &idx_point]() { return points[idx_point].offset_elastic[0]; });
+    csv_out.add_function("offset_elastic_y", [&points, &idx_point]() { return points[idx_point].offset_elastic[1]; });
+    csv_out.add_function("offset_gravity_x", [&points, &idx_point]() { return points[idx_point].offset_gravity[0]; });
+    csv_out.add_function("offset_gravity_y", [&points, &idx_point]() { return points[idx_point].offset_gravity[1]; });
+    csv_out.add_function("structural_twist", [&points, &idx_point]() { return points[idx_point].structural_twist; });
+    csv_out.add_function("damping_flapwise", [&points, &idx_point]() { return points[idx_point].damping_flapwise; });
+    csv_out.add_function("damping_edgewise", [&points, &idx_point]() { return points[idx_point].damping_edgewise; });
+    csv_out.add_function("damping_axial", [&points, &idx_point]() { return points[idx_point].damping_axial; });
+    csv_out.add_function("damping_torsion", [&points, &idx_point]() { return points[idx_point].damping_torsion; });
+    csv_out.add_function("damping_mass", [&points, &idx_point]() { return points[idx_point].damping_mass; });
+    // 6x6 mass and stiffness matrices flattened in row-major order
+    for (int ii = 0; ii < 6; ii++) {
+        for (int jj = 0; jj < 6; jj++) {
+            csv_out.add_function("mass_matrix_" + std::to_string(ii) + std::to_string(jj),
+                                 [&points, &idx_point, ii, jj]() { return points[idx_point].mass_matrix(ii, jj); });
+        }
+    }
+    for (int ii = 0; ii < 6; ii++) {
+        for (int jj = 0; jj < 6; jj++) {
+            csv_out.add_function(
+                "stiffness_matrix_" + std::to_string(ii) + std::to_string(jj),
+                [&points, &idx_point, ii, jj]() { return points[idx_point].stiffness_matrix(ii, jj); });
+        }
+    }
     for (idx_point = 0; idx_point < points.size(); idx_point++) {
         csv_out.write_row();
     }
@@ -285,6 +332,22 @@ void OutputManager::output_initial_logs() {
                     monopile_elasto.discretized_points);
             } catch (const std::bad_cast& e) {
                 // do nothing if no monopile
+            }
+        }
+
+        // blades
+        for (size_t idx_blade = 0; idx_blade < turbine.rna.rotor.blades.size(); idx_blade++) {
+            auto& blade_elasto = turbine.rna.rotor.blades[idx_blade]->elasto;
+            const std::string blade_prefix = turbine_prefix + "_blade" + std::to_string(idx_blade + 1);
+            write_blade_points_csv((fs::path(logs_folder) / (blade_prefix + "_points_reference.csv")).generic_string(),
+                                   blade_elasto.reference_points);
+            try {
+                auto& blade_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(blade_elasto);
+                write_blade_points_csv(
+                    (fs::path(logs_folder) / (blade_prefix + "_points_discretized.csv")).generic_string(),
+                    blade_fea.discretized_points);
+            } catch (const std::bad_cast& e) {
+                // no discretized points for non-FEA blades
             }
         }
     }
