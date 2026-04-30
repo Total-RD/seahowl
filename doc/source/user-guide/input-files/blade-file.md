@@ -129,3 +129,10 @@ Each reference point can specify an airfoil polar file for built-in BEMT:
 - **Y**: Toward low-pressure side (flapwise)
 - **Z**: Toward blade tip (spanwise)
 - Origin at blade root
+
+![Blade reference axes](../../assets/blade_axes.svg){ width="520" }
+/// caption
+Blade reference axes: origin at the root, X toward the leading edge,
+Y toward the low-pressure (suction) side, Z along the span toward the tip.
+Sectional loads and 6×6 mass/stiffness matrices are expressed in this frame.
+///
