@@ -225,6 +225,36 @@ void OutputManager::output_all(int step) {
     }
 }
 
+/**
+ * @brief Writes a CSV log of tower-like reference points (lineic density, stiffnesses, inertias).
+ *
+ * Used for both tower and monopile components, since they share the same TowerReferencePointElasto.
+ *
+ * @param[in] csv_filepath Output CSV file path.
+ * @param[in] points Reference points (either reference_points or discretized_points of a TowerElasto).
+ */
+static void write_tower_points_csv(const std::string& csv_filepath,
+                                   const std::vector<seahowl::elasto::TowerReferencePointElasto>& points) {
+    size_t idx_point;
+    auto csv_out = seahowl::io::CustomCSV(csv_filepath);
+    csv_out.add_function("fraction", [&points, &idx_point]() { return points[idx_point].fraction; });
+    csv_out.add_function("density_linear", [&points, &idx_point]() { return points[idx_point].density; });
+    csv_out.add_function("stiffness_foreaft", [&points, &idx_point]() { return points[idx_point].stiffness_foreaft; });
+    csv_out.add_function("stiffness_sideside",
+                         [&points, &idx_point]() { return points[idx_point].stiffness_sideside; });
+    csv_out.add_function("stiffness_axial", [&points, &idx_point]() { return points[idx_point].stiffness_axial; });
+    csv_out.add_function("stiffness_torsion", [&points, &idx_point]() { return points[idx_point].stiffness_torsion; });
+    csv_out.add_function("stiffness_foreaft_shear",
+                         [&points, &idx_point]() { return points[idx_point].stiffness_foreaft_shear; });
+    csv_out.add_function("stiffness_sideside_shear",
+                         [&points, &idx_point]() { return points[idx_point].stiffness_sideside_shear; });
+    csv_out.add_function("inertia_foreaft", [&points, &idx_point]() { return points[idx_point].inertia_foreaft; });
+    csv_out.add_function("inertia_sideside", [&points, &idx_point]() { return points[idx_point].inertia_sideside; });
+    for (idx_point = 0; idx_point < points.size(); idx_point++) {
+        csv_out.write_row();
+    }
+}
+
 void OutputManager::output_initial_logs() {
     std::string logs_folder = (fs::path(output_folder) / "logs").generic_string();
     spdlog::debug("Creating initial logs in {}.", logs_folder);
@@ -232,78 +262,30 @@ void OutputManager::output_initial_logs() {
     // output
     for (int idx_turbine = 0; idx_turbine < system_core.turbines.size(); idx_turbine++) {
         auto& turbine = *system_core.turbines[idx_turbine];
+        const std::string turbine_prefix = "turbine" + std::to_string(idx_turbine + 1);
 
-        // reference points
-        size_t idx_point;
-        auto& reference_points = turbine.elasto.tower->reference_points;
-        auto csv_out = seahowl::io::CustomCSV(
-            (fs::path(logs_folder) / ("turbine" + std::to_string(idx_turbine + 1) + "_tower_points_reference.csv"))
-                .generic_string());
-        csv_out.add_function("fraction",
-                             [&reference_points, &idx_point]() { return reference_points[idx_point].fraction; });
-        csv_out.add_function("density_linear",
-                             [&reference_points, &idx_point]() { return reference_points[idx_point].density; });
-        csv_out.add_function("stiffness_foreaft", [&reference_points, &idx_point]() {
-            return reference_points[idx_point].stiffness_foreaft;
-        });
-        csv_out.add_function("stiffness_sideside", [&reference_points, &idx_point]() {
-            return reference_points[idx_point].stiffness_sideside;
-        });
-        csv_out.add_function("stiffness_axial",
-                             [&reference_points, &idx_point]() { return reference_points[idx_point].stiffness_axial; });
-        csv_out.add_function("stiffness_torsion", [&reference_points, &idx_point]() {
-            return reference_points[idx_point].stiffness_torsion;
-        });
-        csv_out.add_function("stiffness_foreaft_shear", [&reference_points, &idx_point]() {
-            return reference_points[idx_point].stiffness_foreaft_shear;
-        });
-        csv_out.add_function("stiffness_sideside_shear", [&reference_points, &idx_point]() {
-            return reference_points[idx_point].stiffness_sideside_shear;
-        });
-        csv_out.add_function("inertia_foreaft",
-                             [&reference_points, &idx_point]() { return reference_points[idx_point].inertia_foreaft; });
-        csv_out.add_function("inertia_sideside", [&reference_points, &idx_point]() {
-            return reference_points[idx_point].inertia_sideside;
-        });
-        for (idx_point = 0; idx_point < reference_points.size(); idx_point++) {
-            csv_out.write_row();
-        }
+        // tower
+        write_tower_points_csv(
+            (fs::path(logs_folder) / (turbine_prefix + "_tower_points_reference.csv")).generic_string(),
+            turbine.elasto.tower->reference_points);
+        write_tower_points_csv(
+            (fs::path(logs_folder) / (turbine_prefix + "_tower_points_discretized.csv")).generic_string(),
+            turbine.elasto.tower->discretized_points);
 
-        // discretized points
-        auto& discretized_points = turbine.elasto.tower->discretized_points;
-        csv_out = seahowl::io::CustomCSV(
-            (fs::path(logs_folder) / ("turbine" + std::to_string(idx_turbine + 1) + "_tower_points_discretized.csv"))
-                .generic_string());
-        csv_out.add_function("fraction",
-                             [&discretized_points, &idx_point]() { return discretized_points[idx_point].fraction; });
-        csv_out.add_function("density_linear",
-                             [&discretized_points, &idx_point]() { return discretized_points[idx_point].density; });
-        csv_out.add_function("stiffness_foreaft", [&discretized_points, &idx_point]() {
-            return discretized_points[idx_point].stiffness_foreaft;
-        });
-        csv_out.add_function("stiffness_sideside", [&discretized_points, &idx_point]() {
-            return discretized_points[idx_point].stiffness_sideside;
-        });
-        csv_out.add_function("stiffness_axial", [&discretized_points, &idx_point]() {
-            return discretized_points[idx_point].stiffness_axial;
-        });
-        csv_out.add_function("stiffness_torsion", [&discretized_points, &idx_point]() {
-            return discretized_points[idx_point].stiffness_torsion;
-        });
-        csv_out.add_function("stiffness_foreaft_shear", [&discretized_points, &idx_point]() {
-            return discretized_points[idx_point].stiffness_foreaft_shear;
-        });
-        csv_out.add_function("stiffness_sideside_shear", [&discretized_points, &idx_point]() {
-            return discretized_points[idx_point].stiffness_sideside_shear;
-        });
-        csv_out.add_function("inertia_foreaft", [&discretized_points, &idx_point]() {
-            return discretized_points[idx_point].inertia_foreaft;
-        });
-        csv_out.add_function("inertia_sideside", [&discretized_points, &idx_point]() {
-            return discretized_points[idx_point].inertia_sideside;
-        });
-        for (idx_point = 0; idx_point < discretized_points.size(); idx_point++) {
-            csv_out.write_row();
+        // monopile foundation (if any)
+        if (turbine.foundation) {
+            try {
+                auto& monopile = dynamic_cast<seahowl::core::Monopile&>(*turbine.foundation);
+                auto& monopile_elasto = monopile.elasto;
+                write_tower_points_csv(
+                    (fs::path(logs_folder) / (turbine_prefix + "_monopile_points_reference.csv")).generic_string(),
+                    monopile_elasto.reference_points);
+                write_tower_points_csv(
+                    (fs::path(logs_folder) / (turbine_prefix + "_monopile_points_discretized.csv")).generic_string(),
+                    monopile_elasto.discretized_points);
+            } catch (const std::bad_cast& e) {
+                // do nothing if no monopile
+            }
         }
     }
 }
