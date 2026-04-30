@@ -302,6 +302,40 @@ static void write_blade_points_csv(const std::string& csv_filepath,
     }
 }
 
+/**
+ * @brief Adds 9 columns named `prefix_ij` (i,j in [0,2]) for a 3x3 matrix returned by `getter()`.
+ */
+template <typename Getter>
+static void add_inertia_columns(seahowl::io::CustomCSV& csv_out, const std::string& prefix, Getter getter) {
+    for (int ii = 0; ii < 3; ii++) {
+        for (int jj = 0; jj < 3; jj++) {
+            csv_out.add_function(prefix + "_" + std::to_string(ii) + std::to_string(jj),
+                                 [getter, ii, jj]() { return getter()(ii, jj); });
+        }
+    }
+}
+
+/**
+ * @brief Writes a single-row CSV with mass / position / rpy / inertia of a body.
+ *
+ * @param[in] csv_filepath Output CSV file path.
+ * @param[in] body Body to inspect.
+ * @param[in] extra Optional callback to register extra columns (reference properties) before mass/state.
+ */
+static void write_body_csv(const std::string& csv_filepath,
+                           seahowl::elasto::BodyElasto& body,
+                           const std::function<void(seahowl::io::CustomCSV&)>& extra = {}) {
+    auto csv_out = seahowl::io::CustomCSV(csv_filepath);
+    if (extra) {
+        extra(csv_out);
+    }
+    csv_out.add_function("mass", [&body]() { return body.get_mass(); });
+    csv_out.add_function("position", [&body]() { return body.get_position(); });
+    csv_out.add_function("rpy", [&body]() { return body.get_rpy_angles(); });
+    add_inertia_columns(csv_out, "inertia", [&body]() { return body.get_inertia_matrix(); });
+    csv_out.write_row();
+}
+
 void OutputManager::output_initial_logs() {
     std::string logs_folder = (fs::path(output_folder) / "logs").generic_string();
     spdlog::debug("Creating initial logs in {}.", logs_folder);
@@ -349,6 +383,51 @@ void OutputManager::output_initial_logs() {
             } catch (const std::bad_cast& e) {
                 // no discretized points for non-FEA blades
             }
+        }
+
+        // RNA bodies (rotor/hub, shaft, nacelle): reference properties + body state
+        auto& rna_elasto = turbine.rna.elasto;
+        auto& rotor_elasto = *rna_elasto.rotor;
+        const auto& hub_props = rotor_elasto.hub;
+        const auto& shaft_props = rna_elasto.shaft;
+        const auto& nacelle_props = rna_elasto.nacelle;
+
+        // hub
+        if (rotor_elasto.body_hub) {
+            write_body_csv((fs::path(logs_folder) / (turbine_prefix + "_hub.csv")).generic_string(),
+                           *rotor_elasto.body_hub, [&hub_props](seahowl::io::CustomCSV& csv_out) {
+                               csv_out.add_function("ref_mass", [&hub_props]() { return hub_props.mass; });
+                               csv_out.add_function("ref_overhang", [&hub_props]() { return hub_props.overhang; });
+                               csv_out.add_function("ref_radius", [&hub_props]() { return hub_props.radius; });
+                               csv_out.add_function("ref_position_from_apex",
+                                                    [&hub_props]() { return hub_props.position_from_apex; });
+                               add_inertia_columns(csv_out, "ref_inertia",
+                                                   [&hub_props]() { return hub_props.inertia; });
+                           });
+        }
+
+        // shaft
+        if (rna_elasto.body_shaft) {
+            write_body_csv((fs::path(logs_folder) / (turbine_prefix + "_shaft.csv")).generic_string(),
+                           *rna_elasto.body_shaft, [&shaft_props](seahowl::io::CustomCSV& csv_out) {
+                               csv_out.add_function("ref_tilt", [&shaft_props]() { return shaft_props.tilt; });
+                               csv_out.add_function("ref_distance_from_towertop",
+                                                    [&shaft_props]() { return shaft_props.distance_from_towertop; });
+                           });
+        }
+
+        // nacelle
+        if (rna_elasto.body_nacelle) {
+            write_body_csv(
+                (fs::path(logs_folder) / (turbine_prefix + "_nacelle.csv")).generic_string(), *rna_elasto.body_nacelle,
+                [&nacelle_props](seahowl::io::CustomCSV& csv_out) {
+                    csv_out.add_function("ref_mass", [&nacelle_props]() { return nacelle_props.mass; });
+                    csv_out.add_function("ref_yaw_bearing_mass",
+                                         [&nacelle_props]() { return nacelle_props.yaw_bearing_mass; });
+                    csv_out.add_function("ref_position_from_towertop",
+                                         [&nacelle_props]() { return nacelle_props.position_from_towertop; });
+                    add_inertia_columns(csv_out, "ref_inertia", [&nacelle_props]() { return nacelle_props.inertia; });
+                });
         }
     }
 }
