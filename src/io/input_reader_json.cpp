@@ -502,8 +502,8 @@ void from_json(const json& js, EnvironmentDb& env) {
         env.sea = std::nullopt;
     }
 
-    if (js.contains("soil") && !js["soil"].is_null()) {
-        env.soil = js.at("soil").get<SoilDb>();
+    if (js.contains("soil_moorings") && !js["soil_moorings"].is_null()) {
+        env.soil = js.at("soil_moorings").get<SoilDb>();
     } else {
         env.soil = std::nullopt;
     }
@@ -618,12 +618,6 @@ void from_json(const json& js, TowerOptionsTurbineDb& options) {
             else
                 throw std::runtime_error(
                     "Must provide path to HydroDyn file when using monopile with HydroDyn solver.");
-
-            if (js.contains("file_seastate"))
-                options.file_seastate = js.at("file_seastate").get<std::string>();
-            else
-                throw std::runtime_error(
-                    "Must provide path to SeaState file when using monopile with HydroDyn solver.");
         }
     }
 }

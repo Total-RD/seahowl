@@ -68,7 +68,25 @@ void RotorNacelleAssembly::initialize_this(double time, double dt) {
     // initialize aero variables after updating positions
     aero.initialize();
 
-    spdlog::info("Initialized RNA of total mass {:.4}kg.", elasto.get_mass());
+    double rotor_inertia = elasto.rotor->body_hub->get_inertia_matrix()(0, 0);
+    for (const auto& blade : elasto.rotor->blades) {
+        try {
+            const auto& blade_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade);
+            const auto& pts = blade_fea.discretized_points;
+            for (size_t i = 0; i + 1 < pts.size(); ++i) {
+                // segment between i and i+1: lineic mass = mass_matrix(0,0)
+                double m_per_l = 0.5 * (pts[i].mass_matrix(0, 0) + pts[i + 1].mass_matrix(0, 0));
+                double z_mid = 0.5 * (pts[i].coordinates.z() + pts[i + 1].coordinates.z());
+                double dl = pts[i + 1].coordinates.z() - pts[i].coordinates.z();
+                rotor_inertia += m_per_l * z_mid * z_mid * dl;
+            }
+        } catch (const std::bad_cast&) {
+            // rigid/disk blade: contribution already in hub.inertia(0,0)
+        }
+    }
+
+    spdlog::info("Initialized RNA of total mass {:.4}kg., rotor inertia {:.4}kg.m^2.", elasto.get_mass(),
+                 rotor_inertia);
 }
 
 void RotorNacelleAssembly::prestep(double time, double dt) {
