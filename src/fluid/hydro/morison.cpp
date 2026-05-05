@@ -8,6 +8,7 @@
 
 // Standard library
 #include <cmath>
+#include <math.h>
 
 using namespace seahowl;
 using namespace seahowl::fluid::hydro;
@@ -76,10 +77,10 @@ void MacCamyFuchsTable::generateMacCamyFuchsTable() {
         double aa = 4.0 / (seahowl::PI * kr * kr);
 
         // Compute Bessel functions
-        double J1 = std::cyl_bessel_j(1, kr);
-        double J2 = std::cyl_bessel_j(2, kr);
-        double Y1 = std::cyl_neumann(1, kr);
-        double Y2 = std::cyl_neumann(2, kr);
+        double J1 = j1(kr);
+        double J2 = jn(2, kr);
+        double Y1 = y1(kr);
+        double Y2 = yn(2, kr);
 
         double bb = std::pow(-J2 + (1 / kr) * J1, 2);
         double cc = std::pow(-Y2 + (1 / kr) * Y1, 2);

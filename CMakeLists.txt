@@ -155,7 +155,7 @@ endif(SEAHOWL_ENABLE_HYDROCHRONO)
 
 # python
 if(SEAHOWL_ENABLE_PYTHON)
-    find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
+    find_package(Python 3.6 COMPONENTS Interpreter Development.Module REQUIRED)
     find_package(pybind11 CONFIG REQUIRED)
     add_definitions("-DHAVE_PYTHON=1")
 endif(SEAHOWL_ENABLE_PYTHON)
@@ -619,7 +619,7 @@ if (SEAHOWL_ENABLE_PYTHON)
         ${PYSEAHOWL_DIR}/pyseahowl_io.cpp
     )
 	target_compile_features(pyseahowl PRIVATE cxx_std_17)
-    target_link_libraries(pyseahowl PRIVATE seahowl_core pybind11::embed)
+    target_link_libraries(pyseahowl PRIVATE seahowl_core Python::Module pybind11::module)
     target_compile_options(pyseahowl PRIVATE ${CHRONO_CXX_FLAGS})
     set_target_properties(pyseahowl PROPERTIES OUTPUT_NAME seahowl)
 
@@ -654,10 +654,16 @@ if (SEAHOWL_ENABLE_PYTHON)
             message(FATAL_ERROR "Failed to create virtual environment")
         endif()
 
-        set(CMD_PIP "pip install mkdocs mkdocs-material mkdocs-include-markdown-plugin pybind11-stubgen mkdocstrings[python] matplotlib myst-parser pre-commit numpy pytest scilens scilens-compare")
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+            set(MKDOCSSTRING "\'mkdocstrings[python]\'")
+        else()
+            set(MKDOCSSTRING "mkdocstrings[python]")
+        endif()
+
+        set(CMD_PIP "pip install mkdocs mkdocs-material mkdocs-include-markdown-plugin pybind11-stubgen ${MKDOCSSTRING} matplotlib myst-parser pre-commit numpy pytest scilens scilens-compare")
         set(CMD_PRECOMMIT "pre-commit install")
 
-        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             set(ACTIVATE_PY "source ${CMAKE_BINARY_DIR}/.venv/bin/activate")
             set(LAUNCH_PIP bash -c)
         else()
@@ -686,6 +692,8 @@ endif(SEAHOWL_ENABLE_DOC)
 if (VCPKG_APPLOCAL_DEPS)
     if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         set(LIB_FILE_NAME "libdiscon.so")
+    elseif(APPLE)
+        set(LIB_FILE_NAME "libdiscon.dylib")
     else()
         set(LIB_FILE_NAME "libdiscon.dll")
     endif()
@@ -729,9 +737,15 @@ if(SEAHOWL_ENABLE_PYTHON)
         install(TARGETS pyseahowl
                 LIBRARY DESTINATION lib)
 
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         set_target_properties(pyseahowl PROPERTIES
-                            INSTALL_RPATH "$ORIGIN"
-                            BUILD_RPATH "$ORIGIN")
+                              BUILD_RPATH "@loader_path;@loader_path/../Frameworks"
+                              INSTALL_RPATH "@loader_path;@loader_path/../Frameworks")
+    else()
+            set_target_properties(pyseahowl PROPERTIES
+                                  INSTALL_RPATH "$ORIGIN"
+                                  BUILD_RPATH "$ORIGIN")
+    endif()
     else()
         install(TARGETS pyseahowl
                 LIBRARY DESTINATION bin)
@@ -742,7 +756,7 @@ if(SEAHOWL_ENABLE_PYTHON)
                             DESTINATION tools
                             USE_SOURCE_PERMISSIONS)
 
-        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             set(FILE_INITPY ${CMAKE_BINARY_DIR}/init_pyseahowl.sh)
             file(WRITE ${FILE_INITPY}
                 "#!/bin/bash\n"
@@ -787,7 +801,7 @@ if(SEAHOWL_ENABLE_PYTHON)
 
 endif(SEAHOWL_ENABLE_PYTHON)
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     INSTALL(CODE "
         include(BundleUtilities)
         fixup_bundle(\"${CMAKE_BINARY_DIR}/seahowl_driver\" \"\" \"${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib\")
