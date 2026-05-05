@@ -81,6 +81,8 @@ For monopile foundations:
 | `monopile base moment x/y/z` | Nm | Moment at monopile base |
 | `monopile base force x/y/z` | N | Force at monopile base |
 
+All the outputs are in the local reference frame of each body.
+
 ### CSV Format
 
 The output CSV uses comma-separated values with a header row. Column names include the unit in square brackets (e.g. `time [s]`). 3D vector quantities are expanded into three columns with `x`, `y`, `z` suffixes.
