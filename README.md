@@ -59,10 +59,15 @@ seahowl/
 For example, if you are in the root directory of this repository and compiled the SEAHOWL driver in a `build` folder, you can run:
 
 ```bash
-./build/seahowl_driver ./data/IEA15MW/onshore/main.json
+./build/seahowl_driver ./data/IEA15MW/main_onshore.json
 ```
 
 An `output` folder containing all the outputs will be automatically created.
+
+> [!NOTE]
+> Copy the libdiscon.so (or dll) library for ROSCO >2.8.x into location define in 
+> block **controller** of **turbine.json** file. 
+> Usually into subdirectory **controller** of the test case.
 
 ### Using Python bindings
 
@@ -73,7 +78,7 @@ import seahowl
 
 # make simulation object
 simulation = seahowl.core.Simulation()
-simulation.populate_from_file("data/IEA15MW/onshore/main.json")
+simulation.populate_from_file("data/IEA15MW/main_onshore.json")
 simulation.initialize_from_config()
 
 # simulation loop

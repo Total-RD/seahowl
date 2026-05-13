@@ -1,31 +1,31 @@
 ﻿{
   "numerics": {
-    "dt": 0.025,
+    "dt": 0.05,
     "duration": 2000.0,
     "statics": {
-      "linear_step": false,
-      "nonlinear_steps": 0
+      "linear_step": true,
+      "nonlinear_steps": 10
     },
     "presimulation": {
-      "dt": 0.025,
-      "duration": 2.5,
+      "dt": 0.05,
+      "duration": 0.0,
       "presetup": true,
       "fix_towers": true
     }
   },
   "outputs": {
-    "dt": 0.025,
+    "dt": 0.1,
     "folder": "./output",
     "vtk": false,
-    "log_level": "debug",
+    "log_level": "info",
     "gui": true
   },
   "environment": {
-    "file": "../env/env_waves_200m_seastate.json"
+    "file": "./env/env_onshore.json"
   },
   "turbines": [
     {
-      "file": "./turbine_hydrodyn.json",
+      "file": "./turbine/turbine.json",
       "translation": [0, 0, 0],
       "rotation": 0
     }

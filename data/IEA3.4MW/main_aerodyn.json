@@ -15,17 +15,17 @@
   },
   "outputs": {
     "dt": 0.1,
-    "folder": "./output",
+    "folder": "./output_aerodyn",
     "vtk": false,
     "log_level": "info",
     "gui": true
   },
   "environment": {
-    "file": "../env/env_waves_200m_seastate.json"
+    "file": "./env/env_inflowwind.json"
   },
   "turbines": [
     {
-      "file": "./turbine.json",
+      "file": "./turbine/turbine_aerodyn.json",
       "translation": [0, 0, 0],
       "rotation": 0
     }

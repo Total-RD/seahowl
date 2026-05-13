@@ -15,7 +15,7 @@
   },
   "outputs": {
     "dt": 0.1,
-    "folder": "./output",
+    "folder": "./output_aerodyn",
     "vtk": false,
     "log_level": "info",
     "gui": true
@@ -25,7 +25,7 @@
   },
   "turbines": [
     {
-      "file": "./turbine_aerodyn.json",
+      "file": "./turbine/turbine_aerodyn.json",
       "translation": [0, 0, 0],
       "rotation": 0
     }
