@@ -50,6 +50,13 @@ cmake --preset full
 cmake --build build
 ```
 
+If you are working on a machine with limited CPU or memory resources, the build process can be quite demanding and may lead to failures.
+To improve stability and reduce resource usage, you can limit the level of parallelism by setting the following environment variables before the "cmake --preset full":
+
+export VCPKG_BUILD_JOBS=2
+export VCPKG_MAX_CONCURRENCY=1
+
+
 Other presets are available, such as ``minimal`` for a minimal install with only essential dependencies, ``full_viz`` for an install including in situ visualization, ``full_vtk`` for an install with VTK output feature.
 
 
