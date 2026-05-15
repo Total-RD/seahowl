@@ -23,7 +23,7 @@
       "file_seastate": "SeaState_200m.dat"
     }
   },
-  "soil": {
+  "soil_anchors": {
     "type": "linear",
     "options": {
       "stiffness_normal": 1e5,

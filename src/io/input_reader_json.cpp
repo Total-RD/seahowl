@@ -502,8 +502,8 @@ void from_json(const json& js, EnvironmentDb& env) {
         env.sea = std::nullopt;
     }
 
-    if (js.contains("soil_moorings") && !js["soil_moorings"].is_null()) {
-        env.soil = js.at("soil_moorings").get<SoilDb>();
+    if (js.contains("soil_anchors") && !js["soil_anchors"].is_null()) {
+        env.soil = js.at("soil_anchors").get<SoilDb>();
     } else {
         env.soil = std::nullopt;
     }

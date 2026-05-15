@@ -27,7 +27,7 @@
       "wave_stretching": true
     }
   },
-  "soil": {
+  "soil_anchors": {
     "type": "linear",
     "options": {
       "stiffness_normal": 1e5,
