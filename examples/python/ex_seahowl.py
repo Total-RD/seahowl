@@ -5,7 +5,7 @@ import pathlib
 # we set them relative to this script file for it to run from anywhere
 thispath = pathlib.Path(__file__).parent.resolve()  # path of this file
 
-turbine_filepath = thispath / "../../data/IEA15MW/onshore/turbine.json"
+turbine_filepath = thispath / "../../data/IEA15MW/onshore/turbine/turbine.json"
 environment_filepath = thispath / "../../data/IEA15MW/env/env_inflowwind.json"
 
 #  ____       _
