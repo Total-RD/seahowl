@@ -81,6 +81,39 @@ while simulation.system_core.get_time() < simulation.duration:
     simulation.step()
 ```
 
+#### Adding sensors
+
+[scripts/sensors.py](scripts/sensors.py) provides sensor classes to measure physical quantities at any spanwise location along an FEA component (`fraction=0` at root/bottom, `fraction=1` at tip/top). Sensors are callable and return a `numpy` array. They integrate naturally with the CSV output system:
+
+```python
+import seahowl
+import sys
+sys.path.append("scripts")
+import sensors
+
+simulation = seahowl.core.Simulation()
+simulation.populate_from_file("data/IEA15MW/onshore/main.json")
+simulation.initialize_from_config()
+
+turbine = simulation.system_core.turbines[0]
+
+# create sensors on turbine components
+tower_mid_pos   = sensors.PositionGaugeFEA(turbine.elasto.tower, fraction=0.5)
+blade_root_mom  = sensors.MomentGaugeFEA(turbine.elasto.rna.rotor.blades[0], fraction=0.0)
+tower_top_accel = sensors.AccelerometerFEA(turbine.elasto.tower, fraction=1.0)
+
+# log to CSV — sensors are directly callable
+mycsv = simulation.outputs.create_new_csv("sensors_output.csv")
+mycsv.add_function("time [s]",              lambda: simulation.system_core.get_time())
+mycsv.add_function("tower mid position [m]", tower_mid_pos)
+mycsv.add_function("blade root moment [Nm]", blade_root_mom)
+mycsv.add_function("tower top accel [m/s2]", tower_top_accel)
+
+# simulation loop
+while simulation.system_core.get_time() < simulation.duration:
+    simulation.step()
+```
+
 Other examples of Python bindings usage are available in `examples/python/` from the root of SEAHOWL's repository.
 
 
