@@ -8,7 +8,7 @@ The precompiled SEAHOWL package can be found in the Releases section on GitHub a
 To run SEAHOWL using the driver, execute the following command:
 
 ```bash
-./bin/seahowl_driver data/IEA15MW/onshore/main.json
+./bin/seahowl_driver data/IEA15MW/main_onshore.json
 ```
 
 An `output` folder containing all the outputs will be automatically created.
@@ -43,7 +43,7 @@ import seahowl
 
 # Create a simulation object
 simulation = seahowl.core.Simulation()
-simulation.populate_from_file("data/IEA15MW/onshore/main.json")
+simulation.populate_from_file("data/IEA15MW/main_onshore.json")
 simulation.initialize_from_config()
 
 # Simulation loop
