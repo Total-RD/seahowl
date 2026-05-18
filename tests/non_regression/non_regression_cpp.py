@@ -67,14 +67,14 @@ class TestNonRegressionCpp(unittest.TestCase):
             )
 
     def test_onshore(self):
-        main_json = os.path.join(WORKING_DIR, "data/IEA15MW/onshore/main.json")
+        main_json = os.path.join(WORKING_DIR, "data/IEA15MW/main_onshore.json")
         description = (
             "Non regression Test for Seahowl for Onshore case with duration 100s"
         )
         self._generic_test("cpp/onshore", main_json, description)
 
     def test_monopile(self):
-        main_json = os.path.join(WORKING_DIR, "data/IEA15MW/monopile/main.json")
+        main_json = os.path.join(WORKING_DIR, "data/IEA15MW/main_monopile.json")
         description = (
             "Non regression Test for Seahowl for Monopile case with duration 100s"
         )
