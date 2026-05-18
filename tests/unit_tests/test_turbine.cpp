@@ -269,7 +269,7 @@ TEST_F(TestTurbine, IEA15MW_multiturbines) {
 
 TEST_F(TestTurbine, IEA34MW_fixed_pitch) {
     // create simulation
-    auto turbine_filepath = (DATADIR / "IEA34MW/turbine.json").generic_string();
+    auto turbine_filepath = (DATADIR / "IEA3.4MW/turbine/turbine.json").generic_string();
     auto simulation = create_simulation(0.1, 50.0, turbine_filepath);
     // apply fpm mode
     for (auto& blade : simulation.system_core->turbines[0]->elasto.rna->rotor->blades) {
@@ -292,7 +292,7 @@ TEST_F(TestTurbine, IEA34MW_fixed_pitch) {
 
 TEST_F(TestTurbine, IEA10MW_fixed_pitch) {
     // create simulation
-    auto turbine_filepath = (DATADIR / "IEA10MW/turbine.json").generic_string();
+    auto turbine_filepath = (DATADIR / "IEA10MW/turbine/turbine.json").generic_string();
     auto simulation = create_simulation(0.1, 50.0, turbine_filepath);
     // apply fpm mode
     for (auto& blade : simulation.system_core->turbines[0]->elasto.rna->rotor->blades) {
