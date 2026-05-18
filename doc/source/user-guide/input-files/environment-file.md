@@ -23,7 +23,7 @@ environment.json
 │   ├── water_depth: float                 # Water depth [m]
 │   └── options/                           # Type-specific options
 │
-└── soil/                                  # Soil/seabed model
+└── soil_anchors/                          # Soil/seabed model
     ├── type: string                       # Soil model type
     └── options/                           # Type-specific options
 ```
@@ -54,7 +54,7 @@ environment.json
 | `mean_water_level` | float | m | Still water level |
 | `water_depth` | float | m | Water depth from seabed to MWL |
 
-### soil
+### soil_anchors
 
 | Field | Type | Unit | Description |
 |-------|------|------|-------------|
@@ -233,7 +233,7 @@ SeaState reads a `.dat` input file that defines wave conditions, wave stretching
 Simple linear spring model for soil-mooring interaction.
 
 ```json
-"soil": {
+"soil_anchors": {
   "type": "linear",
   "options": {
     "stiffness_normal": 1e5,
