@@ -45,3 +45,6 @@ tests/non_regression/**/validation/**/*.*
 tests/non_regression/**/*.html
 tests/unit_tests/data/**/test/*.*
 tests/unit_tests/data/**/*.html
+
+# Vim
+*~

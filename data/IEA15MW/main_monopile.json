@@ -15,17 +15,17 @@
   },
   "outputs": {
     "dt": 0.1,
-    "folder": "./output",
+    "folder": "./output_monopile",
     "vtk": false,
     "log_level": "info",
     "gui": true
   },
   "environment": {
-    "file": "../env/env_onshore.json"
+    "file": "./env/env_waves_200m_seastate.json"
   },
   "turbines": [
     {
-      "file": "./turbine.json",
+      "file": "./monopile/turbine.json",
       "translation": [0, 0, 0],
       "rotation": 0
     }

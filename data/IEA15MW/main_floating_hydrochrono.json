@@ -1,31 +1,31 @@
 ﻿{
   "numerics": {
-    "dt": 0.05,
+    "dt": 0.025,
     "duration": 2000.0,
     "statics": {
-      "linear_step": true,
-      "nonlinear_steps": 10
+      "linear_step": false,
+      "nonlinear_steps": 0
     },
     "presimulation": {
-      "dt": 0.05,
-      "duration": 0.0,
+      "dt": 0.025,
+      "duration": 2.5,
       "presetup": true,
       "fix_towers": true
     }
   },
   "outputs": {
     "dt": 0.1,
-    "folder": "./output",
+    "folder": "./output_floating_hydrochrono",
     "vtk": false,
     "log_level": "info",
     "gui": true
   },
   "environment": {
-    "file": "./env/env_onshore.json"
+    "file": "./env/env_waves_200m_regular.json"
   },
   "turbines": [
     {
-      "file": "./turbine.json",
+      "file": "./floating/turbine_hydrochrono.json",
       "translation": [0, 0, 0],
       "rotation": 0
     }

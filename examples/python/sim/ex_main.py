@@ -7,7 +7,7 @@ thispath = pathlib.Path(__file__).parent.resolve()  # path of this file
 
 # options
 main_filepath = (
-    thispath / "../../../data/IEA15MW/onshore/main.json"
+    thispath / "../../../data/IEA15MW/main_onshore.json"
 )  # change to actual filepath
 seahowl.set_log_level_global("info")  # log levels: critical, info, debug, warn, trace
 

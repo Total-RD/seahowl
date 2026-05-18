@@ -123,8 +123,8 @@ TEST_F(TestAeroDyn, IEA15MW_fixed_pitch) {
 
 TEST_F(TestAeroDyn, IEA34MW_fixed_pitch) {
     // create simulation
-    auto turbine_filepath = (DATADIR / "IEA34MW/turbine_aerodyn.json").generic_string();
-    auto inflowwind_filepath = (DATADIR / "IEA34MW/env/InflowWind.dat").generic_string();
+    auto turbine_filepath = (DATADIR / "IEA3.4MW/turbine/turbine_aerodyn.json").generic_string();
+    auto inflowwind_filepath = (DATADIR / "IEA3.4MW/env/InflowWind.dat").generic_string();
     auto simulation = create_simulation(0.1, 50.0, turbine_filepath, inflowwind_filepath);
 
     // create test dataset
@@ -141,7 +141,7 @@ TEST_F(TestAeroDyn, IEA34MW_fixed_pitch) {
 
 TEST_F(TestAeroDyn, IEA10MW_fixed_pitch) {
     // create simulation
-    auto turbine_filepath = (DATADIR / "IEA10MW/turbine_aerodyn.json").generic_string();
+    auto turbine_filepath = (DATADIR / "IEA10MW/turbine/turbine_aerodyn.json").generic_string();
     auto inflowwind_filepath = (DATADIR / "IEA10MW/env/InflowWind.dat").generic_string();
     auto simulation = create_simulation(0.1, 50.0, turbine_filepath, inflowwind_filepath);
 

@@ -25,7 +25,7 @@
   },
   "turbines": [
     {
-      "file": "./turbine.json",
+      "file": "./turbine/turbine.json",
       "translation": [0, 0, 0],
       "rotation": 0
     }

@@ -113,7 +113,7 @@ TEST_F(TestController, IEA15MW_CPC) {
 };
 
 TEST_F(TestController, IEA10MW_CPC) {
-    auto simulation = create_simulation(0.05, 200.0, (DATADIR / "IEA10MW/turbine.json").generic_string(),
+    auto simulation = create_simulation(0.05, 200.0, (DATADIR / "IEA10MW/turbine/turbine.json").generic_string(),
                                         seahowl::Vector3d(12.0, 0.0, 0.0), true);
     auto& system_core = *simulation.system_core;
     auto& turbine = *system_core.turbines[0];
@@ -134,7 +134,7 @@ TEST_F(TestController, IEA10MW_CPC) {
 };
 
 TEST_F(TestController, IEA34MW_CPC) {
-    auto simulation = create_simulation(0.05, 200.0, (DATADIR / "IEA34MW/turbine.json").generic_string(),
+    auto simulation = create_simulation(0.05, 200.0, (DATADIR / "IEA3.4MW/turbine/turbine.json").generic_string(),
                                         seahowl::Vector3d(12.0, 0.0, 0.0), true);
     auto& system_core = *simulation.system_core;
     auto& turbine = *system_core.turbines[0];
