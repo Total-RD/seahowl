@@ -27,6 +27,7 @@
 #include <fstream>
 #include <iomanip>
 #include <spdlog/spdlog.h>
+#include <iostream>
 
 using seahowl::PI;
 using namespace seahowl::io;
@@ -182,6 +183,47 @@ void OutputManager::initialize() {
                 auto& aero_moments = blade1.aero.moments[idx_node];
                 aero_moments_csv.add_function("node" + std::to_string(idx_node + 1) + " aero moment (Nm)",
                                               [&aero_moments]() { return aero_moments; });
+            }
+
+            // output blade torsion, pitch, and twist at each node of blade 1
+            std::string csv_path_aero_angles = "turbine" + std::to_string(idx_turbine + 1) + "_blade_angles_output.csv";
+            auto& aero_angles_csv = create_new_csv(csv_path_aero_angles);
+            aero_angles_csv.add_function("time (s)", [&system_core]() { return system_core.get_time(); });
+            for (size_t idx_node = 0; idx_node < blade1.aero.nodes.size(); idx_node++) {
+                auto& node = blade1.aero.nodes[idx_node];
+                // Torsion calculation: rotation about local spanwise axis (z)
+                aero_angles_csv.add_function(
+                    "node" + std::to_string(idx_node + 1) + " torsion (deg)", [&node, &blade1]() {
+                        Eigen::Matrix3d R_root = blade1.aero.nodes[0].get_rotation().toRotationMatrix();
+                        Eigen::Matrix3d R_root_T = R_root.transpose();
+                        Eigen::Matrix3d Rn = node.get_rotation().toRotationMatrix();
+
+                        // Relative rotation
+                        Eigen::Matrix3d R_rel = R_root_T * Rn;
+
+                        // Convert to axis-angle
+                        Eigen::AngleAxisd aa(R_rel);
+
+                        double angle = aa.angle();
+                        Eigen::Vector3d axis = aa.axis();
+
+                        // Handle small-angle case (important for stability)
+                        Eigen::Vector3d rotvec;
+                        if (angle < 1e-12) {
+                            rotvec.setZero();
+                        } else {
+                            rotvec = angle * axis;
+                        }
+
+                        Eigen::Vector3d ez_local(0, 0, 1);  // z-axis
+
+                        // Projection onto blade axis
+                        double torsion_angle =
+                            (rotvec.dot(ez_local) -
+                             (blade1.aero.nodes[0].properties.structural_twist - node.properties.structural_twist)) *
+                            180 / seahowl::PI;
+                        return torsion_angle;
+                    });
             }
         }
     }
