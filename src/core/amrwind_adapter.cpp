@@ -499,27 +499,20 @@ Vector3d seahowl::env::InflowAmrWind::get_fluid_velocity_this(const Vector3d& po
     //     wind_velocity = Vector3d::Zero();
     // }
 
-    auto closest = wind_positions.begin();
-    double minDistance = (position - *closest).norm();
-
-    for (auto it = wind_positions.begin() + 1; it != wind_positions.end(); ++it) {
-        double distance = (position - *it).norm();
+    int index = 0;
+    double minDistance = (position - wind_positions[0]).norm();
+    for (int i = 1; i < wind_positions.size(); ++i) {
+        double distance = (position - wind_positions[i]).norm();
         if (distance < minDistance) {
-            closest = it;
             minDistance = distance;
+            index = i;
         }
     }
 
     if (minDistance < 1.0e-2) {
-        int index = std::distance(wind_positions.begin(), closest);
         wind_velocity = wind_velocities[index];
-        // std::cout << "Position is " << position.transpose() << "; Closest position is " << *closest << "; minDis is "
-        // << minDistance << std::endl; std::cout << "Position is " << position.transpose() << "; Wind speed is " <<
-        // wind_velocity.transpose() << std::endl;
     } else {
-        // throw std::runtime_error("Position not found in SEAHOWL and AMR-Wind coupling.");
-        spdlog::warn("Position not found in SEAHOWL and AMR-Wind coupling.");
-        // std::cout << "Position is " << position.transpose() << std::endl;
+        spdlog::warn("Position not found in SEAHOWL and AMR-Wind coupling. MinDist: {}", minDistance);
         wind_velocity = Vector3d::Zero();
     }
 
