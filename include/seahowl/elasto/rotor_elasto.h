@@ -180,6 +180,11 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     double get_axial_torque() const;
 
     /**
+     * @brief Returns the lateral torque of the rotor (y component) [Nm]
+     */
+    double get_lateral_torque() const;
+
+    /**
      * @brief Returns the axial thrust of the rotor [N]
      */
     double get_axial_thrust() const;
