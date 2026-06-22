@@ -1,0 +1,74 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main, dev, feature-lateral-torque]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/external/vcpkg
+      # Cache vcpkg-built packages in the GH Actions cache via NuGet protocol
+      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up MSVC dev environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Bootstrap vcpkg
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "$env:VCPKG_ROOT/vcpkg.exe")) {
+            & "$env:VCPKG_ROOT/bootstrap-vcpkg.bat" -disableMetrics
+          }
+
+      # Required for VCPKG_BINARY_SOURCES=x-gha
+      - name: Export GitHub Actions cache env for vcpkg
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Configure
+        shell: pwsh
+        run: cmake --preset default
+
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --config Release -j
+
+      - name: Test
+        shell: pwsh
+        working-directory: build
+        run: ctest --output-on-failure -C Release
+
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seahowl-windows-x64
+          path: |
+            build/**/*.exe
+            build/**/*.dll
+            build/**/*.pyd
+          if-no-files-found: ignore
