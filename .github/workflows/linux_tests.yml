@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test_components:
-    name: Build and run test_components
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     env:
@@ -24,6 +24,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Install build prerequisites
         run: |
@@ -43,10 +44,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Bootstrap vcpkg
+      - name: Bootstrap vcpkg (clone if missing)
         run: |
+          if [ ! -d "$VCPKG_ROOT" ]; then
+            git clone --depth 1 https://github.com/microsoft/vcpkg "$VCPKG_ROOT"
+          fi
           if [ ! -x "$VCPKG_ROOT/vcpkg" ]; then
-            "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics
+            (cd "$VCPKG_ROOT" && ./bootstrap-vcpkg.sh -disableMetrics)
           fi
 
       # Required for VCPKG_BINARY_SOURCES=x-gha
@@ -60,8 +64,27 @@ jobs:
       - name: Configure (default preset)
         run: cmake --preset default
 
-      - name: Build test_components
-        run: cmake --build build --target test_components -j
+      - name: Build all
+        run: cmake --build build -j
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-tree
+          path: build
+          retention-days: 1
+
+  test_components:
+    name: Run test_components
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: build-tree
+          path: build
 
       - name: Run test_components
         working-directory: build
