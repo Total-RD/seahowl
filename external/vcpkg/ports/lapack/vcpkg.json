@@ -1,0 +1,10 @@
+{
+  "name": "lapack",
+  "version-date": "2024-01-01",
+  "port-version": 0,
+  "description": "Overlay metaport that routes LAPACK to OpenBLAS so the build does not require a Fortran compiler on Windows (avoids pulling lapack-reference).",
+  "homepage": "https://github.com/microsoft/vcpkg",
+  "dependencies": [
+    "openblas"
+  ]
+}

@@ -34,31 +34,18 @@ jobs:
         with:
           python-version: "3.11"
 
-      # Install a real Fortran compiler (MSYS2 mingw-w64 gfortran). The flang
-      # bundled with Visual Studio 2026 / standalone LLVM is detected as
-      # "LLVMFlang" by CMake but is not compatible with vcpkg's
-      # lapack-reference build on x64-windows.
-      - name: Set up MSYS2 with gfortran
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: false
-          install: >-
-            mingw-w64-x86_64-gcc-fortran
-          path-type: inherit
-
-      # Remove LLVM/Flang from PATH so CMake doesn't pick up LLVMFlang as the
-      # Fortran compiler, and prepend MSYS2 mingw64/bin so gfortran is found.
-      - name: Sanitize PATH (drop flang, prepend gfortran)
+      # Strip flang from PATH so CMake doesn't accidentally pick it up as the
+      # Fortran compiler. We route BLAS/LAPACK to OpenBLAS via the overlay
+      # ports in external/vcpkg/ports/{blas,lapack}, so no Fortran compiler is
+      # needed for lapack-reference. The `openfast` overlay port still needs
+      # Fortran, but it calls `vcpkg_find_fortran` which auto-downloads its
+      # own private mingw gfortran into vcpkg's cache.
+      - name: Strip flang from PATH
         shell: pwsh
         run: |
           $bad = 'LLVM|Flang'
           $filtered = ($env:PATH.Split(';') | Where-Object { $_ -and ($_ -notmatch $bad) }) -join ';'
-          $gfortran = 'C:\msys64\mingw64\bin'
-          $newPath = "$gfortran;$filtered"
-          "PATH=$newPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          # Make sure CMake/vcpkg don't pick up a stale FC pointing at flang
-          "FC=$gfortran\gfortran.exe" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "PATH=$filtered" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Bootstrap vcpkg
         shell: pwsh
