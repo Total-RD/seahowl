@@ -18,9 +18,8 @@ jobs:
       # Fortran compiler we set up on the runner reaches every vcpkg port build
       # (openfast in particular).
       VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}/external/vcpkg/triplets
-      # Path to MSYS2 mingw gfortran (installed by the setup-msys2 step below).
-      MINGW64_BIN: C:\msys64\mingw64\bin
-      FC: C:\msys64\mingw64\bin\gfortran.exe
+      # FC is exported by the "Configure Fortran toolchain on PATH" step below
+      # once we know where setup-msys2 actually installed MSYS2.
 
     steps:
       - name: Checkout
@@ -57,30 +56,56 @@ jobs:
       # Sanitize PATH: prepend the mingw gfortran dir so CMake's
       # enable_language(Fortran) picks gfortran first, and strip every
       # directory that contains flang.exe so the VS-bundled LLVMFlang is gone.
+      # Locate gfortran via the MSYSTEM_PREFIX env var set by setup-msys2,
+      # since the install path is not fixed (and may differ from C:\msys64).
       - name: Configure Fortran toolchain on PATH
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
 
-          if (-not (Test-Path "$env:MINGW64_BIN\gfortran.exe")) {
-            throw "gfortran not found at $env:MINGW64_BIN\gfortran.exe"
+          # 1. Locate gfortran. Prefer the path advertised by setup-msys2.
+          $gfortran = $null
+          if ($env:MSYSTEM_PREFIX -and (Test-Path "$env:MSYSTEM_PREFIX\bin\gfortran.exe")) {
+            $gfortran = (Resolve-Path "$env:MSYSTEM_PREFIX\bin\gfortran.exe").Path
+          } else {
+            $candidate = Get-Command gfortran -ErrorAction SilentlyContinue
+            if ($candidate) { $gfortran = $candidate.Source }
           }
+          if (-not $gfortran) {
+            # Fall back to scanning common install roots.
+            $roots = @('C:\msys64','C:\tools\msys64',"$env:RUNNER_TEMP\msys64")
+            foreach ($root in $roots) {
+              $p = Join-Path $root 'mingw64\bin\gfortran.exe'
+              if (Test-Path $p) { $gfortran = (Resolve-Path $p).Path; break }
+            }
+          }
+          if (-not $gfortran) {
+            throw "gfortran not found. MSYSTEM_PREFIX=$env:MSYSTEM_PREFIX. Checked roots: C:\msys64, C:\tools\msys64, $env:RUNNER_TEMP\msys64."
+          }
+          $mingwBin = Split-Path $gfortran -Parent
+          Write-Host "gfortran found at: $gfortran"
+          Write-Host "mingw bin dir    : $mingwBin"
 
+          # 2. Show every Fortran-capable compiler currently visible.
           Write-Host "=== Fortran compilers visible BEFORE sanitization ==="
           foreach ($exe in 'flang.exe','flang-new.exe','flang-classic.exe','ifort.exe','ifx.exe','gfortran.exe') {
             Get-Command $exe -All -ErrorAction SilentlyContinue |
               ForEach-Object { Write-Host ("  {0,-22} {1}" -f $exe, $_.Source) }
           }
 
-          # Find every directory that hosts a flang*.exe and strip it from PATH.
+          # 3. Find every directory that hosts a flang*.exe and strip from PATH.
           $flangDirs = @()
           foreach ($exe in 'flang.exe','flang-new.exe','flang-classic.exe') {
             Get-Command $exe -All -ErrorAction SilentlyContinue |
               ForEach-Object { $flangDirs += (Split-Path $_.Source -Parent) }
           }
           $flangDirs = $flangDirs | Sort-Object -Unique
-          Write-Host "Stripping flang dirs from PATH:"
-          $flangDirs | ForEach-Object { Write-Host "  $_" }
+          if ($flangDirs.Count -gt 0) {
+            Write-Host "Stripping flang dirs from PATH:"
+            $flangDirs | ForEach-Object { Write-Host "  $_" }
+          } else {
+            Write-Host "No flang directories detected on PATH."
+          }
 
           $kept = $env:PATH.Split(';') |
             Where-Object {
@@ -88,8 +113,9 @@ jobs:
               ($flangDirs -notcontains $_.TrimEnd('\')) -and
               ($flangDirs -notcontains $_)
             }
-          $newPath = "$env:MINGW64_BIN;" + ($kept -join ';')
+          $newPath = "$mingwBin;" + ($kept -join ';')
 
+          # 4. Re-check what's visible with the new PATH.
           Write-Host "=== Fortran compilers visible AFTER sanitization (simulated) ==="
           $env:PATH = $newPath
           foreach ($exe in 'flang.exe','flang-new.exe','flang-classic.exe','ifort.exe','ifx.exe','gfortran.exe') {
@@ -97,8 +123,10 @@ jobs:
               ForEach-Object { Write-Host ("  {0,-22} {1}" -f $exe, $_.Source) }
           }
 
+          # 5. Persist PATH and FC for subsequent steps.
           "PATH=$newPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          Write-Host "FC=$env:FC"
+          "FC=$gfortran"  | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "FC=$gfortran"
 
       - name: Bootstrap vcpkg
         shell: pwsh
