@@ -1,0 +1,219 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+# Cancel in-progress runs on the same ref when a new commit arrives.
+concurrency:
+  group: windows-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (x64-windows)
+    runs-on: windows-latest
+    timeout-minutes: 180
+
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}\external\vcpkg
+      # Cache built vcpkg packages in the GH Actions cache.
+      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+      VCPKG_DISABLE_METRICS: "1"
+      # Overlay triplet sets VCPKG_ENV_PASSTHROUGH=FC PATH so the Fortran
+      # compiler we configure below reaches openfast's inner build.
+      VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}\external\vcpkg\triplets
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up MSVC dev environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # The windows-latest runner already ships a usable mingw gfortran (at
+      # C:\mingw64\bin and/or via Strawberry Perl at C:\Strawberry\c\bin).
+      # We do NOT install MSYS2 to keep the workflow minimal and avoid flaky
+      # install steps. We just locate the existing gfortran, strip every
+      # flang directory from PATH, and prepend the gfortran directory.
+      - name: Configure Fortran toolchain on PATH
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          # 1. Locate gfortran from well-known runner locations, then PATH.
+          $candidates = @(
+            'C:\mingw64\bin\gfortran.exe',
+            'C:\msys64\mingw64\bin\gfortran.exe',
+            'C:\Strawberry\c\bin\gfortran.exe'
+          )
+          $gfortran = $null
+          foreach ($c in $candidates) {
+            if (Test-Path $c) { $gfortran = $c; break }
+          }
+          if (-not $gfortran) {
+            $cmd = Get-Command gfortran -ErrorAction SilentlyContinue |
+                   Select-Object -First 1
+            if ($cmd) { $gfortran = $cmd.Source }
+          }
+          if (-not $gfortran) {
+            throw "gfortran.exe not found. Checked: $($candidates -join ', '). Also not on PATH."
+          }
+          $mingwBin = Split-Path $gfortran -Parent
+          Write-Host "Using gfortran: $gfortran"
+
+          # 2. Discover every directory hosting a flang*.exe on the current
+          # PATH (regardless of folder name). Strip them.
+          $flangDirs = @()
+          foreach ($exe in 'flang.exe','flang-new.exe','flang-classic.exe') {
+            $found = Get-Command $exe -All -ErrorAction SilentlyContinue
+            if ($found) {
+              $flangDirs += $found | ForEach-Object { Split-Path $_.Source -Parent }
+            }
+          }
+          $flangDirs = @($flangDirs | Sort-Object -Unique)
+          if ($flangDirs.Count -gt 0) {
+            Write-Host "Stripping flang directories from PATH:"
+            $flangDirs | ForEach-Object { Write-Host "  $_" }
+          } else {
+            Write-Host "No flang directories detected on PATH."
+          }
+
+          # 3. Build sanitized PATH: mingw bin first.
+          $kept = $env:PATH.Split(';') | Where-Object {
+            $_ -and
+            ($flangDirs -notcontains $_.TrimEnd('\')) -and
+            ($flangDirs -notcontains $_)
+          }
+          $newPath = "$mingwBin;" + ($kept -join ';')
+
+          # 4. Persist for subsequent steps + every vcpkg port build (via the
+          # overlay triplet's VCPKG_ENV_PASSTHROUGH=FC PATH).
+          "PATH=$newPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "FC=$gfortran"  | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Verify Fortran configuration
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          Write-Host "FC = $env:FC"
+          if (-not (Test-Path $env:FC)) {
+            throw "FC path '$env:FC' does not exist"
+          }
+          $ver = & $env:FC --version | Select-Object -First 1
+          Write-Host "  $ver"
+
+          $stillFlang = foreach ($exe in 'flang.exe','flang-new.exe','flang-classic.exe') {
+            Get-Command $exe -ErrorAction SilentlyContinue
+          }
+          $stillFlang = @($stillFlang | Where-Object { $_ })
+          if ($stillFlang.Count -gt 0) {
+            Write-Host "::warning::flang still visible on PATH:"
+            $stillFlang | ForEach-Object { Write-Host "  $($_.Source)" }
+          } else {
+            Write-Host "OK: no flang*.exe on PATH"
+          }
+
+      - name: Bootstrap vcpkg
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Test-Path "$env:VCPKG_ROOT\vcpkg.exe")) {
+            & "$env:VCPKG_ROOT\bootstrap-vcpkg.bat" -disableMetrics
+            if ($LASTEXITCODE -ne 0) { throw "vcpkg bootstrap failed (exit $LASTEXITCODE)" }
+          }
+          & "$env:VCPKG_ROOT\vcpkg.exe" version | Select-Object -First 1
+
+      # Required for VCPKG_BINARY_SOURCES=x-gha
+      - name: Export GitHub Actions cache env for vcpkg
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Configure (default preset)
+        shell: pwsh
+        run: cmake --preset default
+
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --config Release
+
+      - name: Test
+        shell: pwsh
+        working-directory: build
+        run: ctest --output-on-failure -C Release
+
+      # --- Diagnostics on failure ---------------------------------------------
+
+      - name: Collect failure logs
+        if: failure()
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'SilentlyContinue'
+          New-Item -ItemType Directory -Force -Path ci-logs | Out-Null
+
+          # Per-port vcpkg build logs and issue body
+          $blds = 'build\vcpkg_installed\vcpkg\blds'
+          if (Test-Path $blds) {
+            Get-ChildItem $blds -Recurse -File -Include `
+              'install-*.log','config-*.log','build-*.log','issue_body.md' |
+              ForEach-Object {
+                $rel  = $_.FullName.Substring((Resolve-Path '.').Path.Length + 1)
+                $dest = Join-Path 'ci-logs' $rel
+                New-Item -ItemType Directory -Force -Path (Split-Path $dest -Parent) | Out-Null
+                Copy-Item $_.FullName $dest
+              }
+          }
+
+          # CMake configure-time logs
+          @('build\CMakeFiles\CMakeOutput.log',
+            'build\CMakeFiles\CMakeError.log',
+            'build\CMakeCache.txt',
+            'build\vcpkg-manifest-install.log') |
+            Where-Object { Test-Path $_ } |
+            ForEach-Object {
+              $dest = Join-Path 'ci-logs' $_
+              New-Item -ItemType Directory -Force -Path (Split-Path $dest -Parent) | Out-Null
+              Copy-Item $_ $dest
+            }
+
+          Write-Host "Collected log files:"
+          Get-ChildItem ci-logs -Recurse -File | Select-Object -ExpandProperty FullName
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-failure-logs
+          path: ci-logs
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seahowl-windows-x64
+          path: |
+            build/**/*.exe
+            build/**/*.dll
+            build/**/*.pyd
+          if-no-files-found: ignore
