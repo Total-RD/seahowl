@@ -7,95 +7,64 @@ on:
     branches: [main, dev]
   workflow_dispatch:
 
+concurrency:
+  group: linux-tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
+    # Call the reusable build workflow. Tests cannot run unless this succeeds.
     name: Build
-    runs-on: ubuntu-latest
-
-    env:
-      VCPKG_ROOT: ${{ github.workspace }}/external/vcpkg
-      # Cache vcpkg-built packages in the GH Actions cache
-      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
-      # Keep vcpkg memory/CPU usage modest on the GH runner
-      VCPKG_MAX_CONCURRENCY: "2"
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Install build prerequisites
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            build-essential \
-            ninja-build \
-            gfortran \
-            pkg-config \
-            curl zip unzip tar \
-            autoconf automake autoconf-archive \
-            bison flex \
-            python3 python3-pip
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Bootstrap vcpkg (clone if missing)
-        run: |
-          if [ ! -d "$VCPKG_ROOT" ]; then
-            git clone --depth 1 https://github.com/microsoft/vcpkg "$VCPKG_ROOT"
-          fi
-          if [ ! -x "$VCPKG_ROOT/vcpkg" ]; then
-            (cd "$VCPKG_ROOT" && ./bootstrap-vcpkg.sh -disableMetrics)
-          fi
-
-      # Required for VCPKG_BINARY_SOURCES=x-gha
-      - name: Export GitHub Actions cache env for vcpkg
-        uses: actions/github-script@v7
-        with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-
-      - name: Configure (default preset)
-        run: cmake --preset default
-
-      - name: Build all
-        run: cmake --build build -j
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-tree
-          path: build
-          retention-days: 1
+    uses: ./.github/workflows/linux_build.yml
+    with:
+      preset: default
+      artifact-name: linux-build-tree
+      artifact-retention-days: 1
 
   test_components:
     name: Run test_components
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      - name: Download build
+      # The test_components binary embeds SEAHOWL_DATADIR pointing at the
+      # source tree at configure time (see CMakeLists.txt). Re-checkout at the
+      # same workspace path so those paths resolve.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Install runtime prerequisites
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cmake ninja-build
+
+      - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: build-tree
-          path: build
+          name: ${{ needs.build.outputs.artifact-name }}
+          path: .
+
+      - name: Unpack build tree
+        run: |
+          set -euxo pipefail
+          tar -xzf build-tree.tar.gz
+          rm -f build-tree.tar.gz
+          ls build/tests || true
 
       - name: Run test_components
         working-directory: build
-        run: ctest --output-on-failure -R '^test_components$'
+        run: ctest --output-on-failure -R '^test_components$' --no-tests=error
 
-      - name: Upload test logs on failure
+      - name: Upload ctest logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-logs
-          path: |
-            build/Testing/**/*.log
-            build/Testing/**/LastTest.log
+          name: test_components-logs
+          path: build/Testing
           if-no-files-found: ignore
+          retention-days: 7

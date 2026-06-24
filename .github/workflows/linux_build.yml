@@ -1,0 +1,174 @@
+name: Linux build
+
+# This workflow can be triggered manually OR called by another workflow
+# (e.g. linux_tests.yml) via `workflow_call`. It does NOT trigger on push or
+# pull_request directly — the test workflow is the push/PR entry point, so
+# the build does not run twice.
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      preset:
+        description: "CMake preset to build"
+        required: false
+        type: string
+        default: "default"
+      artifact-name:
+        description: "Name of the uploaded build artifact"
+        required: false
+        type: string
+        default: "linux-build-tree"
+      artifact-retention-days:
+        description: "How long to keep the build artifact"
+        required: false
+        type: number
+        default: 3
+    outputs:
+      artifact-name:
+        description: "Name of the uploaded build artifact"
+        value: ${{ inputs.artifact-name }}
+
+# Avoid stacking redundant standalone runs on the same ref.
+concurrency:
+  group: linux-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (${{ inputs.preset || 'default' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    env:
+      # vcpkg *tool* clone (separate from external/vcpkg, which only holds the
+      # seahowl manifest + overlay ports).
+      VCPKG_ROOT: ${{ github.workspace }}/.vcpkg
+      # Cache built vcpkg packages in the GH Actions cache.
+      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+      VCPKG_DISABLE_METRICS: "1"
+      # Keep memory/CPU usage modest on the standard GH runner.
+      VCPKG_MAX_CONCURRENCY: "2"
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Read pinned vcpkg baseline
+        id: vcpkg
+        run: |
+          set -euo pipefail
+          baseline=$(python3 -c \
+            "import json; \
+             print(json.load(open('external/vcpkg/vcpkg-configuration.json'))['default-registry']['baseline'])")
+          echo "baseline=$baseline" >> "$GITHUB_OUTPUT"
+          echo "Pinned vcpkg baseline: $baseline"
+
+      - name: Install system build prerequisites
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build pkg-config \
+            gfortran \
+            curl zip unzip tar ca-certificates git \
+            autoconf automake autoconf-archive libtool \
+            bison flex \
+            python3 python3-pip
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache vcpkg tool clone
+        id: cache-vcpkg-tool
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.VCPKG_ROOT }}
+          key: vcpkg-tool-${{ runner.os }}-${{ steps.vcpkg.outputs.baseline }}
+
+      - name: Clone vcpkg at pinned baseline
+        if: steps.cache-vcpkg-tool.outputs.cache-hit != 'true'
+        run: |
+          set -euxo pipefail
+          rm -rf "$VCPKG_ROOT"
+          git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+          git -C "$VCPKG_ROOT" checkout "${{ steps.vcpkg.outputs.baseline }}"
+
+      - name: Bootstrap vcpkg if needed
+        run: |
+          set -euxo pipefail
+          if [ ! -x "$VCPKG_ROOT/vcpkg" ]; then
+            "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics
+          fi
+          "$VCPKG_ROOT/vcpkg" version
+
+      # Required for VCPKG_BINARY_SOURCES=x-gha
+      - name: Export GitHub Actions cache env for vcpkg
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Configure
+        run: cmake --preset ${{ inputs.preset || 'default' }}
+
+      - name: Build
+        run: cmake --build build
+
+      # Tar the build tree so file permissions (executable bit on test
+      # binaries, symlinks on .so versions) survive the artifact round-trip.
+      - name: Package build tree
+        if: success()
+        run: |
+          set -euxo pipefail
+          tar --exclude='build/vcpkg_installed/vcpkg/buildtrees' \
+              --exclude='build/vcpkg_installed/vcpkg/downloads' \
+              --exclude='build/vcpkg_installed/vcpkg/packages' \
+              --exclude='build/_deps' \
+              -czf build-tree.tar.gz build
+
+      - name: Upload build artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name || 'linux-build-tree' }}
+          path: build-tree.tar.gz
+          if-no-files-found: error
+          retention-days: ${{ inputs.artifact-retention-days || 3 }}
+
+      # --- Diagnostics on failure ---------------------------------------------
+
+      - name: Collect failure logs
+        if: failure()
+        run: |
+          set +e
+          mkdir -p ci-logs
+          if [ -d build/vcpkg_installed/vcpkg ]; then
+            find build/vcpkg_installed/vcpkg -maxdepth 4 \
+              \( -name 'install-*.log' \
+                 -o -name 'config-*.log' \
+                 -o -name 'build-*.log' \
+                 -o -name 'issue_body.md' \) \
+              -exec cp --parents {} ci-logs/ \;
+          fi
+          for f in build/CMakeFiles/CMakeOutput.log \
+                   build/CMakeFiles/CMakeError.log \
+                   build/CMakeCache.txt; do
+            [ -f "$f" ] && cp --parents "$f" ci-logs/
+          done
+          ls -R ci-logs || true
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build-failure-logs
+          path: ci-logs
+          if-no-files-found: ignore
+          retention-days: 7
