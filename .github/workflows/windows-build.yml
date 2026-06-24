@@ -14,6 +14,13 @@ jobs:
       VCPKG_ROOT: ${{ github.workspace }}/external/vcpkg
       # Cache vcpkg-built packages in the GH Actions cache via NuGet protocol
       VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+      # Use the overlay triplet that sets VCPKG_ENV_PASSTHROUGH=FC PATH, so the
+      # Fortran compiler we set up on the runner reaches every vcpkg port build
+      # (openfast in particular).
+      VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}/external/vcpkg/triplets
+      # Path to MSYS2 mingw gfortran (installed by the setup-msys2 step below).
+      MINGW64_BIN: C:\msys64\mingw64\bin
+      FC: C:\msys64\mingw64\bin\gfortran.exe
 
     steps:
       - name: Checkout
@@ -34,18 +41,64 @@ jobs:
         with:
           python-version: "3.11"
 
-      # Strip flang from PATH so CMake doesn't accidentally pick it up as the
-      # Fortran compiler. We route BLAS/LAPACK to OpenBLAS via the overlay
-      # ports in external/vcpkg/ports/{blas,lapack}, so no Fortran compiler is
-      # needed for lapack-reference. The `openfast` overlay port still needs
-      # Fortran, but it calls `vcpkg_find_fortran` which auto-downloads its
-      # own private mingw gfortran into vcpkg's cache.
-      - name: Strip flang from PATH
+      # Install a real Fortran compiler (MSYS2 mingw gfortran). OpenFAST needs
+      # Fortran, and the VS-bundled LLVMFlang cannot build it. We deliberately
+      # install MSYS2 with `path-type: minimal` so we do NOT pollute PATH with
+      # MSYS coreutils that would shadow the MSVC toolchain.
+      - name: Set up MSYS2 with gfortran
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          path-type: minimal
+          install: >-
+            mingw-w64-x86_64-gcc-fortran
+
+      # Sanitize PATH: prepend the mingw gfortran dir so CMake's
+      # enable_language(Fortran) picks gfortran first, and strip every
+      # directory that contains flang.exe so the VS-bundled LLVMFlang is gone.
+      - name: Configure Fortran toolchain on PATH
         shell: pwsh
         run: |
-          $bad = 'LLVM|Flang'
-          $filtered = ($env:PATH.Split(';') | Where-Object { $_ -and ($_ -notmatch $bad) }) -join ';'
-          "PATH=$filtered" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          $ErrorActionPreference = 'Stop'
+
+          if (-not (Test-Path "$env:MINGW64_BIN\gfortran.exe")) {
+            throw "gfortran not found at $env:MINGW64_BIN\gfortran.exe"
+          }
+
+          Write-Host "=== Fortran compilers visible BEFORE sanitization ==="
+          foreach ($exe in 'flang.exe','flang-new.exe','flang-classic.exe','ifort.exe','ifx.exe','gfortran.exe') {
+            Get-Command $exe -All -ErrorAction SilentlyContinue |
+              ForEach-Object { Write-Host ("  {0,-22} {1}" -f $exe, $_.Source) }
+          }
+
+          # Find every directory that hosts a flang*.exe and strip it from PATH.
+          $flangDirs = @()
+          foreach ($exe in 'flang.exe','flang-new.exe','flang-classic.exe') {
+            Get-Command $exe -All -ErrorAction SilentlyContinue |
+              ForEach-Object { $flangDirs += (Split-Path $_.Source -Parent) }
+          }
+          $flangDirs = $flangDirs | Sort-Object -Unique
+          Write-Host "Stripping flang dirs from PATH:"
+          $flangDirs | ForEach-Object { Write-Host "  $_" }
+
+          $kept = $env:PATH.Split(';') |
+            Where-Object {
+              $_ -and
+              ($flangDirs -notcontains $_.TrimEnd('\')) -and
+              ($flangDirs -notcontains $_)
+            }
+          $newPath = "$env:MINGW64_BIN;" + ($kept -join ';')
+
+          Write-Host "=== Fortran compilers visible AFTER sanitization (simulated) ==="
+          $env:PATH = $newPath
+          foreach ($exe in 'flang.exe','flang-new.exe','flang-classic.exe','ifort.exe','ifx.exe','gfortran.exe') {
+            Get-Command $exe -All -ErrorAction SilentlyContinue |
+              ForEach-Object { Write-Host ("  {0,-22} {1}" -f $exe, $_.Source) }
+          }
+
+          "PATH=$newPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "FC=$env:FC"
 
       - name: Bootstrap vcpkg
         shell: pwsh
@@ -53,6 +106,7 @@ jobs:
           if (-not (Test-Path "$env:VCPKG_ROOT/vcpkg.exe")) {
             & "$env:VCPKG_ROOT/bootstrap-vcpkg.bat" -disableMetrics
           }
+
       # Required for VCPKG_BINARY_SOURCES=x-gha
       - name: Export GitHub Actions cache env for vcpkg
         uses: actions/github-script@v7
@@ -60,6 +114,19 @@ jobs:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Diagnostics before configure
+        shell: pwsh
+        run: |
+          Write-Host "FC = $env:FC"
+          Write-Host "VCPKG_OVERLAY_TRIPLETS = $env:VCPKG_OVERLAY_TRIPLETS"
+          Write-Host "--- gfortran ---"
+          where.exe gfortran 2>$null
+          & "$env:FC" --version
+          Write-Host "--- flang (should be empty) ---"
+          where.exe flang 2>$null ; if ($LASTEXITCODE -ne 0) { Write-Host "(not found)" }
+          where.exe flang-new 2>$null ; if ($LASTEXITCODE -ne 0) { Write-Host "(not found)" }
+
       - name: Configure
         shell: pwsh
         run: cmake --preset default
@@ -72,6 +139,32 @@ jobs:
         shell: pwsh
         working-directory: build
         run: ctest --output-on-failure -C Release
+
+      - name: Collect vcpkg failure logs
+        if: failure()
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'SilentlyContinue'
+          New-Item -ItemType Directory -Force -Path ci-logs | Out-Null
+          $blds = "build/vcpkg_installed/vcpkg/blds"
+          if (Test-Path $blds) {
+            Get-ChildItem -Path $blds -Recurse -File -Include `
+              'install-*.log','config-*.log','build-*.log','issue_body.md' |
+              ForEach-Object {
+                $dest = Join-Path 'ci-logs' ($_.FullName.Substring((Resolve-Path '.').Path.Length + 1))
+                New-Item -ItemType Directory -Force -Path (Split-Path $dest -Parent) | Out-Null
+                Copy-Item $_.FullName $dest
+              }
+          }
+
+      - name: Upload vcpkg failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-vcpkg-failure-logs
+          path: ci-logs
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload build artifacts
         if: success()
