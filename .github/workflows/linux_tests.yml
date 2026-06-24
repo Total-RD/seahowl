@@ -1,0 +1,70 @@
+name: Linux tests
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: linux-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Call the reusable build workflow. Tests cannot run unless this succeeds.
+    name: Build
+    uses: ./.github/workflows/linux_build.yml
+    with:
+      preset: default
+      artifact-name: linux-build-tree
+      artifact-retention-days: 1
+
+  test_components:
+    name: Run test_components
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # The test_components binary embeds SEAHOWL_DATADIR pointing at the
+      # source tree at configure time (see CMakeLists.txt). Re-checkout at the
+      # same workspace path so those paths resolve.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Install runtime prerequisites
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cmake ninja-build
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.artifact-name }}
+          path: .
+
+      - name: Unpack build tree
+        run: |
+          set -euxo pipefail
+          tar -xzf build-tree.tar.gz
+          rm -f build-tree.tar.gz
+          ls build/tests || true
+
+      - name: Run test_components
+        working-directory: build
+        run: ctest --output-on-failure -R '^test_components$' --no-tests=error
+
+      - name: Upload ctest logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_components-logs
+          path: build/Testing
+          if-no-files-found: ignore
+          retention-days: 7
