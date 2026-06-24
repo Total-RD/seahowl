@@ -1,0 +1,78 @@
+name: Linux tests
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+jobs:
+  test_components:
+    name: Build and run test_components
+    runs-on: ubuntu-latest
+
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/external/vcpkg
+      # Cache vcpkg-built packages in the GH Actions cache
+      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+      # Keep vcpkg memory/CPU usage modest on the GH runner
+      VCPKG_MAX_CONCURRENCY: "2"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            ninja-build \
+            gfortran \
+            pkg-config \
+            curl zip unzip tar \
+            autoconf automake autoconf-archive \
+            bison flex \
+            python3 python3-pip
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Bootstrap vcpkg
+        run: |
+          if [ ! -x "$VCPKG_ROOT/vcpkg" ]; then
+            "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics
+          fi
+
+      # Required for VCPKG_BINARY_SOURCES=x-gha
+      - name: Export GitHub Actions cache env for vcpkg
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Configure (default preset)
+        run: cmake --preset default
+
+      - name: Build test_components
+        run: cmake --build build --target test_components -j
+
+      - name: Run test_components
+        working-directory: build
+        run: ctest --output-on-failure -R '^test_components$'
+
+      - name: Upload test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs
+          path: |
+            build/Testing/**/*.log
+            build/Testing/**/LastTest.log
+          if-no-files-found: ignore
