@@ -63,6 +63,7 @@ void add_basic_turbine_info_to_csv(seahowl::io::CustomCSV& custom_csv, seahowl::
     custom_csv.add_function("torque elec [Nm]", [&turbine]() { return turbine.controller->get_torque_elec(); });
     custom_csv.add_function("axial thrust [N]", [&turbine]() { return turbine.rna.elasto.get_axial_thrust(); });
     custom_csv.add_function("axial torque [Nm]", [&turbine]() { return turbine.rna.elasto.get_axial_torque(); });
+    custom_csv.add_function("lateral torque [Nm]", [&turbine]() { return turbine.rna.elasto.get_lateral_torque(); });
     custom_csv.add_function("rotor azimuth [rad]", [&turbine]() { return turbine.rna.elasto.get_azimuth(); });
     custom_csv.add_function("tower base moment [Nm]",
                             [&turbine]() { return turbine.tower.elasto.get_tower_base_moment(); });
