@@ -285,7 +285,7 @@ double RotorNacelleAssemblyElasto::get_axial_torque() const {
     return react_torque.x();
 }
 
-double RotorNacelleAssemblyElasto::get_lateral_torque() const {
+double RotorNacelleAssemblyElasto::get_lateral_torque_y() const {
     // get reaction torque from all blades linked to hub
     // those links are already in the hub body reference frame
     auto react_torque = Vector3d(0.0, 0.0, 0.0);
@@ -293,6 +293,16 @@ double RotorNacelleAssemblyElasto::get_lateral_torque() const {
         react_torque += blade->link_blade->get_reaction_torque();
     }
     return react_torque.y();
+}
+
+double RotorNacelleAssemblyElasto::get_lateral_torque_z() const {
+    // get reaction torque from all blades linked to hub
+    // those links are already in the hub body reference frame
+    auto react_torque = Vector3d(0.0, 0.0, 0.0);
+    for (auto& blade : rotor->blades) {
+        react_torque += blade->link_blade->get_reaction_torque();
+    }
+    return react_torque.z();
 }
 
 void RotorNacelleAssemblyElasto::accumulate_electrical_torque(double torque) {
