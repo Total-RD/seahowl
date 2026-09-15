@@ -169,6 +169,20 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     double get_mass() const override;
     void reset_loads() override;
 
+
+    /**
+     * @brief Returns whether rotor is fixed (true) or not (false).
+     */
+    virtual bool is_fixed() const;
+
+    /**
+     * @brief Fixes rotor in space.
+     *
+     * @param[in] is_fixed Fixed if true, free if false.
+     */
+    virtual void set_fixed(bool is_fixed);
+
+
     /**
      * @brief Returns the RPM of the rotor [rpm]
      */
@@ -245,6 +259,8 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     double torque_elec_accumulated = 0.0;
     /** @brief Whether the RNA is mounted (such as on a tower) or not. */
     bool is_mounted = false;
+    /** @brief Whether the rotor spin DOF is locked (loads still flow to the tower). */
+    bool rotor_locked = false;
 };
 
 }  // namespace elasto

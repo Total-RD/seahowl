@@ -311,6 +311,8 @@ void initialize_pyseahowl_elasto(py::module& m) {
                std::shared_ptr<seahowl::elasto::RotorNacelleAssemblyElasto>, seahowl::elasto::ComponentElasto>(
         m_elasto, "RotorNacelleAssemblyElasto")
         .def(py::init<std::shared_ptr<seahowl::elasto::RotorElasto>>())
+        .def("set_fixed", &seahowl::elasto::RotorNacelleAssemblyElasto::set_fixed)
+        .def("is_fixed", &seahowl::elasto::RotorNacelleAssemblyElasto::is_fixed)
         .def("get_rpm", &seahowl::elasto::RotorNacelleAssemblyElasto::get_rpm)
         .def("accumulate_electrical_torque", &seahowl::elasto::RotorNacelleAssemblyElasto::accumulate_electrical_torque)
         .def("get_axial_thrust", &seahowl::elasto::RotorNacelleAssemblyElasto::get_axial_thrust)
