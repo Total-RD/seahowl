@@ -324,10 +324,13 @@ void RotorNacelleAssemblyElasto::attach_rna_to_node(const NodeElasto& node) {
 }
 
 bool RotorNacelleAssemblyElasto::is_fixed() const {
-    return rotor->body_hub->is_fixed();
+    return rotor_locked;
 }
 
 void RotorNacelleAssemblyElasto::set_fixed(bool is_fixed) {
-    rotor->body_hub->set_fixed(is_fixed);
+    // Lock only the rotor spin (roll) DOF of the hub-shaft revolute joint, so structural
+    // loads still flow from the hub through the shaft into the tower.
+    link_shaft_hub->set_constraints(true, true, true, is_fixed, true, true);
+    rotor_locked = is_fixed;
 }
 

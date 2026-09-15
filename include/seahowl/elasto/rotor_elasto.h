@@ -249,6 +249,8 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     double torque_elec_accumulated = 0.0;
     /** @brief Whether the RNA is mounted (such as on a tower) or not. */
     bool is_mounted = false;
+    /** @brief Whether the rotor spin DOF is locked (loads still flow to the tower). */
+    bool rotor_locked = false;
 };
 
 }  // namespace elasto
