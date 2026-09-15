@@ -180,6 +180,16 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     double get_axial_torque() const;
 
     /**
+     * @brief Returns the shaft torque of the rotor (y component) [Nm]
+     */
+    double get_shaft_torque_y() const;
+
+    /**
+     * @brief Returns the shaft torque of the rotor (z component) [Nm]
+     */
+    double get_shaft_torque_z() const;
+
+    /**
      * @brief Returns the axial thrust of the rotor [N]
      */
     double get_axial_thrust() const;
