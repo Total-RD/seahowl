@@ -322,3 +322,12 @@ void RotorNacelleAssemblyElasto::attach_rna_to_node(const NodeElasto& node) {
     is_mounted = true;
     link_rna->initialize(*actuator_yaw->body_controller, node);
 }
+
+bool RotorNacelleAssemblyElasto::is_fixed() const {
+    return rotor->body_hub->is_fixed();
+}
+
+void RotorNacelleAssemblyElasto::set_fixed(bool is_fixed) {
+    rotor->body_hub->set_fixed(is_fixed);
+}
+

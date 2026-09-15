@@ -169,6 +169,20 @@ class RotorNacelleAssemblyElasto : public ComponentElasto {
     double get_mass() const override;
     void reset_loads() override;
 
+
+    /**
+     * @brief Returns whether rotor is fixed (true) or not (false).
+     */
+    virtual bool is_fixed() const;
+
+    /**
+     * @brief Fixes rotor in space.
+     *
+     * @param[in] is_fixed Fixed if true, free if false.
+     */
+    virtual void set_fixed(bool is_fixed);
+
+
     /**
      * @brief Returns the RPM of the rotor [rpm]
      */
