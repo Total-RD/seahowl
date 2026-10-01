@@ -78,18 +78,18 @@ void RotorNacelleAssembly::initialize_this(double time, double dt) {
     // initialize aero variables after updating positions
     aero.initialize();
 
-    double rotor_inertia = elasto.rotor->body_hub->get_inertia_matrix()(0, 0);
-    for (const auto& blade : elasto.rotor->blades) {
+    double rotor_inertia = rotor_elasto.body_hub->get_inertia_matrix()(0, 0);
+    for (const auto& blade : rotor_elasto.blades) {
         try {
             const auto& blade_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade);
             const auto& pts = blade_fea.discretized_points;
-            for (size_t i = 0; i + 1 < pts.size(); ++i) {
-                // segment between i and i+1: lineic mass = mass_matrix(0,0)
-                double m_per_l = 0.5 * (pts[i].mass_matrix(0, 0) + pts[i + 1].mass_matrix(0, 0));
-                double z_mid = 0.5 * (pts[i].coordinates.z() + pts[i + 1].coordinates.z());
-                double dl = pts[i + 1].coordinates.z() - pts[i].coordinates.z();
-                rotor_inertia += m_per_l * z_mid * z_mid * dl;
-            }
+            // Estimate the blade contribution without integrating finite elements: lump the known
+            // blade mass at an estimated centre of gravity located at 25% of the blade span from
+            // the root, and take its inertia about the shaft (spin) axis.
+            double blade_mass = blade_fea.get_mass();
+            double blade_span = pts.back().coordinates.z() - pts.front().coordinates.z();
+            double r_cog = 0.25 * blade_span;
+            rotor_inertia += blade_mass * r_cog * r_cog;
         } catch (const std::bad_cast&) {
             // rigid/disk blade: contribution already in hub.inertia(0,0)
         }
