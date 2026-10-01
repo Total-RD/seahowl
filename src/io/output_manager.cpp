@@ -63,10 +63,8 @@ void add_basic_turbine_info_to_csv(seahowl::io::CustomCSV& custom_csv, seahowl::
     custom_csv.add_function("torque elec [Nm]", [&turbine]() { return turbine.controller->get_torque_elec(); });
     custom_csv.add_function("axial thrust [N]", [&turbine]() { return turbine.rna.elasto.get_axial_thrust(); });
     custom_csv.add_function("axial torque [Nm]", [&turbine]() { return turbine.rna.elasto.get_axial_torque(); });
-    custom_csv.add_function("shaft torque y [Nm]",
-                            [&turbine]() { return turbine.rna.elasto.get_shaft_torque_y(); });
-    custom_csv.add_function("shaft torque z [Nm]",
-                            [&turbine]() { return turbine.rna.elasto.get_shaft_torque_z(); });
+    custom_csv.add_function("shaft torque y [Nm]", [&turbine]() { return turbine.rna.elasto.get_shaft_torque_y(); });
+    custom_csv.add_function("shaft torque z [Nm]", [&turbine]() { return turbine.rna.elasto.get_shaft_torque_z(); });
     custom_csv.add_function("rotor azimuth [rad]", [&turbine]() { return turbine.rna.elasto.get_azimuth(); });
     custom_csv.add_function("tower base moment [Nm]",
                             [&turbine]() { return turbine.tower.elasto.get_tower_base_moment(); });
@@ -350,6 +348,36 @@ static void write_body_csv(const std::string& csv_filepath,
     csv_out.write_row();
 }
 
+/**
+ * @brief Computes the assembled rotor inertia about the shaft (spin) axis [kg.m^2].
+ *
+ * Sums the hub axial inertia (which already includes the generator/drivetrain contribution), the
+ * shaft body axial inertia, and the blade masses integrated about the shaft axis, matching the
+ * computation in RotorNacelleAssembly.
+ */
+static double compute_rotor_axial_inertia(const seahowl::elasto::RotorElasto& rotor_elasto,
+                                          const seahowl::elasto::BodyElasto* body_shaft) {
+    double rotor_inertia = rotor_elasto.body_hub->get_inertia_matrix()(0, 0);
+    if (body_shaft) {
+        rotor_inertia += body_shaft->get_inertia_matrix()(0, 0);
+    }
+    for (const auto& blade : rotor_elasto.blades) {
+        try {
+            const auto& blade_fea = dynamic_cast<seahowl::elasto::BladeElastoFEA&>(*blade);
+            const auto& pts = blade_fea.discretized_points;
+            for (size_t i = 0; i + 1 < pts.size(); ++i) {
+                double m_per_l = 0.5 * (pts[i].mass_matrix(0, 0) + pts[i + 1].mass_matrix(0, 0));
+                double z_mid = 0.5 * (pts[i].coordinates.z() + pts[i + 1].coordinates.z());
+                double dl = pts[i + 1].coordinates.z() - pts[i].coordinates.z();
+                rotor_inertia += m_per_l * z_mid * z_mid * dl;
+            }
+        } catch (const std::bad_cast&) {
+            // rigid/disk blade: contribution already in hub.inertia(0,0)
+        }
+    }
+    return rotor_inertia;
+}
+
 void OutputManager::output_initial_logs() {
     std::string logs_folder = (fs::path(output_folder) / "logs").generic_string();
     spdlog::debug("Creating initial logs in {}.", logs_folder);
@@ -405,6 +433,17 @@ void OutputManager::output_initial_logs() {
         const auto& hub_props = rotor_elasto.hub;
         const auto& shaft_props = rna_elasto.shaft;
         const auto& nacelle_props = rna_elasto.nacelle;
+
+        // rotor (hub + blades assembled): mass and axial/spin inertia about the shaft axis
+        {
+            auto csv_out =
+                seahowl::io::CustomCSV((fs::path(logs_folder) / (turbine_prefix + "_rotor.csv")).generic_string());
+            csv_out.add_function("mass", [&rotor_elasto]() { return rotor_elasto.get_mass(); });
+            csv_out.add_function("inertia_axial", [&rotor_elasto, &rna_elasto]() {
+                return compute_rotor_axial_inertia(rotor_elasto, rna_elasto.body_shaft.get());
+            });
+            csv_out.write_row();
+        }
 
         // hub
         if (rotor_elasto.body_hub) {
